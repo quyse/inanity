@@ -1,0 +1,1 @@
+iconv -f cp1251 -t utf8 < ../inanity/$1 > ./$1

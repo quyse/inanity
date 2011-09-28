@@ -1,0 +1,14 @@
+#!/bin/sh
+# скрипт выполняет переименование .h в .hpp, и заменяет в .hpp и в .cpp ссылки на эти файлы
+
+for i in `ls *.h`
+do
+	mv $i ${i%.*}.hpp
+done
+for i in `ls *.hpp *.cpp`
+do
+	sed -r "s/#include \"(.+)\.h\"/#include \"\1.hpp\"/" < $i | \
+	sed -r "s/#(ifndef|define) ___INANITY_(.+)_H___/#\1 ___INANITY_\2_HPP___/" > tmp
+	cp tmp $i
+done
+rm tmp
