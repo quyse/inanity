@@ -1,0 +1,97 @@
+#ifndef ___INANITY_FOLDER_FILE_SYSTEM_HPP___
+#define ___INANITY_FOLDER_FILE_SYSTEM_HPP___
+
+#include "FileSystem.hpp"
+
+BEGIN_INANITY
+
+/// Класс "папковой" файловой системы.
+/** Предоставляет доступ к каталогу родной дисковой файловой системы
+компьютера, как к отдельной файловой системе.
+Как и все файловые системы, использует прямой слеш / как разделитель каталогов в имени.
+*/
+class FolderFileSystem : public FileSystem
+{
+public:
+	//подсказки при кэшировании
+	enum CacheHint
+	{
+		cacheHintNone,
+		cacheHintSequentialScan,
+		cacheHintRandomScan
+	};
+
+private:
+	/// Полное Unicode-имя каталога в Windows
+	/** Оно абсолютное, вида \\?\C:\..., не оканчивается на слеш. */
+	std::wstring folderName;
+
+	std::wstring GetFullName(std::wstring fileName) const;
+	void GetFileNames(std::wstring sourceDirectory, const std::wstring& targetDirectory, std::vector<std::wstring>& fileNames) const;
+	/// Выбросить исключение, соответствующее ошибке.
+	/** Ошибка определяется с помощью GetLastError.
+	*/
+	void ThrowFileError();
+
+	/// Конструктор для создания абсолютной файловой системы.
+	FolderFileSystem();
+
+public:
+	/// Создать "папковую" файловую систему.
+	/** Создает объект файловой системы, относящийся к заданному
+	каталогу. В качестве каталога можно указать строку нулевой длины,
+	в таком случае считается, что объект файловой системы
+	относится к текущему каталогу приложения.
+	\param folderName Имя каталога файловой системы, или строка
+	нулевой длины. Каталог задаётся относительно текущего каталога,
+	кроме случая, когда folderName[1]==':', тогда он считается абсолютным.
+	*/
+	FolderFileSystem(const std::wstring& userFolderName);
+
+	/// Создать абсолютную "папковую" файловую систему.
+	/** Такая файловая система не производит никаких преобразований с
+	именами файлов, и поэтому может принимать и абсолютные пути.
+	Но зато она не может возвращать список файлов. */
+	static ptr<FolderFileSystem> GetNativeFileSystem();
+
+	//методы, унаследованные из FileSystem
+	ptr<File> LoadFile(const std::wstring& fileName);
+	ptr<InputStream> LoadFileAsStream(const std::wstring& fileName);
+	void SaveFile(ptr<File> file, const std::wstring& fileName);
+	ptr<OutputStream> SaveFileAsStream(const std::wstring& fileName);
+	void GetFileNames(std::vector<std::wstring>& fileNames) const;
+
+	//расширенные методы для загрузки файлов, специфичные для FolderFileSystem
+
+	/// Получить размер файла.
+	/**
+	\param fileName Имя файла.
+	\return Размер файла в байтах.
+	*/
+	size_t GetFileSize(const std::wstring& fileName);
+	/// Загрузить файл с подсказкой о кэшировании
+	/** Метод содержит дополнительный параметр, позволяющий указывать
+	подсказку о кэшировании файла.
+	\param fileName Имя файла.
+	\param cacheHint Подсказка о кэшировании.
+	\return Объект-файл.
+	*/
+	ptr<File> LoadFile(const std::wstring& fileName, CacheHint cacheHint);
+	/// Загрузить часть файла с подсказкой о кэировании.
+	/** Самый мощный метод для загрузки файлов. Остальные методы работают
+	через него. Позволяет задать начало и размер проекции файла в память,
+	чтобы проецировать только нужную часть файла.
+	\param fileName Имя файла.
+	\param mappingStart Требуемое смещение до начала проекции файла. Допускается
+	указывать значения, не кратные гранулярности выделения памяти.
+	\param mappingSize Требуемый размер проекции файла. Допускается указывать
+	значения, не кратные гранулярости выделения памяти. Значение 0 означает,
+	что проекция файла занимать весь объем файла.
+	\return Объект-файл.
+	*/
+	ptr<File> LoadPartOfFile(const std::wstring& fileName, long long mappingStart, size_t mappingSize, CacheHint cacheHint);
+};
+
+END_INANITY
+
+#endif

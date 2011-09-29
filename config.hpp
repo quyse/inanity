@@ -5,10 +5,12 @@
  * Конфигурация Inanity для компиляции.
  */
 
-#ifdef _WINDOWS
+#if defined(_WINDOWS)
 #define ___INANITY_WINDOWS
-#elif _LINUX
+#elif defined(_LINUX)
 #define ___INANITY_LINUX
+#else
+#error Unknown platform. Must be _WINDOWS or _LINUX defined.
 #endif
 
 #ifdef ___INANITY_WINDOWS
