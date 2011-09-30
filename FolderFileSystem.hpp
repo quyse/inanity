@@ -24,10 +24,10 @@ public:
 private:
 	/// Полное Unicode-имя каталога в Windows
 	/** Оно абсолютное, вида \\?\C:\..., не оканчивается на слеш. */
-	std::wstring folderName;
+	String folderName;
 
-	std::wstring GetFullName(std::wstring fileName) const;
-	void GetFileNames(std::wstring sourceDirectory, const std::wstring& targetDirectory, std::vector<std::wstring>& fileNames) const;
+	String GetFullName(String fileName) const;
+	void GetFileNames(String sourceDirectory, const String& targetDirectory, std::vector<String>& fileNames) const;
 	/// Выбросить исключение, соответствующее ошибке.
 	/** Ошибка определяется с помощью GetLastError.
 	*/
@@ -46,7 +46,7 @@ public:
 	нулевой длины. Каталог задаётся относительно текущего каталога,
 	кроме случая, когда folderName[1]==':', тогда он считается абсолютным.
 	*/
-	FolderFileSystem(const std::wstring& userFolderName);
+	FolderFileSystem(const String& userFolderName);
 
 	/// Создать абсолютную "папковую" файловую систему.
 	/** Такая файловая система не производит никаких преобразований с
@@ -55,11 +55,11 @@ public:
 	static ptr<FolderFileSystem> GetNativeFileSystem();
 
 	//методы, унаследованные из FileSystem
-	ptr<File> LoadFile(const std::wstring& fileName);
-	ptr<InputStream> LoadFileAsStream(const std::wstring& fileName);
-	void SaveFile(ptr<File> file, const std::wstring& fileName);
-	ptr<OutputStream> SaveFileAsStream(const std::wstring& fileName);
-	void GetFileNames(std::vector<std::wstring>& fileNames) const;
+	ptr<File> LoadFile(const String& fileName);
+	ptr<InputStream> LoadFileAsStream(const String& fileName);
+	void SaveFile(ptr<File> file, const String& fileName);
+	ptr<OutputStream> SaveFileAsStream(const String& fileName);
+	void GetFileNames(std::vector<String>& fileNames) const;
 
 	//расширенные методы для загрузки файлов, специфичные для FolderFileSystem
 
@@ -68,7 +68,7 @@ public:
 	\param fileName Имя файла.
 	\return Размер файла в байтах.
 	*/
-	size_t GetFileSize(const std::wstring& fileName);
+	size_t GetFileSize(const String& fileName);
 	/// Загрузить файл с подсказкой о кэшировании
 	/** Метод содержит дополнительный параметр, позволяющий указывать
 	подсказку о кэшировании файла.
@@ -76,7 +76,7 @@ public:
 	\param cacheHint Подсказка о кэшировании.
 	\return Объект-файл.
 	*/
-	ptr<File> LoadFile(const std::wstring& fileName, CacheHint cacheHint);
+	ptr<File> LoadFile(const String& fileName, CacheHint cacheHint);
 	/// Загрузить часть файла с подсказкой о кэировании.
 	/** Самый мощный метод для загрузки файлов. Остальные методы работают
 	через него. Позволяет задать начало и размер проекции файла в память,
@@ -89,7 +89,7 @@ public:
 	что проекция файла занимать весь объем файла.
 	\return Объект-файл.
 	*/
-	ptr<File> LoadPartOfFile(const std::wstring& fileName, long long mappingStart, size_t mappingSize, CacheHint cacheHint);
+	ptr<File> LoadPartOfFile(const String& fileName, long long mappingStart, size_t mappingSize, CacheHint cacheHint);
 };
 
 END_INANITY

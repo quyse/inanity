@@ -3,15 +3,15 @@
 #include "FileInputStream.hpp"
 #include "Exception.hpp"
 
-ptr<File> FileSystem::LoadFile(const std::wstring& fileName)
+ptr<File> FileSystem::LoadFile(const String& fileName)
 {
 	ptr<File> file = TryLoadFile(fileName);
 	if(file)
 		return file;
-	THROW_PRIMARY_EXCEPTION(L"Can't load file " + fileName);
+	THROW_PRIMARY_EXCEPTION("Can't load file " + fileName);
 }
 
-ptr<File> FileSystem::TryLoadFile(const std::wstring& fileName)
+ptr<File> FileSystem::TryLoadFile(const String& fileName)
 {
 	try
 	{
@@ -20,11 +20,11 @@ ptr<File> FileSystem::TryLoadFile(const std::wstring& fileName)
 	catch(Exception* exception)
 	{
 		MakePointer(exception);
-		return nullptr;
+		return 0;
 	}
 }
 
-ptr<InputStream> FileSystem::LoadFileAsStream(const std::wstring& fileName)
+ptr<InputStream> FileSystem::LoadFileAsStream(const String& fileName)
 {
 	try
 	{
@@ -32,21 +32,21 @@ ptr<InputStream> FileSystem::LoadFileAsStream(const std::wstring& fileName)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION(L"Can't load file " + fileName + L" as stream", exception);
+		THROW_SECONDARY_EXCEPTION("Can't load file " + fileName + " as stream", exception);
 	}
 }
 
-void FileSystem::SaveFile(ptr<File> file, const std::wstring& fileName)
+void FileSystem::SaveFile(ptr<File> file, const String& fileName)
 {
-	THROW_PRIMARY_EXCEPTION(L"Saving files in this filesystem is not supported");
+	THROW_PRIMARY_EXCEPTION("Saving files in this filesystem is not supported");
 }
 
-ptr<OutputStream> FileSystem::SaveFileAsStream(const std::wstring& fileName)
+ptr<OutputStream> FileSystem::SaveFileAsStream(const String& fileName)
 {
-	THROW_PRIMARY_EXCEPTION(L"Saving files as stream in this filesystem is not supported");
+	THROW_PRIMARY_EXCEPTION("Saving files as stream in this filesystem is not supported");
 }
 
-void FileSystem::GetFileNames(std::vector<std::wstring>& fileNames) const
+void FileSystem::GetFileNames(std::vector<String>& fileNames) const
 {
-	THROW_PRIMARY_EXCEPTION(L"Getting file names in this filesystem in not supported");
+	THROW_PRIMARY_EXCEPTION("Getting file names in this filesystem in not supported");
 }

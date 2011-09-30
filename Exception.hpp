@@ -2,7 +2,7 @@
 #define ___INANITY_EXCEPTION_HPP___
 
 #include "Object.hpp"
-#include <string>
+#include "String.hpp"
 #include <ostream>
 
 BEGIN_INANITY
@@ -27,7 +27,7 @@ BEGIN_INANITY
 class Exception : public Object
 {
 protected:
-	std::wstring message;
+	String message;
 	ptr<Exception> innerException;
 
 public:
@@ -36,7 +36,7 @@ public:
 	возникающем при ошибке.
 	\param message Текстовое сообщение об ошибке.
 	*/
-	Exception(const std::wstring& message);
+	Exception(const String& message);
 
 	/// Создать вторичный объект исключения.
 	/** Вторичный объект исключения является исключением,
@@ -47,14 +47,14 @@ public:
 	\param innerException Исключение более низкого уровня,
 	породившее данное исключение.
 	*/
-	Exception(const std::wstring& message, ptr<Exception> innerException);
+	Exception(const String& message, ptr<Exception> innerException);
 
 	/// Получить текст сообщения об ошибке.
 	/** Данный текст включает только сообщение, которое
 	относится именно к этому уровню ошибки.
 	\return Текст сообщения об ошибке.
 	*/
-	std::wstring GetMessageText() const;
+	String GetMessageText() const;
 
 	/// Получить внутреннее (низкоуровневое) исключение
 	/** \return Объект внутреннего исключения, или null,
@@ -66,24 +66,17 @@ public:
 	/** Позволяет получить полную картину произошедшей ошибки,
 	выводя всю информацию по указанной ошибке.
 	*/
-	virtual void PrintStack(std::wostream& stream) const;
+	virtual void PrintStack(std::ostream& stream) const;
 };
 
 #ifdef _DEBUG
-//несколько макросов, для того, чтобы определить Unicode-версии __FILE__ и __LINE__
-#define INANITY_EXCEPTION_WIDEN2(x) L##x
-#define INANITY_EXCEPTION_WIDEN(x) INANITY_EXCEPTION_WIDEN2(x)
-#define __WFILE__ INANITY_EXCEPTION_WIDEN(__FILE__)
-#define INANITY_EXCEPTION_WIDENS2(x) L#x
-#define INANITY_EXCEPTION_WIDENS(x) INANITY_EXCEPTION_WIDENS2(x)
-#define __WLINE__ INANITY_EXCEPTION_WIDENS(__LINE__)
-#endif
-
-#ifdef _DEBUG
+#define __SLINE2__(x) #x
+#define __SLINE3__(x) __SLINE2__(x)
+#define __SLINE__ __SLINE3__(__LINE__)
 /// Макрос для вызова первичного исключения
-#define THROW_PRIMARY_EXCEPTION(message) throw NEW(Exception(std::wstring(L"[ " __WFILE__ L", " __WLINE__ L" ] ") + (message)))
+#define THROW_PRIMARY_EXCEPTION(message) throw NEW(Exception(String("[ " __FILE__ ", " __SLINE__ " ] ") + (message)))
 /// Макрос для вызова вторичного исключения
-#define THROW_SECONDARY_EXCEPTION(message, exception) throw NEW(Exception(std::wstring(L"[ " __WFILE__ L", " __WLINE__ L" ] ") + (message), (exception)))
+#define THROW_SECONDARY_EXCEPTION(message, exception) throw NEW(Exception(String("[ " __FILE__ ", " __SLINE__ " ] ") + (message), (exception)))
 #else
 /// Макрос для вызова первичного исключения
 #define THROW_PRIMARY_EXCEPTION(message) throw NEW(Exception((message)))

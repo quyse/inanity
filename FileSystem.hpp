@@ -2,7 +2,7 @@
 #define ___INANITY_FILE_SYSTEM_HPP___
 
 #include "Object.hpp"
-#include <string>
+#include "String.hpp"
 #include <vector>
 
 BEGIN_INANITY
@@ -42,7 +42,7 @@ public:
 	\param fileName Имя файла в данной файловой системе.
 	\return Объект File для заданного файла.
 	*/
-	virtual ptr<File> LoadFile(const std::wstring& fileName);
+	virtual ptr<File> LoadFile(const String& fileName);
 
 	/// Загрузить файл.
 	/** Возвращает объект File для заданного файла. При отсутствии файла
@@ -51,14 +51,14 @@ public:
 	\return Объект File для заданного файла, или null, если файл не
 	удалось загрузить.
 	*/
-	virtual ptr<File> TryLoadFile(const std::wstring& fileName);
+	virtual ptr<File> TryLoadFile(const String& fileName);
 
 	/// Открыть файл как поток ввода.
 	/** Возвращает поток ввода, предназначенный для чтения файла.
 	\param fileName Имя файла.
 	\return Поток ввода.
 	*/
-	virtual ptr<InputStream> LoadFileAsStream(const std::wstring& fileName);
+	virtual ptr<InputStream> LoadFileAsStream(const String& fileName);
 
 	/// Сохранить файл.
 	/** Сохраняет файл в файловой системе, с заданным именем. Если файловая
@@ -66,14 +66,14 @@ public:
 	\param file Файл, то есть данные, которые необходимо сохранить.
 	\param fileName Имя в файловой системе, под которым сохраняются данные.
 	*/
-	virtual void SaveFile(ptr<File> file, const std::wstring& fileName);
+	virtual void SaveFile(ptr<File> file, const String& fileName);
 
 	/// Открыть файл как поток вывода.
 	/** Возвращает поток вывода, предназначенный для записи в файл.
 	\param fileName Имя файла.
 	\return Поток вывода.
 	*/
-	virtual ptr<OutputStream> SaveFileAsStream(const std::wstring& fileName);
+	virtual ptr<OutputStream> SaveFileAsStream(const String& fileName);
 
 	/// Получить список имен файлов в файловой системе.
 	/** Получает список имен файлов. Не гарантируется, что он будет полным
@@ -81,7 +81,7 @@ public:
 	имен файлов, выбрасывается исключение.
 	\param fileNames Выходной список имен файлов.
 	*/
-	virtual void GetFileNames(std::vector<std::wstring>& fileNames) const;
+	virtual void GetFileNames(std::vector<String>& fileNames) const;
 };
 
 END_INANITY
