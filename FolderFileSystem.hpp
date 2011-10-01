@@ -12,15 +12,6 @@ BEGIN_INANITY
 */
 class FolderFileSystem : public FileSystem
 {
-public:
-	//подсказки при кэшировании
-	enum CacheHint
-	{
-		cacheHintNone,
-		cacheHintSequentialScan,
-		cacheHintRandomScan
-	};
-
 private:
 	/// Полное Unicode-имя каталога в Windows
 	/** Оно абсолютное, вида \\?\C:\..., не оканчивается на слеш. */
@@ -28,10 +19,6 @@ private:
 
 	String GetFullName(String fileName) const;
 	void GetFileNames(String sourceDirectory, const String& targetDirectory, std::vector<String>& fileNames) const;
-	/// Выбросить исключение, соответствующее ошибке.
-	/** Ошибка определяется с помощью GetLastError.
-	*/
-	void ThrowFileError();
 
 	/// Конструктор для создания абсолютной файловой системы.
 	FolderFileSystem();
@@ -69,15 +56,7 @@ public:
 	\return Размер файла в байтах.
 	*/
 	size_t GetFileSize(const String& fileName);
-	/// Загрузить файл с подсказкой о кэшировании
-	/** Метод содержит дополнительный параметр, позволяющий указывать
-	подсказку о кэшировании файла.
-	\param fileName Имя файла.
-	\param cacheHint Подсказка о кэшировании.
-	\return Объект-файл.
-	*/
-	ptr<File> LoadFile(const String& fileName, CacheHint cacheHint);
-	/// Загрузить часть файла с подсказкой о кэировании.
+	/// Загрузить часть файла.
 	/** Самый мощный метод для загрузки файлов. Остальные методы работают
 	через него. Позволяет задать начало и размер проекции файла в память,
 	чтобы проецировать только нужную часть файла.
@@ -89,7 +68,7 @@ public:
 	что проекция файла занимать весь объем файла.
 	\return Объект-файл.
 	*/
-	ptr<File> LoadPartOfFile(const String& fileName, long long mappingStart, size_t mappingSize, CacheHint cacheHint);
+	ptr<File> LoadPartOfFile(const String& fileName, long long mappingStart, size_t mappingSize);
 };
 
 END_INANITY

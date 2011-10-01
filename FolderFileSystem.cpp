@@ -1,11 +1,14 @@
 #include "FolderFileSystem.hpp"
 #include "File.hpp"
+#include "Handle.hpp"
 #include "PartFile.hpp"
 #include "EmptyFile.hpp"
-#include "Handle.hpp"
 #include "DiskInputStream.hpp"
 #include "DiskOutputStream.hpp"
 #include "Exception.hpp"
+
+#ifdef ___INANITY_WINDOWS
+
 #include <windows.h>
 
 class FolderFile : public File
@@ -35,7 +38,7 @@ public:
 	}
 };
 
-FolderFileSystem::FolderFileSystem(const std::wstring& userFolderName)
+FolderFileSystem::FolderFileSystem(const String& userFolderName)
 {
 	//если имя абсолютное
 	if(userFolderName.length() >= 2 && userFolderName[1] == L':')
@@ -49,7 +52,7 @@ FolderFileSystem::FolderFileSystem(const std::wstring& userFolderName)
 		if(!GetCurrentDirectory(length, buffer))
 		{
 			delete [] buffer;
-			THROW_PRIMARY_EXCEPTION(L"Can't get current directory");
+			THROW_PRIMARY_EXCEPTION("Can't get current directory");
 		}
 		folderName = buffer;
 		delete [] buffer;
@@ -63,8 +66,8 @@ FolderFileSystem::FolderFileSystem(const std::wstring& userFolderName)
 	}
 
 	//убедиться, что имя каталога поддерживает длинные имена
-	if(this->folderName.compare(0, 4, L"\\\\?\\") != 0)
-		this->folderName = L"\\\\?\\" + this->folderName;
+	if(this->folderName.compare(0, 4, "\\\\?\\") != 0)
+		this->folderName = "\\\\?\\" + this->folderName;
 }
 
 FolderFileSystem::FolderFileSystem()
@@ -73,17 +76,11 @@ FolderFileSystem::FolderFileSystem()
 	//folderName - пустая строка
 }
 
-ptr<FolderFileSystem> FolderFileSystem::GetNativeFileSystem()
-{
-	//этот метод сделан просто для лучшей понятности
-	return NEW(FolderFileSystem());
-}
-
-std::wstring FolderFileSystem::GetFullName(std::wstring fileName) const
+String FolderFileSystem::GetFullName(String fileName) const
 {
 	if(fileName.length() && fileName.front() == '/')
 		fileName = fileName.substr(1);
-	std::wstring result = folderName.length() ? (folderName + L"\\" + fileName) : fileName;
+	String result = folderName.length() ? (folderName + "\\" + fileName) : fileName;
 	size_t length = result.length();
 	for(size_t i = 0; i < length; ++i)
 		if(result[i] == '/')
@@ -97,52 +94,52 @@ void FolderFileSystem::ThrowFileError()
 	switch(GetLastError())
 	{
 	case ERROR_FILE_NOT_FOUND:
-		message = L"File not found";
+		message = "File not found";
 		break;
 	case ERROR_PATH_NOT_FOUND:
-		message = L"Path not found";
+		message = "Path not found";
 		break;
 	case ERROR_ACCESS_DENIED:
-		message = L"Access denied";
+		message = "Access denied";
 		break;
 	default:
-		message = L"Unknown error when opening the file";
+		message = "Unknown error when opening the file";
 		break;
 	}
 	THROW_PRIMARY_EXCEPTION(message);
 }
 
-ptr<File> FolderFileSystem::LoadFile(const std::wstring& fileName)
+ptr<File> FolderFileSystem::LoadFile(const String& fileName)
 {
 	return LoadFile(fileName, cacheHintNone);
 }
 
-size_t FolderFileSystem::GetFileSize(const std::wstring& fileName)
+size_t FolderFileSystem::GetFileSize(const String& fileName)
 {
 	HANDLE file = CreateFile(GetFullName(fileName).c_str(), FILE_READ_ATTRIBUTES, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
 	if(file == INVALID_HANDLE_VALUE)
-		THROW_PRIMARY_EXCEPTION(L"Can't open file to determine file size");
+		THROW_PRIMARY_EXCEPTION("Can't open file to determine file size");
 
 	LARGE_INTEGER size;
 	if(!::GetFileSizeEx(file, &size))
-		THROW_PRIMARY_EXCEPTION(L"Can't get file size");
+		THROW_PRIMARY_EXCEPTION("Can't get file size");
 	CloseHandle(file);
 
 	size_t resultSize = (size_t)size.QuadPart;
 	if(resultSize != size.QuadPart)
-		THROW_PRIMARY_EXCEPTION(L"File is too big");
+		THROW_PRIMARY_EXCEPTION("File is too big");
 	
 	return resultSize;
 }
 
-ptr<File> FolderFileSystem::LoadFile(const std::wstring& fileName, CacheHint cacheHint)
+ptr<File> FolderFileSystem::LoadFile(const String& fileName, CacheHint cacheHint)
 {
 	return LoadPartOfFile(fileName, 0, 0, cacheHint);
 }
 
-ptr<File> FolderFileSystem::LoadPartOfFile(const std::wstring& fileName, long long mappingStart, size_t mappingSize, CacheHint cacheHint)
+ptr<File> FolderFileSystem::LoadPartOfFile(const String& fileName, long long mappingStart, size_t mappingSize, CacheHint cacheHint)
 {
-	std::wstring name = GetFullName(fileName);
+	String name = GetFullName(fileName);
 	try
 	{
 		DWORD flags = 0;
@@ -168,12 +165,12 @@ ptr<File> FolderFileSystem::LoadPartOfFile(const std::wstring& fileName, long lo
 			::GetFileSizeEx(hFile, &li);
 			size = (size_t)li.QuadPart;
 			if(size != li.QuadPart)
-				THROW_PRIMARY_EXCEPTION(L"File too long to map");
+				THROW_PRIMARY_EXCEPTION("File too long to map");
 		}
 		if(!size)
 			return NEW(EmptyFile());
 		Handle hMapping = CreateFileMapping(hFile, 0, PAGE_READONLY, 0, 0, 0);
-		if(!hMapping) THROW_PRIMARY_EXCEPTION(L"Can't create file mapping");
+		if(!hMapping) THROW_PRIMARY_EXCEPTION("Can't create file mapping");
 
 		//получить гранулярность выделения памяти
 		static unsigned allocationGranularity = 0;
@@ -190,7 +187,7 @@ ptr<File> FolderFileSystem::LoadPartOfFile(const std::wstring& fileName, long lo
 		size_t realMappingSize = mappingSize + (size_t)(mappingStart - realMappingStart);
 		//спроецировать файл с учетом этого сдвига
 		void* data = MapViewOfFile(hMapping, FILE_MAP_READ, realMappingStart >> 32, realMappingStart & ((1LL << 32) - 1), realMappingSize);
-		if(!data) THROW_PRIMARY_EXCEPTION(L"Can't map view of file");
+		if(!data) THROW_PRIMARY_EXCEPTION("Can't map view of file");
 
 		//если сдвиг был
 		if(realMappingStart < mappingStart)
@@ -201,34 +198,34 @@ ptr<File> FolderFileSystem::LoadPartOfFile(const std::wstring& fileName, long lo
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION(L"Can't load file \"" + fileName + L"\" as \"" + name + L"\"", exception);
+		THROW_SECONDARY_EXCEPTION("Can't load file \"" + fileName + "\" as \"" + name + "\"", exception);
 	}
 }
 
-void FolderFileSystem::SaveFile(ptr<File> file, const std::wstring& fileName)
+void FolderFileSystem::SaveFile(ptr<File> file, const String& fileName)
 {
-	std::wstring name = GetFullName(fileName);
+	String name = GetFullName(fileName);
 	try
 	{
 		HANDLE hFile = CreateFile(name.c_str(), GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, NULL);
-		if(hFile == INVALID_HANDLE_VALUE) THROW_PRIMARY_EXCEPTION(L"Can't create file");
+		if(hFile == INVALID_HANDLE_VALUE) THROW_PRIMARY_EXCEPTION("Can't create file");
 		DWORD written;
 		size_t size = file->GetSize();
 		if((DWORD)size != size)
-			THROW_PRIMARY_EXCEPTION(L"So big files is not supported");
+			THROW_PRIMARY_EXCEPTION("So big files is not supported");
 		if(!WriteFile(hFile, file->GetData(), (DWORD)size, &written, NULL) || written != size)
-			THROW_PRIMARY_EXCEPTION(L"Can't write file");
+			THROW_PRIMARY_EXCEPTION("Can't write file");
 		CloseHandle(hFile);
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION(std::wstring(L"Can't save file \"") + fileName + L"\" as \"" + name + L"\"", exception);
+		THROW_SECONDARY_EXCEPTION(String("Can't save file \"") + fileName + "\" as \"" + name + "\"", exception);
 	}
 }
 
-ptr<InputStream> FolderFileSystem::LoadFileAsStream(const std::wstring& fileName)
+ptr<InputStream> FolderFileSystem::LoadFileAsStream(const String& fileName)
 {
-	std::wstring name = GetFullName(fileName);
+	String name = GetFullName(fileName);
 	try
 	{
 		ptr<Handle> file = NEW(Handle(CreateFile(name.c_str(), GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL)));
@@ -238,13 +235,13 @@ ptr<InputStream> FolderFileSystem::LoadFileAsStream(const std::wstring& fileName
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION(std::wstring(L"Can't load file \"") + fileName + L"\" as \"" + name + L"\" as stream", exception);
+		THROW_SECONDARY_EXCEPTION(String("Can't load file \"") + fileName + "\" as \"" + name + "\" as stream", exception);
 	}
 }
 
-ptr<OutputStream> FolderFileSystem::SaveFileAsStream(const std::wstring& fileName)
+ptr<OutputStream> FolderFileSystem::SaveFileAsStream(const String& fileName)
 {
-	std::wstring name = GetFullName(fileName);
+	String name = GetFullName(fileName);
 	try
 	{
 		ptr<Handle> file = NEW(Handle(CreateFile(name.c_str(), GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, NULL)));
@@ -254,23 +251,23 @@ ptr<OutputStream> FolderFileSystem::SaveFileAsStream(const std::wstring& fileNam
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION(std::wstring(L"Can't save file \"") + fileName + L"\" as \"" + name + L"\" as stream", exception);
+		THROW_SECONDARY_EXCEPTION(String("Can't save file \"") + fileName + "\" as \"" + name + "\" as stream", exception);
 	}
 }
 
-void FolderFileSystem::GetFileNames(std::wstring sourceDirectory, const std::wstring& targetDirectory, std::vector<std::wstring>& fileNames) const
+void FolderFileSystem::GetFileNames(String sourceDirectory, const String& targetDirectory, std::vector<String>& fileNames) const
 {
 	sourceDirectory += L'\\';
 	WIN32_FIND_DATA find;
-	HANDLE hFind = FindFirstFile((sourceDirectory + L"*").c_str(), &find);
+	HANDLE hFind = FindFirstFile((sourceDirectory + "*").c_str(), &find);
 	if(hFind == INVALID_HANDLE_VALUE) return;
 	do
 	{
-		std::wstring fileTitle(find.cFileName);
+		String fileTitle(find.cFileName);
 		if(fileTitle.length() && fileTitle[0] == L'.' || (find.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN))
 			continue;
 		if(find.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-			GetFileNames(sourceDirectory + fileTitle, targetDirectory + fileTitle + L"/", fileNames);
+			GetFileNames(sourceDirectory + fileTitle, targetDirectory + fileTitle + "/", fileNames);
 		else
 			fileNames.push_back(targetDirectory + fileTitle);
 	}
@@ -278,9 +275,256 @@ void FolderFileSystem::GetFileNames(std::wstring sourceDirectory, const std::wst
 	FindClose(hFind);
 }
 
-void FolderFileSystem::GetFileNames(std::vector<std::wstring>& fileNames) const
+#endif // ___INANITY_WINDOWS
+
+#ifdef ___INANITY_LINUX
+
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <dirent.h>
+#include <errno.h>
+
+class FolderFile : public File
+{
+private:
+	void* data;
+	size_t size;
+
+public:
+	FolderFile(void* data, size_t size) : data(data), size(size)
+	{
+	}
+
+	~FolderFile()
+	{
+		munmap(data, size);
+	}
+
+	void* GetData() const
+	{
+		return data;
+	}
+
+	size_t GetSize() const
+	{
+		return size;
+	}
+};
+
+FolderFileSystem::FolderFileSystem(const String& userFolderName)
+{
+	//если имя абсолютное
+	if(userFolderName.length() >= 1 && userFolderName[0] == L'/')
+		folderName = userFolderName;
+	//иначе относительное
+	else
+	{
+		//получить полное имя текущего каталога
+		char* currentDirectory = getcwd(0, 0);
+		if(!currentDirectory)
+			THROW_PRIMARY_EXCEPTION("Can't get current directory");
+		folderName = currentDirectory;
+		free(currentDirectory);
+
+		//прибавить к нему заданное имя каталога, и получить таким образом полный каталог
+		if(userFolderName.length())
+		{
+			folderName += '/';
+			folderName += userFolderName;
+		}
+	}
+}
+
+FolderFileSystem::FolderFileSystem()
+{
+	//создать абсолютную файловую систему, то есть ничего не делать;
+	//folderName - пустая строка
+}
+
+String FolderFileSystem::GetFullName(String fileName) const
+{
+	if(fileName.length() && fileName[0] == '/')
+		fileName = fileName.substr(1);
+	return folderName.length() ? (folderName + "/" + fileName) : fileName;
+}
+
+size_t FolderFileSystem::GetFileSize(const String& fileName)
+{
+	struct stat st;
+	if(stat(fileName.c_str(), &st) != 0)
+		THROW_PRIMARY_EXCEPTION("Can't determine file size");
+
+	return st.st_size;
+}
+
+ptr<File> FolderFileSystem::LoadFile(const String& fileName)
+{
+	return LoadPartOfFile(fileName, 0, 0);
+}
+
+ptr<File> FolderFileSystem::LoadPartOfFile(const String& fileName, long long mappingStart, size_t mappingSize)
+{
+	String name = GetFullName(fileName);
+	try
+	{
+		int fd = open(name.c_str(), O_RDONLY, 0);
+		if(fd < 0)
+			THROW_SECONDARY_EXCEPTION("Can't open file", Exception::SystemError());
+		size_t size;
+		if(mappingSize)
+			size = mappingSize;
+		else
+		{
+			struct stat st;
+			if(fstat(fd, &st) < 0)
+				THROW_SECONDARY_EXCEPTION("Can't get file size", Exception::SystemError());
+			size = st.st_size;
+		}
+		if(!size)
+			return NEW(EmptyFile());
+
+		//получить размер страницы
+		static size_t pageSize = 0;
+		if(!pageSize)
+			pageSize = getpagesize();
+
+		//округлить начало проекции вниз на размер страницы
+		size_t realMappingStart = mappingStart & ~(pageSize - 1);
+		//вычислить реальный размер
+		size_t realMappingSize = mappingSize + (size_t)(mappingStart - realMappingStart);
+		//спроецировать файл с учетом этого сдвига
+		void* data = mmap(0, realMappingSize, PROT_READ, MAP_PRIVATE, fd, realMappingStart);
+		if(data == (caddr_t)-1)
+			THROW_PRIMARY_EXCEPTION("Can't map file");
+
+		//если сдвиг был
+		if(realMappingStart < (unsigned long long)mappingStart)
+			//вернуть указатель на частичный файл, с учетом сдвига
+			return NEW(PartFile(NEW(FolderFile(data, realMappingSize)), (char*)data + (size_t)(mappingStart - realMappingStart), size));
+		//иначе сдвига не было, просто вернуть файл
+		return NEW(FolderFile(data, size));
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't load file \"" + fileName + "\" as \"" + name + "\"", exception);
+	}
+}
+
+void FolderFileSystem::SaveFile(ptr<File> file, const String& fileName)
+{
+	String name = GetFullName(fileName);
+	try
+	{
+		int fd = open(fileName.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0644);
+		if(fd < 0)
+			THROW_SECONDARY_EXCEPTION("Can't open file", Exception::SystemError());
+
+		const char* data = (const char*)file->GetData();
+		size_t size = file->GetSize();
+
+		while(size > 0)
+		{
+			ssize_t written = write(fd, data, size);
+			if(written < 0)
+			{
+				ptr<Exception> exception = Exception::SystemError();
+				close(fd);
+				THROW_SECONDARY_EXCEPTION("Can't write file", exception);
+			}
+			size -= written;
+			data += written;
+		}
+		close(fd);
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION(String("Can't save file \"") + fileName + "\" as \"" + name + "\"", exception);
+	}
+}
+
+ptr<InputStream> FolderFileSystem::LoadFileAsStream(const String& fileName)
+{
+	String name = GetFullName(fileName);
+	try
+	{
+		int fd = open(name.c_str(), O_RDONLY, 0);
+		if(fd < 0)
+			THROW_SECONDARY_EXCEPTION("Can't open file", Exception::SystemError());
+		return NEW(DiskInputStream(NEW(Handle(fd))));
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION(String("Can't load file \"") + fileName + "\" as \"" + name + "\" as stream", exception);
+	}
+}
+
+ptr<OutputStream> FolderFileSystem::SaveFileAsStream(const String& fileName)
+{
+	String name = GetFullName(fileName);
+	try
+	{
+		int fd = open(fileName.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0644);
+		if(fd < 0)
+			THROW_SECONDARY_EXCEPTION("Can't open file", Exception::SystemError());
+		return NEW(DiskOutputStream(NEW(Handle(fd))));
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION(String("Can't save file \"") + fileName + "\" as \"" + name + "\" as stream", exception);
+	}
+}
+
+void FolderFileSystem::GetFileNames(String sourceDirectory, const String& targetDirectory, std::vector<String>& fileNames) const
+{
+	DIR* dir = opendir(sourceDirectory.c_str());
+
+	sourceDirectory += '/';
+
+	while(struct dirent* ent = readdir(dir))
+	{
+		if(errno)
+		{
+			ptr<Exception> exception = Exception::SystemError();
+			closedir(dir);
+			THROW_SECONDARY_EXCEPTION("Can't read dir", exception);
+		}
+
+		String fileName = ent->d_name;
+		String sourceFileName = sourceDirectory + fileName;
+		struct stat st;
+		if(stat(sourceFileName.c_str(), &st) < 0)
+		{
+			ptr<Exception> exception = Exception::SystemError();
+			closedir(dir);
+			THROW_SECONDARY_EXCEPTION("Can't stat file " + sourceFileName, exception);
+		}
+
+		// если это каталог
+		if((st.st_mode & S_IFMT) == S_IFDIR)
+			// рекурсивно продолжить перечисление
+			GetFileNames(sourceFileName, targetDirectory + fileName + '/', fileNames);
+		else
+			// добавить файл в результат
+			fileNames.push_back(targetDirectory + fileName);
+	}
+
+	closedir(dir);
+}
+
+#endif // ___INANITY_LINUX
+
+ptr<FolderFileSystem> FolderFileSystem::GetNativeFileSystem()
+{
+	//этот метод сделан просто для лучшей понятности
+	return NEW(FolderFileSystem());
+}
+
+void FolderFileSystem::GetFileNames(std::vector<String>& fileNames) const
 {
 	//только если файловая система не абсолютная
 	if(folderName.length())
-		GetFileNames(folderName, L"/", fileNames);
+		GetFileNames(folderName, "/", fileNames);
 }

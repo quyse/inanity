@@ -67,6 +67,10 @@ public:
 	выводя всю информацию по указанной ошибке.
 	*/
 	virtual void PrintStack(std::ostream& stream) const;
+
+	/// Создать исключение, описывающее ошибку системы.
+	/** Ошибка системы определяется специфичным для платформы способом (Windows - GetLastError, Linux - errno). */
+	static ptr<Exception> SystemError();
 };
 
 #ifdef _DEBUG
