@@ -30,9 +30,8 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.639552162" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug">
 								<option id="gnu.cpp.compiler.lib.debug.option.optimization.level.725430553" name="Optimization Level" superClass="gnu.cpp.compiler.lib.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.lib.debug.option.debugging.level.968365379" name="Debug Level" superClass="gnu.cpp.compiler.lib.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.preprocessor.def.226958306" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+								<option id="gnu.cpp.compiler.option.preprocessor.def.226958306" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="INANITY_LIB"/>
-									<listOptionValue builtIn="false" value="_LINUX"/>
 									<listOptionValue builtIn="false" value="_DEBUG"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1105465339" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
@@ -116,5 +115,8 @@
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.1485392265;cdt.managedbuild.config.gnu.lib.debug.1485392265.;cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.639552162;cdt.managedbuild.tool.gnu.cpp.compiler.input.1105465339">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
 		</scannerConfigBuildInfo>
+	</storageModule>
+	<storageModule moduleId="refreshScope" versionNumber="1">
+		<resource resourceType="PROJECT" workspacePath="/inanity2"/>
 	</storageModule>
 </cproject>
