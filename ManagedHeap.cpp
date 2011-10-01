@@ -104,7 +104,7 @@ void* ManagedHeap::Allocate(size_t size)
 void ManagedHeap::Free(void *data)
 {
 #ifdef TRACE_HEAP
-	auto i = allocations.find(data);
+	std::map<void*, AllocationInfo>::iterator i = allocations.find(data);
 	if(i == allocations.end())
 		DebugBreak();
 	allocations.erase(i);
@@ -122,7 +122,7 @@ void ManagedHeap::Free(void *data)
 
 void ManagedHeap::SetAllocationInfo(void* data, const char* info)
 {
-	auto i = allocations.find(data);
+	std::map<void*, AllocationInfo>::iterator i = allocations.find(data);
 	if(i != allocations.end())
 		i->second.info = info;
 }

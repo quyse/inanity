@@ -1,5 +1,6 @@
 #include "Exception.hpp"
 #ifdef ___INANITY_LINUX
+#include <errno.h>
 // для strerror
 #include <cstring>
 #endif

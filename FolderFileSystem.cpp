@@ -286,6 +286,7 @@ void FolderFileSystem::GetFileNames(String sourceDirectory, const String& target
 #include <fcntl.h>
 #include <dirent.h>
 #include <errno.h>
+#include <stdlib.h>
 
 class FolderFile : public File
 {
