@@ -34,6 +34,9 @@
 									<listOptionValue builtIn="false" value="INANITY_LIB"/>
 									<listOptionValue builtIn="false" value="_DEBUG"/>
 								</option>
+								<option id="gnu.cpp.compiler.option.include.paths.1720090015" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/deps/libuv/include}&quot;"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1105465339" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.debug.1688621594" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.debug">
@@ -48,6 +51,19 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<folderInfo id="cdt.managedbuild.config.gnu.lib.debug.1485392265.861906398" name="/" resourcePath="deps">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.lib.debug.1987000592" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.lib.debug" unusedChildren="">
+							<tool id="cdt.managedbuild.tool.gnu.archiver.lib.debug.993965527" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.debug.766900867"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1521278527" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.639552162"/>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.debug.1168006813" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.debug.1688621594"/>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.947039968" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base.576601643"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.793711023" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base.1962696121"/>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.lib.debug.2022469623" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.debug.1525197206"/>
+						</toolChain>
+					</folderInfo>
+					<sourceEntries>
+						<entry excluding="deps" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+					</sourceEntries>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
