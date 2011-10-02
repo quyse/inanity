@@ -2,23 +2,32 @@
 #define ___INANITY_EVENT_LOOP_HPP___
 
 #include "Object.hpp"
+#include "ServerSocket.hpp"
+#include <uv.h>
 
-#ifdef ___INANITY_WINDOWS
+/*
+ * Файл содержит класс цикла обработки асинхронных событий,
+ * основанного на библиотеке libuv.
+ */
 
-#include "WindowsEventLoop.hpp"
 BEGIN_INANITY
-typedef WindowsEventLoop EventLoop;
+
+class EventLoop : public Object
+{
+	friend class ServerSocket;
+private:
+	uv_loop_t* loop;
+
+public:
+	EventLoop();
+	~EventLoop();
+
+	static uv_buf_t AllocCallback(uv_handle_t* handle, size_t size);
+	static void Free(uv_buf_t buf);
+
+	ptr<ServerSocket> Listen(int port, ptr<ServerSocket::Handler> handler);
+};
+
 END_INANITY
-
-#endif
-
-#ifdef ___INANITY_LINUX
-
-#include "LibevEventLoop.hpp"
-BEGIN_INANITY
-typedef LibevEventLoop EventLoop;
-END_INANITY
-
-#endif
 
 #endif
