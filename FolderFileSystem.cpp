@@ -503,6 +503,11 @@ void FolderFileSystem::GetFileNames(String sourceDirectory, const String& target
 			THROW_SECONDARY_EXCEPTION("Can't stat file " + sourceFileName, exception);
 		}
 
+		// если файл скрыт (или ненужен: . или ..)
+		if(fileName.length() > 0 && fileName[0] == '.')
+			// пропустить его
+			continue;
+
 		// если это каталог
 		if((st.st_mode & S_IFMT) == S_IFDIR)
 			// рекурсивно продолжить перечисление
