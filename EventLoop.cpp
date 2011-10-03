@@ -1,9 +1,18 @@
 #include "EventLoop.hpp"
-#include "ServerSocket.cpp"
+#include "ServerSocket.hpp"
+#include "ClientSocket.hpp"
+#include "Exception.hpp"
+#include <string.h>
+
+EventLoop::ConnectRequest::ConnectRequest(ptr<EventLoop> eventLoop, ptr<ConnectHandler> connectHandler)
+	: eventLoop(eventLoop), connectHandler(connectHandler), stream(0)
+{
+}
 
 EventLoop::EventLoop()
 {
 	loop = uv_loop_new();
+	loop->data = this;
 }
 
 EventLoop::~EventLoop()
@@ -19,6 +28,76 @@ uv_buf_t EventLoop::AllocCallback(uv_handle_t* handle, size_t size)
 void EventLoop::Free(uv_buf_t buf)
 {
 	delete [] (char*)buf.base;
+}
+
+void EventLoop::GetAddrInfoCallback(uv_getaddrinfo_t* handle, int status, addrinfo* res)
+{
+	bool success = false;
+	ConnectRequest* request = (ConnectRequest*)handle->data;
+
+	if(status == 0)
+	{
+		// запустить подключение
+		// пока алгоритм такой: берём первый попавшийся IPv4 или IPv6 адрес, и соединяемся с ним
+		// TODO: сделать перебор всех вариантов, в случае неудачного соединения
+		request->stream = new uv_tcp_t;
+		uv_tcp_init(request->eventLoop->loop, request->stream);
+		request->connectReq.data = request;
+		for(addrinfo* addr = res; addr; addr = addr->ai_next)
+		{
+			int status;
+			if(addr->ai_family == AF_INET)
+				status = uv_tcp_connect(&request->connectReq, request->stream, *(sockaddr_in*)&addr->ai_addr, ConnectCallback);
+			else if(addr->ai_family == AF_INET6)
+				status = uv_tcp_connect6(&request->connectReq, request->stream, *(sockaddr_in6*)&addr->ai_addr, ConnectCallback);
+			else
+				continue;
+			if(status != 0)
+				continue;
+			success = true;
+			break;
+		}
+
+		// если неуспешно, то удалить созданный stream
+		if(!success)
+			delete request->stream;
+	}
+
+	// если уже известно, что соединиться не получится
+	if(!success)
+	{
+		ConnectHandler* handler = (ConnectHandler*)handle->data;
+		// сообщить обработчику об ошибке
+		handler->Fire(0);
+
+		// удалить структуру запроса
+		delete request;
+	}
+
+	// освободить память результата
+	if(res)
+		uv_freeaddrinfo(res);
+}
+
+void EventLoop::ConnectCallback(uv_connect_t* req, int status)
+{
+	ConnectRequest* request = (ConnectRequest*)req->data;
+
+	// если соединение установлено
+	if(status == 0)
+		// создать сокет и передать его обработчику
+		// при этом stream переходит к сокету, и он уже за него отвечает
+		request->connectHandler->Fire(NEW(ClientSocket(request->eventLoop, request->stream)));
+	else
+	{
+		// ошибка, сообщить обработчику
+		request->connectHandler->Fire(0);
+		// удалить stream
+		delete request->stream;
+	}
+
+	// и в любом случае удалить структуру запроса
+	delete request;
 }
 
 ptr<ServerSocket> EventLoop::Listen(int port, ptr<ServerSocket::Handler> handler)
@@ -43,5 +122,26 @@ ptr<ServerSocket> EventLoop::Listen(int port, ptr<ServerSocket::Handler> handler
 	catch(Exception* exception)
 	{
 		THROW_SECONDARY_EXCEPTION("Can't create server socket", exception);
+	}
+}
+
+void EventLoop::Connect(const String& host, int port, ptr<ConnectHandler> handler)
+{
+	ConnectRequest* request = new ConnectRequest(this, handler);
+	request->getaddrinfoReq.data = request;
+
+	// сформировать структуру "подсказок"
+	// пока поддерживаем только IPv4
+	addrinfo hints;
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+	hints.ai_flags = 0;
+
+	if(uv_getaddrinfo(loop, &request->getaddrinfoReq, GetAddrInfoCallback, host.c_str(), 0, &hints) != 0)
+	{
+		delete request;
+		THROW_SECONDARY_EXCEPTION("Can't get addr info", NEW(Exception(uv_strerror(uv_last_error(loop)))));
 	}
 }
