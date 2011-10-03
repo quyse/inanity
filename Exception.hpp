@@ -71,6 +71,7 @@ public:
 	/// Создать исключение, описывающее ошибку системы.
 	/** Ошибка системы определяется специфичным для платформы способом (Windows - GetLastError, Linux - errno). */
 	static ptr<Exception> SystemError();
+	static ptr<Exception> SystemError(int errorCode);
 };
 
 #ifdef _DEBUG

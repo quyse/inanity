@@ -39,9 +39,22 @@ void Exception::PrintStack(std::ostream& stream) const
 ptr<Exception> Exception::SystemError()
 {
 #ifdef ___INANITY_WINDOWS
+	int errorCode = GetLastError();
+#endif // ___INANITY_WINDOWS
+
+#ifdef ___INANITY_LINUX
+	int errorCode  = errno;
+#endif // ___INANITY_LINUX
+
+	return SystemError(errorCode);
+}
+
+ptr<Exception> Exception::SystemError(int errorCode)
+{
+#ifdef ___INANITY_WINDOWS
 
 	wchar_t* buffer;
-	if(!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, 0, GetLastError(), 0, &buffer, 0))
+	if(!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, 0, errorCode, 0, &buffer, 0))
 		return NEW(Exception("Unknown system error"));
 
 	ptr<Exception> exception = NEW(Exception(buffer));
@@ -53,7 +66,7 @@ ptr<Exception> Exception::SystemError()
 
 #ifdef ___INANITY_LINUX
 
-	return NEW(Exception(strerror(errno)));
+	return NEW(Exception(strerror(errorCode)));
 
 #endif // ___INANITY_LINUX
 }
