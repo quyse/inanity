@@ -145,3 +145,8 @@ void EventLoop::Connect(const String& host, int port, ptr<ConnectHandler> handle
 		THROW_SECONDARY_EXCEPTION("Can't get addr info", NEW(Exception(uv_strerror(uv_last_error(loop)))));
 	}
 }
+
+void EventLoop::Run()
+{
+	uv_run(loop);
+}

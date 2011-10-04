@@ -18,6 +18,12 @@ private:
 	private:
 		ptr<ClientSocket> clientSocket;
 
+		struct WriteRequest
+		{
+			uv_write_t req;
+			uv_buf_t buf;
+		};
+
 	public:
 		SocketOutputStream(ptr<ClientSocket> clientSocket);
 

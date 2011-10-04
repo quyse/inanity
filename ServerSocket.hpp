@@ -3,7 +3,6 @@
 
 #include "Socket.hpp"
 #include "EventHandler.hpp"
-#include <uv.h>
 
 BEGIN_INANITY
 

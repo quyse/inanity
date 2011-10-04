@@ -48,6 +48,8 @@ public:
 
 	ptr<ServerSocket> Listen(int port, ptr<ServerSocket::Handler> handler);
 	void Connect(const String& host, int port, ptr<ConnectHandler> handler);
+
+	void Run();
 };
 
 END_INANITY
