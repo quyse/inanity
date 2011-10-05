@@ -21,7 +21,7 @@ private:
 		struct WriteRequest
 		{
 			uv_write_t req;
-			uv_buf_t buf;
+			ptr<File> file;
 		};
 
 	public:
@@ -29,7 +29,7 @@ private:
 
 		static void WriteCallback(uv_write_t* req, int status);
 
-		void Write(const void* data, size_t size);
+		void Write(ptr<File> file);
 		/// Закрыть записывающую сторону сокета.
 		void Flush();
 	};

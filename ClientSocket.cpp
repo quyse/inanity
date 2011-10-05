@@ -63,20 +63,20 @@ void ClientSocket::SocketOutputStream::WriteCallback(uv_write_t* req, int status
 	ClientSocket* socket = (ClientSocket*)(Socket*)req->handle->data;
 	if(status != 0)
 	{
-		// закрыть записывающую сторону сокета
-		socket->Shutdown();
+		// закрыть сокет
+		socket->Close();
 	}
 	// в любом случае выполнить очистку
 	delete (WriteRequest*)req->data;
 }
 
-void ClientSocket::SocketOutputStream::Write(const void* data, size_t size)
+void ClientSocket::SocketOutputStream::Write(ptr<File> file)
 {
 	WriteRequest* request = new WriteRequest;
 	request->req.data = request;
-	request->buf = uv_buf_init(new char[size], size);
-	memcpy(request->buf.base, data, size);
-	uv_write(&request->req, (uv_stream_t*)clientSocket->stream, &request->buf, 1, WriteCallback);
+	request->file = file;
+	uv_buf_t buf = uv_buf_init((char*)file->GetData(), file->GetSize());
+	uv_write(&request->req, (uv_stream_t*)clientSocket->stream, &buf, 1, WriteCallback);
 }
 
 void ClientSocket::SocketOutputStream::Flush()
