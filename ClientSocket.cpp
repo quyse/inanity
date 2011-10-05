@@ -34,7 +34,9 @@ void ClientSocket::ReadCallback(uv_stream_t* stream, ssize_t nread, uv_buf_t buf
 
 void ClientSocket::ShutdownCallback(uv_shutdown_t* req, int status)
 {
+	ClientSocket* socket = (ClientSocket*)(Socket*)req->handle->data;
 	delete req;
+	socket->Close();
 }
 
 void ClientSocket::Shutdown()
