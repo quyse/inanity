@@ -100,6 +100,12 @@ void EventLoop::ConnectCallback(uv_connect_t* req, int status)
 	delete request;
 }
 
+ptr<Exception> EventLoop::GetLastError()
+{
+	uv_err_t err = uv_last_error(loop);
+	return err.code ? NEW(Exception(uv_strerror(err))) : 0;
+}
+
 ptr<ServerSocket> EventLoop::Listen(int port, ptr<ServerSocket::Handler> handler)
 {
 	try
@@ -114,35 +120,42 @@ ptr<ServerSocket> EventLoop::Listen(int port, ptr<ServerSocket::Handler> handler
 		if(uv_tcp_bind(stream, addr) != 0)
 		{
 			delete stream;
-			THROW_PRIMARY_EXCEPTION("Can't bind socket");
+			THROW_SECONDARY_EXCEPTION("Can't bind socket", GetLastError());
 		}
 
 		return NEW(ServerSocket(this, stream, handler));
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create server socket", exception);
+		THROW_SECONDARY_EXCEPTION("Can't initialize network server", exception);
 	}
 }
 
 void EventLoop::Connect(const String& host, int port, ptr<ConnectHandler> handler)
 {
-	ConnectRequest* request = new ConnectRequest(this, handler);
-	request->getaddrinfoReq.data = request;
-
-	// сформировать структуру "подсказок"
-	// пока поддерживаем только IPv4
-	addrinfo hints;
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_protocol = IPPROTO_TCP;
-	hints.ai_flags = 0;
-
-	if(uv_getaddrinfo(loop, &request->getaddrinfoReq, GetAddrInfoCallback, host.c_str(), 0, &hints) != 0)
+	try
 	{
-		delete request;
-		THROW_SECONDARY_EXCEPTION("Can't get addr info", NEW(Exception(uv_strerror(uv_last_error(loop)))));
+		ConnectRequest* request = new ConnectRequest(this, handler);
+		request->getaddrinfoReq.data = request;
+
+		// сформировать структуру "подсказок"
+		// пока поддерживаем только IPv4
+		addrinfo hints;
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_family = AF_INET;
+		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_protocol = IPPROTO_TCP;
+		hints.ai_flags = 0;
+
+		if(uv_getaddrinfo(loop, &request->getaddrinfoReq, GetAddrInfoCallback, host.c_str(), 0, &hints) != 0)
+		{
+			delete request;
+			THROW_SECONDARY_EXCEPTION("Can't get addr info", GetLastError());
+		}
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't initialize client connection", exception);
 	}
 }
 

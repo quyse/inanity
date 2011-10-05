@@ -14,6 +14,7 @@
 
 BEGIN_INANITY
 
+class Exception;
 class ClientSocket;
 
 class EventLoop : public Object
@@ -46,7 +47,11 @@ public:
 	static void GetAddrInfoCallback(uv_getaddrinfo_t* handle, int status, struct addrinfo* res);
 	static void ConnectCallback(uv_connect_t* req, int status);
 
+	ptr<Exception> GetLastError();
+
+	/// Открыть серверный сокет для приёма входящих соединений.
 	ptr<ServerSocket> Listen(int port, ptr<ServerSocket::Handler> handler);
+	/// Подключиться к серверу.
 	void Connect(const String& host, int port, ptr<ConnectHandler> handler);
 
 	void Run();

@@ -7,8 +7,15 @@
 ServerSocket::ServerSocket(ptr<EventLoop> eventLoop, uv_tcp_t* stream, ptr<Handler> handler) :
 	Socket(eventLoop, stream), handler(handler)
 {
-	if(uv_listen((uv_stream_t*)stream, 10, ConnectionCallback) != 0)
-		THROW_PRIMARY_EXCEPTION("Can't listen socket");
+	try
+	{
+		if(uv_listen((uv_stream_t*)stream, 100, ConnectionCallback) != 0)
+			THROW_SECONDARY_EXCEPTION("Can't listen socket", eventLoop->GetLastError());
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create server socket", exception);
+	}
 }
 
 void ServerSocket::ConnectionCallback(uv_stream_t* stream, int status)
