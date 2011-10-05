@@ -30,7 +30,7 @@ private:
 		static void WriteCallback(uv_write_t* req, int status);
 
 		void Write(ptr<File> file);
-		/// Закрыть записывающую сторону сокета.
+		/// Закрыть сокет после завершения всех операций записи.
 		void Flush();
 	};
 

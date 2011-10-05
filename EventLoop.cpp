@@ -3,6 +3,7 @@
 #include "ClientSocket.hpp"
 #include "Exception.hpp"
 #include <string.h>
+#include <stdio.h>
 
 EventLoop::ConnectRequest::ConnectRequest(ptr<EventLoop> eventLoop, ptr<ConnectHandler> connectHandler)
 	: eventLoop(eventLoop), connectHandler(connectHandler), stream(0)
@@ -47,9 +48,9 @@ void EventLoop::GetAddrInfoCallback(uv_getaddrinfo_t* handle, int status, addrin
 		{
 			int status;
 			if(addr->ai_family == AF_INET)
-				status = uv_tcp_connect(&request->connectReq, request->stream, *(sockaddr_in*)&addr->ai_addr, ConnectCallback);
+				status = uv_tcp_connect(&request->connectReq, request->stream, *(sockaddr_in*)addr->ai_addr, ConnectCallback);
 			else if(addr->ai_family == AF_INET6)
-				status = uv_tcp_connect6(&request->connectReq, request->stream, *(sockaddr_in6*)&addr->ai_addr, ConnectCallback);
+				status = uv_tcp_connect6(&request->connectReq, request->stream, *(sockaddr_in6*)addr->ai_addr, ConnectCallback);
 			else
 				continue;
 			if(status != 0)
@@ -66,9 +67,8 @@ void EventLoop::GetAddrInfoCallback(uv_getaddrinfo_t* handle, int status, addrin
 	// если уже известно, что соединиться не получится
 	if(!success)
 	{
-		ConnectHandler* handler = (ConnectHandler*)handle->data;
 		// сообщить обработчику об ошибке
-		handler->Fire(0);
+		request->connectHandler->Fire(0);
 
 		// удалить структуру запроса
 		delete request;
@@ -145,9 +145,12 @@ void EventLoop::Connect(const String& host, int port, ptr<ConnectHandler> handle
 		hints.ai_family = AF_INET;
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_protocol = IPPROTO_TCP;
-		hints.ai_flags = 0;
+		hints.ai_flags = AI_NUMERICSERV;
 
-		if(uv_getaddrinfo(loop, &request->getaddrinfoReq, GetAddrInfoCallback, host.c_str(), 0, &hints) != 0)
+		char portStr[10];
+		sprintf(portStr, "%d", port);
+
+		if(uv_getaddrinfo(loop, &request->getaddrinfoReq, GetAddrInfoCallback, host.c_str(), portStr, &hints) != 0)
 		{
 			delete request;
 			THROW_SECONDARY_EXCEPTION("Can't get addr info", GetLastError());
