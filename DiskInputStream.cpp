@@ -2,16 +2,14 @@
 #include "Handle.hpp"
 #include "Exception.hpp"
 
-DiskInputStream::DiskInputStream(ptr<Handle> handle) : handle(handle)
-{
-}
-
 #ifdef ___INANITY_WINDOWS
+
+#include "windows.hpp"
 
 size_t DiskInputStream::Read(void *data, size_t size)
 {
 	if((DWORD)size != size)
-		THROW_PRIMARY_EXCEPTION(L"So big reading size is not supported");
+		THROW_PRIMARY_EXCEPTION("So big reading size is not supported");
 	DWORD read;
 	ReadFile(*handle, data, (DWORD)size, &read, NULL);
 	return read;
@@ -21,10 +19,10 @@ size_t DiskInputStream::GetSize() const
 {
 	LARGE_INTEGER size;
 	if(!GetFileSizeEx(*handle, &size))
-		THROW_PRIMARY_EXCEPTION(L"Error getting size");
+		THROW_PRIMARY_EXCEPTION("Error getting size");
 	size_t returnSize = (size_t)size.QuadPart;
 	if(returnSize != size.QuadPart)
-		THROW_PRIMARY_EXCEPTION(L"File is too big");
+		THROW_PRIMARY_EXCEPTION("File is too big");
 	return returnSize;
 }
 
@@ -67,3 +65,7 @@ size_t DiskInputStream::GetSize() const
 }
 
 #endif // ___INANITY_LINUX
+
+DiskInputStream::DiskInputStream(ptr<Handle> handle) : handle(handle)
+{
+}

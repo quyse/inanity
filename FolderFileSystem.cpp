@@ -9,7 +9,8 @@
 
 #ifdef ___INANITY_WINDOWS
 
-#include <windows.h>
+#include "windows.hpp"
+#include "Strings.hpp"
 
 class FolderFile : public File
 {
@@ -54,13 +55,13 @@ FolderFileSystem::FolderFileSystem(const String& userFolderName)
 			delete [] buffer;
 			THROW_PRIMARY_EXCEPTION("Can't get current directory");
 		}
-		folderName = buffer;
+		folderName = Strings::Unicode2UTF8(buffer);
 		delete [] buffer;
 
 		//прибавить к нему заданное имя каталога, и получить таким образом полный каталог
 		if(userFolderName.length())
 		{
-			folderName += L'\\';
+			folderName += '\\';
 			folderName += userFolderName;
 		}
 	}
@@ -88,42 +89,15 @@ String FolderFileSystem::GetFullName(String fileName) const
 	return result;
 }
 
-void FolderFileSystem::ThrowFileError()
-{
-	const wchar_t* message;
-	switch(GetLastError())
-	{
-	case ERROR_FILE_NOT_FOUND:
-		message = "File not found";
-		break;
-	case ERROR_PATH_NOT_FOUND:
-		message = "Path not found";
-		break;
-	case ERROR_ACCESS_DENIED:
-		message = "Access denied";
-		break;
-	default:
-		message = "Unknown error when opening the file";
-		break;
-	}
-	THROW_PRIMARY_EXCEPTION(message);
-}
-
-ptr<File> FolderFileSystem::LoadFile(const String& fileName)
-{
-	return LoadFile(fileName, cacheHintNone);
-}
-
 size_t FolderFileSystem::GetFileSize(const String& fileName)
 {
-	HANDLE file = CreateFile(GetFullName(fileName).c_str(), FILE_READ_ATTRIBUTES, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
-	if(file == INVALID_HANDLE_VALUE)
+	Handle hFile = CreateFile(Strings::UTF82Unicode(GetFullName(fileName)).c_str(), FILE_READ_ATTRIBUTES, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+	if(!hFile.IsValid())
 		THROW_PRIMARY_EXCEPTION("Can't open file to determine file size");
 
 	LARGE_INTEGER size;
-	if(!::GetFileSizeEx(file, &size))
+	if(!::GetFileSizeEx(hFile, &size))
 		THROW_PRIMARY_EXCEPTION("Can't get file size");
-	CloseHandle(file);
 
 	size_t resultSize = (size_t)size.QuadPart;
 	if(resultSize != size.QuadPart)
@@ -132,30 +106,14 @@ size_t FolderFileSystem::GetFileSize(const String& fileName)
 	return resultSize;
 }
 
-ptr<File> FolderFileSystem::LoadFile(const String& fileName, CacheHint cacheHint)
-{
-	return LoadPartOfFile(fileName, 0, 0, cacheHint);
-}
-
-ptr<File> FolderFileSystem::LoadPartOfFile(const String& fileName, long long mappingStart, size_t mappingSize, CacheHint cacheHint)
+ptr<File> FolderFileSystem::LoadPartOfFile(const String& fileName, long long mappingStart, size_t mappingSize)
 {
 	String name = GetFullName(fileName);
 	try
 	{
-		DWORD flags = 0;
-		switch(cacheHint)
-		{
-		case cacheHintSequentialScan:
-			flags = FILE_FLAG_SEQUENTIAL_SCAN;
-			break;
-		case cacheHintRandomScan:
-			flags = FILE_FLAG_RANDOM_ACCESS;
-			break;
-		}
-
-		Handle hFile = CreateFile(name.c_str(), GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, flags, NULL);
-		if(hFile == INVALID_HANDLE_VALUE)
-			ThrowFileError();
+		Handle hFile = CreateFile(Strings::UTF82Unicode(name).c_str(), GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, NULL);
+		if(!hFile.IsValid())
+			THROW_SECONDARY_EXCEPTION("Can't open file", Exception::SystemError());
 		size_t size;
 		if(mappingSize)
 			size = mappingSize;
@@ -170,7 +128,8 @@ ptr<File> FolderFileSystem::LoadPartOfFile(const String& fileName, long long map
 		if(!size)
 			return NEW(EmptyFile());
 		Handle hMapping = CreateFileMapping(hFile, 0, PAGE_READONLY, 0, 0, 0);
-		if(!hMapping) THROW_PRIMARY_EXCEPTION("Can't create file mapping");
+		if(!hMapping)
+			THROW_SECONDARY_EXCEPTION("Can't create file mapping", Exception::SystemError());
 
 		//получить гранулярность выделения памяти
 		static unsigned allocationGranularity = 0;
@@ -187,7 +146,8 @@ ptr<File> FolderFileSystem::LoadPartOfFile(const String& fileName, long long map
 		size_t realMappingSize = mappingSize + (size_t)(mappingStart - realMappingStart);
 		//спроецировать файл с учетом этого сдвига
 		void* data = MapViewOfFile(hMapping, FILE_MAP_READ, realMappingStart >> 32, realMappingStart & ((1LL << 32) - 1), realMappingSize);
-		if(!data) THROW_PRIMARY_EXCEPTION("Can't map view of file");
+		if(!data)
+			THROW_SECONDARY_EXCEPTION("Can't map view of file", Exception::SystemError());
 
 		//если сдвиг был
 		if(realMappingStart < mappingStart)
@@ -207,15 +167,15 @@ void FolderFileSystem::SaveFile(ptr<File> file, const String& fileName)
 	String name = GetFullName(fileName);
 	try
 	{
-		HANDLE hFile = CreateFile(name.c_str(), GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, NULL);
-		if(hFile == INVALID_HANDLE_VALUE) THROW_PRIMARY_EXCEPTION("Can't create file");
+		Handle hFile = CreateFile(Strings::UTF82Unicode(name).c_str(), GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, NULL);
+		if(!hFile.IsValid())
+			THROW_SECONDARY_EXCEPTION("Can't create file", Exception::SystemError());
 		DWORD written;
 		size_t size = file->GetSize();
 		if((DWORD)size != size)
 			THROW_PRIMARY_EXCEPTION("So big files is not supported");
 		if(!WriteFile(hFile, file->GetData(), (DWORD)size, &written, NULL) || written != size)
-			THROW_PRIMARY_EXCEPTION("Can't write file");
-		CloseHandle(hFile);
+			THROW_SECONDARY_EXCEPTION("Can't write file", Exception::SystemError());
 	}
 	catch(Exception* exception)
 	{
@@ -228,9 +188,9 @@ ptr<InputStream> FolderFileSystem::LoadFileAsStream(const String& fileName)
 	String name = GetFullName(fileName);
 	try
 	{
-		ptr<Handle> file = NEW(Handle(CreateFile(name.c_str(), GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL)));
+		ptr<Handle> file = NEW(Handle(CreateFile(Strings::UTF82Unicode(name).c_str(), GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL)));
 		if(!file->IsValid())
-			ThrowFileError();
+			THROW_SECONDARY_EXCEPTION("Can't open file", Exception::SystemError());
 		return NEW(DiskInputStream(file));
 	}
 	catch(Exception* exception)
@@ -244,9 +204,9 @@ ptr<OutputStream> FolderFileSystem::SaveFileAsStream(const String& fileName)
 	String name = GetFullName(fileName);
 	try
 	{
-		ptr<Handle> file = NEW(Handle(CreateFile(name.c_str(), GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, NULL)));
+		ptr<Handle> file = NEW(Handle(CreateFile(Strings::UTF82Unicode(name).c_str(), GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, NULL)));
 		if(!file->IsValid())
-			ThrowFileError();
+			THROW_SECONDARY_EXCEPTION("Can't open file", Exception::SystemError());
 		return NEW(DiskOutputStream(file));
 	}
 	catch(Exception* exception)
@@ -257,14 +217,14 @@ ptr<OutputStream> FolderFileSystem::SaveFileAsStream(const String& fileName)
 
 void FolderFileSystem::GetFileNames(String sourceDirectory, const String& targetDirectory, std::vector<String>& fileNames) const
 {
-	sourceDirectory += L'\\';
+	sourceDirectory += '\\';
 	WIN32_FIND_DATA find;
-	HANDLE hFind = FindFirstFile((sourceDirectory + "*").c_str(), &find);
+	HANDLE hFind = FindFirstFile(Strings::UTF82Unicode(sourceDirectory + "*").c_str(), &find);
 	if(hFind == INVALID_HANDLE_VALUE) return;
 	do
 	{
-		String fileTitle(find.cFileName);
-		if(fileTitle.length() && fileTitle[0] == L'.' || (find.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN))
+		String fileTitle(Strings::Unicode2UTF8(find.cFileName));
+		if(fileTitle.length() && fileTitle[0] == '.' || (find.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN))
 			continue;
 		if(find.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 			GetFileNames(sourceDirectory + fileTitle, targetDirectory + fileTitle + "/", fileNames);
@@ -359,11 +319,6 @@ size_t FolderFileSystem::GetFileSize(const String& fileName)
 		THROW_PRIMARY_EXCEPTION("Can't determine file size");
 
 	return st.st_size;
-}
-
-ptr<File> FolderFileSystem::LoadFile(const String& fileName)
-{
-	return LoadPartOfFile(fileName, 0, 0);
 }
 
 ptr<File> FolderFileSystem::LoadPartOfFile(const String& fileName, long long mappingStart, size_t mappingSize)
@@ -521,6 +476,11 @@ void FolderFileSystem::GetFileNames(String sourceDirectory, const String& target
 }
 
 #endif // ___INANITY_LINUX
+
+ptr<File> FolderFileSystem::LoadFile(const String& fileName)
+{
+	return LoadPartOfFile(fileName, 0, 0);
+}
 
 ptr<FolderFileSystem> FolderFileSystem::GetNativeFileSystem()
 {

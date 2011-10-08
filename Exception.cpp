@@ -1,9 +1,13 @@
 #include "Exception.hpp"
+#include "Strings.hpp"
+#ifdef ___INANITY_WINDOWS
+#include "windows.hpp"
+#endif // ___INANITY_WINDOWS
 #ifdef ___INANITY_LINUX
 #include <errno.h>
 // для strerror
 #include <cstring>
-#endif
+#endif // ___INANITY_LINUX
 
 Exception::Exception(const String& message) : message(message)
 {
@@ -54,10 +58,10 @@ ptr<Exception> Exception::SystemError(int errorCode)
 #ifdef ___INANITY_WINDOWS
 
 	wchar_t* buffer;
-	if(!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, 0, errorCode, 0, &buffer, 0))
+	if(!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, 0, errorCode, 0, (wchar_t*)&buffer, 0, 0))
 		return NEW(Exception("Unknown system error"));
 
-	ptr<Exception> exception = NEW(Exception(buffer));
+	ptr<Exception> exception = NEW(Exception(Strings::Unicode2UTF8(buffer)));
 	LocalFree(buffer);
 
 	return exception;

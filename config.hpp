@@ -11,13 +11,6 @@
 #define ___INANITY_LINUX
 #endif
 
-#ifdef ___INANITY_WINDOWS
-// чтобы не объявлялись макросы MIN и MAX
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#endif // ___INANITY_WINDOWS
-
 #ifdef ___INANITY_LINUX
 #define DebugBreak() asm("int3")
 #endif // ___INANITY_LINUX

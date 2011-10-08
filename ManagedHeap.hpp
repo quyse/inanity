@@ -7,7 +7,7 @@
 
 #include "Object.hpp"
 #ifdef ___INANITY_WINDOWS
-#include <windows.h>
+#include "windows.hpp"
 #endif
 #include <vector>
 
