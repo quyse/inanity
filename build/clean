@@ -1,0 +1,6 @@
+#!/bin/sh
+# скрипт очистки inanity2
+
+# rm -v {debug,release}/{obj/*,*.a,*.lib}
+# expansion почему-то не работает из скрипта
+rm -vf debug/obj/* debug/*.a debug/*.lib release/obj/* release/*.a release/*.lib
