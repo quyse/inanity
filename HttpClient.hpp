@@ -12,18 +12,11 @@ BEGIN_INANITY
 class HttpClient : public Object
 {
 private:
-	/// Класс обработчика соединения с HTTP.
-	class ConnectHandler : public EventLoop::ConnectHandler
-	{
-	private:
-		String request;
-		ptr<OutputStream> outputStream;
+	String request;
+	ptr<OutputStream> outputStream;
 
-	public:
-		ConnectHandler(const String& host, int port, const String& path, ptr<OutputStream> outputStream);
-
-		void OnEvent(ptr<ClientSocket> socket);
-	};
+	HttpClient(const String& request, ptr<OutputStream> outputStream);
+	void OnConnect(ptr<ClientSocket> socket);
 
 public:
 	/// Скачать данные по HTTP.

@@ -45,22 +45,12 @@ static void parseUrl(const String& url, String& host, int& port, String& path)
 	}
 }
 
-HttpClient::ConnectHandler::ConnectHandler(const String& host, int port, const String& path, ptr<OutputStream> outputStream) :
-	outputStream(outputStream)
+HttpClient::HttpClient(const String& request, ptr<OutputStream> outputStream) :
+	request(request), outputStream(outputStream)
 {
-	std::ostringstream request;
-	request << "GET " << path << " HTTP/1.1\r\n";
-	request << "Connection: close\r\n";
-	request << "Host: " << host;
-	if(port != 80)
-		request << ":" << port;
-	request << "\r\n";
-	request << "User-Agent: Inanity/1.0\r\n";
-	request << "\r\n";
-	this->request = request.str();
 }
 
-void HttpClient::ConnectHandler::OnEvent(ptr<ClientSocket> socket)
+void HttpClient::OnConnect(ptr<ClientSocket> socket)
 {
 	if(!socket)
 	{
@@ -78,10 +68,24 @@ void HttpClient::Fetch(ptr<EventLoop> eventLoop, const String& url, ptr<OutputSt
 {
 	try
 	{
+		// разобрать URL
 		String host, path;
 		int port;
 		parseUrl(url, host, port, path);
-		eventLoop->Connect(host, port, NEW(ConnectHandler(host, port, path, outputStream)));
+
+		// сразу сформировать запрос
+		std::ostringstream request;
+		request << "GET " << path << " HTTP/1.1\r\n";
+		request << "Connection: close\r\n";
+		request << "Host: " << host;
+		if(port != 80)
+			request << ":" << port;
+		request << "\r\n";
+		request << "User-Agent: Inanity/1.0\r\n";
+		request << "\r\n";
+
+		// выполнить подключение
+		eventLoop->Connect(host, port, EventLoop::ConnectHandler::Create(NEW(HttpClient(request.str(), outputStream)), &HttpClient::OnConnect));
 	}
 	catch(Exception* exception)
 	{
