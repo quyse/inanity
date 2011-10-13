@@ -8,6 +8,8 @@ FileInputStream
 FileSystem
 FolderFileSystem
 Handle
+HttpClient
+HttpResponseStream
 ManagedHeap
 MemoryFile
 Object
