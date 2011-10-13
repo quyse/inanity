@@ -41,7 +41,7 @@ static void parseUrl(const String& url, String& host, int& port, String& path)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("URL must be of form http://<host>[:<port>]/[query]", exception);
+		THROW_SECONDARY_EXCEPTION("URL must be of form http://<host>[:<port>]/[<query>]", exception);
 	}
 }
 
