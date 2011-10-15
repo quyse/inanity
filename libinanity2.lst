@@ -10,6 +10,7 @@ FolderFileSystem
 Handle
 HttpClient
 HttpResponseStream
+LuaState
 ManagedHeap
 MemoryFile
 Object
@@ -17,3 +18,4 @@ OutputStream
 PartFile
 ServerSocket
 Socket
+Strings

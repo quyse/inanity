@@ -1,0 +1,159 @@
+#ifndef ___INANITY_LUA_STATE_HPP___
+#define ___INANITY_LUA_STATE_HPP___
+
+/* Файл содержит общие определения, используемые для поддержки Lua.
+ */
+
+#include "Object.hpp"
+#include "String.hpp"
+#include "lua.hpp"
+#include <vector>
+
+BEGIN_INANITY
+
+class LuaState;
+
+/// Класс, инкапсулирующий состояние Lua.
+class LuaState : public Object
+{
+private:
+	lua_State* state;
+
+public:
+	/// Вспомогательный класс, с которым происходит взаимодействие при выполнении Inanity-метода, вызванного из Lua.
+	class Call
+	{
+		friend class LuaState;
+	private:
+		LuaState* state;
+		int argumentsCount;
+		bool returned;
+
+		/// Создать объект.
+		Call(LuaState* state);
+
+		/// Проверить, не возвращалось ли уже значение.
+		void CheckReturn();
+
+		/// Завершить выполнение вызова.
+		/** Возвращает количество возвращённых аргументов (0 или 1). */
+		int Finish();
+
+	public:
+		/// Получить количество входящих аргументов.
+		int GetArgumentsCount() const;
+		/// Проверить, что аргументов ровно столько, сколько должно. (Метод для удобства)
+		/** Если не столько, выбрасывается исключение. */
+		void EnsureArgumentsCount(int count);
+
+		bool GetBoolean(int i) const;
+		int GetInteger(int i) const;
+		float GetFloat(int i) const;
+		double GetDouble(int i) const;
+		String GetString(int i) const;
+		template <typename T>
+		ptr<T> GetPointer(int i) const;
+
+		void Return(bool value);
+		void Return(int value);
+		void Return(float value);
+		void Return(double value);
+		void Return(const String& value);
+
+		template <typename T>
+		void Return(ptr<T> value)
+		{
+			CheckReturn();
+			state->PushObject(static_cast<Object*>((T*)value), &T::scriptClass);
+		}
+
+		template <typename T>
+		void Return(ptr<T> value, const char* methodName)
+		{
+			CheckReturn();
+			state->PushDelegate(static_cast<Object*>((T*)value), &T::scriptClass, methodName);
+		}
+	};
+
+	/// Тип метода.
+	typedef void (Object::*Method)(Call&);
+
+	/// Класс, хранящий, каким образом Inanity-класс представляется в Lua.
+	/** То есть, содержит свойства и методы, видимые в Lua. */
+	class Class
+	{
+		friend class LuaState;
+	private:
+		/// Список читающих свойств.
+		std::vector<std::pair<const char*, Method> > getProperties;
+		/// Список записывающих свойств.
+		std::vector<std::pair<const char*, Method> > setProperties;
+		/// Список методов.
+		std::vector<std::pair<const char*, Method> > methods;
+
+	public:
+		void AddProperty(const char* name, Method readMethod, Method writeMethod);
+		void AddMethod(const char* name, Method method);
+	};
+
+private:
+	/// Каждая открытая userdata является этой структурой.
+	struct UserData
+	{
+		/// Тип userdata.
+		enum Type
+		{
+			typeObject
+		} type;
+	};
+
+	/// Структура объекта, представляющего управляемый указатель в Lua.
+	struct ObjectUserData : public UserData
+	{
+		Object* object;
+		Class* cls;
+	};
+
+	/// Структура объекта, представляющего метод.
+	struct MethodUserData
+	{
+		Method method;
+	};
+
+	/// Обработчик выделения памяти Lua.
+	static void* Alloc(void* self, void* ptr, size_t osize, size_t nsize);
+
+	// Обработчики объектов.
+	static int ObjectIndexed(lua_State* state);
+	static int ObjectCollected(lua_State* state);
+
+	// Обработчик делегата.
+	static int DelegateCalled(lua_State* state);
+
+	/// Вызвать метод, применив его к объекту.
+	/** В стеке Lua должны лежать аргументы. */
+	int CallMethod(Object* object, Method method);
+
+	/// Зарегистрировать класс.
+	void Register(Class* cls);
+	/// Запихать в стек объект.
+	/** Относительно медленный метод, так как создаётся fulluserdata. */
+	void PushObject(Object* object, Class* cls);
+	/// Запихать в стек делегат.
+	/** Предполагается, в стеке лежит объект и имя метода; они будут замены на делегат. */
+	void PushDelegate();
+	/// Запихать в стек делегат.
+	/** Относительно медленный метод, так как объект запихивается PushObject. */
+	void PushDelegate(Object* object, Class* cls, const char* methodName);
+
+public:
+	LuaState();
+	~LuaState();
+};
+
+typedef LuaState::Call LuaCall;
+typedef LuaState::Class LuaClass;
+
+END_INANITY
+
+#endif
