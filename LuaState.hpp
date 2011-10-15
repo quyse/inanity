@@ -180,6 +180,7 @@ public:
 };
 
 typedef LuaState::Call LuaCall;
+typedef LuaState::Method LuaMethod;
 typedef LuaState::Class LuaClass;
 typedef LuaState::Script LuaScript;
 
