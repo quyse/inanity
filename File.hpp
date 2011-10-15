@@ -2,6 +2,7 @@
 #define ___INANITY_FILE_HPP___
 
 #include "Object.hpp"
+#include "scripting.hpp"
 
 BEGIN_INANITY
 
@@ -24,6 +25,12 @@ public:
 	\return Размер файла в байтах.
 	*/
 	virtual size_t GetSize() const = 0;
+
+#ifdef ___INANITY_SCRIPTING
+
+	SCRIPTABLE_CLASS();
+
+#endif
 };
 
 END_INANITY

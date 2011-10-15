@@ -50,3 +50,24 @@ void FileSystem::GetFileNames(std::vector<String>& fileNames) const
 {
 	THROW_PRIMARY_EXCEPTION("Getting file names in this filesystem in not supported");
 }
+
+#ifdef ___INANITY_SCRIPTING
+
+void FileSystem::Script_loadFile(ScriptCall& call)
+{
+	call.EnsureArgumentsCount(1);
+	call.Return(LoadFile(call.GetString(1)));
+}
+
+void FileSystem::Script_saveFile(ScriptCall& call)
+{
+	call.EnsureArgumentsCount(2);
+	SaveFile(call.GetPointer<File>(1), call.GetString(2));
+}
+
+SCRIPTABLE_CLASS_MAP_BEGIN(FileSystem);
+	SCRIPTABLE_METHOD(FileSystem, loadFile);
+	SCRIPTABLE_METHOD(FileSystem, saveFile);
+SCRIPTABLE_CLASS_MAP_END();
+
+#endif

@@ -3,6 +3,7 @@
 
 #include "Object.hpp"
 #include "String.hpp"
+#include "scripting.hpp"
 #include <vector>
 
 BEGIN_INANITY
@@ -82,6 +83,10 @@ public:
 	\param fileNames Выходной список имен файлов.
 	*/
 	virtual void GetFileNames(std::vector<String>& fileNames) const;
+
+	SCRIPTABLE_CALL(loadFile);
+	SCRIPTABLE_CALL(saveFile);
+	SCRIPTABLE_CLASS();
 };
 
 END_INANITY

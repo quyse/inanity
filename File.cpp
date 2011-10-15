@@ -1,0 +1,8 @@
+#include "File.hpp"
+
+#ifdef ___INANITY_SCRIPTING
+
+SCRIPTABLE_CLASS_MAP_BEGIN(File);
+SCRIPTABLE_CLASS_MAP_END(File);
+
+#endif

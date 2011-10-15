@@ -4,6 +4,7 @@ DiskOutputStream
 EmptyFile
 EventLoop
 Exception
+File
 FileInputStream
 FileSystem
 FolderFileSystem
