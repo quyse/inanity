@@ -11,7 +11,7 @@
 
 BEGIN_INANITY
 
-class LuaState;
+class File;
 
 /// Класс, инкапсулирующий состояние Lua.
 class LuaState : public Object
@@ -58,6 +58,7 @@ public:
 		void Return(int value);
 		void Return(float value);
 		void Return(double value);
+		void Return(const char* value);
 		void Return(const String& value);
 
 		template <typename T>
@@ -94,6 +95,22 @@ public:
 	public:
 		void AddProperty(const char* name, Method readMethod, Method writeMethod);
 		void AddMethod(const char* name, Method method);
+	};
+
+	/// Класс скрипта Lua.
+	/** Lua-функция скрипта хранится в глобальной таблице scripts, индексированной адресом объекта Script. */
+	class Script : public Object
+	{
+	private:
+		ptr<LuaState> state;
+
+	public:
+		/// Создать скрипт Lua.
+		/** Предполагается, что при вызове в стеке Lua лежит функция скрипта. Конструктор забирает её из стека. */
+		Script(ptr<LuaState> luaState);
+		~Script();
+
+		void Run();
 	};
 
 private:
@@ -145,14 +162,26 @@ private:
 	/// Запихать в стек делегат.
 	/** Относительно медленный метод, так как объект запихивается PushObject. */
 	void PushDelegate(Object* object, Class* cls, const char* methodName);
+	/// Установить глобальный объект.
+	void SetGlobal(const char* name, Object* object, Class* cls);
 
 public:
 	LuaState();
 	~LuaState();
+
+	/// Загрузить скрипт из файла.
+	ptr<Script> LoadScript(ptr<File> file);
+	/// Указать глобальный объект.
+	template <typename T>
+	void SetGlobal(const char* name, ptr<T> object)
+	{
+		SetGlobal(name, static_cast<Object*>((T*)object), &T::scriptClass);
+	}
 };
 
 typedef LuaState::Call LuaCall;
 typedef LuaState::Class LuaClass;
+typedef LuaState::Script LuaScript;
 
 END_INANITY
 

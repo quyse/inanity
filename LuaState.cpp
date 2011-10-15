@@ -1,4 +1,5 @@
 #include "LuaState.hpp"
+#include "File.hpp"
 #include "Exception.hpp"
 #include <cstdlib>
 #include <sstream>
@@ -34,6 +35,14 @@ LuaState::LuaState()
 	state = lua_newstate(Alloc, this);
 	if(!state)
 		THROW_PRIMARY_EXCEPTION("Can't create Lua state");
+
+	// создать таблицу классов
+	lua_newtable(state);
+	lua_setglobal(state, "classes");
+
+	// создать таблицу скриптов
+	lua_newtable(state);
+	lua_setglobal(state, "scripts");
 
 	//******* создать метатаблицу для объектов
 
@@ -72,28 +81,17 @@ void* LuaState::Alloc(void* self, void* ptr, size_t osize, size_t nsize)
  */
 int LuaState::ObjectIndexed(lua_State* state)
 {
+	// TODO: сделать свойства; пока только методы
+
 	// в замыкании лежит состояние
 	LuaState* self = (LuaState*)lua_touserdata(state, lua_upvalueindex(1));
 
 	// в стеке лежит: сначала userdata, затем индекс
-	// получить userdata объекта
-	ObjectUserData* userData = (ObjectUserData*)lua_touserdata(state, 1);
-
-	// TODO: сделать свойства; пока только методы
-
-	// получить метод
-	lua_getglobal(state, "classes");							// object classes
-	lua_pushlightuserdata(state, userData->cls);	// object classes cls
-	lua_gettable(state, -2);											// object classes methods
-	lua_pushvalue(state, 2);											// object classes methods index
-	lua_gettable(state, -2);											// object classes methods method
-	lua_replace(state, -3);												// object method methods
-	lua_pop(state, 1);														// object method
 
 	// положить в стек делегат
 	self->PushDelegate();
 
-	// один ответ возвращён
+	// возвращается один ответ
 	return 1;
 }
 
@@ -109,7 +107,10 @@ int LuaState::ObjectCollected(lua_State* state)
 int LuaState::DelegateCalled(lua_State* state)
 {
 	// в замыкании лежат: состояние, объект и метод
+	// в стеке лежит: объект, затем аргументы
 
+	// удалить объект из стека
+	lua_remove(state, 1);
 	// получить состояние
 	LuaState* self = (LuaState*)lua_touserdata(state, lua_upvalueindex(1));
 	// получить объект
@@ -210,15 +211,20 @@ void LuaState::PushDelegate()
 {
 	// делегат - это C-замыкание с объектом и методом.
 	// на стеке уже должны лежать объект, и имя метода
-	// получить метод
+
+	ObjectUserData* objectUserData = (ObjectUserData*)lua_touserdata(state, -2);
+
 	lua_getglobal(state, "classes");						// object methodName classes
-	lua_pushvalue(state, -3);										// object methodName classes object
+	lua_pushlightuserdata(state, objectUserData->cls);
+																							// object methodName classes cls
 	lua_gettable(state, -2);										// object methodName classes methods
 	lua_pushvalue(state, -3);										// object methodName classes methods methodName
 	lua_gettable(state, -2);										// object methodName classes methods method
 	lua_replace(state, -4);											// object method classes methods
 	lua_pop(state, 2);													// object method
-	lua_pushcclosure(state, DelegateCalled, 2);	// delegate
+	lua_pushlightuserdata(state, this);					// object method self
+	lua_insert(state, -3);											// self object method
+	lua_pushcclosure(state, DelegateCalled, 3);	// delegate
 }
 
 void LuaState::PushDelegate(Object* object, Class* cls, const char* methodName)
@@ -226,6 +232,52 @@ void LuaState::PushDelegate(Object* object, Class* cls, const char* methodName)
 	PushObject(object, cls);
 	lua_pushstring(state, methodName);
 	PushDelegate();
+}
+
+void LuaState::SetGlobal(const char* name, Object* object, Class* cls)
+{
+	PushObject(object, cls);
+	lua_setglobal(state, name);
+}
+
+ptr<LuaState::Script> LuaState::LoadScript(ptr<File> file)
+{
+	/// Класс читателя.
+	/** Чтение выполняется в один приём. */
+	class Reader
+	{
+	private:
+		ptr<File> file;
+		bool read;
+
+	public:
+		Reader(ptr<File> file) : file(file), read(false) {}
+
+		static const char* Callback(lua_State* state, void* data, size_t* size)
+		{
+			Reader* reader = (Reader*)data;
+			if(reader->read)
+			{
+				*size = 0;
+				return 0;
+			}
+			reader->read = true;
+			*size = reader->file->GetSize();
+			return (const char*)reader->file->GetData();
+		};
+	};
+
+	Reader reader(file);
+	switch(lua_load(state, Reader::Callback, &reader, "noname"))
+	{
+	case 0:
+		// конструктор Script заберёт функцию из стека, и сохранит её себе
+		return NEW(Script(this));
+	case LUA_ERRSYNTAX:
+		THROW_PRIMARY_EXCEPTION("Syntax error in Lua script");
+	default:
+		THROW_PRIMARY_EXCEPTION("Error when loading Lua script");
+	}
 }
 
 //********* класс LuaState::Call
@@ -249,7 +301,6 @@ void LuaState::Call::EnsureArgumentsCount(int count)
 
 bool LuaState::Call::GetBoolean(int i) const
 {
-	++i;
 	if(lua_isboolean(state->state, i))
 		return lua_toboolean(state->state, i);
 	THROW_PRIMARY_EXCEPTION("Argument is not a boolean");
@@ -257,7 +308,6 @@ bool LuaState::Call::GetBoolean(int i) const
 
 int LuaState::Call::GetInteger(int i) const
 {
-	++i;
 	if(lua_isnumber(state->state, i))
 		return (int)lua_tointeger(state->state, i);
 	THROW_PRIMARY_EXCEPTION("Argument is not a number");
@@ -265,7 +315,6 @@ int LuaState::Call::GetInteger(int i) const
 
 float LuaState::Call::GetFloat(int i) const
 {
-	++i;
 	if(lua_isnumber(state->state, i))
 		return (float)lua_tonumber(state->state, i);
 	THROW_PRIMARY_EXCEPTION("Argument is not a number");
@@ -273,7 +322,6 @@ float LuaState::Call::GetFloat(int i) const
 
 double LuaState::Call::GetDouble(int i) const
 {
-	++i;
 	if(lua_isnumber(state->state, i))
 		return (double)lua_tonumber(state->state, i);
 	THROW_PRIMARY_EXCEPTION("Argument is not a number");
@@ -281,7 +329,6 @@ double LuaState::Call::GetDouble(int i) const
 
 String LuaState::Call::GetString(int i) const
 {
-	++i;
 	if(lua_isstring(state->state, i))
 		return lua_tostring(state->state, i);
 	THROW_PRIMARY_EXCEPTION("Argument is not a string");
@@ -290,7 +337,6 @@ String LuaState::Call::GetString(int i) const
 template <typename T>
 ptr<T> LuaState::Call::GetPointer(int i) const
 {
-	++i;
 	if(lua_isuserdata(state->state, i))
 	{
 		UserData* userData = (UserData*)lua_touserdata(state->state, i);
@@ -341,8 +387,63 @@ void LuaState::Call::Return(double value)
 	lua_pushnumber(state->state, value);
 }
 
+void LuaState::Call::Return(const char* value)
+{
+	CheckReturn();
+	lua_pushstring(state->state, value);
+}
+
 void LuaState::Call::Return(const String& value)
 {
 	CheckReturn();
 	lua_pushstring(state->state, value.c_str());
+}
+
+//********* класс LuaState::Class
+
+void LuaState::Class::AddMethod(const char* name, Method method)
+{
+	methods.push_back(std::make_pair(name, method));
+}
+
+//********* класс LuaState::Script
+
+LuaState::Script::Script(ptr<LuaState> luaState) : state(luaState)
+{
+	// предполагается, что функция лежит в стеке
+	// запомнить функцию в таблице скриптов
+	lua_State* state = this->state->state;
+	lua_getglobal(state, "scripts");			// func scripts
+	lua_pushlightuserdata(state, this);		// func scripts this
+	lua_pushvalue(state, -3);							// func scripts this func
+	lua_settable(state, -3);							// func scripts
+	lua_pop(state, 2);										//
+}
+
+LuaState::Script::~Script()
+{
+	// удалить функцию из таблицы скриптов
+	lua_State* state = this->state->state;
+	lua_getglobal(state, "scripts");			// scripts
+	lua_pushlightuserdata(state, this);		// scripts this
+	lua_pushnil(state);										// scripts this nil
+	lua_settable(state, -3);							// scripts
+	lua_pop(state, 1);										//
+}
+
+void LuaState::Script::Run()
+{
+	// получить функцию из таблицы скриптов и запустить её
+	lua_State* state = this->state->state;
+	lua_getglobal(state, "scripts");			// scripts
+	lua_pushlightuserdata(state, this);		// scripts this
+	lua_gettable(state, -2);							// scripts func
+	lua_replace(state, -2);								// func
+	// используем защищённый вызов - ни к чему, чтобы ошибки вылезали куда-то через longjump
+	if(lua_pcall(state, 0, 0, 0) != 0)		// [errormsg]
+	{
+		ptr<Exception> exception = NEW(Exception(lua_tostring(state, -1)));
+		lua_pop(state, 1);									//
+		THROW_SECONDARY_EXCEPTION("Lua runtime script error", exception);
+	}
 }

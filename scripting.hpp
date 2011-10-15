@@ -9,8 +9,17 @@
 
 #include "LuaState.hpp"
 
+BEGIN_INANITY
+
+/// Тип, хранящий состояние скриптовой системы.
 typedef LuaState ScriptState;
+/// Тип, используемый для вызовов.
 typedef LuaCall ScriptCall;
+/// Тип, используемый для указания метаинформации о типах, видимых скриптам.
 typedef LuaClass ScriptClass;
+/// Тип скриптов.
+typedef LuaScript Script;
+
+END_INANITY
 
 #endif
