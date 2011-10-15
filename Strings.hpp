@@ -15,6 +15,7 @@ class File;
 class Strings
 {
 public:
+#ifdef ___INANITY_WINDOWS
 	/// Преобразовать строку из ASCII в Unicode.
 	static std::wstring Ascii2Unicode(const std::string& str);
 
@@ -22,6 +23,7 @@ public:
 	static std::string Unicode2UTF8(const std::wstring& str);
 	/// Преобразовать строку из UTF-8 в Unicode.
 	static std::wstring UTF82Unicode(const std::string& str);
+#endif
 
 	/// Преобразовать строку ASCII в файл.
 	static ptr<File> Ascii2File(const std::string& str);

@@ -1,5 +1,9 @@
 #include "Strings.hpp"
 #include "MemoryFile.hpp"
+#include <cstring>
+
+#ifdef ___INANITY_WINDOWS
+
 #include "windows.hpp"
 
 std::wstring Strings::Ascii2Unicode(const std::string& str)
@@ -25,6 +29,8 @@ std::wstring Strings::UTF82Unicode(const std::string& str)
 		MultiByteToWideChar(CP_UTF8, 0, str.c_str(), (int)str.length(), &*res.begin(), (int)res.length());
 	return res;
 }
+
+#endif
 
 ptr<File> Strings::Ascii2File(const std::string& str)
 {
