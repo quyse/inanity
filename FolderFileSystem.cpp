@@ -350,11 +350,11 @@ ptr<File> FolderFileSystem::LoadPartOfFile(const String& fileName, long long map
 		//округлить начало проекции вниз на размер страницы
 		size_t realMappingStart = mappingStart & ~(pageSize - 1);
 		//вычислить реальный размер
-		size_t realMappingSize = mappingSize + (size_t)(mappingStart - realMappingStart);
+		size_t realMappingSize = size + (size_t)(mappingStart - realMappingStart);
 		//спроецировать файл с учетом этого сдвига
 		void* data = mmap(0, realMappingSize, PROT_READ, MAP_PRIVATE, fd, realMappingStart);
 		if(data == (caddr_t)-1)
-			THROW_PRIMARY_EXCEPTION("Can't map file");
+			THROW_SECONDARY_EXCEPTION("Can't map file", Exception::SystemError());
 
 		//если сдвиг был
 		if(realMappingStart < (unsigned long long)mappingStart)
