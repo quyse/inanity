@@ -340,10 +340,13 @@ ptr<T> LuaState::Call::GetPointer(int i) const
 	if(lua_isuserdata(state->state, i))
 	{
 		UserData* userData = (UserData*)lua_touserdata(state->state, i);
+		// проверить, что это действительно объект
 		if(userData->type == UserData::typeObject)
 		{
 			ObjectUserData* objectUserData = (ObjectUserData*)userData;
-			return dynamic_cast<T*>(objectUserData->object);
+			// проверить, что это действительно объект нужного типа
+			if(objectUserData->cls == &T::scriptClass)
+				return (T*)objectUserData->object;
 		}
 		THROW_PRIMARY_EXCEPTION("Userdata argument is not an object pointer");
 	}
