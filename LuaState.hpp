@@ -6,6 +6,7 @@
 
 #include "Object.hpp"
 #include "String.hpp"
+#include "Exception.hpp"
 #include "lua.hpp"
 #include <vector>
 
@@ -52,7 +53,23 @@ public:
 		double GetDouble(int i) const;
 		String GetString(int i) const;
 		template <typename T>
-		ptr<T> GetPointer(int i) const;
+		ptr<T> GetPointer(int i) const
+		{
+			if(lua_isuserdata(state->state, i))
+			{
+				UserData* userData = (UserData*)lua_touserdata(state->state, i);
+				// проверить, что это действительно объект
+				if(userData->type == UserData::typeObject)
+				{
+					ObjectUserData* objectUserData = (ObjectUserData*)userData;
+					// проверить, что это действительно объект нужного типа
+					if(objectUserData->cls == &T::scriptClass)
+						return (T*)objectUserData->object;
+				}
+				THROW_PRIMARY_EXCEPTION("Userdata argument is not an object pointer");
+			}
+			THROW_PRIMARY_EXCEPTION("Argument is not an userdata");
+		}
 
 		void Return(bool value);
 		void Return(int value);

@@ -334,25 +334,6 @@ String LuaState::Call::GetString(int i) const
 	THROW_PRIMARY_EXCEPTION("Argument is not a string");
 }
 
-template <typename T>
-ptr<T> LuaState::Call::GetPointer(int i) const
-{
-	if(lua_isuserdata(state->state, i))
-	{
-		UserData* userData = (UserData*)lua_touserdata(state->state, i);
-		// проверить, что это действительно объект
-		if(userData->type == UserData::typeObject)
-		{
-			ObjectUserData* objectUserData = (ObjectUserData*)userData;
-			// проверить, что это действительно объект нужного типа
-			if(objectUserData->cls == &T::scriptClass)
-				return (T*)objectUserData->object;
-		}
-		THROW_PRIMARY_EXCEPTION("Userdata argument is not an object pointer");
-	}
-	THROW_PRIMARY_EXCEPTION("Argument is not an userdata");
-}
-
 void LuaState::Call::CheckReturn()
 {
 	if(returned)

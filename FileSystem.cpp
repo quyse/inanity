@@ -65,9 +65,9 @@ void FileSystem::Script_saveFile(ScriptCall& call)
 	SaveFile(call.GetPointer<File>(1), call.GetString(2));
 }
 
-SCRIPTABLE_CLASS_MAP_BEGIN(FileSystem);
+SCRIPTABLE_MAP_BEGIN(FileSystem);
 	SCRIPTABLE_METHOD(FileSystem, loadFile);
 	SCRIPTABLE_METHOD(FileSystem, saveFile);
-SCRIPTABLE_CLASS_MAP_END();
+SCRIPTABLE_MAP_END();
 
 #endif

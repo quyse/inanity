@@ -35,10 +35,10 @@ typedef LuaScript Script;
 #define SCRIPTABLE_CALL(name) \
 	void Script_##name(ScriptCall& call)
 // Карта методов - добавить в cpp-файл класса.
-#define SCRIPTABLE_CLASS_MAP_BEGIN(cls) \
+#define SCRIPTABLE_MAP_BEGIN(cls) \
 	ScriptClass cls::scriptClass = cls::InitScriptClass(); \
 	ScriptClass cls::InitScriptClass() { ScriptClass res
-#define SCRIPTABLE_CLASS_MAP_END() \
+#define SCRIPTABLE_MAP_END() \
 	return res; }
 // Метод в карте методов.
 #define SCRIPTABLE_METHOD(cls, method) \
