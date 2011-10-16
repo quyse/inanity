@@ -211,6 +211,7 @@ void LuaState::PushDelegate()
 {
 	// делегат - это C-замыкание с объектом и методом.
 	// на стеке уже должны лежать объект, и имя метода
+	// если метода не существует, возвращается ошибка
 
 	ObjectUserData* objectUserData = (ObjectUserData*)lua_touserdata(state, -2);
 
@@ -220,6 +221,8 @@ void LuaState::PushDelegate()
 	lua_gettable(state, -2);										// object methodName classes methods
 	lua_pushvalue(state, -3);										// object methodName classes methods methodName
 	lua_gettable(state, -2);										// object methodName classes methods method
+	if(lua_isnil(state, -1))
+		THROW_PRIMARY_EXCEPTION("Inanity object has no method: " + String(lua_tostring(state, -4)));
 	lua_replace(state, -4);											// object method classes methods
 	lua_pop(state, 2);													// object method
 	lua_pushlightuserdata(state, this);					// object method self
