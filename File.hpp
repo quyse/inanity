@@ -29,6 +29,7 @@ public:
 #ifdef ___INANITY_SCRIPTING
 
 	SCRIPTABLE_CLASS();
+	SCRIPTABLE_CALL(getSize);
 
 #endif
 };
