@@ -305,7 +305,7 @@ void LuaState::Call::EnsureArgumentsCount(int count)
 bool LuaState::Call::GetBoolean(int i) const
 {
 	if(lua_isboolean(state->state, i))
-		return lua_toboolean(state->state, i);
+		return !!lua_toboolean(state->state, i);
 	THROW_PRIMARY_EXCEPTION("Argument is not a boolean");
 }
 
