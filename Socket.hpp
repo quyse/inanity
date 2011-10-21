@@ -2,7 +2,7 @@
 #define ___INANITY_SOCKET_HPP___
 
 #include "Object.hpp"
-#include <uv.h>
+#include "uv.hpp"
 
 BEGIN_INANITY
 

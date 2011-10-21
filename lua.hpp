@@ -3,7 +3,7 @@
 
 extern "C"
 {
-#include <lua.h>
+#include "deps/lua-5.1.4/src/lua.h"
 }
 
 #endif

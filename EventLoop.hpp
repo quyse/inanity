@@ -5,7 +5,7 @@
 #include "EventHandler.hpp"
 #include "ServerSocket.hpp"
 #include "String.hpp"
-#include <uv.h>
+#include "uv.hpp"
 
 /*
  * Файл содержит класс цикла обработки асинхронных событий,
