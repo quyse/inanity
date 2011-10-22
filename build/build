@@ -1,4 +1,0 @@
-#!/bin/sh
-# скрипт компиляции inanity2
-
-node build/build.js libinanity2.a
