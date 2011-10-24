@@ -12,13 +12,20 @@ EventLoop::ConnectRequest::ConnectRequest(ptr<EventLoop> eventLoop, ptr<ConnectH
 
 EventLoop::EventLoop()
 {
+#ifdef ___INANITY_WINDOWS
+	// под windows пока поддерживается только цикл по умолчанию
+	loop = uv_default_loop();
+#else
 	loop = uv_loop_new();
+#endif
 	loop->data = this;
 }
 
 EventLoop::~EventLoop()
 {
+#ifndef ___INANITY_WINDOWS
 	uv_loop_delete(loop);
+#endif
 }
 
 uv_buf_t EventLoop::AllocCallback(uv_handle_t* handle, size_t size)

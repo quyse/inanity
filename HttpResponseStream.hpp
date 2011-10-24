@@ -3,7 +3,7 @@
 
 #include "OutputStream.hpp"
 #include "String.hpp"
-#include "deps/http-parser/http_parser.h"
+#include "http_parser.h"
 #include <vector>
 
 BEGIN_INANITY
