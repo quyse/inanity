@@ -89,7 +89,7 @@ int LuaState::ObjectIndexed(lua_State* state)
 	// в стеке лежит: сначала userdata, затем индекс
 
 	// положить в стек делегат
-	self->PushDelegate();
+	self->PushDelegate(true);
 
 	// возвращается один ответ
 	return 1;
@@ -107,10 +107,8 @@ int LuaState::ObjectCollected(lua_State* state)
 int LuaState::DelegateCalled(lua_State* state)
 {
 	// в замыкании лежат: состояние, объект и метод
-	// в стеке лежит: объект, затем аргументы
+	// в стеке лежат: аргументы
 
-	// удалить объект из стека
-	lua_remove(state, 1);
 	// получить состояние
 	LuaState* self = (LuaState*)lua_touserdata(state, lua_upvalueindex(1));
 	// получить объект
@@ -120,6 +118,18 @@ int LuaState::DelegateCalled(lua_State* state)
 
 	// вызвать делегат
 	return self->CallMethod(object->object, method->method);
+}
+
+int LuaState::MethodDelegateCalled(lua_State* state)
+{
+	// в замыкании лежат: состояние, объект и метод
+	// в стеке лежит: объект, затем аргументы
+
+	// удалить объект из стека (он не нужен, так как объект хранится в замыкании делегата)
+	lua_remove(state, 1);
+
+	// а дальше как для обычного делегата
+	return DelegateCalled(state);
 }
 
 int LuaState::CallMethod(Object* object, Method method)
@@ -207,7 +217,7 @@ void LuaState::PushObject(Object* object, Class* cls)
 	lua_setmetatable(state, -2);
 }
 
-void LuaState::PushDelegate()
+void LuaState::PushDelegate(bool method)
 {
 	// делегат - это C-замыкание с объектом и методом.
 	// на стеке уже должны лежать объект, и имя метода
@@ -227,7 +237,7 @@ void LuaState::PushDelegate()
 	lua_pop(state, 2);													// object method
 	lua_pushlightuserdata(state, this);					// object method self
 	lua_insert(state, -3);											// self object method
-	lua_pushcclosure(state, DelegateCalled, 3);	// delegate
+	lua_pushcclosure(state, method ? MethodDelegateCalled : DelegateCalled, 3);	// delegate
 }
 
 void LuaState::PushDelegate(Object* object, Class* cls, const char* methodName)

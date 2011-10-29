@@ -163,6 +163,8 @@ private:
 
 	// Обработчик делегата.
 	static int DelegateCalled(lua_State* state);
+	// Обработчик делегата-метода.
+	static int MethodDelegateCalled(lua_State* state);
 
 	/// Вызвать метод, применив его к объекту.
 	/** В стеке Lua должны лежать аргументы. */
@@ -174,8 +176,9 @@ private:
 	/** Относительно медленный метод, так как создаётся fulluserdata. */
 	void PushObject(Object* object, Class* cls);
 	/// Запихать в стек делегат.
-	/** Предполагается, в стеке лежит объект и имя метода; они будут замены на делегат. */
-	void PushDelegate();
+	/** Предполагается, в стеке лежит объект и имя метода; они будут замены на делегат.
+	 * \param method флаг, нужно ли удалять первый аргумент (self) из стека. */
+	void PushDelegate(bool method = false);
 	/// Запихать в стек делегат.
 	/** Относительно медленный метод, так как объект запихивается PushObject. */
 	void PushDelegate(Object* object, Class* cls, const char* methodName);
