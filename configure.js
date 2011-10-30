@@ -1,7 +1,6 @@
 exports.configureCompiler = function(objectFile, compiler) {
 	// объектные файлы: <conf>/object
 	var a = /^[^\/]+\/([^\/]+)$/.exec(objectFile);
-	// console.log('zzz', objectFile, a);
 	compiler.setSourceFile(a[1] + '.cpp');
 	compiler.addMacro('INANITY_LIB');
 };
