@@ -13,8 +13,8 @@ BEGIN_INANITY
 class FolderFileSystem : public FileSystem
 {
 private:
-	/// Полное Unicode-имя каталога в Windows
-	/** Оно абсолютное, вида \\?\C:\..., не оканчивается на слеш. */
+	/// Полное имя каталога.
+	/** Оно абсолютное (вида \\?\C:\... в Windows), не оканчивается на слеш. */
 	String folderName;
 
 	String GetFullName(String fileName) const;
@@ -31,7 +31,7 @@ public:
 	относится к текущему каталогу приложения.
 	\param folderName Имя каталога файловой системы, или строка
 	нулевой длины. Каталог задаётся относительно текущего каталога,
-	кроме случая, когда folderName[1]==':', тогда он считается абсолютным.
+	кроме случая, когда folderName[1]==':' (в Windows), тогда он считается абсолютным.
 	*/
 	FolderFileSystem(const String& userFolderName);
 
