@@ -29,7 +29,7 @@ private:
 
 		static void WriteCallback(uv_write_t* req, int status);
 
-		void Write(ptr<File> file);
+		void WriteFile(ptr<File> file);
 		/// Закрыть сокет после завершения всех операций записи.
 		void Flush();
 	};

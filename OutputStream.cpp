@@ -7,10 +7,10 @@ void OutputStream::Write(const void* data, size_t size)
 {
 	ptr<MemoryFile> file = NEW(MemoryFile(size));
 	memcpy(file->GetData(), data, size);
-	Write(file);
+	WriteFile(file);
 }
 
-void OutputStream::Write(ptr<File> file)
+void OutputStream::WriteFile(ptr<File> file)
 {
 	Write(file->GetData(), file->GetSize());
 }
@@ -21,9 +21,11 @@ void OutputStream::Flush()
 
 size_t OutputStream::ReadAllFromStream(ptr<InputStream> inputStream)
 {
-	static char buffer[0x100000];
+	const size_t bufferSize = 0x10000;
+	MemoryFile bufferFile(bufferSize);
+	void* buffer = bufferFile.GetData();
 	size_t totalRead = 0;
-	while(size_t read = inputStream->Read(buffer, sizeof(buffer)))
+	while(size_t read = inputStream->Read(buffer, bufferSize))
 	{
 		Write(buffer, read);
 		totalRead += read;

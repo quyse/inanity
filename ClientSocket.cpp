@@ -72,7 +72,7 @@ void ClientSocket::SocketOutputStream::WriteCallback(uv_write_t* req, int status
 	delete (WriteRequest*)req->data;
 }
 
-void ClientSocket::SocketOutputStream::Write(ptr<File> file)
+void ClientSocket::SocketOutputStream::WriteFile(ptr<File> file)
 {
 	WriteRequest* request = new WriteRequest;
 	request->req.data = request;
