@@ -15,7 +15,7 @@ var libraries = {
 		// совсем общее
 		'Object', 'ManagedHeap', 'Strings', 'Exception',
 		// общее: файлы и потоки
-		'File', 'EmptyFile', 'PartFile', 'MemoryFile', 'OutputStream', 'FileInputStream',
+		'File', 'EmptyFile', 'PartFile', 'MemoryFile', 'OutputStream', 'FileInputStream', 'StreamReader', 'StreamWriter', 'BufferedInputStream', 'BufferedOutputStream',
 		// файловые системы
 		'FileSystem', 'FolderFileSystem', 'Handle', 'DiskInputStream', 'DiskOutputStream']
 	},
