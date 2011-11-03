@@ -5,8 +5,9 @@
 
 exports.configureCompiler = function(objectFile, compiler) {
 	// объектные файлы: <conf>/object
-	var a = /^[^\/]+\/([^\/]+)$/.exec(objectFile);
-	compiler.setSourceFile('src/' + a[1] + '.c');
+	var a = /^([^\/]+)\/([^\/]+)$/.exec(objectFile);
+	compiler.configuration = a[1];
+	compiler.setSourceFile('src/' + a[2] + '.c');
 };
 
 var objects = 'lapi lcode ldebug ldo ldump lfunc lgc llex lmem lobject lopcodes lparser lstate lstring ltable ltm lundump lvm lzio lauxlib lbaselib ldblib liolib lmathlib loslib ltablib lstrlib loadlib linit' //
@@ -14,8 +15,9 @@ var objects = 'lapi lcode ldebug ldo ldump lfunc lgc llex lmem lobject lopcodes 
 
 exports.configureComposer = function(libraryFile, composer) {
 	// файлы библиотек: <conf>/library
-	var a = /^([^\/]+\/)([^\/]+)$/.exec(libraryFile);
+	var a = /^(([^\/]+)\/)([^\/]+)$/.exec(libraryFile);
 	var confDir = a[1];
+	composer.configuration = a[2];
 	for ( var i = 0; i < objects.length; ++i)
 		composer.addObjectFile(confDir + objects[i]);
 };
