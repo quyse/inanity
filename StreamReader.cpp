@@ -1,7 +1,9 @@
 #include "StreamReader.hpp"
 #include "InputStream.hpp"
 #include "Exception.hpp"
+#ifdef ___INANITY_LINUX
 #include <alloca.h>
+#endif
 
 StreamReader::StreamReader(ptr<InputStream> stream) : stream(stream), read(0)
 {

@@ -1,7 +1,9 @@
 #include "StreamWriter.hpp"
 #include "OutputStream.hpp"
 #include "Exception.hpp"
+#ifdef ___INANITY_LINUX
 #include <alloca.h>
+#endif
 
 StreamWriter::StreamWriter(ptr<OutputStream> stream) : stream(stream), written(0)
 {

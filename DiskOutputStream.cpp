@@ -13,7 +13,7 @@ void DiskOutputStream::Write(const void *data, size_t size)
 	if((DWORD)size != size)
 		THROW_PRIMARY_EXCEPTION("So big write size is not supported");
 	DWORD written;
-	if(!WriteFile(*handle, data, (DWORD)size, &written, NULL) || written != size)
+	if(!::WriteFile(*handle, data, (DWORD)size, &written, NULL) || written != size)
 		THROW_PRIMARY_EXCEPTION("Disk write error");
 }
 
