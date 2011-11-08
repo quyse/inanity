@@ -3,15 +3,13 @@
 
 #include "graphics.hpp"
 
+#ifdef ___INANITY_GRAPHICS_DX
+
+#include "dx/System.hpp"
 BEGIN_INANITY_GRAPHICS
-
-/// Центральный класс графической подсистемы.
-class System : public Object
-{
-public:
-	void Resize(size_t width, size_t height);
-};
-
+typedef DX::System System;
 END_INANITY_GRAPHICS
+
+#endif
 
 #endif

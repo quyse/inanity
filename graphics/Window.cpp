@@ -103,7 +103,7 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
-void Window::SetGraphicsSystem(ptr<System> graphicsSystem)
+void Window::SetGraphicsSystem(ptr<Graphics::System> graphicsSystem)
 {
 	this->graphicsSystem = graphicsSystem;
 }

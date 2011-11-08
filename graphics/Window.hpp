@@ -2,11 +2,13 @@
 #define ___INANITY_GRAPHICS_WINDOW_HPP___
 
 #include "graphics.hpp"
+#include "System.hpp"
 #include "../String.hpp"
-#include "../windows.hpp"
 #include "../input/input.hpp"
 
 #ifdef ___INANITY_WINDOWS
+
+#include "../windows.hpp"
 
 BEGIN_INANITY_INPUT
 
@@ -15,8 +17,6 @@ class Manager;
 END_INANITY_INPUT
 
 BEGIN_INANITY_GRAPHICS
-
-class System;
 
 class Window
 {

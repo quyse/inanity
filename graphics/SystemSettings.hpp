@@ -21,8 +21,6 @@ struct SystemSettings
 {
 	/// Настройки экрана.
 	ScreenSettings screenSettings;
-	//окно
-	HWND hWnd;
 	//"железный" режим? (false - референсный драйвер)
 	bool hardware;
 	//можно ли получать скриншот экрана
