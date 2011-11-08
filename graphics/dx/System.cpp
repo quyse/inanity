@@ -1,59 +1,33 @@
-#include "Graphics.h"
-#include "File.h"
-#include "RenderBuffer.h"
-#include "TextureBuffer.h"
-#include "DepthStencilBuffer.h"
-#include "ConstantBuffer.h"
-#include "Geometry.h"
-#include "GeometryFormat.h"
-#include "EditableGeometry.h"
-#include "GraphicsContext.h"
-#include "OcclusionPredicate.h"
-#include "VertexShader.h"
-#include "PixelShader.h"
-#include "ShaderReflection.h"
-#include "GraphicsMath.h"
-#include "Exception.h"
-#include <windowsx.h>
+#include "System.hpp"
+#include "Context.hpp"
+#include "RenderBuffer.hpp"
+#include "../Window.hpp"
+#include "../../Exception.hpp"
 #include <vector>
 
-Graphics::Graphics() : initialized(false)
-{
-}
-
-Graphics::~Graphics()
-{
-	if(IsInitialized())
-		Uninitialize();
-}
-
-bool Graphics::IsInitialized() const
-{
-	return initialized;
-}
-
-void Graphics::Initialize(const GraphicsSettings &settings)
+DX::System::System(ptr<Graphics::Window> window, const SystemSettings& settings)
 {
 	try
 	{
 		//запомнить размеры и формат экрана
 		screenSettings = settings.screenSettings;
-		//запомнить окно
-		this->hWnd = settings.hWnd;
+
+		// сформировать структуру режима экрана
+		DXGI_MODE_DESC mode = GetScreenMode(screenSettings);
 
 		//если режим - полноэкранный, необходимо его скорректировать,
 		//то есть привести к поддерживаемому
 		if(settings.screenSettings.fullscreen)
-			screenSettings.mode = GetSupportedScreenMode(screenSettings.mode);
+			mode = GetSupportedScreenMode(mode);
 
 		//создать цепочку буферов вывода
 		{
 			DXGI_SWAP_CHAIN_DESC desc;
 			ZeroMemory(&desc, sizeof(desc));
 			desc.BufferCount = 1;
-			desc.BufferDesc = screenSettings.mode;
+			desc.BufferDesc = mode;
 			desc.BufferUsage = DXGI_USAGE_BACK_BUFFER | DXGI_USAGE_RENDER_TARGET_OUTPUT;
-			desc.OutputWindow = settings.hWnd;
+			desc.OutputWindow = window->GetWindowHandle();
 			//мультисемплинга пока нет
 			desc.SampleDesc.Count = 1;
 			desc.SampleDesc.Quality = 0;
@@ -69,7 +43,6 @@ void Graphics::Initialize(const GraphicsSettings &settings)
 			IDXGISwapChain* swapChainInterface;
 			ID3D11DeviceContext* deviceContextInterface;
 
-
 			UINT flags = D3D11_CREATE_DEVICE_SINGLETHREADED
 #ifdef _DEBUG
 				| D3D11_CREATE_DEVICE_DEBUG
@@ -77,11 +50,11 @@ void Graphics::Initialize(const GraphicsSettings &settings)
 				;
 			if(FAILED(D3D11CreateDeviceAndSwapChain(nullptr, settings.hardware ? D3D_DRIVER_TYPE_HARDWARE : D3D_DRIVER_TYPE_REFERENCE, NULL,
 				flags, &featureLevel, 1, D3D11_SDK_VERSION, &desc, &swapChainInterface, &deviceInterface, NULL, &deviceContextInterface)))
-				THROW_PRIMARY_EXCEPTION(L"Can't create device and swap chain");
+				THROW_PRIMARY_EXCEPTION("Can't create device and swap chain");
 
 			device = deviceInterface;
 			swapChain = swapChainInterface;
-			context = NEW(GraphicsContext(deviceContextInterface));
+			context = NEW(Context(deviceContextInterface));
 		}
 
 		/* Есть некая странная процедура отсюда:
@@ -91,152 +64,146 @@ void Graphics::Initialize(const GraphicsSettings &settings)
 		//запомнить режим, который мы хотим установить
 		ScreenSettings needScreenSettings = screenSettings;
 		//а текущий режим исправим, чтобы он соответствовал действительному положению дел
-		screenSettings.mode.Width = 1;
-		screenSettings.mode.Height = 1;
+		screenSettings.width = 1;
+		screenSettings.height = 1;
 		screenSettings.fullscreen = true;
 		//переключить режим
 		SetScreenSettings(needScreenSettings);
-
-		initialized = true;
 	}
 	catch(Exception* exception)
 	{
-		if(hWnd) DestroyWindow(hWnd);
-		THROW_SECONDARY_EXCEPTION(L"Can't initialize graphics", exception);
+		THROW_SECONDARY_EXCEPTION("Can't initialize graphics", exception);
 	}
 }
 
-void Graphics::Uninitialize()
+DXGI_MODE_DESC DX::System::GetScreenMode(const ScreenSettings& screenSettings)
 {
-	if(!IsInitialized())
-		THROW_PRIMARY_EXCEPTION(L"Graphics object is not initialized. Can't uninitialize graphics");
-
-	initialized = false;
-	swapChain->SetFullscreenState(FALSE, NULL);
-	swapChain = 0;
-	device = 0;
+	DXGI_MODE_DESC mode;
+	mode.Width = screenSettings.width;
+	mode.Height = screenSettings.height;
+	mode.Format = screenFormat;
+	mode.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+	mode.RefreshRate.Numerator = 0;
+	mode.RefreshRate.Denominator = 0;
+	mode.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	return mode;
 }
 
-HWND Graphics::GetWindow() const
-{
-	return hWnd;
-}
-
-DXGI_MODE_DESC Graphics::GetSupportedScreenMode(const DXGI_MODE_DESC& modeDesc)
+DXGI_MODE_DESC DX::System::GetSupportedScreenMode(const DXGI_MODE_DESC& modeDesc)
 {
 	try
 	{
 		//создать фабрику DXGI
 		IDXGIFactory* factoryPtr;
 		if(FAILED(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&factoryPtr)))
-			THROW_PRIMARY_EXCEPTION(L"Can't create DXGI Factory");
+			THROW_PRIMARY_EXCEPTION("Can't create DXGI Factory");
 		ComPointer<IDXGIFactory> factory = factoryPtr;
 
 		//получить первый попавшийся адаптер
 		IDXGIAdapter* adapterPtr;
 		if(FAILED(factory->EnumAdapters(0, &adapterPtr)))
-			THROW_PRIMARY_EXCEPTION(L"Can't get default adapter");
+			THROW_PRIMARY_EXCEPTION("Can't get default adapter");
 		ComPointer<IDXGIAdapter> adapter = adapterPtr;
 
 		//получить первое попавшееся устройство вывода
 		IDXGIOutput* outputPtr;
 		if(FAILED(adapter->EnumOutputs(0, &outputPtr)))
-			THROW_PRIMARY_EXCEPTION(L"Can't get default adapter's output");
+			THROW_PRIMARY_EXCEPTION("Can't get default adapter's output");
 		ComPointer<IDXGIOutput> output = outputPtr;
 
 		//найти подходящий графический режим среди поддерживаемых устройством вывода
 		DXGI_MODE_DESC bestModeDesc;
 		if(FAILED(output->FindClosestMatchingMode(&modeDesc, &bestModeDesc, nullptr)))
-			THROW_PRIMARY_EXCEPTION(L"Can't find closest matching mode");
+			THROW_PRIMARY_EXCEPTION("Can't find closest matching mode");
 
 		return bestModeDesc;	
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION(L"Can't get supported screen mode", exception);
+		THROW_SECONDARY_EXCEPTION("Can't get supported screen mode", exception);
 	}
 }
 
-const ScreenSettings& Graphics::GetScreenSettings() const
+const ScreenSettings& DX::System::GetScreenSettings() const
 {
 	return screenSettings;
 }
 
-void Graphics::SetScreenSettings(const ScreenSettings& screenSettings)
+void DX::System::SetScreenSettings(const ScreenSettings& screenSettings)
 {
 	try
 	{
 		//В MSDN рекомендуется сначала изменять размер, а потом переключать полноэкранность.
 
 		//если режим изменился, изменить его
-		if(memcmp(&this->screenSettings.mode, &screenSettings.mode, sizeof(DXGI_MODE_DESC)) != 0)
-			if(FAILED(swapChain->ResizeTarget(&screenSettings.mode)))
-				THROW_PRIMARY_EXCEPTION(L"Can't resize target");
+		if(this->screenSettings.width != screenSettings.width || this->screenSettings.height != screenSettings.height)
+			if(FAILED(swapChain->ResizeTarget(&GetScreenMode(screenSettings))))
+				THROW_PRIMARY_EXCEPTION("Can't resize target");
 		//если полноэкранность изменилась, изменить её
 		if(this->screenSettings.fullscreen != screenSettings.fullscreen)
 			if(FAILED(swapChain->SetFullscreenState(screenSettings.fullscreen, nullptr)))
-				THROW_PRIMARY_EXCEPTION(L"Can't set fullscreen state");
+				THROW_PRIMARY_EXCEPTION("Can't set fullscreen state");
 
 		//запомнить новые настройки
 		this->screenSettings = screenSettings;
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION(L"Can't set screen settings", exception);
+		THROW_SECONDARY_EXCEPTION("Can't set screen settings", exception);
 	}
 }
 
-void Graphics::Resize(unsigned width, unsigned height)
+void DX::System::Resize(size_t width, size_t height)
 {
 	//сбросить ссылки на вторичный буфер
-	backBufferRenderBuffer = nullptr;
-	backBufferTextureBuffer = nullptr;
+	backBufferRenderBuffer = 0;
+	backBufferTextureBuffer = 0;
 	//изменить размеры буфера
-	if(FAILED(swapChain->ResizeBuffers(1, width, height, screenSettings.mode.Format, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH)))
-		THROW_PRIMARY_EXCEPTION(L"Can't resize buffers");
+	if(FAILED(swapChain->ResizeBuffers(1, width, height, screenFormat, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH)))
+		THROW_PRIMARY_EXCEPTION("Can't resize buffers");
 }
 
-ptr<TextureBuffer> Graphics::GetBackBufferTextureBuffer()
+ptr<TextureBuffer> DX::System::GetBackBufferTextureBuffer()
 {
 	if(!backBufferTextureBuffer)
 	{
 		ID3D11Texture2D* texture;
 		if(FAILED(swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&texture)))
-			THROW_PRIMARY_EXCEPTION(L"Can't get back buffer texture");
+			THROW_PRIMARY_EXCEPTION("Can't get back buffer texture");
 		backBufferTextureBuffer = NEW(TextureBuffer(texture));
 	}
 	return backBufferTextureBuffer;
 }
 
-ptr<RenderBuffer> Graphics::GetBackBufferRenderBuffer()
+ptr<RenderBuffer> DX::System::GetBackBufferRenderBuffer()
 {
 	if(!backBufferRenderBuffer)
 	{
 		ID3D11Texture2D* backBufferTexture;
 		if(FAILED(swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backBufferTexture)))
-			THROW_PRIMARY_EXCEPTION(L"Can't get back buffer texture");
+			THROW_PRIMARY_EXCEPTION("Can't get back buffer texture");
 
 		ID3D11RenderTargetView* renderTarget;
 		HRESULT hr = device->CreateRenderTargetView(backBufferTexture, 0, &renderTarget);
 		backBufferTexture->Release();
 		if(FAILED(hr))
-			THROW_PRIMARY_EXCEPTION(L"Can't create back buffer render target view");
+			THROW_PRIMARY_EXCEPTION("Can't create back buffer render target view");
 		backBufferRenderBuffer = NEW(RenderBuffer(renderTarget));
 	}
 	return backBufferRenderBuffer;
 }
 
-void Graphics::Flip()
+void DX::System::Flip()
 {
 	swapChain->Present(0, 0);
 }
 
-ptr<GraphicsContext> Graphics::GetGraphicsContext() const
+ptr<Context> DX::System::GetContext() const
 {
 	return context;
 }
-
-ptr<ConstantBuffer> Graphics::CreateConstantBuffer(size_t size)
+/*
+ptr<ConstantBuffer> System::CreateConstantBuffer(size_t size)
 {
 	try
 	{
@@ -252,18 +219,18 @@ ptr<ConstantBuffer> Graphics::CreateConstantBuffer(size_t size)
 		ID3D11Buffer* buffer;
 		HRESULT hr;
 		if(FAILED(hr = device->CreateBuffer(&desc, NULL, &buffer)))
-			THROW_PRIMARY_EXCEPTION(L"Can't create buffer");
+			THROW_PRIMARY_EXCEPTION("Can't create buffer");
 		return NEW(ConstantBuffer(buffer, size));
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION(L"Can't create shader constant buffer", exception);
+		THROW_SECONDARY_EXCEPTION("Can't create shader constant buffer", exception);
 	}
 }
 
-//ptr<Geometry> Graphics::CreateStaticGeometry(ptr<File> vertices, unsigned vertexStride, ptr<File> indices, unsigned indexStride, 
+//ptr<Geometry> System::CreateStaticGeometry(ptr<File> vertices, unsigned vertexStride, ptr<File> indices, unsigned indexStride,
 
-ptr<TextureBuffer> Graphics::CreateTextureBuffer(unsigned width, unsigned height, DXGI_FORMAT format, bool canBeReadByCPU)
+ptr<TextureBuffer> System::CreateTextureBuffer(unsigned width, unsigned height, DXGI_FORMAT format, bool canBeReadByCPU)
 {
 	try
 	{
@@ -283,18 +250,18 @@ ptr<TextureBuffer> Graphics::CreateTextureBuffer(unsigned width, unsigned height
 			desc.MiscFlags = 0;
 			HRESULT hr;
 			if(FAILED(hr = device->CreateTexture2D(&desc, 0, &buffer)))
-				THROW_PRIMARY_EXCEPTION(L"Can't create buffer");
+				THROW_PRIMARY_EXCEPTION("Can't create buffer");
 		}
 
 		return NEW(TextureBuffer(buffer));
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION(L"Can't create texture buffer", exception);
+		THROW_SECONDARY_EXCEPTION("Can't create texture buffer", exception);
 	}
 }
 
-ptr<RenderBuffer> Graphics::CreateRenderBuffer(unsigned width, unsigned height, DXGI_FORMAT format, bool canBeResource)
+ptr<RenderBuffer> System::CreateRenderBuffer(unsigned width, unsigned height, DXGI_FORMAT format, bool canBeResource)
 {
 	try
 	{
@@ -314,14 +281,14 @@ ptr<RenderBuffer> Graphics::CreateRenderBuffer(unsigned width, unsigned height, 
 			desc.MiscFlags = 0;
 			HRESULT hr;
 			if(FAILED(hr = device->CreateTexture2D(&desc, 0, &buffer)))
-				THROW_PRIMARY_EXCEPTION(L"Can't create buffer");
+				THROW_PRIMARY_EXCEPTION("Can't create buffer");
 		}
 
 		ID3D11RenderTargetView* renderTargetView;
 		if(FAILED(device->CreateRenderTargetView(buffer, 0, &renderTargetView)))
 		{
 			buffer->Release();
-			THROW_PRIMARY_EXCEPTION(L"Can't create render target view");
+			THROW_PRIMARY_EXCEPTION("Can't create render target view");
 		}
 
 		if(canBeResource)
@@ -331,7 +298,7 @@ ptr<RenderBuffer> Graphics::CreateRenderBuffer(unsigned width, unsigned height, 
 			{
 				buffer->Release();
 				renderTargetView->Release();
-				THROW_PRIMARY_EXCEPTION(L"Can't create shader resource view");
+				THROW_PRIMARY_EXCEPTION("Can't create shader resource view");
 			}
 
 			buffer->Release();
@@ -345,11 +312,11 @@ ptr<RenderBuffer> Graphics::CreateRenderBuffer(unsigned width, unsigned height, 
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION(L"Can't create render buffer", exception);
+		THROW_SECONDARY_EXCEPTION("Can't create render buffer", exception);
 	}
 }
 
-std::vector<ptr<RenderBuffer> > Graphics::CreateRenderBuffersMipmap(unsigned width, unsigned height, unsigned levelsCount, DXGI_FORMAT format, bool canBeResource)
+std::vector<ptr<RenderBuffer> > System::CreateRenderBuffersMipmap(unsigned width, unsigned height, unsigned levelsCount, DXGI_FORMAT format, bool canBeResource)
 {
 	try
 	{
@@ -370,7 +337,7 @@ std::vector<ptr<RenderBuffer> > Graphics::CreateRenderBuffersMipmap(unsigned wid
 			desc.MiscFlags = 0;
 			HRESULT hr;
 			if(FAILED(hr = device->CreateTexture2D(&desc, 0, &buffer)))
-				THROW_PRIMARY_EXCEPTION(L"Can't create buffer");
+				THROW_PRIMARY_EXCEPTION("Can't create buffer");
 		}
 
 		//создать рендертаргеты
@@ -386,7 +353,7 @@ std::vector<ptr<RenderBuffer> > Graphics::CreateRenderBuffersMipmap(unsigned wid
 				buffer->Release();
 				for(--i; i>=0; --i)
 					renderTargetViews[i]->Release();
-				THROW_PRIMARY_EXCEPTION(L"Can't create render target view");
+				THROW_PRIMARY_EXCEPTION("Can't create render target view");
 			}
 		}
 
@@ -407,7 +374,7 @@ std::vector<ptr<RenderBuffer> > Graphics::CreateRenderBuffersMipmap(unsigned wid
 						shaderResourceViews[i]->Release();
 					for(i = 0; i < (int)levelsCount; ++i)
 						renderTargetViews[i]->Release();
-					THROW_PRIMARY_EXCEPTION(L"Can't create shader resource view");
+					THROW_PRIMARY_EXCEPTION("Can't create shader resource view");
 				}
 			}
 			buffer->Release();
@@ -425,11 +392,11 @@ std::vector<ptr<RenderBuffer> > Graphics::CreateRenderBuffersMipmap(unsigned wid
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION(L"Can't create render buffers with mipmap chain", exception);
+		THROW_SECONDARY_EXCEPTION("Can't create render buffers with mipmap chain", exception);
 	}
 }
 
-ptr<DepthStencilBuffer> Graphics::CreateDepthStencilBuffer(unsigned width, unsigned height, DXGI_FORMAT format, bool canBeResource, DXGI_FORMAT depthStencilViewFormat, DXGI_FORMAT shaderResourceViewFormat)
+ptr<DepthStencilBuffer> System::CreateDepthStencilBuffer(unsigned width, unsigned height, DXGI_FORMAT format, bool canBeResource, DXGI_FORMAT depthStencilViewFormat, DXGI_FORMAT shaderResourceViewFormat)
 {
 	try
 	{
@@ -448,7 +415,7 @@ ptr<DepthStencilBuffer> Graphics::CreateDepthStencilBuffer(unsigned width, unsig
 			desc.CPUAccessFlags = 0;
 			desc.MiscFlags = 0;
 			if(FAILED(device->CreateTexture2D(&desc, 0, &buffer)))
-				THROW_PRIMARY_EXCEPTION(L"Can't create buffer");
+				THROW_PRIMARY_EXCEPTION("Can't create buffer");
 		}
 
 		ID3D11DepthStencilView* depthStencilView;
@@ -468,7 +435,7 @@ ptr<DepthStencilBuffer> Graphics::CreateDepthStencilBuffer(unsigned width, unsig
 			if(FAILED(hr))
 			{
 				buffer->Release();
-				THROW_PRIMARY_EXCEPTION(L"Can't create depth stencil view");
+				THROW_PRIMARY_EXCEPTION("Can't create depth stencil view");
 			}
 		}
 
@@ -491,7 +458,7 @@ ptr<DepthStencilBuffer> Graphics::CreateDepthStencilBuffer(unsigned width, unsig
 			{
 				buffer->Release();
 				depthStencilView->Release();
-				THROW_PRIMARY_EXCEPTION(L"Can't create shader resource view");
+				THROW_PRIMARY_EXCEPTION("Can't create shader resource view");
 			}
 			buffer->Release();
 			return NEW(DepthStencilBuffer(depthStencilView, shaderResourceView));
@@ -502,11 +469,11 @@ ptr<DepthStencilBuffer> Graphics::CreateDepthStencilBuffer(unsigned width, unsig
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION(L"Can't create depth stencil buffer", exception);
+		THROW_SECONDARY_EXCEPTION("Can't create depth stencil buffer", exception);
 	}
 }
 
-std::pair<ptr<DepthStencilBuffer>, ptr<DepthStencilBuffer>> Graphics::Create2DepthStencilBuffers(unsigned width, unsigned height, DXGI_FORMAT format, bool canBeResource, DXGI_FORMAT depthStencilViewFormat1, DXGI_FORMAT depthStencilViewFormat2, DXGI_FORMAT shaderResourceViewFormat)
+std::pair<ptr<DepthStencilBuffer>, ptr<DepthStencilBuffer>> System::Create2DepthStencilBuffers(unsigned width, unsigned height, DXGI_FORMAT format, bool canBeResource, DXGI_FORMAT depthStencilViewFormat1, DXGI_FORMAT depthStencilViewFormat2, DXGI_FORMAT shaderResourceViewFormat)
 {
 	try
 	{
@@ -525,7 +492,7 @@ std::pair<ptr<DepthStencilBuffer>, ptr<DepthStencilBuffer>> Graphics::Create2Dep
 			desc.CPUAccessFlags = 0;
 			desc.MiscFlags = 0;
 			if(FAILED(device->CreateTexture2D(&desc, 0, &buffer)))
-				THROW_PRIMARY_EXCEPTION(L"Can't create buffer");
+				THROW_PRIMARY_EXCEPTION("Can't create buffer");
 		}
 
 		ID3D11DepthStencilView* depthStencilView1;
@@ -545,7 +512,7 @@ std::pair<ptr<DepthStencilBuffer>, ptr<DepthStencilBuffer>> Graphics::Create2Dep
 			if(FAILED(hr))
 			{
 				buffer->Release();
-				THROW_PRIMARY_EXCEPTION(L"Can't create depth stencil view 1");
+				THROW_PRIMARY_EXCEPTION("Can't create depth stencil view 1");
 			}
 		}
 
@@ -567,7 +534,7 @@ std::pair<ptr<DepthStencilBuffer>, ptr<DepthStencilBuffer>> Graphics::Create2Dep
 			{
 				buffer->Release();
 				depthStencilView1->Release();
-				THROW_PRIMARY_EXCEPTION(L"Can't create depth stencil view 2");
+				THROW_PRIMARY_EXCEPTION("Can't create depth stencil view 2");
 			}
 		}
 
@@ -591,7 +558,7 @@ std::pair<ptr<DepthStencilBuffer>, ptr<DepthStencilBuffer>> Graphics::Create2Dep
 				buffer->Release();
 				depthStencilView1->Release();
 				depthStencilView2->Release();
-				THROW_PRIMARY_EXCEPTION(L"Can't create shader resource view");
+				THROW_PRIMARY_EXCEPTION("Can't create shader resource view");
 			}
 			buffer->Release();
 
@@ -606,11 +573,11 @@ std::pair<ptr<DepthStencilBuffer>, ptr<DepthStencilBuffer>> Graphics::Create2Dep
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION(L"Can't create depth stencil buffers", exception);
+		THROW_SECONDARY_EXCEPTION("Can't create depth stencil buffers", exception);
 	}
 }
 
-ptr<OcclusionPredicate> Graphics::CreateOcclusionPredicate()
+ptr<OcclusionPredicate> System::CreateOcclusionPredicate()
 {
 	try
 	{
@@ -619,46 +586,47 @@ ptr<OcclusionPredicate> Graphics::CreateOcclusionPredicate()
 		desc.MiscFlags = 0;
 		ID3D11Query* query;
 		if(FAILED(device->CreateQuery(&desc, &query)))
-			THROW_PRIMARY_EXCEPTION(L"Can't create query");
+			THROW_PRIMARY_EXCEPTION("Can't create query");
 		return NEW(OcclusionPredicate(query));
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION(L"Can't create occlusion predicate", exception);
+		THROW_SECONDARY_EXCEPTION("Can't create occlusion predicate", exception);
 	}
 }
 
-ptr<VertexShader> Graphics::CreateVertexShader(ptr<File> file)
+ptr<VertexShader> System::CreateVertexShader(ptr<File> file)
 {
 	try
 	{
 		ID3D11VertexShader* shader;
 		if(FAILED(device->CreateVertexShader(file->GetData(), file->GetSize(), NULL, &shader)))
-			THROW_PRIMARY_EXCEPTION(L"Can't create DirectX 11 vertex shader");
+			THROW_PRIMARY_EXCEPTION("Can't create DirectX 11 vertex shader");
 		return NEW(VertexShader(NEW(ShaderReflection(file)), shader));
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION(L"Can't create vertex shader", exception);
+		THROW_SECONDARY_EXCEPTION("Can't create vertex shader", exception);
 	}
 }
 
-ptr<PixelShader> Graphics::CreatePixelShader(ptr<File> file)
+ptr<PixelShader> System::CreatePixelShader(ptr<File> file)
 {
 	try
 	{
 		ID3D11PixelShader* shader;
 		if(FAILED(device->CreatePixelShader(file->GetData(), file->GetSize(), NULL, &shader)))
-			THROW_PRIMARY_EXCEPTION(L"Can't create DirectX 11 pixel shader");
-		return NEW(PixelShader(nullptr/*NEW(ShaderReflection(file))*/, shader));
+			THROW_PRIMARY_EXCEPTION("Can't create DirectX 11 pixel shader");
+		return NEW(PixelShader(NEW(ShaderReflection(file)), shader));
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION(L"Can't create pixel shader", exception);
+		THROW_SECONDARY_EXCEPTION("Can't create pixel shader", exception);
 	}
 }
 
-ID3D11Device* Graphics::GetDevice() const
+ID3D11Device* System::GetDevice() const
 {
 	return device;
 }
+*/

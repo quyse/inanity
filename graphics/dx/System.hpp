@@ -1,10 +1,10 @@
 #ifndef ___INANITY_DX_SYSTEM_HPP___
 #define ___INANITY_DX_SYSTEM_HPP___
 
-#include "../ComPointer.hpp"
+#include "../../ComPointer.hpp"
 #include "dx.hpp"
-#include "SystemSettings.hpp"
-#include "d3d.h"
+#include "../SystemSettings.hpp"
+#include "d3d.hpp"
 #include <string>
 #include <vector>
 
@@ -13,6 +13,12 @@ BEGIN_INANITY
 class File;
 
 END_INANITY
+
+BEGIN_INANITY_GRAPHICS
+
+class Window;
+
+END_INANITY_GRAPHICS
 
 BEGIN_INANITY_DX
 
@@ -31,48 +37,46 @@ class EditableGeometry;
 class OcclusionPredicate;
 class VertexShader;
 class PixelShader;
-class Graphics : public Object
+class System : public Object
 {
 private:
-	//флаг инициализированности
-	bool initialized;
+	static const DXGI_FORMAT screenFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+
 	//3D-устройство
 	ComPointer<ID3D11Device> device;
 	/// Настройки экрана.
-	ScreenSettings screenSettings;
+	Graphics::ScreenSettings screenSettings;
 	//цепочка обмена буферов
 	ComPointer<IDXGISwapChain> swapChain;
 	//основной графический контекст
-	ptr<GraphicsContext> context;
+	ptr<Context> context;
 	/// Вторичный буфер в виде текстуры.
 	ptr<TextureBuffer> backBufferTextureBuffer;
 	/// Вторичный буфер в виде рендербуфера.
 	ptr<RenderBuffer> backBufferRenderBuffer;
 
-public:
-	Graphics();
-	~Graphics();
-
-	bool IsInitialized() const;
-	void Initialize(const GraphicsSettings& settings);
-	void Uninitialize();
-
-	/// Получить настройки экрана, которые лучше всего подходят для заданных настроек.
+private:
+	/// Перевести настроки экрана в настройки для DirectX.
+	static DXGI_MODE_DESC GetScreenMode(const ScreenSettings& screenSettings);
+	/// Получить настройки DirectX, которые лучше всего подходят для заданных настроек.
 	static DXGI_MODE_DESC GetSupportedScreenMode(const DXGI_MODE_DESC& modeDesc);
+
+public:
+	System(ptr<Window> window, const SystemSettings& settings);
 
 	/// Получить настройки экрана.
 	const ScreenSettings& GetScreenSettings() const;
 	/// Изменить настройки экрана.
 	void SetScreenSettings(const ScreenSettings& screenSettings);
-	/// Метод, вызываемый GameWindow как реакция на изменение размеров окна.
-	void Resize(unsigned width, unsigned height);
+	/// Метод, вызываемый Graphics::Window как реакция на изменение размеров окна.
+	void Resize(size_t width, size_t height);
 	ptr<TextureBuffer> GetBackBufferTextureBuffer();
 	ptr<RenderBuffer> GetBackBufferRenderBuffer();
 	void Flip();
 
 	/// Получить графический контекст.
-	ptr<GraphicsContext> GetGraphicsContext() const;
-
+	ptr<Context> GetContext() const;
+/*
 	/// Создать константный буфер.
 	ptr<ConstantBuffer> CreateConstantBuffer(size_t size);
 	/// Создать статичную геометрию.
@@ -91,7 +95,7 @@ public:
 	/// Создать пиксельный шейдер.
 	ptr<PixelShader> CreatePixelShader(ptr<File> file);
 
-	ID3D11Device* GetDevice() const;
+	ID3D11Device* GetDevice() const;*/
 };
 
 END_INANITY_DX
