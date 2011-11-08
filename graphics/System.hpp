@@ -8,6 +8,8 @@ BEGIN_INANITY_GRAPHICS
 /// Центральный класс графической подсистемы.
 class System : public Object
 {
+public:
+	void Resize(size_t width, size_t height);
 };
 
 END_INANITY_GRAPHICS

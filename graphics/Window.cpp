@@ -51,7 +51,7 @@ Window::~Window()
 	singleWindow = 0;
 }
 
-HWND Window::GetWindow() const
+HWND Window::GetWindowHandle() const
 {
 	return hWnd;
 }
@@ -89,7 +89,7 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 	case WM_MOVE:
 		return 0;
 	case WM_SIZE:
-		if(singleWindow && singleWindow->graphics)
+		if(singleWindow && singleWindow->graphicsSystem)
 			singleWindow->graphicsSystem->Resize(LOWORD(lParam), HIWORD(lParam));
 		return 0;
 	case WM_CLOSE:

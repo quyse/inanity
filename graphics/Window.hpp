@@ -51,11 +51,11 @@ public:
 	void SetInputManager(ptr<Input::Manager> inputManager);
 };
 
+END_INANITY_GRAPHICS
+
 #else
 
 #error Other than Windows Window is not implemented.
-
-END_INANITY_GRAPHICS
 
 #endif
 
