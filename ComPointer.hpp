@@ -1,7 +1,7 @@
 #ifndef ___INANITY_COM_POINTER_H___
 #define ___INANITY_COM_POINTER_H___
 
-#include "naming.h"
+#include "config.hpp"
 
 /*
 Файл содержит класс указателя на интерфейс объекта COM.
