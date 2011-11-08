@@ -2,7 +2,7 @@ exports.configureCompiler = function(objectFile, compiler) {
 	// объектные файлы: <conf>/object
 	var a = /^([^\/]+)\/([^\/]+)$/.exec(objectFile);
 	compiler.configuration = a[1];
-	compiler.setSourceFile(a[2] + '.cpp');
+	compiler.setSourceFile(a[2].replace(/\./g, '/') + '.cpp');
 	compiler.addMacro('INANITY_LIB');
 };
 
@@ -11,7 +11,7 @@ exports.configureCompiler = function(objectFile, compiler) {
  */
 var libraries = {
 	// ****** базовая библиотека
-	'libinanity2-base': {
+	'libinanity-base': {
 		objects: [
 		// совсем общее
 		'Object', 'ManagedHeap', 'Strings', 'Exception',
@@ -21,7 +21,7 @@ var libraries = {
 		'FileSystem', 'FolderFileSystem', 'Handle', 'DiskInputStream', 'DiskOutputStream']
 	},
 	// ******* сетевая библиотека
-	'libinanity2-net': {
+	'libinanity-net': {
 		objects: [
 		// базовая часть
 		'EventLoop',
@@ -31,8 +31,16 @@ var libraries = {
 		'HttpClient', 'HttpResponseStream', 'http_parser']
 	},
 	// ******* скрипты на lua
-	'libinanity2-lua': {
+	'libinanity-lua': {
 		objects: ['LuaState']
+	},
+	// ******* подсистема ввода
+	'libinanity-input': {
+		objects: ['input.Frame', 'input.Manager', 'input.Mux', 'input.Processor', 'input.RawManager']
+	},
+	// ******* общая графика
+	'libinanity-graphics': {
+		objects: ['graphics.EditableGeometry', 'graphics.GeometryFormat', 'graphics.Window']
 	}
 };
 
