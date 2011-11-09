@@ -1,17 +1,16 @@
 #ifndef ___INANITY_STREAM_WRITER_HPP___
 #define ___INANITY_STREAM_WRITER_HPP___
 
+#include "OutputStream.hpp"
 #include "String.hpp"
 
 BEGIN_INANITY
-
-class OutputStream;
 
 /// Класс записывателя в поток вывода.
 /** По сути является просто вспомогательным объектом. Предоставляет
 сервис записи в поток вывода бинарных простых типов данных.
 */
-class StreamWriter : public Object
+class StreamWriter : public OutputStream
 {
 private:
 	ptr<OutputStream> stream;
@@ -52,6 +51,8 @@ public:
 	/** Выравнивание должно быть степенью двойки!
 	Для профилактики ошибок записываются байты 0xCC, а не нули. */
 	void WriteGap(size_t alignment);
+
+	void Flush();
 };
 
 END_INANITY

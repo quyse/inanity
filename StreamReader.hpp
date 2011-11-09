@@ -1,6 +1,7 @@
 #ifndef ___INANITY_STREAM_READER_HPP___
 #define ___INANITY_STREAM_READER_HPP___
 
+#include "InputStream.hpp"
 #include "String.hpp"
 
 BEGIN_INANITY
@@ -11,7 +12,7 @@ class InputStream;
 /** По сути является просто вспомогательным объектом. Предоставляет
 сервис чтения из потока ввода бинарных простых типов данных.
 */
-class StreamReader : public Object
+class StreamReader : public InputStream
 {
 private:
 	ptr<InputStream> stream;
@@ -28,7 +29,7 @@ public:
 	size_t GetReadSize() const;
 
 	/// Прочитать произвольные данные.
-	void Read(void* data, size_t size);
+	size_t Read(void* data, size_t size);
 
 	/// Прочитать простое данное из потока ввода.
 	/**

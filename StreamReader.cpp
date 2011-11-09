@@ -14,11 +14,12 @@ size_t StreamReader::GetReadSize() const
 	return read;
 }
 
-void StreamReader::Read(void* data, size_t size)
+size_t StreamReader::Read(void* data, size_t size)
 {
 	if(stream->Read(data, size) != size)
 		THROW_PRIMARY_EXCEPTION("Can't read data");
 	read += size;
+	return size;
 }
 
 String StreamReader::ReadString()
