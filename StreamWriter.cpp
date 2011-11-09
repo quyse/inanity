@@ -29,15 +29,20 @@ void StreamWriter::Write(const void* data, size_t size)
 110 - длина равна 3 байтам.
 1110 - длина равна 4 байтам.
 11110 - длина равна 5 байтам.
+111110 - длина равна 6 байтам.
+1111110 - длина равна 7 байтам.
+11111110 - длина равна 8 байтам.
+11111111 - длина равна 9 байтам.
 При этом в первом байте записывается старший байт числа, а в последующих -
 оставшиеся байты числа, в порядке x86. То есть весь формат выглядит, как
 low-endian, с переставленным на первое место старшим байтом.
+Максимальное представимое число - 64-битное, но оно обрезается но размера size_t.
 */
 
-void StreamWriter::WriteShortly(unsigned data)
+void StreamWriter::WriteShortly(size_t data)
 {
 	//длина числа (без первого байта)
-	unsigned length;
+	size_t length;
 	//первый байт
 	unsigned char first;
 
@@ -61,10 +66,30 @@ void StreamWriter::WriteShortly(unsigned data)
 		length = 3;
 		first = 0xE0;
 	}
-	else
+	else if(data < 0x800000000ULL)
 	{
 		length = 4;
 		first = 0xF0;
+	}
+	else if(data < 0x40000000000ULL)
+	{
+		length = 5;
+		first = 0xF8;
+	}
+	else if(data < 0x2000000000000ULL)
+	{
+		length = 6;
+		first = 0xFC;
+	}
+	else if(data < 0x1000000000000ULL)
+	{
+		length = 7;
+		first = 0xFE;
+	}
+	else
+	{
+		length = 8;
+		first = 0xFF;
 	}
 
 	//добавить в первый байт старший байт числа, и записать первый байт
@@ -73,23 +98,15 @@ void StreamWriter::WriteShortly(unsigned data)
 	Write(&data, length);
 }
 
-void StreamWriter::Write(const std::wstring& data)
+void StreamWriter::WriteString(const String& data)
 {
 	//сначала записать длину строки
-	WriteShortly((unsigned)data.length());
-	//затем саму строку
-	Write(data.c_str(), data.length() * sizeof(wchar_t));
-}
-
-void StreamWriter::Write(const std::string& data)
-{
-	//сначала записать длину строки
-	WriteShortly((unsigned)data.length());
+	WriteShortly(data.length());
 	//затем саму строку
 	Write(data.c_str(), data.length());
 }
 
-void StreamWriter::WriteGap(unsigned alignment)
+void StreamWriter::WriteGap(size_t alignment)
 {
 #ifdef _DEBUG
 	//проверить, что выравнивание - степень двойки
@@ -103,7 +120,7 @@ void StreamWriter::WriteGap(unsigned alignment)
 	if(alignment)
 	{
 		unsigned char* data = (unsigned char*)alloca(alignment);
-		for(unsigned i = 0; i < alignment; ++i)
+		for(size_t i = 0; i < alignment; ++i)
 			data[i] = 0xCC;
 		Write(data, alignment);
 	}

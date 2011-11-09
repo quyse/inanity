@@ -1,8 +1,7 @@
 #ifndef ___INANITY_STREAM_READER_HPP___
 #define ___INANITY_STREAM_READER_HPP___
 
-#include "Object.hpp"
-#include <string>
+#include "String.hpp"
 
 BEGIN_INANITY
 
@@ -45,26 +44,17 @@ public:
 	}
 
 	/// Считать строку из потока ввода
-	std::string ReadString()
-	{
-		//считать длину строки
-		unsigned length = ReadShortly();
-		//считать строку
-		std::string r(length, ' ');
-		if(length)
-			Read(&*r.begin(), length);
-		return r;
-	}
+	String ReadString();
 
 	/// Считать сокращенное число.
 	/** Сокращенные числа записываются в особом формате (см. примечания к реализации),
 	что обеспечивает сокращенный размер записи. */
-	unsigned ReadShortly();
+	size_t ReadShortly();
 
 	/// Пропустить 0 или более байт, чтобы достичь необходимого выравнивания.
 	/** Выравнивание должно быть степенью двойки!
 	Сами байты не считываются. */
-	void ReadGap(unsigned alignment);
+	void ReadGap(size_t alignment);
 };
 
 END_INANITY

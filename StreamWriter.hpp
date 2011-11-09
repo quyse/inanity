@@ -1,8 +1,7 @@
 #ifndef ___INANITY_STREAM_WRITER_HPP___
 #define ___INANITY_STREAM_WRITER_HPP___
 
-#include "Object.hpp"
-#include <string>
+#include "String.hpp"
 
 BEGIN_INANITY
 
@@ -44,18 +43,15 @@ public:
 	/// Записать сокращенное число.
 	/** Сокращенные числа записываются в особом формате (см. примечания к реализации),
 	что обеспечивает сокращенный размер записи. */
-	void WriteShortly(unsigned data);
+	void WriteShortly(size_t data);
 
-	/// Записать строку Unicode в поток вывода
-	void Write(const std::wstring& data);
-
-	/// Записать строку ASCII в поток вывода
-	void Write(const std::string& data);
+	/// Записать строку в поток вывода
+	void WriteString(const String& data);
 
 	/// Записать 0 или более байт, чтобы достичь необходимого выравнивания.
 	/** Выравнивание должно быть степенью двойки!
 	Для профилактики ошибок записываются байты 0xCC, а не нули. */
-	void WriteGap(unsigned alignment);
+	void WriteGap(size_t alignment);
 };
 
 END_INANITY
