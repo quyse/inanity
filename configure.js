@@ -15,10 +15,12 @@ var libraries = {
 		objects: [
 		// совсем общее
 		'Object', 'ManagedHeap', 'Strings', 'Exception',
+		// синхронизация
+		'CriticalCode', 'CriticalSection',
 		// общее: файлы и потоки
-		'File', 'EmptyFile', 'PartFile', 'MemoryFile', 'OutputStream', 'FileInputStream', 'StreamReader', 'StreamWriter', 'BufferedInputStream', 'BufferedOutputStream',
+		'File', 'EmptyFile', 'PartFile', 'MemoryFile', 'OutputStream', 'FileInputStream', 'StreamReader', 'StreamWriter', 'BufferedInputStream', 'BufferedOutputStream', 'MemoryStream',
 		// файловые системы
-		'FileSystem', 'FolderFileSystem', 'Handle', 'DiskInputStream', 'DiskOutputStream']
+		'FileSystem', 'FolderFileSystem', 'Handle', 'DiskInputStream', 'DiskOutputStream', 'BlobFileSystem']
 	},
 	// ******* сетевая библиотека
 	'libinanity-net': {
@@ -41,6 +43,10 @@ var libraries = {
 	// ******* общая графика
 	'libinanity-graphics': {
 		objects: ['graphics.EditableGeometry', 'graphics.GeometryFormat', 'graphics.Window']
+	},
+	// ******* подсистема DX
+	'libinanity-dx': {
+		objects: ['graphics.dx.System']
 	}
 };
 
