@@ -15,12 +15,12 @@ class ResourceCache : public Object
 private:
 	/// Хранилище ресурсов, из которого следует брать ресурсы.
 	ptr<ResourceStore> resourceStore;
-	/// Карта уже загруженных ресурсов (с кодом ресурса).
-	std::hash_map<String, std::pair<ptr<Object>, int>> resources;
+	/// Карта уже загруженных ресурсов.
+	std::hash_map<String, std::pair<ptr<Object>, void*> > resources;
 
 public:
 	//конструктор
-	ResourceCache(ptr<ResourceStore> fileLoader);
+	ResourceCache(ptr<ResourceStore> resourceStore);
 
 	//загрузить ресурс
 	template <typename T>
@@ -29,12 +29,12 @@ public:
 		try
 		{
 			// попробовать найти ресурс в уже загруженных
-			std::hash_map<String, std::pair<ptr<Object>, int> >::const_iterator it = resources.find(fileName);
+			std::hash_map<String, std::pair<ptr<Object>, void*> >::const_iterator it = resources.find(fileName);
 			// если найден
 			if(it != resources.end())
 			{
-				// проверить тип ресурса по коду
-				if(it->second.second != T::resourceCode)
+				// проверить тип ресурса
+				if(it->second.second != (void*)T::Deserialize)
 					THROW_PRIMARY_EXCEPTION("Invalid resource type");
 				// вернуть ресурс
 				return static_cast<T*>(&*it->second.first);
@@ -44,7 +44,7 @@ public:
 			// загрузить новый ресурс
 			ptr<T> resource = resourceStore->LoadResource<T>(fileName);
 			// добавить его в карту ресурсов
-			resources[fileName] = std::make_pair(resource, T::resourceCode);
+			resources[fileName] = std::make_pair(resource, (void*)T::Deserialize);
 			// вернуть ресурс
 			return resource;
 		}
