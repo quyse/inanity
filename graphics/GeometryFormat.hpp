@@ -5,11 +5,17 @@
 #include "../String.hpp"
 #include <vector>
 
+BEGIN_INANITY
+
+class InputStream;
+class OutputStream;
+
+END_INANITY
+
 BEGIN_INANITY_GRAPHICS
 
 /// Формат геометрии.
-/** Задаёт привязки данных. Является ресурсом, загружаемым загрузчиком
-GeometryFormatLoader.
+/** Задаёт привязки данных.
 Семантика, то есть поле в структуре вершины.
 Семантика имеет имя, которое используется в шейдере в качестве семантики поля структуры.
 Сама семантика является просто именем, типа Normal.
@@ -21,15 +27,13 @@ private:
 	std::vector<std::pair<String, GeometrySemantic> > semantics;
 
 public:
-	enum
-	{
-		resourceCode = 'geof'
-	};
-
 	GeometryFormat(const std::vector<std::pair<String, GeometrySemantic> >& semantics);
 
 	/// Получить семантику.
 	const GeometrySemantic& GetSemantic(const String& name) const;
+
+	static ptr<GeometryFormat> Deserialize(ptr<InputStream> inputStream);
+	void Serialize(ptr<OutputStream> outputStream);
 };
 
 END_INANITY_GRAPHICS

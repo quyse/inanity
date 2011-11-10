@@ -7,6 +7,7 @@
 BEGIN_INANITY
 
 class File;
+class OutputStream;
 
 END_INANITY
 
@@ -32,6 +33,9 @@ public:
 	ptr<File> GetIndices() const;
 	size_t GetIndexStride() const;
 	ptr<GeometryFormat> GetFormat() const;
+
+	static ptr<Geometry> Deserialize(ptr<File> file);
+	void Serialize(ptr<OutputStream> outputStream);
 };
 
 END_INANITY_GRAPHICS

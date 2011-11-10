@@ -22,6 +22,7 @@ struct GeometrySemantic
 	/// Смещение от начала данных вершины до элемента.
 	unsigned short offset;
 
+	GeometrySemantic() {}
 	GeometrySemantic(unsigned char type, unsigned char count, unsigned short offset) : type(type), count(count), offset(offset) {}
 };
 
