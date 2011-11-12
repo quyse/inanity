@@ -4,25 +4,20 @@
 /* Файл, содержащий ссылки на конкретную реализацию графической подсистемы.
  */
 
-#ifdef ___INANITY_WINDOWS___
-
 // В Windows используется подсистема DX, использующая DirectX 11
-
-// Заголовочные файлы.
-
-#include "dx/System.hpp"
-
-// Определения.
-
-namespace Graphics
-{
-	typedef DX::System System;
-	typedef DX::Texture Texture;
-	typedef DX::ConstantBuffer ConstantBuffer;
-	typedef DX::Geometry Geometry;
-	typedef DX::GeometryFormat GeometryFormat;
-};
-
+#ifdef ___INANITY_WINDOWS
+#define ___INANITY_GRAPHICS_DX
+#else
+#error There is no implemented graphics system for current platform.
 #endif
+
+#include "graphics/graphics.hpp"
+#include "graphics/System.hpp"
+#include "graphics/Texture.hpp"
+#include "graphics/Window.hpp"
+#include "graphics/PixelFormat.hpp"
+#include "graphics/Geometry.hpp"
+#include "graphics/GeometryFormat.hpp"
+#include "graphics/GeometrySemantic.hpp"
 
 #endif
