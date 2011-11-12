@@ -1,6 +1,7 @@
 #include "System.hpp"
 #include "Context.hpp"
 #include "RenderBuffer.hpp"
+#include "Texture.hpp"
 #include "../Window.hpp"
 #include "../../Exception.hpp"
 #include <vector>
@@ -157,13 +158,13 @@ void DX::System::Resize(size_t width, size_t height)
 {
 	//сбросить ссылки на вторичный буфер
 	backBufferRenderBuffer = 0;
-	backBufferTextureBuffer = 0;
+//	backBufferTextureBuffer = 0;
 	//изменить размеры буфера
 	if(FAILED(swapChain->ResizeBuffers(1, width, height, screenFormat, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH)))
 		THROW_PRIMARY_EXCEPTION("Can't resize buffers");
 }
 
-ptr<TextureBuffer> DX::System::GetBackBufferTextureBuffer()
+/*ptr<TextureBuffer> DX::System::GetBackBufferTextureBuffer()
 {
 	if(!backBufferTextureBuffer)
 	{
@@ -173,7 +174,7 @@ ptr<TextureBuffer> DX::System::GetBackBufferTextureBuffer()
 		backBufferTextureBuffer = NEW(TextureBuffer(texture));
 	}
 	return backBufferTextureBuffer;
-}
+}*/
 
 ptr<RenderBuffer> DX::System::GetBackBufferRenderBuffer()
 {
@@ -202,6 +203,55 @@ ptr<Context> DX::System::GetContext() const
 {
 	return context;
 }
+
+ptr<RenderBuffer> DX::System::CreateRenderBuffer(size_t width, size_t height, DXGI_FORMAT format)
+{
+	try
+	{
+		ID3D11Texture2D* buffer;
+		{
+			D3D11_TEXTURE2D_DESC desc;
+			desc.Width = width;
+			desc.Height = height;
+			desc.MipLevels = 1;
+			desc.ArraySize = 1;
+			desc.Format = format;
+			desc.SampleDesc.Count = 1;
+			desc.SampleDesc.Quality = 0;
+			desc.Usage = D3D11_USAGE_DEFAULT;
+			desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+			desc.CPUAccessFlags = 0;
+			desc.MiscFlags = 0;
+			HRESULT hr;
+			if(FAILED(hr = device->CreateTexture2D(&desc, 0, &buffer)))
+				THROW_PRIMARY_EXCEPTION("Can't create buffer");
+		}
+
+		ID3D11RenderTargetView* renderTargetView;
+		if(FAILED(device->CreateRenderTargetView(buffer, 0, &renderTargetView)))
+		{
+			buffer->Release();
+			THROW_PRIMARY_EXCEPTION("Can't create render target view");
+		}
+
+		ID3D11ShaderResourceView* shaderResourceView;
+		if(FAILED(device->CreateShaderResourceView(buffer, 0, &shaderResourceView)))
+		{
+			buffer->Release();
+			renderTargetView->Release();
+			THROW_PRIMARY_EXCEPTION("Can't create shader resource view");
+		}
+
+		buffer->Release();
+
+		return NEW(RenderBuffer(renderTargetView, NEW(Texture(shaderResourceView))));
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create render buffer", exception);
+	}
+}
+
 /*
 ptr<ConstantBuffer> System::CreateConstantBuffer(size_t size)
 {
@@ -258,61 +308,6 @@ ptr<TextureBuffer> System::CreateTextureBuffer(unsigned width, unsigned height, 
 	catch(Exception* exception)
 	{
 		THROW_SECONDARY_EXCEPTION("Can't create texture buffer", exception);
-	}
-}
-
-ptr<RenderBuffer> System::CreateRenderBuffer(unsigned width, unsigned height, DXGI_FORMAT format, bool canBeResource)
-{
-	try
-	{
-		ID3D11Texture2D* buffer;
-		{
-			D3D11_TEXTURE2D_DESC desc;
-			desc.Width = width;
-			desc.Height = height;
-			desc.MipLevels = 1;
-			desc.ArraySize = 1;
-			desc.Format = format;
-			desc.SampleDesc.Count = 1;
-			desc.SampleDesc.Quality = 0;
-			desc.Usage = D3D11_USAGE_DEFAULT;
-			desc.BindFlags = (canBeResource ? D3D11_BIND_SHADER_RESOURCE : 0) | D3D11_BIND_RENDER_TARGET;
-			desc.CPUAccessFlags = 0;
-			desc.MiscFlags = 0;
-			HRESULT hr;
-			if(FAILED(hr = device->CreateTexture2D(&desc, 0, &buffer)))
-				THROW_PRIMARY_EXCEPTION("Can't create buffer");
-		}
-
-		ID3D11RenderTargetView* renderTargetView;
-		if(FAILED(device->CreateRenderTargetView(buffer, 0, &renderTargetView)))
-		{
-			buffer->Release();
-			THROW_PRIMARY_EXCEPTION("Can't create render target view");
-		}
-
-		if(canBeResource)
-		{
-			ID3D11ShaderResourceView* shaderResourceView;
-			if(FAILED(device->CreateShaderResourceView(buffer, 0, &shaderResourceView)))
-			{
-				buffer->Release();
-				renderTargetView->Release();
-				THROW_PRIMARY_EXCEPTION("Can't create shader resource view");
-			}
-
-			buffer->Release();
-
-			return NEW(RenderBuffer(renderTargetView, shaderResourceView));
-		}
-
-		buffer->Release();
-
-		return NEW(RenderBuffer(renderTargetView));
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY_EXCEPTION("Can't create render buffer", exception);
 	}
 }
 

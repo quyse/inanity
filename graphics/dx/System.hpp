@@ -51,7 +51,7 @@ private:
 	//основной графический контекст
 	ptr<Context> context;
 	/// Вторичный буфер в виде текстуры.
-	ptr<TextureBuffer> backBufferTextureBuffer;
+	//ptr<TextureBuffer> backBufferTextureBuffer;
 	/// Вторичный буфер в виде рендербуфера.
 	ptr<RenderBuffer> backBufferRenderBuffer;
 
@@ -70,12 +70,15 @@ public:
 	void SetScreenSettings(const ScreenSettings& screenSettings);
 	/// Метод, вызываемый Graphics::Window как реакция на изменение размеров окна.
 	void Resize(size_t width, size_t height);
-	ptr<TextureBuffer> GetBackBufferTextureBuffer();
+	//ptr<TextureBuffer> GetBackBufferTextureBuffer();
 	ptr<RenderBuffer> GetBackBufferRenderBuffer();
 	void Flip();
 
 	/// Получить графический контекст.
 	ptr<Context> GetContext() const;
+
+	/// Создать рендербуфер.
+	ptr<RenderBuffer> CreateRenderBuffer(size_t width, size_t height, DXGI_FORMAT format);
 /*
 	/// Создать константный буфер.
 	ptr<ConstantBuffer> CreateConstantBuffer(size_t size);
@@ -84,8 +87,6 @@ public:
 
 	/// Создать текстурный буфер. - непонятно зачем нужный метод.
 	ptr<TextureBuffer> CreateTextureBuffer(unsigned width, unsigned height, DXGI_FORMAT format, bool canBeReadByCPU);
-	/// Создать рендербуфер.
-	ptr<RenderBuffer> CreateRenderBuffer(unsigned width, unsigned height, DXGI_FORMAT format, bool canBeResource);
 	std::vector<ptr<RenderBuffer>> CreateRenderBuffersMipmap(unsigned width, unsigned height, unsigned levelsCount, DXGI_FORMAT format, bool canBeResource);
 	ptr<DepthStencilBuffer> CreateDepthStencilBuffer(unsigned width, unsigned height, DXGI_FORMAT format, bool canBeResource, DXGI_FORMAT depthStencilViewFormat = DXGI_FORMAT_UNKNOWN, DXGI_FORMAT shaderResourceViewFormat = DXGI_FORMAT_UNKNOWN);
 	std::pair<ptr<DepthStencilBuffer>, ptr<DepthStencilBuffer>> Create2DepthStencilBuffers(unsigned width, unsigned height, DXGI_FORMAT format, bool canBeResource, DXGI_FORMAT depthStencilViewFormat1 = DXGI_FORMAT_UNKNOWN, DXGI_FORMAT depthStencilViewFormat2 = DXGI_FORMAT_UNKNOWN, DXGI_FORMAT shaderResourceViewFormat = DXGI_FORMAT_UNKNOWN);
