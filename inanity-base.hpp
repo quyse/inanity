@@ -18,6 +18,8 @@
 #include "StreamWriter.hpp"
 #include "BufferedInputStream.hpp"
 #include "BufferedOutputStream.hpp"
+#include "MemoryStream.hpp"
+#include "Base64OutputStream.hpp"
 #include "FileSystem.hpp"
 #include "FolderFileSystem.hpp"
 #include "Handle.hpp"

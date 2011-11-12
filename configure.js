@@ -19,6 +19,8 @@ var libraries = {
 		'CriticalCode', 'CriticalSection',
 		// общее: файлы и потоки
 		'File', 'EmptyFile', 'PartFile', 'MemoryFile', 'OutputStream', 'FileInputStream', 'StreamReader', 'StreamWriter', 'BufferedInputStream', 'BufferedOutputStream', 'MemoryStream',
+		// преобразующие потоки
+		'Base64OutputStream',
 		// файловые системы
 		'FileSystem', 'FolderFileSystem', 'Handle', 'DiskInputStream', 'DiskOutputStream', 'BlobFileSystem']
 	},
