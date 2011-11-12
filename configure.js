@@ -42,7 +42,7 @@ var libraries = {
 	},
 	// ******* общая графика
 	'libinanity-graphics': {
-		objects: ['graphics.Geometry', 'graphics.GeometryFormat', 'graphics.Window']
+		objects: ['graphics.Geometry', 'graphics.GeometryFormat', 'graphics.Window', 'graphics.RenderStage']
 	},
 	// ******* подсистема DX
 	'libinanity-dx': {

@@ -1,39 +1,41 @@
-#ifndef ___INANITY_RENDER_STAGE_HPP___
-#define ___INANITY_RENDER_STAGE_HPP___
+#ifndef ___INANITY_GRAPHICS_RENDER_STAGE_HPP___
+#define ___INANITY_GRAPHICS_RENDER_STAGE_HPP___
 
-#include "dx.hpp"
-#include "d3d.hpp"
+#include "graphics.hpp"
+#include "Context.hpp"
+#include "RenderBuffer.hpp"
+#include "DepthStencilBuffer.hpp"
+#include <vector>
 
-BEGIN_INANITY_DX
+BEGIN_INANITY_GRAPHICS
 
-class Context;
-class RenderBuffer;
-class DepthStencilBuffer;
 /// Класс стадии рендеринга.
 /** Хранит список рендербуферов, и буфер глубины/трафарета, а также может их очищать. */
 class RenderStage : public Object
 {
-public:
-	static const unsigned maxRenderTargetsCount = D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT;
-
 private:
-	ptr<RenderBuffer> renderTargets[maxRenderTargetsCount];
-	bool clearTargets[maxRenderTargetsCount];
-	float clearTargetColors[maxRenderTargetsCount][4];
+	struct RenderTarget
+	{
+		ptr<RenderBuffer> renderBuffer;
+		bool clear;
+		float clearColor[4];
+
+		RenderTarget();
+	};
+
+	std::vector<RenderTarget> renderTargets;
+	std::vector<ptr<RenderBuffer> > renderBuffers;
 	ptr<DepthStencilBuffer> depthStencilBuffer;
 	bool clearDepth;
 	bool clearStencil;
 	float clearDepthValue;
 	unsigned clearStencilValue;
 
-	unsigned renderTargetsCount;
-
 public:
 	RenderStage();
 
 	void ResetRenderTargets();
-	void SetRenderTarget(size_t slot, ptr<RenderBuffer> renderBuffer);
-	void SetRenderTargetClearing(size_t slot, bool clear, const float* color = 0);
+	void SetRenderTarget(size_t slot, ptr<RenderBuffer> renderBuffer, bool clear = false, const float* color = 0);
 	void SetDepthStencilBuffer(ptr<DepthStencilBuffer> depthStencilBuffer);
 	void SetDepthClearing(bool clear, float depth = 1.0f);
 	void SetStencilClearing(bool clear, unsigned stencil = 0);
@@ -41,6 +43,6 @@ public:
 	void Apply(Context* context);
 };
 
-END_INANITY_DX
+END_INANITY_GRAPHICS
 
 #endif

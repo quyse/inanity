@@ -48,3 +48,12 @@ void DX::Context::ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer
 {
 	context->ClearDepthStencilView(depthStencilBuffer->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, stencil);
 }
+
+void DX::Context::SetRenderTargets(const std::vector<ptr<RenderBuffer> >& renderBuffers, ptr<DepthStencilBuffer> depthStencilBuffer)
+{
+	renderTargets.resize(renderBuffers.size());
+	for(size_t i = 0; i < renderBuffers.size(); ++i)
+		renderTargets[i] = renderBuffers[i] ? renderBuffers[i]->GetRenderTargetView() : 0;
+	context->OMSetRenderTargets(renderTargets.size(), renderTargets.empty() ? 0 : &renderTargets[0], depthStencilBuffer ? depthStencilBuffer->GetDepthStencilView() : 0);
+	renderTargets.clear();
+}

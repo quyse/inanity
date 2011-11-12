@@ -4,6 +4,7 @@
 #include "dx.hpp"
 #include "d3d.hpp"
 #include "../../ComPointer.hpp"
+#include <vector>
 
 BEGIN_INANITY_DX
 
@@ -15,6 +16,7 @@ class Context : public Object
 private:
 	ComPointer<ID3D11DeviceContext> context;
 	size_t lastViewportWidth, lastViewportHeight;
+	std::vector<ID3D11RenderTargetView*> renderTargets;
 
 public:
 	/// Создать графический контекст.
@@ -32,6 +34,9 @@ public:
 	void ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, unsigned stencil);
 	/// Очистить глубину и трафарет в depth-stencil буфере.
 	void ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, float depth, unsigned stencil);
+
+	/// Указать цели для рендеринга.
+	void SetRenderTargets(const std::vector<ptr<RenderBuffer> >& renderBuffers, ptr<DepthStencilBuffer> depthStencilBuffer);
 };
 
 END_INANITY_DX

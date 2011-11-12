@@ -51,6 +51,8 @@ public:
 		pixelFormatFloatRGB32 = pixelFormatFloatR11G11B10
 	};
 
+	static const size_t maxRenderTargetCount = D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT;
+
 private:
 	static const DXGI_FORMAT screenFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 
@@ -62,10 +64,8 @@ private:
 	ComPointer<IDXGISwapChain> swapChain;
 	//основной графический контекст
 	ptr<Context> context;
-	/// Вторичный буфер в виде текстуры.
-	//ptr<TextureBuffer> backBufferTextureBuffer;
-	/// Вторичный буфер в виде рендербуфера.
-	ptr<RenderBuffer> backBufferRenderBuffer;
+	/// Вторичный буфер.
+	ptr<RenderBuffer> backBuffer;
 
 private:
 	/// Перевести настроки экрана в настройки для DirectX.
@@ -82,8 +82,7 @@ public:
 	void SetScreenSettings(const ScreenSettings& screenSettings);
 	/// Метод, вызываемый Graphics::Window как реакция на изменение размеров окна.
 	void Resize(size_t width, size_t height);
-	//ptr<TextureBuffer> GetBackBufferTextureBuffer();
-	ptr<RenderBuffer> GetBackBufferRenderBuffer();
+	ptr<RenderBuffer> GetBackBuffer();
 	void Flip();
 
 	/// Получить графический контекст.

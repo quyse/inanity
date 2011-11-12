@@ -16,6 +16,8 @@
 #include "graphics/Texture.hpp"
 #include "graphics/RenderBuffer.hpp"
 #include "graphics/DepthStencilBuffer.hpp"
+#include "graphics/RenderStage.hpp"
+#include "graphics/Context.hpp"
 #include "graphics/Window.hpp"
 #include "graphics/Geometry.hpp"
 #include "graphics/GeometryFormat.hpp"

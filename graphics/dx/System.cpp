@@ -157,29 +157,16 @@ void DX::System::SetScreenSettings(const ScreenSettings& screenSettings)
 
 void DX::System::Resize(size_t width, size_t height)
 {
-	//сбросить ссылки на вторичный буфер
-	backBufferRenderBuffer = 0;
-//	backBufferTextureBuffer = 0;
+	//сбросить ссылку на вторичный буфер
+	backBuffer = 0;
 	//изменить размеры буфера
 	if(FAILED(swapChain->ResizeBuffers(1, width, height, screenFormat, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH)))
 		THROW_PRIMARY_EXCEPTION("Can't resize buffers");
 }
 
-/*ptr<TextureBuffer> DX::System::GetBackBufferTextureBuffer()
+ptr<RenderBuffer> DX::System::GetBackBuffer()
 {
-	if(!backBufferTextureBuffer)
-	{
-		ID3D11Texture2D* texture;
-		if(FAILED(swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&texture)))
-			THROW_PRIMARY_EXCEPTION("Can't get back buffer texture");
-		backBufferTextureBuffer = NEW(TextureBuffer(texture));
-	}
-	return backBufferTextureBuffer;
-}*/
-
-ptr<RenderBuffer> DX::System::GetBackBufferRenderBuffer()
-{
-	if(!backBufferRenderBuffer)
+	if(!backBuffer)
 	{
 		ID3D11Texture2D* backBufferTexture;
 		if(FAILED(swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backBufferTexture)))
@@ -190,9 +177,9 @@ ptr<RenderBuffer> DX::System::GetBackBufferRenderBuffer()
 		backBufferTexture->Release();
 		if(FAILED(hr))
 			THROW_PRIMARY_EXCEPTION("Can't create back buffer render target view");
-		backBufferRenderBuffer = NEW(RenderBuffer(renderTarget));
+		backBuffer = NEW(RenderBuffer(renderTarget));
 	}
-	return backBufferRenderBuffer;
+	return backBuffer;
 }
 
 void DX::System::Flip()
