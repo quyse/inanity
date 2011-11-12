@@ -4,6 +4,7 @@
 #include "graphics.hpp"
 #include "System.hpp"
 #include "../String.hpp"
+#include "../EventHandler.hpp"
 #include "../input/input.hpp"
 
 #ifdef ___INANITY_WINDOWS
@@ -18,8 +19,12 @@ END_INANITY_INPUT
 
 BEGIN_INANITY_GRAPHICS
 
-class Window
+class Window : public Object
 {
+public:
+	/// Тип обработчика активного окна.
+	typedef EventHandler<int> ActiveHandler;
+
 private:
 	//дескриптор окна
 	HWND hWnd;
@@ -36,6 +41,10 @@ private:
 	ptr<Input::Manager> inputManager;
 
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+	/// Выполнить одну итерацию оконного цикла.
+	bool Do(ActiveHandler* activeHandler);
+
 public:
 	Window(const String& windowTitle);
 	~Window();
@@ -49,6 +58,13 @@ public:
 	void SetGraphicsSystem(ptr<System> graphicsSystem);
 	/// Указать менеджер ввода.
 	void SetInputManager(ptr<Input::Manager> inputManager);
+
+	/// Закрыть окно.
+	/** Также прекращает оконный цикл. */
+	void Close();
+
+	/// Запустить оконный цикл.
+	void Run(ptr<ActiveHandler> activeHandler);
 };
 
 END_INANITY_GRAPHICS

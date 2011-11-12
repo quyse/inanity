@@ -93,7 +93,7 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 			singleWindow->graphicsSystem->Resize(LOWORD(lParam), HIWORD(lParam));
 		return 0;
 	case WM_CLOSE:
-		DestroyWindow(hWnd);
+		singleWindow->Close();
 		return 0;
 	case WM_DESTROY:
 		singleWindow->hWnd = 0;
@@ -111,4 +111,47 @@ void Window::SetGraphicsSystem(ptr<Graphics::System> graphicsSystem)
 void Window::SetInputManager(ptr<Input::Manager> inputManager)
 {
 	this->inputManager = inputManager;
+}
+
+bool Window::Do(ActiveHandler* activeHandler)
+{
+	MSG msg;
+	bool lastActive;
+	while((lastActive = active) ? PeekMessage(&msg, 0, 0, 0, PM_REMOVE) : GetMessage(&msg, 0, 0, 0))
+	{
+		if(msg.message == WM_QUIT) return false;
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+		if(active != lastActive)
+		{
+			if(inputManager)
+				if(active)
+					inputManager->AcquireDevices();
+				else
+					inputManager->UnacquireDevices();
+		}
+	}
+
+	if(active)
+	{
+		if(inputManager)
+			inputManager->Update();
+		activeHandler->Fire(0);
+	}
+	else
+		//если не активно, то значит, вышли из цикла по GetMessage(), и сообщение - WM_QUIT
+		return false;
+
+	return true;
+}
+
+void Window::Close()
+{
+	if(hWnd)
+		DestroyWindow(hWnd);
+}
+
+void Window::Run(ptr<ActiveHandler> activeHandler)
+{
+	while(Do(activeHandler));
 }
