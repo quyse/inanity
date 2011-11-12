@@ -26,7 +26,6 @@ BEGIN_INANITY_DX
 /** Достаточно низкоуровневый класс. Содержит методы для создания различных ресурсов, буферов и
 тому подобного. */
 class Context;
-class TextureBuffer;
 class RenderBuffer;
 class Texture;
 class DepthStencilBuffer;
@@ -39,6 +38,19 @@ class VertexShader;
 class PixelShader;
 class System : public Object
 {
+public:
+	enum PixelFormat
+	{
+		pixelFormatUnknown = DXGI_FORMAT_UNKNOWN,
+		pixelFormatIntR8G8B8A8 = DXGI_FORMAT_R8G8B8A8_UNORM,
+		pixelFormatFloatR11G11B10 = DXGI_FORMAT_R11G11B10_FLOAT,
+		pixelFormatTypelessR32 = DXGI_FORMAT_R32_TYPELESS,
+		pixelFormatFloatR32 = DXGI_FORMAT_R32_FLOAT,
+		pixelFormatFloatR32Depth = DXGI_FORMAT_D32_FLOAT,
+		pixelFormatIntRGBA32 = pixelFormatIntR8G8B8A8,
+		pixelFormatFloatRGB32 = pixelFormatFloatR11G11B10
+	};
+
 private:
 	static const DXGI_FORMAT screenFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 
@@ -78,7 +90,9 @@ public:
 	ptr<Context> GetContext() const;
 
 	/// Создать рендербуфер.
-	ptr<RenderBuffer> CreateRenderBuffer(size_t width, size_t height, DXGI_FORMAT format);
+	ptr<RenderBuffer> CreateRenderBuffer(size_t width, size_t height, PixelFormat format);
+	/// Создать буфер глубины-трафарета.
+	ptr<DepthStencilBuffer> CreateDepthStencilBuffer(size_t width, size_t height, PixelFormat format, bool canBeResource = false, PixelFormat depthStencilViewFormat = pixelFormatUnknown, PixelFormat shaderResourceViewFormat = pixelFormatUnknown);
 /*
 	/// Создать константный буфер.
 	ptr<ConstantBuffer> CreateConstantBuffer(size_t size);
@@ -88,7 +102,6 @@ public:
 	/// Создать текстурный буфер. - непонятно зачем нужный метод.
 	ptr<TextureBuffer> CreateTextureBuffer(unsigned width, unsigned height, DXGI_FORMAT format, bool canBeReadByCPU);
 	std::vector<ptr<RenderBuffer>> CreateRenderBuffersMipmap(unsigned width, unsigned height, unsigned levelsCount, DXGI_FORMAT format, bool canBeResource);
-	ptr<DepthStencilBuffer> CreateDepthStencilBuffer(unsigned width, unsigned height, DXGI_FORMAT format, bool canBeResource, DXGI_FORMAT depthStencilViewFormat = DXGI_FORMAT_UNKNOWN, DXGI_FORMAT shaderResourceViewFormat = DXGI_FORMAT_UNKNOWN);
 	std::pair<ptr<DepthStencilBuffer>, ptr<DepthStencilBuffer>> Create2DepthStencilBuffers(unsigned width, unsigned height, DXGI_FORMAT format, bool canBeResource, DXGI_FORMAT depthStencilViewFormat1 = DXGI_FORMAT_UNKNOWN, DXGI_FORMAT depthStencilViewFormat2 = DXGI_FORMAT_UNKNOWN, DXGI_FORMAT shaderResourceViewFormat = DXGI_FORMAT_UNKNOWN);
 	ptr<OcclusionPredicate> CreateOcclusionPredicate();
 	/// Создать вершинный шейдер.

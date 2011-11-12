@@ -15,14 +15,14 @@ void RenderStage::ResetRenderTargets()
 	renderTargetsCount = 0;
 }
 
-void RenderStage::SetRenderTarget(unsigned slot, ptr<RenderBuffer> renderBuffer)
+void RenderStage::SetRenderTarget(size_t slot, ptr<RenderBuffer> renderBuffer)
 {
 	renderTargets[slot] = renderBuffer;
 	clearTargets[slot] = false;
 	renderTargetsCount = std::max(renderTargetsCount, slot + 1);
 }
 
-void RenderStage::SetRenderTargetClearing(unsigned slot, bool clear, const float* color)
+void RenderStage::SetRenderTargetClearing(size_t slot, bool clear, const float* color)
 {
 	clearTargets[slot] = clear;
 	if(color) std::copy(color, color + 4, clearTargetColors[slot]);
@@ -47,7 +47,7 @@ void RenderStage::SetStencilClearing(bool clear, unsigned stencil)
 
 void RenderStage::Apply(Context* context)
 {
-	for(unsigned i = 0; i < renderTargetsCount; ++i)
+	for(size_t i = 0; i < renderTargetsCount; ++i)
 		if(clearTargets[i] && renderTargets[i])
 			context->ClearRenderBuffer(renderTargets[i], clearTargetColors[i]);
 
@@ -61,7 +61,7 @@ void RenderStage::Apply(Context* context)
 			context->ClearDepthStencilBuffer(depthStencilBuffer, clearStencilValue);
 
 	ID3D11RenderTargetView* renderTargetViews[maxRenderTargetsCount];
-	for(unsigned i = 0; i < renderTargetsCount; ++i)
+	for(size_t i = 0; i < renderTargetsCount; ++i)
 		renderTargetViews[i] = renderTargets[i] ? renderTargets[i]->GetRenderTargetView() : 0;
 	ID3D11DepthStencilView* depthStencilView = depthStencilBuffer ? depthStencilBuffer->GetDepthStencilView() : 0;
 	context->GetDeviceContext()->OMSetRenderTargets(renderTargetsCount, renderTargetsCount ? renderTargetViews : NULL, depthStencilView);

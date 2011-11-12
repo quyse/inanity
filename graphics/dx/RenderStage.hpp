@@ -32,8 +32,8 @@ public:
 	RenderStage();
 
 	void ResetRenderTargets();
-	void SetRenderTarget(unsigned slot, ptr<RenderBuffer> renderBuffer);
-	void SetRenderTargetClearing(unsigned slot, bool clear, const float* color = 0);
+	void SetRenderTarget(size_t slot, ptr<RenderBuffer> renderBuffer);
+	void SetRenderTargetClearing(size_t slot, bool clear, const float* color = 0);
 	void SetDepthStencilBuffer(ptr<DepthStencilBuffer> depthStencilBuffer);
 	void SetDepthClearing(bool clear, float depth = 1.0f);
 	void SetStencilClearing(bool clear, unsigned stencil = 0);

@@ -2,6 +2,7 @@
 #include "Context.hpp"
 #include "RenderBuffer.hpp"
 #include "Texture.hpp"
+#include "DepthStencilBuffer.hpp"
 #include "../Window.hpp"
 #include "../../Exception.hpp"
 #include <vector>
@@ -204,7 +205,7 @@ ptr<Context> DX::System::GetContext() const
 	return context;
 }
 
-ptr<RenderBuffer> DX::System::CreateRenderBuffer(size_t width, size_t height, DXGI_FORMAT format)
+ptr<RenderBuffer> DX::System::CreateRenderBuffer(size_t width, size_t height, PixelFormat format)
 {
 	try
 	{
@@ -215,7 +216,7 @@ ptr<RenderBuffer> DX::System::CreateRenderBuffer(size_t width, size_t height, DX
 			desc.Height = height;
 			desc.MipLevels = 1;
 			desc.ArraySize = 1;
-			desc.Format = format;
+			desc.Format = (DXGI_FORMAT)format;
 			desc.SampleDesc.Count = 1;
 			desc.SampleDesc.Quality = 0;
 			desc.Usage = D3D11_USAGE_DEFAULT;
@@ -249,6 +250,83 @@ ptr<RenderBuffer> DX::System::CreateRenderBuffer(size_t width, size_t height, DX
 	catch(Exception* exception)
 	{
 		THROW_SECONDARY_EXCEPTION("Can't create render buffer", exception);
+	}
+}
+
+ptr<DepthStencilBuffer> DX::System::CreateDepthStencilBuffer(size_t width, size_t height, PixelFormat format, bool canBeResource, PixelFormat depthStencilViewFormat, PixelFormat shaderResourceViewFormat)
+{
+	try
+	{
+		ID3D11Texture2D* buffer;
+		{
+			D3D11_TEXTURE2D_DESC desc;
+			desc.Width = width;
+			desc.Height = height;
+			desc.MipLevels = 1;
+			desc.ArraySize = 1;
+			desc.Format = (DXGI_FORMAT)format;
+			desc.SampleDesc.Count = 1;
+			desc.SampleDesc.Quality = 0;
+			desc.Usage = D3D11_USAGE_DEFAULT;
+			desc.BindFlags = (canBeResource ? D3D11_BIND_SHADER_RESOURCE : 0) | D3D11_BIND_DEPTH_STENCIL;
+			desc.CPUAccessFlags = 0;
+			desc.MiscFlags = 0;
+			if(FAILED(device->CreateTexture2D(&desc, 0, &buffer)))
+				THROW_PRIMARY_EXCEPTION("Can't create buffer");
+		}
+
+		ID3D11DepthStencilView* depthStencilView;
+		{
+			HRESULT hr;
+			if(depthStencilViewFormat == pixelFormatUnknown)
+				hr = device->CreateDepthStencilView(buffer, 0, &depthStencilView);
+			else
+			{
+				D3D11_DEPTH_STENCIL_VIEW_DESC desc;
+				desc.Format = (DXGI_FORMAT)depthStencilViewFormat;
+				desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+				desc.Flags = 0;
+				desc.Texture2D.MipSlice = 0;
+				hr = device->CreateDepthStencilView(buffer, &desc, &depthStencilView);
+			}
+			if(FAILED(hr))
+			{
+				buffer->Release();
+				THROW_PRIMARY_EXCEPTION("Can't create depth stencil view");
+			}
+		}
+
+		if(canBeResource)
+		{
+			ID3D11ShaderResourceView* shaderResourceView;
+			HRESULT hr;
+			if(shaderResourceViewFormat == pixelFormatUnknown)
+				hr = device->CreateShaderResourceView(buffer, 0, &shaderResourceView);
+			else
+			{
+				D3D11_SHADER_RESOURCE_VIEW_DESC desc;
+				desc.Format = (DXGI_FORMAT)shaderResourceViewFormat;
+				desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+				desc.Texture2D.MostDetailedMip = 0;
+				desc.Texture2D.MipLevels = 1;
+				hr = device->CreateShaderResourceView(buffer, &desc, &shaderResourceView);
+			}
+			if(FAILED(hr))
+			{
+				buffer->Release();
+				depthStencilView->Release();
+				THROW_PRIMARY_EXCEPTION("Can't create shader resource view");
+			}
+			buffer->Release();
+			return NEW(DepthStencilBuffer(depthStencilView, NEW(Texture(shaderResourceView))));
+		}
+
+		buffer->Release();
+		return NEW(DepthStencilBuffer(depthStencilView));
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create depth stencil buffer", exception);
 	}
 }
 
@@ -388,83 +466,6 @@ std::vector<ptr<RenderBuffer> > System::CreateRenderBuffersMipmap(unsigned width
 	catch(Exception* exception)
 	{
 		THROW_SECONDARY_EXCEPTION("Can't create render buffers with mipmap chain", exception);
-	}
-}
-
-ptr<DepthStencilBuffer> System::CreateDepthStencilBuffer(unsigned width, unsigned height, DXGI_FORMAT format, bool canBeResource, DXGI_FORMAT depthStencilViewFormat, DXGI_FORMAT shaderResourceViewFormat)
-{
-	try
-	{
-		ID3D11Texture2D* buffer;
-		{
-			D3D11_TEXTURE2D_DESC desc;
-			desc.Width = width;
-			desc.Height = height;
-			desc.MipLevels = 1;
-			desc.ArraySize = 1;
-			desc.Format = format;
-			desc.SampleDesc.Count = 1;
-			desc.SampleDesc.Quality = 0;
-			desc.Usage = D3D11_USAGE_DEFAULT;
-			desc.BindFlags = (canBeResource ? D3D11_BIND_SHADER_RESOURCE : 0) | D3D11_BIND_DEPTH_STENCIL;
-			desc.CPUAccessFlags = 0;
-			desc.MiscFlags = 0;
-			if(FAILED(device->CreateTexture2D(&desc, 0, &buffer)))
-				THROW_PRIMARY_EXCEPTION("Can't create buffer");
-		}
-
-		ID3D11DepthStencilView* depthStencilView;
-		{
-			HRESULT hr;
-			if(depthStencilViewFormat == DXGI_FORMAT_UNKNOWN)
-				hr = device->CreateDepthStencilView(buffer, 0, &depthStencilView);
-			else
-			{
-				D3D11_DEPTH_STENCIL_VIEW_DESC desc;
-				desc.Format = depthStencilViewFormat;
-				desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-				desc.Flags = 0;
-				desc.Texture2D.MipSlice = 0;
-				hr = device->CreateDepthStencilView(buffer, &desc, &depthStencilView);
-			}
-			if(FAILED(hr))
-			{
-				buffer->Release();
-				THROW_PRIMARY_EXCEPTION("Can't create depth stencil view");
-			}
-		}
-
-		if(canBeResource)
-		{
-			ID3D11ShaderResourceView* shaderResourceView;
-			HRESULT hr;
-			if(shaderResourceViewFormat == DXGI_FORMAT_UNKNOWN)
-				hr = device->CreateShaderResourceView(buffer, 0, &shaderResourceView);
-			else
-			{
-				D3D11_SHADER_RESOURCE_VIEW_DESC desc;
-				desc.Format = shaderResourceViewFormat;
-				desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-				desc.Texture2D.MostDetailedMip = 0;
-				desc.Texture2D.MipLevels = 1;
-				hr = device->CreateShaderResourceView(buffer, &desc, &shaderResourceView);
-			}
-			if(FAILED(hr))
-			{
-				buffer->Release();
-				depthStencilView->Release();
-				THROW_PRIMARY_EXCEPTION("Can't create shader resource view");
-			}
-			buffer->Release();
-			return NEW(DepthStencilBuffer(depthStencilView, shaderResourceView));
-		}
-
-		buffer->Release();
-		return NEW(DepthStencilBuffer(depthStencilView));
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY_EXCEPTION("Can't create depth stencil buffer", exception);
 	}
 }
 

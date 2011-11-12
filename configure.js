@@ -42,11 +42,11 @@ var libraries = {
 	},
 	// ******* общая графика
 	'libinanity-graphics': {
-		objects: ['graphics.EditableGeometry', 'graphics.GeometryFormat', 'graphics.Window']
+		objects: ['graphics.Geometry', 'graphics.GeometryFormat', 'graphics.Window']
 	},
 	// ******* подсистема DX
 	'libinanity-dx': {
-		objects: ['graphics.dx.System']
+		objects: ['graphics.dx.System', 'graphics.dx.Context', 'graphics.dx.RenderBuffer', 'graphics.dx.Texture', 'graphics.dx.DepthStencilBuffer']
 	}
 };
 
