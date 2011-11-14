@@ -15,8 +15,8 @@ var libraries = {
 		objects: [
 		// совсем общее
 		'Object', 'ManagedHeap', 'Strings', 'Exception',
-		// синхронизация
-		'CriticalCode', 'CriticalSection',
+		// синхронизация и потоки выполнения
+		'Thread', 'CriticalSection', 'CriticalCode',
 		// общее: файлы и потоки
 		'File', 'EmptyFile', 'PartFile', 'MemoryFile', 'OutputStream', 'FileInputStream', 'StreamReader', 'StreamWriter', 'BufferedInputStream', 'BufferedOutputStream', 'MemoryStream',
 		// преобразующие потоки
