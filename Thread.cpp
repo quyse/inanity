@@ -10,6 +10,11 @@ Thread::Thread(ptr<Handler> handler)
 	{
 		this->handler = handler;
 
+#ifdef ___INANITY_WINDOWS
+		thread = NEW(Handle(CreateThread(0, 0, ThreadRoutine, this, 0, 0)));
+		if(!thread->IsValid())
+			THROW_SECONDARY_EXCEPTION("CreateThread failed", Exception::SystemError());
+#endif
 #ifdef ___INANITY_LINUX
 		if(pthread_create(&thread, 0, ThreadRoutine, this))
 			THROW_SECONDARY_EXCEPTION("pthread_create failed", Exception::SystemError());
@@ -21,15 +26,20 @@ Thread::Thread(ptr<Handler> handler)
 	}
 }
 
-Thread::~Thread()
+#ifdef ___INANITY_WINDOWS
+DWORD CALLBACK Thread::ThreadRoutine(void* self)
 {
+	((Thread*)self)->Run();
+	return 0;
 }
-
+#endif
+#ifdef ___INANITY_LINUX
 void* Thread::ThreadRoutine(void* self)
 {
 	((Thread*)self)->Run();
 	return 0;
 }
+#endif
 
 void Thread::Run()
 {
@@ -38,8 +48,11 @@ void Thread::Run()
 
 void Thread::WaitEnd()
 {
+#ifdef ___INANITY_WINDOWS
+	if(WaitForSingleObject(*thread, INFINITE) != WAIT_OBJECT_0)
+#endif
 #ifdef ___INANITY_LINUX
 	if(pthread_join(thread, 0))
-		THROW_SECONDARY_EXCEPTION("Can't wait for thread end", Exception::SystemError());
 #endif
+		THROW_SECONDARY_EXCEPTION("Can't wait for thread end", Exception::SystemError());
 }

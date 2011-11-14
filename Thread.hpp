@@ -2,6 +2,10 @@
 #define ___INANITY_THREAD_HPP___
 
 #include "EventHandler.hpp"
+#ifdef ___INANITY_WINDOWS
+#include "Handle.hpp"
+#include "windows.hpp"
+#endif
 #ifdef ___INANITY_LINUX
 #include <sys/types.h>
 #endif
@@ -17,6 +21,14 @@ public:
 private:
 	ptr<Handler> handler;
 
+#ifdef ___INANITY_WINDOWS
+
+	ptr<Handle> thread;
+
+	static DWORD CALLBACK ThreadRoutine(void* self);
+
+#endif
+
 #ifdef ___INANITY_LINUX
 
 	pthread_t thread;
@@ -29,7 +41,6 @@ private:
 
 public:
 	Thread(ptr<Handler> handler);
-	~Thread();
 
 	void WaitEnd();
 };
