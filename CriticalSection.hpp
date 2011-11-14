@@ -2,16 +2,25 @@
 #define ___INANITY_CRITICAL_SECTION_H___
 
 #include "Object.hpp"
+#ifdef ___INANITY_WINDOWS
 #include "windows.hpp"
+#endif
+#ifdef ___INANITY_LINUX
+#include <sys/types.h>
+#endif
 
 BEGIN_INANITY
 
 //класс критической секции
-//инкапсулирует обычную CRITICAL_SECTION
 class CriticalSection
 {
 private:
+#ifdef ___INANITY_WINDOWS
 	CRITICAL_SECTION criticalSection;
+#endif
+#ifdef ___INANITY_LINUX
+	pthread_mutex_t mutex;
+#endif
 
 public:
 	CriticalSection();
