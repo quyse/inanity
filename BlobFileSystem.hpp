@@ -2,7 +2,7 @@
 #define ___INANITY_BLOB_FILE_SYSTEM_HPP___
 
 #include "FileSystem.hpp"
-#include <hash_map>
+#include <unordered_map>
 
 BEGIN_INANITY
 
@@ -21,9 +21,9 @@ public:
 	/// Структура, которой заканчивается файл системы.
 	struct Terminator
 	{
-		static const unsigned signatureValue = 'BOLB';
+		static const char signatureValue[4];
 		/// Сигнатура.
-		unsigned signature;
+		char signature[4];
 		/// Размер заголовка.
 		unsigned headerSize;
 	};
@@ -32,7 +32,7 @@ private:
 	/// Исходный файл.
 	ptr<File> file;
 	/// Хеш файлов из файловой системы.
-	std::hash_map<String, ptr<File> > files;
+	std::unordered_map<String, ptr<File> > files;
 
 public:
 	//открыть существующую файловую систему

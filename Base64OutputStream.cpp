@@ -13,7 +13,7 @@ Base64OutputStream::Base64OutputStream(bool encoding, ptr<OutputStream> outputSt
 		for(int i = 0; i < 256; ++i)
 			inverseSchema[i] = 0xFF;
 		for(int i = 0; i < 64; ++i)
-			inverseSchema[schema[i]] = i;
+			inverseSchema[(ptrdiff_t)schema[i]] = i;
 	}
 }
 
@@ -93,7 +93,6 @@ void Base64OutputStream::ProcessDecodeBuffer()
 		// 12   12       1 байт, ==
 		// 18   6        2 байта, =
 		// 24   0
-		int bufferSizeInit = bufferSize;
 		int i;
 		unsigned char bytes[3];
 		unsigned char bytesLength = 0;

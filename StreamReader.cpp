@@ -93,7 +93,7 @@ size_t StreamReader::ReadShortly()
 	return (size_t)(a | (first << (length * 8)));
 }
 
-void StreamReader::ReadGap(unsigned alignment)
+void StreamReader::ReadGap(size_t alignment)
 {
 #ifdef _DEBUG
 	//проверить, что выравнивание - степень двойки
@@ -106,7 +106,7 @@ void StreamReader::ReadGap(unsigned alignment)
 	//считать их
 	if(alignment)
 	{
-		unsigned char* data = (unsigned char*)alloca(alignment);
+		char* data = (char*)alloca(alignment);
 		Read(data, alignment);
 	}
 }

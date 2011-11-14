@@ -1,6 +1,7 @@
 #include "MemoryStream.hpp"
 #include "MemoryFile.hpp"
 #include "PartFile.hpp"
+#include <string.h>
 
 MemoryStream::MemoryStream() : dataSize(0), lastDataSize(0), files(1)
 {

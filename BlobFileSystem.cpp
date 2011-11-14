@@ -3,6 +3,9 @@
 #include "FileInputStream.hpp"
 #include "StreamReader.hpp"
 #include "Exception.hpp"
+#include <string.h>
+
+const char BlobFileSystem::Terminator::signatureValue[4] = { 'B', 'L', 'O', 'B' };
 
 BlobFileSystem::BlobFileSystem(ptr<File> file) : file(file)
 {
@@ -11,7 +14,6 @@ BlobFileSystem::BlobFileSystem(ptr<File> file) : file(file)
 		void* fileData = file->GetData();
 		size_t fileSize = file->GetSize();
 		size_t size = fileSize;
-		const void* data = fileData;
 
 		//получить терминатор
 		if(size < sizeof(Terminator))
@@ -20,7 +22,7 @@ BlobFileSystem::BlobFileSystem(ptr<File> file) : file(file)
 		size -= sizeof(*terminator);
 
 		//проверить сигнатуру
-		if(terminator->signature != Terminator::signatureValue)
+		if(memcmp(terminator->signature, Terminator::signatureValue, 4) != 0)
 			THROW_PRIMARY_EXCEPTION("Invalid signature");
 
 		//проверить, что заголовок читается
@@ -61,7 +63,7 @@ BlobFileSystem::BlobFileSystem(ptr<File> file) : file(file)
 
 ptr<File> BlobFileSystem::TryLoadFile(const String& fileName)
 {
-	std::hash_map<String, ptr<File> >::const_iterator it = files.find(fileName);
+	std::unordered_map<String, ptr<File> >::const_iterator it = files.find(fileName);
 	if(it == files.end())
 		return 0;
 	return it->second;
@@ -69,7 +71,7 @@ ptr<File> BlobFileSystem::TryLoadFile(const String& fileName)
 
 void BlobFileSystem::GetFileNames(std::vector<String>& fileNames) const
 {
-	for(std::hash_map<String, ptr<File> >::const_iterator i = files.begin(); i != files.end(); ++i)
+	for(std::unordered_map<String, ptr<File> >::const_iterator i = files.begin(); i != files.end(); ++i)
 		fileNames.push_back(i->first);
 }
 
