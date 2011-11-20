@@ -6,12 +6,15 @@
 
 BEGIN_INANITY
 
+class Exception;
+
 /// Класс клиентского сокета.
 /** Олицетворяет собственно сокет на соединении. */
 class ClientSocket : public Socket
 {
 private:
 	ptr<OutputStream> streamToWriteInput;
+	ptr<Exception> exception;
 
 	class SocketOutputStream : public OutputStream
 	{
@@ -44,6 +47,9 @@ public:
 
 	void SetStreamToWriteInput(ptr<OutputStream> streamToWriteInput);
 	ptr<OutputStream> GetOutputStream();
+
+	/// Получить исключение, если произошла ошибка. Если ошибки не было, то 0.
+	ptr<Exception> GetError() const;
 };
 
 END_INANITY

@@ -15,9 +15,13 @@ void ClientSocket::ReadCallback(uv_stream_t* stream, ssize_t nread, uv_buf_t buf
 	if(nread < 0)
 	{
 		// ошибка или легальный конец данных
-		// не разбираемся, в любом случае нужно закрыть сокет
+		// в любом случае нужно закрыть сокет
 		socket->Close();
-		// сообщить о конце файла
+		// если ошибка
+		if(uv_last_error(socket->eventLoop->loop).code != UV_EOF)
+			// сохранить её
+			socket->exception = socket->eventLoop->GetLastError();
+		// и сообщить о конце потока
 		if(socket->streamToWriteInput)
 			socket->streamToWriteInput->Flush();
 	}
@@ -53,6 +57,11 @@ void ClientSocket::SetStreamToWriteInput(ptr<OutputStream> streamToWriteInput)
 ptr<OutputStream> ClientSocket::GetOutputStream()
 {
 	return NEW(SocketOutputStream(this));
+}
+
+ptr<Exception> ClientSocket::GetError() const
+{
+	return exception;
 }
 
 ClientSocket::SocketOutputStream::SocketOutputStream(ptr<ClientSocket> clientSocket) :

@@ -20,6 +20,7 @@ class ClientSocket;
 class EventLoop : public Object
 {
 	friend class ServerSocket;
+	friend class ClientSocket;
 public:
 	typedef EventHandler<ptr<ClientSocket> > ConnectHandler;
 
