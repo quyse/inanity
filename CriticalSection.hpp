@@ -11,7 +11,7 @@
 
 BEGIN_INANITY
 
-//класс критической секции
+/// Класс критической секции.
 class CriticalSection
 {
 private:

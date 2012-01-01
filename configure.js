@@ -16,11 +16,11 @@ var libraries = {
 		// совсем общее
 		'Object', 'ManagedHeap', 'Strings', 'Exception',
 		// синхронизация и потоки выполнения
-		'Thread', 'CriticalSection', 'CriticalCode',
+		'Thread', 'CriticalSection', 'CriticalCode', 'Semaphore',
 		// общее: файлы и потоки
 		'File', 'EmptyFile', 'PartFile', 'MemoryFile', 'OutputStream', 'FileInputStream', 'StreamReader', 'StreamWriter', 'BufferedInputStream', 'BufferedOutputStream', 'MemoryStream',
 		// преобразующие потоки
-		'Base64OutputStream',
+		'Base64OutputStream', 'Out2InStream',
 		// файловые системы
 		'FileSystem', 'FolderFileSystem', 'Handle', 'DiskInputStream', 'DiskOutputStream', 'BlobFileSystem']
 	},
