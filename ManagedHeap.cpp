@@ -1,4 +1,7 @@
 #include "ManagedHeap.hpp"
+#ifdef ___INANITY_TRACE_HEAP
+#include "CriticalCode.hpp"
+#endif
 #include <cstdlib>
 #include <cstdio>
 
@@ -14,14 +17,14 @@ END_INANITY
 #define DEBUG_PRINT(x) printf("%s", (x))
 #endif
 
-#ifdef TRACE_HEAP
+#ifdef ___INANITY_TRACE_HEAP
 ManagedHeap::AllocationInfo::AllocationInfo(size_t number, size_t size) : number(number), size(size)
 {
 }
 #endif
 
 ManagedHeap::ManagedHeap()
-#ifdef TRACE_HEAP
+#ifdef ___INANITY_TRACE_HEAP
 : allocationsCount(0), allAllocationsSize(0), tracedBlock(-1)
 #endif
 {
@@ -45,7 +48,7 @@ ManagedHeap::~ManagedHeap()
 	HeapDestroy(heap);
 #endif
 
-#ifdef TRACE_HEAP
+#ifdef ___INANITY_TRACE_HEAP
 	//выдать отчет по памяти
 	DEBUG_PRINT("======= INANITY MANAGED HEAP REPORT =======\n");
 	static char s[100];
@@ -65,7 +68,7 @@ ManagedHeap::~ManagedHeap()
 #endif
 }
 
-#ifdef TRACE_HEAP
+#ifdef ___INANITY_TRACE_HEAP
 void ManagedHeap::PrintAllocations()
 {
 	static char s[1024];
@@ -92,22 +95,28 @@ void* ManagedHeap::Allocate(size_t size)
 	void* data = malloc(size);
 #endif
 
-#ifdef TRACE_HEAP
-	if(allocationsCount == tracedBlock)
-		DebugBreak();
-	allocations.insert(std::make_pair(data, AllocationInfo(allocationsCount++, size)));
-	allAllocationsSize += size;
+#ifdef ___INANITY_TRACE_HEAP
+	{
+		CriticalCode code(criticalSection);
+		if(allocationsCount == tracedBlock)
+			DebugBreak();
+		allocations.insert(std::make_pair(data, AllocationInfo(allocationsCount++, size)));
+		allAllocationsSize += size;
+	}
 #endif
 	return data;
 }
 
 void ManagedHeap::Free(void *data)
 {
-#ifdef TRACE_HEAP
-	std::map<void*, AllocationInfo>::iterator i = allocations.find(data);
-	if(i == allocations.end())
-		DebugBreak();
-	allocations.erase(i);
+#ifdef ___INANITY_TRACE_HEAP
+	{
+		CriticalCode code(criticalSection);
+		std::map<void*, AllocationInfo>::iterator i = allocations.find(data);
+		if(i == allocations.end())
+			DebugBreak();
+		allocations.erase(i);
+	}
 #endif
 
 #ifdef ___INANITY_WINDOWS
@@ -118,10 +127,11 @@ void ManagedHeap::Free(void *data)
 #endif
 }
 
-#ifdef TRACE_HEAP
+#ifdef ___INANITY_TRACE_HEAP
 
 void ManagedHeap::SetAllocationInfo(void* data, const char* info)
 {
+	CriticalCode code(criticalSection);
 	std::map<void*, AllocationInfo>::iterator i = allocations.find(data);
 	if(i != allocations.end())
 		i->second.info = info;

@@ -13,10 +13,11 @@
 
 #ifdef _DEBUG
 //макрос для трассировки памяти
-#define TRACE_HEAP
+#define ___INANITY_TRACE_HEAP
 #endif
 
-#ifdef TRACE_HEAP
+#ifdef ___INANITY_TRACE_HEAP
+#include "CriticalSection.hpp"
 #include <map>
 #endif
 
@@ -27,8 +28,9 @@ class ManagedHeap
 {
 private:
 	//информация для трассировки
-#ifdef TRACE_HEAP
+#ifdef ___INANITY_TRACE_HEAP
 
+	CriticalSection criticalSection;
 	size_t allocationsCount;
 	size_t allAllocationsSize;
 	struct AllocationInfo
@@ -55,7 +57,7 @@ private:
 	HANDLE heap;
 #endif
 
-#ifdef TRACE_HEAP
+#ifdef ___INANITY_TRACE_HEAP
 public:
 	//значение указателя на выделяемую память, при котором будет выдаваться breakpoint
 	size_t tracedBlock;
@@ -70,7 +72,7 @@ public:
 
 	void* Allocate(size_t size);
 	void Free(void* data);
-#ifdef TRACE_HEAP
+#ifdef ___INANITY_TRACE_HEAP
 	void PrintAllocations();
 #endif
 };
