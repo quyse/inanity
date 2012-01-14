@@ -1,5 +1,5 @@
 #include "FolderFileSystem.hpp"
-#include "File.hpp"
+#include "FolderFile.hpp"
 #include "Handle.hpp"
 #include "PartFile.hpp"
 #include "EmptyFile.hpp"
@@ -11,33 +11,6 @@
 
 #include "windows.hpp"
 #include "Strings.hpp"
-
-class FolderFile : public File
-{
-private:
-	void* data;
-	size_t size;
-
-public:
-	FolderFile(void* data, size_t size) : data(data), size(size)
-	{
-	}
-
-	~FolderFile()
-	{
-		UnmapViewOfFile(data);
-	}
-
-	void* GetData() const
-	{
-		return data;
-	}
-
-	size_t GetSize() const
-	{
-		return size;
-	}
-};
 
 FolderFileSystem::FolderFileSystem(const String& userFolderName)
 {
@@ -247,33 +220,6 @@ void FolderFileSystem::GetFileNames(String sourceDirectory, const String& target
 #include <dirent.h>
 #include <errno.h>
 #include <stdlib.h>
-
-class FolderFile : public File
-{
-private:
-	void* data;
-	size_t size;
-
-public:
-	FolderFile(void* data, size_t size) : data(data), size(size)
-	{
-	}
-
-	~FolderFile()
-	{
-		munmap(data, size);
-	}
-
-	void* GetData() const
-	{
-		return data;
-	}
-
-	size_t GetSize() const
-	{
-		return size;
-	}
-};
 
 FolderFileSystem::FolderFileSystem(const String& userFolderName)
 {
