@@ -7,6 +7,7 @@
 */
 
 #include "../../windows.hpp"
+#include <InitGuid.h>
 #include <d3d11.h>
 
 #endif
