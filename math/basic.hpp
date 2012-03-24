@@ -359,10 +359,10 @@ inline matrix<4, 4> CreateProjectionPerspectiveFovMatrix(scalar fovY, scalar asp
 	return r;
 }
 
-typedef vector<2> vec2;
-typedef vector<3> vec3;
-typedef vector<4> vec4;
-typedef matrix<4, 4> mat4x4;
+typedef vector<2> float2;
+typedef vector<3> float3;
+typedef vector<4> float4;
+typedef matrix<4, 4> float4x4;
 
 END_INANITY_MATH
 
