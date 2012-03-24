@@ -1,28 +1,35 @@
-#ifndef ___INANITY_RESOURCE_CACHE_HPP___
-#define ___INANITY_RESOURCE_CACHE_HPP___
+#ifndef ___INANITY_RESOURCE_MANAGER_HPP___
+#define ___INANITY_RESOURCE_MANAGER_HPP___
 
-#include "ResourceStore.hpp"
+#include "FileSystem.hpp"
 #include "Exception.hpp"
 #include "String.hpp"
 #include <hash_map>
 
 BEGIN_INANITY
 
-/// Класс кэша ресурсов.
-/** Кэш ресурсов хранит коллекцию ресурсов, которые в него загружены. */
-class ResourceCache : public Object
+class ResourceLoader;
+
+/// Класс менеджера ресурсов.
+/** Загружает ресурсы, и кэширует их для исключения повторной загрузки.
+Класс ресурса T должен иметь метод десериализации:
+static ptr<T> Deserialize(ptr<File> file, ResourceLoader* resourceLoader);
+*/
+class ResourceManager : public Object
 {
 private:
-	/// Хранилище ресурсов, из которого следует брать ресурсы.
-	ptr<ResourceStore> resourceStore;
+	/// Файловая система, из которой берутся ресурсы.
+	ptr<FileSystem> fileSystem;
 	/// Карта уже загруженных ресурсов.
 	std::hash_map<String, std::pair<ptr<Object>, void*> > resources;
 
-public:
-	//конструктор
-	ResourceCache(ptr<ResourceStore> resourceStore);
+	/// Получить префикс для имени файла.
+	String GetFileNamePrefix(const String& fileName);
 
-	//загрузить ресурс
+public:
+	ResourceManager(ptr<FileSystem> fileSystem);
+
+	/// Загрузить ресурс.
 	template <typename T>
 	ptr<T> LoadResource(const String& fileName)
 	{
@@ -42,7 +49,7 @@ public:
 
 			// иначе ресурс ещё не загружен
 			// загрузить новый ресурс
-			ptr<T> resource = resourceStore->LoadResource<T>(fileName);
+			ptr<T> resource = T::Deserialize(fileSystem->LoadFile(fileName), &ResourceLoader(this, GetFileNamePrefix(fileName)));
 			// добавить его в карту ресурсов
 			resources[fileName] = std::make_pair(resource, (void*)T::Deserialize);
 			// вернуть ресурс
