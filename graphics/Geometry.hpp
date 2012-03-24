@@ -8,6 +8,7 @@ BEGIN_INANITY
 
 class File;
 class OutputStream;
+class ResourceLoader;
 
 END_INANITY
 
@@ -34,7 +35,7 @@ public:
 	size_t GetIndexStride() const;
 	ptr<GeometryFormat> GetFormat() const;
 
-	static ptr<Geometry> Deserialize(ptr<File> file);
+	static ptr<Geometry> Deserialize(ptr<File> file, ResourceLoader* resourceLoader);
 	void Serialize(ptr<OutputStream> outputStream);
 };
 

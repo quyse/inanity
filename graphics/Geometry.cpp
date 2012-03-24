@@ -5,6 +5,8 @@
 #include "../OutputStream.hpp"
 #include "../StreamReader.hpp"
 #include "../StreamWriter.hpp"
+#include "../ResourceLoader.hpp"
+#include "../ResourceManager.hpp"
 #include "../Exception.hpp"
 
 Geometry::Geometry(ptr<File> vertices, size_t vertexStride, ptr<File> indices, size_t indexStride, ptr<GeometryFormat> format)
@@ -38,7 +40,7 @@ ptr<GeometryFormat> Geometry::GetFormat() const
 	return format;
 }
 
-ptr<Geometry> Geometry::Deserialize(ptr<File> file)
+ptr<Geometry> Geometry::Deserialize(ptr<File> file, ResourceLoader* resourceLoader)
 {
 	try
 	{
@@ -65,7 +67,7 @@ ptr<Geometry> Geometry::Deserialize(ptr<File> file)
 		}
 
 		// считать формат геометрии
-		ptr<GeometryFormat> format = GeometryFormat::Deserialize(reader);
+		ptr<GeometryFormat> format = resourceLoader->LoadResource<GeometryFormat>(reader->ReadString());
 
 		char* fileData = (char*)file->GetData();
 		// считать вершины

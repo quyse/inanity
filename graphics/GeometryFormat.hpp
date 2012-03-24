@@ -7,8 +7,9 @@
 
 BEGIN_INANITY
 
-class InputStream;
+class File;
 class OutputStream;
+class ResourceLoader;
 
 END_INANITY
 
@@ -32,7 +33,7 @@ public:
 	/// Получить семантику.
 	const GeometrySemantic& GetSemantic(const String& name) const;
 
-	static ptr<GeometryFormat> Deserialize(ptr<InputStream> inputStream);
+	static ptr<GeometryFormat> Deserialize(ptr<File> file, ResourceLoader* resourceLoader);
 	void Serialize(ptr<OutputStream> outputStream);
 };
 

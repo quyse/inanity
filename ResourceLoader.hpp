@@ -18,7 +18,7 @@ private:
 	String pathPrefix;
 
 public:
-	Loader(ptr<ResourceManager> resourceManager, const String& pathPrefix);
+	ResourceLoader(ptr<ResourceManager> resourceManager, const String& pathPrefix);
 
 	/// Загрузить ресурс.
 	template <typename T>

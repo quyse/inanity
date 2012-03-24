@@ -1,4 +1,6 @@
 #include "GeometryFormat.hpp"
+#include "../FileInputStream.hpp"
+#include "../File.hpp"
 #include "../StreamReader.hpp"
 #include "../StreamWriter.hpp"
 #include "../Exception.hpp"
@@ -17,9 +19,9 @@ const GeometrySemantic& GeometryFormat::GetSemantic(const String& name) const
 	THROW_PRIMARY_EXCEPTION("Can't get semantic " + name);
 }
 
-ptr<GeometryFormat> GeometryFormat::Deserialize(ptr<InputStream> inputStream)
+ptr<GeometryFormat> GeometryFormat::Deserialize(ptr<File> file, ResourceLoader* resourceLoader)
 {
-	ptr<StreamReader> reader = NEW(StreamReader(inputStream));
+	ptr<StreamReader> reader = NEW(StreamReader(NEW(FileInputStream(file))));
 
 	std::vector<std::pair<String, GeometrySemantic> > semantics;
 	for(;;)
