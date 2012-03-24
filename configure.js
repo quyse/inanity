@@ -22,7 +22,7 @@ var libraries = {
 		// преобразующие потоки
 		'Base64OutputStream', 'Out2InStream',
 		// файловые системы
-		'FileSystem', 'FolderFileSystem', 'Handle', 'DiskInputStream', 'DiskOutputStream', 'BlobFileSystem']
+		'FileSystem', 'FolderFileSystem', 'Handle', 'DiskInputStream', 'DiskOutputStream', 'BlobFileSystem', 'CompositeFileSystem']
 	},
 	// ******* сетевая библиотека
 	'libinanity-net': {
