@@ -22,7 +22,9 @@ var libraries = {
 		// преобразующие потоки
 		'Base64OutputStream', 'Out2InStream',
 		// файловые системы
-		'FileSystem', 'FolderFileSystem', 'Handle', 'DiskInputStream', 'DiskOutputStream', 'BlobFileSystem', 'CompositeFileSystem']
+		'FileSystem', 'FolderFileSystem', 'FolderFile', 'Handle', 'DiskInputStream', 'DiskOutputStream', 'BlobFileSystem', 'BlobFileSystemBuilder', 'CompositeFileSystem',
+		// ресурсы
+		'ResourceManager', 'ResourceLoader']
 	},
 	// ******* сетевая библиотека
 	'libinanity-net': {
@@ -44,11 +46,19 @@ var libraries = {
 	},
 	// ******* общая графика
 	'libinanity-graphics': {
-		objects: ['graphics.Geometry', 'graphics.GeometryFormat', 'graphics.Window', 'graphics.RenderStage']
+		objects: ['graphics.RenderStage', 'graphics.Window', 'graphics.Geometry', 'graphics.GeometryFormat', 'graphics.EditableFont']
 	},
 	// ******* подсистема DX
 	'libinanity-dx': {
 		objects: ['graphics.dx.System', 'graphics.dx.Context', 'graphics.dx.RenderBuffer', 'graphics.dx.Texture', 'graphics.dx.DepthStencilBuffer']
+	}
+};
+
+var executables = {
+	archi: {
+		objects: ['archi.main', 'archi.BlobCreator', /*'archi.FontCreator',*/ 'archi.SimpleGeometryCreator', 'archi.SystemFontCreator'/*, 'archi.WavefrontObj', 'archi.XafConverter'*/],
+		staticLibraries: ['libinanity-base', 'libinanity-graphics'],
+		dynamicLibraries: ['user32.lib', 'gdi32.lib', 'comdlg32.lib']
 	}
 };
 
@@ -60,4 +70,18 @@ exports.configureComposer = function(libraryFile, composer) {
 	var library = libraries[a[3]];
 	for ( var i = 0; i < library.objects.length; ++i)
 		composer.addObjectFile(confDir + library.objects[i]);
+};
+
+exports.configureLinker = function(executableFile, linker) {
+	// исполняемые файлы: <conf>/executable
+	var a = /^(([^\/]+)\/)([^\/]+)$/.exec(executableFile);
+	var confDir = a[1];
+	linker.configuration = a[2];
+	var executable = executables[a[3]];
+	for ( var i = 0; i < executable.objects.length; ++i)
+		linker.addObjectFile(confDir + executable.objects[i]);
+	for ( var i = 0; i < executable.staticLibraries.length; ++i)
+		linker.addStaticLibrary(confDir + executable.staticLibraries[i]);
+	for ( var i = 0; i < executable.dynamicLibraries.length; ++i)
+		linker.addDynamicLibrary(executable.dynamicLibraries[i]);
 };

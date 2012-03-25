@@ -27,8 +27,14 @@
 #include "Out2InStream.hpp"
 #include "FileSystem.hpp"
 #include "FolderFileSystem.hpp"
+#include "FolderFile.hpp"
 #include "Handle.hpp"
 #include "DiskInputStream.hpp"
 #include "DiskOutputStream.hpp"
+#include "BlobFileSystem.hpp"
+#include "BlobFileSystemBuilder.hpp"
+#include "CompositeFileSystem.hpp"
+#include "ResourceManager.hpp"
+#include "ResourceLoader.hpp"
 
 #endif

@@ -22,5 +22,8 @@
 #include "graphics/Geometry.hpp"
 #include "graphics/GeometryFormat.hpp"
 #include "graphics/GeometrySemantic.hpp"
+#include "graphics/EditableGeometry.hpp"
+#include "graphics/FontChar.hpp"
+#include "graphics/EditableFont.hpp"
 
 #endif
