@@ -5,7 +5,7 @@
 #include "Exception.hpp"
 #include <string.h>
 
-const char BlobFileSystem::Terminator::signatureValue[4] = { 'B', 'L', 'O', 'B' };
+const unsigned BlobFileSystem::Terminator::signatureValue = 'BOLB';
 
 BlobFileSystem::BlobFileSystem(ptr<File> file) : file(file)
 {
@@ -22,7 +22,7 @@ BlobFileSystem::BlobFileSystem(ptr<File> file) : file(file)
 		size -= sizeof(*terminator);
 
 		//проверить сигнатуру
-		if(memcmp(terminator->signature, Terminator::signatureValue, 4) != 0)
+		if(terminator->signature != Terminator::signatureValue)
 			THROW_PRIMARY_EXCEPTION("Invalid signature");
 
 		//проверить, что заголовок читается

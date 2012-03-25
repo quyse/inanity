@@ -21,9 +21,9 @@ public:
 	/// Структура, которой заканчивается файл системы.
 	struct Terminator
 	{
-		static const char signatureValue[4];
+		static const unsigned signatureValue;
 		/// Сигнатура.
-		char signature[4];
+		unsigned signature;
 		/// Размер заголовка.
 		unsigned headerSize;
 	};

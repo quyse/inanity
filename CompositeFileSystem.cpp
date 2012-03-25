@@ -1,5 +1,6 @@
 #include "CompositeFileSystem.hpp"
 #include "File.hpp"
+#include "Exception.hpp"
 
 ptr<FileSystem> CompositeFileSystem::GetFileSystemForPath(String& path)
 {

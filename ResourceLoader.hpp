@@ -1,7 +1,7 @@
 #ifndef ___INANITY_RESOURCE_LOADER_HPP___
 #define ___INANITY_RESOURCE_LOADER_HPP___
 
-#include "Object.hpp"
+#include "String.hpp"
 
 BEGIN_INANITY
 

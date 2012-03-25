@@ -15,7 +15,7 @@
 #define DebugBreak() asm("int3")
 #endif // ___INANITY_LINUX
 
-#define ___INANITY_SCRIPTING
+//#define ___INANITY_SCRIPTING
 
 #define BEGIN_INANITY namespace Inanity {
 #define END_INANITY }
