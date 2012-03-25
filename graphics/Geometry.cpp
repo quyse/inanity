@@ -97,7 +97,7 @@ ptr<Geometry> Geometry::Deserialize(ptr<File> file, ResourceLoader* resourceLoad
 	}
 }
 
-void Geometry::Serialize(ptr<OutputStream> outputStream)
+void Geometry::Serialize(ptr<OutputStream> outputStream, const String& geometryFormatName)
 {
 	ptr<StreamWriter> writer = NEW(StreamWriter(outputStream));
 
@@ -111,7 +111,7 @@ void Geometry::Serialize(ptr<OutputStream> outputStream)
 	else
 		writer->WriteShortly(0);
 
-	format->Serialize(writer);
+	writer->Write(geometryFormatName);
 
 	writer->Write(vertices->GetData(), vertices->GetSize());
 	if(indices)

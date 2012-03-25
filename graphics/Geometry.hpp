@@ -36,7 +36,7 @@ public:
 	ptr<GeometryFormat> GetFormat() const;
 
 	static ptr<Geometry> Deserialize(ptr<File> file, ResourceLoader* resourceLoader);
-	void Serialize(ptr<OutputStream> outputStream);
+	void Serialize(ptr<OutputStream> outputStream, const String& geometryFormatName);
 };
 
 END_INANITY_GRAPHICS
