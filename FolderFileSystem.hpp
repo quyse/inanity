@@ -18,7 +18,6 @@ private:
 	String folderName;
 
 	String GetFullName(String fileName) const;
-	void GetFileNames(String sourceDirectory, const String& targetDirectory, std::vector<String>& fileNames) const;
 
 	/// Конструктор для создания абсолютной файловой системы.
 	FolderFileSystem();
@@ -47,6 +46,7 @@ public:
 	void SaveFile(ptr<File> file, const String& fileName);
 	ptr<OutputStream> SaveFileAsStream(const String& fileName);
 	void GetFileNames(std::vector<String>& fileNames) const;
+	void GetDirectoryEntries(const String& directoryName, std::vector<String>& fileNames) const;
 
 	//расширенные методы для загрузки файлов, специфичные для FolderFileSystem
 

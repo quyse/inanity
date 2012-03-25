@@ -48,7 +48,34 @@ ptr<OutputStream> FileSystem::SaveFileAsStream(const String& fileName)
 
 void FileSystem::GetFileNames(std::vector<String>& fileNames) const
 {
-	THROW_PRIMARY_EXCEPTION("Getting file names in this filesystem in not supported");
+	THROW_PRIMARY_EXCEPTION("Getting file names in this filesystem is not supported");
+}
+
+void FileSystem::GetDirectoryEntries(const String& directoryName, std::vector<String>& entries) const
+{
+	THROW_PRIMARY_EXCEPTION("Getting directory entries in this filesystem is not supported");
+}
+
+void FileSystem::GetAllDirectoryEntries(const String& directoryName, std::vector<String>& entries) const
+{
+	// получить (нерекурсивно) файлы и каталоги в заданном каталоге
+	size_t size1 = entries.size();
+	GetDirectoryEntries(directoryName, entries);
+	size_t size2 = entries.size();
+
+	// перебрать полученные файлы и каталоги
+	for(size_t i = size1; i < size2; ++i)
+	{
+		// получить файл
+		String& entry = entries[i];
+		// добавить к имени имя текущего каталога, чтобы сделать абсолютные имена
+		entry = directoryName + entry;
+		// если это каталог
+		if(entry.length() && entry[entry.length() - 1] == '/')
+			// рекурсивно получить файлы и каталоги в нём
+			// копия имени делается, так как ссылка может стать недействительной
+			GetAllDirectoryEntries(String(entry), entries);
+	}
 }
 
 #ifdef ___INANITY_SCRIPTING

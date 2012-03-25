@@ -188,21 +188,19 @@ ptr<OutputStream> FolderFileSystem::SaveFileAsStream(const String& fileName)
 	}
 }
 
-void FolderFileSystem::GetFileNames(String sourceDirectory, const String& targetDirectory, std::vector<String>& fileNames) const
+void FolderFileSystem::GetDirectoryEntries(const String& directoryName, std::vector<String>& entries) const
 {
-	sourceDirectory += '\\';
 	WIN32_FIND_DATA find;
-	HANDLE hFind = FindFirstFile(Strings::UTF82Unicode(sourceDirectory + "*").c_str(), &find);
+	HANDLE hFind = FindFirstFile(Strings::UTF82Unicode(GetFullName(directoryName) + "*").c_str(), &find);
 	if(hFind == INVALID_HANDLE_VALUE) return;
 	do
 	{
 		String fileTitle(Strings::Unicode2UTF8(find.cFileName));
-		if(fileTitle.length() && fileTitle[0] == '.' || (find.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN))
+		if(!fileTitle.length() || fileTitle[0] == '.' || (find.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN))
 			continue;
 		if(find.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-			GetFileNames(sourceDirectory + fileTitle, targetDirectory + fileTitle + "/", fileNames);
-		else
-			fileNames.push_back(targetDirectory + fileTitle);
+			fileTitle += '/';
+		entries.push_back(directoryName + fileTitle + "/");
 	}
 	while(FindNextFile(hFind, &find));
 	FindClose(hFind);
@@ -379,11 +377,10 @@ ptr<OutputStream> FolderFileSystem::SaveFileAsStream(const String& fileName)
 	}
 }
 
-void FolderFileSystem::GetFileNames(String sourceDirectory, const String& targetDirectory, std::vector<String>& fileNames) const
+void FolderFileSystem::GetDirectoryEntries(const String& directoryName, std::vector<String>& entries) const
 {
-	DIR* dir = opendir(sourceDirectory.c_str());
-
-	sourceDirectory += '/';
+	String fullDirectoryName = GetFullName(directoryName);
+	DIR* dir = opendir(fullDirectoryName.c_str());
 
 	while(struct dirent* ent = readdir(dir))
 	{
@@ -394,28 +391,27 @@ void FolderFileSystem::GetFileNames(String sourceDirectory, const String& target
 			THROW_SECONDARY_EXCEPTION("Can't read dir", exception);
 		}
 
-		String fileName = ent->d_name;
-		String sourceFileName = sourceDirectory + fileName;
+		String fileTitle = ent->d_name;
+		String fullFileName = fullDirectoryName + fileTitle;
 		struct stat st;
-		if(stat(sourceFileName.c_str(), &st) < 0)
+		if(stat(fullFileName.c_str(), &st) < 0)
 		{
 			ptr<Exception> exception = Exception::SystemError();
 			closedir(dir);
-			THROW_SECONDARY_EXCEPTION("Can't stat file " + sourceFileName, exception);
+			THROW_SECONDARY_EXCEPTION("Can't stat file " + fullFileName, exception);
 		}
 
 		// если файл скрыт (или ненужен: . или ..)
-		if(fileName.length() > 0 && fileName[0] == '.')
+		if(!fileTitle.length() || fileTitle[0] == '.')
 			// пропустить его
 			continue;
 
 		// если это каталог
 		if((st.st_mode & S_IFMT) == S_IFDIR)
-			// рекурсивно продолжить перечисление
-			GetFileNames(sourceFileName, targetDirectory + fileName + '/', fileNames);
-		else
-			// добавить файл в результат
-			fileNames.push_back(targetDirectory + fileName);
+			// добавить слеш в конец
+			fileTitle += '/';
+		// добавить файл/каталог в результат
+		entries.push_back(directoryName + fileTitle);
 	}
 
 	closedir(dir);
@@ -438,5 +434,5 @@ void FolderFileSystem::GetFileNames(std::vector<String>& fileNames) const
 {
 	//только если файловая система не абсолютная
 	if(folderName.length())
-		GetFileNames(folderName, "/", fileNames);
+		GetAllDirectoryEntries("/", fileNames);
 }

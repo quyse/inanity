@@ -33,6 +33,7 @@ class OutputStream;
 MemoryStream. Реализация SaveFileAsStream только бросает исключение.
 В качестве разделителя каталогов используется прямой слеш /.
 Путь должен начинаться со слеша.
+Имя каталога должно заканчиваться слешем.
 */
 class FileSystem : public Object
 {
@@ -84,9 +85,26 @@ public:
 	*/
 	virtual void GetFileNames(std::vector<String>& fileNames) const;
 
+	/// Получить список файлов и каталогов в заданном каталоге (нерекурсивно).
+	/** Получает список имён файлов и каталогов в заданном каталоге.
+	Если файловая система не поддерживает это, выбрасывается исключение.
+	\param directoryName Имя каталога, оканчивающееся слешем.
+	\param entries Выходной список с относительными именами файлов и каталогов.
+	*/
+	virtual void GetDirectoryEntries(const String& directoryName, std::vector<String>& entries) const;
+
+	/// Получить список всех файлов и каталогов, начиная с данного каталога (рекурсивно).
+	/**
+	\param directoryName Имя каталога, оканчивающееся слешем.
+	\param entries Выходной список с абсолютными именами файлов и каталогов.
+	*/
+	virtual void GetAllDirectoryEntries(const String& directoryName, std::vector<String>& entries) const;
+
+#ifdef ___INANITY_SCRIPTING
 	SCRIPTABLE_CALL(loadFile);
 	SCRIPTABLE_CALL(saveFile);
 	SCRIPTABLE_CLASS();
+#endif
 };
 
 END_INANITY
