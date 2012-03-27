@@ -1,5 +1,6 @@
 #include "SystemFontCreator.hpp"
 #include <iostream>
+#include <unordered_set>
 #include <windowsx.h>
 
 int min2(int n)
@@ -69,7 +70,30 @@ void SystemFontCreator::CreateImage(const String& alphabatFileName, const String
 		{
 			THROW_SECONDARY_EXCEPTION("Can't get symbol image", exception);
 		}
+
+	// получить кернинг-пары
+	size_t kerningPairsCount = GetKerningPairs(hdc, 0, NULL);
+	ptr<File> kerningPairsFile = NEW(MemoryFile(kerningPairsCount * sizeof(KERNINGPAIR)));
+	KERNINGPAIR* kp = (KERNINGPAIR*)kerningPairsFile->GetData();
+	if(GetKerningPairs(hdc, kerningPairsCount, kp) != kerningPairsCount)
+		THROW_PRIMARY_EXCEPTION("Can't get kerning pairs");
+
+	// теперь можно освободить контекст, он больше не нужен
 	ReleaseDC(NULL, hdc);
+
+	// кернинг-пары нужно оставить только те, которые работают с символами алфавита
+	// составить набор символов алфавита
+	std::unordered_set<wchar_t> symbols;
+	for(int i = 0; i < n; ++i)
+		symbols.insert(str[i]);
+
+	// добавить кернинг-пары
+	for(size_t i = 0; i < kerningPairsCount; ++i)
+		if(symbols.find(kp[i].wFirst) != symbols.end() && symbols.find(kp[i].wSecond) != symbols.end())
+			kerningPairs[std::pair<wchar_t, wchar_t>(kp[i].wFirst, kp[i].wSecond)] = (float)kp[i].iKernAmount;
+
+	// можно освободить память
+	kerningPairsFile = nullptr;
 
 	//функтор, который будет вычислять ширину и высоту
 	//а также получает размеры одного символа
@@ -297,5 +321,5 @@ void SystemFontCreator::Run(const std::vector<String>& arguments)
 	}
 
 	CreateImage(arguments[0], arguments[1]);
-	MakePointer(NEW(EditableFont(arguments[1], charset, (float)charHeight)))->Serialize(FolderFileSystem::GetNativeFileSystem()->SaveFileAsStream(arguments[2]));
+	MakePointer(NEW(EditableFont(arguments[1], charset, kerningPairs, (float)charHeight)))->Serialize(FolderFileSystem::GetNativeFileSystem()->SaveFileAsStream(arguments[2]));
 }

@@ -2,8 +2,8 @@
 #include "../OutputStream.hpp"
 #include "../StreamWriter.hpp"
 
-EditableFont::EditableFont(const String& textureName, const std::unordered_map<wchar_t, FontChar>& charset, float charHeight)
-: textureName(textureName), charset(charset), charHeight(charHeight)
+EditableFont::EditableFont(const String& textureName, const Charset& charset, const KerningPairs& kerningPairs, float charHeight)
+: textureName(textureName), charset(charset), kerningPairs(kerningPairs), charHeight(charHeight)
 {
 }
 
@@ -17,9 +17,14 @@ void EditableFont::SetTextureName(const String& textureName)
 	this->textureName = textureName;
 }
 
-std::unordered_map<wchar_t, FontChar>& EditableFont::GetCharset()
+EditableFont::Charset& EditableFont::GetCharset()
 {
 	return charset;
+}
+
+EditableFont::KerningPairs& EditableFont::GetKerningPairs()
+{
+	return kerningPairs;
 }
 
 float EditableFont::GetCharHeight() const
@@ -39,12 +44,20 @@ void EditableFont::Serialize(ptr<OutputStream> outputStream)
 	// записать заголовок файла
 	writer->Write(textureName);
 	writer->Write<float>(charHeight);
-	writer->WriteShortly(charset.size());
 
 	// записать символы
-	for(std::unordered_map<wchar_t, FontChar>::const_iterator i = charset.begin(); i != charset.end(); ++i)
+	writer->WriteShortly(charset.size());
+	for(Charset::const_iterator i = charset.begin(); i != charset.end(); ++i)
 	{
 		writer->Write(i->first);
+		writer->Write(i->second);
+	}
+
+	// записать кернинг-пары
+	for(KerningPairs::const_iterator i = kerningPairs.begin(); i != kerningPairs.end(); ++i)
+	{
+		writer->Write(i->first.first);
+		writer->Write(i->first.second);
 		writer->Write(i->second);
 	}
 }

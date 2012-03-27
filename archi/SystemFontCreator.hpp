@@ -9,7 +9,8 @@ class SystemFontCreator : public Processor
 private:
 	LOGFONT lf;
 	String textureFileName;
-	std::unordered_map<wchar_t, FontChar> charset;
+	EditableFont::Charset charset;
+	EditableFont::KerningPairs kerningPairs;
 	int charHeight;
 
 	void CreateImage(const String& alphabatFileName, const String& textureFileName);
