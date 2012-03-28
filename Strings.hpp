@@ -25,10 +25,10 @@ public:
 	static std::wstring UTF82Unicode(const std::string& str);
 #endif
 
-	/// Преобразовать строку ASCII в файл.
-	static ptr<File> Ascii2File(const std::string& str);
-	/// Преобразовать файл в строку ASCII.
-	static std::string File2Ascii(ptr<File> file);
+	/// Преобразовать строку в файл.
+	static ptr<File> String2File(const std::string& str);
+	/// Преобразовать файл в строку.
+	static std::string File2String(ptr<File> file);
 };
 
 END_INANITY

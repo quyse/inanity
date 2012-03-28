@@ -32,14 +32,14 @@ std::wstring Strings::UTF82Unicode(const std::string& str)
 
 #endif
 
-ptr<File> Strings::Ascii2File(const std::string& str)
+ptr<File> Strings::String2File(const std::string& str)
 {
 	ptr<File> file = NEW(MemoryFile(str.length()));
 	memcpy(file->GetData(), str.c_str(), file->GetSize());
 	return file;
 }
 
-std::string Strings::File2Ascii(ptr<File> file)
+std::string Strings::File2String(ptr<File> file)
 {
 	char* str = (char*)file->GetData();
 	return std::string(str, str + file->GetSize());
