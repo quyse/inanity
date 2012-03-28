@@ -9,18 +9,19 @@
  */
 
 #include "../Object.hpp"
+// Решено просто включать математику во всю графику.
+#include "../inanity-math.hpp"
 
 #define BEGIN_INANITY_GRAPHICS BEGIN_INANITY namespace Graphics {
 #define END_INANITY_GRAPHICS } END_INANITY
 
-// Конфигурация графики.
-
 #ifdef ___INANITY_WINDOWS
 #define ___INANITY_GRAPHICS_DX
 #endif
-#ifdef INANITY_LIB
 BEGIN_INANITY_GRAPHICS
+using namespace Inanity::Math;
 END_INANITY_GRAPHICS
+#ifdef INANITY_LIB
 using namespace Graphics;
 #endif
 
