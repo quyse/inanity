@@ -40,6 +40,10 @@ var libraries = {
 	'libinanity-lua': {
 		objects: ['LuaState']
 	},
+	// ******* криптография
+	'libinanity-crypto': {
+		objects: ['crypto.HashStream', 'crypto.WhirlpoolStream']
+	},
 	// ******* подсистема ввода
 	'libinanity-input': {
 		objects: ['input.Frame', 'input.Manager', 'input.Mux', 'input.Processor', 'input.RawManager']
