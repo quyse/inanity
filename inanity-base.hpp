@@ -8,6 +8,8 @@
 #include "String.hpp"
 #include "Strings.hpp"
 #include "Exception.hpp"
+#include "Time.hpp"
+#include "Profiling.hpp"
 #include "Thread.hpp"
 #include "CriticalSection.hpp"
 #include "CriticalCode.hpp"

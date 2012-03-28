@@ -15,6 +15,10 @@ var libraries = {
 		objects: [
 		// совсем общее
 		'Object', 'ManagedHeap', 'Strings', 'Exception',
+		// время
+		'Time',
+		// профилирование
+		'Profiling',
 		// синхронизация и потоки выполнения
 		'Thread', 'CriticalSection', 'CriticalCode', 'Semaphore',
 		// общее: файлы и потоки
