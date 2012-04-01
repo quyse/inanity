@@ -14,7 +14,7 @@ var libraries = {
 	'libinanity-base': {
 		objects: [
 		// совсем общее
-		'Object', 'ManagedHeap', 'Strings', 'Exception',
+		'Object', 'ManagedHeap', 'Strings', 'StringTraveler', 'Exception',
 		// время
 		'Time',
 		// профилирование
@@ -26,7 +26,7 @@ var libraries = {
 		// преобразующие потоки
 		'Base64OutputStream', 'Out2InStream',
 		// файловые системы
-		'FileSystem', 'FolderFileSystem', 'FolderFile', 'Handle', 'DiskInputStream', 'DiskOutputStream', 'BlobFileSystem', 'BlobFileSystemBuilder', 'CompositeFileSystem',
+		'FileSystem', 'FolderFileSystem', 'FolderFile', 'Handle', 'DiskInputStream', 'DiskOutputStream', 'BlobFileSystem', 'BlobFileSystemBuilder', 'CompositeFileSystem', 'TempFileSystem',
 		// ресурсы
 		'ResourceManager', 'ResourceLoader']
 	},
@@ -54,17 +54,22 @@ var libraries = {
 	},
 	// ******* общая графика
 	'libinanity-graphics': {
-		objects: ['graphics.RenderStage', 'graphics.Window', 'graphics.Geometry', 'graphics.GeometryFormat', 'graphics.EditableFont']
+		objects: ['graphics.RenderStage', 'graphics.Window', 'graphics.GeometryFormat', 'graphics.EditableFont', 'graphics.Font', 'graphics.ShaderSource']
 	},
 	// ******* подсистема DX
 	'libinanity-dx': {
-		objects: ['graphics.dx.System', 'graphics.dx.Context', 'graphics.dx.RenderBuffer', 'graphics.dx.Texture', 'graphics.dx.DepthStencilBuffer']
+		objects: [
+			'graphics.dx.System', 'graphics.dx.Buffer', 'graphics.dx.Context', 'graphics.dx.RenderBuffer', 'graphics.dx.DepthStencilBuffer',
+			'graphics.dx.DepthStencilState', 'graphics.dx.BlendState', 'graphics.dx.RasterizerState', 'graphics.dx.SamplerState',
+			'graphics.dx.Geometry', 'graphics.dx.Texture',
+			'graphics.dx.ShaderLayout', 'graphics.dx.ShaderReflection', 'graphics.dx.ConstantBuffer', 'graphics.dx.Shader', 'graphics.dx.VertexShader', 'graphics.dx.PixelShader',
+			'graphics.dx.ShaderCompiler', 'graphics.dx.D3D10BlobFile', 'graphics.dx.FontDrawer']
 	}
 };
 
 var executables = {
 	archi: {
-		objects: ['archi.main', 'archi.BlobCreator', /*'archi.FontCreator',*/ 'archi.SimpleGeometryCreator', 'archi.SystemFontCreator'/*, 'archi.WavefrontObj', 'archi.XafConverter'*/],
+		objects: ['archi.main', 'archi.BlobCreator', /*'archi.FontCreator',*/ /*'archi.SimpleGeometryCreator',*/ 'archi.SystemFontCreator'/*, 'archi.WavefrontObj', 'archi.XafConverter'*/],
 		staticLibraries: ['libinanity-base', 'libinanity-graphics'],
 		dynamicLibraries: ['user32.lib', 'gdi32.lib', 'comdlg32.lib']
 	}
