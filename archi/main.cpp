@@ -1,5 +1,5 @@
 #include "BlobCreator.hpp"
-#include "SimpleGeometryCreator.hpp"
+//#include "SimpleGeometryCreator.hpp"
 //#include "FontCreator.hpp"
 #include "SystemFontCreator.hpp"
 //#include "WavefrontObj.hpp"
@@ -30,7 +30,7 @@ int wmain(int argc, const wchar_t** argv)
 	{
 		NEW(BlobCreator()),
 //		NEW(WavefrontObj()),
-		NEW(SimpleGeometryCreator()),
+//		NEW(SimpleGeometryCreator()),
 		NEW(SystemFontCreator())
 	};
 	const size_t processorsCount = sizeof(processors) / sizeof(processors[0]);
