@@ -7,6 +7,7 @@
 #include "ManagedHeap.hpp"
 #include "String.hpp"
 #include "Strings.hpp"
+#include "StringTraveler.hpp"
 #include "Exception.hpp"
 #include "Time.hpp"
 #include "Profiling.hpp"
@@ -36,6 +37,7 @@
 #include "BlobFileSystem.hpp"
 #include "BlobFileSystemBuilder.hpp"
 #include "CompositeFileSystem.hpp"
+#include "TempFileSystem.hpp"
 #include "ResourceManager.hpp"
 #include "ResourceLoader.hpp"
 

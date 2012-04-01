@@ -12,7 +12,7 @@ ptr<FileSystem> CompositeFileSystem::GetFileSystemForPath(String& path)
 		if(path.compare(0, prefix.length(), prefix, 0, prefix.length()) == 0)
 		{
 			// исправить путь (отрезать префикс)
-			path = path.substr(0, prefix.length() - 1);
+			path = path.substr(prefix.length() - 1);
 			// вернуть файловую систему
 			return fileSystems[i].second;
 		}
