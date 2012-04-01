@@ -25,5 +25,7 @@
 #include "graphics/EditableGeometry.hpp"
 #include "graphics/FontChar.hpp"
 #include "graphics/EditableFont.hpp"
+#include "graphics/Font.hpp"
+#include "graphics/FontDrawer.hpp"
 
 #endif

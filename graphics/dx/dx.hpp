@@ -3,16 +3,12 @@
 
 /* Файл, общий для подсистемы DX.
  * Подсистема DX является вложенным в подсистему Graphics.
+ * Особого пространства имён не делаем, просто классы будут с префиксом DX.
  */
 
 #include "../graphics.hpp"
 
-#define BEGIN_INANITY_DX BEGIN_INANITY_GRAPHICS namespace DX {
-#define END_INANITY_DX } END_INANITY_GRAPHICS
-#ifdef INANITY_LIB
-BEGIN_INANITY_DX
-END_INANITY_DX
-using namespace DX;
-#endif
+#define BEGIN_INANITY_DX BEGIN_INANITY_GRAPHICS
+#define END_INANITY_DX END_INANITY_GRAPHICS
 
 #endif

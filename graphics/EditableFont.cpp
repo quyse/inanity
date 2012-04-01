@@ -1,6 +1,7 @@
 #include "EditableFont.hpp"
 #include "../OutputStream.hpp"
 #include "../StreamWriter.hpp"
+#include "../Exception.hpp"
 
 EditableFont::EditableFont(const String& textureName, const Charset& charset, const KerningPairs& kerningPairs, float charHeight)
 : textureName(textureName), charset(charset), kerningPairs(kerningPairs), charHeight(charHeight)
@@ -39,25 +40,33 @@ void EditableFont::SetCharHeight(float charHeight)
 
 void EditableFont::Serialize(ptr<OutputStream> outputStream)
 {
-	ptr<Inanity::StreamWriter> writer = NEW(StreamWriter(outputStream));
-
-	// записать заголовок файла
-	writer->Write(textureName);
-	writer->Write<float>(charHeight);
-
-	// записать символы
-	writer->WriteShortly(charset.size());
-	for(Charset::const_iterator i = charset.begin(); i != charset.end(); ++i)
+	try
 	{
-		writer->Write(i->first);
-		writer->Write(i->second);
+		ptr<Inanity::StreamWriter> writer = NEW(StreamWriter(outputStream));
+
+		// записать заголовок файла
+		writer->WriteString(textureName);
+		writer->Write<float>(charHeight);
+
+		// записать символы
+		writer->WriteShortly(charset.size());
+		for(Charset::const_iterator i = charset.begin(); i != charset.end(); ++i)
+		{
+			writer->Write(i->first);
+			writer->Write(i->second);
+		}
+
+		// записать кернинг-пары
+		writer->WriteShortly(kerningPairs.size());
+		for(KerningPairs::const_iterator i = kerningPairs.begin(); i != kerningPairs.end(); ++i)
+		{
+			writer->Write(i->first.first);
+			writer->Write(i->first.second);
+			writer->Write(i->second);
+		}
 	}
-
-	// записать кернинг-пары
-	for(KerningPairs::const_iterator i = kerningPairs.begin(); i != kerningPairs.end(); ++i)
+	catch(Exception* exception)
 	{
-		writer->Write(i->first.first);
-		writer->Write(i->first.second);
-		writer->Write(i->second);
+		THROW_SECONDARY_EXCEPTION("Can't serialize editable font", exception);
 	}
 }

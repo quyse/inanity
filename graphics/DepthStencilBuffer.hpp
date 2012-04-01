@@ -6,9 +6,6 @@
 #ifdef ___INANITY_GRAPHICS_DX
 
 #include "dx/DepthStencilBuffer.hpp"
-BEGIN_INANITY_GRAPHICS
-typedef DX::DepthStencilBuffer DepthStencilBuffer;
-END_INANITY_GRAPHICS
 
 #endif
 

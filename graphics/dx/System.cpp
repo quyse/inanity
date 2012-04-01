@@ -3,11 +3,18 @@
 #include "RenderBuffer.hpp"
 #include "Texture.hpp"
 #include "DepthStencilBuffer.hpp"
+#include "ConstantBuffer.hpp"
+#include "ShaderReflection.hpp"
+#include "VertexShader.hpp"
+#include "PixelShader.hpp"
 #include "../Window.hpp"
+#include "../../File.hpp"
 #include "../../Exception.hpp"
 #include <vector>
 
-DX::System::System(ptr<Graphics::Window> window, const SystemSettings& settings)
+String System::staticResourceName = "/inanity/dx/System";
+
+System::System(ptr<Graphics::Window> window, const SystemSettings& settings)
 {
 	try
 	{
@@ -78,7 +85,7 @@ DX::System::System(ptr<Graphics::Window> window, const SystemSettings& settings)
 	}
 }
 
-DXGI_MODE_DESC DX::System::GetScreenMode(const ScreenSettings& screenSettings)
+DXGI_MODE_DESC System::GetScreenMode(const ScreenSettings& screenSettings)
 {
 	DXGI_MODE_DESC mode;
 	mode.Width = screenSettings.width;
@@ -91,7 +98,7 @@ DXGI_MODE_DESC DX::System::GetScreenMode(const ScreenSettings& screenSettings)
 	return mode;
 }
 
-DXGI_MODE_DESC DX::System::GetSupportedScreenMode(const DXGI_MODE_DESC& modeDesc)
+DXGI_MODE_DESC System::GetSupportedScreenMode(const DXGI_MODE_DESC& modeDesc)
 {
 	try
 	{
@@ -126,12 +133,12 @@ DXGI_MODE_DESC DX::System::GetSupportedScreenMode(const DXGI_MODE_DESC& modeDesc
 	}
 }
 
-const ScreenSettings& DX::System::GetScreenSettings() const
+const ScreenSettings& System::GetScreenSettings() const
 {
 	return screenSettings;
 }
 
-void DX::System::SetScreenSettings(const ScreenSettings& screenSettings)
+void System::SetScreenSettings(const ScreenSettings& screenSettings)
 {
 	try
 	{
@@ -155,7 +162,7 @@ void DX::System::SetScreenSettings(const ScreenSettings& screenSettings)
 	}
 }
 
-void DX::System::Resize(size_t width, size_t height)
+void System::Resize(size_t width, size_t height)
 {
 	//сбросить ссылку на вторичный буфер
 	backBuffer = 0;
@@ -164,7 +171,7 @@ void DX::System::Resize(size_t width, size_t height)
 		THROW_PRIMARY_EXCEPTION("Can't resize buffers");
 }
 
-ptr<RenderBuffer> DX::System::GetBackBuffer()
+ptr<RenderBuffer> System::GetBackBuffer()
 {
 	if(!backBuffer)
 	{
@@ -182,17 +189,17 @@ ptr<RenderBuffer> DX::System::GetBackBuffer()
 	return backBuffer;
 }
 
-void DX::System::Flip()
+void System::Flip()
 {
 	swapChain->Present(0, 0);
 }
 
-ptr<Context> DX::System::GetContext() const
+ptr<Context> System::GetContext() const
 {
 	return context;
 }
 
-ptr<RenderBuffer> DX::System::CreateRenderBuffer(size_t width, size_t height, PixelFormat format)
+ptr<RenderBuffer> System::CreateRenderBuffer(size_t width, size_t height, PixelFormat format)
 {
 	try
 	{
@@ -240,7 +247,7 @@ ptr<RenderBuffer> DX::System::CreateRenderBuffer(size_t width, size_t height, Pi
 	}
 }
 
-ptr<DepthStencilBuffer> DX::System::CreateDepthStencilBuffer(size_t width, size_t height, PixelFormat format, bool canBeResource, PixelFormat depthStencilViewFormat, PixelFormat shaderResourceViewFormat)
+ptr<DepthStencilBuffer> System::CreateDepthStencilBuffer(size_t width, size_t height, PixelFormat format, bool canBeResource, PixelFormat depthStencilViewFormat, PixelFormat shaderResourceViewFormat)
 {
 	try
 	{
@@ -317,7 +324,6 @@ ptr<DepthStencilBuffer> DX::System::CreateDepthStencilBuffer(size_t width, size_
 	}
 }
 
-/*
 ptr<ConstantBuffer> System::CreateConstantBuffer(size_t size)
 {
 	try
@@ -343,6 +349,37 @@ ptr<ConstantBuffer> System::CreateConstantBuffer(size_t size)
 	}
 }
 
+ptr<VertexShader> System::CreateVertexShader(ptr<File> file)
+{
+	try
+	{
+		ID3D11VertexShader* shader;
+		if(FAILED(device->CreateVertexShader(file->GetData(), file->GetSize(), NULL, &shader)))
+			THROW_PRIMARY_EXCEPTION("Can't create DirectX 11 vertex shader");
+		return NEW(VertexShader(NEW(ShaderReflection(file)), shader));
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create vertex shader", exception);
+	}
+}
+
+ptr<PixelShader> System::CreatePixelShader(ptr<File> file)
+{
+	try
+	{
+		ID3D11PixelShader* shader;
+		if(FAILED(device->CreatePixelShader(file->GetData(), file->GetSize(), NULL, &shader)))
+			THROW_PRIMARY_EXCEPTION("Can't create DirectX 11 pixel shader");
+		return NEW(PixelShader(NEW(ShaderReflection(file)), shader));
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create pixel shader", exception);
+	}
+}
+
+/*
 //ptr<Geometry> System::CreateStaticGeometry(ptr<File> vertices, unsigned vertexStride, ptr<File> indices, unsigned indexStride,
 
 ptr<TextureBuffer> System::CreateTextureBuffer(unsigned width, unsigned height, DXGI_FORMAT format, bool canBeReadByCPU)
@@ -577,39 +614,9 @@ ptr<OcclusionPredicate> System::CreateOcclusionPredicate()
 		THROW_SECONDARY_EXCEPTION("Can't create occlusion predicate", exception);
 	}
 }
-
-ptr<VertexShader> System::CreateVertexShader(ptr<File> file)
-{
-	try
-	{
-		ID3D11VertexShader* shader;
-		if(FAILED(device->CreateVertexShader(file->GetData(), file->GetSize(), NULL, &shader)))
-			THROW_PRIMARY_EXCEPTION("Can't create DirectX 11 vertex shader");
-		return NEW(VertexShader(NEW(ShaderReflection(file)), shader));
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY_EXCEPTION("Can't create vertex shader", exception);
-	}
-}
-
-ptr<PixelShader> System::CreatePixelShader(ptr<File> file)
-{
-	try
-	{
-		ID3D11PixelShader* shader;
-		if(FAILED(device->CreatePixelShader(file->GetData(), file->GetSize(), NULL, &shader)))
-			THROW_PRIMARY_EXCEPTION("Can't create DirectX 11 pixel shader");
-		return NEW(PixelShader(NEW(ShaderReflection(file)), shader));
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY_EXCEPTION("Can't create pixel shader", exception);
-	}
-}
+*/
 
 ID3D11Device* System::GetDevice() const
 {
 	return device;
 }
-*/

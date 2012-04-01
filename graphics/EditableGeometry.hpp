@@ -15,7 +15,7 @@ BEGIN_INANITY_GRAPHICS
 Различные процедуры выдвигают различные требования к шаблонным параметрам.
 Они написаны в комментариях.
 */
-template <typename Vertex, typename Index = unsigned>
+template <typename Vertex, typename Index = unsigned short>
 class EditableGeometry : public Object
 {
 private:
@@ -37,14 +37,30 @@ public:
 			indices[i] = i;
 	}
 
-	/// Преобразовать в нетипизированную (обычную) геометрию.
-	ptr<Geometry> Compile(ptr<GeometryFormat> format) const
+	/// Сериализовать геометрию.
+	void Serialize(ptr<OutputStream> outputStream, const String& formatFileName)
 	{
-		ptr<File> newVertices = NEW(MemoryFile(vertices.size() * sizeof(Vertex)));
-		memcpy(newVertices->GetData(), &*vertices.begin(), newVertices->GetSize());
-		ptr<File> newIndices = NEW(MemoryFile(indices.size() * sizeof(Index)));
-		memcpy(newIndices->GetData(), &*indices.begin(), newIndices->GetSize());
-		return NEW(Geometry(newVertices, sizeof(Vertex), newIndices, sizeof(Index), format));
+		// проверить, являются ли индексы последовательными числами
+		// тогда геометрию можно будет сериализовать без индексов
+		bool needIndices = false;
+		for(size_t i = 0; i < indices.size(); ++i)
+			if(indices[i] != i)
+			{
+				needIndices = true;
+				break;
+			}
+
+		ptr<StreamWriter> writer = NEW(StreamWriter(outputStream));
+
+		writer->WriteShortly(vertices.size());
+		writer->WriteShortly(sizeof(Vertex));
+		writer->WriteShortly(needIndices ? indices.size() : 0);
+		if(needIndices)
+			writer->WriteShortly(sizeof(Index));
+		writer->WriteString(formatFileName);
+		writer->Write(&*vertices.begin(), vertices.size() * sizeof(Vertex));
+		if(needIndices)
+			writer->Write(&*indices.begin(), indices.size() * sizeof(Index));
 	}
 
 	/// Оптимизировать геометрию

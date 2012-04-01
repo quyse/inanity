@@ -1,16 +1,16 @@
-#ifndef ___INANITY_GRAPHICS_BUFFER_H___
-#define ___INANITY_GRAPHICS_BUFFER_H___
+#ifndef ___INANITY_DX_BUFFER_H___
+#define ___INANITY_DX_BUFFER_H___
 
-#include "Object.h"
-#include "ComPointer.h"
-#include "d3d.h"
+#include "dx.hpp"
+#include "../../ComPointer.hpp"
+#include "d3d.hpp"
 
-BEGIN_INANITY
+BEGIN_INANITY_DX
 
-/// Класс графического буфера.
+/// Класс буфера.
 /** Представляет собой буфер заданного размера, который
 можно использовать в DirectX в разных целях. */
-class GraphicsBuffer : public Object
+class Buffer : public Object
 {
 private:
 	/// буфер
@@ -20,7 +20,7 @@ private:
 
 public:
 	/// Создать буфер.
-	GraphicsBuffer(ID3D11Buffer* buffer, size_t size);
+	Buffer(ID3D11Buffer* buffer, size_t size);
 
 	/// Получить интерфейс.
 	ID3D11Buffer* GetInternalInterface() const;
@@ -28,6 +28,6 @@ public:
 	size_t GetSize() const;
 };
 
-END_INANITY
+END_INANITY_DX
 
 #endif

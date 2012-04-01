@@ -5,13 +5,16 @@
 #include "d3d.hpp"
 #include "../../ComPointer.hpp"
 
+BEGIN_INANITY
+
+class File;
+class ResourceLoader;
+
+END_INANITY
+
 BEGIN_INANITY_DX
 
-/*
-Файл содержит класс текстуры. Текстура - это ресурс,
-загружаемый загрузчиком TextureLoader.
-*/
-
+/// Класс текстуры.
 class Texture : public Object
 {
 private:
@@ -21,6 +24,8 @@ public:
 	Texture(ID3D11ShaderResourceView* shaderResourceView);
 
 	ID3D11ShaderResourceView* GetShaderResource() const;
+
+	static ptr<Texture> Deserialize(ptr<File> file, ResourceLoader* resourceLoader);
 };
 
 END_INANITY_DX

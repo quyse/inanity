@@ -6,9 +6,6 @@
 #ifdef ___INANITY_GRAPHICS_DX
 
 #include "dx/Texture.hpp"
-BEGIN_INANITY_GRAPHICS
-typedef DX::Texture Texture;
-END_INANITY_GRAPHICS
 
 #endif
 

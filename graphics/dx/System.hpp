@@ -4,6 +4,7 @@
 #include "../../ComPointer.hpp"
 #include "dx.hpp"
 #include "../SystemSettings.hpp"
+#include "../../String.hpp"
 #include "d3d.hpp"
 #include <string>
 #include <vector>
@@ -32,13 +33,14 @@ class DepthStencilBuffer;
 class ConstantBuffer;
 class Geometry;
 class GeometryFormat;
-class EditableGeometry;
 class OcclusionPredicate;
 class VertexShader;
 class PixelShader;
 class System : public Object
 {
 public:
+	static String staticResourceName;
+
 	enum PixelFormat
 	{
 		pixelFormatUnknown = DXGI_FORMAT_UNKNOWN,
@@ -56,13 +58,13 @@ public:
 private:
 	static const DXGI_FORMAT screenFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 
-	//3D-устройство
+	/// 3D-устройство.
 	ComPointer<ID3D11Device> device;
 	/// Настройки экрана.
 	Graphics::ScreenSettings screenSettings;
-	//цепочка обмена буферов
+	/// Цепочка обмена буферов.
 	ComPointer<IDXGISwapChain> swapChain;
-	//основной графический контекст
+	/// Основной графический контекст.
 	ptr<Context> context;
 	/// Вторичный буфер.
 	ptr<RenderBuffer> backBuffer;
@@ -92,23 +94,24 @@ public:
 	ptr<RenderBuffer> CreateRenderBuffer(size_t width, size_t height, PixelFormat format);
 	/// Создать буфер глубины-трафарета.
 	ptr<DepthStencilBuffer> CreateDepthStencilBuffer(size_t width, size_t height, PixelFormat format, bool canBeResource = false, PixelFormat depthStencilViewFormat = pixelFormatUnknown, PixelFormat shaderResourceViewFormat = pixelFormatUnknown);
-/*
+
 	/// Создать константный буфер.
 	ptr<ConstantBuffer> CreateConstantBuffer(size_t size);
-	/// Создать статичную геометрию.
-	ptr<Geometry> CreateStaticGeometry(ptr<File> vertices, unsigned vertexStride, ptr<File> indices, unsigned indexStride, ptr<GeometryFormat> format);
 
-	/// Создать текстурный буфер. - непонятно зачем нужный метод.
-	ptr<TextureBuffer> CreateTextureBuffer(unsigned width, unsigned height, DXGI_FORMAT format, bool canBeReadByCPU);
-	std::vector<ptr<RenderBuffer>> CreateRenderBuffersMipmap(unsigned width, unsigned height, unsigned levelsCount, DXGI_FORMAT format, bool canBeResource);
-	std::pair<ptr<DepthStencilBuffer>, ptr<DepthStencilBuffer>> Create2DepthStencilBuffers(unsigned width, unsigned height, DXGI_FORMAT format, bool canBeResource, DXGI_FORMAT depthStencilViewFormat1 = DXGI_FORMAT_UNKNOWN, DXGI_FORMAT depthStencilViewFormat2 = DXGI_FORMAT_UNKNOWN, DXGI_FORMAT shaderResourceViewFormat = DXGI_FORMAT_UNKNOWN);
-	ptr<OcclusionPredicate> CreateOcclusionPredicate();
 	/// Создать вершинный шейдер.
 	ptr<VertexShader> CreateVertexShader(ptr<File> file);
 	/// Создать пиксельный шейдер.
 	ptr<PixelShader> CreatePixelShader(ptr<File> file);
+/*
+	/// Создать статичную геометрию.
+	ptr<Geometry> CreateStaticGeometry(ptr<File> vertices, unsigned vertexStride, ptr<File> indices, unsigned indexStride, ptr<GeometryFormat> format);
+	/// Создать текстурный буфер. - непонятно зачем нужный метод.
+	ptr<TextureBuffer> CreateTextureBuffer(unsigned width, unsigned height, DXGI_FORMAT format, bool canBeReadByCPU);
+	std::vector<ptr<RenderBuffer>> CreateRenderBuffersMipmap(unsigned width, unsigned height, unsigned levelsCount, DXGI_FORMAT format, bool canBeResource);
+	std::pair<ptr<DepthStencilBuffer>, ptr<DepthStencilBuffer>> Create2DepthStencilBuffers(unsigned width, unsigned height, DXGI_FORMAT format, bool canBeResource, DXGI_FORMAT depthStencilViewFormat1 = DXGI_FORMAT_UNKNOWN, DXGI_FORMAT depthStencilViewFormat2 = DXGI_FORMAT_UNKNOWN, DXGI_FORMAT shaderResourceViewFormat = DXGI_FORMAT_UNKNOWN);
+	ptr<OcclusionPredicate> CreateOcclusionPredicate();*/
 
-	ID3D11Device* GetDevice() const;*/
+	ID3D11Device* GetDevice() const;
 };
 
 END_INANITY_DX

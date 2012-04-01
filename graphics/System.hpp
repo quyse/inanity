@@ -6,9 +6,6 @@
 #ifdef ___INANITY_GRAPHICS_DX
 
 #include "dx/System.hpp"
-BEGIN_INANITY_GRAPHICS
-typedef DX::System System;
-END_INANITY_GRAPHICS
 
 #endif
 
