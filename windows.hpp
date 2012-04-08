@@ -11,6 +11,7 @@
 #endif
 #define UNICODE
 #define _UNICODE
+#define _WIN32_WINNT _WIN32_WINNT_VISTA
 #include <windows.h>
 
 #endif
