@@ -31,6 +31,7 @@ void SystemFontCreator::CreateImage(const String& alphabatFileName, const String
 
 	int n = (int)str.length();
 
+	lf.lfQuality = PROOF_QUALITY;
 	HFONT font = CreateFontIndirect(&lf);
 	HDC hdc = GetDC(NULL);
 	SelectFont(hdc, font);
