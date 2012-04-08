@@ -121,12 +121,28 @@ inline vector<n> operator+(const vector<n>& a, const vector<n>& b)
 }
 
 template <int n>
+inline vector<n>& operator+=(vector<n>& a, const vector<n>& b)
+{
+	for(int i = 0; i < n; ++i)
+		a.t[i] += b.t[i];
+	return a;
+}
+
+template <int n>
 inline vector<n> operator-(const vector<n>& a, const vector<n>& b)
 {
 	vector<n> r;
 	for(int i = 0; i < n; ++i)
 		r.t[i] = a.t[i] - b.t[i];
 	return r;
+}
+
+template <int n>
+inline vector<n>& operator-=(vector<n>& a, const vector<n>& b)
+{
+	for(int i = 0; i < n; ++i)
+		a.t[i] -= b.t[i];
+	return a;
 }
 
 template <int n>
@@ -139,12 +155,28 @@ inline vector<n> operator*(const vector<n>& a, const vector<n>& b)
 }
 
 template <int n>
+inline vector<n>& operator*=(vector<n>& a, const vector<n>& b)
+{
+	for(int i = 0; i < n; ++i)
+		a.t[i] *= b.t[i];
+	return a;
+}
+
+template <int n>
 inline vector<n> operator*(const vector<n>& a, scalar b)
 {
 	vector<n> r;
 	for(int i = 0; i < n; ++i)
 		r.t[i] = a.t[i] * b;
 	return r;
+}
+
+template <int n>
+inline vector<n>& operator*=(vector<n>& a, scalar b)
+{
+	for(int i = 0; i < n; ++i)
+		a.t[i] *= b;
+	return a;
 }
 
 template <int n>
@@ -157,12 +189,28 @@ inline vector<n> operator/(const vector<n>& a, const vector<n>& b)
 }
 
 template <int n>
+inline vector<n>& operator/=(vector<n>& a, const vector<n>& b)
+{
+	for(int i = 0; i < n; ++i)
+		a.t[i] /= b.t[i];
+	return a;
+}
+
+template <int n>
 inline vector<n> operator/(const vector<n>& a, scalar b)
 {
 	vector<n> r;
 	for(int i = 0; i < n; ++i)
 		r.t[i] = a.t[i] / b;
 	return r;
+}
+
+template <int n>
+inline vector<n>& operator/=(vector<n>& a, scalar b)
+{
+	for(int i = 0; i < n; ++i)
+		a.t[i] /= b;
+	return a;
 }
 
 template <int n>
