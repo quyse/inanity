@@ -64,6 +64,11 @@ var libraries = {
 			'graphics.dx.Geometry', 'graphics.dx.Texture',
 			'graphics.dx.ShaderLayout', 'graphics.dx.ShaderReflection', 'graphics.dx.ConstantBuffer', 'graphics.dx.Shader', 'graphics.dx.VertexShader', 'graphics.dx.PixelShader',
 			'graphics.dx.ShaderCompiler', 'graphics.dx.D3D10BlobFile', 'graphics.dx.FontDrawer']
+	},
+	// ******* подсистема GUI
+	'libinanity-gui': {
+		objects: [
+			'gui.Element', 'gui.ContainerElement', 'gui.FreeContainer', 'gui.Label', 'gui.Button', 'gui.TextBox']
 	}
 };
 
