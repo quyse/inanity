@@ -2,7 +2,17 @@ exports.configureCompiler = function(objectFile, compiler) {
 	// объектные файлы: <conf>/object
 	var a = /^([^\/]+)\/([^\/]+)$/.exec(objectFile);
 	compiler.configuration = a[1];
-	compiler.setSourceFile(a[2].replace(/\./g, '/') + '.cpp');
+	// заменяем точки на слеши, и добавляем расширение
+	// если оканчивается на .c - это .c-файл, иначе .cpp
+	var source = a[2];
+	var b = /^(.*)\.c$/.exec(source);
+	if(b)
+		// .c-файл
+		source = b[1].replace(/\./g, '/') + '.c';
+	else
+		// .cpp-файл
+		source = source.replace(/\./g, '/') + '.cpp';
+	compiler.setSourceFile(source);
 	compiler.addMacro('INANITY_LIB');
 };
 
@@ -29,6 +39,14 @@ var libraries = {
 		'FileSystem', 'FolderFileSystem', 'FolderFile', 'Handle', 'DiskInputStream', 'DiskOutputStream', 'BlobFileSystem', 'BlobFileSystemBuilder', 'CompositeFileSystem', 'TempFileSystem',
 		// ресурсы
 		'ResourceManager', 'ResourceLoader']
+	},
+	// ******* сжатие
+	'libinanity-compress': {
+		objects: [
+		// зависимость - zlib
+		'deps.zlib.adler32.c', 'deps.zlib.compress.c', 'deps.zlib.crc32.c', 'deps.zlib.deflate.c', 'deps.zlib.gzclose.c', 'deps.zlib.gzlib.c', 'deps.zlib.gzread.c', 'deps.zlib.gzwrite.c', 'deps.zlib.infback.c', 'deps.zlib.inflate.c', 'deps.zlib.inftrees.c', 'deps.zlib.inffast.c', 'deps.zlib.trees.c', 'deps.zlib.uncompr.c', 'deps.zlib.zutil.c',
+		// потоки для сжатия
+		'CompressStream', 'DecompressStream']
 	},
 	// ******* сетевая библиотека
 	'libinanity-net': {
@@ -77,6 +95,12 @@ var executables = {
 		objects: ['archi.main', 'archi.BlobCreator', /*'archi.FontCreator',*/ /*'archi.SimpleGeometryCreator',*/ 'archi.SystemFontCreator'/*, 'archi.WavefrontObj', 'archi.XafConverter'*/],
 		staticLibraries: ['libinanity-base', 'libinanity-graphics'],
 		dynamicLibraries: ['user32.lib', 'gdi32.lib', 'comdlg32.lib']
+	}
+	// TEST
+	, shaderlanguagetest: {
+		objects: ['graphics.dx.ShaderLanguageTest'],
+		staticLibraries: ['libinanity-base', 'libinanity-graphics'],
+		dynamicLibraries: []
 	}
 };
 
