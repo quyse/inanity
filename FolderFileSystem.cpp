@@ -15,7 +15,7 @@
 FolderFileSystem::FolderFileSystem(const String& userFolderName)
 {
 	//если имя абсолютное
-	if(userFolderName.length() >= 2 && userFolderName[1] == L':')
+	if(userFolderName.length() >= 2 && userFolderName[1] == ':')
 		folderName = userFolderName;
 	//иначе относительное
 	else
@@ -222,7 +222,7 @@ void FolderFileSystem::GetDirectoryEntries(const String& directoryName, std::vec
 FolderFileSystem::FolderFileSystem(const String& userFolderName)
 {
 	//если имя абсолютное
-	if(userFolderName.length() >= 1 && userFolderName[0] == L'/')
+	if(userFolderName.length() >= 1 && userFolderName[0] == '/')
 		folderName = userFolderName;
 	//иначе относительное
 	else
