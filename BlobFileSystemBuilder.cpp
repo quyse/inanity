@@ -66,7 +66,7 @@ void BlobFileSystemBuilder::Finalize()
 		outputWriter->Write(headerFile->GetData(), headerFile->GetSize());
 		//записать терминатор
 		BlobFileSystem::Terminator terminator;
-		terminator.signature = BlobFileSystem::Terminator::signatureValue;
+		terminator.magic = BlobFileSystem::Terminator::magicValue;
 		terminator.headerSize = headerFile->GetSize();
 		outputWriter->Write(terminator);
 

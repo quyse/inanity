@@ -5,7 +5,7 @@
 #include "Exception.hpp"
 #include <string.h>
 
-const unsigned BlobFileSystem::Terminator::signatureValue = 'BOLB';
+const unsigned BlobFileSystem::Terminator::magicValue = 'BOLB';
 
 BlobFileSystem::BlobFileSystem(ptr<File> file) : file(file)
 {
@@ -22,8 +22,8 @@ BlobFileSystem::BlobFileSystem(ptr<File> file) : file(file)
 		size -= sizeof(*terminator);
 
 		//проверить сигнатуру
-		if(terminator->signature != Terminator::signatureValue)
-			THROW_PRIMARY_EXCEPTION("Invalid signature");
+		if(terminator->magic != Terminator::magicValue)
+			THROW_PRIMARY_EXCEPTION("Invalid magic");
 
 		//проверить, что заголовок читается
 		if(size < terminator->headerSize)
