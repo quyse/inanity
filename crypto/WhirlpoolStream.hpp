@@ -1,5 +1,5 @@
-#ifndef ___INANITY_WHIRLPOOL_STREAM_HPP___
-#define ___INANITY_WHIRLPOOL_STREAM_HPP___
+#ifndef ___INANITY_CRYPTO_WHIRLPOOL_STREAM_HPP___
+#define ___INANITY_CRYPTO_WHIRLPOOL_STREAM_HPP___
 
 #include "HashStream.hpp"
 
@@ -11,6 +11,9 @@ http://www.larc.usp.br/~pbarreto/WhirlpoolPage.html
 */
 class WhirlpoolStream : public HashStream
 {
+public:
+	static const size_t hashSize;
+
 private:
 	unsigned char bitLength[32]; /* global number of hashed bits (256-bit counter) */
 	unsigned char buffer[64];	/* buffer of data to hash */
@@ -33,6 +36,7 @@ public:
 
 	size_t GetHashSize() const;
 	void GetHash(void* data) const;
+	void Reset();
 };
 
 END_INANITY_CRYPTO

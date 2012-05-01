@@ -64,7 +64,7 @@ var libraries = {
 	},
 	// ******* криптография
 	'libinanity-crypto': {
-		objects: ['crypto.HashStream', 'crypto.WhirlpoolStream']
+		objects: ['crypto.CngRandomAlgorithm', 'crypto.HashStream', 'crypto.LamportSignatureAlgorithm', 'crypto.WhirlpoolStream']
 	},
 	// ******* подсистема ввода
 	'libinanity-input': {

@@ -1,5 +1,5 @@
-#ifndef ___INANITY_HASH_STREAM_HPP___
-#define ___INANITY_HASH_STREAM_HPP___
+#ifndef ___INANITY_CRYPTO_HASH_STREAM_HPP___
+#define ___INANITY_CRYPTO_HASH_STREAM_HPP___
 
 #include "crypto.hpp"
 #include "../OutputStream.hpp"
@@ -19,6 +19,8 @@ public:
 	Допустимо вызывать её многократно.
 	\param data Буфер для хеша достаточного размера. */
 	virtual void GetHash(void* data) const = 0;
+	/// Сбросить состояние потока, чтобы использовать его повторно.
+	virtual void Reset() = 0;
 
 	/// Получить хеш как строку.
 	/** Получает хеш в виде 16-ричного представления. */
