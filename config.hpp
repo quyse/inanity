@@ -17,6 +17,11 @@
 
 //#define ___INANITY_SCRIPTING
 
+/// Тип для "больших размеров" данных.
+/** То есть для таких, которые, возможно, не помещаются
+в память целиком, но мы хотим их обрабатывать. */
+typedef unsigned long long bigsize_t;
+
 #define BEGIN_INANITY namespace Inanity {
 #define END_INANITY }
 

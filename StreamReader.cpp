@@ -33,14 +33,23 @@ String StreamReader::ReadString()
 	return r;
 }
 
+size_t StreamReader::ReadShortly()
+{
+	bigsize_t a = ReadShortlyBig();
+	size_t b = (size_t)a;
+	if(a != b)
+		THROW_PRIMARY_EXCEPTION("Can't read shortly because number is too big");
+	return b;
+}
+
 /*
 Формат сокращенных чисел, см. примечание к реализации StreamWriter::WriteShortly().
 */
 
-size_t StreamReader::ReadShortly()
+bigsize_t StreamReader::ReadShortlyBig()
 {
 	//считать первый байт
-	size_t first = Read<unsigned char>();
+	bigsize_t first = Read<unsigned char>();
 	//определить длину дополнительной части числа
 	size_t length;
 	if(!(first & 0x80))
@@ -87,10 +96,10 @@ size_t StreamReader::ReadShortly()
 		first &= ~0xFF;
 	}
 	//считать дополнительную часть числа
-	unsigned long long a = 0;
+	bigsize_t a = 0;
 	Read(&a, length);
 	//вернуть результат
-	return (size_t)(a | (first << (length * 8)));
+	return a | (first << (length * 8));
 }
 
 void StreamReader::ReadGap(size_t alignment)

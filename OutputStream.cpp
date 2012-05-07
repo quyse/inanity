@@ -19,12 +19,12 @@ void OutputStream::Flush()
 {
 }
 
-size_t OutputStream::ReadAllFromStream(ptr<InputStream> inputStream)
+bigsize_t OutputStream::ReadAllFromStream(ptr<InputStream> inputStream)
 {
 	const size_t bufferSize = 0x10000;
 	MemoryFile bufferFile(bufferSize);
 	void* buffer = bufferFile.GetData();
-	size_t totalRead = 0;
+	bigsize_t totalRead = 0;
 	while(size_t read = inputStream->Read(buffer, bufferSize))
 	{
 		Write(buffer, read);

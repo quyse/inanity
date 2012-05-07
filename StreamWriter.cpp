@@ -20,6 +20,11 @@ void StreamWriter::Write(const void* data, size_t size)
 	written += size;
 }
 
+void StreamWriter::WriteShortly(size_t data)
+{
+	WriteShortlyBig(data);
+}
+
 /*
 Формат сокращенных чисел:
 Длина сокращенного числа определяется по первому байту, а точнее, по его
@@ -39,7 +44,7 @@ low-endian, с переставленным на первое место ста�
 Максимальное представимое число - 64-битное, но оно обрезается но размера size_t.
 */
 
-void StreamWriter::WriteShortly(size_t data)
+void StreamWriter::WriteShortlyBig(bigsize_t data)
 {
 	//длина числа (без первого байта)
 	size_t length;
@@ -93,7 +98,7 @@ void StreamWriter::WriteShortly(size_t data)
 	}
 
 	//добавить в первый байт старший байт числа, и записать первый байт
-	Write<unsigned char>(first | data >> (length * 8));
+	Write<unsigned char>((unsigned char)(first | (data >> (length * 8))));
 	//записать остальное число
 	Write(&data, length);
 }

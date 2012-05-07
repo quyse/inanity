@@ -47,7 +47,7 @@ public:
 
 	/// Считать весь входной поток в себя.
 	/** Так как такая задача часто встречается. */
-	size_t ReadAllFromStream(ptr<InputStream> inputStream);
+	bigsize_t ReadAllFromStream(ptr<InputStream> inputStream);
 };
 
 END_INANITY

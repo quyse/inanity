@@ -35,7 +35,7 @@ void StreamSigner::WriteSigningHeader(ptr<InputStream> sourceStream, ptr<OutputS
 
 		ptr<StreamWriter> writer = NEW(StreamWriter(destStream));
 
-		size_t sourceDataSize;
+		bigsize_t sourceDataSize;
 
 		// сформировать цепочку хешей
 		ptr<File> hashes;
@@ -49,7 +49,7 @@ void StreamSigner::WriteSigningHeader(ptr<InputStream> sourceStream, ptr<OutputS
 		}
 
 		// записать заголовок
-		writer->WriteShortly(sourceDataSize);
+		writer->WriteShortlyBig(sourceDataSize);
 		writer->WriteShortly(blockSize);
 		// записать хеши
 		destStream->WriteFile(hashes);
@@ -100,10 +100,10 @@ void StreamSigner::VerifyStream::ReadHeader()
 	try
 	{
 		ptr<StreamReader> reader = NEW(StreamReader(sourceStream));
-		size_t dataSize = reader->ReadShortly();
+		bigsize_t dataSize = reader->ReadShortlyBig();
 		size_t blockSize = reader->ReadShortly();
 		// вычислить количество блоков
-		size_t blocksCount = (dataSize + blockSize - 1) / blockSize;
+		size_t blocksCount = (size_t)((dataSize + blockSize - 1) / blockSize);
 		// считать хеши блоков
 		ptr<MemoryFile> hashes = NEW(MemoryFile(blocksCount * signer->blockHashAlgorithm->GetHashSize()));
 		reader->Read(hashes->GetData(), hashes->GetSize());
