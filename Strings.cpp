@@ -36,3 +36,17 @@ String Strings::ToString(int number)
 	_itoa(number, str, 10);
 	return str;
 }
+
+String Strings::ToHex(const void* data, size_t size)
+{
+	static const char hex[] = "0123456789abcdef";
+	String str(size * 2, ' ');
+	size_t j = 0;
+	for(size_t i = 0; i < size; ++i)
+	{
+		unsigned char byte = ((const unsigned char*)data)[i];
+		str[j++] = hex[byte >> 4];
+		str[j++] = hex[byte & 15];
+	}
+	return str;
+}

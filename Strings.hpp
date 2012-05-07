@@ -26,6 +26,8 @@ public:
 
 	/// Преобразовать int в строку.
 	static String ToString(int number);
+	/// Преобразовать данные в hex.
+	static String ToHex(const void* data, size_t size);
 };
 
 END_INANITY
