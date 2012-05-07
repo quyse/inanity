@@ -58,7 +58,7 @@ size_t Out2InStream::Reader::Read(void* data, size_t size)
 		else
 			semaphore.Release();
 	}
-	return dataPtr - data;
+	return dataPtr - (char*)data;
 }
 
 void Out2InStream::Reader::Push(ptr<File> file)
