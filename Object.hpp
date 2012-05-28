@@ -45,8 +45,8 @@ public:
 #ifdef _DEBUG
 #define INANITY_SIDENS2(x) #x
 #define INANITY_SIDENS(x) INANITY_SIDENS2(x)
-#define NEW(o) ObjectSetAllocationInfo(new o, __FILE__ "(" INANITY_SIDENS(__LINE__) "): " #o)
-#define NEW_WITH_TAG(tag, o) ObjectSetAllocationInfo(new o, __FILE__ "(" INANITY_SIDENS(__LINE__) "), tag: [" tag "]: " #o)
+#define NEW(...) ObjectSetAllocationInfo(new __VA_ARGS__, __FILE__ "(" INANITY_SIDENS(__LINE__) "): " #__VA_ARGS__)
+#define NEW_WITH_TAG(tag, ...) ObjectSetAllocationInfo(new __VA_ARGS__, __FILE__ "(" INANITY_SIDENS(__LINE__) "), tag: [" tag "]: " #__VA_ARGS__)
 //функция определена в ManagedHeap.cpp
 void ManagedHeapSetAllocationInfo(void*, const char* info);
 template <typename T>
@@ -56,20 +56,9 @@ T* ObjectSetAllocationInfo(T* data, const char* info)
 	return data;
 }
 #else
-#define NEW(o) new o
-#define NEW_WITH_TAG(tag, o) new o
+#define NEW(...) new __VA_ARGS__
+#define NEW_WITH_TAG(tag, ...) new __VA_ARGS__
 #endif
-
-/// Замечательный макрос, представляющий собой запятую.
-/** Смысл в том, что если мы пишем что-то типа NEW(Class<Param1, Param2>(arg1, arg2)),
-то возникает ошибка компиляции. Всё потому, что запятую между Param1 и Param2
-препроцессор считает разделителем аргументов для макроса. (А вторую запятую,
-между arg1 и arg2 - не считает, потому что она в круглых скобках).
-Препроцессор просто не смотрит на угловые скобки. (Ну, вообще-то правильно,
-потому что они не обязательно образуют правильную скобочную последовательность -
-бывает просто оператор "больше"). Поэтому, в таких случаях вместо этой запятой
-можно ставить этот замечательный макрос. */
-#define INANITY_COMMA ,
 
 END_INANITY
 
