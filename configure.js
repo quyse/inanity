@@ -98,7 +98,7 @@ var executables = {
 	}
 	// TEST
 	, shaderlanguagetest: {
-		objects: ['graphics.dx.ShaderLanguageTest'],
+		objects: ['graphics.shaders.ShaderLanguageTest'],
 		staticLibraries: ['libinanity-base', 'libinanity-graphics'],
 		dynamicLibraries: []
 	}
