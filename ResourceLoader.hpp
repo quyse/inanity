@@ -1,59 +1,38 @@
 #ifndef ___INANITY_RESOURCE_LOADER_HPP___
 #define ___INANITY_RESOURCE_LOADER_HPP___
 
-#include "String.hpp"
+#include "ResourceLoader_decl.hpp"
+#include "ResourceManager_decl.hpp"
 
 BEGIN_INANITY
 
-class ResourceManager;
+/* Файл содержит реализацию шаблонных методов класса
+ResourceLoader, определённого в ResourceLoader_decl.hpp.
+*/
 
-/// Вспомогательный класс для загрузки связанных ресурсов.
-/** Просто разрешает относительные ссылки. */
-class ResourceLoader
+template <typename T>
+ptr<T> ResourceLoader::LoadResource(const String& fileName)
 {
-private:
-	/// Менеджер ресурсов.
-	ptr<ResourceManager> resourceManager;
-	/// Префикс пути (со слешем в конце).
-	const String pathPrefix;
+	return resourceManager->LoadResource<T>(TransformName(fileName));
+}
 
-public:
-	ResourceLoader(ptr<ResourceManager> resourceManager, const String& pathPrefix);
+template <typename T>
+ptr<T> ResourceLoader::GetResource(const String& fileName)
+{
+	return resourceManager->GetResource<T>(TransformName(fileName));
+}
 
-	/// Преобразовать имя ресурса в соответствии с состоянием загрузчика.
-	String TransformName(const String& fileName) const;
+template <typename T>
+ptr<T> ResourceLoader::GetStaticResource()
+{
+	return resourceManager->GetStaticResource<T>();
+}
 
-	/// Получить менеджер ресурсов.
-	ptr<ResourceManager> GetResourceManager() const;
-
-	/// Загрузить ресурс.
-	template <typename T>
-	ptr<T> LoadResource(const String& fileName)
-	{
-		return resourceManager->LoadResource<T>(TransformName(fileName));
-	}
-
-	/// Получить ресурс.
-	template <typename T>
-	ptr<T> GetResource(const String& fileName)
-	{
-		return resourceManager->GetResource<T>(TransformName(fileName));
-	}
-
-	/// Получить статический ресурс.
-	template <typename T>
-	ptr<T> GetStaticResource()
-	{
-		return resourceManager->GetStaticResource<T>();
-	}
-
-	/// Загрузить статический ресурс.
-	template <typename T>
-	ptr<T> LoadStaticResource()
-	{
-		return resourceManager->LoadStaticResource<T>();
-	}
-};
+template <typename T>
+ptr<T> ResourceLoader::LoadStaticResource()
+{
+	return resourceManager->LoadStaticResource<T>();
+}
 
 END_INANITY
 
