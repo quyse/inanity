@@ -99,7 +99,7 @@ var executables = {
 	// TEST
 	, shaderlanguagetest: {
 		objects: ['graphics.shaders.ShaderLanguageTest'],
-		staticLibraries: ['libinanity-base', 'libinanity-graphics'],
+		staticLibraries: ['libinanity-base'],
 		dynamicLibraries: []
 	}
 };
