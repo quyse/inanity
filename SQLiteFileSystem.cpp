@@ -2,6 +2,7 @@
 #include "MemoryFile.hpp"
 #include "CriticalCode.hpp"
 #include "Exception.hpp"
+#include <memory.h>
 
 std::unordered_multimap<void*, ptr<File> > SQLiteFileSystem::files;
 CriticalSection SQLiteFileSystem::filesCriticalSection;
