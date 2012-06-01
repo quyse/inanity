@@ -1,4 +1,5 @@
 #include "Language.hpp"
+#include "Functions.hpp"
 #include <iostream>
 
 struct Input
@@ -45,7 +46,8 @@ int main()
 		float4_ target(output(&Output::target));
 		float_ depth(output(&Output::depth));
 
-		target = position.Cast<float4>() * worldTransform;
+		target = position.Cast<float4>() * worldTransform * length(normal);
+		target = lerp(depth.Cast<float4>(), normal.Cast<float4>(), position);
 		depth = a;
 
 		std::cout << s.finalize();

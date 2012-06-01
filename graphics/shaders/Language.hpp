@@ -28,21 +28,6 @@ public:
 	virtual void expression(std::ostream& stream) const = 0;
 };
 
-//******* имена типов данных
-template <typename DataType>
-const char* GetTypeName()
-{
-	THROW_PRIMARY_EXCEPTION("Unknown type name");
-}
-#define DECLARE_TYPE_NAME(t) \
-	template <> const char* GetTypeName<t>() { return #t; }
-DECLARE_TYPE_NAME(float);
-DECLARE_TYPE_NAME(float2);
-DECLARE_TYPE_NAME(float3);
-DECLARE_TYPE_NAME(float4);
-DECLARE_TYPE_NAME(float4x4);
-#undef DECLARE_TYPE_NAME
-
 /// Класс константных данных.
 template <typename DataType>
 class ConstData : public Data<DataType>
@@ -58,141 +43,13 @@ public:
 	}
 };
 
-/// Класс оператора приведения типа.
+// прототип Variable
+template <typename DataType>
+class Variable;
+
+// прототип CastData
 template <typename DataTypeFrom, typename DataTypeTo>
-class CastData : public Data<DataTypeTo>
-{
-private:
-	ptr<Data<DataTypeFrom> > data;
-public:
-	CastData(ptr<Data<DataTypeFrom> > data) : data(data) {}
-
-	void expression(std::ostream& stream) const
-	{
-		stream << "(" << GetTypeName<DataTypeTo>() << ")(";
-		data->expression(stream);
-		stream << ")";
-	}
-};
-
-/// Класс оператора плюс.
-template <typename DataTypeA, typename DataTypeB>
-class AddData : public Data<decltype(DataTypeA() + DataTypeB())>
-{
-private:
-	ptr<Data<DataTypeA> > a;
-	ptr<Data<DataTypeB> > b;
-public:
-	AddData(ptr<Data<DataTypeA> > a, ptr<Data<DataTypeB> > b) : a(a), b(b) {}
-
-	void expression(std::ostream& stream) const
-	{
-		stream << "(";
-		a->expression(stream);
-		stream << ") + (";
-		b->expression(stream);
-		stream << ")";
-	}
-};
-
-/// Класс оператора минус.
-template <typename DataTypeA, typename DataTypeB>
-class SubtractData : public Data<decltype(DataTypeA() - DataTypeB())>
-{
-private:
-	ptr<Data<DataTypeA> > a;
-	ptr<Data<DataTypeB> > b;
-public:
-	SubtractData(ptr<Data<DataTypeA> > a, ptr<Data<DataTypeB> > b) : a(a), b(b) {}
-
-	void expression(std::ostream& stream) const
-	{
-		stream << "(";
-		a->expression(stream);
-		stream << ") - (";
-		b->expression(stream);
-		stream << ")";
-	}
-};
-
-/// Класс оператора умножить.
-template <typename DataTypeA, typename DataTypeB>
-class MultiplyData : public Data<decltype(DataTypeA() * DataTypeB())>
-{
-private:
-	ptr<Data<DataTypeA> > a;
-	ptr<Data<DataTypeB> > b;
-public:
-	MultiplyData(ptr<Data<DataTypeA> > a, ptr<Data<DataTypeB> > b) : a(a), b(b) {}
-
-	void expression(std::ostream& stream) const
-	{
-		stream << "(";
-		a->expression(stream);
-		stream << ") * (";
-		b->expression(stream);
-		stream << ")";
-	}
-};
-
-/// Класс оператора разделить.
-template <typename DataTypeA, typename DataTypeB>
-class DivideData : public Data<decltype(DataTypeA() / DataTypeB())>
-{
-private:
-	ptr<Data<DataTypeA> > a;
-	ptr<Data<DataTypeB> > b;
-public:
-	DivideData(ptr<Data<DataTypeA> > a, ptr<Data<DataTypeB> > b) : a(a), b(b) {}
-
-	void expression(std::ostream& stream) const
-	{
-		stream << "(";
-		a->expression(stream);
-		stream << ") / (";
-		b->expression(stream);
-		stream << ")";
-	}
-};
-
-/// Класс вызова функции с одним аргументом.
-template <typename ReturnType, typename Arg1Type>
-class Call1Data : public Data<ReturnType>
-{
-private:
-	const char* const functionName;
-	ptr<Data<Arg1Type> > arg1;
-public:
-	Call1Data(const char* functionName, ptr<Data<Arg1Type> > arg1) : functionName(functionName), arg1(arg1) {}
-
-	void expression(std::ostream& stream) const
-	{
-		stream << functionName << "((";
-		arg1->expression(stream);
-		stream << "))";
-	}
-};
-
-/// Класс вызова функции с двумя аргументами.
-template <typename ReturnType, typename Arg1Type, typename Arg2Type>
-class Call2Data : public Data<ReturnType>
-{
-private:
-	const char* const functionName;
-	ptr<Data<Arg1Type> > arg1;
-	ptr<Data<Arg2Type> > arg2;
-public:
-	Call2Data(const char* functionName, ptr<Data<Arg1Type> > arg1, ptr<Data<Arg2Type> > arg2) : functionName(functionName), arg1(arg1), arg2(arg2) {}
-
-	void expression(std::ostream& stream) const
-	{
-		stream << functionName << "((";
-		arg1->expression(stream);
-		stream << "), (";
-		arg2->expression(stream);
-		stream << "))";
-	}
-};
+class CastData;
 
 /// Класс указателя на источник данных.
 template <typename DataType>
@@ -211,19 +68,6 @@ public:
 		return data;
 	}
 
-	/// Неявный оператор приведения типа к указателю на данные.
-	operator Data<DataType>*() const
-	{
-		return data;
-	}
-
-	/// Ещё один оператор, почти такой же, но возвращает управляемый указатель.
-	/** Нужен, так как два преобразования подряд не могут выполняться неявно. */
-	operator ptr<Data<DataType> >() const
-	{
-		return data;
-	}
-
 	/// Оператор присваивания.
 	void operator=(DataPtr<DataType> b)
 	{
@@ -238,6 +82,181 @@ public:
 	DataPtr<DataTypeTo> Cast() const
 	{
 		return NEW(CastData<DataType, DataTypeTo>(data));
+	}
+};
+
+//******* имена типов данных
+template <typename DataType>
+const char* GetTypeName()
+{
+	THROW_PRIMARY_EXCEPTION("Unknown type name");
+}
+#define DECLARE_TYPE_NAME(t) \
+	template <> const char* GetTypeName<t>() { return #t; }
+DECLARE_TYPE_NAME(float);
+DECLARE_TYPE_NAME(float2);
+DECLARE_TYPE_NAME(float3);
+DECLARE_TYPE_NAME(float4);
+DECLARE_TYPE_NAME(float4x4);
+#undef DECLARE_TYPE_NAME
+
+/// Класс оператора приведения типа.
+template <typename DataTypeFrom, typename DataTypeTo>
+class CastData : public Data<DataTypeTo>
+{
+private:
+	DataPtr<DataTypeFrom> data;
+public:
+	CastData(DataPtr<DataTypeFrom> data) : data(data) {}
+
+	void expression(std::ostream& stream) const
+	{
+		stream << "(" << GetTypeName<DataTypeTo>() << ")(";
+		data->expression(stream);
+		stream << ")";
+	}
+};
+
+/// Класс оператора плюс.
+template <typename DataTypeA, typename DataTypeB>
+class AddData : public Data<decltype(DataTypeA() + DataTypeB())>
+{
+private:
+	DataPtr<DataTypeA> a;
+	DataPtr<DataTypeB> b;
+public:
+	AddData(DataPtr<DataTypeA> a, DataPtr<DataTypeB> b) : a(a), b(b) {}
+
+	void expression(std::ostream& stream) const
+	{
+		stream << "(";
+		a->expression(stream);
+		stream << ") + (";
+		b->expression(stream);
+		stream << ")";
+	}
+};
+
+/// Класс оператора минус.
+template <typename DataTypeA, typename DataTypeB>
+class SubtractData : public Data<decltype(DataTypeA() - DataTypeB())>
+{
+private:
+	DataPtr<DataTypeA> a;
+	DataPtr<DataTypeB> b;
+public:
+	SubtractData(DataPtr<DataTypeA> a, DataPtr<DataTypeB> b) : a(a), b(b) {}
+
+	void expression(std::ostream& stream) const
+	{
+		stream << "(";
+		a->expression(stream);
+		stream << ") - (";
+		b->expression(stream);
+		stream << ")";
+	}
+};
+
+/// Класс оператора умножить.
+template <typename DataTypeA, typename DataTypeB>
+class MultiplyData : public Data<decltype(DataTypeA() * DataTypeB())>
+{
+private:
+	DataPtr<DataTypeA> a;
+	DataPtr<DataTypeB> b;
+public:
+	MultiplyData(DataPtr<DataTypeA> a, DataPtr<DataTypeB> b) : a(a), b(b) {}
+
+	void expression(std::ostream& stream) const
+	{
+		stream << "(";
+		a->expression(stream);
+		stream << ") * (";
+		b->expression(stream);
+		stream << ")";
+	}
+};
+
+/// Класс оператора разделить.
+template <typename DataTypeA, typename DataTypeB>
+class DivideData : public Data<decltype(DataTypeA() / DataTypeB())>
+{
+private:
+	DataPtr<DataTypeA> a;
+	DataPtr<DataTypeB> b;
+public:
+	DivideData(DataPtr<DataTypeA> a, DataPtr<DataTypeB> b) : a(a), b(b) {}
+
+	void expression(std::ostream& stream) const
+	{
+		stream << "(";
+		a->expression(stream);
+		stream << ") / (";
+		b->expression(stream);
+		stream << ")";
+	}
+};
+
+/// Класс вызова функции с одним аргументом.
+template <typename ReturnType, typename Arg1Type>
+class Call1Data : public Data<ReturnType>
+{
+private:
+	const char* const functionName;
+	DataPtr<Arg1Type> arg1;
+public:
+	Call1Data(const char* functionName, DataPtr<Arg1Type> arg1) : functionName(functionName), arg1(arg1) {}
+
+	void expression(std::ostream& stream) const
+	{
+		stream << functionName << "((";
+		arg1->expression(stream);
+		stream << "))";
+	}
+};
+
+/// Класс вызова функции с двумя аргументами.
+template <typename ReturnType, typename Arg1Type, typename Arg2Type>
+class Call2Data : public Data<ReturnType>
+{
+private:
+	const char* const functionName;
+	DataPtr<Arg1Type> arg1;
+	DataPtr<Arg2Type> arg2;
+public:
+	Call2Data(const char* functionName, DataPtr<Arg1Type> arg1, DataPtr<Arg2Type> arg2) : functionName(functionName), arg1(arg1), arg2(arg2) {}
+
+	void expression(std::ostream& stream) const
+	{
+		stream << functionName << "((";
+		arg1->expression(stream);
+		stream << "), (";
+		arg2->expression(stream);
+		stream << "))";
+	}
+};
+
+/// Класс вызова функции с тремя аргументами.
+template <typename ReturnType, typename Arg1Type, typename Arg2Type, typename Arg3Type>
+class Call3Data : public Data<ReturnType>
+{
+private:
+	const char* const functionName;
+	DataPtr<Arg1Type> arg1;
+	DataPtr<Arg2Type> arg2;
+	DataPtr<Arg3Type> arg3;
+public:
+	Call3Data(const char* functionName, DataPtr<Arg1Type> arg1, DataPtr<Arg2Type> arg2, DataPtr<Arg3Type> arg3) : functionName(functionName), arg1(arg1), arg2(arg2), arg3(arg3) {}
+
+	void expression(std::ostream& stream) const
+	{
+		stream << functionName << "((";
+		arg1->expression(stream);
+		stream << "), (";
+		arg2->expression(stream);
+		stream << "), (";
+		arg3->expression(stream);
+		stream << "))";
 	}
 };
 
