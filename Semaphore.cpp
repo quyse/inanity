@@ -8,16 +8,23 @@ Semaphore::Semaphore(int initialCount)
 #ifdef ___INANITY_WINDOWS
 		handle = CreateSemaphore(NULL, initialCount, 0x7fffffff, NULL);
 		if(!handle.IsValid())
-			THROW_PRIMARY_EXCEPTION("Can't create semaphore handle");
 #endif
 #ifdef ___INANITY_LINUX
-#error Dont implemented yet
+		if(sem_init(&sem, 0, 0) != 0)
 #endif
+			THROW_SECONDARY_EXCEPTION("Can't initialize semaphore", Exception::SystemError());
 	}
 	catch(Exception* exception)
 	{
 		THROW_SECONDARY_EXCEPTION("Can't create semaphore", exception);
 	}
+}
+
+Semaphore::~Semaphore()
+{
+#ifdef ___INANITY_LINUX
+	sem_destroy(&sem);
+#endif
 }
 
 void Semaphore::Acquire()
@@ -26,9 +33,9 @@ void Semaphore::Acquire()
 	if(WaitForSingleObject(handle, INFINITE) != WAIT_OBJECT_0)
 #endif
 #ifdef ___INANITY_LINUX
-#error Dont implemented yet
+	if(sem_wait(&sem) != 0)
 #endif
-		THROW_PRIMARY_EXCEPTION("Error when acquiring semaphore");
+		THROW_SECONDARY_EXCEPTION("Can't acquire semaphore", Exception::SystemError());
 }
 
 void Semaphore::Release(int count)
@@ -37,7 +44,9 @@ void Semaphore::Release(int count)
 	if(!ReleaseSemaphore(handle, count, NULL))
 #endif
 #ifdef ___INANITY_LINUX
-#error Dont implemented yet
+	int i;
+	for(i = 0; i < count && sem_post(&sem) == 0; ++i);
+	if(i < count)
 #endif
-		THROW_PRIMARY_EXCEPTION("Error when releasing semaphore");
+		THROW_SECONDARY_EXCEPTION("Can't release semaphore", Exception::SystemError());
 }

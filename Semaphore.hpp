@@ -7,7 +7,8 @@
 #include "Handle.hpp"
 #endif
 #ifdef ___INANITY_LINUX
-#include <sys/types.h>
+//#include <sys/types.h>
+#include <semaphore.h>
 #endif
 
 BEGIN_INANITY
@@ -20,12 +21,13 @@ private:
 	Handle handle;
 #endif
 #ifdef ___INANITY_LINUX
-#error Dont implemented yet
+	sem_t sem;
 #endif
 
 public:
 	/// Создать семафор.
 	Semaphore(int initialCount = 0);
+	~Semaphore();
 
 	/// Уменьшить счётчик семафора на 1, дождавшись, когда он станет больше нуля.
 	void Acquire();
