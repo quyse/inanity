@@ -5,7 +5,7 @@
 #include "Exception.hpp"
 #include <string.h>
 
-const unsigned BlobFileSystem::Terminator::magicValue = 'BOLB';
+const char BlobFileSystem::Terminator::magicValue[4] = { 'B', 'L', 'O', 'B' };
 
 BlobFileSystem::BlobFileSystem(ptr<File> file) : file(file)
 {
@@ -22,7 +22,7 @@ BlobFileSystem::BlobFileSystem(ptr<File> file) : file(file)
 		size -= sizeof(*terminator);
 
 		//проверить сигнатуру
-		if(terminator->magic != Terminator::magicValue)
+		if(memcmp(terminator->magic, Terminator::magicValue, sizeof(terminator->magic)) != 0)
 			THROW_PRIMARY_EXCEPTION("Invalid magic");
 
 		//проверить, что заголовок читается

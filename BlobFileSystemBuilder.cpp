@@ -7,6 +7,7 @@
 #include "FileInputStream.hpp"
 #include "File.hpp"
 #include "Exception.hpp"
+#include <cstring>
 
 BlobFileSystemBuilder::BlobFileSystemBuilder(ptr<OutputStream> outputStream)
 {
@@ -39,7 +40,7 @@ void BlobFileSystemBuilder::AddFileStream(const String& fileName, ptr<InputStrea
 		//записать данные файла
 		char buffer[0x10000];
 		size_t fileSize = 0;
-		for(size_t length; length = fileStream->Read(buffer, sizeof(buffer)); fileSize += length)
+		for(size_t length; (length = fileStream->Read(buffer, sizeof(buffer))); fileSize += length)
 			outputWriter->Write(buffer, length);
 
 		//добавить запись о файле
@@ -66,7 +67,7 @@ void BlobFileSystemBuilder::Finalize()
 		outputWriter->Write(headerFile->GetData(), headerFile->GetSize());
 		//записать терминатор
 		BlobFileSystem::Terminator terminator;
-		terminator.magic = BlobFileSystem::Terminator::magicValue;
+		memcpy(terminator.magic, BlobFileSystem::Terminator::magicValue, sizeof(terminator.magic));
 		terminator.headerSize = headerFile->GetSize();
 		outputWriter->Write(terminator);
 

@@ -2,6 +2,7 @@
 #include "File.hpp"
 #include "CriticalCode.hpp"
 #include "Exception.hpp"
+#include <cstring>
 
 Out2InStream::Reader::Reader(ptr<Out2InStream> stream)
 	: stream(stream), firstOffset(0), flushed(false)

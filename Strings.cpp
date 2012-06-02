@@ -33,7 +33,7 @@ std::string Strings::File2String(ptr<File> file)
 String Strings::ToString(int number)
 {
 	char str[11];
-	_itoa(number, str, 10);
+	sprintf(str, "%d", number);
 	return str;
 }
 
