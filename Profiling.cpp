@@ -86,6 +86,8 @@ void Report(std::ostream& stream)
 		case recordTypeScopeLeave:
 			scopeTotalTime[recordPositions[i]] += recordTimes[i] - scopeLastEnterTime[recordPositions[i]];
 			break;
+		default:
+			break;
 		}
 	std::vector<std::pair<long long, const char*> > scopes;
 	scopes.reserve(scopeTotalTime.size());
