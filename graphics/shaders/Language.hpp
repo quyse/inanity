@@ -17,7 +17,46 @@
 
 BEGIN_INANITY_SHADERS
 
-class Composer;
+// прототип Variable
+template <typename DataType>
+class Variable;
+
+/// Класс, выполняющий создание шейдера.
+/** Одновременно не должно быть более одного такого объекта. */
+class Composer
+{
+public:
+	/// Текущий композер.
+	static Composer* current;
+
+private:
+	/// Текст декларации переменных.
+	std::ostringstream declarations;
+	/// Текст выражений.
+	std::ostringstream statements;
+	/// Объявления входных переменных.
+	/** Они составляют структуру входных данных. */
+	std::vector<std::pair<size_t, std::string> > inputDeclarations;
+	/// Объявления выходных переменных.
+	/** Они составляют структуру выходных данных. */
+	std::vector<std::pair<size_t, std::string> > outputDeclarations;
+
+public:
+	Composer();
+	~Composer();
+
+	static Composer* getCurrent();
+
+	template <typename DataType, typename StructType>
+	void addInputDeclaration(const Variable<DataType>* variable, DataType StructType::* field);
+
+	template <typename DataType, typename StructType>
+	void addOutputDeclaration(const Variable<DataType>* variable, DataType StructType::*field);
+
+	std::ostringstream& declarationStream();
+	std::ostringstream& statementStream();
+	std::string finalize() const;
+};
 
 /// Абстрактный класс данных.
 /** Указывает источник данных */
@@ -43,14 +82,6 @@ public:
 	}
 };
 
-// прототип Variable
-template <typename DataType>
-class Variable;
-
-// прототип CastData
-template <typename DataTypeFrom, typename DataTypeTo>
-class CastData;
-
 /// Класс указателя на источник данных.
 template <typename DataType>
 class DataPtr
@@ -61,7 +92,7 @@ private:
 public:
 	DataPtr() : data(NEW(Variable<DataType>())) {}
 	DataPtr(DataType data) : data(NEW(ConstData<DataType>(data))) {}
-	DataPtr(ptr<Data<DataType> > data) : data(data) {}
+	DataPtr(Data<DataType>* data) : data(data) {}
 
 	Data<DataType>* operator->() const
 	{
@@ -79,10 +110,7 @@ public:
 	}
 
 	template <typename DataTypeTo>
-	DataPtr<DataTypeTo> Cast() const
-	{
-		return NEW(CastData<DataType, DataTypeTo>(data));
-	}
+	DataPtr<DataTypeTo> Cast() const;
 };
 
 //******* имена типов данных
@@ -92,7 +120,7 @@ const char* GetTypeName()
 	THROW_PRIMARY_EXCEPTION("Unknown type name");
 }
 #define DECLARE_TYPE_NAME(t) \
-	template <> const char* GetTypeName<t>() { return #t; }
+	template <> const char* GetTypeName<t>()
 DECLARE_TYPE_NAME(float);
 DECLARE_TYPE_NAME(float2);
 DECLARE_TYPE_NAME(float3);
@@ -330,7 +358,7 @@ public:
 	InputVariable(DataType StructType::* field) : field(field) {}
 	void expression(std::ostream& stream) const
 	{
-		ensureDeclared();
+		this->ensureDeclared();
 		stream << "input.i" << this;
 	}
 };
@@ -356,7 +384,7 @@ public:
 	OutputVariable(DataType StructType::* field) : field(field) {}
 	void expression(std::ostream& stream) const
 	{
-		ensureDeclared();
+		this->ensureDeclared();
 		stream << "output.o" << this;
 	}
 };
@@ -406,93 +434,35 @@ auto operator/(DataPtr<DataTypeA> a, DataPtr<DataTypeB> b) -> DataPtr<decltype(D
 	return NEW(DivideData<DataTypeA, DataTypeB>(a, b));
 }
 
-/// Класс, выполняющий создание шейдера.
-/** Одновременно не должно быть более одного такого объекта. */
-class Composer
+// отложенные реализации
+
+template <typename DataType, typename StructType>
+void Composer::addInputDeclaration(const Variable<DataType>* variable, DataType StructType::* field)
 {
-public:
-	/// Текущий композер.
-	static Composer* current;
+	std::ostringstream s;
+	s << GetTypeName<DataType>() << " i" << variable << ";\n";
+	inputDeclarations.push_back(std::make_pair(
+		(char*)&(((StructType*)nullptr)->*field) - (char*)nullptr,
+		s.str()));
+}
 
-private:
-	/// Текст декларации переменных.
-	std::ostringstream declarations;
-	/// Текст выражений.
-	std::ostringstream statements;
-	/// Объявления входных переменных.
-	/** Они составляют структуру входных данных. */
-	std::vector<std::pair<size_t, std::string> > inputDeclarations;
-	/// Объявления выходных переменных.
-	/** Они составляют структуру выходных данных. */
-	std::vector<std::pair<size_t, std::string> > outputDeclarations;
+template <typename DataType, typename StructType>
+void Composer::addOutputDeclaration(const Variable<DataType>* variable, DataType StructType::*field)
+{
+	std::ostringstream s;
+	s << GetTypeName<DataType>() << " o" << variable << ";\n";
+	outputDeclarations.push_back(std::make_pair(
+		(char*)&(((StructType*)nullptr)->*field) - (char*)nullptr,
+		s.str()));
+}
 
-public:
-	Composer()
-	{
-#ifdef _DEBUG
-		if(current)
-			THROW_PRIMARY_EXCEPTION("Using of more then one ShaderLanguage::Composer`s at a time is not allowed");
-#endif
-		current = this;
-	}
+template <typename DataType>
+template <typename DataTypeTo>
+DataPtr<DataTypeTo> DataPtr<DataType>::Cast() const
+{
+	return NEW(CastData<DataType, DataTypeTo>(*this));
+}
 
-	~Composer()
-	{
-		current = nullptr;
-	}
-
-	static Composer* getCurrent()
-	{
-		if(!current)
-			THROW_PRIMARY_EXCEPTION("No current composer");
-		return current;
-	}
-
-	template <typename DataType, typename StructType>
-	void addInputDeclaration(const Variable<DataType>* variable, DataType StructType::* field)
-	{
-		std::ostringstream s;
-		s << GetTypeName<DataType>() << " i" << variable << ";\n";
-		inputDeclarations.push_back(std::make_pair(
-			(char*)&(((StructType*)nullptr)->*field) - (char*)nullptr,
-			s.str()));
-	}
-
-	template <typename DataType, typename StructType>
-	void addOutputDeclaration(const Variable<DataType>* variable, DataType StructType::*field)
-	{
-		std::ostringstream s;
-		s << GetTypeName<DataType>() << " o" << variable << ";\n";
-		outputDeclarations.push_back(std::make_pair(
-			(char*)&(((StructType*)nullptr)->*field) - (char*)nullptr,
-			s.str()));
-	}
-
-	std::ostringstream& declarationStream()
-	{
-		return declarations;
-	}
-
-	std::ostringstream& statementStream()
-	{
-		return statements;
-	}
-
-	std::string finalize() const
-	{
-		std::ostringstream res;
-		res << "struct Input {\n";
-		for(size_t i = 0; i < inputDeclarations.size(); ++i)
-			res << inputDeclarations[i].second;
-		res << "};\n";
-		res << "struct Output {\n";
-		for(size_t i = 0; i < outputDeclarations.size(); ++i)
-			res << outputDeclarations[i].second;
-		res << "};\n";
-		res << "Output F(Input input) {\nOutput output;\n" << declarations.str() << statements.str() << "return output;\n}\n";
-		return res.str();
-	}
-};
 
 END_INANITY_SHADERS
 

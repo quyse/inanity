@@ -1,14 +1,11 @@
 #ifndef ___INANITY_SHADERS_FUNCTIONS_HPP___
 #define ___INANITY_SHADERS_FUNCTIONS_HPP___
 
-#include "shaders.hpp"
 #include "Language.hpp"
 
 /* Файл содержит определения функций из HLSL/GLSL, для их лёгкого использования
 при написании шейдеров.
 */
-
-/// Макрос для опреде
 
 /// Макрос для определения простой функции 2-х аргументов.
 #define IYS_FUN_SIMPLE1(name) \

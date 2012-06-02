@@ -83,6 +83,10 @@ var libraries = {
 			'graphics.dx.ShaderLayout', 'graphics.dx.ShaderReflection', 'graphics.dx.ConstantBuffer', 'graphics.dx.Shader', 'graphics.dx.VertexShader', 'graphics.dx.PixelShader',
 			'graphics.dx.ShaderCompiler', 'graphics.dx.D3D10BlobFile', 'graphics.dx.FontDrawer']
 	},
+	// ******* подсистема шейдеров
+	'libinanity-shaders': {
+		objects: ['graphics.shaders.Language']
+	},
 	// ******* подсистема GUI
 	'libinanity-gui': {
 		objects: [
@@ -93,13 +97,13 @@ var libraries = {
 var executables = {
 	archi: {
 		objects: ['archi.main', 'archi.BlobCreator', /*'archi.FontCreator',*/ /*'archi.SimpleGeometryCreator',*/ 'archi.SystemFontCreator'/*, 'archi.WavefrontObj', 'archi.XafConverter'*/],
-		staticLibraries: ['libinanity-base', 'libinanity-graphics'],
+		staticLibraries: ['libinanity-base', 'libinanity-graphics',],
 		dynamicLibraries: ['user32.lib', 'gdi32.lib', 'comdlg32.lib']
 	}
 	// TEST
 	, shaderlanguagetest: {
 		objects: ['graphics.shaders.ShaderLanguageTest'],
-		staticLibraries: ['libinanity-base'],
+		staticLibraries: ['libinanity-base', 'libinanity-shaders'],
 		dynamicLibraries: []
 	}
 };
