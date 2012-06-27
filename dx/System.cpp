@@ -45,7 +45,7 @@ System::System(ptr<Graphics::Window> window, const SystemSettings& settings)
 			desc.Windowed = TRUE;
 			desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 			desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-			
+
 			D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_10_0;
 
 			ID3D11Device* deviceInterface;

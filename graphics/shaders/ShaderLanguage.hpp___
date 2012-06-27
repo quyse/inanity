@@ -1,0 +1,411 @@
+#ifndef ___INANITY_DX_SHADER_LANGUAGE_HPP___
+#define ___INANITY_DX_SHADER_LANGUAGE_HPP___
+
+#include "dx.hpp"
+#include "../../Exception.hpp"
+#include <sstream>
+
+/* Файл содержит специальные классы для формирования текстов шейдеров.
+*/
+
+BEGIN_INANITY_DX
+
+namespace ShaderLanguage
+{
+
+/// Класс данных.
+template <typename DataType>
+class Data : public Object
+{
+public:
+	virtual void expression(std::ostream& stream) const = 0;
+};
+
+//******* имена типов данных
+template <typename DataType>
+const char* GetTypeName()
+{
+	THROW_PRIMARY_EXCEPTION("Unknown type name");
+}
+#define DECLARE_TYPE_NAME(t) \
+	template <> const char* GetTypeName<t>() { return #t; }
+DECLARE_TYPE_NAME(float);
+DECLARE_TYPE_NAME(float2);
+DECLARE_TYPE_NAME(float3);
+DECLARE_TYPE_NAME(float4);
+DECLARE_TYPE_NAME(float4x4);
+#undef DECLARE_TYPE_NAME
+
+/// Класс константных данных.
+template <typename DataType>
+class ConstData : public Data<DataType>
+{
+private:
+	DataType data;
+public:
+	ConstData(DataType data) : data(data) {}
+
+	void expression(std::ostream& stream) const
+	{
+		stream << data;
+	}
+};
+
+/// Класс оператора приведения типа.
+template <typename DataTypeFrom, typename DataTypeTo>
+class CastData : public Data<DataTypeTo>
+{
+private:
+	ptr<Data<DataTypeFrom> > data;
+public:
+	CastData(ptr<Data<DataTypeFrom> > data) : data(data) {}
+
+	void expression(std::ostream& stream) const
+	{
+		stream << "(" << GetTypeName(DataTypeTo) << ")(";
+		data->expression(stream);
+		stream << ")";
+	}
+};
+
+/// Класс оператора плюс.
+template <typename DataTypeA, typename DataTypeB>
+class AddData : public Data<decltype(DataTypeA() + DataTypeB())>
+{
+private:
+	ptr<Data<DataTypeA> > a;
+	ptr<Data<DataTypeB> > b;
+public:
+	AddData(ptr<Data<DataTypeA> > a, ptr<Data<DataTypeB> > b) : a(a), b(b) {}
+
+	void expression(std::ostream& stream) const
+	{
+		stream << "(";
+		a->expression(stream);
+		stream << ")+(";
+		b->expression(stream);
+		stream << ")";
+	}
+};
+
+/// Класс оператора минус.
+template <typename DataTypeA, typename DataTypeB>
+class SubtractData : public Data<decltype(DataTypeA() - DataTypeB())>
+{
+private:
+	ptr<Data<DataTypeA> > a;
+	ptr<Data<DataTypeB> > b;
+public:
+	SubtractData(ptr<Data<DataTypeA> > a, ptr<Data<DataTypeB> > b) : a(a), b(b) {}
+
+	void expression(std::ostream& stream) const
+	{
+		stream << "(";
+		a->expression(stream);
+		stream << ")-(";
+		b->expression(stream);
+		stream << ")";
+	}
+};
+
+/// Класс оператора умножить.
+template <typename DataTypeA, typename DataTypeB>
+class MultiplyData : public Data<decltype(DataTypeA() * DataTypeB())>
+{
+private:
+	ptr<Data<DataTypeA> > a;
+	ptr<Data<DataTypeB> > b;
+public:
+	MultiplyData(ptr<Data<DataTypeA> > a, ptr<Data<DataTypeB> > b) : a(a), b(b) {}
+
+	void expression(std::ostream& stream) const
+	{
+		stream << "(";
+		a->expression(stream);
+		stream << ")*(";
+		b->expression(stream);
+		stream << ")";
+	}
+};
+
+/// Класс оператора разделить.
+template <typename DataTypeA, typename DataTypeB>
+class DivideData : public Data<decltype(DataTypeA() / DataTypeB())>
+{
+private:
+	ptr<Data<DataTypeA> > a;
+	ptr<Data<DataTypeB> > b;
+public:
+	DivideData(ptr<Data<DataTypeA> > a, ptr<Data<DataTypeB> > b) : a(a), b(b) {}
+
+	void expression(std::ostream& stream) const
+	{
+		stream << "(";
+		a->expression(stream);
+		stream << ")/(";
+		b->expression(stream);
+		stream << ")";
+	}
+};
+
+/// Класс вызова функции с одним аргументом.
+template <typename ReturnType, typename Arg1Type>
+class Call1Data : public Data<ReturnType>
+{
+private:
+	const char* const functionName;
+	ptr<Data<Arg1Type> > arg1;
+public:
+	Call1Data(const char* functionName, ptr<Data<Arg1Type> > arg1) : functionName(functionName), arg1(arg1) {}
+
+	void expression(std::ostream& stream) const
+	{
+		stream << functionName << "((";
+		arg1->expression(stream);
+		stream << "))";
+	}
+};
+
+/// Класс вызова функции с двумя аргументами.
+template <typename ReturnType, typename Arg1Type, typename Arg2Type>
+class Call2Data : public Data<ReturnType>
+{
+private:
+	const char* const functionName;
+	ptr<Data<Arg1Type> > arg1;
+	ptr<Data<Arg2Type> > arg2;
+public:
+	Call2Data(const char* functionName, ptr<Data<Arg1Type> > arg1, ptr<Data<Arg2Type> > arg2) : functionName(functionName), arg1(arg1), arg2(arg2) {}
+
+	void expression(std::ostream& stream) const
+	{
+		stream << functionName << "((";
+		arg1->expression(stream);
+		stream << "),(";
+		arg2->expression(stream);
+		stream << "))";
+	}
+};
+
+/// Класс указателя на источник данных.
+template <typename DataType>
+class DataPtr
+{
+protected:
+	ptr<Data<DataType> > data;
+
+private:
+	/// Оператор запрещён.
+	DataPtr operator=(DataPtr b)
+	{
+	}
+
+public:
+	DataPtr(ptr<Data<DataType> > data) : data(data) {}
+	DataPtr(DataType data) : data(NEW(ConstData<DataType>(data))) {}
+
+	Data<DataType>* operator->() const
+	{
+		return data;
+	}
+
+	/// Неявный оператор приведения типа к указателю на данные.
+	operator Data<DataType>*() const
+	{
+		return data;
+	}
+
+	/// Ещё один оператор, почти такой же, но возвращает управляемый указатель.
+	/** Нужен, так как два преобразования подряд не могут выполняться неявно. */
+	operator ptr<Data<DataType> >() const
+	{
+		return data;
+	}
+
+	template <typename DataType2>
+	DataPtr<void> operator ,(DataPtr<DataType2> b)
+	{
+		return NEW(
+	}
+
+	template <typename DataTypeTo>
+	DataPtr<DataTypeTo> Cast() const
+	{
+		return NEW(CastData<DataType INANITY_COMMA DataTypeTo>(*data));
+	}
+};
+
+//******* определения для упрощения жизни
+/* По идее, они не нужны. Есть только переменные,
+с данными работать не надо, они только внутри выражений.
+typedef DataPtr<float> dfloat;
+typedef DataPtr<float2> dfloat2;
+typedef DataPtr<float3> dfloat3;
+typedef DataPtr<float4> dfloat4;
+typedef DataPtr<float4x4> dfloat4x4;*/
+
+/// Класс переменной.
+template <typename DataType>
+class Variable : public Data<DataType>
+{
+private:
+	DataPtr<DataType> initData;
+public:
+	Variable(ptr<Data<DataType> > initData = nullptr) : initData(initData) {}
+	
+	void expression(std::ostream& stream) const
+	{
+		stream << "v" << this;
+	}
+
+	virtual void declaration(std::ostream& stream) const
+	{
+		stream << GetTypeName<DataType>() << " v" << this;
+		if(initData)
+		{
+			stream << "=(";
+			initData->expression(stream);
+			stream << ")";
+		}
+		stream << ";";
+	}
+};
+
+/// Класс присваивания переменной.
+/** Работает как переданная первая переменная. */
+template <typename DataTypeA, typename DataTypeB>
+class AssignData : public Data<DataTypeA>
+{
+private:
+	ptr<Data<DataTypeA> > a;
+	ptr<Data<DataTypeB> > b;
+public:
+	AssignData(ptr<Data<DataTypeA> > a, ptr<Data<DataTypeB> > b) : a(a), b(b) {}
+
+	void expression(std::ostream& stream) const
+	{
+		a->expression(stream);
+		stream << "=(";
+		b->expression(stream);
+		stream << ")";
+	}
+};
+
+/// Класс указателя на переменную.
+template <typename DataType>
+class VariablePtr : public DataPtr<DataType>
+{
+public:
+	/// Создать неинициализированную переменную.
+	VariablePtr() : DataPtr<DataType>(NEW(Variable<DataType>())) {}
+	/// Создать указатель на переменную.
+	VariablePtr(Variable<DataType>* data) : DataPtr<DataType>(data) {}
+	/// Создать инициализированную переменную.
+//	VariablePtr(DataPtr<DataType> initDataPtr) : DataPtr<DataType>(NEW(Variable<DataType>(initDataPtr))) {}
+
+	Variable<DataType>* operator->() const
+	{
+		return (Variable<DataType>*)(Data<DataType>*)(*this);
+	}
+
+	/// Неявный оператор приведения типа к указателю на переменную.
+	operator Variable<DataType>*() const
+	{
+		return (Variable<DataType>*)(Data<DataType>*)(*this);
+	}
+
+	/// Ещё один оператор, почти такой же, но возвращает управляемый указатель.
+	/** Нужен, так как два преобразования подряд не могут выполняться неявно. */
+	operator ptr<Variable<DataType> >() const
+	{
+		return (Variable<DataType>*)(Data<DataType>*)(*this);
+	}
+
+	/// Присвоить значение.
+	template <typename DataTypeB>
+	VariablePtr operator=(DataPtr<DataTypeB> b)
+	{
+		return NEW(AssignData<DataType INANITY_COMMA DataTypeB>(*this, b));
+	}
+	/// И ещё один оператор, для замены автоматического оператора присваивания.
+	void operator=(VariablePtr b)
+	{
+		return NEW(AssignData<DataType INANITY_COMMA DataType>(*this, b));
+	}
+};
+
+//******* определения для упрощения жизни
+
+typedef VariablePtr<float> vfloat;
+typedef VariablePtr<float2> vfloat2;
+typedef VariablePtr<float3> vfloat3;
+typedef VariablePtr<float4> vfloat4;
+typedef VariablePtr<float4x4> vfloat4x4;
+
+//******* операторы
+/* Мы разрешаем выполнять операции с разными типами.
+Предполагается, что в шейдерном языке операции выполняются так же,
+как у нас в C++. Следовательно, неверные операции будут отброшены.
+Если что, можно дописывать специализированные операторы -
+плохие операторы будут отброшены в соответствии с принципом SFINAE. */
+/// Плюс.
+template <typename DataTypeA, typename DataTypeB>
+auto operator+(DataPtr<DataTypeA> a, DataPtr<DataTypeB> b) -> DataPtr<decltype(DataTypeA() + DataTypeB())>
+{
+	return NEW(AddData<DataTypeA INANITY_COMMA DataTypeB>(a, b));
+}
+/// Минус.
+template <typename DataTypeA, typename DataTypeB>
+auto operator-(DataPtr<DataTypeA> a, DataPtr<DataTypeB> b) -> DataPtr<decltype(DataTypeA() - DataTypeB())>
+{
+	return NEW(SubtractData<DataTypeA INANITY_COMMA DataTypeB>(a, b));
+}
+/// Умножить.
+template <typename DataTypeA, typename DataTypeB>
+auto operator*(DataPtr<DataTypeA> a, DataPtr<DataTypeB> b) -> DataPtr<decltype(DataTypeA() * DataTypeB())>
+{
+	return NEW(MultiplyData<DataTypeA INANITY_COMMA DataTypeB>(a, b));
+}
+/// Разделить.
+template <typename DataTypeA, typename DataTypeB>
+auto operator/(DataPtr<DataTypeA> a, DataPtr<DataTypeB> b) -> DataPtr<decltype(DataTypeA() / DataTypeB())>
+{
+	return NEW(DivideData<DataTypeA INANITY_COMMA DataTypeB>(a, b));
+}
+
+/// Класс, выполняющий создание шейдера.
+template <typename InputStruct, typename OutputStruct>
+class ShaderComposer
+{
+private:
+	/// Текст декларации переменных.
+	std::ostringstream declarations;
+	/// Текст выражений.
+	std::ostringstream expressions;
+
+public:
+	template <typename DataType>
+	VariablePtr<DataType> variable()
+	{
+		VariablePtr<DataType> var = NEW(Variable<DataType>());
+		var->declaration(declarations);
+		return var;
+	}
+
+	template <typename DataType>
+	void expr(DataPtr<DataType> data)
+	{
+		data->expression(expressions);
+	}
+
+	std::string str() const
+	{
+		return declarations.str() + expressions.str();
+	}
+};
+
+};
+
+END_INANITY_DX
+
+#endif

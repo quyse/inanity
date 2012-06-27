@@ -99,8 +99,10 @@ public:
 	ptr<ConstantBuffer> CreateConstantBuffer(size_t size);
 
 	/// Создать вершинный шейдер.
+	/** Создаёт вершинный шейдер из файла со скомпилированным бинарным кодом. */
 	ptr<VertexShader> CreateVertexShader(ptr<File> file);
 	/// Создать пиксельный шейдер.
+	/** Создаёт пиксельный шейдер из файла со скомпилированным бинарным кодом. */
 	ptr<PixelShader> CreatePixelShader(ptr<File> file);
 /*
 	/// Создать статичную геометрию.

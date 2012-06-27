@@ -53,5 +53,23 @@ int main()
 		std::cout << s.finalize();
 	}
 
+#if 2+2==3
+
+	// код так, как он должен быть
+
+	USING_INANITY_SHADERS;// using namespace Inanity::Shaders;
+
+	ShaderComposer composer;
+	auto iPosition = composer.InputVariable<float3>();
+	auto iNormal = composer.InputVariable<float4>();
+	auto iTexcoord = composer.ifloat4(); // то же, что и в предыдущей строке
+
+	auto v2pPosition = composer.VO;
+
+	c = a + b; // действия с переменными создают действия в шейдере
+
+
+#endif
+
 	return 0;
 }

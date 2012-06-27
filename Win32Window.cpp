@@ -1,4 +1,4 @@
-#include "Window.hpp"
+#include "Win32Window.hpp"
 #include "System.hpp"
 #include "../input/Manager.hpp"
 #include "../Strings.hpp"

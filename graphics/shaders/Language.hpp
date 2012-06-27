@@ -7,6 +7,15 @@
 #include <sstream>
 
 /* Файл содержит специальные классы для формирования текстов шейдеров.
+
+Shader (шейдер) - это один шейдер (вершинный или пиксельный, в будущем - ещё геометрический и т.д.).
+ShaderComposition - это композиция из вершинного и пиксельного шейдера (и ещё геометрического, и т.д.)
+ShaderComposer - штука, которая создаёт композицию. Шейдеры у нас не делаются по отдельности.
+
+Для переменных используется следующая терминология.
+Входная, выходная переменная - понятно. Заметим, что в GLSL входные переменные вершинного шейдера - это атрибуты.
+uniform-переменная - в HLSL - константная переменная, в GLSL - uniform-переменная.
+Временная переменная - переменная внутри функции шейдера.
 */
 
 /*
@@ -25,10 +34,6 @@ class Variable;
 /** Одновременно не должно быть более одного такого объекта. */
 class Composer
 {
-public:
-	/// Текущий композер.
-	static Composer* current;
-
 private:
 	/// Текст декларации переменных.
 	std::ostringstream declarations;
@@ -333,6 +338,18 @@ public:
 	}
 };
 
+/// Класс константной переменной.
+/** То есть той, которая передаётся в константных буферах. */
+template <typename DataType>
+class UniformVariable
+{
+protected:
+	void declare(Shader* composer) const
+	{
+		composer->addUniformDeclaration(
+	}
+};
+
 /// Класс переменной, передающейся в/из/между шейдерами.
 template <typename DataType, typename StructType>
 class InterVariable : public Variable<DataType>
@@ -344,6 +361,7 @@ public:
 };
 
 /// Класс входной переменной.
+/** То есть переменной, которая задаёт поле в вершине. */
 template <typename DataType, typename StructType>
 class InputVariable : public Variable<DataType>
 {

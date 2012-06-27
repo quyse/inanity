@@ -3,10 +3,18 @@
 
 #include "graphics.hpp"
 
-#ifdef ___INANITY_GRAPHICS_DX
+BEGIN_INANITY_GRAPHICS
 
-#include "dx/RenderBuffer.hpp"
+/// Абстрактный класс рендербуфера.
+class RenderBuffer : public Object
+{
+public:
+	/// Получить текстуру, соответствующую рендербуферу.
+	/** Может возвращать 0, если рендербуфер не имеет
+	возможности быть источником данных. */
+	virtual ptr<Texture> GetAsTexture() = 0;
+};
 
-#endif
+END_INANITY_GRAPHICS
 
 #endif
