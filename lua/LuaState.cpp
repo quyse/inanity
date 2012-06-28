@@ -1,6 +1,6 @@
 #include "LuaState.hpp"
-#include "File.hpp"
-#include "Exception.hpp"
+#include "../File.hpp"
+#include "../Exception.hpp"
 #include <cstdlib>
 #include <sstream>
 
@@ -281,16 +281,15 @@ ptr<LuaState::Script> LuaState::LoadScript(ptr<File> file)
 	};
 
 	Reader reader(file);
-	switch(lua_load(state, Reader::Callback, &reader, "noname"))
+	switch(lua_load(state, Reader::Callback, &reader, "noname", 0))
 	{
 	case 0:
 		// конструктор Script заберёт функцию из стека, и сохранит её себе
 		return NEW(Script(this));
 	case LUA_ERRSYNTAX:
 		THROW_PRIMARY_EXCEPTION("Syntax error in Lua script");
-	default:
-		THROW_PRIMARY_EXCEPTION("Error when loading Lua script");
 	}
+	THROW_PRIMARY_EXCEPTION("Error when loading Lua script");
 }
 
 //********* класс LuaState::Call

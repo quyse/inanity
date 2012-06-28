@@ -4,9 +4,9 @@
 /* Файл содержит общие определения, используемые для поддержки Lua.
  */
 
-#include "Object.hpp"
-#include "String.hpp"
-#include "Exception.hpp"
+#include "../Object.hpp"
+#include "../String.hpp"
+#include "../Exception.hpp"
 #include "lua.hpp"
 #include <vector>
 
