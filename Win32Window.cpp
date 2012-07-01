@@ -5,34 +5,19 @@
 #include "../Exception.hpp"
 #include <windowsx.h>
 
-Window* Window::singleWindow = 0;
+Win32Window* Win32Window::singleWindow = 0;
 
-Window::Window(const String& windowTitle) : active(true)
+Win32Window::Win32Window(ATOM windowClass, const String& title) : active(true)
 {
 	try
 	{
 		if(singleWindow)
 			THROW_PRIMARY_EXCEPTION("Can't create second game window");
 
-		static ATOM windowClass = NULL;
-		//зарегистрировать класс окна, если еще не сделано
-		if(!windowClass)
-		{
-			WNDCLASS wndClass;
-			ZeroMemory(&wndClass, sizeof(wndClass));
-			wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-			wndClass.hbrBackground = GetStockBrush(BLACK_BRUSH);
-			wndClass.lpszClassName = TEXT("Window");
-			wndClass.hInstance = GetModuleHandle(NULL);
-			wndClass.lpfnWndProc = WndProc;
-			windowClass = RegisterClass(&wndClass);
-			if(!windowClass)
-				THROW_PRIMARY_EXCEPTION("Can't register window class");
-		}
 		//создать окно
 		int primaryWidth = GetSystemMetrics(SM_CXSCREEN);
 		int primaryHeight = GetSystemMetrics(SM_CYSCREEN);
-		hWnd = CreateWindow((LPCTSTR)windowClass, Strings::UTF82Unicode(windowTitle).c_str(), WS_POPUP | WS_VISIBLE, 0, 0, 1, 1, NULL, NULL, GetModuleHandle(NULL), NULL);
+		hWnd = CreateWindow((LPCTSTR)windowClass, Strings::UTF82Unicode(windowTitle).c_str(), WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 0, 0, 1, 1, NULL, NULL, GetModuleHandle(NULL), NULL);
 		if(!hWnd)
 			THROW_PRIMARY_EXCEPTION("Can't create window");
 		ShowCursor(FALSE);
@@ -45,23 +30,70 @@ Window::Window(const String& windowTitle) : active(true)
 	}
 }
 
-Window::~Window()
+Win32Window::~Win32Window()
 {
 	if(hWnd) DestroyWindow(hWnd);
 	singleWindow = 0;
 }
 
-HWND Window::GetWindowHandle() const
+void Win32Window::SetTitle(const String& title)
+{
+	SetWindowText(hWnd, title.c_str());
+}
+
+ptr<Win32Window> Win32Window::CreateForDirectX()
+{
+	static ATOM windowClass = NULL;
+	//зарегистрировать класс окна, если еще не сделано
+	if(!windowClass)
+	{
+		WNDCLASS wndClass;
+		ZeroMemory(&wndClass, sizeof(wndClass));
+		wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+		wndClass.hbrBackground = GetStockBrush(BLACK_BRUSH);
+		wndClass.lpszClassName = TEXT("Win32DirectXWindow");
+		wndClass.hInstance = GetModuleHandle(NULL);
+		wndClass.lpfnWndProc = WndProc;
+		windowClass = RegisterClass(&wndClass);
+		if(!windowClass)
+			THROW_PRIMARY_EXCEPTION("Can't register window class for DirectX");
+	}
+
+	return NEW(Win32Window(windowClass));
+}
+
+ptr<Win32Window> Win32Window::CreateForOpenGL()
+{
+	static ATOM windowClass = NULL;
+	//зарегистрировать класс окна, если еще не сделано
+	if(!windowClass)
+	{
+		WNDCLASS wndClass;
+		ZeroMemory(&wndClass, sizeof(wndClass));
+		wndClass.style = CS_OWNDC;
+		wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+		wndClass.lpszClassName = TEXT("Win32OpenGLWindow");
+		wndClass.hInstance = GetModuleHandle(NULL);
+		wndClass.lpfnWndProc = WndProc;
+		windowClass = RegisterClass(&wndClass);
+		if(!windowClass)
+			THROW_PRIMARY_EXCEPTION("Can't register window class for OpenGL");
+	}
+
+	return NEW(Win32Window(windowClass));
+}
+
+HWND Win32Window::GetWindowHandle() const
 {
 	return hWnd;
 }
 
-bool Window::IsActive() const
+bool Win32Window::IsActive() const
 {
 	return active;
 }
 
-LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK Win32Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	if(singleWindow && singleWindow->inputManager)
 		if(singleWindow->inputManager->ProcessWindowMessage(uMsg, wParam, lParam))
@@ -103,17 +135,17 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
-void Window::SetGraphicsSystem(ptr<Graphics::System> graphicsSystem)
+void Win32Window::SetGraphicsSystem(ptr<Graphics::System> graphicsSystem)
 {
 	this->graphicsSystem = graphicsSystem;
 }
 
-void Window::SetInputManager(ptr<Input::Manager> inputManager)
+void Win32Window::SetInputManager(ptr<Input::Manager> inputManager)
 {
 	this->inputManager = inputManager;
 }
 
-bool Window::Do(ActiveHandler* activeHandler)
+bool Win32Window::Do(ActiveHandler* activeHandler)
 {
 	MSG msg;
 	bool lastActive;
@@ -145,13 +177,13 @@ bool Window::Do(ActiveHandler* activeHandler)
 	return true;
 }
 
-void Window::Close()
+void Win32Window::Close()
 {
 	if(hWnd)
 		DestroyWindow(hWnd);
 }
 
-void Window::Run(ptr<ActiveHandler> activeHandler)
+void Win32Window::Run(ptr<ActiveHandler> activeHandler)
 {
 	while(Do(activeHandler));
 }

@@ -36,6 +36,11 @@ DXGI_FORMAT DxSystem::GetDXGIFormat(PixelFormat format)
 	}
 }
 
+ptr<Window> DxSystem::CreateWindow()
+{
+	return Win32Window::CreateForDirectX();
+}
+
 ptr<Device> DxSystem::CreatePrimaryDevice()
 {
 	try

@@ -9,6 +9,8 @@ BEGIN_INANITY
 class Window : public Object
 {
 public:
+	/// Указать заголовок окна.
+	virtual void SetTitle(const String& title) = 0;
 };
 
 END_INANITY

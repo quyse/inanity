@@ -19,6 +19,8 @@ public:
 	/// Преобразовать формат пикселей из общего перечисления в DXGI.
 	static DXGI_FORMAT GetDXGIFormat(PixelFormat format);
 
+	// методы System
+	ptr<Window> CreateWindow();
 	ptr<Device> CreatePrimaryDevice();
 
 	/// Получить фабрику DXGI.

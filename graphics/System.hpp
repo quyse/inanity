@@ -19,6 +19,8 @@ public:
 	};
 
 public:
+	/// Создать окно, пригодное для использования с данной графической подсистемой.
+	virtual ptr<Window> CreateWindow() = 0;
 	/// Создать главное графическое устройство.
 	virtual ptr<Device> CreatePrimaryDevice() = 0;
 };

@@ -11,7 +11,7 @@
 
 BEGIN_INANITY
 
-class Window : public Object
+class Win32Window : public Object
 {
 public:
 	/// Тип обработчика активного окна.
@@ -33,8 +33,16 @@ private:
 	bool Do(ActiveHandler* activeHandler);
 
 public:
-	Window(const String& windowTitle);
-	~Window();
+	Win32Window(ATOM windowClass, const String& title = String());
+	~Win32Window();
+
+	// методы Window
+	void SetTitle(const String& title);
+
+	/// Создать окно для DirectX.
+	static ptr<Win32Window> CreateForDirectX();
+	/// Создать окно для OpenGL.
+	static ptr<Win32Window> CreateForOpenGL();
 
 	//получить окно
 	HWND GetWindowHandle() const;
