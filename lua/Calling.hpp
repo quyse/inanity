@@ -2,6 +2,11 @@
 #define ___INANITY_LUA_CALLING_HPP___
 
 #include "lua.hpp"
+#include "lualib.hpp"
+#include "State.hpp"
+#include "../Exception.hpp"
+
+BEGIN_INANITY_LUA
 
 /// Структура, сохраняющая состояние для получения аргументов.
 struct ArgGettingState
@@ -35,12 +40,18 @@ int GetNextArg<int>(ArgGettingState* state)
 }
 
 template <>
-String GetNextArg<String>(ArgGettingState* state)
+const char* GetNextArg<const char*>(ArgGettingState* state)
 {
 	const char* res = lua_tostring(state->state, ++state->gotArgsCount);
 	if(!res)
 		THROW_PRIMARY_EXCEPTION("Expected a string for argument");
 	return res;
+}
+
+template <>
+String GetNextArg<String>(ArgGettingState* state)
+{
+	return GetNextArg<const char*>(state);
 }
 
 /// Структура-контейнер списка типов.
@@ -65,8 +76,8 @@ struct MethodCaller<ReturnType (ClassType::*)(ArgTypes...), method, Args<ArgType
 	}
 };
 // И когда хотя бы один аргумент остался.
-template <typename ReturnType, typename ClassType, typename... GotArgTypes, typename FirstRestArgType, typename... MoreRestArgTypes, ReturnType (ClassType::*method)(GotArgTypes..., FirstRestArgType, MoreRestArgTypes)>
-struct MethodCaller<ReturnType (ClassType::*method)(GotArgTypes..., FirstRestArgType, MoreRestArgTypes), method, Args<GotArgTypes...>, Args<FirstRestArgType, MoreRestArgTypes...> >
+template <typename ReturnType, typename ClassType, typename... GotArgTypes, typename FirstRestArgType, typename... MoreRestArgTypes, ReturnType (ClassType::*method)(GotArgTypes..., FirstRestArgType, MoreRestArgTypes...)>
+struct MethodCaller<ReturnType (ClassType::*)(GotArgTypes..., FirstRestArgType, MoreRestArgTypes...), method, Args<GotArgTypes...>, Args<FirstRestArgType, MoreRestArgTypes...> >
 {
 	inline static ReturnType Call(ArgGettingState* state, GotArgTypes... gotArgs)
 	{
@@ -74,7 +85,7 @@ struct MethodCaller<ReturnType (ClassType::*method)(GotArgTypes..., FirstRestArg
 		if(state->gotArgsCount >= state->argsCount)
 			THROW_PRIMARY_EXCEPTION("Not enough arguments for method call");
 		// аргумент есть, получить его и двигаться дальше
-		return MethodCaller<ReturnType (ClassType::*method)(GotArgTypes..., FirstRestArgType, MoreRestArgTypes), method, Args<GotArgTypes..., FirstRestArgType>, Args<MoreRestArgTypes> >::Call(gotArgs..., GetNextArg<FirstRestArgType>(state));
+		return MethodCaller<ReturnType (ClassType::*)(GotArgTypes..., FirstRestArgType, MoreRestArgTypes...), method, Args<GotArgTypes..., FirstRestArgType>, Args<MoreRestArgTypes...> >::Call(gotArgs..., GetNextArg<FirstRestArgType>(state));
 	}
 };
 
@@ -84,12 +95,9 @@ struct MethodCaller<ReturnType (ClassType::*method)(GotArgTypes..., FirstRestArg
 template <typename MethodType, MethodType method>
 struct MethodThunk;
 // Специализация, разбирающая тип метода.
-template <typename ReturnType, typename ClassType, typename... ArgTypes>
-struct MethodThunk<ReturnType (ClassType::*)(ArgTypes...), ReturnType (ClassType::*method)(ArgTypes...)>
+template <typename ReturnType, typename ClassType, typename... ArgTypes, ReturnType (ClassType::*method)(ArgTypes...)>
+struct MethodThunk<ReturnType (ClassType::*)(ArgTypes...), method>
 {
-	/// Собственно, тип метода.
-	typedef ReturnType (ClassType::*MethodType)(ArgTypes...);
-
 	/// Функция, вызывающая метод у объекта.
 	/** Следует формату и протоколу lua_CFunction. */
 	static int Thunk(lua_State* luaState)
@@ -100,7 +108,7 @@ struct MethodThunk<ReturnType (ClassType::*)(ArgTypes...), ReturnType (ClassType
 			ArgGettingState state;
 			state.state = luaState;
 			// получить действительное количество аргументов
-			state.argsCount = lua_gettop(state);
+			state.argsCount = lua_gettop(luaState);
 			state.gotArgsCount = 0;
 
 			// получить объект this
@@ -115,11 +123,13 @@ struct MethodThunk<ReturnType (ClassType::*)(ArgTypes...), ReturnType (ClassType
 		catch(Exception* exception)
 		{
 			// положить в стек исключение
-			LuaState::Push(state, MakePointer(exception));
+			State::Push(state, MakePointer(exception));
 			// и выбросить ошибку
 			lua_error(state);
 		}
 	}
 };
+
+END_INANITY_LUA
 
 #endif

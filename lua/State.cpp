@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <sstream>
 
-/* Мануал по Lua: http://www.lua.org/manual/5.1/manual.html
+/* Мануал по Lua: http://www.lua.org/manual/5.2/manual.html
  *
  * Как Inanity взаимодействует со скриптом на Lua.
  *
