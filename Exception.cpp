@@ -9,6 +9,8 @@
 #include <cstring>
 #endif // ___INANITY_LINUX
 
+SCRIPTABLE_MAP_BEGIN(Exception);
+
 Exception::Exception(const String& message) : message(message)
 {
 }

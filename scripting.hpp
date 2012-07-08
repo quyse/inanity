@@ -9,18 +9,19 @@
 
 #include "Object.hpp"
 
+#define ___INANITY_SCRIPTING
 #ifdef ___INANITY_SCRIPTING
 
-#include "LuaState.hpp"
+#include "inanity-lua.hpp"
 
 BEGIN_INANITY
 
 /// Тип, хранящий состояние скриптовой системы.
-typedef LuaState ScriptState;
+typedef Lua::State ScriptState;
 /// Тип, используемый для указания метаинформации о типах, видимых скриптам.
-typedef LuaClass ScriptClass;
+typedef Lua::Class ScriptClass;
 /// Тип скриптов.
-typedef LuaScript Script;
+typedef Lua::Script Script;
 
 //****** Макросы для определения методов и свойств.
 
@@ -31,15 +32,22 @@ typedef LuaScript Script;
 // Добавить в файл реализации.
 #define SCRIPTABLE_MAP_BEGIN(className) \
 	ScriptClass className::scriptClass = cls::InitScriptClass(); \
-	ScriptClass className::InitScriptClass() { ScriptClass res
+	ScriptClass className::InitScriptClass() { ScriptClass res(typeid(className)->name)
 #define SCRIPTABLE_MAP_END() \
 	return res; }
 // Метод в карте методов.
 #define SCRIPTABLE_METHOD(className, methodName) \
-	res.AddMethod(#method, &className::methodName)
+	res.AddMethod(#methodName, &className::methodName)
 
 END_INANITY
 
-#endif
+#else // ___INANITY_SCRIPTING
+
+#define SCRIPTABLE_CLASS()
+#define SCRIPTABLE_MAP_BEGIN(className)
+#define SCRIPTABLE_MAP_END()
+#define SCRIPTABLE_METHOD(className, methodName)
+
+#endif // ___INANITY_SCRIPTING
 
 #endif

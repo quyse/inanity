@@ -3,6 +3,7 @@
 
 #include "Object.hpp"
 #include "String.hpp"
+#include "scripting.hpp"
 #include <ostream>
 
 BEGIN_INANITY
@@ -72,6 +73,8 @@ public:
 	/** Ошибка системы определяется специфичным для платформы способом (Windows - GetLastError, Linux - errno). */
 	static ptr<Exception> SystemError();
 	static ptr<Exception> SystemError(int errorCode);
+
+	SCRIPTABLE_CLASS();
 };
 
 #ifdef _DEBUG
