@@ -2,7 +2,7 @@
 #define ___INANITY_FILE_HPP___
 
 #include "Object.hpp"
-#include "scripting.hpp"
+#include "scripting_decl.hpp"
 
 BEGIN_INANITY
 
@@ -26,12 +26,7 @@ public:
 	*/
 	virtual size_t GetSize() const = 0;
 
-#ifdef ___INANITY_SCRIPTING
-
 	SCRIPTABLE_CLASS();
-	SCRIPTABLE_CALL(getSize);
-
-#endif
 };
 
 END_INANITY

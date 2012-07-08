@@ -3,7 +3,7 @@
 
 #include "Object.hpp"
 #include "String.hpp"
-#include "scripting.hpp"
+#include "scripting_decl.hpp"
 #include <ostream>
 
 BEGIN_INANITY

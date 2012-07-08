@@ -1,5 +1,5 @@
-#ifndef ___INANITY_LUA_CALLING_HPP___
-#define ___INANITY_LUA_CALLING_HPP___
+#ifndef ___INANITY_LUA_STUFF_HPP___
+#define ___INANITY_LUA_STUFF_HPP___
 
 /* Файл содержит различные шаблонные функции.
 Часто функции оформляются как статические методы в структурах,
@@ -10,188 +10,30 @@
 #include "lualib.hpp"
 #include "State.hpp"
 #include "userdata.hpp"
-#include "reflection.hpp"
+#include "reflection_decl.hpp"
 #include "../Exception.hpp"
 
 BEGIN_INANITY_LUA
 
 /// Универсальная функция для индексирования метатаблиц (классов и объектов).
 /** Предполагает, что в замыкании лежит таблица методов. */
-int MetaTable_index(lua_State* state)
-{
-	// в стеке лежит: сначала userdata, затем индекс
-	// а в замыкании лежит таблица методов
-
-	// получить метод
-	lus_gettable(state, lua_upvalueindex(1));
-	// проверять, что он есть, не нужно
-	// если что, будет nil, так что пофиг
-	return 1;
-}
+int MetaTable_index(lua_State* state);
 
 /// Запихать в стек метатаблицу для классов.
 /** Метатаблица классов нигде не хранится, и создаётся каждый раз заново.
 Потому что предполагается, что она один раз будет нужна (для одного глобального объекта).
 Вообще говоря, можно было бы обойтись вообще без метатаблицы, а сделать просто таблицу,
 а не объект. Но пофиг, пусть будет более круто. */
-void PushClassMetaTable(lua_State* state, const Class& cls)
-{
-	// создать табличку
-	lua_createtable(state, 0, cls.constructor ? 2 : 1);
-	
-	// если есть конструктор, сделать call
-	if(cls.constructor)
-	{
-		lua_pushliteral(state, "__call");
-		cls.constructor->PushThunk(state);
-		lua_settable(state, -2);
-	}
-
-	// сделать index для статических методов
-	lua_pushliteral(state, "__index");
-	// создать таблицу методов
-	lua_createtable(state, 0, (int)cls.staticMethods.size());
-	for(size_t i = 0; i < cls.staticMethods.size(); ++i)
-	{
-		const Function* function = cls.staticMethods[i];
-
-		lua_pushstring(state, function->GetName());
-		function->PushThunk(state);
-		lua_settable(state, -2);
-	}
-	// таблица методов попадает в замыкание
-	lua_pushcclosure(state, &MetaTable_index, 1);
-
-	// всё.
-}
+void PushClassMetaTable(lua_State* state, Class& cls);
 
 /// Зарегистрировать класс в состоянии.
-void RegisterClass(lua_State* state, const Class& cls)
-{
-	// разобрать полное имя класса (вида Inanity::Namespace1::Namespace2::ClassName),
-	// пройтись по этому пути, и создать глобальный объект
-	String fullName = cls.GetFullName();
-	// поддерживаем инвариант - в стеке лежит последний объект пройденного пути
-	// сначала тут, конечно, глобальное пространство
-	lua_pushinteger(state, LUA_RIDX_GLOBALS);
-	lua_gettable(state, LUA_REGISTRYINDEX);
-	// цикл по кускам пути
-	for(size_t i = 0; i < fullName.length(); )
-	{
-		size_t j;
-		for(j = i + 1; j < fullName.length() && fullName[j] != ':'; ++j);
-		// тут [i, j) задают строку пути
-		// положить строку в стек
-		lua_pushlstring(state, fullName.c_str() + i, j - i);   // prevPath name
-
-		// если это последняя строка
-		if(j >= fullName.length())
-		{
-			// создать объект
-			ClassUserData* userData = (ClassUserData*)lua_newuserdata(state, sizeof(ClassUserData)); // prevPath name userData
-			// указать ему метатаблицу
-			PushClassMetaTable(state, cls);                        // prevPath name userData metatable
-			lua_setmetatable(state, -2);                           // prevPath name userData
-			// и добавить его в таблицу
-			lua_settable(state, -3);                               // prevPath
-		}
-		// иначе это промежуточная строка
-		else
-		{
-			// сразу продублировать строку, на случай, если опять понадобится
-			lua_pushvalue(state, -1);                              // prevPath name fullName
-			lua_gettable(state, -3);                               // prevPath name curPath
-			// если получена
-			if(lua_istable(state, -1))
-			{
-				// выбросить копию строки и предыдущий путь
-				lua_replace(state, -3);                              // curPath name
-				lua_pop(state, 1);                                   // curPath
-			}
-			// иначе нету
-			else
-			{
-				// выбросить nil
-				lua_pop(state, 1);                                   // prevPath name
-				// создать таблицу
-				lua_createtable(state);                              // prevPath name curPath
-				// продублировать её перед предыдущим путём
-				lua_pushvalue(state, -1);                            // prevPath name curPath curPath
-				lua_insert(state, lua_absindex(state, -4));          // curPath prevPath name curPath
-				// положить её в предыдущую таблицу
-				lua_settable(state, -3);                             // curPath prevPath
-				// выкинуть предыдущую таблицу
-				lua_pop(state, 1);
-			}
-		}
-
-		// передвинуть i, чтобы пройти второе двоеточие
-		for(i = j; i < fullName.length() && fullName[i] == ':'; ++i);
-	}
-
-	// очистить стек
-	lua_pop(state, 1);
-}
+void RegisterClass(lua_State* state, Class& cls);
 
 /// Структура с методами метатаблицы объектов.
-int ObjectMetaTable_gc(lua_State* state)
-{
-	// в стеке лежит: userdata
-
-	ObjectUserData* userData = (ObjectUserData*)lua_touserdata(state, -1);
-	// освободить ссылку на объект
-	userData->object->Dereference();
-	userData->object = 0;
-	userData->cls = 0;
-	return 0;
-}
+int ObjectMetaTable_gc(lua_State* state);
 
 /// Запихать в стек метатаблицу для объектов.
-void PushObjectMetaTable(lua_State* state, const Class& cls)
-{
-	// получить метатаблицу объектов
-	lua_pushlightuserdata(state, &cls);
-	lua_gettable(state, LUA_REGISTRYINDEX);
-	// если её нет, сделать
-	if(!lua_istable(state, -1))
-	{
-		// выбросить nil из стека
-		lua_pop(state, 1);
-
-		// таблица методов нужна только в __index.
-		// так пусть она будет у __index в замыкании :)
-		// и никуда больше её не сохранять, здорово ^_^
-
-		// создать метатаблицу
-		// использовать адрес структуры класса как индекс в реестре
-		lua_pushlightuserdata(state, &cls);
-		lua_createtable(state, 0, 2);
-		// задать индексатор
-		lua_pushliteral(state, "__index");
-
-		// вот в этом месте создать таблицу методов
-		lua_pushlightuserdata(state, &cls.methods);
-		lua_createtable(state, 0, (int)cls.methods.size());
-		for(size_t i = 0; i < cls.methods.size(); ++i)
-		{
-			const Method* method = cls.methods[i];
-			lua_pushstring(state, method->GetName());
-			method->PushThunk(state);
-			lua_settable(state, -3);
-		}
-		// и засунуть её в замыкание
-		lua_pushcclosure(state, &MetaTable_index, 1);
-		lua_settable(state, -3);
-
-		// задать деструктор
-		lua_pushliteral(state, "__gc");
-		lua_pushcclosure(state, &ObjectMetaTable_gc, 0);
-		lua_settable(state, -3);
-
-		// и положить метатаблицу в реестр
-		lua_settable(state, LUA_REGISTRYINDEX);
-	}
-}
+void PushObjectMetaTable(lua_State* state, Class& cls);
 
 /// Структура, сохраняющая состояние для получения аргументов.
 struct ArgGettingState
@@ -202,23 +44,6 @@ struct ArgGettingState
 	int argsCount;
 	/// Количество уже вытащенных аргументов.
 	int gotArgsCount;
-};
-
-/// Вспомогательная функция для получения аргумента из стека Lua.
-/** Использует структуру для получения кучи аргументов, и увеличивает счётчик. */
-template <typename ArgType>
-struct NextArgGetter
-{
-	static inline ArgType Get(ArgGettingState* state)
-	{
-		return ArgGetter<ArgType>::Get(state->state, ++state->gotArgsCount);
-	}
-};
-// для void отдельная специализация, не увеличивающая счётчик
-template <>
-struct NextArgGetter<void>
-{
-	static inline void Get(ArgGettingState* state) {}
 };
 
 /// Структура для получения аргумента из стека.
@@ -268,13 +93,21 @@ struct ArgGetter<String>
 		return ArgGetter<const char*>::Get(state, index);
 	}
 };
+template <>
+struct ArgGetter<const String&>
+{
+	static inline String Get(lua_State* state, int index)
+	{
+		return ArgGetter<const char*>::Get(state, index);
+	}
+};
 template <typename ObjectType>
 struct ArgGetter<ptr<ObjectType> >
 {
 	static inline ptr<ObjectType> Get(lua_State* state, int index)
 	{
 		// получить userdata для объекта, и проверить, что это объект
-		UserDataObject* userData = (UserDataObject*)lua_touserdata(state, index);
+		ObjectUserData* userData = (ObjectUserData*)lua_touserdata(state, index);
 		if(!userData || lua_islightuserdata(state, index) || userData->type != UserData::typeObject)
 			THROW_PRIMARY_EXCEPTION("Expected an object for argument");
 		// проверить тип объекта
@@ -285,17 +118,26 @@ struct ArgGetter<ptr<ObjectType> >
 	}
 };
 
+/// Вспомогательная функция для получения аргумента из стека Lua.
+/** Использует структуру для получения кучи аргументов, и увеличивает счётчик. */
+template <typename ArgType>
+struct NextArgGetter
+{
+	static inline auto Get(ArgGettingState* state) -> decltype(ArgGetter<ArgType>::Get(state->state, ++state->gotArgsCount))
+	{
+		return ArgGetter<ArgType>::Get(state->state, ++state->gotArgsCount);
+	}
+};
+// для void отдельная специализация, не увеличивающая счётчик
+template <>
+struct NextArgGetter<void>
+{
+	static inline void Get(ArgGettingState* state) {}
+};
+
 /// Вспомогательная структура для запихивания аргумента в стек Lua.
 template <typename ArgType>
 struct ArgPusher;
-template <>
-struct ArgPusher<void>
-{
-	static void Push(lua_State* state, void)
-	{
-		return 0;
-	}
-};
 template <>
 struct ArgPusher<bool>
 {
@@ -317,31 +159,36 @@ struct ArgPusher<int>
 template <>
 struct ArgPusher<const char*>
 {
-	static void Push(lua_State* state, const char* arg)
+	static int Push(lua_State* state, const char* arg)
 	{
 		lua_pushstring(state, arg);
+		return 1;
 	}
 };
 template <>
 struct ArgPusher<String>
 {
-	static void Push(lua_State* state, const String& arg)
+	static int Push(lua_State* state, const String& arg)
 	{
 		lua_pushstring(state, arg.c_str());
+		return 1;
 	}
 };
 template <typename ObjectType>
 struct ArgPusher<ptr<ObjectType> >
 {
-	static void Push(lua_State* state, ptr<ObjectType> arg)
+	static int Push(lua_State* state, ptr<ObjectType> arg)
 	{
-		PushObjectMetaTable<ObjectType>(state);
 		ObjectUserData* userData = (ObjectUserData*)lua_newuserdata(state, sizeof(ObjectUserData));
 		userData->type = UserData::typeObject;
 		userData->object = (Object*)(ObjectType*)arg;
-		userData->class = &ObjectType::scriptClass;
+		userData->cls = &ObjectType::scriptClass;
+		// указать метатаблицу
+		PushObjectMetaTable(state, ObjectType::scriptClass);
+		lua_setmetatable(state, -2);
 		// задать дополнительную ссылку объекту
 		userData->object->Reference();
+		return 1;
 	}
 };
 
@@ -364,6 +211,26 @@ struct ArgsPusher<FirstArgType, RestArgTypes...>
 		ArgPusher<FirstArgType>::Push(state, firstArg);
 		// и остальные
 		ArgsPusher<RestArgTypes...>::Push(state, restArgs...);
+	}
+};
+
+/// Вспомогательная структура, вызывающая статический Call у переданного типа,
+/// и кладущая результат в стек. Корректно обрабатывает void.
+template <typename CallerType, typename ReturnType, typename... ArgTypes>
+struct CallAndPusher
+{
+	static inline int CallAndPush(lua_State* state, ArgTypes... args)
+	{
+		return ArgPusher<ReturnType>::Push(state, CallerType::Call(args...));
+	}
+};
+template <typename CallerType, typename... ArgTypes>
+struct CallAndPusher<CallerType, void, ArgTypes...>
+{
+	static inline int CallAndPush(lua_State* state, ArgTypes... args)
+	{
+		CallerType::Call(args...);
+		return 0;
 	}
 };
 
@@ -398,7 +265,7 @@ struct FunctionCaller<ReturnType (*)(GotArgTypes..., FirstRestArgType, MoreRestA
 		if(state->gotArgsCount >= state->argsCount)
 			THROW_PRIMARY_EXCEPTION("Not enough arguments for method call");
 		// аргумент есть, получить его и двигаться дальше
-		return Caller<ReturnType (*)(GotArgTypes..., FirstRestArgType, MoreRestArgTypes...), function, Args<GotArgTypes..., FirstRestArgType>, Args<MoreRestArgTypes...> >::Call(gotArgs..., NextArgGetter<FirstRestArgType>::Get(state));
+		return FunctionCaller<ReturnType (*)(GotArgTypes..., FirstRestArgType, MoreRestArgTypes...), function, Args<GotArgTypes..., FirstRestArgType>, Args<MoreRestArgTypes...> >::Call(gotArgs..., NextArgGetter<FirstRestArgType>::Get(state));
 	}
 };
 
@@ -428,7 +295,7 @@ struct MethodCaller<ReturnType (ClassType::*)(GotArgTypes..., FirstRestArgType, 
 		if(state->gotArgsCount >= state->argsCount)
 			THROW_PRIMARY_EXCEPTION("Not enough arguments for method call");
 		// аргумент есть, получить его и двигаться дальше
-		return MethodCaller<ReturnType (ClassType::*)(GotArgTypes..., FirstRestArgType, MoreRestArgTypes...), method, Args<GotArgTypes..., FirstRestArgType>, Args<MoreRestArgTypes...> >::Call(object, gotArgs..., NextArgGetter<FirstRestArgType>::Get(state));
+		return MethodCaller<ReturnType (ClassType::*)(GotArgTypes..., FirstRestArgType, MoreRestArgTypes...), method, Args<GotArgTypes..., FirstRestArgType>, Args<MoreRestArgTypes...> >::Call(state, object, gotArgs..., NextArgGetter<FirstRestArgType>::Get(state));
 	}
 };
 
@@ -484,14 +351,15 @@ struct FunctionThunk<ReturnType (*)(ArgTypes...), function>
 
 			// получить аргументы, выполнить вызов и положить результат в стек
 			// возвращается количество результатов
-			return ArgPusher<ReturnType>::Push(luaState, FunctionCaller<ReturnType (*)(ArgTypes...), function, Args<>, Args<ArgTypes...> >::Call(&state));
+			//return ArgPusher<ReturnType>::Push(luaState, FunctionCaller<ReturnType (*)(ArgTypes...), function, Args<>, Args<ArgTypes...> >::Call(&state));
+			return CallAndPusher<FunctionCaller<ReturnType (*)(ArgTypes...), function, Args<>, Args<ArgTypes...> >, ReturnType, ArgGettingState*>(luaState, &state);
 		}
 		catch(Exception* exception)
 		{
 			// положить в стек исключение
-			State::Push(state, MakePointer(exception));
+			ArgPusher<ptr<Exception> >::Push(luaState, exception);
 			// и выбросить ошибку
-			lua_error(state);
+			lua_error(luaState);
 		}
 	}
 };
@@ -521,14 +389,16 @@ struct MethodThunk<ReturnType (ClassType::*)(ArgTypes...), method>
 
 			// получить аргументы, выполнить вызов и положить результат в стек
 			// возвращается количество результатов
-			return ArgPusher<ReturnType>::Push(luaState, MethodCaller<ReturnType (ClassType::*)(ArgTypes...), method, Args<>, Args<ArgTypes...> >::Call(&state, thisObject));
+			return CallAndPusher<MethodCaller<ReturnType (ClassType::*)(ArgTypes...), method, Args<>, Args<ArgTypes...> >, ReturnType, ArgGettingState*, ptr<ClassType> >::CallAndPush(luaState, &state, thisObject);
 		}
 		catch(Exception* exception)
 		{
 			// положить в стек исключение
-			State::Push(state, MakePointer(exception));
+			ArgPusher<ptr<Exception> >::Push(luaState, exception);
 			// и выбросить ошибку
-			lua_error(state);
+			lua_error(luaState);
+			// lua_error не возвращает управления, это только для компилятора
+			return 0;
 		}
 	}
 };
@@ -557,9 +427,9 @@ struct ConstructorThunk
 		catch(Exception* exception)
 		{
 			// положить в стек исключение
-			State::Push(state, MakePointer(exception));
+			ArgPusher<ptr<Exception> >::Push(luaState, exception);
 			// и выбросить ошибку
-			lua_error(state);
+			lua_error(luaState);
 		}
 	}
 };

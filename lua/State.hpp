@@ -7,6 +7,7 @@
 #include "lua.hpp"
 #include "lualib.hpp"
 #include "stuff.hpp"
+#include "reflection_decl.hpp"
 
 BEGIN_INANITY
 
@@ -32,6 +33,9 @@ public:
 	State();
 	~State();
 
+	/// Получить состояние Lua.
+	lua_State* GetState();
+
 	/// Зарегистрировать класс.
 	template <typename ClassType>
 	void RegisterClass()
@@ -43,6 +47,6 @@ public:
 	ptr<Script> LoadScript(ptr<File> file);
 };
 
-END_INANITY
+END_INANITY_LUA
 
 #endif

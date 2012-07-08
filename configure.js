@@ -60,7 +60,7 @@ var libraries = {
 	},
 	// ******* скрипты на lua
 	'libinanity-lua': {
-		objects: ['lua.LuaState']
+		objects: ['lua.stuff', 'lua.reflection', 'lua.State', 'lua.Script']
 	},
 	// ******* криптография
 	'libinanity-crypto': {

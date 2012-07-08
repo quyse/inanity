@@ -1,9 +1,11 @@
-#include "LuaState.hpp"
+#include "State.hpp"
 #include "Script.hpp"
 #include "../File.hpp"
 #include "../Exception.hpp"
 #include <cstdlib>
 #include <sstream>
+
+BEGIN_INANITY_LUA
 
 State::State()
 {
@@ -13,12 +15,12 @@ State::State()
 		THROW_PRIMARY_EXCEPTION("Can't create Lua state");
 }
 
-LuaState::~LuaState()
+State::~State()
 {
 	lua_close(state);
 }
 
-void* LuaState::Alloc(void* self, void* ptr, size_t osize, size_t nsize)
+void* State::Alloc(void* self, void* ptr, size_t osize, size_t nsize)
 {
 	if(nsize)
 		return realloc(ptr, nsize);
@@ -26,7 +28,12 @@ void* LuaState::Alloc(void* self, void* ptr, size_t osize, size_t nsize)
 	return 0;
 }
 
-ptr<LuaState::Script> LuaState::LoadScript(ptr<File> file)
+lua_State* State::GetState()
+{
+	return state;
+}
+
+ptr<Script> State::LoadScript(ptr<File> file)
 {
 	/// Класс читателя.
 	/** Чтение выполняется в один приём. */
@@ -64,3 +71,5 @@ ptr<LuaState::Script> LuaState::LoadScript(ptr<File> file)
 	}
 	THROW_PRIMARY_EXCEPTION("Error when loading Lua script");
 }
+
+END_INANITY_LUA

@@ -1,5 +1,9 @@
 #include "reflection.hpp"
 
+BEGIN_INANITY_LUA
+
+ClassMember::~ClassMember() {}
+
 NamedClassMember::NamedClassMember(const char* name) : name(name) {}
 
 const char* NamedClassMember::GetName() const
@@ -7,7 +11,7 @@ const char* NamedClassMember::GetName() const
 	return name;
 }
 
-Class::Class(const char* fullName) : constructor(0), fullName(fullName)
+Class::Class(const char* fullName) : fullName(fullName), constructor(0)
 {
 	// получить имя класса
 	ptrdiff_t i;
@@ -24,3 +28,10 @@ Class::~Class()
 	for(size_t i = 0; i < staticMethods.size(); ++i)
 		delete staticMethods[i];
 }
+
+String Class::GetFullName() const
+{
+	return fullName;
+}
+
+END_INANITY_LUA

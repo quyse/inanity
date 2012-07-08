@@ -3,7 +3,7 @@
 
 #include "Object.hpp"
 #include "String.hpp"
-#include "scripting.hpp"
+#include "scripting_decl.hpp"
 #include <vector>
 
 BEGIN_INANITY
@@ -100,11 +100,7 @@ public:
 	*/
 	virtual void GetAllDirectoryEntries(const String& directoryName, std::vector<String>& entries) const;
 
-#ifdef ___INANITY_SCRIPTING
-	SCRIPTABLE_CALL(loadFile);
-	SCRIPTABLE_CALL(saveFile);
 	SCRIPTABLE_CLASS();
-#endif
 };
 
 END_INANITY
