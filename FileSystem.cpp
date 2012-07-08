@@ -4,9 +4,9 @@
 #include "Exception.hpp"
 #include "scripting.hpp"
 
-SCRIPTABLE_MAP_BEGIN(FileSystem);
-	SCRIPTABLE_METHOD(FileSystem, LoadFile);
-	SCRIPTABLE_METHOD(FileSystem, SaveFile);
+SCRIPTABLE_MAP_BEGIN(FileSystem, Inanity.FileSystem);
+//	SCRIPTABLE_METHOD(FileSystem, LoadFile);
+//	SCRIPTABLE_METHOD(FileSystem, SaveFile);
 SCRIPTABLE_MAP_END();
 
 ptr<File> FileSystem::LoadFile(const String& fileName)

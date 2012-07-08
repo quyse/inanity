@@ -6,9 +6,11 @@ exports.configureCompiler = function(objectFile, compiler) {
 	// если оканчивается на .c - это .c-файл, иначе .cpp
 	var source = a[2];
 	var b = /^(.*)\.c$/.exec(source);
-	if(b)
+	if(b) {
 		// .c-файл
 		source = b[1].replace(/\./g, '/') + '.c';
+		compiler.cppMode = false;
+	}
 	else
 		// .cpp-файл
 		source = source.replace(/\./g, '/') + '.cpp';
@@ -102,6 +104,12 @@ var executables = {
 		staticLibraries: ['libinanity-base', 'libinanity-graphics'],
 		dynamicLibraries: []
 	}
+	// TEST
+	, luatest: {
+		objects: ['lua.test'],
+		staticLibraries: ['libinanity-base', 'libinanity-lua', 'deps/lua//liblua'],
+		dynamicLibraries: ['m']
+	}
 };
 
 exports.configureComposer = function(libraryFile, composer) {
@@ -122,8 +130,15 @@ exports.configureLinker = function(executableFile, linker) {
 	var executable = executables[a[3]];
 	for ( var i = 0; i < executable.objects.length; ++i)
 		linker.addObjectFile(confDir + executable.objects[i]);
-	for ( var i = 0; i < executable.staticLibraries.length; ++i)
-		linker.addStaticLibrary(confDir + executable.staticLibraries[i]);
+	for ( var i = 0; i < executable.staticLibraries.length; ++i) {
+		var staticLibrary = executable.staticLibraries[i];
+		var confPos = staticLibrary.indexOf('//');
+		if(confPos >= 0)
+			staticLibrary = staticLibrary.replace('//', '/' + confDir);
+		else
+			staticLibrary = confDir + staticLibrary;
+		linker.addStaticLibrary(staticLibrary);
+	}
 	for ( var i = 0; i < executable.dynamicLibraries.length; ++i)
 		linker.addDynamicLibrary(executable.dynamicLibraries[i]);
 };

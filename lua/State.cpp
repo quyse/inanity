@@ -13,6 +13,9 @@ State::State()
 	state = lua_newstate(Alloc, this);
 	if(!state)
 		THROW_PRIMARY_EXCEPTION("Can't create Lua state");
+
+	// установить функцию окончания
+//	lua_atpanic(state, Panic);
 }
 
 State::~State()
@@ -26,6 +29,19 @@ void* State::Alloc(void* self, void* ptr, size_t osize, size_t nsize)
 		return realloc(ptr, nsize);
 	free(ptr);
 	return 0;
+}
+
+int State::Panic(lua_State* state)
+{
+	try
+	{
+		ProcessError(state);
+		THROW_PRIMARY_EXCEPTION("Unprocessed lua panic");
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Lua panic", exception);
+	}
 }
 
 lua_State* State::GetState()

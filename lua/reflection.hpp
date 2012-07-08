@@ -2,7 +2,7 @@
 #define ___INANITY_LUA_REFLECTION_HPP___
 
 #include "reflection_decl.hpp"
-#include "stuff.hpp"
+#include "core.hpp"
 #include "lualib.hpp"
 
 BEGIN_INANITY_LUA
@@ -33,16 +33,29 @@ void Class::SetConstructor()
 	constructor = new ConcreteConstructor<ClassType, ArgTypes...>();
 }
 
+// нестатический метод
+template <typename ReturnType, typename ClassType, typename... ArgTypes, ReturnType (ClassType::*method)(ArgTypes...)>
+struct ClassMethodAdder<ReturnType (ClassType::*)(ArgTypes...), method>
+{
+	static void Add(Class* cls, const char* name)
+	{
+		cls->methods.push_back(new ConcreteMethod<ReturnType (ClassType::*)(ArgTypes...), method>(name));
+	}
+};
+// статический метод
+template <typename ReturnType, typename... ArgTypes, ReturnType (*method)(ArgTypes...)>
+struct ClassMethodAdder<ReturnType (*)(ArgTypes...), method>
+{
+	static void Add(Class* cls, const char* name)
+	{
+		cls->staticMethods.push_back(new ConcreteFunction<ReturnType (*)(ArgTypes...), method>(name));
+	}
+};
+
 template <typename MethodType, MethodType method>
 void Class::AddMethod(const char* name)
 {
-	methods.push_back(new ConcreteMethod<MethodType, method>(name));
-}
-
-template <typename FunctionType, FunctionType function>
-void Class::AddStaticMethod(const char* name)
-{
-	staticMethods.push_back(new ConcreteFunction<FunctionType, function>(name));
+	ClassMethodAdder<MethodType, method>::Add(this, name);
 }
 
 END_INANITY_LUA

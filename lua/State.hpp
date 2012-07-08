@@ -28,6 +28,8 @@ private:
 private:
 	/// Обработчик выделения памяти Lua.
 	static void* Alloc(void* self, void* ptr, size_t osize, size_t nsize);
+	/// Обработчик фатальной ошибки Lua.
+	static int Panic(lua_State* state);
 
 public:
 	State();
@@ -40,7 +42,7 @@ public:
 	template <typename ClassType>
 	void RegisterClass()
 	{
-		RegisterClass(state, ClassType::scriptClass);
+		Lua::RegisterClass(state, ClassType::scriptClass);
 	}
 
 	/// Загрузить скрипт из файла.

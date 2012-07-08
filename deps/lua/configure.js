@@ -8,6 +8,7 @@ exports.configureCompiler = function(objectFile, compiler) {
 	var a = /^([^\/]+)\/([^\/]+)$/.exec(objectFile);
 	compiler.configuration = a[1];
 	compiler.setSourceFile('src/' + a[2] + '.c');
+	compiler.cppMode = false;
 };
 
 var objects = 'lapi lcode lctype ldebug ldo ldump lfunc lgc llex lmem lobject lopcodes lparser lstate lstring ltable ltm lundump lvm lzio' //

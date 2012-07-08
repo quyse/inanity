@@ -67,15 +67,24 @@ public:
 	void PushThunk(lua_State* luaState);
 };
 
+/// Вспомогательная структура для добавления методов.
+template <typename MethodType, MethodType method>
+struct ClassMethodAdder;
+
 /// Класс, описывающий класс, который можно использовать в скрипте.
 class Class
 {
+	template <typename MethodType, MethodType method>
+	friend struct ClassMethodAdder;
 private:
 	/// Имя класса.
 	String name;
 	/// Полное имя класса (с namespace).
 	String fullName;
-public:
+
+	/// Родительский класс (если есть).
+	/** От него наследуются методы и свойства (нестатические). */
+	Class* parent;
 	/// Конструктор (если есть).
 	Constructor* constructor;
 	/// Список методов класса.
@@ -90,17 +99,25 @@ public:
 	/// Получить полное имя класса.
 	String GetFullName() const;
 
+	/// Получить родительский класс (если есть).
+	Class* GetParent() const;
+	/// Указать родительский класс.
+	void SetParent(Class* parent);
+
+	/// Получить конструктор (если есть).
+	Constructor* GetConstructor() const;
 	/// Указать конструктор.
 	template <typename ClassType, typename... ArgTypes>
 	void SetConstructor();
 
-	/// Добавить метод.
+	/// Получить методы.
+	const std::vector<Method*>& GetMethods() const;
+	/// Получить статические методы.
+	const std::vector<Function*>& GetStaticMethods() const;
+
+	/// Добавить метод (статический или динамический).
 	template <typename MethodType, MethodType method>
 	void AddMethod(const char* name);
-
-	/// Добавить статический метод.
-	template <typename FunctionType, FunctionType function>
-	void AddStaticMethod(const char* name);
 };
 
 END_INANITY_LUA

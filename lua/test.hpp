@@ -1,0 +1,35 @@
+/* Тестовый файл Lua.
+*/
+
+#include "../scripting_decl.hpp"
+
+BEGIN_INANITY_LUA
+
+class ClassA : public Object
+{
+public:
+	ClassA();
+
+	virtual void print(const String& a);
+	void print2(int a, const String& b);
+
+	static String describe(ptr<ClassA> a);
+
+	SCRIPTABLE_CLASS();
+};
+
+class ClassB : public ClassA
+{
+private:
+	ptr<ClassA> a;
+
+public:
+	ClassB(ptr<ClassA> a);
+
+	void print(const String& a);
+	void print3(ptr<ClassA> a);
+
+	SCRIPTABLE_CLASS();
+};
+
+END_INANITY_LUA

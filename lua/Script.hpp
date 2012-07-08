@@ -3,7 +3,7 @@
 
 #include "lua.hpp"
 #include "State.hpp"
-#include "stuff.hpp"
+#include "core.hpp"
 
 BEGIN_INANITY_LUA
 
@@ -42,6 +42,7 @@ public:
 			gettingState.state = luaState;
 			gettingState.argsCount = lua_gettop(luaState) - beginStack;
 			gettingState.gotArgsCount = 0;
+#if 0 // FIXME: проверять всё-таки надо, но загвоздка с void
 			// получить единственный результат
 			ReturnType result = NextArgGetter<ReturnType>::Get(&gettingState);
 			// проверить, что результатов правильное количество
@@ -49,24 +50,13 @@ public:
 				THROW_PRIMARY_EXCEPTION("Invalid results count returned by Lua function");
 			// вернуть результат
 			return result;
+#else
+			// просто получить
+			return NextArgGetter<ReturnType>::Get(&gettingState);
+#endif
 		}
-		// иначе ошибка
-		// посмотреть, не ptr<Exception> ли
-		if(lua_isuserdata(luaState, -1) && !lua_islightuserdata(luaState, -1))
-		{
-			// full userdata, возможно, что Exception
-			ObjectUserData* userData = (ObjectUserData*)lua_touserdata(luaState, -1);
-			if(userData->type == UserData::typeObject && userData->cls == &Exception::scriptClass)
-				// да, Exception! завернуть его в новое исключение
-				THROW_SECONDARY_EXCEPTION("Exception while running Lua function", (Exception*)userData->object);
-		}
-		// это не Exception, хз, чё это
-		// если строка
-		const char* errorString = lua_tostring(luaState, -1);
-		if(errorString)
-			THROW_PRIMARY_EXCEPTION(String("Error while running Lua function: ") + errorString);
-		// иначе совсем хз
-		THROW_PRIMARY_EXCEPTION("Unknown error while running Lua function");
+		// иначе ошибка, обработать её
+		ProcessError(luaState);
 	}
 };
 

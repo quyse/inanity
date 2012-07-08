@@ -13,7 +13,7 @@
 
 #include "scripting.hpp"
 
-SCRIPTABLE_MAP_BEGIN(Exception);
+SCRIPTABLE_MAP_BEGIN(Exception, Inanity.Exception);
 SCRIPTABLE_MAP_END();
 
 Exception::Exception(const String& message) : message(message)
