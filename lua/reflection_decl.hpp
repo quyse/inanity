@@ -60,7 +60,7 @@ public:
 };
 
 /// Конкретный конструктор.
-template <typename ClassType, typename... ArgTypes>
+template <typename ConstructorType>
 class ConcreteConstructor : public Constructor
 {
 public:
@@ -68,14 +68,14 @@ public:
 };
 
 /// Вспомогательная структура для добавления методов.
-template <typename MethodType, MethodType method>
-struct ClassMethodAdder;
+template <typename CalleeType, CalleeType callee, int isMethod>
+struct CalleeAdder;
 
 /// Класс, описывающий класс, который можно использовать в скрипте.
 class Class
 {
-	template <typename MethodType, MethodType method>
-	friend struct ClassMethodAdder;
+	template <typename CalleeType, CalleeType callee, int isMethod>
+	friend struct CalleeAdder;
 private:
 	/// Имя класса.
 	String name;
@@ -106,19 +106,36 @@ public:
 
 	/// Получить конструктор (если есть).
 	Constructor* GetConstructor() const;
-	/// Указать конструктор.
-	template <typename ClassType, typename... ArgTypes>
-	void SetConstructor();
 
 	/// Получить методы.
 	const std::vector<Method*>& GetMethods() const;
 	/// Получить статические методы.
 	const std::vector<Function*>& GetStaticMethods() const;
 
-	/// Добавить метод (статический или динамический).
+	/// Добавить метод (статический или нестатический).
 	template <typename MethodType, MethodType method>
 	void AddMethod(const char* name);
+
+	/// Указать конструктор.
+	template <typename ConstructorType>
+	void SetConstructor();
 };
+
+/// Класс конкретного класса.
+template <typename ClassType>
+class ConcreteClass : public Class
+{
+public:
+	/// Тип исходного класса.
+	typedef ClassType Type;
+
+public:
+	ConcreteClass(const char* fullName);
+};
+
+/// Инициализатор конкретного класса.
+template <typename ClassType>
+void InitConcreteClass(ConcreteClass<ClassType>& cls);
 
 END_INANITY_LUA
 

@@ -2,7 +2,8 @@
 #define ___INANITY_LUA_REFLECTION_HPP___
 
 #include "reflection_decl.hpp"
-#include "core.hpp"
+#include "thunks_decl.hpp"
+#include "callable_decl.hpp"
 #include "lualib.hpp"
 
 BEGIN_INANITY_LUA
@@ -10,52 +11,58 @@ BEGIN_INANITY_LUA
 template <typename FunctionType, FunctionType function>
 void ConcreteFunction<FunctionType, function>::PushThunk(lua_State* luaState)
 {
-	lua_pushcclosure(luaState, &FunctionThunk<FunctionType, function>::Thunk, 0);
+	lua_pushcclosure(luaState, &CalleeThunk<FunctionType, function>::Thunk, 0);
 }
 
 template <typename MethodType, MethodType method>
 void ConcreteMethod<MethodType, method>::PushThunk(lua_State* luaState)
 {
-	lua_pushcclosure(luaState, &MethodThunk<MethodType, method>::Thunk, 0);
+	lua_pushcclosure(luaState, &CalleeThunk<MethodType, method>::Thunk, 0);
 }
 
-template <typename ClassType, typename... ArgTypes>
-void ConcreteConstructor<ClassType, ArgTypes...>::PushThunk(lua_State* luaState)
+template <typename ConstructorType>
+void ConcreteConstructor<ConstructorType>::PushThunk(lua_State* luaState)
 {
-	lua_pushcclosure(luaState, &ConstructorThunk<ClassType, ArgTypes...>::Thunk, 0);
+	lua_pushcclosure(luaState, &ConstructorThunk<ConstructorType>::Thunk, 0);
 }
 
-template <typename ClassType, typename... ArgTypes>
+template <typename ClassType>
+ConcreteClass<ClassType>::ConcreteClass(const char* fullName) : Class(fullName)
+{
+	InitConcreteClass<ClassType>(*this);
+}
+
+template <typename CalleeType, CalleeType callee, int isMethod>
+struct CalleeAdder;
+
+template <typename CalleeType, CalleeType callee>
+struct CalleeAdder<CalleeType, callee, 0>
+{
+	static void Add(Class* cls, const char* name)
+	{
+		cls->staticMethods.push_back(new ConcreteFunction<CalleeType, callee>(name));
+	}
+};
+
+template <typename CalleeType, CalleeType callee>
+struct CalleeAdder<CalleeType, callee, 1>
+{
+	static void Add(Class* cls, const char* name)
+	{
+		cls->methods.push_back(new ConcreteMethod<CalleeType, callee>(name));
+	}
+};
+
+template <typename ConstructorType>
 void Class::SetConstructor()
 {
-	if(constructor)
-		delete constructor;
-	constructor = new ConcreteConstructor<ClassType, ArgTypes...>();
+	constructor = new ConcreteConstructor<ConstructorType>();
 }
-
-// нестатический метод
-template <typename ReturnType, typename ClassType, typename... ArgTypes, ReturnType (ClassType::*method)(ArgTypes...)>
-struct ClassMethodAdder<ReturnType (ClassType::*)(ArgTypes...), method>
-{
-	static void Add(Class* cls, const char* name)
-	{
-		cls->methods.push_back(new ConcreteMethod<ReturnType (ClassType::*)(ArgTypes...), method>(name));
-	}
-};
-// статический метод
-template <typename ReturnType, typename... ArgTypes, ReturnType (*method)(ArgTypes...)>
-struct ClassMethodAdder<ReturnType (*)(ArgTypes...), method>
-{
-	static void Add(Class* cls, const char* name)
-	{
-		cls->staticMethods.push_back(new ConcreteFunction<ReturnType (*)(ArgTypes...), method>(name));
-	}
-};
 
 template <typename MethodType, MethodType method>
 void Class::AddMethod(const char* name)
 {
-	ClassMethodAdder<MethodType, method>::Add(this, name);
+	CalleeAdder<MethodType, method, Callable<MethodType>::isMethod>::Add(this, name);
 }
 
 END_INANITY_LUA

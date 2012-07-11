@@ -1,5 +1,6 @@
 #include "test.hpp"
 #include "../inanity-base.hpp"
+#include "../scripting_impl.hpp"
 #include "../scripting.hpp"
 #include <iostream>
 #include <sstream>

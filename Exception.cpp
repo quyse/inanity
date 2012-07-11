@@ -11,7 +11,7 @@
 #include <cstring>
 #endif // ___INANITY_LINUX
 
-#include "scripting.hpp"
+#include "scripting_impl.hpp"
 
 SCRIPTABLE_MAP_BEGIN(Exception, Inanity.Exception);
 SCRIPTABLE_MAP_END();

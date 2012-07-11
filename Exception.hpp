@@ -74,7 +74,7 @@ public:
 	static ptr<Exception> SystemError();
 	static ptr<Exception> SystemError(int errorCode);
 
-	SCRIPTABLE_CLASS();
+	SCRIPTABLE_CLASS(Exception);
 };
 
 #ifdef _DEBUG

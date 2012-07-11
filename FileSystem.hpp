@@ -100,7 +100,7 @@ public:
 	*/
 	virtual void GetAllDirectoryEntries(const String& directoryName, std::vector<String>& entries) const;
 
-	SCRIPTABLE_CLASS();
+	SCRIPTABLE_CLASS(FileSystem);
 };
 
 END_INANITY

@@ -2,11 +2,11 @@
 #include "File.hpp"
 #include "FileInputStream.hpp"
 #include "Exception.hpp"
-#include "scripting.hpp"
+#include "scripting_impl.hpp"
 
 SCRIPTABLE_MAP_BEGIN(FileSystem, Inanity.FileSystem);
-//	SCRIPTABLE_METHOD(FileSystem, LoadFile);
-//	SCRIPTABLE_METHOD(FileSystem, SaveFile);
+	SCRIPTABLE_METHOD(FileSystem, LoadFile);
+	SCRIPTABLE_METHOD(FileSystem, SaveFile);
 SCRIPTABLE_MAP_END();
 
 ptr<File> FileSystem::LoadFile(const String& fileName)

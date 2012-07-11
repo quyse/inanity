@@ -1,5 +1,6 @@
 #include "stuff.hpp"
 #include "reflection.hpp"
+#include "values.hpp"
 
 BEGIN_INANITY_LUA
 
@@ -22,7 +23,7 @@ int NonConstructableClass_call(lua_State* state)
 	// а в замыкании лежит полное имя класса
 
 	// выбросить исключение
-	ArgPusher<ptr<Exception> >::Push(state, NEW(Exception(String("Trying to create object of non-constructable class ") + lua_tostring(state, lua_upvalueindex(1)))));
+	Value<ptr<Exception> >::Push(state, NEW(Exception(String("Trying to create object of non-constructable class ") + lua_tostring(state, lua_upvalueindex(1)))));
 	lua_error(state);
 	return 0;
 }

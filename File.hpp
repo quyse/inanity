@@ -26,7 +26,7 @@ public:
 	*/
 	virtual size_t GetSize() const = 0;
 
-	SCRIPTABLE_CLASS();
+	SCRIPTABLE_CLASS(File);
 };
 
 END_INANITY

@@ -1,52 +1,25 @@
 #ifndef ___INANITY_SCRIPTING_HPP___
 #define ___INANITY_SCRIPTING_HPP___
 
-/* Файл для включения в cpp-файлы.
+/* Файл для включения, если требуется непосредственная работа со скриптами.
 */
 
-#include "Object.hpp"
+#include "scripting_decl.hpp"
 
-#define ___INANITY_SCRIPTING
 #ifdef ___INANITY_SCRIPTING
 
 #include "lua/reflection.hpp"
+#include "lua/callable.hpp"
+#include "lua/thunks.hpp"
 #include "lua/State.hpp"
 #include "lua/Script.hpp"
-#include <typeinfo>
 
 BEGIN_INANITY
 
-/// Тип, хранящий состояние скриптовой системы.
 typedef Lua::State ScriptState;
-/// Тип скриптов.
 typedef Lua::Script Script;
 
-//****** Макросы для определения методов и свойств.
-
-// Добавить в файл реализации.
-#define SCRIPTABLE_MAP_BEGIN(className, fullClassName) \
-	ScriptClass className::scriptClass = className::InitScriptClass(); \
-	ScriptClass className::InitScriptClass() { ScriptClass res(#fullClassName)
-#define SCRIPTABLE_MAP_END() \
-	return res; }
-// Родительский класс.
-#define SCRIPTABLE_PARENT(parentClassName) \
-	res.SetParent(&parentClassName::scriptClass)
-// Конструктор класса.
-#define SCRIPTABLE_CONSTRUCTOR(...) \
-	res.SetConstructor<__VA_ARGS__>()
-// Метод в карте методов (статический или нестатический).
-#define SCRIPTABLE_METHOD(className, methodName) \
-	res.AddMethod<decltype(&className::methodName), &className::methodName>(#methodName)
-
 END_INANITY
-
-#else // ___INANITY_SCRIPTING
-
-#define SCRIPTABLE_MAP_BEGIN(className)
-#define SCRIPTABLE_MAP_END()
-#define SCRIPTABLE_PARENT(parentClassName)
-#define SCRIPTABLE_METHOD(className, methodName)
 
 #endif // ___INANITY_SCRIPTING
 

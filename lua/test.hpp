@@ -15,7 +15,7 @@ public:
 
 	static String describe(ptr<ClassA> a);
 
-	SCRIPTABLE_CLASS();
+	SCRIPTABLE_CLASS(ClassA);
 };
 
 class ClassB : public ClassA
@@ -29,7 +29,7 @@ public:
 	void print(const String& a);
 	void print3(ptr<ClassA> a);
 
-	SCRIPTABLE_CLASS();
+	SCRIPTABLE_CLASS(ClassB);
 };
 
 END_INANITY_LUA
