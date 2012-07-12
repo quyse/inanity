@@ -150,7 +150,8 @@ struct ConstructorThunk
 			state.state = luaState;
 			// получить действительное количество аргументов
 			state.argsCount = lua_gettop(luaState);
-			state.gotArgsCount = 0;
+			// первый аргумент нужно пропустить, так как это всегда будет объект класса
+			state.gotArgsCount = 1;
 
 			// получить аргументы, выполнить вызов и положить результат в стек
 			// возвращается количество результатов

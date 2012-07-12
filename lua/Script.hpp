@@ -18,7 +18,7 @@ inline ReturnType ScriptReturn(lua_State* state, int argsCount)
 template <>
 inline void ScriptReturn<void>(lua_State* state, int argsCount)
 {
-	if(argsCount != 1)
+	if(argsCount != 0)
 		THROW_PRIMARY_EXCEPTION("Lua function expected to return no results");
 }
 
