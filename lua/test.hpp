@@ -1,6 +1,7 @@
 /* Тестовый файл Lua.
 */
 
+#include "../inanity-base.hpp"
 #include "../scripting_decl.hpp"
 
 BEGIN_INANITY_LUA
@@ -13,7 +14,7 @@ public:
 	virtual void print(const String& a);
 	void print2(int a, const String& b);
 
-	static String describe(ptr<ClassA> a);
+	static void printFile(ptr<File> a);
 
 	SCRIPTABLE_CLASS(ClassA);
 };

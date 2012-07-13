@@ -11,7 +11,7 @@ SCRIPTABLE_MAP_BEGIN(ClassA, Inanity.Lua.ClassA);
 	SCRIPTABLE_CONSTRUCTOR(ClassA);
 	SCRIPTABLE_METHOD(ClassA, print);
 	SCRIPTABLE_METHOD(ClassA, print2);
-	SCRIPTABLE_METHOD(ClassA, describe);
+	SCRIPTABLE_METHOD(ClassA, printFile);
 SCRIPTABLE_MAP_END();
 SCRIPTABLE_MAP_BEGIN(ClassB, Inanity.Lua.ClassB);
 	SCRIPTABLE_PARENT(ClassA);
@@ -31,11 +31,9 @@ void ClassA::print2(int a, const String& b)
 	std::cout << "ClassA::print2: " << a << ", " << b << '\n';
 }
 
-String ClassA::describe(ptr<ClassA> a)
+void ClassA::printFile(ptr<File> file)
 {
-	char str[10];
-	sprintf(str, "%p", (ClassA*)a);
-	return str;
+	std::cout << Strings::File2String(file);
 }
 
 ClassB::ClassB(ptr<ClassA> a) : a(a) {}
@@ -60,6 +58,9 @@ int main()
 
 		state->RegisterClass<Lua::ClassA>();
 		state->RegisterClass<Lua::ClassB>();
+		state->RegisterClass<Inanity::FileSystem>();
+		state->RegisterClass<Inanity::File>();
+		state->RegisterClass<Inanity::FolderFileSystem>();
 
 		ptr<Script> script = state->LoadScript(FolderFileSystem::GetNativeFileSystem()->LoadFile("lua/test.lua"));
 
