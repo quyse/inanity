@@ -141,6 +141,10 @@ struct Value<ptr<ObjectType> >
 {
 	static inline ptr<ObjectType> Get(lua_State* state, int index)
 	{
+		// проверить, если это nil (это допустимо)
+		if(lua_isnil(state, index))
+			return 0;
+
 		// получить userdata для объекта, и проверить, что это объект
 		ObjectUserData* userData = (ObjectUserData*)lua_touserdata(state, index);
 		if(!userData || lua_islightuserdata(state, index) || userData->type != UserData::typeObject)
@@ -157,6 +161,13 @@ struct Value<ptr<ObjectType> >
 
 	static inline void Push(lua_State* state, ptr<ObjectType> value)
 	{
+		// проверить, если указатель нулевой, то запустить nil (это допустимо)
+		if(!value)
+		{
+			lua_pushnil(state);
+			return;
+		}
+
 		ObjectUserData* userData = (ObjectUserData*)lua_newuserdata(state, sizeof(ObjectUserData));
 		userData->type = UserData::typeObject;
 		userData->object = (Object*)(ObjectType*)value;
