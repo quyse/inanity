@@ -9,8 +9,9 @@
 // Добавить в файл реализации.
 // Начало карты методов.
 #define SCRIPTABLE_MAP_BEGIN(className, fullClassName) \
-	Inanity::Lua::ConcreteClass<className> className::scriptClass(#fullClassName); \
-	template <> void Inanity::Lua::InitConcreteClass<className>(Inanity::Lua::ConcreteClass<className>& cls) {
+	static void InitConcreteClass_##className(Inanity::Lua::ConcreteClass<className>& cls); \
+	Inanity::Lua::ConcreteClass<className> className::scriptClass(#fullClassName, &InitConcreteClass_##className); \
+	static void InitConcreteClass_##className(Inanity::Lua::ConcreteClass<className>& cls) {
 // Конец карты методов.
 #define SCRIPTABLE_MAP_END() }
 // Родительский класс.

@@ -27,9 +27,10 @@ void ConcreteConstructor<ConstructorType>::PushThunk(lua_State* luaState)
 }
 
 template <typename ClassType>
-ConcreteClass<ClassType>::ConcreteClass(const char* fullName) : Class(fullName)
+ConcreteClass<ClassType>::ConcreteClass(const char* fullName, void (*init)(ConcreteClass<ClassType>& cls)) : Class(fullName)
 {
-	InitConcreteClass<ClassType>(*this);
+	if(init)
+		init(*this);
 }
 
 template <typename CalleeType, CalleeType callee, int isMethod>

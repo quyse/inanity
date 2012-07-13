@@ -130,12 +130,8 @@ public:
 	typedef ClassType Type;
 
 public:
-	ConcreteClass(const char* fullName);
+	ConcreteClass(const char* fullName, void (*init)(ConcreteClass<ClassType>&) = 0);
 };
-
-/// Инициализатор конкретного класса.
-template <typename ClassType>
-void InitConcreteClass(ConcreteClass<ClassType>& cls);
 
 END_INANITY_LUA
 
