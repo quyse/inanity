@@ -68,7 +68,7 @@ void PushClassMetaTable(lua_State* state, Class& cls)
 	// всё.
 }
 
-void RegisterClass(lua_State* state, Class& cls)
+void RegisterCls(lua_State* state, Class& cls)
 {
 	// разобрать полное имя класса (вида Inanity.Namespace1.Namespace2.ClassName),
 	// пройтись по этому пути, и создать глобальный объект

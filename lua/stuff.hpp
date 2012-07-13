@@ -19,7 +19,7 @@ int MetaTable_index(lua_State* state);
 void PushClassMetaTable(lua_State* state, Class& cls);
 
 /// Зарегистрировать класс в состоянии.
-void RegisterClass(lua_State* state, Class& cls);
+void RegisterCls(lua_State* state, Class& cls);
 
 /// Структура с методами метатаблицы объектов.
 int ObjectMetaTable_gc(lua_State* state);

@@ -41,7 +41,7 @@ public:
 	template <typename ClassType>
 	void RegisterClass()
 	{
-		Lua::RegisterClass(state, ClassType::scriptClass);
+		Lua::RegisterCls(state, ClassType::scriptClass);
 	}
 
 	/// Загрузить скрипт из файла.
