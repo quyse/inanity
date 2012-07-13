@@ -17,9 +17,6 @@ struct ArgGettingState
 	int gotArgsCount;
 };
 
-/// Специальный бесполезный тип, который нужен для указания конструкторов.
-struct Construct;
-
 /// Переходник для функций.
 /** Предназначен для содержания следующего метода:
 static int Thunk(lua_State* luaState);
@@ -30,7 +27,7 @@ template <typename CalleeType, CalleeType callee>
 struct CalleeThunk;
 
 /// Переходник для конструкторов.
-/* CalleeType = Construct (ClassType::*)(ArgTypes...)
+/* CalleeType = void (ClassType::*)(ArgTypes...)
 */
 template <typename CalleeType>
 struct ConstructorThunk;

@@ -28,7 +28,7 @@ struct Storagable<const SourceType&>
 template <typename First, typename Rest>
 struct Types
 {
-	First first;
+	typename Storagable<First>::Type first;
 	Rest rest;
 };
 typedef char TypesVoid;
