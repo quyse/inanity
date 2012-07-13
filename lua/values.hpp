@@ -15,7 +15,7 @@ struct Value<bool>
 {
 	static inline bool Get(lua_State* state, int index)
 	{
-		return lua_toboolean(state, index);
+		return !!lua_toboolean(state, index);
 	}
 
 	static inline void Push(lua_State* state, bool value)

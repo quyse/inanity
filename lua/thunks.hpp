@@ -86,21 +86,21 @@ struct ConstructorCaller;
 template <typename CalleeType>
 struct ConstructorCaller<CalleeType, void>
 {
-	static inline typename Callable<CalleeType>::ReturnType Call(ArgGettingState& state, typename ArgsOrVoid<typename Callable<CalleeType>::Args>::Args& args, TypesVoid& restArgs)
+	static inline typename CallableConstructor<CalleeType>::ReturnType Call(ArgGettingState& state, typename ArgsOrVoid<typename CallableConstructor<CalleeType>::Args>::Args& args, TypesVoid& restArgs)
 	{
 		// в стеке не должно остаться аргументов
 		if(state.gotArgsCount != state.argsCount)
 			THROW_PRIMARY_EXCEPTION("Extra arguments for function call");
 
 		// выполнить вызов
-		return Callable<CalleeType>::Call(args);
+		return CallableConstructor<CalleeType>::Call(args);
 	}
 };
 // когда ещё не все аргументы получены
 template <typename CalleeType, typename FirstRestArg, typename RestRestArgs>
 struct ConstructorCaller<CalleeType, Types<FirstRestArg, RestRestArgs> >
 {
-	static inline typename Callable<CalleeType>::ReturnType Call(ArgGettingState& state, typename Callable<CalleeType>::Args& args, Types<FirstRestArg, RestRestArgs>& restArgs)
+	static inline typename CallableConstructor<CalleeType>::ReturnType Call(ArgGettingState& state, typename CallableConstructor<CalleeType>::Args& args, Types<FirstRestArg, RestRestArgs>& restArgs)
 	{
 		restArgs.first = ArgGetter<FirstRestArg>::Get(state);
 		return ConstructorCaller<CalleeType, RestRestArgs>::Call(state, args, restArgs.rest);
@@ -155,8 +155,8 @@ struct ConstructorThunk
 
 			// получить аргументы, выполнить вызов и положить результат в стек
 			// возвращается количество результатов
-			typename ArgsOrVoid<typename Callable<CalleeType>::Args>::Args args;
-			return CallAndReturn<ConstructorCaller<CalleeType, typename Callable<CalleeType>::Args>, typename Callable<CalleeType>::ReturnType, typename ArgsOrVoid<typename Callable<CalleeType>::Args>::Args>::Do(state, args);
+			typename ArgsOrVoid<typename CallableConstructor<CalleeType>::Args>::Args args;
+			return CallAndReturn<ConstructorCaller<CalleeType, typename CallableConstructor<CalleeType>::Args>, typename CallableConstructor<CalleeType>::ReturnType, typename ArgsOrVoid<typename CallableConstructor<CalleeType>::Args>::Args>::Do(state, args);
 		}
 		catch(Exception* exception)
 		{

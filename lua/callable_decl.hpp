@@ -39,7 +39,7 @@ struct Types<First, void>
 	TypesVoid rest; // необходимо, чтобы был хоть какой-нибудь элемент
 };
 
-/// Структура, получающая список типов аргументов функции, метода или конструктора.
+/// Структура, получающая список типов аргументов функции или метода.
 /**
 Функция или метод определяются просто по типу CalleeType.
 Конструктор - это особый случай, это функция с возвращаемым значением типа 
@@ -51,6 +51,11 @@ template <CalleeType callee> ReturnType Call(Args& args) - вызов соотв
 */
 template <typename CalleeType>
 struct Callable;
+
+/// Аналогичная структура для конструкторов.
+/** CalleeType = void (ClassType::*)(ArgTypes...) */
+template <typename CalleeType>
+struct CallableConstructor;
 
 END_INANITY_LUA
 

@@ -18,7 +18,7 @@
 	cls.SetParent(&parentClassName::scriptClass)
 // Конструктор класса.
 #define SCRIPTABLE_CONSTRUCTOR(className, ...) \
-	cls.SetConstructor<Inanity::Lua::Construct (className::*)(__VA_ARGS__)>()
+	cls.SetConstructor<void (className::*)(__VA_ARGS__)>()
 //	cls.SetConstructor<Inanity::Lua::Construct (decltype(cls)::Type::*)(__VA_ARGS__)>()
 // Метод в карте методов (статический или нестатический).
 #define SCRIPTABLE_METHOD(className, methodName) \

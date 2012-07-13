@@ -298,82 +298,82 @@ struct Callable<R (C::*)(A1, A2, A3, A4, A5, A6, A7, A8) const>
 //******* Callable для конструкторов
 
 template <typename C>
-struct Callable<Construct (C::*)()>
+struct CallableConstructor<void (C::*)()>
 {
 	enum { isMethod = 0 };
-	typedef Construct (C::*CalleeType)();
+	typedef void (C::*CalleeType)();
 	typedef void Args;
 	typedef ptr<C> ReturnType;
 	static inline ptr<C> Call(TypesVoid& args) { return NEW(C()); }
 };
 template <typename C, typename A1>
-struct Callable<Construct (C::*)(A1)>
+struct CallableConstructor<void (C::*)(A1)>
 {
 	enum { isMethod = 0 };
-	typedef Construct (C::*CalleeType)(A1);
+	typedef void (C::*CalleeType)(A1);
 	typedef Types<A1, void> Args;
 	typedef ptr<C> ReturnType;
 	static inline ptr<C> Call(Args& args) { return NEW(C(a1)); }
 };
 template <typename C, typename A1, typename A2>
-struct Callable<Construct (C::*)(A1, A2)>
+struct CallableConstructor<void (C::*)(A1, A2)>
 {
 	enum { isMethod = 0 };
-	typedef Construct (C::*CalleeType)(A1, A2);
+	typedef void (C::*CalleeType)(A1, A2);
 	typedef Types<A1, Types<A2, void> > Args;
 	typedef ptr<C> ReturnType;
 	static inline ptr<C> Call(Args& args) { return NEW(C(a1, a2)); }
 };
 template <typename C, typename A1, typename A2, typename A3>
-struct Callable<Construct (C::*)(A1, A2, A3)>
+struct CallableConstructor<void (C::*)(A1, A2, A3)>
 {
 	enum { isMethod = 0 };
-	typedef Construct (C::*CalleeType)(A1, A2, A3);
+	typedef void (C::*CalleeType)(A1, A2, A3);
 	typedef Types<A1, Types<A2, Types<A3, void> > > Args;
 	typedef ptr<C> ReturnType;
 	static inline ptr<C> Call(Args& args) { return NEW(C(a1, a2, a3)); }
 };
 template <typename C, typename A1, typename A2, typename A3, typename A4>
-struct Callable<Construct (C::*)(A1, A2, A3, A4)>
+struct CallableConstructor<void (C::*)(A1, A2, A3, A4)>
 {
 	enum { isMethod = 0 };
-	typedef Construct (C::*CalleeType)(A1, A2, A3, A4);
+	typedef void (C::*CalleeType)(A1, A2, A3, A4);
 	typedef Types<A1, Types<A2, Types<A3, Types<A4, void> > > > Args;
 	typedef ptr<C> ReturnType;
 	static inline ptr<C> Call(Args& args) { return NEW(C(a1, a2, a3, a4)); }
 };
 template <typename C, typename A1, typename A2, typename A3, typename A4, typename A5>
-struct Callable<Construct (C::*)(A1, A2, A3, A4, A5)>
+struct CallableConstructor<void (C::*)(A1, A2, A3, A4, A5)>
 {
 	enum { isMethod = 0 };
-	typedef Construct (C::*CalleeType)(A1, A2, A3, A4, A5);
+	typedef void (C::*CalleeType)(A1, A2, A3, A4, A5);
 	typedef Types<A1, Types<A2, Types<A3, Types<A4, Types<A5, void> > > > > Args;
 	typedef ptr<C> ReturnType;
 	static inline ptr<C> Call(Args& args) { return NEW(C(a1, a2, a3, a4, a5)); }
 };
 template <typename C, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
-struct Callable<Construct (C::*)(A1, A2, A3, A4, A5, A6)>
+struct CallableConstructor<void (C::*)(A1, A2, A3, A4, A5, A6)>
 {
 	enum { isMethod = 0 };
-	typedef Construct (C::*CalleeType)(A1, A2, A3, A4, A5, A6);
+	typedef void (C::*CalleeType)(A1, A2, A3, A4, A5, A6);
 	typedef Types<A1, Types<A2, Types<A3, Types<A4, Types<A5, Types<A6, void> > > > > > Args;
 	typedef ptr<C> ReturnType;
 	static inline ptr<C> Call(Args& args) { return NEW(C(a1, a2, a3, a4, a5, a6)); }
 };
 template <typename C, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7>
-struct Callable<Construct (C::*)(A1, A2, A3, A4, A5, A6, A7)>
+struct CallableConstructor<void (C::*)(A1, A2, A3, A4, A5, A6, A7)>
 {
 	enum { isMethod = 0 };
-	typedef Construct (C::*CalleeType)(A1, A2, A3, A4, A5, A6, A7);
+	typedef void (C::*CalleeType)(A1, A2, A3, A4, A5, A6, A7);
 	typedef Types<A1, Types<A2, Types<A3, Types<A4, Types<A5, Types<A6, Types<A7, void> > > > > > > Args;
 	typedef ptr<C> ReturnType;
 	static inline ptr<C> Call(Args& args) { return NEW(C(a1, a2, a3, a4, a5, a6, a7)); }
 };
 template <typename C, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8>
-struct Callable<Construct (C::*)(A1, A2, A3, A4, A5, A6, A7, A8)>
+struct CallableConstructor<void (C::*)(A1, A2, A3, A4, A5, A6, A7, A8)>
 {
 	enum { isMethod = 0 };
-	typedef Construct (C::*CalleeType)(A1, A2, A3, A4, A5, A6, A7, A8);
+	typedef void (C::*CalleeType)(A1, A2, A3, A4, A5, A6, A7, A8);
 	typedef Types<A1, Types<A2, Types<A3, Types<A4, Types<A5, Types<A6, Types<A7, Types<A8, void> > > > > > > > Args;
 	typedef ptr<C> ReturnType;
 	static inline ptr<C> Call(Args& args) { return NEW(C(a1, a2, a3, a4, a5, a6, a7, a8)); }
