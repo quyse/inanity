@@ -2,6 +2,7 @@
 #define ___INANITY_INPUT_STREAM_HPP___
 
 #include "Object.hpp"
+#include "scripting_decl.hpp"
 
 BEGIN_INANITY
 
@@ -21,6 +22,8 @@ public:
 	\param size Размер данных для считывания, в байтах.
 	*/
 	virtual size_t Read(void* data, size_t size) = 0;
+
+	SCRIPTABLE_CLASS(InputStream);
 };
 
 END_INANITY

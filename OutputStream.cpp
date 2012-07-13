@@ -1,7 +1,13 @@
 #include "OutputStream.hpp"
 #include "InputStream.hpp"
 #include "MemoryFile.hpp"
+#include "scripting_impl.hpp"
 #include <string.h>
+
+SCRIPTABLE_MAP_BEGIN(OutputStream, Inanity.OutputStream);
+	SCRIPTABLE_METHOD(OutputStream, WriteFile);
+	SCRIPTABLE_METHOD(OutputStream, Flush);
+SCRIPTABLE_MAP_END();
 
 void OutputStream::Write(const void* data, size_t size)
 {

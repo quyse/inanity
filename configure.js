@@ -34,7 +34,7 @@ var libraries = {
 		// синхронизация и потоки выполнения
 		'Thread', 'CriticalSection', 'CriticalCode', 'Semaphore',
 		// общее: файлы и потоки
-		'File', 'EmptyFile', 'PartFile', 'MemoryFile', 'OutputStream', 'FileInputStream', 'StreamReader', 'StreamWriter', 'BufferedInputStream', 'BufferedOutputStream', 'MemoryStream',
+		'File', 'EmptyFile', 'PartFile', 'MemoryFile', 'InputStream', 'OutputStream', 'FileInputStream', 'StreamReader', 'StreamWriter', 'BufferedInputStream', 'BufferedOutputStream', 'MemoryStream',
 		// преобразующие потоки
 		'Base64OutputStream', 'Out2InStream',
 		// файловые системы
