@@ -1,9 +1,18 @@
 #include "GlDevice.hpp"
+#include "GlPresenter.hpp"
+#include "GlRenderBuffer.hpp"
+#include "GlContext.hpp"
 
 #ifdef ___INANITY_WINDOWS
 GlDevice::GlDevice(ptr<GlSystem> system, const String& deviceName, ptr<GlContext> context)
-: system(system), deviceName(deviceName), context(context)
+: system(system), deviceName(deviceName), context(context), hglrc(0)
 {
+}
+
+GlDevice::~GlDevice()
+{
+	if(hglrc)
+		wglDeleteContext(hglrc);
 }
 #endif
 
@@ -61,7 +70,7 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, const Prese
 			THROW_PRIMARY_EXCEPTION("Can't set pixel format");
 
 		// создать контекст
-		HGLRC hglrc = wglCreateContext(hdc);
+		hglrc = wglCreateContext(hdc);
 		if(!hglrc)
 			THROW_PRIMARY_EXCEPTION("Can't create OpenGL window context");
 
@@ -69,10 +78,68 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, const Prese
 		if(!wglMakeCurrent(hdc, hglrc))
 			THROW_SECONDARY_EXCEPTION("Can't make OpenGL context current", Exception::SystemError());
 
+		// создать и вернуть Presenter
+		return NEW(GlPresenter(this, hdc, NEW(GlRenderBuffer(0, 0))));
+
 #endif
 	}
 	catch(Exception* exception)
 	{
 		THROW_SECONDARY_EXCEPTION("Can't create presenter for GL device", exception);
+	}
+}
+
+ptr<Context> GlDevice::GetContext()
+{
+	return context;
+}
+
+ptr<RenderBuffer> GlDevice::CreateRenderBuffer(size_t width, size_t height, PixelFormat pixelFormat)
+{
+	try
+	{
+		// FIXME: обернуть textureName в какой-нибудь класс, чтобы оно не утекало
+		GLuint textureName;
+		glGenTextures(1, &textureName);
+		GlSystem::CheckErrors("Can't get textures");
+		glBindTexture(GL_TEXTURE_2D, textureName);
+		GlSystem::CheckErrors("Can't bind texture");
+
+		GLint internalFormat;
+		GLenum format;
+		GLenum type;
+		if(!GlSystem::GetTextureFormat(pixelFormat, internalFormat, format, type))
+			THROW_PRIMARY_EXCEPTION("Invalid pixel format");
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, (GLsizei)width, (GLsizei)height, 0, format, type, 0);
+		GlSystem::CheckErrors("Can't initialize texture");
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		GlSystem::CheckErrors("Can't set texture parameters");
+
+		return NEW(GlRenderBuffer(textureName, NEW(GlTexture(textureName))));
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create render buffer", exception);
+	}
+}
+
+ptr<VertexShader> GlDevice::CreateVertexShader(ptr<File> file)
+{
+	try
+	{
+		GLuint shaderName = glCreateShader(GL_VERTEX_SHADER);
+		GlSystem::CheckErrors("Can't create shader");
+		const GLchar* string = (const GLchar*)file->GetData();
+		const GLint length = (GLint)file->GetSize();
+		glShaderSource(shaderName, 1, &string, &length);
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create vertex shader", exception);
 	}
 }

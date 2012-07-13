@@ -6,6 +6,9 @@
 BEGIN_INANITY_GRAPHICS
 
 /// Класс графического устройства OpenGL.
+/** Текущие ограничения:
+- только один возможный Presenter.
+*/
 class GlDevice : public Device
 {
 private:
@@ -14,6 +17,10 @@ private:
 #ifdef ___INANITY_WINDOWS
 	/// Имя графического устройства.
 	String deviceName;
+	/// Контекст рендеринга OpenGL.
+	/** Создаётся при первом создании Presenter'а.
+	Является общим для всех Presenter'ов. */
+	HGLRC hglrc;
 #endif
 	/// Основной графический контекст.
 	ptr<GlContext> context;
@@ -21,6 +28,7 @@ private:
 public:
 #ifdef ___INANITY_WINDOWS
 	GlDevice(ptr<GlSystem> system, const String& deviceName, ptr<GlContext> context);
+	~GlDevice();
 #endif
 
 	// методы Device
