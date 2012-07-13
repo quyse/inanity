@@ -5,6 +5,12 @@
 #include "lualib.hpp"
 #include "reflection_decl.hpp"
 
+BEGIN_INANITY
+
+class Exception;
+
+END_INANITY
+
 BEGIN_INANITY_LUA
 
 /// Универсальная функция для индексирования метатаблиц (классов и объектов).
@@ -27,8 +33,14 @@ int ObjectMetaTable_gc(lua_State* state);
 /// Запихать в стек метатаблицу для объектов.
 void PushObjectMetaTable(lua_State* state, Class& cls);
 
+/// Перевести ошибку в исключение.
+/** Вытаскивает ошибку из стека. */
+ptr<Exception> ErrorToException(lua_State* state);
 /// Обработать ошибку в Lua.
+/** То есть достать её из стека и бросить как исключение. */
 void ProcessError(lua_State* state);
+/// Обработать ошибку при вызове скрипта, и вернуть в Lua расширенную информацию об ошибке.
+int ScriptErrorHook(lua_State* state);
 
 /// Описать строкой значение в стеке Lua.
 String DescribeValue(lua_State* state, int index);

@@ -1,6 +1,8 @@
 #include "stuff.hpp"
 #include "reflection.hpp"
 #include "values.hpp"
+#include "../Exception.hpp"
+#include <sstream>
 
 BEGIN_INANITY_LUA
 
@@ -9,10 +11,21 @@ int MetaTable_index(lua_State* state)
 	// в стеке лежит: сначала userdata, затем индекс
 	// а в замыкании лежит таблица методов
 
+	// продублировать индекс
+	lua_pushvalue(state, 2);
 	// получить метод
 	lua_gettable(state, lua_upvalueindex(1));
-	// проверять, что он есть, не нужно
-	// если что, будет nil, так что пофиг
+
+	// если такого метода нет
+	if(lua_isnil(state, -1))
+	{
+		// вернуть понятную ошибку
+		lua_pushliteral(state, "No such method: ");
+		lua_pushvalue(state, 2);
+		lua_concat(state, 2);
+		lua_error(state);
+	}
+
 	return 1;
 }
 
@@ -23,7 +36,9 @@ int NonConstructableClass_call(lua_State* state)
 	// а в замыкании лежит полное имя класса
 
 	// выбросить исключение
-	Value<ptr<Exception> >::Push(state, NEW(Exception(String("Trying to create object of non-constructable class ") + lua_tostring(state, lua_upvalueindex(1)))));
+	lua_pushliteral(state, "Trying to create object of non-constructable class ");
+	lua_pushvalue(state, lua_upvalueindex(1));
+	lua_concat(state, 2);
 	lua_error(state);
 	return 0;
 }
@@ -206,24 +221,154 @@ void PushObjectMetaTable(lua_State* state, Class& cls)
 	}
 }
 
-void ProcessError(lua_State* state)
+ptr<Exception> ErrorToException(lua_State* state)
 {
+	ptr<Exception> exception;
 	// посмотреть, не ptr<Exception> ли
 	if(lua_isuserdata(state, -1) && !lua_islightuserdata(state, -1))
 	{
 		// full userdata, возможно, что Exception
 		ObjectUserData* userData = (ObjectUserData*)lua_touserdata(state, -1);
 		if(userData->type == UserData::typeObject && userData->cls == &Exception::scriptClass)
-			// да, Exception! завернуть его в новое исключение
-			THROW_SECONDARY_EXCEPTION("Exception while running Lua function", (Exception*)userData->object);
+			// да, Exception!
+			exception = (Exception*)userData->object;
 	}
-	// это не Exception, хз, чё это
-	// если строка
-	const char* errorString = lua_tostring(state, -1);
-	if(errorString)
-		THROW_PRIMARY_EXCEPTION(String("Error while running Lua function: ") + errorString);
-	// иначе совсем хз
-	THROW_PRIMARY_EXCEPTION("Unknown error while running Lua function");
+	// если это не Exception, то вывести, как произвольное значение
+	if(!exception)
+		exception = NEW(Exception("Lua error: " + DescribeValue(state, -1)));
+
+	lua_pop(state, 1);
+
+	return exception;
+}
+
+void ProcessError(lua_State* state)
+{
+	THROW_SECONDARY_EXCEPTION("Error while running Lua function", ErrorToException(state));
+}
+
+int ScriptErrorHook(lua_State* state)
+{
+	// в стеке: сообщение об ошибке
+
+	// собрать информацию о стеке вызовов
+	std::ostringstream stream;
+	stream << "Lua error backtrace:\n";
+	lua_Debug ar;
+	for(int i = 0; lua_getstack(state, i, &ar); ++i)
+	{
+		// получить активационную запись, и положить в стек Lua функцию на этом уровне
+		if(!lua_getinfo(state, "nSltuf", &ar))
+		{
+			// по идее, ошибки быть не должно
+			stream << "<error while getting activation record>\n";
+			break;
+		}
+
+		// имя файла и номер строки
+		stream << ar.short_src << ':';
+		if(ar.currentline >= 0)
+			stream << ar.currentline;
+		else
+			stream << "??";
+		stream << ' ';
+		// тип функции
+		if(ar.what)
+			stream << ar.what;
+		// имя функции
+		stream << ' ' << (ar.name ? ar.name : "<function>");
+		// значения в замыкании (upvalues), если есть
+		if(ar.nups)
+		{
+			stream << '[';
+			for(int j = 1; j <= ar.nups; ++j)
+			{
+				// положить значение upvalue в стек, и получить имя upvalue
+				const char* upvalueName = lua_getupvalue(state, -1, j);
+
+				if(j > 1)
+					stream << ", ";
+
+				// вывести имя upvalue
+				if(upvalueName && upvalueName[0])
+					stream << upvalueName << " = ";
+				// вывести значение upvalue
+				stream << DescribeValue(state, -1);
+				// выбросить значение из стека
+				lua_pop(state, 1);
+			}
+			stream << ']';
+		}
+		// параметры
+		stream << '(';
+		// сначала фиксированные параметры
+		for(int j = 1; j <= ar.nparams; ++j)
+		{
+			// положить значение параметра в стек, и получить его имя
+			const char* paramName = lua_getlocal(state, &ar, j);
+
+			if(j > 1)
+				stream << ", ";
+
+			// вывести имя параметра
+			if(paramName && paramName[0])
+				stream << paramName << " = ";
+			// вывести значение параметра
+			stream << DescribeValue(state, -1);
+			// выбросить значение из стека
+			lua_pop(state, 1);
+		}
+		// теперь, если предполагаются vararg-параметры
+		if(ar.isvararg)
+		{
+			stream << " ... ";
+			// получить и их
+			const char* paramName;
+			for(int j = -1; paramName = lua_getlocal(state, &ar, j); --j)
+			{
+				if(j < -1)
+					stream << ", ";
+
+				// вывести имя параметра
+				if(paramName && paramName[0])
+					stream << paramName << " = ";
+				// вывести значение параметра
+				stream << DescribeValue(state, -1);
+				// выбросить значение из стека
+				lua_pop(state, 1);
+			}
+		}
+		// и теперь ещё попробуем вывести локальные переменные и временные значения
+		{
+			const char* paramName;
+			for(int j = ar.nparams + 1; paramName = lua_getlocal(state, &ar, j); ++j)
+			{
+				stream << (j > ar.nparams + 1 ? ", " : " | ");
+
+				// вывести имя параметра
+				if(paramName && paramName[0])
+					stream << paramName << " = ";
+				// вывести значение параметра
+				stream << DescribeValue(state, -1);
+				// выбросить значение из стека
+				lua_pop(state, 1);
+			}
+		}
+		stream << ')';
+
+		// если это хвостовой вызов, отметить это
+		if(ar.istailcall)
+			stream << " [tailcall]";
+
+		stream << '\n';
+
+		// выбросить функцию из стека
+		lua_pop(state, 1);
+	}
+
+	// положить в стек исключение
+	Value<ptr<Exception> >::Push(state, NEW(Exception(stream.str(), ErrorToException(state))));
+	return 1;
 }
 
 String DescribeValue(lua_State* state, int index)

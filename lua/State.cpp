@@ -77,15 +77,13 @@ ptr<Script> State::LoadScript(ptr<File> file)
 	};
 
 	Reader reader(file);
-	switch(lua_load(state, Reader::Callback, &reader, "noname", 0))
-	{
-	case 0:
+	if(lua_load(state, Reader::Callback, &reader, "=noname", 0) == LUA_OK)
 		// конструктор Script заберёт функцию из стека, и сохранит её себе
 		return NEW(Script(this));
-	case LUA_ERRSYNTAX:
-		THROW_PRIMARY_EXCEPTION("Syntax error in Lua script");
-	}
-	THROW_PRIMARY_EXCEPTION("Error when loading Lua script");
+	// обработать ошибку
+	ProcessError(state);
+	// ProcessError никогда не возвращает управления
+	return 0;
 }
 
 END_INANITY_LUA
