@@ -324,7 +324,7 @@ int ScriptErrorHook(lua_State* state)
 			stream << " ... ";
 			// получить и их
 			const char* paramName;
-			for(int j = -1; paramName = lua_getlocal(state, &ar, j); --j)
+			for(int j = -1; (paramName = lua_getlocal(state, &ar, j)); --j)
 			{
 				if(j < -1)
 					stream << ", ";
@@ -341,7 +341,7 @@ int ScriptErrorHook(lua_State* state)
 		// и теперь ещё попробуем вывести локальные переменные и временные значения
 		{
 			const char* paramName;
-			for(int j = ar.nparams + 1; paramName = lua_getlocal(state, &ar, j); ++j)
+			for(int j = ar.nparams + 1; (paramName = lua_getlocal(state, &ar, j)); ++j)
 			{
 				stream << (j > ar.nparams + 1 ? ", " : " | ");
 
