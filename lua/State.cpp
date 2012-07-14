@@ -15,7 +15,7 @@ State::State()
 		THROW_PRIMARY_EXCEPTION("Can't create Lua state");
 
 	// установить функцию окончания
-//	lua_atpanic(state, Panic);
+	lua_atpanic(state, Panic);
 }
 
 State::~State()
