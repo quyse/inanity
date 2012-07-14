@@ -110,6 +110,20 @@ public:
 	{
 		return a.object != b.object;
 	}
+
+	/// Оператор для статического преобразования типа.
+	template <typename TT>
+	ptr<TT> StaticCast() const
+	{
+		return static_cast<TT*>(object);
+	}
+
+	/// Оператор для динамического преобразования типа.
+	template <typename TT>
+	ptr<TT> DynamicCast() const
+	{
+		return dynamic_cast<TT*>(object);
+	}
 };
 
 /// Специальная функция для явного создания управляемого указателя
