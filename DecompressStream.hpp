@@ -2,7 +2,8 @@
 #define ___INANITY_DECOMPRESS_STREAM_HPP___
 
 #include "InputStream.hpp"
-#include "deps/zlib/zlib.h"
+#include "scripting_decl.hpp"
+#include "zlib.hpp"
 
 /*
 Файл содержит класс потока для распаковки данных.
@@ -39,6 +40,8 @@ public:
 	static ptr<File> DecompressFile(ptr<File> file);
 
 	size_t Read(void* data, size_t size);
+
+	SCRIPTABLE_CLASS(DecompressStream);
 };
 
 END_INANITY
