@@ -4,4 +4,12 @@ local a = Inanity.Lua.ClassB(Inanity.Lua.ClassA())
 a:print("this is a test string")
 a:print2(1234, "fdsfe")
 
-Inanity.Lua.ClassA.printFile(Inanity.FolderFileSystem.GetNativeFileSystem():LoadFile("lua/test.lua"))
+local fileSystem = Inanity.FolderFileSystem.GetNativeFileSystem();
+
+-- Inanity.Lua.ClassA.printFile(fileSystem:LoadFile("lua/test.lua"))
+
+local bfsStream = Inanity.CompressStream.CreateMax(fileSystem:SaveFileAsStream("lua/test.bfs"));
+local bfsBuilder = Inanity.BlobFileSystemBuilder(bfsStream);
+bfsBuilder:AddFile("gdfsgfd", fileSystem:LoadFile("lua/test.lua"), 4);
+bfsBuilder:Finalize();
+bfsStream:Flush();

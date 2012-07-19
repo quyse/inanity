@@ -1,5 +1,6 @@
 #include "test.hpp"
 #include "../inanity-base.hpp"
+#include "../inanity-compress.hpp"
 #include "../scripting_impl.hpp"
 #include "../scripting.hpp"
 #include <iostream>
@@ -61,6 +62,10 @@ int main()
 		state->RegisterClass<Inanity::FileSystem>();
 		state->RegisterClass<Inanity::File>();
 		state->RegisterClass<Inanity::FolderFileSystem>();
+		state->RegisterClass<Inanity::BlobFileSystem>();
+		state->RegisterClass<Inanity::BlobFileSystemBuilder>();
+		state->RegisterClass<Inanity::CompressStream>();
+		state->RegisterClass<Inanity::DecompressStream>();
 
 		ptr<Script> script = state->LoadScript(FolderFileSystem::GetNativeFileSystem()->LoadFile("lua/test.lua"));
 

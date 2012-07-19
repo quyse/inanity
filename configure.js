@@ -107,7 +107,7 @@ var executables = {
 	// TEST
 	, luatest: {
 		objects: ['lua.test'],
-		staticLibraries: ['libinanity-base', 'libinanity-lua', 'deps/lua//liblua'],
+		staticLibraries: ['libinanity-base', 'libinanity-compress', 'libinanity-lua', 'deps/lua//liblua'],
 		dynamicLibraries: ['m']
 	}
 };
