@@ -18,8 +18,9 @@ long long Time::GetTicks()
 	return li.QuadPart;
 #endif
 #ifdef ___INANITY_LINUX
-	// FIXME: неточное измерение
-	return GetUnixTime();
+	struct timespec t;
+	clock_gettime(CLOCK_MONOTONIC, &t);
+	return t.tv_sec * 1000000000LL + t.tv_nsec;
 #endif
 }
 
@@ -31,7 +32,6 @@ long long Time::GetTicksPerSecond()
 	return li.QuadPart;
 #endif
 #ifdef ___INANITY_LINUX
-	// FIXME: неточное измерение
-	return 1;
+	return 1000000000LL;
 #endif
 }
