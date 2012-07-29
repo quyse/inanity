@@ -1,10 +1,13 @@
 #include "GlSystem.hpp"
+#include "GlDevice.hpp"
+#include "GlContext.hpp"
 #ifdef ___INANITY_WINDOWS
-#include "../windows.hpp"
+#include "../Win32Window.hpp"
+#include "../Strings.hpp"
 #endif
 #include "../Exception.hpp"
 
-ptr<Window> GlSystem::CreateWindow()
+ptr<Window> GlSystem::CreateDefaultWindow()
 {
 #ifdef ___INANITY_WINDOWS
 	return Win32Window::CreateForOpenGL();
@@ -26,7 +29,7 @@ ptr<Device> GlSystem::CreatePrimaryDevice()
 			// если устройство primary
 			if(deviceInfo.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE)
 				// вернуть его
-				return NEW(GlDevice(this, deviceInfo.DeviceName, 0));
+				return NEW(GlDevice(this, Strings::Unicode2UTF8(deviceInfo.DeviceName), NEW(GlContext()));
 
 		// в MSDN написано, устройство всегда есть, так что этого быть не должно
 		THROW_PRIMARY_EXCEPTION("Can't find primary device");
@@ -38,7 +41,19 @@ ptr<Device> GlSystem::CreatePrimaryDevice()
 	}
 }
 
-static void GlSystem::CheckErrors(const char* primaryExceptionString)
+void GlSystem::InitGLEW()
+{
+	GLenum err = glewInit();
+	if(err != GLEW_OK)
+		THROW_PRIMARY_EXCEPTION(String("Can't initialize GLEW: ") + (const char*)glewGetErrorString(err));
+}
+
+void GlSystem::ClearErrors()
+{
+	while(glGetError() != GL_NO_ERROR);	
+}
+
+void GlSystem::CheckErrors(const char* primaryExceptionString)
 {
 	GLenum error = glGetError();
 	// если есть хотя бы одна ошибка
@@ -105,7 +120,7 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, GLint& internalFormat, 
 		type = GL_UNSIGNED_BYTE;
 		return true;
 	case PixelFormats::floatR32Depth:
-		internalFormat = GL_DEPTH_COMPONENT_32F;
+		internalFormat = GL_DEPTH_COMPONENT32F;
 		format = GL_DEPTH_COMPONENT;
 		type = GL_FLOAT;
 		return true;

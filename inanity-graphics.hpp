@@ -4,6 +4,8 @@
 /* Файл, содержащий ссылки на конкретную реализацию графической подсистемы.
  */
 
+#include "Object.hpp"
+
 // В Windows используется подсистема DX, использующая DirectX 11
 #ifdef ___INANITY_WINDOWS
 #define ___INANITY_GRAPHICS_DX
@@ -18,7 +20,6 @@
 #include "graphics/DepthStencilBuffer.hpp"
 #include "graphics/RenderStage.hpp"
 #include "graphics/Context.hpp"
-#include "graphics/Window.hpp"
 #include "graphics/Geometry.hpp"
 #include "graphics/GeometryFormat.hpp"
 #include "graphics/GeometrySemantic.hpp"

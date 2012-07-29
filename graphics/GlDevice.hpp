@@ -2,8 +2,13 @@
 #define ___INANITY_GRAPHICS_GL_DEVICE_HPP___
 
 #include "Device.hpp"
+#include "opengl.hpp"
+#include "../String.hpp"
 
 BEGIN_INANITY_GRAPHICS
+
+class GlSystem;
+class GlContext;
 
 /// Класс графического устройства OpenGL.
 /** Текущие ограничения:
@@ -25,6 +30,10 @@ private:
 	/// Основной графический контекст.
 	ptr<GlContext> context;
 
+	/// Скомпилировать шейдер.
+	/** Возвращает имя программы OpenGL. */
+	static GLuint CompileShader(GLuint shaderName, ptr<File> file);
+
 public:
 #ifdef ___INANITY_WINDOWS
 	GlDevice(ptr<GlSystem> system, const String& deviceName, ptr<GlContext> context);
@@ -38,7 +47,7 @@ public:
 	ptr<RenderBuffer> CreateRenderBuffer(size_t width, size_t height, PixelFormat pixelFormat);
 	ptr<VertexShader> CreateVertexShader(ptr<File> file);
 	ptr<PixelShader> CreatePixelShader(ptr<File> file);
-	ptr<ConstantBuffer> CreateConstantBuffer(size_t size);
+	ptr<UniformBuffer> CreateUniformBuffer(size_t size);
 	ptr<VertexBuffer> CreateVertexBuffer(ptr<File> file, size_t vertexStride);
 	ptr<IndexBuffer> CreateIndexBuffer(ptr<File> file, size_t indexSize);
 	ptr<Texture> CreateStaticTexture(ptr<File> file);

@@ -2,6 +2,7 @@
 #include "DxSystem.hpp"
 #include "DxDevice.hpp"
 #include "DxRenderBuffer.hpp"
+#include "DxTexture.hpp"
 #include "Win32Output.hpp"
 #include "../Exception.hpp"
 

@@ -74,14 +74,21 @@ var libraries = {
 	'libinanity-graphics': {
 		objects: ['graphics.RenderStage', 'graphics.Window', 'graphics.GeometryFormat', 'graphics.EditableFont', 'graphics.Font', 'graphics.ShaderSource']
 	},
-	// ******* подсистема DX
+	// ******* подсистема DirectX 11
 	'libinanity-dx': {
 		objects: [
-			'graphics.dx.System', 'graphics.dx.Buffer', 'graphics.dx.Context', 'graphics.dx.RenderBuffer', 'graphics.dx.DepthStencilBuffer',
-			'graphics.dx.DepthStencilState', 'graphics.dx.BlendState', 'graphics.dx.RasterizerState', 'graphics.dx.SamplerState',
-			'graphics.dx.Geometry', 'graphics.dx.Texture',
-			'graphics.dx.ShaderLayout', 'graphics.dx.ShaderReflection', 'graphics.dx.ConstantBuffer', 'graphics.dx.Shader', 'graphics.dx.VertexShader', 'graphics.dx.PixelShader',
-			'graphics.dx.ShaderCompiler', 'graphics.dx.D3D10BlobFile', 'graphics.dx.FontDrawer']
+			'graphics.DxSystem', 'graphics.DxDevice', 'graphics.DxPresenter', 'graphics.DxContext',
+			'graphics.DxRenderBuffer', 'graphics.DxDepthStencilBuffer', 'graphics.DxTexture', 'graphics.DxUniformBuffer',
+			'graphics.DxVertexShader', 'graphics.DxPixelShader'
+		]
+	},
+	// ******* подсистема OpenGl
+	'libinanity-gl': {
+		objects: [
+			'graphics.GlSystem', 'graphics.GlDevice', 'graphics.GlPresenter', 'graphics.GlContext',
+			'graphics.GlRenderBuffer', 'graphics.GlDepthStencilBuffer', 'graphics.GlTexture', 'graphics.GlUniformBuffer',
+			'graphics.GlVertexShader', 'graphics.GlPixelShader'
+		]
 	},
 	// ******* подсистема шейдеров
 	'libinanity-shaders': {
@@ -104,6 +111,12 @@ var executables = {
 	, shaderlanguagetest: {
 		objects: ['graphics.shaders.ShaderLanguageTest'],
 		staticLibraries: ['libinanity-base', 'libinanity-shaders'],
+		dynamicLibraries: []
+	}
+	// TEST
+	, graphicstest: {
+		objects: ['graphics.test'],
+		staticLibraries: ['libinanity-base', 'libinanity-dx'],
 		dynamicLibraries: []
 	}
 };

@@ -1,8 +1,14 @@
 #include "DxDevice.hpp"
 #include "DxSystem.hpp"
 #include "DxContext.hpp"
+#include "DxTexture.hpp"
 #include "Win32Output.hpp"
 #include "DxPresenter.hpp"
+#include "DxRenderBuffer.hpp"
+#include "DxVertexShader.hpp"
+#include "DxPixelShader.hpp"
+#include "DxUniformBuffer.hpp"
+#include "../File.hpp"
 #include "../Exception.hpp"
 
 DxDevice::DxDevice(ptr<DxSystem> system, ComPointer<ID3D11Device> device, ptr<DxContext> context)
@@ -78,7 +84,7 @@ ptr<RenderBuffer> DxDevice::CreateRenderBuffer(size_t width, size_t height, Pixe
 
 		buffer->Release();
 
-		return NEW(DxRenderBuffer(renderTargetView, NEW(Texture(shaderResourceView))));
+		return NEW(DxRenderBuffer(renderTargetView, NEW(DxTexture(shaderResourceView))));
 	}
 	catch(Exception* exception)
 	{
@@ -116,7 +122,7 @@ ptr<PixelShader> DxDevice::CreatePixelShader(ptr<File> file)
 	}
 }
 
-ptr<ConstantBuffer> DxDevice::CreateConstantBuffer(size_t size)
+ptr<UniformBuffer> DxDevice::CreateUniformBuffer(size_t size)
 {
 	try
 	{
@@ -133,7 +139,7 @@ ptr<ConstantBuffer> DxDevice::CreateConstantBuffer(size_t size)
 		HRESULT hr;
 		if(FAILED(hr = device->CreateBuffer(&desc, NULL, &buffer)))
 			THROW_PRIMARY_EXCEPTION("Can't create buffer");
-		return NEW(ConstantBuffer(buffer, size));
+		return NEW(DxUniformBuffer(buffer, size));
 	}
 	catch(Exception* exception)
 	{

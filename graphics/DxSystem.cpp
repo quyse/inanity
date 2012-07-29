@@ -1,6 +1,7 @@
 #include "DxSystem.hpp"
 #include "DxDevice.hpp"
 #include "DxContext.hpp"
+#include "../Win32Window.hpp"
 #include "../Exception.hpp"
 
 IDXGIFactory* DxSystem::GetDXGIFactory()
@@ -36,7 +37,7 @@ DXGI_FORMAT DxSystem::GetDXGIFormat(PixelFormat format)
 	}
 }
 
-ptr<Window> DxSystem::CreateWindow()
+ptr<Window> DxSystem::CreateDefaultWindow()
 {
 	return Win32Window::CreateForDirectX();
 }

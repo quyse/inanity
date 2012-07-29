@@ -33,4 +33,20 @@ using namespace Inanity;
 
 #endif
 
+BEGIN_INANITY
+
+/// "Быстрое" преобразование типа.
+/** В отладке это dynamic_cast, в релизе - static_cast. */
+template <typename ToType, typename FromType>
+ToType fast_cast(FromType object)
+{
+#ifdef _DEBUG
+	return dynamic_cast<ToType>(object);
+#else
+	return static_cast<ToType>(object);
+#endif
+}
+
+END_INANITY
+
 #endif

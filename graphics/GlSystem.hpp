@@ -2,6 +2,8 @@
 #define ___INANITY_GRAPHICS_GL_SYSTEM_HPP___
 
 #include "System.hpp"
+#include "PixelFormat.hpp"
+#include "opengl.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
@@ -10,15 +12,22 @@ class GlSystem : public System
 {
 public:
 	// методы System
-	ptr<Window> CreateWindow();
+	ptr<Window> CreateDefaultWindow();
 	ptr<Device> CreatePrimaryDevice();
 
+	/// Инициализация GLEW.
+	/** Нужно вызывать после создания контекста OpenGL. */
+	static void InitGLEW();
+
+	/// Очистить ошибки OpenGL (игнорируя их).
+	static void ClearErrors();
 	/// Проверить ошибки OpenGL, и выбросить исключение, если есть.
 	/**
 	\param primaryExceptionString Строка с исключением, оборачивающим ошибку OpenGL (если она будет).
 	Если не задана, то ошибка не оборачивается.
 	*/
 	static void CheckErrors(const char* primaryExceptionString = 0);
+
 	/// Получить формат текстуры для OpenGL.
 	static bool GetTextureFormat(PixelFormat pixelFormat, GLint& internalFormat, GLenum& format, GLenum& type);
 };

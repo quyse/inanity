@@ -3,10 +3,14 @@
 
 #include "graphics.hpp"
 
-#ifdef ___INANITY_GRAPHICS_DX
+BEGIN_INANITY_GRAPHICS
 
-#include "dx/Geometry.hpp"
+class Geometry
+{
+public:
+	ptr<VertexBuffer> vertexBuffer;
+};
 
-#endif
+END_INANITY_GRAPHICS
 
 #endif

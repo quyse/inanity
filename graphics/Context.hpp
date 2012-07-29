@@ -5,17 +5,73 @@
 
 BEGIN_INANITY_GRAPHICS
 
+class RenderBuffer;
+class DepthStencilBuffer;
+class Texture;
+class Sampler;
+class UniformBuffer;
+class VertexShader;
+class PixelShader;
+class VertexBuffer;
+class IndexBuffer;
+
 /// Абстрактный класс графического контекста.
 /** Контекст управляет рисованием.
 В контексте указываются различные настройки рендеринга,
 задаются источники данных и так далее. Контекст должен
 работать лениво, то есть передавать в своё API эти данные
 только тогда, когда это действительно нужно (команда на
-рисование). */
+рисование).
+*/
 class Context : public Object
 {
+protected:
+	/// Количество рендертаргетов.
+	static const int renderTargetSlotsCount = 8;
+	/// Привязанные рендертаргеты.
+	ptr<RenderBuffer> boundRenderBuffers[renderTargetSlotsCount];
+	bool dirtyRenderBuffers[renderTargetSlotsCount];
+	/// Привязанный depth-stencil буфер.
+	ptr<DepthStencilBuffer> boundDepthStencilBuffer;
+	bool dirtyDepthStencilBuffer;
+
+	/// Количество текстурных слотов.
+	static const int textureSlotsCount = 16;
+	/// Привязанные текстуры.
+	ptr<Texture> boundTextures[textureSlotsCount];
+	bool dirtyTextures[textureSlotsCount];
+	/// Привязанные семплеры.
+	/** Семплеры привязываются в той же нумерации, что и текстурные слоты. */
+	ptr<Sampler> boundSamplers[textureSlotsCount];
+	bool dirtySamplers[textureSlotsCount];
+
+	/// Количество слотов для константных буферов.
+	static const int uniformBufferSlotsCount = 16;
+	/// Привязанные константные буферы.
+	ptr<UniformBuffer> boundUniformBuffers[uniformBufferSlotsCount];
+	bool dirtyUniformBuffers[uniformBufferSlotsCount];
+
+	/// Привязанный вершинный шейдер.
+	ptr<VertexShader> boundVertexShader;
+	bool dirtyVertexShader;
+	/// Привязанный пиксельный шейдер.
+	ptr<PixelShader> boundPixelShader;
+	bool dirtyPixelShader;
+
+	/// Привязанный вершинный буфер.
+	ptr<VertexBuffer> boundVertexBuffer;
+	bool dirtyVertexBuffer;
+	/// Привязанный индексный буфер.
+	ptr<IndexBuffer> boundIndexBuffer;
+	bool dirtyIndexBuffer;
+
+protected:
+	/// Выполнить инициализацию всех флажков и прочего.
+	Context();
+
 public:
-	//******* Методы очистки.
+	//******* Методы очистки рендербуферов и depth-stencil буферов.
+	/* Непосредственные методы - тут же выполняют вызов к API. */
 	/// Очистить рендербуфер.
 	virtual void ClearRenderBuffer(RenderBuffer* renderBuffer, const float* color) = 0;
 	/// Очистить глубину в depth-stencil буфере.
@@ -26,21 +82,49 @@ public:
 	virtual void ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, float depth, unsigned stencil) = 0;
 
 	//******* Методы для привязки данных к конвейеру.
+	/* Работают лениво, то есть реальный вызов к API происходит, только когда нужно рисовать. */
 	/// Очистить все слоты вывода.
-	virtual void ResetTargets() = 0;
+	void ResetTargets();
 	/// Указать рендербуфер в слот вывода.
-	virtual void BindTargetRenderBuffer(size_t slot, ptr<RenderBuffer> renderBuffer) = 0;
+	void BindTargetRenderBuffer(int slot, ptr<RenderBuffer> renderBuffer);
 	/// Указать depth-stencil буфер.
-	virtual void BindTargetDepthStencilBuffer(ptr<DepthStencilBuffer> depthStencilBuffer);
+	void BindTargetDepthStencilBuffer(ptr<DepthStencilBuffer> depthStencilBuffer);
+	/// Очистить все текстурные слоты.
+	void ResetTextures();
 	/// Указать текстуру в текстурный слот.
-	virtual void BindTexture(size_t slot, ptr<Texture> texture) = 0;
+	void BindTexture(int slot, ptr<Texture> texture);
+	/// Очистить все семплерные слоты.
+	void ResetSamplers();
+	/// Указать семплер в семплерный слот.
+	void BindSampler(int slot, ptr<Sampler> sampler);
+	/// Очистить все uniform-буферы.
+	void ResetUniformBuffers();
 	/// Указать uniform-буфер в слот буферов.
-	virtual void BindUniformBuffer(size_t slot, ptr<UniformBuffer> buffer) = 0;
+	void BindUniformBuffer(int slot, ptr<UniformBuffer> buffer);
+	/// Указать вершинный шейдер.
+	void BindVertexShader(ptr<VertexShader> vertexShader);
+	/// Указать пиксельный шейдер.
+	void BindPixelShader(ptr<PixelShader> pixelShader);
+	/// Указать вершинный буфер.
+	void BindVertexBuffer(ptr<VertexBuffer> vertexBuffer);
+	/// Указать индексный буфер.
+	void BindIndexBuffer(ptr<IndexBuffer> indexBuffer);
 
 	//******* Методы для передачи данных.
+	/* Непосредственные методы. */
 	/// Указать данные для uniform-буфера.
 	/** Размер передаваемых данных должен совпадать с размером буфера. */
 	virtual void SetUniformBufferData(UniformBuffer* buffer, const void* data, size_t size) = 0;
+
+	//******* Методы рисования.
+	/* Непосредственные методы. Кроме того, могут выполнять ранее отложенные действия по привязке данных. */
+	/// Выполнить рисование.
+	/**
+	\param indicesCount Количество индексов. -1, если нужно нарисовать весь индексный буфер.
+	*/
+	virtual void Draw() = 0;
+	/// Выполнить instanced-рисование.
+	virtual void DrawInstanced(int instancesCount) = 0;
 };
 
 END_INANITY_GRAPHICS

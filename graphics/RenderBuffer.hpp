@@ -5,6 +5,8 @@
 
 BEGIN_INANITY_GRAPHICS
 
+class Texture;
+
 /// Абстрактный класс рендербуфера.
 class RenderBuffer : public Object
 {
@@ -12,7 +14,7 @@ public:
 	/// Получить текстуру, соответствующую рендербуферу.
 	/** Может возвращать 0, если рендербуфер не имеет
 	возможности быть источником данных. */
-	virtual ptr<Texture> GetAsTexture() = 0;
+	virtual ptr<Texture> GetTexture() = 0;
 };
 
 END_INANITY_GRAPHICS

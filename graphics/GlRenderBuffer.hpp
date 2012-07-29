@@ -23,16 +23,17 @@ class GlRenderBuffer : public RenderBuffer
 {
 private:
 	/// Имя рендербуфера.
-	GLuint renderBufferName;
+	GLuint name;
 	/// Текстура рендербуфера.
 	ptr<GlTexture> texture;
 
 public:
-	GlRenderBuffer(GLuint renderBufferName, ptr<GlTexture> texture);
+	GlRenderBuffer(GLuint name, ptr<GlTexture> texture);
 	~GlRenderBuffer();
 
+	GLuint GetName() const;
 	/// Получить рендербуфер как текстуру.
-	ptr<Texture> GetAsTexture();
+	ptr<Texture> GetTexture();
 };
 
 END_INANITY_GRAPHICS

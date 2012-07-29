@@ -17,9 +17,10 @@ class Presenter;
 class Output;
 struct PresentMode;
 class Context;
+class RenderBuffer;
 class VertexShader;
 class PixelShader;
-class ConstantBuffer;
+class UniformBuffer;
 class VertexBuffer;
 class IndexBuffer;
 class Texture;
@@ -57,7 +58,7 @@ public:
 	virtual ptr<PixelShader> CreatePixelShader(ptr<File> file) = 0;
 
 	/// Создать константный буфер.
-	virtual ptr<ConstantBuffer> CreateConstantBuffer(size_t size) = 0;
+	virtual ptr<UniformBuffer> CreateUniformBuffer(size_t size) = 0;
 	/// Создать вершинный буфер.
 	virtual ptr<VertexBuffer> CreateVertexBuffer(ptr<File> file, size_t vertexStride) = 0;
 	/// Создать индексный буфер.

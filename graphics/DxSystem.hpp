@@ -20,7 +20,7 @@ public:
 	static DXGI_FORMAT GetDXGIFormat(PixelFormat format);
 
 	// методы System
-	ptr<Window> CreateWindow();
+	ptr<Window> CreateDefaultWindow();
 	ptr<Device> CreatePrimaryDevice();
 
 	/// Получить фабрику DXGI.

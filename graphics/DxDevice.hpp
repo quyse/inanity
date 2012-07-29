@@ -31,7 +31,7 @@ public:
 	ptr<RenderBuffer> CreateRenderBuffer(size_t width, size_t height, PixelFormat pixelFormat);
 	ptr<VertexShader> CreateVertexShader(ptr<File> file);
 	ptr<PixelShader> CreatePixelShader(ptr<File> file);
-	ptr<ConstantBuffer> CreateConstantBuffer(size_t size);
+	ptr<UniformBuffer> CreateUniformBuffer(size_t size);
 	ptr<VertexBuffer> CreateVertexBuffer(ptr<File> file, size_t vertexStride);
 	ptr<IndexBuffer> CreateIndexBuffer(ptr<File> file, size_t indexSize);
 	ptr<Texture> CreateStaticTexture(ptr<File> file);

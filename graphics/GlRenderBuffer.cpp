@@ -1,15 +1,21 @@
 #include "GlRenderBuffer.hpp"
 #include "GlTexture.hpp"
+#include "opengl.hpp"
 
-GlRenderBuffer::GlRenderBuffer(GLuint renderBufferName, ptr<GlTexture> texture)
-: renderBufferName(renderBufferName), texture(texture)
+GlRenderBuffer::GlRenderBuffer(GLuint name, ptr<GlTexture> texture)
+: name(name), texture(texture)
 {
 }
 
 ~GlRenderBuffer::GlRenderBuffer()
 {
-	if(renderBufferName)
-		glDeleteRenderBuffers(1, &renderBufferName);
+	if(name)
+		glDeleteRenderBuffers(1, &name);
+}
+
+GLuint GlRenderBuffer::GetName() const
+{
+	return name;
 }
 
 ptr<Texture> GlRenderBuffer::GetTexture()

@@ -10,11 +10,17 @@ BEGIN_INANITY_GRAPHICS
 в OpenGl - uniform-буфер. */
 class UniformBuffer : public Object
 {
+protected:
+	size_t size;
+
+protected:
+	UniformBuffer(size_t size);
+
 public:
 	/// Получить размер буфера.
 	/** Размер буфера указывается при создании, и
 	не может быть изменён. */
-	virtual size_t GetSize() = 0;
+	size_t GetSize() const;
 };
 
 END_INANITY_GRAPHICS
