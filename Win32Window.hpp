@@ -11,7 +11,7 @@
 
 BEGIN_INANITY
 
-class Win32Window : public Object
+class Win32Window : public Window
 {
 public:
 	/// Тип обработчика активного окна.
@@ -38,6 +38,7 @@ public:
 
 	// методы Window
 	void SetTitle(const String& title);
+	ptr<Graphics::Output> CreateOutput();
 
 	/// Создать окно для DirectX.
 	static ptr<Win32Window> CreateForDirectX();

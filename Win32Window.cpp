@@ -3,6 +3,7 @@
 #include "../input/Manager.hpp"
 #include "../Strings.hpp"
 #include "../Exception.hpp"
+#include "graphics/Win32Output.hpp"
 #include <windowsx.h>
 
 Win32Window* Win32Window::singleWindow = 0;
@@ -39,6 +40,11 @@ Win32Window::~Win32Window()
 void Win32Window::SetTitle(const String& title)
 {
 	SetWindowText(hWnd, title.c_str());
+}
+
+ptr<Graphics::Output> Win32Window::CreateOutput()
+{
+	return NEW(Graphics::Win32Output(this));
 }
 
 ptr<Win32Window> Win32Window::CreateForDirectX()
