@@ -3,7 +3,7 @@
 #include "GlRenderBuffer.hpp"
 
 #ifdef ___INANITY_WINDOWS
-GlPresenter::GlPresenter(ptr<GlDevice> device, HDC hdc, ptr<RenderBuffer> backBuffer)
+GlPresenter::GlPresenter(ptr<GlDevice> device, HDC hdc, ptr<GlRenderBuffer> backBuffer)
 : device(device), hdc(hdc), backBuffer(backBuffer)
 {
 }
@@ -21,7 +21,7 @@ ptr<RenderBuffer> GlPresenter::GetBackBuffer()
 
 void GlPresenter::SetMode(const PresentMode& mode)
 {
-#error Not implemented yet.
+	// TODO.
 }
 
 void GlPresenter::Present()

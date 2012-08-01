@@ -29,7 +29,7 @@ ptr<Device> GlSystem::CreatePrimaryDevice()
 			// если устройство primary
 			if(deviceInfo.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE)
 				// вернуть его
-				return NEW(GlDevice(this, Strings::Unicode2UTF8(deviceInfo.DeviceName), NEW(GlContext()));
+				return NEW(GlDevice(this, Strings::Unicode2UTF8(deviceInfo.DeviceName), NEW(GlContext())));
 
 		// в MSDN написано, устройство всегда есть, так что этого быть не должно
 		THROW_PRIMARY_EXCEPTION("Can't find primary device");

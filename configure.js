@@ -72,13 +72,14 @@ var libraries = {
 	},
 	// ******* общая графика
 	'libinanity-graphics': {
-		objects: ['graphics.RenderStage', 'graphics.Window', 'graphics.GeometryFormat', 'graphics.EditableFont', 'graphics.Font', 'graphics.ShaderSource']
+		objects: ['graphics.Context', 'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.IndexBuffer']
 	},
 	// ******* подсистема DirectX 11
 	'libinanity-dx': {
 		objects: [
 			'graphics.DxSystem', 'graphics.DxDevice', 'graphics.DxPresenter', 'graphics.DxContext',
 			'graphics.DxRenderBuffer', 'graphics.DxDepthStencilBuffer', 'graphics.DxTexture', 'graphics.DxUniformBuffer',
+			'graphics.DxVertexBuffer', 'graphics.DxIndexBuffer',
 			'graphics.DxVertexShader', 'graphics.DxPixelShader'
 		]
 	},
@@ -86,7 +87,8 @@ var libraries = {
 	'libinanity-gl': {
 		objects: [
 			'graphics.GlSystem', 'graphics.GlDevice', 'graphics.GlPresenter', 'graphics.GlContext',
-			'graphics.GlRenderBuffer', 'graphics.GlDepthStencilBuffer', 'graphics.GlTexture', 'graphics.GlUniformBuffer',
+			'graphics.GlInternalTexture', 'graphics.GlRenderBuffer', 'graphics.GlDepthStencilBuffer', 'graphics.GlTexture', 'graphics.GlUniformBuffer',
+			'graphics.GlVertexBuffer', 'graphics.GlIndexBuffer',
 			'graphics.GlVertexShader', 'graphics.GlPixelShader'
 		]
 	},

@@ -74,8 +74,8 @@ void Context::BindTexture(int slot, ptr<Texture> texture)
 {
 	if(boundTextures[slot] != texture)
 	{
-		boundTextures[i] = texture;
-		dirtyTextures[i] = true;
+		boundTextures[slot] = texture;
+		dirtyTextures[slot] = true;
 	}
 }
 

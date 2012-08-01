@@ -2,6 +2,7 @@
 #define ___INANITY_GRAPHICS_GL_PIXEL_SHADER_HPP___
 
 #include "PixelShader.hpp"
+#include "opengl.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
@@ -9,12 +10,14 @@ BEGIN_INANITY_GRAPHICS
 class GlPixelShader : public PixelShader
 {
 private:
-	ptr<GlDevice> device;
 	GLuint programName;
 	GLuint shaderName;
 
 public:
-	GlPixelShader(ptr<GlDevice> device, GLuint programName, GLuint shaderName);
+	GlPixelShader(GLuint programName, GLuint shaderName);
+	~GlPixelShader();
+
+	GLuint GetProgramName() const;
 };
 
 END_INANITY_GRAPHICS

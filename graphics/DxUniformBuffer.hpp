@@ -12,13 +12,9 @@ class DxUniformBuffer : public UniformBuffer
 {
 private:
 	ComPointer<ID3D11Buffer> buffer;
-	size_t size;
 
 public:
 	DxUniformBuffer(ID3D11Buffer* buffer, size_t size);
-
-	// методы UniformBuffer
-	size_t GetSize();
 
 	ID3D11Buffer* GetBufferInterface() const;
 };

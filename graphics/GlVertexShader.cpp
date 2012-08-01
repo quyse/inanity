@@ -1,7 +1,15 @@
 #include "GlVertexShader.hpp"
-#include "GlDevice.hpp"
 
-GlVertexShader::GlVertexShader(ptr<GlDevice> device, GLuint programName, GLuint shaderName)
-: device(device), programName(programName), shaderName(shaderName)
+GlVertexShader::GlVertexShader(GLuint programName, GLuint shaderName)
+: programName(programName), shaderName(shaderName) {}
+
+GlVertexShader::~GlVertexShader()
 {
+	glDeleteProgram(programName);
+	glDeleteShader(shaderName);
+}
+
+GLuint GlVertexShader::GetProgramName() const
+{
+	return programName;
 }

@@ -2,9 +2,11 @@
 #define ___INANITY_GL_RENDER_BUFFER_HPP___
 
 #include "RenderBuffer.hpp"
+#include "opengl.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
+class GlInternalTexture;
 class GlTexture;
 
 /// Класс рендербуфера OpenGL.
@@ -22,14 +24,13 @@ texture = <texture>
 class GlRenderBuffer : public RenderBuffer
 {
 private:
-	/// Имя рендербуфера.
-	GLuint name;
+	/// Внутренний текстурный объект.
+	ptr<GlInternalTexture> internalTexture;
 	/// Текстура рендербуфера.
 	ptr<GlTexture> texture;
 
 public:
-	GlRenderBuffer(GLuint name, ptr<GlTexture> texture);
-	~GlRenderBuffer();
+	GlRenderBuffer(ptr<GlInternalTexture> internalTexture, ptr<GlTexture> texture);
 
 	GLuint GetName() const;
 	/// Получить рендербуфер как текстуру.

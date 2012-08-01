@@ -6,6 +6,7 @@
 #include "GlTexture.hpp"
 #include "GlVertexShader.hpp"
 #include "GlPixelShader.hpp"
+#include "GlInternalTexture.hpp"
 #include "Win32Output.hpp"
 #include "../File.hpp"
 #include "../Exception.hpp"
@@ -133,7 +134,8 @@ ptr<RenderBuffer> GlDevice::CreateRenderBuffer(size_t width, size_t height, Pixe
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 		GlSystem::CheckErrors("Can't set texture parameters");
 
-		return NEW(GlRenderBuffer(textureName, NEW(GlTexture(textureName))));
+		ptr<GlInternalTexture> internalTexture = NEW(GlInternalTexture(textureName));
+		return NEW(GlRenderBuffer(internalTexture, NEW(GlTexture(internalTexture))));
 	}
 	catch(Exception* exception)
 	{
@@ -214,7 +216,7 @@ ptr<VertexShader> GlDevice::CreateVertexShader(ptr<File> file)
 
 		GLuint programName = CompileShader(shaderName, file);
 
-		return NEW(GlVertexShader(this, programName, shaderName));
+		return NEW(GlVertexShader(programName, shaderName));
 	}
 	catch(Exception* exception)
 	{
@@ -231,7 +233,7 @@ ptr<PixelShader> GlDevice::CreatePixelShader(ptr<File> file)
 
 		GLuint programName = CompileShader(shaderName, file);
 
-		return NEW(GlPixelShader(this, programName, shaderName));
+		return NEW(GlPixelShader(programName, shaderName));
 	}
 	catch(Exception* exception)
 	{

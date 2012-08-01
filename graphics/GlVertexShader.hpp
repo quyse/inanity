@@ -6,18 +6,18 @@
 
 BEGIN_INANITY_GRAPHICS
 
-class GlDevice;
-
 /// Класс вершинного шейдера OpenGL.
 class GlVertexShader : public VertexShader
 {
 private:
-	ptr<GlDevice> device;
 	GLuint programName;
 	GLuint shaderName;
 
 public:
-	GlVertexShader(ptr<GlDevice> device, GLuint programName, GLuint shaderName);
+	GlVertexShader(GLuint programName, GLuint shaderName);
+	~GlVertexShader();
+
+	GLuint GetProgramName() const;
 };
 
 END_INANITY_GRAPHICS

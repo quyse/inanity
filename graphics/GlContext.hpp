@@ -2,6 +2,7 @@
 #define ___INANITY_GRAPHICS_GL_CONTEXT_HPP___
 
 #include "Context.hpp"
+#include "opengl.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
@@ -23,7 +24,6 @@ private:
 	/** Если он стоит, то буфер следует установить в currentFramebuffer. */
 	bool dirtyCurrentFramebuffer;
 
-	void BindTargetsFramebuffer();
 	void BindServiceFramebuffer();
 	/// Выполнить обновление в API всех "грязных" состояний.
 	void Update();

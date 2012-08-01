@@ -11,6 +11,7 @@ class IndexBuffer : public Object
 protected:
 	size_t indicesCount;
 
+protected:
 	IndexBuffer(size_t indicesCount);
 
 public:

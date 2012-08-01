@@ -1,6 +1,15 @@
 #include "GlPixelShader.hpp"
 
-GlPixelShader::GlPixelShader(ptr<GlDevice> device, GLuint programName, GLuint shaderName)
-: device(device), programName(programName), shaderName(shaderName)
+GlPixelShader::GlPixelShader(GLuint programName, GLuint shaderName)
+: programName(programName), shaderName(shaderName) {}
+
+GlPixelShader::~GlPixelShader()
 {
+	glDeleteProgram(programName);
+	glDeleteShader(shaderName);
+}
+
+GLuint GlPixelShader::GetProgramName() const
+{
+	return programName;
 }

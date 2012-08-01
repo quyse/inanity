@@ -7,7 +7,7 @@
 #include "DxVertexShader.hpp"
 #include "DxPixelShader.hpp"
 #include "DxVertexBuffer.hpp"
-#include "DxPixelBuffer.hpp"
+#include "DxIndexBuffer.hpp"
 #include "../Exception.hpp"
 
 DxContext::DxContext(ID3D11DeviceContext* deviceContext) : deviceContext(deviceContext)
@@ -179,7 +179,7 @@ void DxContext::Update()
 	{
 		ID3D11VertexShader* shader;
 		if(boundVertexShader)
-			shader = fast_cast<DxVertexShader*>(boundVertexShader)->GetVertexShaderInterface();
+			shader = fast_cast<DxVertexShader*>(&*boundVertexShader)->GetVertexShaderInterface();
 		else
 			shader = 0;
 		deviceContext->VSSetShader(shader, NULL, 0);
@@ -192,7 +192,7 @@ void DxContext::Update()
 	{
 		ID3D11PixelShader* shader;
 		if(boundPixelShader)
-			shader = fast_cast<DxPixelShader*>(boundPixelShader)->GetPixelShaderInterface();
+			shader = fast_cast<DxPixelShader*>(&*boundPixelShader)->GetPixelShaderInterface();
 		else
 			shader = 0;
 		deviceContext->PSSetShader(shader, NULL, 0);

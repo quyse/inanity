@@ -2,18 +2,22 @@
 #define ___INANITY_GL_TEXTURE_HPP___
 
 #include "Texture.hpp"
+#include "opengl.hpp"
 
 BEGIN_INANITY_GRAPHICS
+
+class GlInternalTexture;
 
 /// Класс текстуры OpenGL.
 class GlTexture : public Texture
 {
 private:
-	GLuint textureName;
+	ptr<GlInternalTexture> internalTexture;
 
 public:
-	GlTexture(GLuint textureName);
-	~GlTexture();
+	GlTexture(ptr<GlInternalTexture> internalTexture);
+
+	GLuint GetName() const;
 };
 
 END_INANITY_GRAPHICS

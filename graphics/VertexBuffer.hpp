@@ -8,7 +8,14 @@ BEGIN_INANITY_GRAPHICS
 /// Абстрактный класс вершинного буфера.
 class VertexBuffer : public Object
 {
+protected:
+	size_t verticesCount;
+
+protected:
+	VertexBuffer(size_t verticesCount);
+
 public:
+	size_t GetVerticesCount() const;
 };
 
 END_INANITY_GRAPHICS

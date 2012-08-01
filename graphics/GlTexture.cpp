@@ -1,11 +1,10 @@
 #include "GlTexture.hpp"
+#include "GlInternalTexture.hpp"
 #include "opengl.hpp"
 
-GlTexture::GlTexture(GLuint textureName) : textureName(textureName)
-{
-}
+GlTexture::GlTexture(ptr<GlInternalTexture> internalTexture) : internalTexture(internalTexture) {}
 
-GlTexture::GlTexture()
+GLuint GlTexture::GetName() const
 {
-	glDeleteTextures(1, &textureName);
+	return internalTexture->GetName();
 }
