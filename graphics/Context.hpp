@@ -65,6 +65,48 @@ protected:
 	ptr<IndexBuffer> boundIndexBuffer;
 	bool dirtyIndexBuffer;
 
+	//******* Параметры растеризации.
+	/// Режим заливки.
+	enum FillMode
+	{
+		fillModeWireframe,
+		fillModeSolid
+	};
+	FillMode fillMode;
+	bool dirtyFillMode;
+	/// Режим culling.
+	enum CullMode
+	{
+		cullModeNone,
+		cullModeBack,
+		cullModeFront
+	};
+	CullMode cullMode;
+	bool dirtyCullMode;
+
+	/// Viewport.
+	int viewportWidth, viewportHeight;
+	bool dirtyViewport;
+
+	/// Функция, сравнивающая глубину.
+	/** Для отключения теста глубины нужно просто выставить эту функцию в always. */
+	enum DepthTestFunc
+	{
+		depthTestFuncNever,
+		depthTestFuncLess,
+		depthTestFuncLessOrEqual,
+		depthTestFuncEqual,
+		depthTestFuncNonEqual,
+		depthTestFuncGreaterOrEqual,
+		depthTestFuncGreater,
+		depthTestFuncAlways
+	};
+	DepthTestFunc depthTestFunc;
+	bool dirtyDepthTestFunc;
+	/// Запись в буфер глубины.
+	bool depthWrite;
+	bool dirtyDepthWrite;
+
 protected:
 	/// Выполнить инициализацию всех флажков и прочего.
 	Context();
@@ -109,6 +151,16 @@ public:
 	void BindVertexBuffer(ptr<VertexBuffer> vertexBuffer);
 	/// Указать индексный буфер.
 	void BindIndexBuffer(ptr<IndexBuffer> indexBuffer);
+	/// Указать режим заливки.
+	void SetFillMode(FillMode fillMode);
+	/// Указать режим culling.
+	void SetCullMode(CullMode cullMode);
+	/// Указать viewport.
+	void SetViewport(int viewportWidth, int viewportHeight);
+	/// Указать фукцию для теста глубины.
+	void SetDepthTestFunc(DepthTestFunc depthTestFunc);
+	/// Указать, включена ли запись глубины.
+	void SetDepthWrite(bool depthWrite);
 
 	//******* Методы для передачи данных.
 	/* Непосредственные методы. */

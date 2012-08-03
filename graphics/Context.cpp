@@ -25,6 +25,19 @@ Context::Context()
 	dirtyPixelShader = true;
 	dirtyVertexBuffer = true;
 	dirtyIndexBuffer = true;
+
+	fillMode = fillModeSolid;
+	dirtyFillMode = true;
+	cullMode = cullModeBack;
+	dirtyCullMode = true;
+
+	viewportWidth = viewportHeight = 1;
+	dirtyViewport = true;
+
+	depthTestFunc = depthTestFuncLess;
+	dirtyDepthTestFunc = true;
+	depthWrite = true;
+	dirtyDepthWrite = true;
 }
 
 void Context::ResetTargets()
@@ -150,5 +163,51 @@ void Context::BindIndexBuffer(ptr<IndexBuffer> indexBuffer)
 	{
 		boundIndexBuffer = indexBuffer;
 		dirtyIndexBuffer = true;
+	}
+}
+
+void Context::SetFillMode(FillMode fillMode)
+{
+	if(this->fillMode != fillMode)
+	{
+		this->fillMode = fillMode;
+		dirtyFillMode = true;
+	}
+}
+
+void Context::SetCullMode(CullMode cullMode)
+{
+	if(this->cullMode != cullMode)
+	{
+		this->cullMode = cullMode;
+		dirtyCullMode = true;
+	}
+}
+
+void Context::SetViewport(int viewportWidth, int viewportHeight)
+{
+	if(this->viewportWidth != viewportWidth || this->viewportHeight != viewportHeight)
+	{
+		this->viewportWidth = viewportWidth;
+		this->viewportHeight = viewportHeight;
+		dirtyViewport = true;
+	}
+}
+
+void Context::SetDepthTestFunc(DepthTestFunc depthTestFunc)
+{
+	if(this->depthTestFunc != depthTestFunc)
+	{
+		this->depthTestFunc = depthTestFunc;
+		dirtyDepthTestFunc = true;
+	}
+}
+
+void Context::SetDepthWrite(bool depthWrite)
+{
+	if(this->depthWrite != depthWrite)
+	{
+		this->depthWrite = depthWrite;
+		dirtyDepthWrite = true;
 	}
 }
