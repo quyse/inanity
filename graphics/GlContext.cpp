@@ -149,6 +149,92 @@ void GlContext::Update()
 
 		dirtyIndexBuffer = false;
 	}
+
+	if(dirtyFillMode)
+	{
+		switch(fillMode)
+		{
+		case fillModeWireframe:
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			break;
+		case fillModeSolid:
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			break;
+		}
+
+		dirtyFillMode = false;
+	}
+
+	if(dirtyCullMode)
+	{
+		switch(cullMode)
+		{
+		case cullModeNone:
+			glDisable(GL_CULL_FACE);
+			break;
+		case cullModeBack:
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_BACK);
+			break;
+		case cullModeFront:
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_FRONT);
+			break;
+		}
+
+		dirtyCullMode = false;
+	}
+
+	if(dirtyViewport)
+	{
+		glViewport(0, 0, viewportWidth, viewportHeight);
+
+		dirtyViewport = false;
+	}
+
+	if(dirtyDepthTestFunc)
+	{
+		GLenum func = GL_NEVER;
+		switch(depthTestFunc)
+		{
+		case depthTestFuncNever:
+			func = GL_NEVER;
+			break;
+		case depthTestFuncLess:
+			func = GL_LESS;
+			break;
+		case depthTestFuncLessOrEqual:
+			func = GL_LEQUAL;
+			break;
+		case depthTestFuncEqual:
+			func = GL_EQUAL;
+			break;
+		case depthTestFuncNonEqual:
+			func = GL_NOTEQUAL;
+			break;
+		case depthTestFuncGreaterOrEqual:
+			func = GL_GEQUAL;
+			break;
+		case depthTestFuncGreater:
+			func = GL_GREATER;
+			break;
+		case depthTestFuncAlways:
+			func = GL_ALWAYS;
+			break;
+		}
+
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(func);
+
+		dirtyDepthTestFunc = false;
+	}
+
+	if(dirtyDepthWrite)
+	{
+		glDepthMask(depthWrite ? GL_TRUE : GL_FALSE);
+
+		dirtyDepthWrite = false;
+	}
 }
 
 void GlContext::ClearRenderBuffer(RenderBuffer* renderBuffer, const float* color)
