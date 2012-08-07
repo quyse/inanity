@@ -68,6 +68,9 @@ public:
 	*/
 	virtual void PrintStack(std::ostream& stream) const;
 
+	/// Получить текст всего стека исключений.
+	String GetStackText() const;
+
 	/// Создать исключение, описывающее ошибку системы.
 	/** Ошибка системы определяется специфичным для платформы способом (Windows - GetLastError, Linux - errno). */
 	static ptr<Exception> SystemError();
