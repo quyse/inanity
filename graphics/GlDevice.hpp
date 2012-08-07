@@ -31,8 +31,7 @@ private:
 	ptr<GlContext> context;
 
 	/// Скомпилировать шейдер.
-	/** Возвращает имя программы OpenGL. */
-	static GLuint CompileShader(GLuint shaderName, ptr<File> file);
+	static void CompileShader(GLuint shaderName, ptr<File> file);
 
 public:
 #ifdef ___INANITY_WINDOWS

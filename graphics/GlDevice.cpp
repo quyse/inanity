@@ -143,7 +143,7 @@ ptr<RenderBuffer> GlDevice::CreateRenderBuffer(size_t width, size_t height, Pixe
 	}
 }
 
-GLuint GlDevice::CompileShader(GLuint shaderName, ptr<File> file)
+void GlDevice::CompileShader(GLuint shaderName, ptr<File> file)
 {
 	// указать текст шейдера
 	const GLchar* string = (const GLchar*)file->GetData();
@@ -172,39 +172,6 @@ GLuint GlDevice::CompileShader(GLuint shaderName, ptr<File> file)
 			THROW_PRIMARY_EXCEPTION("Can't compile shader:\n" + log);
 		}
 	}
-
-	// создать программу
-	GLuint programName = glCreateProgram();
-	GlSystem::CheckErrors("Can't create program");
-	// присоединить шейдер
-	glAttachShader(programName, shaderName);
-	GlSystem::CheckErrors("Can't attach shader");
-	// установить параметры
-	glProgramParameteri(programName, GL_PROGRAM_SEPARABLE, GL_TRUE);
-	GlSystem::CheckErrors("Can't setup program");
-	// слинковать программу
-	glLinkProgram(programName);
-	{
-		GLint status;
-		glGetProgramiv(programName, GL_LINK_STATUS, &status);
-		if(status != GL_TRUE)
-		{
-			// получить лог ошибок
-			GLint logLength;
-			glGetProgramiv(programName, GL_INFO_LOG_LENGTH, &logLength);
-			String log(logLength, ' ');
-			glGetProgramInfoLog(shaderName, logLength, &logLength, &*log.begin());
-			log.resize(logLength);
-
-			// очистить ошибки, на всякий случай
-			GlSystem::ClearErrors();
-
-			// выбросить ошибку
-			THROW_PRIMARY_EXCEPTION("Can't link program:\n" + log);
-		}
-	}
-
-	return programName;
 }
 
 ptr<VertexShader> GlDevice::CreateVertexShader(ptr<File> file)
@@ -214,9 +181,9 @@ ptr<VertexShader> GlDevice::CreateVertexShader(ptr<File> file)
 		GLuint shaderName = glCreateShader(GL_VERTEX_SHADER);
 		GlSystem::CheckErrors("Can't create shader");
 
-		GLuint programName = CompileShader(shaderName, file);
+		CompileShader(shaderName, file);
 
-		return NEW(GlVertexShader(programName, shaderName));
+		return NEW(GlVertexShader(shaderName));
 	}
 	catch(Exception* exception)
 	{
@@ -231,9 +198,9 @@ ptr<PixelShader> GlDevice::CreatePixelShader(ptr<File> file)
 		GLuint shaderName = glCreateShader(GL_FRAGMENT_SHADER);
 		GlSystem::CheckErrors("Can't create shader");
 
-		GLuint programName = CompileShader(shaderName, file);
+		CompileShader(shaderName, file);
 
-		return NEW(GlPixelShader(programName, shaderName));
+		return NEW(GlPixelShader(shaderName));
 	}
 	catch(Exception* exception)
 	{

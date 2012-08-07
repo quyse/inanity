@@ -6,6 +6,8 @@
 
 BEGIN_INANITY_GRAPHICS
 
+class GlInternalProgramCache;
+
 /// Класс контекста OpenGL.
 class GlContext : public Context
 {
@@ -23,6 +25,9 @@ private:
 	/// Флажок "грязности" текущего фреймбуфера.
 	/** Если он стоит, то буфер следует установить в currentFramebuffer. */
 	bool dirtyCurrentFramebuffer;
+
+	/// Кэш программ.
+	ptr<GlInternalProgramCache> programCache;
 
 	void BindServiceFramebuffer();
 	/// Выполнить обновление в API всех "грязных" состояний.

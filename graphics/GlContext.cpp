@@ -1,5 +1,7 @@
 #include "GlContext.hpp"
 #include "GlSystem.hpp"
+#include "GlInternalProgramCache.hpp"
+#include "GlInternalProgram.hpp"
 #include "GlRenderBuffer.hpp"
 #include "GlDepthStencilBuffer.hpp"
 #include "GlTexture.hpp"
@@ -15,6 +17,7 @@ GlContext::GlContext() :
 	targetsFramebuffer(0), serviceFramebuffer(0),
 	currentFramebuffer(0), dirtyCurrentFramebuffer(true)
 {
+	programCache = NEW(GlInternalProgramCache());
 }
 
 GlContext::~GlContext()
@@ -118,19 +121,12 @@ void GlContext::Update()
 			dirtyUniformBuffers[i] = false;
 		}
 
-	// вершинный шейдер
-	if(dirtyVertexShader)
+	// вершинный и пиксельный шейдеры
+	if(dirtyVertexShader || dirtyPixelShader)
 	{
-		glUseProgram(fast_cast<GlPixelShader*>(&*boundVertexShader)->GetProgramName());
+		glUseProgram(programCache->GetProgram(fast_cast<GlVertexShader*>(&*boundVertexShader), fast_cast<GlPixelShader*>(&*boundPixelShader))->GetName());
 
 		dirtyVertexShader = false;
-	}
-
-	// пиксельный шейдер
-	if(dirtyPixelShader)
-	{
-		glUseProgram(fast_cast<GlPixelShader*>(&*boundPixelShader)->GetProgramName());
-
 		dirtyPixelShader = false;
 	}
 

@@ -10,14 +10,13 @@ BEGIN_INANITY_GRAPHICS
 class GlVertexShader : public VertexShader
 {
 private:
-	GLuint programName;
 	GLuint shaderName;
 
 public:
-	GlVertexShader(GLuint programName, GLuint shaderName);
+	GlVertexShader(GLuint shaderName);
 	~GlVertexShader();
 
-	GLuint GetProgramName() const;
+	GLuint GetShaderName() const;
 };
 
 END_INANITY_GRAPHICS

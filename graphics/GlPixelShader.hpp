@@ -10,14 +10,13 @@ BEGIN_INANITY_GRAPHICS
 class GlPixelShader : public PixelShader
 {
 private:
-	GLuint programName;
 	GLuint shaderName;
 
 public:
-	GlPixelShader(GLuint programName, GLuint shaderName);
+	GlPixelShader(GLuint shaderName);
 	~GlPixelShader();
 
-	GLuint GetProgramName() const;
+	GLuint GetShaderName() const;
 };
 
 END_INANITY_GRAPHICS
