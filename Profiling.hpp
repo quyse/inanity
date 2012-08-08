@@ -32,7 +32,7 @@
 
 /// Макрос, описывающий позицию в коде.
 #define PROFILE_CODE_POSITION \
-	__FILE__ ":" __SLINE__ " " __FUNCTION__
+	__FUNCTION__ "(" __FILE__ ":" __SLINE__ ")"
 
 /// Макрос, профилирующий определённую точку.
 #define PROFILE_POINT() \

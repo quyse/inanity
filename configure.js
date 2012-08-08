@@ -102,6 +102,11 @@ var executables = {
 		staticLibraries: ['libinanity-base', 'libinanity-graphics'],
 		dynamicLibraries: []
 	}
+	, profilingtest: {
+		objects: ['test.profiling'],
+		staticLibraries: ['libinanity-base'],
+		dynamicLibraries: []
+	}
 };
 
 exports.configureComposer = function(libraryFile, composer) {
