@@ -1,4 +1,5 @@
 #include "DxContext.hpp"
+#include "DxDevice.hpp"
 #include "DxRenderBuffer.hpp"
 #include "DxDepthStencilBuffer.hpp"
 #include "DxTexture.hpp"
@@ -7,11 +8,16 @@
 #include "DxVertexShader.hpp"
 #include "DxPixelShader.hpp"
 #include "DxVertexBuffer.hpp"
+#include "VertexLayout.hpp"
+#include "DxInternalInputLayout.hpp"
+#include "DxInternalInputLayoutCache.hpp"
 #include "DxIndexBuffer.hpp"
 #include "../Exception.hpp"
 
-DxContext::DxContext(ID3D11DeviceContext* deviceContext) : deviceContext(deviceContext)
+DxContext::DxContext(ptr<DxDevice> device, ID3D11DeviceContext* deviceContext) : deviceContext(deviceContext)
 {
+	// создать кэш входных разметок
+	inputLayoutCache = NEW(DxInternalInputLayoutCache(device));
 }
 
 void DxContext::Update()
@@ -172,6 +178,19 @@ void DxContext::Update()
 			for(int i = begin; i < end; ++i)
 				dirtyUniformBuffers[i] = false;
 		}
+	}
+
+	// входная разметка
+	if(dirtyVertexShader || dirtyVertexLayout)
+	{
+		ptr<DxInternalInputLayout> inputLayout = inputLayoutCache->GetInputLayout(boundVertexLayout, fast_cast<DxVertexShader*>(&*boundVertexShader));
+		if(inputLayout != boundInputLayout)
+		{
+			deviceContext->IASetInputLayout(inputLayout->GetInputLayoutInterface());
+			boundInputLayout = inputLayout;
+		}
+
+		dirtyVertexLayout = false;
 	}
 
 	// вершинный шейдер

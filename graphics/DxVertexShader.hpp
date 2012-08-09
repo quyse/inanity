@@ -5,17 +5,26 @@
 #include "d3d.hpp"
 #include "../ComPointer.hpp"
 
+BEGIN_INANITY
+
+class File;
+
+END_INANITY
+
 BEGIN_INANITY_GRAPHICS
 
 class DxVertexShader : public VertexShader
 {
 private:
+	ptr<File> code;
 	ComPointer<ID3D11VertexShader> vertexShader;
 
 public:
-	DxVertexShader(ID3D11VertexShader* vertexShader);
+	DxVertexShader(ptr<File> code, ID3D11VertexShader* vertexShader);
 
 	ID3D11VertexShader* GetVertexShaderInterface() const;
+
+	ptr<File> GetCode() const;
 };
 
 END_INANITY_GRAPHICS

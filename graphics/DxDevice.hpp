@@ -9,6 +9,9 @@ BEGIN_INANITY_GRAPHICS
 
 class DxSystem;
 class DxContext;
+class VertexLayout;
+class DxVertexShader;
+class DxInternalInputLayout;
 
 /// Класс графического устройства DirectX 11.
 class DxDevice : public Device
@@ -38,6 +41,9 @@ public:
 
 	/// Получить интерфейс устройства DirectX 11.
 	ID3D11Device* GetDeviceInterface() const;
+
+	/// Создать входную разметку.
+	ptr<DxInternalInputLayout> CreateInternalInputLayout(ptr<VertexLayout> vertexLayout, ptr<DxVertexShader> vertexShader);
 };
 
 END_INANITY_GRAPHICS

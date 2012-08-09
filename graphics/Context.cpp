@@ -7,6 +7,7 @@
 #include "VertexShader.hpp"
 #include "PixelShader.hpp"
 #include "VertexBuffer.hpp"
+#include "VertexLayout.hpp"
 #include "IndexBuffer.hpp"
 
 Context::Context()
@@ -24,6 +25,7 @@ Context::Context()
 	dirtyVertexShader = true;
 	dirtyPixelShader = true;
 	dirtyVertexBuffer = true;
+	dirtyVertexLayout = true;
 	dirtyIndexBuffer = true;
 
 	fillMode = fillModeSolid;
@@ -154,6 +156,15 @@ void Context::BindVertexBuffer(ptr<VertexBuffer> vertexBuffer)
 	{
 		boundVertexBuffer = vertexBuffer;
 		dirtyVertexBuffer = true;
+	}
+}
+
+void Context::BindVertexLayout(ptr<VertexLayout> vertexLayout)
+{
+	if(boundVertexLayout != vertexLayout)
+	{
+		boundVertexLayout = vertexLayout;
+		dirtyVertexLayout = true;
 	}
 }
 

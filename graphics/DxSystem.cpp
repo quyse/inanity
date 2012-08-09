@@ -62,7 +62,7 @@ ptr<Device> DxSystem::CreatePrimaryDevice()
 			THROW_PRIMARY_EXCEPTION("Can't create device and context");
 
 		ComPointer<ID3D11Device> device = deviceInterface;
-		ptr<DxContext> context = NEW(DxContext(deviceContextInterface));
+		ptr<DxContext> context = NEW(DxContext(device, deviceContextInterface));
 
 		// вернуть объект
 		return NEW(DxDevice(this, deviceInterface, context));
