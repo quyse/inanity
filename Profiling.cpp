@@ -115,19 +115,19 @@ void ReportScopes(std::ostream& stream)
 	{
 		std::vector<State> states;
 
-		struct OwnTimeSorter
+		struct AverageOwnTimeSorter
 		{
 			StateTrie* trie;
 			bool operator()(int a, int b) const
 			{
-				return trie->states[a].totalTime < trie->states[b].totalTime;
+				return trie->states[a].ownTime * trie->states[b].hitCount < trie->states[b].ownTime * trie->states[a].hitCount;
 			}
 		};
-		OwnTimeSorter ownTimeSorter;
+		AverageOwnTimeSorter averageOwnTimeSorter;
 
 		StateTrie() : states(1)
 		{
-			ownTimeSorter.trie = this;
+			averageOwnTimeSorter.trie = this;
 		}
 
 		int Go(int u, const char* position)
@@ -166,13 +166,13 @@ void ReportScopes(std::ostream& stream)
 		}
 
 		/// Отсортировать потомков состояния по собственному времени.
-		void SortByOwnTime(int u)
+		void SortByAverageOwnTime(int u)
 		{
 			static std::vector<int> tmp;
 			tmp.clear();
 			for(int i = states[u].firstChild; i >= 0; i = states[i].nextSibling)
 				tmp.push_back(i);
-			std::sort(tmp.begin(), tmp.end(), ownTimeSorter);
+			std::sort(tmp.begin(), tmp.end(), averageOwnTimeSorter);
 			states[u].firstChild = -1;
 			for(int i = 0; i < (int)tmp.size(); ++i)
 			{
@@ -181,7 +181,7 @@ void ReportScopes(std::ostream& stream)
 				states[u].firstChild = t;
 			}
 			for(int i = states[u].firstChild; i >= 0; i = states[i].nextSibling)
-				SortByOwnTime(i);
+				SortByAverageOwnTime(i);
 		}
 
 		void Print(std::ostream& stream, int u, int level = 0)
@@ -191,7 +191,7 @@ void ReportScopes(std::ostream& stream)
 			{
 				for(int i = 0; i < level; ++i)
 					stream << "  ";
-				stream << states[u].position << " hitcount=" << states[u].hitCount << " total=" << Ticks2Time(states[u].totalTime) << " own=" << Ticks2Time(states[u].ownTime) << '\n';
+				stream << states[u].position << " hitcount=" << states[u].hitCount << " total=" << Ticks2Time(states[u].totalTime) << " own=" << Ticks2Time(states[u].ownTime) << " avgown=" << (Ticks2Time(states[u].ownTime) / states[u].hitCount) << '\n';
 			}
 
 			if(u > 0)
@@ -237,8 +237,10 @@ void ReportScopes(std::ostream& stream)
 		}
 	}
 
-	// отсортировать по собственному времени
-	trie.SortByOwnTime(0);
+	// расставить собственные времена
+	trie.CalculateOwnTimes(0);
+	// отсортировать по среднему собственному времени
+	trie.SortByAverageOwnTime(0);
 	// вывести всё
 	stream << std::fixed;
 	stream.precision(6);

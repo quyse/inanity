@@ -83,7 +83,7 @@ void run()
 
 	SA a;
 	const char pat[] = "abacaba";
-	const int cnt = 10;
+	const int cnt = 1;
 	char str[cnt * (sizeof(pat) - 1) + 1];
 	for(int i = 0; i < cnt; ++i)
 		memcpy(str + i * (sizeof(pat) - 1), pat, sizeof(pat));
@@ -97,7 +97,11 @@ void run()
 int main()
 {
 	Profiling::Start();
-	run();
+	{
+		PROFILE_SCOPE();
+		for(int i = 0; i < 1000; ++i)
+			run();
+	}
 	Profiling::Stop();
 	Profiling::Report(std::cout);
 	return 0;
