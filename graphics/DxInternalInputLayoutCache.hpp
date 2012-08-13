@@ -8,7 +8,7 @@ BEGIN_INANITY_GRAPHICS
 
 class VertexLayout;
 class DxVertexShader;
-class DxDevice;
+class DxContext;
 class DxInternalInputLayout;
 
 /// Класс кэша входных разметок DirectX.
@@ -26,10 +26,10 @@ private:
 	typedef std::unordered_map<Key, ptr<DxInternalInputLayout> > InputLayouts;
 	InputLayouts inputLayouts;
 
-	ptr<DxDevice> device;
+	DxContext* context;
 
 public:
-	DxInternalInputLayoutCache(ptr<DxDevice> device);
+	DxInternalInputLayoutCache(DxContext* context);
 
 	ptr<DxInternalInputLayout> GetInputLayout(VertexLayout* vertexLayout, DxVertexShader* vertexShader);
 };

@@ -7,26 +7,32 @@
 
 BEGIN_INANITY_GRAPHICS
 
-class DxDevice;
 class DxInternalInputLayoutCache;
 class DxInternalInputLayout;
+class DxVertexShader;
 
 /// Класс контекста DirectX 11.
 class DxContext : public Context
 {
 private:
+	ComPointer<ID3D11Device> device;
 	ComPointer<ID3D11DeviceContext> deviceContext;
 
 	/// Кэш входных разметок.
 	ptr<DxInternalInputLayoutCache> inputLayoutCache;
 	/// Текущая входная разметка.
 	ptr<DxInternalInputLayout> boundInputLayout;
+	/// Получить разметку.
+	ptr<DxInternalInputLayout> GetInputLayout(VertexLayout* vertexLayout, VertexShader* vertexShader);
 
 	/// Выполнить обновление в API всех "грязных" состояний.
 	void Update();
 
 public:
-	DxContext(ptr<DxDevice> device, ID3D11DeviceContext* deviceContext);
+	DxContext(ID3D11Device* device, ID3D11DeviceContext* deviceContext);
+
+	/// Создать входную разметку.
+	ptr<DxInternalInputLayout> CreateInternalInputLayout(VertexLayout* vertexLayout, DxVertexShader* vertexShader);
 
 	// методы Context
 

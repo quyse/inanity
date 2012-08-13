@@ -41,9 +41,6 @@ public:
 
 	/// Получить интерфейс устройства DirectX 11.
 	ID3D11Device* GetDeviceInterface() const;
-
-	/// Создать входную разметку.
-	ptr<DxInternalInputLayout> CreateInternalInputLayout(ptr<VertexLayout> vertexLayout, ptr<DxVertexShader> vertexShader);
 };
 
 END_INANITY_GRAPHICS

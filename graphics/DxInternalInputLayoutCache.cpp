@@ -2,15 +2,15 @@
 #include "VertexLayout.hpp"
 #include "DxVertexShader.hpp"
 #include "DxInternalInputLayout.hpp"
-#include "DxDevice.hpp"
+#include "DxContext.hpp"
 
 DxInternalInputLayoutCache::Key::operator size_t() const
 {
 	return size_t(vertexLayout) ^ size_t(vertexShader);
 }
 
-DxInternalInputLayoutCache::DxInternalInputLayoutCache(ptr<DxDevice> device)
-: device(device) {}
+DxInternalInputLayoutCache::DxInternalInputLayoutCache(DxContext* context)
+: context(context) {}
 
 ptr<DxInternalInputLayout> DxInternalInputLayoutCache::GetInputLayout(VertexLayout* vertexLayout, DxVertexShader* vertexShader)
 {
@@ -19,7 +19,7 @@ ptr<DxInternalInputLayout> DxInternalInputLayoutCache::GetInputLayout(VertexLayo
 	if(i != inputLayouts.end())
 		return i->second;
 
-	ptr<DxInternalInputLayout> inputLayout = device->CreateInternalInputLayout(vertexLayout, vertexShader);
+	ptr<DxInternalInputLayout> inputLayout = context->CreateInternalInputLayout(vertexLayout, vertexShader);
 
 	inputLayouts[key] = inputLayout;
 
