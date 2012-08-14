@@ -2,6 +2,9 @@
 #include "GlSystem.hpp"
 #include "GlInternalProgramCache.hpp"
 #include "GlInternalProgram.hpp"
+#include "GlInternalAttributeBinding.hpp"
+#include "GlInternalAttributeBindingCache.hpp"
+#include "VertexLayout.hpp"
 #include "GlRenderBuffer.hpp"
 #include "GlDepthStencilBuffer.hpp"
 #include "GlTexture.hpp"
@@ -36,6 +39,119 @@ void GlContext::BindServiceFramebuffer()
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, serviceFramebuffer);
 
 	dirtyCurrentFramebuffer = true;
+}
+
+ptr<GlInternalAttributeBinding> GlContext::CreateInternalAttributeBinding(VertexLayout* vertexLayout, GlInternalProgram* program)
+{
+	try
+	{
+		const std::vector<VertexLayout::Element>& layoutElements = vertexLayout->GetElements();
+		if(layoutElements.empty())
+			THROW_PRIMARY_EXCEPTION("Vertex layout is empty");
+
+		const std::vector<String>& attributes = program->GetAttributes();
+
+		GLuint programName = program->GetName();
+
+		ptr<GlInternalAttributeBinding> binding = NEW(GlInternalAttributeBinding());
+		std::vector<GlInternalAttributeBinding::Element>& resultElements = binding->GetElements();
+
+		for(size_t i = 0; i < attributes.size(); ++i)
+		{
+			const String& attribute = attributes[i];
+
+			// получить соответствующий элемент разметки вершины
+			// для этого преобразовать имя атрибута в семантику
+			int semantic = GlSystem::AttributeNameToSemantic(attributes[i]);
+			size_t layoutElementIndex;
+			for(layoutElementIndex = 0; layoutElementIndex < layoutElements.size(); ++layoutElementIndex)
+				if(layoutElements[layoutElementIndex].semantic == semantic)
+					break;
+			if(layoutElementIndex >= layoutElements.size())
+				THROW_PRIMARY_EXCEPTION("Can't find element for attribute");
+
+			const VertexLayout::Element& layoutElement = layoutElements[layoutElementIndex];
+
+			// получить количество необходимых результирующих элементов, и размер элемента в байтах
+			int needResultElementsCount;
+			switch(layoutElement.type)
+			{
+			case VertexLayout::typeFloat4x4:
+				needResultElementsCount = 4;
+				break;
+			default:
+				needResultElementsCount = 1;
+				break;
+			}
+			// выбрать формат и размер
+			GLint size;
+			GLenum type;
+			switch(layoutElement.type)
+			{
+			case VertexLayout::typeFloat:
+				size = 1;
+				type = GL_FLOAT;
+				break;
+			case VertexLayout::typeFloat2:
+				size = 2;
+				type = GL_FLOAT;
+				break;
+			case VertexLayout::typeFloat3:
+				size = 3;
+				type = GL_FLOAT;
+				break;
+			case VertexLayout::typeFloat4:
+			case VertexLayout::typeFloat4x4:
+				size = 4;
+				type = GL_FLOAT;
+				break;
+			case VertexLayout::typeUInt:
+				size = 1;
+				type = GL_UNSIGNED_INT;
+				break;
+			case VertexLayout::typeUInt2:
+				size = 2;
+				type = GL_UNSIGNED_INT;
+				break;
+			case VertexLayout::typeUInt3:
+				size = 3;
+				type = GL_UNSIGNED_INT;
+				break;
+			case VertexLayout::typeUInt4:
+				size = 4;
+				type = GL_UNSIGNED_INT;
+				break;
+			default:
+				THROW_PRIMARY_EXCEPTION("Unknown element type");
+			}
+
+			// размер элемента - пока всегда один вектор (float4 или uint4),
+			// так как он нужен только для матриц float4x4
+			const int elementSize = 16;
+
+			// получить локацию атрибута
+			GLuint location = glGetAttribLocation(programName, attribute.c_str());
+
+			// цикл по результирующим элементам
+			for(int resultElementIndex = 0; resultElementIndex < needResultElementsCount; ++resultElementIndex)
+			{
+				resultElements.push_back(GlInternalAttributeBinding::Element());
+				GlInternalAttributeBinding::Element& resultElement = resultElements.back();
+
+				resultElement.index = location + resultElementIndex;
+				resultElement.size = size;
+				resultElement.type = type;
+				resultElement.normalized = false;
+				resultElement.pointer = (GLvoid*)((char*)0 + layoutElement.offset + resultElementIndex * elementSize);
+			}
+		}
+
+		return binding;
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create GL internal input layout", exception);
+	}
 }
 
 void GlContext::Update()
@@ -121,13 +237,21 @@ void GlContext::Update()
 			dirtyUniformBuffers[i] = false;
 		}
 
+	bool dirtyAttributeBinding = false;
+
 	// вершинный и пиксельный шейдеры
 	if(dirtyVertexShader || dirtyPixelShader)
 	{
-		glUseProgram(programCache->GetProgram(fast_cast<GlVertexShader*>(&*boundVertexShader), fast_cast<GlPixelShader*>(&*boundPixelShader))->GetName());
+		ptr<GlInternalProgram> program = programCache->GetProgram(fast_cast<GlVertexShader*>(&*boundVertexShader), fast_cast<GlPixelShader*>(&*boundPixelShader));
+		if(boundProgram != program)
+		{
+			boundProgram = program;
+			glUseProgram(boundProgram->GetName());
+		}
 
 		dirtyVertexShader = false;
 		dirtyPixelShader = false;
+		dirtyAttributeBinding = true;
 	}
 
 	// вершинный буфер
@@ -136,6 +260,7 @@ void GlContext::Update()
 		glBindBuffer(GL_ARRAY_BUFFER, fast_cast<GlVertexBuffer*>(&*boundVertexBuffer)->GetName());
 
 		dirtyVertexBuffer = false;
+		dirtyAttributeBinding = true;
 	}
 
 	// индексный буфер
@@ -144,6 +269,30 @@ void GlContext::Update()
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, boundIndexBuffer ? fast_cast<GlVertexBuffer*>(&*boundIndexBuffer)->GetName() : 0);
 
 		dirtyIndexBuffer = false;
+		dirtyAttributeBinding = true;
+	}
+
+	// привязка к атрибутам
+	if(dirtyAttributeBinding)
+	{
+		ptr<VertexLayout> vertexLayout = boundVertexBuffer->GetVertexLayout();
+		ptr<GlInternalAttributeBinding> attributeBinding = attributeBindingCache->GetBinding(vertexLayout, boundProgram);
+		if(boundAttributeBinding != attributeBinding)
+		{
+			boundAttributeBinding = attributeBinding;
+
+			// выполнить привязку
+			int stride = vertexLayout->GetStride();
+			const std::vector<GlInternalAttributeBinding::Element>& elements = boundAttributeBinding->GetElements();
+			for(size_t i = 0; i < elements.size(); ++i)
+			{
+				const GlInternalAttributeBinding::Element& element = elements[i];
+
+				glVertexAttribPointer(element.index, element.size, element.type, element.normalized, stride, element.pointer);
+			}
+		}
+
+		dirtyAttributeBinding = false;
 	}
 
 	if(dirtyFillMode)

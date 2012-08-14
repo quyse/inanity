@@ -7,6 +7,10 @@
 BEGIN_INANITY_GRAPHICS
 
 class GlInternalProgramCache;
+class GlInternalAttributeBinding;
+class GlInternalAttributeBindingCache;
+class GlVertexLayout;
+class GlInternalProgram;
 
 /// Класс контекста OpenGL.
 class GlContext : public Context
@@ -28,6 +32,13 @@ private:
 
 	/// Кэш программ.
 	ptr<GlInternalProgramCache> programCache;
+	/// Текущая программа.
+	ptr<GlInternalProgram> boundProgram;
+
+	/// Кэш привязок аттрибутов.
+	ptr<GlInternalAttributeBindingCache> attributeBindingCache;
+	/// Текущая привязка атрибутов.
+	ptr<GlInternalAttributeBinding> boundAttributeBinding;
 
 	void BindServiceFramebuffer();
 	/// Выполнить обновление в API всех "грязных" состояний.
@@ -36,6 +47,9 @@ private:
 public:
 	GlContext();
 	~GlContext();
+
+	/// Создать привязку атрибутов.
+	ptr<GlInternalAttributeBinding> CreateInternalAttributeBinding(VertexLayout* vertexLayout, GlInternalProgram* program);
 
 	// методы Context
 

@@ -4,6 +4,7 @@
 #include "System.hpp"
 #include "PixelFormat.hpp"
 #include "opengl.hpp"
+#include "../String.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
@@ -30,6 +31,9 @@ public:
 
 	/// Получить формат текстуры для OpenGL.
 	static bool GetTextureFormat(PixelFormat pixelFormat, GLint& internalFormat, GLenum& format, GLenum& type);
+
+	/// Перевести имя аттрибута в спецификацию.
+	static int AttributeNameToSemantic(const String& name);
 };
 
 END_INANITY_GRAPHICS

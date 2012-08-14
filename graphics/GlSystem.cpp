@@ -129,3 +129,27 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, GLint& internalFormat, 
 		return false;
 	}
 }
+
+int GlSystem::AttributeNameToSemantic(const String& name)
+{
+	// имя атрибута должно начинаться с "attr_"
+	static const char beginStr[] = "attr_";
+	size_t i;
+	for(i = 0; i < name.length() && beginStr[i]; ++i)
+		if(name[i] != beginStr[i])
+			break;
+	if(beginStr[i])
+		THROW_PRIMARY_EXCEPTION("Wrong attribute name");
+
+	// перевести имя в семантику
+	int semantic = 0;
+	for(; i < name.length(); ++i)
+	{
+		char ch = name[i];
+		if(ch < 'a' || ch > 'z')
+			THROW_PRIMARY_EXCEPTION("Wrong symbol in attribute semantic");
+		semantic = semantic * 26 + ch - 'a';
+	}
+
+	return semantic;
+}

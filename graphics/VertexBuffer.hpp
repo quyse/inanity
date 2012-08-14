@@ -5,17 +5,22 @@
 
 BEGIN_INANITY_GRAPHICS
 
+class VertexLayout;
+
 /// Абстрактный класс вершинного буфера.
 class VertexBuffer : public Object
 {
 protected:
-	size_t verticesCount;
+	int verticesCount;
+	ptr<VertexLayout> vertexLayout;
 
 protected:
-	VertexBuffer(size_t verticesCount);
+	VertexBuffer(int verticesCount, ptr<VertexLayout> vertexLayout);
 
 public:
-	size_t GetVerticesCount() const;
+	int GetVerticesCount() const;
+
+	ptr<VertexLayout> GetVertexLayout() const;
 };
 
 END_INANITY_GRAPHICS

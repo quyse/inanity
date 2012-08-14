@@ -89,6 +89,10 @@ ptr<DxInternalInputLayout> DxContext::CreateInternalInputLayout(VertexLayout* ve
 				THROW_PRIMARY_EXCEPTION("Unknown element type");
 			}
 
+			// размер элемента - пока всегда один вектор (float4 или uint4),
+			// так как он нужен только для матриц float4x4
+			const int elementSize = 16;
+
 			// имя семантики получается переводом кода семантики в 26-ричную систему (буквы)
 			String& semanticName = semanticNames[i];
 			semanticName.assign('A', 8);
@@ -112,7 +116,7 @@ ptr<DxInternalInputLayout> DxContext::CreateInternalInputLayout(VertexLayout* ve
 				desc.SemanticIndex = descIndex;
 				desc.Format = format;
 				desc.InputSlot = 0;
-				desc.AlignedByteOffset = element.offset;
+				desc.AlignedByteOffset = element.offset + descIndex * elementSize;
 				desc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 				desc.InstanceDataStepRate = 0;
 			}
@@ -295,16 +299,14 @@ void DxContext::Update()
 	}
 
 	// входная разметка
-	if(dirtyVertexShader || dirtyVertexLayout)
+	if(dirtyVertexBuffer || dirtyVertexShader)
 	{
-		ptr<DxInternalInputLayout> inputLayout = inputLayoutCache->GetInputLayout(boundVertexLayout, fast_cast<DxVertexShader*>(&*boundVertexShader));
+		ptr<DxInternalInputLayout> inputLayout = inputLayoutCache->GetInputLayout(boundVertexBuffer->GetVertexLayout(), fast_cast<DxVertexShader*>(&*boundVertexShader));
 		if(inputLayout != boundInputLayout)
 		{
 			deviceContext->IASetInputLayout(inputLayout->GetInputLayoutInterface());
 			boundInputLayout = inputLayout;
 		}
-
-		dirtyVertexLayout = false;
 	}
 
 	// вершинный шейдер

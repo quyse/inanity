@@ -38,10 +38,14 @@ public:
 	};
 
 private:
+	int stride;
 	std::vector<Element> elements;
 
 public:
+	VertexLayout(int stride);
+
 	std::vector<Element>& GetElements();
+	int GetStride() const;
 };
 
 END_INANITY_GRAPHICS

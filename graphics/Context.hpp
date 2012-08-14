@@ -62,9 +62,6 @@ protected:
 	/// Привязанный вершинный буфер.
 	ptr<VertexBuffer> boundVertexBuffer;
 	bool dirtyVertexBuffer;
-	/// Привязанная вершинная разметка.
-	ptr<VertexLayout> boundVertexLayout;
-	bool dirtyVertexLayout;
 	/// Привязанный индексный буфер.
 	ptr<IndexBuffer> boundIndexBuffer;
 	bool dirtyIndexBuffer;
@@ -153,8 +150,6 @@ public:
 	void BindPixelShader(ptr<PixelShader> pixelShader);
 	/// Указать вершинный буфер.
 	void BindVertexBuffer(ptr<VertexBuffer> vertexBuffer);
-	/// Указать вершинную разметку.
-	void BindVertexLayout(ptr<VertexLayout> vertexLayout);
 	/// Указать индексный буфер.
 	void BindIndexBuffer(ptr<IndexBuffer> indexBuffer);
 	/// Указать режим заливки.

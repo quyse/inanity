@@ -89,6 +89,7 @@ var libraries = {
 		objects: [
 			'graphics.GlSystem', 'graphics.GlDevice', 'graphics.GlPresenter', 'graphics.GlContext',
 			'graphics.GlInternalTexture', 'graphics.GlInternalProgram', 'graphics.GlInternalProgramCache',
+			'graphics.GlInternalAttributeBinding', 'graphics.GlInternalAttributeBindingCache',
 			'graphics.GlRenderBuffer', 'graphics.GlDepthStencilBuffer', 'graphics.GlTexture', 'graphics.GlUniformBuffer',
 			'graphics.GlVertexBuffer', 'graphics.GlIndexBuffer',
 			'graphics.GlVertexShader', 'graphics.GlPixelShader'

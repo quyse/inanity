@@ -1,7 +1,8 @@
 #include "GlVertexBuffer.hpp"
+#include "VertexLayout.hpp"
 
-GlVertexBuffer::GlVertexBuffer(GLuint name, size_t verticesCount)
-: VertexBuffer(verticesCount), name(name) {}
+GlVertexBuffer::GlVertexBuffer(GLuint name, int verticesCount, ptr<VertexLayout> vertexLayout)
+: VertexBuffer(verticesCount, vertexLayout), name(name) {}
 
 GlVertexBuffer::~GlVertexBuffer()
 {

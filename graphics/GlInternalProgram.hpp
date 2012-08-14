@@ -3,6 +3,8 @@
 
 #include "graphics.hpp"
 #include "opengl.hpp"
+#include "../String.hpp"
+#include <vector>
 
 BEGIN_INANITY_GRAPHICS
 
@@ -12,12 +14,14 @@ class GlInternalProgram : public Object
 {
 private:
 	GLuint name;
+	std::vector<String> attributes;
 
 public:
 	GlInternalProgram(GLuint name);
 	~GlInternalProgram();
 
 	GLuint GetName() const;
+	std::vector<String>& GetAttributes();
 };
 
 END_INANITY_GRAPHICS

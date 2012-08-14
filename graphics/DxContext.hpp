@@ -22,8 +22,6 @@ private:
 	ptr<DxInternalInputLayoutCache> inputLayoutCache;
 	/// Текущая входная разметка.
 	ptr<DxInternalInputLayout> boundInputLayout;
-	/// Получить разметку.
-	ptr<DxInternalInputLayout> GetInputLayout(VertexLayout* vertexLayout, VertexShader* vertexShader);
 
 	/// Выполнить обновление в API всех "грязных" состояний.
 	void Update();
