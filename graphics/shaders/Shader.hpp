@@ -1,32 +1,54 @@
 #ifndef ___INANITY_SHADERS_SHADER_HPP___
 #define ___INANITY_SHADERS_SHADER_HPP___
 
-#include "shaders.hpp"
-#include <sstream>
-#include <string>
+#include "DataType.hpp"
+#include "Statement.hpp"
+#include <vector>
 
 BEGIN_INANITY_SHADERS
 
-/// Класс, обозначающий строящийся шейдер.
+/// Класс шейдера.
 class Shader
 {
-public:
-	/// Текст объявлений глобальных переменных.
-	std::ostringstream globalDeclarations;
-	/// Текст объявлений временных переменных.
-	std::ostringstream tempDeclarations;
-	/// Текст объявлений входных данных.
-	std::ostringstream inputDeclarations;
-	/// Текст объявлений выходных данных.
-	std::ostringstream outputDeclarations;
-	/// Текст собственно действий.
-	std::ostringstream statements;
+protected:
+	Statement code;
+
+	/// Переменная.
+	struct Variable
+	{
+		DataType dataType;
+		int offset;
+
+		Variable(DataType dataType, int offset);
+	};
+	/// Список переменных.
+	typedef std::vector<Variable> Variables;
+
+	Variables inputVariables;
+	Variables outputVariables;
+	Variables tempVariables;
+	/// Вектор списков переменных по константным буферам.
+	std::vector<Variables> uniformsVariables;
+	/// Битовая маска слотов семплеров.
+	int samplerSlotsMask;
+
+protected:
+	Shader();
+
+	/// Зарегистрировать переменную, если она ещё не зарегистрирована.
+	static void RegisterVariable(Variables& variables, DataType dataType, int offset);
 
 public:
-	/// Получить результирующий текст.
-	std::string getSource() const;
+	void SetCode(Statement code);
+	Statement GetCode() const;
+
+	const Variables& GetInputVariables() const;
+	const Variables& GetOutputVariables() const;
+	const Variables& GetTempVariables() const;
+	const std::vector<Variables>& GetUniformsVariables() const;
+	int GetSamplerSlotsMask() const;
 };
 
-END_INANITY_SHADER
+END_INANITY_SHADERS
 
 #endif

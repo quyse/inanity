@@ -97,7 +97,11 @@ var libraries = {
 	},
 	// ******* подсистема шейдеров
 	'libinanity-shaders': {
-		objects: ['graphics.shaders.Language']
+		objects: [
+			'graphics.shaders.Expression', 'graphics.shaders.ExpressionObjects',
+			'graphics.shaders.Statement', 'graphics.shaders.StatementObjects',
+			'graphics.shaders.Shader', 'graphics.shaders.ShaderBuilder'
+		]
 	},
 	// ******* подсистема GUI
 	'libinanity-gui': {

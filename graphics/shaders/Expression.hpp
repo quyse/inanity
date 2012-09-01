@@ -5,41 +5,25 @@
 
 BEGIN_INANITY_SHADERS
 
+class ExpressionObject;
+
 /// Класс выражения.
-template <DataType>
 class Expression
 {
 private:
-	ptr<ExpressionObject<DataType> > object;
+	ptr<ExpressionObject> object;
 
 	//******* Различные операторы для выражений.
-	friend Expression<DataType> operator-(Expression<DataType> a)
-	{
-		return NEW(NegateExpressionObject<DataType>(a));
-	}
-	template <typename DataTypeA, typename DataTypeB>
-	friend auto operator+(Expression<DataTypeA> a, Expression<DataTypeB> b) -> Expression<decltype(ExpressionObject<DataTypeA> + ExpressionObject<DataTypeB>)>
-	{
-		return NEW(AddExpressionObject<DataTypeA, DataTypeB>(a, b));
-	}
-	template <typename DataTypeA, typename DataTypeB>
-	friend auto operator-(Expression<DataTypeA> a, Expression<DataTypeB> b) -> Expression<decltype(ExpressionObject<DataTypeA> - ExpressionObject<DataTypeB>)>
-	{
-		return NEW(SubtractExpressionObject<DataTypeA, DataTypeB>(a, b));
-	}
-	template <typename DataTypeA, typename DataTypeB>
-	friend auto operator*(Expression<DataTypeA> a, Expression<DataTypeB> b) -> Expression<decltype(ExpressionObject<DataTypeA> * ExpressionObject<DataTypeB>)>
-	{
-		return NEW(MultiplyExpressionObject<DataTypeA, DataTypeB>(a, b));
-	}
-	template <typename DataTypeA, typename DataTypeB>
-	friend auto operator/(Expression<DataTypeA> a, Expression<DataTypeB> b) -> Expression<decltype(ExpressionObject<DataTypeA> / ExpressionObject<DataTypeB>)>
-	{
-		return NEW(DivideExpressionObject<DataTypeA, DataTypeB>(a, b));
-	}
+	Expression operator=(Expression b);
+	Expression operator[](Expression index);
+	friend Expression operator-(Expression a);
+	friend Expression operator+(Expression a, Expression b);
+	friend Expression operator-(Expression a, Expression b);
+	friend Expression operator*(Expression a, Expression b);
+	friend Expression operator/(Expression a, Expression b);
 
 public:
-	Expression(ptr<ExpressionObject<DataType> > object) : object(object) {}
+	Expression(ptr<ExpressionObject> object);
 };
 
 END_INANITY_SHADERS

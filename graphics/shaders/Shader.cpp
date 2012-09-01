@@ -1,29 +1,58 @@
 #include "Shader.hpp"
+#include "StatementObject.hpp"
+#include "../../Exception.hpp"
 
-std::string Shader::getSource() const
+Shader::Variable::Variable(DataType dataType, int offset)
+: dataType(dataType), offset(offset) {}
+
+Shader::Shader() : samplerSlotsMask(0) {}
+
+void Shader::RegisterVariable(Variables& variables, DataType dataType, int offset)
 {
-	std::ostringstream source;
+	// попробовать найти эту переменную, может, она уже есть
+	for(size_t i = 0; i < variables.size(); ++i)
+		if(variables[i].offset == offset)
+		{
+			if(variables[i].dataType != dataType)
+				THROW_PRIMARY_EXCEPTION("Data type is not match for already registered variable");
+			return;
+		}
 
-#ifdef ___INANITY_SHADERS_HLSL
-	// входная структура
-	source << "struct Input\n{\n" << inputDeclarations.str() << "};\n";
-	// выходная структура
-	source << "struct Output\n{\n" << outputDeclarations.str() << "};\n";
-	// глобальные переменные
-	source << globalDeclarations;
-	// начало функции
-	source << "Output f(Input input)\n{Output output;\n";
-	// временные переменные
-	source << tempDeclarations.str();
-	// действия
-	source << statements.str();
-	// конец функции
-	source << "return output;\n}\n";
-#endif
+	// переменная не найдена, добавить её
+	variables.push_back(Variable(dataType, offset));
+}
 
-#ifdef ___INANITY_SHADERS_GLSL
-	// атрибуты
-	source << inputDeclarations;
-	source << globalDeclarations;
-#endif
+void Shader::SetCode(Statement code)
+{
+	this->code = code;
+}
+
+Statement Shader::GetCode() const
+{
+	return code;
+}
+
+const Shader::Variables& Shader::GetInputVariables() const
+{
+	return inputVariables;
+}
+
+const Shader::Variables& Shader::GetOutputVariables() const
+{
+	return outputVariables;
+}
+
+const Shader::Variables& Shader::GetTempVariables() const
+{
+	return tempVariables;
+}
+
+const std::vector<Shader::Variables>& Shader::GetUniformsVariables() const
+{
+	return uniformsVariables;
+}
+
+int Shader::GetSamplerSlotsMask() const
+{
+	return samplerSlotsMask;
 }
