@@ -4,7 +4,7 @@
 #include "graphics.hpp"
 #include "System.hpp"
 #include "../String.hpp"
-#include "../EventHandler.hpp"
+#include "../Handler.hpp"
 #include "../input/input.hpp"
 
 #ifdef ___INANITY_WINDOWS
@@ -23,7 +23,7 @@ class Window : public Object
 {
 public:
 	/// Тип обработчика активного окна.
-	typedef EventHandler<int> ActiveHandler;
+	typedef Handler<int> ActiveHandler;
 
 private:
 	//дескриптор окна

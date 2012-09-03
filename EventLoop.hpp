@@ -2,7 +2,7 @@
 #define ___INANITY_EVENT_LOOP_HPP___
 
 #include "Object.hpp"
-#include "EventHandler.hpp"
+#include "Handler.hpp"
 #include "ServerSocket.hpp"
 #include "String.hpp"
 #include "uv.hpp"
@@ -22,7 +22,7 @@ class EventLoop : public Object
 	friend class ServerSocket;
 	friend class ClientSocket;
 public:
-	typedef EventHandler<ptr<ClientSocket> > ConnectHandler;
+	typedef Handler<ptr<ClientSocket> > ConnectHandler;
 
 private:
 	uv_loop_t* loop;

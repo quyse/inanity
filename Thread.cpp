@@ -4,12 +4,10 @@
 #include <pthread.h>
 #endif
 
-Thread::Thread(ptr<Handler> handler)
+Thread::Thread(ptr<ThreadHandler> handler) : handler(handler)
 {
 	try
 	{
-		this->handler = handler;
-
 #ifdef ___INANITY_WINDOWS
 		thread = NEW(Handle(CreateThread(0, 0, ThreadRoutine, this, 0, 0)));
 		if(!thread->IsValid())
