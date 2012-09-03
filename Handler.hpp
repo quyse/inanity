@@ -5,8 +5,20 @@
 
 BEGIN_INANITY
 
-/// Абстрактный класс обработчика событий.
-/** Предназначен для обратной связи различных классов. */
+/// Абстрактный класс обработчика.
+class VoidHandler : public Object
+{
+protected:
+	virtual void OnEvent() = 0;
+
+public:
+	void Fire()
+	{
+		OnEvent();
+	}
+};
+
+/// Абстрактный класс обработчика с одним параметром.
 template <typename T>
 class Handler : public Object
 {
@@ -23,16 +35,20 @@ public:
 	}
 };
 
-/// Специальная версия без параметров.
-class VoidHandler : public Object
+/// Абстрактный класс обработчика с двумя параметрами.
+template <typename T1, typename T2>
+class Handler2 : public Object
 {
 protected:
-	virtual void OnEvent() = 0;
+	/// Обработать событие.
+	/** Собственно, метод, который нужно перегружать в производном классе. */
+	virtual void OnEvent(T1 data1, T2 data2) = 0;
 
 public:
-	void Fire()
+	/// Сообщить о наступлении события.
+	void Fire(T1 data1, T2 data2)
 	{
-		OnEvent();
+		OnEvent(data1, data2);
 	}
 };
 

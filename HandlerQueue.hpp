@@ -29,9 +29,11 @@ private:
 	private:
 		ptr<VoidHandler> handler;
 
+	protected:
+		void OnEvent();
+
 	public:
 		EnqueueHandler(ptr<VoidHandler> handler);
-		void OnEvent();
 	};
 
 public:
