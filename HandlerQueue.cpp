@@ -1,6 +1,14 @@
 #include "HandlerQueue.hpp"
 #include "CriticalCode.hpp"
 
+HandlerQueue::EnqueueHandler::EnqueueHandler(ptr<VoidHandler> handler)
+: handler(handler) {}
+
+void HandlerQueue::EnqueueHandler::OnEvent()
+{
+	handler->Fire();
+}
+
 HandlerQueue::HandlerQueue() : stop(false) {}
 
 void HandlerQueue::Enqueue(ptr<VoidHandler> handler)
@@ -65,4 +73,9 @@ void HandlerQueue::Finish()
 {
 	stop = true;
 	Enqueue(0);
+}
+
+ptr<VoidHandler> HandlerQueue::CreateEnqueueHandler(ptr<VoidHandler> handler)
+{
+	return NEW(EnqueueHandler(handler));
 }

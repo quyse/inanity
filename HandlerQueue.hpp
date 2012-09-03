@@ -9,7 +9,8 @@
 BEGIN_INANITY
 
 /// Класс очереди на обработку.
-/** Очередь получает элементы на обработку, и выполняет их по порядку. */
+/** Очередь получает элементы на обработку, и выполняет их по порядку.
+Класс поддерживает любое количество потоков обработки. */
 class HandlerQueue : public Object
 {
 private:
@@ -21,7 +22,17 @@ private:
 	Semaphore semaphore;
 	/// Флажок завершения работы.
 	volatile bool stop;
-	/// Количество выполняющихся.
+
+	/// Вспомогательный обработчик, выполняющий заданный ему обработчик асинхронно.
+	class EnqueueHandler : public VoidHandler
+	{
+	private:
+		ptr<VoidHandler> handler;
+
+	public:
+		EnqueueHandler(ptr<VoidHandler> handler);
+		void OnEvent();
+	};
 
 public:
 	HandlerQueue();
@@ -40,6 +51,8 @@ public:
 	/** Выполняется мгновенно. Потоки, выполняющие обработчики,
 	выполняют всё, что есть в очереди, и завершаются. */
 	void Finish();
+
+	static ptr<VoidHandler> CreateEnqueueHandler(ptr<VoidHandler> handler);
 };
 
 END_INANITY
