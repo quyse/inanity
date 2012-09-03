@@ -1,6 +1,7 @@
 #include "FileSystem.hpp"
 #include "File.hpp"
 #include "FileInputStream.hpp"
+#include "Future.hpp"
 #include "Exception.hpp"
 
 ptr<File> FileSystem::LoadFile(const String& fileName)
@@ -9,6 +10,20 @@ ptr<File> FileSystem::LoadFile(const String& fileName)
 	if(file)
 		return file;
 	THROW_PRIMARY_EXCEPTION("Can't load file " + fileName);
+}
+
+ptr<Future<ptr<File> > > FileSystem::LoadFileAsync(const String& fileName)
+{
+	ptr<Future<ptr<File> > > future = NEW(Future<ptr<File> >());
+	try
+	{
+		future->Result(LoadFile(fileName));
+	}
+	catch(Exception* exception)
+	{
+		future->Error(exception);
+	}
+	return future;
 }
 
 ptr<File> FileSystem::TryLoadFile(const String& fileName)
@@ -39,6 +54,21 @@ ptr<InputStream> FileSystem::LoadFileAsStream(const String& fileName)
 void FileSystem::SaveFile(ptr<File> file, const String& fileName)
 {
 	THROW_PRIMARY_EXCEPTION("Saving files in this filesystem is not supported");
+}
+
+ptr<Future<int> > FileSystem::SaveFileAsync(ptr<File> file, const String& fileName)
+{
+	ptr<Future<int> > future = NEW(Future<int>());
+	try
+	{
+		SaveFile(file, fileName);
+		future->Result(0);
+	}
+	catch(Exception* exception)
+	{
+		future->Error(exception);
+	}
+	return future;
 }
 
 ptr<OutputStream> FileSystem::SaveFileAsStream(const String& fileName)

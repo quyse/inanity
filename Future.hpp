@@ -6,7 +6,7 @@
 
 BEGIN_INANITY
 
-/// Абстрактный класс, представляющий результат асинхронной работы.
+/// Класс, представляющий результат асинхронной работы.
 /** Предоставляется результат и объект исключения, если произошла ошибка.
 Всегда нужно сначала проверять объект исключения (== null).
 Этот механизм - асинхронная замена бросанию исключений через throw. */
@@ -60,8 +60,9 @@ private:
 	}
 
 	/// Выполнить обработчики.
-	void Process()
+	void Finish()
 	{
+		finished = true;
 		// вызвать добавленные обработчики
 		for(size_t i = 0; i < targets.size(); ++i)
 			Run(targets[i]);
@@ -88,14 +89,14 @@ public:
 	void Result(T result)
 	{
 		this->result = result;
-		Process();
+		Finish();
 	}
 
 	/// Указать, что произошла ошибка.
 	void Error(ptr<Exception> exception)
 	{
 		this->exception = exception;
-		Process();
+		Finish();
 	}
 };
 

@@ -1,18 +1,22 @@
 #include "OutputStream.hpp"
 #include "InputStream.hpp"
 #include "MemoryFile.hpp"
+#include "Future.hpp"
 #include <string.h>
 
-void OutputStream::Write(const void* data, size_t size)
+ptr<Future<int> > OutputStream::WriteAsync(ptr<File> file)
 {
-	ptr<MemoryFile> file = NEW(MemoryFile(size));
-	memcpy(file->GetData(), data, size);
-	WriteFile(file);
-}
-
-void OutputStream::WriteFile(ptr<File> file)
-{
-	Write(file->GetData(), file->GetSize());
+	ptr<Future<int> > future = NEW(Future<int>());
+	try
+	{
+		Write(file->GetData(), file->GetSize());
+		future->Result(0);
+	}
+	catch(Exception* exception)
+	{
+		future->Error(exception);
+	}
+	return future;
 }
 
 void OutputStream::Flush()

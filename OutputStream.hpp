@@ -7,6 +7,8 @@ BEGIN_INANITY
 
 class File;
 class InputStream;
+template <typename T>
+class Future;
 
 /// Абстрактный класс потока вывода.
 /** Предназначен для потокового вывода в различные выходные объекты.
@@ -24,12 +26,11 @@ public:
 		\param data Указатель на буфер с записываемыми данными.
 		\param size Размер буфера для записи, в байтах.
 	*/
-	virtual void Write(const void* data, size_t size);
+	virtual void Write(const void* data, size_t size) = 0;
 
-	/// Записать данные из файла в поток.
-	/** Предполагается, что переданный файл уже не будет изменяться.
-	 * Реализация по умолчанию вызывает предыдущий метод. */
-	virtual void WriteFile(ptr<File> file);
+	/// Записать данные асинхронно.
+	/** Реализация по умолчанию делает это синхронно через Write. */
+	virtual ptr<Future<int> > WriteAsync(ptr<File> file);
 
 	/// Убедиться, что весь вывод записан.
 	/** Поток не обязан записывать выводить данные в нужное место сразу.

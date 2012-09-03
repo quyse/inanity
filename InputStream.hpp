@@ -5,6 +5,10 @@
 
 BEGIN_INANITY
 
+class File;
+template <typename T>
+class Future;
+
 /// Абстрактный класс потока ввода.
 /** Предназначен для считывания потоковых данных из различных источников. */
 class InputStream : public Object
@@ -21,6 +25,11 @@ public:
 	\param size Размер данных для считывания, в байтах.
 	*/
 	virtual size_t Read(void* data, size_t size) = 0;
+
+	/// Считать данные из потока асинхронно.
+	/** Семантика такая же, как у Read. Реализация по умолчанию
+	работает синхронно через Read. */
+	virtual ptr<Future<size_t> > ReadAsync(ptr<File> file);
 };
 
 END_INANITY
