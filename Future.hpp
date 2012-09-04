@@ -2,6 +2,8 @@
 #define ___INANITY_FUTURE_HPP___
 
 #include "HandlerQueue.hpp"
+#include "CriticalSection.hpp"
+#include "CriticalCode.hpp"
 #include "Exception.hpp"
 
 BEGIN_INANITY
@@ -18,6 +20,8 @@ public:
 	typedef Handler2<T, ptr<Exception> > Target;
 
 private:
+	/// Критическая секция.
+	CriticalSection criticalSection;
 	/// Очередь для выполнения.
 	ptr<HandlerQueue> queue;
 	/// Список функций для вызова.
@@ -49,6 +53,7 @@ private:
 
 private:
 	/// Выполнить обработчик.
+	/** Можно вызывать, только если finished == true. */
 	void Run(ptr<Target> target)
 	{
 		// если очередь задана, положить в неё
@@ -62,11 +67,19 @@ private:
 	/// Выполнить обработчики.
 	void Finish()
 	{
-		finished = true;
-		// вызвать добавленные обработчики
+		// установить флажок завершённости, и забрать список обработчиков
+		std::vector<ptr<Target> > targets;
+		{
+			CriticalCode code(criticalSection);
+			finished = true;
+			targets.swap(this->targets);
+		}
+
+		// с этого момента добавляемые обработчики будут сразу выполняться
+
+		// вызвать полученные обработчики
 		for(size_t i = 0; i < targets.size(); ++i)
 			Run(targets[i]);
-		targets.clear();
 	}
 
 public:
@@ -76,13 +89,19 @@ public:
 	/// Добавить обработчик завершения.
 	void AddTarget(ptr<Target> target)
 	{
-		// если работа уже выполнена
-		if(finished)
-			// просто запустить обработчик
-			Run(target);
-		// иначе добавить в список
-		else
-			targets.push_back(target);
+		{
+			CriticalCode code(criticalSection);
+			// если работа ещё не выполнена
+			if(!finished)
+			{
+				// добавить обработчик в список
+				targets.push_back(target);
+				return;
+			}
+		}
+		// иначе работа уже выполнена
+		// просто запустить обработчик
+		Run(target);
 	}
 
 	/// Указать, что работа успешно завершена.
