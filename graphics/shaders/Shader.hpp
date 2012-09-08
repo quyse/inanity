@@ -2,6 +2,7 @@
 #define ___INANITY_SHADERS_SHADER_HPP___
 
 #include "DataType.hpp"
+#include "Semantic.hpp"
 #include "Statement.hpp"
 #include <vector>
 
@@ -10,19 +11,25 @@ BEGIN_INANITY_SHADERS
 /// Класс шейдера.
 class Shader
 {
-protected:
-	Statement code;
-
+public:
 	/// Переменная.
 	struct Variable
 	{
+		/// Тип данных переменной.
 		DataType dataType;
+		/// Смещение до переменной от начала буфера, в байтах.
 		int offset;
+		/// Специальная семантика переменной.
+		Semantic semantic;
 
 		Variable(DataType dataType, int offset);
 	};
 	/// Список переменных.
 	typedef std::vector<Variable> Variables;
+
+protected:
+	/// Весь код шейдера.
+	Statement code;
 
 	Variables inputVariables;
 	Variables outputVariables;

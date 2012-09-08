@@ -18,10 +18,13 @@ private:
 
 public:
 	/// Основной конструктор - из указателя на StatementObject.
-	Statement(ptr<StatementObject> object);
+	Statement(ptr<StatementObject> object = 0);
 
 	/// Конструктор для инкапсуляции выражения в statement.
 	Statement(Expression expression);
+
+	/// Получить объект.
+	ptr<StatementObject> GetObject() const;
 
 	/// Конкатенация statement'ов, для объединения их в один.
 	friend Statement operator,(Statement a, Statement b);

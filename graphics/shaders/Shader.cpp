@@ -3,7 +3,7 @@
 #include "../../Exception.hpp"
 
 Shader::Variable::Variable(DataType dataType, int offset)
-: dataType(dataType), offset(offset) {}
+: dataType(dataType), offset(offset), semantic(Semantics::None) {}
 
 Shader::Shader() : samplerSlotsMask(0) {}
 

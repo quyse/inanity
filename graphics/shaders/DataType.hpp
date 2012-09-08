@@ -18,10 +18,18 @@ struct DataTypes
 		UInt,
 		UInt2,
 		UInt3,
-		UInt4
+		UInt4,
+		_Count
 	};
 };
 typedef DataTypes::_ DataType;
+
+/// Размеры данных.
+extern int dataTypeSizes[DataTypes::_Count];
+inline int GetDataTypeSize(DataType dataType)
+{
+	return dataTypeSizes[dataType];
+}
 
 /// Перевести тип на этапе компиляции в константу типа.
 template <typename T>

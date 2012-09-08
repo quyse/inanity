@@ -3,6 +3,11 @@
 
 Expression::Expression(ptr<ExpressionObject> object) : object(object) {}
 
+ptr<ExpressionObject> Expression::GetObject() const
+{
+	return object;
+}
+
 BEGIN_INANITY_SHADERS
 
 Expression Expression::operator=(Expression b)

@@ -73,11 +73,20 @@ public:
 	Type GetType() const;
 };
 
-class NegateExpressionObject : public ExpressionObject
+class UnaryExpressionObject : public ExpressionObject
 {
 private:
 	Expression a;
 
+protected:
+	UnaryExpressionObject(Expression a);
+
+public:
+	Expression GetInner() const;
+};
+
+class NegateExpressionObject : public UnaryExpressionObject
+{
 public:
 	NegateExpressionObject(Expression a);
 

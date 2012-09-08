@@ -7,6 +7,11 @@ Statement::Statement(ptr<StatementObject> object) : object(object) {}
 Statement::Statement(Expression expression)
 : object(NEW(ExpressionStatementObject(expression))) {}
 
+ptr<StatementObject> Statement::GetObject() const
+{
+	return object;
+}
+
 BEGIN_INANITY_SHADERS
 
 Statement operator,(Statement a, Statement b)

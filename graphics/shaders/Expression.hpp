@@ -24,6 +24,8 @@ private:
 
 public:
 	Expression(ptr<ExpressionObject> object);
+
+	ptr<ExpressionObject> GetObject() const;
 };
 
 END_INANITY_SHADERS

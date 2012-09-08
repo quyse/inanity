@@ -71,9 +71,18 @@ ExpressionObject::Type TempExpressionObject::GetType() const
 	return typeTemp;
 }
 
+//******* UnaryExpressionObject
+
+UnaryExpressionObject::UnaryExpressionObject(Expression a) : a(a) {}
+
+Expression UnaryExpressionObject::GetInner() const
+{
+	return a;
+}
+
 //******* NegateExpressionObject
 
-NegateExpressionObject::NegateExpressionObject(Expression a) : a(a) {}
+NegateExpressionObject::NegateExpressionObject(Expression a) : UnaryExpressionObject(a) {}
 
 ExpressionObject::Type NegateExpressionObject::GetType() const
 {
