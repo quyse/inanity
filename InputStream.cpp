@@ -1,6 +1,10 @@
 #include "InputStream.hpp"
 #include "File.hpp"
 #include "Future.hpp"
+#include "scripting_impl.hpp"
+
+SCRIPTABLE_MAP_BEGIN(InputStream, Inanity.InputStream);
+SCRIPTABLE_MAP_END();
 
 ptr<Future<size_t> > InputStream::ReadAsync(ptr<File> file)
 {

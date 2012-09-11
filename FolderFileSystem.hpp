@@ -2,6 +2,7 @@
 #define ___INANITY_FOLDER_FILE_SYSTEM_HPP___
 
 #include "FileSystem.hpp"
+#include "scripting_decl.hpp"
 
 BEGIN_INANITY
 
@@ -69,6 +70,8 @@ public:
 	\return Объект-файл.
 	*/
 	ptr<File> LoadPartOfFile(const String& fileName, long long mappingStart, size_t mappingSize);
+
+	SCRIPTABLE_CLASS(FolderFileSystem);
 };
 
 END_INANITY

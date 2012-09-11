@@ -1,8 +1,18 @@
 #include "FileSystem.hpp"
 #include "File.hpp"
 #include "FileInputStream.hpp"
+#include "OutputStream.hpp"
 #include "Future.hpp"
 #include "Exception.hpp"
+#include "scripting_impl.hpp"
+
+SCRIPTABLE_MAP_BEGIN(FileSystem, Inanity.FileSystem);
+	SCRIPTABLE_METHOD(FileSystem, LoadFile);
+	SCRIPTABLE_METHOD(FileSystem, TryLoadFile);
+	SCRIPTABLE_METHOD(FileSystem, LoadFileAsStream);
+	SCRIPTABLE_METHOD(FileSystem, SaveFile);
+	SCRIPTABLE_METHOD(FileSystem, SaveFileAsStream);
+SCRIPTABLE_MAP_END();
 
 ptr<File> FileSystem::LoadFile(const String& fileName)
 {
@@ -107,24 +117,3 @@ void FileSystem::GetAllDirectoryEntries(const String& directoryName, std::vector
 			GetAllDirectoryEntries(String(entry), entries);
 	}
 }
-
-#ifdef ___INANITY_SCRIPTING
-
-void FileSystem::Script_loadFile(ScriptCall& call)
-{
-	call.EnsureArgumentsCount(1);
-	call.Return(LoadFile(call.GetString(1)));
-}
-
-void FileSystem::Script_saveFile(ScriptCall& call)
-{
-	call.EnsureArgumentsCount(2);
-	SaveFile(call.GetPointer<File>(1), call.GetString(2));
-}
-
-SCRIPTABLE_MAP_BEGIN(FileSystem);
-	SCRIPTABLE_METHOD(FileSystem, loadFile);
-	SCRIPTABLE_METHOD(FileSystem, saveFile);
-SCRIPTABLE_MAP_END();
-
-#endif

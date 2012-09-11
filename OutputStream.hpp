@@ -2,6 +2,7 @@
 #define ___INANITY_OUTPUT_STREAM_HPP___
 
 #include "Object.hpp"
+#include "scripting_decl.hpp"
 
 BEGIN_INANITY
 
@@ -49,6 +50,8 @@ public:
 	/// Считать весь входной поток в себя.
 	/** Так как такая задача часто встречается. */
 	bigsize_t ReadAllFromStream(ptr<InputStream> inputStream);
+
+	SCRIPTABLE_CLASS(OutputStream);
 };
 
 END_INANITY

@@ -2,6 +2,7 @@
 #define ___INANITY_STRINGS_HPP___
 
 #include "String.hpp"
+#include "scripting_decl.hpp"
 
 /*
 Файл содержит статический класс, предлагающий некоторые сервисы работы
@@ -28,6 +29,8 @@ public:
 	static String ToString(int number);
 	/// Преобразовать данные в hex.
 	static String ToHex(const void* data, size_t size);
+
+	SCRIPTABLE_CLASS(Strings);
 };
 
 END_INANITY

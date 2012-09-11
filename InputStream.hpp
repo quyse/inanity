@@ -2,6 +2,7 @@
 #define ___INANITY_INPUT_STREAM_HPP___
 
 #include "Object.hpp"
+#include "scripting_decl.hpp"
 
 BEGIN_INANITY
 
@@ -30,6 +31,8 @@ public:
 	/** Семантика такая же, как у Read. Реализация по умолчанию
 	работает синхронно через Read. */
 	virtual ptr<Future<size_t> > ReadAsync(ptr<File> file);
+
+	SCRIPTABLE_CLASS(InputStream);
 };
 
 END_INANITY

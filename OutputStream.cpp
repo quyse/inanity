@@ -2,7 +2,12 @@
 #include "InputStream.hpp"
 #include "MemoryFile.hpp"
 #include "Future.hpp"
+#include "scripting_impl.hpp"
 #include <string.h>
+
+SCRIPTABLE_MAP_BEGIN(OutputStream, Inanity.OutputStream);
+	SCRIPTABLE_METHOD(OutputStream, Flush);
+SCRIPTABLE_MAP_END();
 
 ptr<Future<int> > OutputStream::WriteAsync(ptr<File> file)
 {
