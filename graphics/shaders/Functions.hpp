@@ -1,82 +1,78 @@
-#ifndef ___INANITY_SHADERS_FUNCTIONS_HPP___
-#define ___INANITY_SHADERS_FUNCTIONS_HPP___
+#ifndef ___INANITY_GRAPHICS_SHADERS_FUNCTIONS_HPP___
+#define ___INANITY_GRAPHICS_SHADERS_FUNCTIONS_HPP___
 
 #include "Language.hpp"
 
-/* Файл содержит определения функций из HLSL/GLSL, для их лёгкого использования
-при написании шейдеров.
+/* Файл содержит определения функций, которые можно
+использовать при написании шейдеров.
+Функции должны иметь реализации в соответствующих
+языковых генераторах.
 */
-
-/// Макрос для определения простой функции 2-х аргументов.
-#define IYS_FUN_SIMPLE1(name) \
-	template <typename DataType> \
-	DataPtr<DataType> name(DataPtr<DataType> a) \
-	{ \
-		return NEW(Call1Data<DataType, DataType>(#name, a)); \
-	}
-
-/// Макрос для определения простой функции 2-х аргументов.
-#define IYS_FUN_SIMPLE2(name) \
-	template <typename DataType> \
-	DataPtr<DataType> name(DataPtr<DataType> a, DataPtr<DataType> b) \
-	{ \
-		return NEW(Call2Data<DataType, DataType, DataType>(#name, a, b)); \
-	}
-
-/// Макрос для определения простой функции 3-х аргументов.
-#define IYS_FUN_SIMPLE3(name) \
-	template <typename DataType> \
-	DataPtr<DataType> name(DataPtr<DataType> a, DataPtr<DataType> b, DataPtr<DataType> c) \
-	{ \
-		return NEW(Call3Data<DataType, DataType, DataType, DataType>(#name, a, b, c)); \
-	}
 
 BEGIN_INANITY_SHADERS
 
-template <int n>
-float_ length(DataPtr<vector<n> > a)
+namespace F
 {
-	return NEW(Call1Data<float, vector<n> >("length", a));
-}
-template <int n>
-float_ distance(DataPtr<vector<n> > a, DataPtr<vector<n> > b)
-{
-	return NEW(Call2Data<float, vector<n>, vector<n> >("distance", a, b));
-}
-template <int n>
-DataPtr<vector<n> > normalize(DataPtr<vector<n> > a)
-{
-	return NEW(Call1Data<vector<n>, vector<n> >("normalize", a));
-}
+	//******* Макросы для объявлений функций.
+#define FUN1(name) \
+	Expression name(Expression a) { \
+		return NEW(Call1ExpressionObject(#name, a)); }
+#define FUN2(name) \
+	Expression name(Expression a, Expression b) { \
+		return NEW(Call2ExpressionObject(#name, a, b)); }
+#define FUN3(name) \
+	Expression name(Expression a, Expression b, Expression c) { \
+		return NEW(Call3ExpressionObject(#name, a, b, c)); }
+#define FUN4(name) \
+	Expression name(Expression a, Expression b, Expression c, Expression d) { \
+		return NEW(Call4ExpressionObject(#name, a, b, c, d)); }
 
-IYS_FUN_SIMPLE1(sin)
-IYS_FUN_SIMPLE1(cos)
-IYS_FUN_SIMPLE1(tan)
-IYS_FUN_SIMPLE1(exp)
-IYS_FUN_SIMPLE1(exp2)
-IYS_FUN_SIMPLE2(pow)
+	//******* Собственно функции.
 
-IYS_FUN_SIMPLE1(abs)
-IYS_FUN_SIMPLE2(min)
-IYS_FUN_SIMPLE2(max)
-IYS_FUN_SIMPLE1(floor)
-IYS_FUN_SIMPLE1(ceil)
-IYS_FUN_SIMPLE3(clamp)
-IYS_FUN_SIMPLE3(lerp)
+	FUN1(length);
+	FUN2(distance);
+	FUN1(normalize);
+	FUN1(sin);
+	FUN1(cos);
+	FUN1(tan);
+	FUN1(exp);
+	FUN1(exp2);
+	FUN2(pow);
 
-template <int n>
-float_ dot(DataPtr<vector<n> > a, DataPtr<vector<n> > b)
-{
-	return NEW(Call2Data<float, vector<n>, vector<n> >("dot", a, b));
-}
-float3_ cross(float3_ a, float3_ b)
-{
-	return NEW(Call2Data<float3, float3, float3>("cross", a, b));
-}
+	FUN1(abs);
+	FUN2(min);
+	FUN2(max);
+	FUN1(floor);
+	FUN1(ceil);
+	FUN3(clamp);
+	FUN3(lerp);
+
+	FUN2(dot);
+	FUN2(cross);
+
+	/// Умножение матриц на векторы.
+	FUN2(mul);
+
+	/// Получить семпл из семплера.
+	/** Параметры - семплер и координаты. */
+	FUN2(sample);
+
+	// конструкторы векторов
+	FUN4(float4);
+	FUN2(float4_xyz_w);
+	FUN3(float4_xy_z_w);
+	FUN3(fLoat3);
+	FUN2(float2);
+	// преобразование к матрице
+	FUN1(cast4x4to3x3)
+
+	//******* отменяем макросы
+#undef FUN1
+#undef FUN2
+#undef FUN3
+#undef FUN4
+};
 
 END_INANITY_SHADERS
-
-#undef IYS_FUN_SIMPLE2
-#undef IYS_FUN_SIMPLE3
 
 #endif

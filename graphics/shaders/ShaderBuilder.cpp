@@ -5,6 +5,7 @@ UniformBuffer::UniformBuffer(int slot, int offset, int size)
 
 void ShaderBuilderBase::uniformBuffer(int slot, int offset, int size)
 {
+	RegisterUniformBuffer(slot);
 	uniformBuffers.push_back(UniformBuffer(slot, offset, size));
 }
 

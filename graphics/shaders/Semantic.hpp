@@ -12,15 +12,49 @@ struct Semantics
 	{
 		/// Нет специальной семантики.
 		None,
+
+		//******* Специальные семантики.
+
+		_SpecialBegin,
+
 		/// Номер инстанса.
-		Instance,
+		Instance = _SpecialBegin,
 		/// Координаты вершины из вершинного шейдера для растеризации.
 		VertexPosition,
-		/// Цвет результирующего пиксела.
-		PixelColor,
-		/// Глубина результирующего пиксела.
-		TargetDepth,
-		_Count
+		/// Цвет результирующего пиксела (для первого рендербуфера).
+		_TargetColorBegin,
+		TargetColor0 = _TargetColorBegin,
+		// ...
+		_TargetColorEnd = _TargetColorBegin + 8,
+		/// Глубина результирующего пиксела (для первого рендербуфера).
+		_TargetDepthBegin = _TargetColorEnd,
+		TargetDepth0 = _TargetDepthBegin,
+		// ...
+		_TargetDepthEnd = _TargetDepthBegin + 8,
+
+		_SpecialEnd = _TargetDepthEnd,
+
+		//******* Пользовательские семантики.
+
+		_CustomBegin = _SpecialEnd,
+
+		Custom0 = _CustomBegin,
+
+		/// Положение вершины.
+		CustomPosition = Custom0,
+		/// Нормаль вершины.
+		CustomNormal,
+		/// Бинормаль.
+		CustomBinormal,
+		/// Тангента,
+		CustomTangent,
+		/// Текстурные координаты вершины
+		CustomTexcoord0,
+		// ...
+		/// Коэффициенты локальной трансформации (переводящей из пространства модели в пространство
+		CustomLocalTransform = CustomTexcoord0 + 8,
+
+		_CustomEnd = _CustomBegin + 64
 	};
 };
 typedef Semantics::_ Semantic;

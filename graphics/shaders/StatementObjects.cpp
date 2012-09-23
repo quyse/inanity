@@ -22,6 +22,16 @@ StatementObject::Type CommaStatementObject::GetType() const
 	return typeComma;
 }
 
+Statement CommaStatementObject::GetLeft() const
+{
+	return a;
+}
+
+Statement CommaStatementObject::GetRight() const
+{
+	return b;
+}
+
 IfStatementObject::IfStatementObject(Expression condition, Statement trueBody, Statement falseBody)
 : condition(condition), trueBody(trueBody), falseBody(falseBody) {}
 

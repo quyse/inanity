@@ -71,6 +71,34 @@ ExpressionObject::Type TempExpressionObject::GetType() const
 	return typeTemp;
 }
 
+//******* ConstFloatExpressionObject
+
+ConstFloatExpressionObject::ConstFloatExpressionObject(float value) : value(value) {}
+
+ExpressionObject::Type ConstFloatExpressionObject::GetType() const
+{
+	return typeConstFloat;
+}
+
+float ConstFloatExpressionObject::GetValue() const
+{
+	return value;
+}
+
+//******* ConstIntExpressionObject
+
+ConstIntExpressionObject::ConstIntExpressionObject(int value) : value(value) {}
+
+ExpressionObject::Type ConstIntExpressionObject::GetType() const
+{
+	return typeConstInt;
+}
+
+int ConstIntExpressionObject::GetValue() const
+{
+	return value;
+}
+
 //******* UnaryExpressionObject
 
 UnaryExpressionObject::UnaryExpressionObject(Expression a) : a(a) {}
@@ -87,6 +115,21 @@ NegateExpressionObject::NegateExpressionObject(Expression a) : UnaryExpressionOb
 ExpressionObject::Type NegateExpressionObject::GetType() const
 {
 	return typeNegate;
+}
+
+//******* SwizzleExpressionObject
+
+SwizzleExpressionObject::SwizzleExpressionObject(Expression a, const char* components)
+: UnaryExpressionObject(a), components(components) {}
+
+ExpressionObject::Type SwizzleExpressionObject::GetType() const
+{
+	return typeSwizzle;
+}
+
+const char* SwizzleExpressionObject::GetComponents() const
+{
+	return components;
 }
 
 //******* BinaryExpressionObject
@@ -224,4 +267,34 @@ Expression Call3ExpressionObject::GetArg2() const
 Expression Call3ExpressionObject::GetArg3() const
 {
 	return c;
+}
+
+//******* Call4ExpressionObject
+
+Call4ExpressionObject::Call4ExpressionObject(const char* name, Expression a, Expression b, Expression c, Expression d)
+: CallExpressionObject(name), a(a), b(b), c(c), d(d) {}
+
+ExpressionObject::Type Call4ExpressionObject::GetType() const
+{
+	return typeCall4;
+}
+
+Expression Call4ExpressionObject::GetArg1() const
+{
+	return a;
+}
+
+Expression Call4ExpressionObject::GetArg2() const
+{
+	return b;
+}
+
+Expression Call4ExpressionObject::GetArg3() const
+{
+	return c;
+}
+
+Expression Call4ExpressionObject::GetArg4() const
+{
+	return d;
 }

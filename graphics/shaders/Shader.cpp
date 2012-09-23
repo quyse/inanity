@@ -7,6 +7,14 @@ Shader::Variable::Variable(DataType dataType, int offset)
 
 Shader::Shader() : samplerSlotsMask(0) {}
 
+Shader::Variable* Shader::GetVariable(Variables& variables, int offset)
+{
+	for(size_t i = 0; i < variables.size(); ++i)
+		if(variables[i].offset == offset)
+			return &variables[i];
+	return 0;
+}
+
 void Shader::RegisterVariable(Variables& variables, DataType dataType, int offset)
 {
 	// попробовать найти эту переменную, может, она уже есть
@@ -20,6 +28,12 @@ void Shader::RegisterVariable(Variables& variables, DataType dataType, int offse
 
 	// переменная не найдена, добавить её
 	variables.push_back(Variable(dataType, offset));
+}
+
+void Shader::RegisterUniformBuffer(int slot)
+{
+	if(slot >= (int)uniformsVariables.size())
+		uniformsVariables.resize(slot + 1);
 }
 
 void Shader::SetCode(Statement code)

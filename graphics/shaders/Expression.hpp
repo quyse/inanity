@@ -13,6 +13,11 @@ class Expression
 private:
 	ptr<ExpressionObject> object;
 
+public:
+	Expression(ptr<ExpressionObject> object);
+
+	ptr<ExpressionObject> GetObject() const;
+
 	//******* Различные операторы для выражений.
 	Expression operator=(Expression b);
 	Expression operator[](Expression index);
@@ -22,10 +27,8 @@ private:
 	friend Expression operator*(Expression a, Expression b);
 	friend Expression operator/(Expression a, Expression b);
 
-public:
-	Expression(ptr<ExpressionObject> object);
-
-	ptr<ExpressionObject> GetObject() const;
+	/// Выбор компонентов вектора.
+	Expression Swizzle(const char* components);
 };
 
 END_INANITY_SHADERS

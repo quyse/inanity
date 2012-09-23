@@ -5,6 +5,7 @@
 #include "ExpressionObjects.hpp"
 #include "../../Exception.hpp"
 #include <algorithm>
+#include <iomanip>
 
 BEGIN_INANITY_SHADERS
 
@@ -23,64 +24,133 @@ void HlslGeneratorInstance::PrintDataType(DataType dataType)
 	hlsl << names[dataType];
 }
 
-void HlslGeneratorInstance::PrintVariables(Shader::Variables variables, const char* variableNamePrefix)
+void HlslGeneratorInstance::PrintVariables(Shader::Variables variables, const char* variableNamePrefix, bool printPackOffsets)
 {
-	// сортировщик переменных по смещениям
-	struct Sorter
+	try
 	{
-		bool operator()(const Shader::Variable& a, const Shader::Variable& b) const
+		// сортировщик переменных по смещениям
+		struct Sorter
 		{
-			return a.offset < b.offset;
-		}
-	};
-	// отсортировать переменные по смещениям
-	std::sort(variables.begin(), variables.end(), Sorter());
+			bool operator()(const Shader::Variable& a, const Shader::Variable& b) const
+			{
+				return a.offset < b.offset;
+			}
+		};
+		// отсортировать переменные по смещениям
+		std::sort(variables.begin(), variables.end(), Sorter());
 
-	for(size_t i = 0; i < variables.size(); ++i)
+		for(size_t i = 0; i < variables.size(); ++i)
+			try
+			{
+				const Shader::Variable& variable = variables[i];
+
+				// переменная должна лежать на границе float'а, как минимум
+				if(variable.offset % sizeof(float))
+					THROW_PRIMARY_EXCEPTION("Wrong variable offset: should be on 4-byte boundary");
+
+				// печатаем определение переменной
+
+				// тип переменной
+				PrintTabs();
+				PrintDataType(variable.dataType);
+				// имя переменной
+				hlsl << ' ' << variableNamePrefix << variable.offset;
+
+				//** семантика
+
+				const char* semanticStr = 0;
+				char semanticBuffer[16];
+				// автоматическая семантика
+				if(variable.semantic == Semantics::None)
+				{
+					// получается по смещению элемента
+					strcpy(semanticBuffer, "AUTO");
+					int o = variable.offset;
+					int i;
+					for(i = 4; o; ++i)
+					{
+						semanticBuffer[i] = 'a' + o % 26;
+						o /= 26;
+					}
+					semanticBuffer[i] = 0;
+					semanticStr = semanticBuffer;
+				}
+				// специальная семантика
+				else if(variable.semantic >= Semantics::_SpecialBegin && variable.semantic < Semantics::_SpecialEnd)
+				{
+					if(variable.semantic == Semantics::Instance)
+						semanticStr = "SV_InstanceID";
+					else if(variable.semantic == Semantics::VertexPosition)
+						semanticStr = "SV_Position";
+					else if(variable.semantic >= Semantics::_TargetColorBegin && variable.semantic < Semantics::_TargetColorEnd)
+					{
+						sprintf(semanticBuffer, "SV_Target%d", variable.semantic - Semantics::TargetColor0);
+						semanticStr = semanticBuffer;
+					}
+					else if(variable.semantic >= Semantics::_TargetDepthBegin && variable.semantic < Semantics::_TargetDepthEnd)
+					{
+						sprintf(semanticBuffer, "SV_Depth%d", variable.semantic - Semantics::TargetDepth0);
+						semanticStr = semanticBuffer;
+					}
+				}
+				// пользовательская семантика
+				else if(variable.semantic >= Semantics::_CustomBegin && variable.semantic < Semantics::_CustomEnd)
+				{
+					strcpy(semanticBuffer, "CUSTOM");
+					int o = variable.semantic - Semantics::Custom0;
+					int i;
+					for(i = 6; o; ++i)
+					{
+						semanticBuffer[i] = 'a' + o % 26;
+						o /= 26;
+					}
+					semanticBuffer[i] = 0;
+					semanticStr = semanticBuffer;
+				}
+
+				// если семантика осталась не указанной
+				if(!semanticStr)
+					THROW_PRIMARY_EXCEPTION("Can't determine semantic");
+
+				hlsl << " : " << semanticStr;
+
+				if(printPackOffsets)
+				{
+					// регистр и положение в нём переменной
+					hlsl << " : packoffset(c" << (variable.offset / sizeof(float4));
+					// если переменная не начинается ровно на границе регистра, нужно дописать ещё компоненты регистра
+					int registerOffset = variable.offset % sizeof(float4);
+					if(registerOffset)
+					{
+						// получить размер данных
+						int variableSize = GetDataTypeSize(variable.dataType);
+						// переменная не должна пересекать границу регистра
+						if(registerOffset + variableSize > sizeof(float4))
+							THROW_PRIMARY_EXCEPTION("Variable should not intersect a register boundary");
+						// выложить столько буков, сколько нужно
+						registerOffset /= sizeof(float);
+						int endRegisterOffset = registerOffset + variableSize / sizeof(float);
+						hlsl << '.';
+						for(int j = registerOffset; j < endRegisterOffset; ++j)
+							hlsl << "xyzw"[j];
+					}
+					// конец упаковки
+					hlsl << ")";
+				}
+
+				// конец переменной
+				hlsl << ";\n";
+			}
+			catch(Exception* exception)
+			{
+				std::ostringstream s;
+				s << "Can't print variable " << i;
+				THROW_SECONDARY_EXCEPTION(s.str(), exception);
+			}
+	}
+	catch(Exception* exception)
 	{
-		const Shader::Variable& variable = variables[i];
-
-		// переменная должна лежать на границе float'а, как минимум
-		if(variable.offset % sizeof(float))
-			THROW_PRIMARY_EXCEPTION("Wrong variable offset: should be on 4-byte boundary");
-
-		// печатаем определение переменной
-
-		// тип переменной
-		PrintTabs();
-		PrintDataType(variable.dataType);
-		// имя переменной
-		hlsl << ' ' << variableNamePrefix << variable.offset;
-
-		// семантика
-		static const char* semantics[Semantics::_Count] = { 0, "SV_InstanceID", "SV_Position", "SV_Target", "SV_Depth" };
-		const char* semantic = semantics[variable.semantic];
-		if(semantic)
-			hlsl << " : " << semantic;
-
-		// регистр и положение в нём переменной
-		hlsl << " : packoffset(c" << (variable.offset / sizeof(float4));
-		// если переменная не начинается ровно на границе регистра, нужно дописать ещё компоненты регистра
-		int registerOffset = variable.offset % sizeof(float4);
-		if(registerOffset)
-		{
-			// получить размер данных
-			int variableSize = GetDataTypeSize(variable.dataType);
-			// переменная не должна пересекать границу регистра
-			if(registerOffset + variableSize > sizeof(float4))
-				THROW_PRIMARY_EXCEPTION("Variable should not intersect a register boundary");
-			// выложить столько буков, сколько нужно
-			registerOffset /= sizeof(float);
-			int endRegisterOffset = registerOffset + variableSize / sizeof(float);
-			hlsl << '.';
-			for(int j = registerOffset; j < endRegisterOffset; ++j)
-				hlsl << "xyzw"[j];
-		}
-		// конец упаковки
-		hlsl << ")";
-
-		// конец переменной
-		hlsl << ";\n";
+		THROW_SECONDARY_EXCEPTION(String("Can't print variables (prefix ") + variableNamePrefix + ")", exception);
 	}
 }
 
@@ -146,10 +216,10 @@ void HlslGeneratorInstance::PrintExpression(Expression expression)
 	switch(object->GetType())
 	{
 	case ExpressionObject::typeIn:
-		hlsl << 'i' << fast_cast<InExpressionObject*>(object)->GetOffset();
+		hlsl << "input.i" << fast_cast<InExpressionObject*>(object)->GetOffset();
 		break;
 	case ExpressionObject::typeOut:
-		hlsl << 'o' << fast_cast<OutExpressionObject*>(object)->GetOffset();
+		hlsl << "output.o" << fast_cast<OutExpressionObject*>(object)->GetOffset();
 		break;
 	case ExpressionObject::typeUniform:
 		{
@@ -163,10 +233,24 @@ void HlslGeneratorInstance::PrintExpression(Expression expression)
 	case ExpressionObject::typeTemp:
 		hlsl << 'loc' << fast_cast<TempExpressionObject*>(object)->GetOffset();
 		break;
+	case ExpressionObject::typeConstFloat:
+		hlsl << std::fixed << std::setprecision(10) << fast_cast<ConstFloatExpressionObject*>(object)->GetValue() << 'f';
+		break;
+	case ExpressionObject::typeConstInt:
+		hlsl << fast_cast<ConstIntExpressionObject*>(object)->GetValue();
+		break;
 	case ExpressionObject::typeNegate:
 		hlsl << "(-";
 		PrintExpression(fast_cast<NegateExpressionObject*>(object)->GetInner());
 		hlsl << ')';
+		break;
+	case ExpressionObject::typeSwizzle:
+		{
+			SwizzleExpressionObject* swizzleObject = fast_cast<SwizzleExpressionObject*>(object);
+			hlsl << '(';
+			PrintExpression(swizzleObject->GetInner());
+			hlsl << '.' << swizzleObject->GetComponents() << ')';
+		}
 		break;
 	case ExpressionObject::typeAssign:
 		{
@@ -230,7 +314,10 @@ void HlslGeneratorInstance::PrintExpression(Expression expression)
 	case ExpressionObject::typeCall1:
 		{
 			Call1ExpressionObject* call1Object = fast_cast<Call1ExpressionObject*>(object);
-			hlsl << call1Object->GetName() << '(';
+
+			const char* functionName = GetRealFunctionName(call1Object->GetName());
+
+			hlsl << functionName << '(';
 			PrintExpression(call1Object->GetArg1());
 			hlsl << ')';
 		}
@@ -238,17 +325,39 @@ void HlslGeneratorInstance::PrintExpression(Expression expression)
 	case ExpressionObject::typeCall2:
 		{
 			Call2ExpressionObject* call2Object = fast_cast<Call2ExpressionObject*>(object);
-			hlsl << call2Object->GetName() << '(';
-			PrintExpression(call2Object->GetArg1());
-			hlsl << ", ";
-			PrintExpression(call2Object->GetArg2());
-			hlsl << ')';
+
+			const char* functionName = GetRealFunctionName(call2Object->GetName());
+
+			// особая функция sample
+			if(strcmp(functionName, "sample") == 0)
+			{
+				// первый параметр должен быть семплером
+				ExpressionObject* a1 = call2Object->GetArg1().GetObject();
+				if(a1->GetType() != ExpressionObject::typeSampler)
+					THROW_PRIMARY_EXCEPTION("First parameter of sample function should be a sampler");
+				int samplerSlot = fast_cast<SamplerExpressionObject*>(a1)->GetSlot();
+				hlsl << 't' << samplerSlot << ".Sample(s" << samplerSlot << ", ";
+				PrintExpression(call2Object->GetArg2());
+				hlsl << ')';
+			}
+			// остальные функции
+			else
+			{
+				hlsl << functionName << '(';
+				PrintExpression(call2Object->GetArg1());
+				hlsl << ", ";
+				PrintExpression(call2Object->GetArg2());
+				hlsl << ')';
+			}
 		}
 		break;
 	case ExpressionObject::typeCall3:
 		{
 			Call3ExpressionObject* call3Object = fast_cast<Call3ExpressionObject*>(object);
-			hlsl << call3Object->GetName() << '(';
+
+			const char* functionName = GetRealFunctionName(call3Object->GetName());
+
+			hlsl << functionName << '(';
 			PrintExpression(call3Object->GetArg1());
 			hlsl << ", ";
 			PrintExpression(call3Object->GetArg2());
@@ -257,9 +366,40 @@ void HlslGeneratorInstance::PrintExpression(Expression expression)
 			hlsl << ')';
 		}
 		break;
+	case ExpressionObject::typeCall4:
+		{
+			Call4ExpressionObject* call4Object = fast_cast<Call4ExpressionObject*>(object);
+
+			const char* functionName = GetRealFunctionName(call4Object->GetName());
+
+			hlsl << functionName << '(';
+			PrintExpression(call4Object->GetArg1());
+			hlsl << ", ";
+			PrintExpression(call4Object->GetArg2());
+			hlsl << ", ";
+			PrintExpression(call4Object->GetArg3());
+			hlsl << ", ";
+			PrintExpression(call4Object->GetArg4());
+			hlsl << ')';
+		}
+		break;
 	default:
 		THROW_PRIMARY_EXCEPTION("Invalid expression type");
 	}
+}
+
+const char* HlslGeneratorInstance::GetRealFunctionName(const char* functionName)
+{
+	static const char* const names[][2] =
+	{
+		{ "float4_xyz_w", "float4" },
+		{ "float4_xy_z_w", "float4" },
+		{ "cast4x4to3x3", "(float3x3)" }
+	};
+	for(int i = 0; i < sizeof(names) / sizeof(names[0]); ++i)
+		if(strcmp(names[i][0], functionName) == 0)
+			return names[i][1];
+	return functionName;
 }
 
 std::string HlslGeneratorInstance::Generate()
@@ -269,12 +409,12 @@ std::string HlslGeneratorInstance::Generate()
 
 	// структура входных данных
 	hlsl << "struct Input\n{\n";
-	PrintVariables(shader.GetInputVariables(), "i");
+	PrintVariables(shader.GetInputVariables(), "i", false);
 	hlsl << "};\n";
 
 	// структура выходных данных
 	hlsl << "struct Output\n{\n";
-	PrintVariables(shader.GetOutputVariables(), "o");
+	PrintVariables(shader.GetOutputVariables(), "o", false);
 	hlsl << "};\n";
 
 	// структуры константных буферов
@@ -282,11 +422,13 @@ std::string HlslGeneratorInstance::Generate()
 	for(size_t i = 0; i < uniformsVariables.size(); ++i)
 	{
 		const Shader::Variables& variables = uniformsVariables[i];
+		if(variables.empty())
+			continue;
 
-		hlsl << "cbuffer : register(b" << i << ")\n{\n";
+		hlsl << "cbuffer CBuffer" << i << " : register(b" << i << ")\n{\n";
 		char bufferPrefix[20];
 		sprintf(bufferPrefix, "u%u_", (unsigned int)i);
-		PrintVariables(variables, bufferPrefix);
+		PrintVariables(variables, bufferPrefix, true);
 		hlsl << "};\n";
 	}
 
@@ -298,11 +440,11 @@ std::string HlslGeneratorInstance::Generate()
 			// текстура
 			hlsl << "Texture t" << i << " : register(t" << i << ");\n";
 			// семплер
-			hlsl << "Sampler s" << i << " : register(s" << i << ");\n";
+			hlsl << "SamplerState s" << i << " : register(s" << i << ");\n";
 		}
 
 	// функция шейдера
-	hlsl << "Output Main(Input input)\n{\n";
+	hlsl << "Output Main(Input input)\n{\n\tOutput output;\n";
 	// код шейдера
 	PrintStatement(shader.GetCode());
 	// возврат значения и конец

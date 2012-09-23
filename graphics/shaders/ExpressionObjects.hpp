@@ -73,6 +73,32 @@ public:
 	Type GetType() const;
 };
 
+class ConstFloatExpressionObject : public ExpressionObject
+{
+private:
+	float value;
+
+public:
+	ConstFloatExpressionObject(float value);
+
+	Type GetType() const;
+
+	float GetValue() const;
+};
+
+class ConstIntExpressionObject : public ExpressionObject
+{
+private:
+	int value;
+
+public:
+	ConstIntExpressionObject(int value);
+
+	Type GetType() const;
+
+	int GetValue() const;
+};
+
 class UnaryExpressionObject : public ExpressionObject
 {
 private:
@@ -91,6 +117,18 @@ public:
 	NegateExpressionObject(Expression a);
 
 	Type GetType() const;
+};
+
+class SwizzleExpressionObject : public UnaryExpressionObject
+{
+protected:
+	const char* components;
+
+public:
+	SwizzleExpressionObject(Expression a, const char* components);
+
+	Type GetType() const;
+	const char* GetComponents() const;
 };
 
 class BinaryExpressionObject : public ExpressionObject
@@ -182,8 +220,7 @@ public:
 class Call2ExpressionObject : public CallExpressionObject
 {
 private:
-	Expression a;
-	Expression b;
+	Expression a, b;
 
 public:
 	Call2ExpressionObject(const char* name, Expression a, Expression b);
@@ -197,9 +234,7 @@ public:
 class Call3ExpressionObject : public CallExpressionObject
 {
 private:
-	Expression a;
-	Expression b;
-	Expression c;
+	Expression a, b, c;
 
 public:
 	Call3ExpressionObject(const char* name, Expression a, Expression b, Expression c);
@@ -209,6 +244,22 @@ public:
 	Expression GetArg1() const;
 	Expression GetArg2() const;
 	Expression GetArg3() const;
+};
+
+class Call4ExpressionObject : public CallExpressionObject
+{
+private:
+	Expression a, b, c, d;
+
+public:
+	Call4ExpressionObject(const char* name, Expression a, Expression b, Expression c, Expression d);
+
+	Type GetType() const;
+
+	Expression GetArg1() const;
+	Expression GetArg2() const;
+	Expression GetArg3() const;
+	Expression GetArg4() const;
 };
 
 END_INANITY_SHADERS

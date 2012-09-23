@@ -119,8 +119,8 @@ var executables = {
 		dynamicLibraries: ['user32.lib', 'gdi32.lib', 'comdlg32.lib']
 	}
 	// TEST
-	, shaderlanguagetest: {
-		objects: ['graphics.shaders.ShaderLanguageTest'],
+	, shaderstest: {
+		objects: ['graphics.shaders.test'],
 		staticLibraries: ['libinanity-base', 'libinanity-shaders'],
 		dynamicLibraries: []
 	}

@@ -24,11 +24,13 @@ private:
 	/// Напечатать имя типа.
 	void PrintDataType(DataType dataType);
 	/// Напечатать структуру с объявлениями.
-	void PrintVariables(Shader::Variables variables, const char* variableNamePrefix);
+	void PrintVariables(Shader::Variables variables, const char* variableNamePrefix, bool printPackOffsets);
 	/// Напечатать statement.
 	void PrintStatement(Statement statement);
 	/// Напечатать выражение.
 	void PrintExpression(Expression expression);
+	/// Получить имя функции HLSL, если оно преобразовывается.
+	static const char* GetRealFunctionName(const char* functionName);
 
 public:
 	HlslGeneratorInstance(const Shader& shader);

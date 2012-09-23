@@ -22,8 +22,14 @@ public:
 		typeSampler,
 		/// Временная (локальная) переменная.
 		typeTemp,
+		/// Константа float.
+		typeConstFloat,
+		/// Константа int.
+		typeConstInt,
 		/// Операция унарный минус.
 		typeNegate,
+		/// Выбор компонент вектора.
+		typeSwizzle,
 		/// Присваивание.
 		typeAssign,
 		/// Индексирование.
@@ -41,7 +47,9 @@ public:
 		/// Вызов функции с двумя аргументами.
 		typeCall2,
 		/// Вызов функции с тремя аргументами.
-		typeCall3
+		typeCall3,
+		/// Вызов функции с четырьмя аргументами.
+		typeCall4
 	};
 
 public:

@@ -46,3 +46,8 @@ Expression operator/(Expression a, Expression b)
 }
 
 END_INANITY_SHADERS
+
+Expression Expression::Swizzle(const char* components)
+{
+	return NEW(SwizzleExpressionObject(*this, components));
+}

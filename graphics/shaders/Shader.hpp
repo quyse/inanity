@@ -42,8 +42,13 @@ protected:
 protected:
 	Shader();
 
+	/// Получить переменную по смещению.
+	static Variable* GetVariable(Variables& variables, int offset);
 	/// Зарегистрировать переменную, если она ещё не зарегистрирована.
 	static void RegisterVariable(Variables& variables, DataType dataType, int offset);
+
+	/// Зарегистрировать константный буфер.
+	void RegisterUniformBuffer(int slot);
 
 public:
 	void SetCode(Statement code);
