@@ -5,7 +5,8 @@
 Shader::Variable::Variable(DataType dataType, int offset)
 : dataType(dataType), offset(offset), semantic(Semantics::None) {}
 
-Shader::Shader() : samplerSlotsMask(0) {}
+Shader::Sampler::Sampler(SamplerType samplerType, DataType dataType)
+: samplerType(samplerType), dataType(dataType) {}
 
 Shader::Variable* Shader::GetVariable(Variables& variables, int offset)
 {
@@ -34,6 +35,14 @@ void Shader::RegisterUniformBuffer(int slot)
 {
 	if(slot >= (int)uniformsVariables.size())
 		uniformsVariables.resize(slot + 1);
+}
+
+void Shader::RegisterSampler(int slot, SamplerType samplerType, DataType dataType)
+{
+	if(slot >= (int)samplers.size())
+		samplers.resize(slot + 1);
+	samplers[slot].samplerType = samplerType;
+	samplers[slot].dataType = dataType;
 }
 
 void Shader::SetCode(Statement code)
@@ -66,7 +75,7 @@ const std::vector<Shader::Variables>& Shader::GetUniformsVariables() const
 	return uniformsVariables;
 }
 
-int Shader::GetSamplerSlotsMask() const
+const std::vector<Shader::Sampler> Shader::GetSamplers() const
 {
-	return samplerSlotsMask;
+	return samplers;
 }

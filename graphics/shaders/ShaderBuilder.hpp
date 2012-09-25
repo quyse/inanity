@@ -25,7 +25,7 @@ protected:
 
 public:
 	/// Добавить константный буфер.
-	void uniformBuffer(int slot, int offset, int size);
+	void RegisterUniformBuffer(int slot, int offset, int size);
 
 	/// Получить семплер.
 	Expression sampler(int slot);
@@ -44,9 +44,9 @@ public:
 public:
 	/// Типизированный метод для добавления константного буфера.
 	template <typename BufferType>
-	void uniformBuffer(int slot, BufferType Uniforms::* buffer)
+	void RegisterUniformBuffer(int slot, BufferType Uniforms::* buffer)
 	{
-		ShaderBuilderBase::uniformBuffer(slot, (char*)&(((Uniforms*)0)->*buffer) - (char*)0, sizeof(BufferType));
+		ShaderBuilderBase::RegisterUniformBuffer(slot, (char*)&(((Uniforms*)0)->*buffer) - (char*)0, sizeof(BufferType));
 	}
 
 	/// Получить входную переменную.

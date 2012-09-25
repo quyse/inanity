@@ -78,6 +78,7 @@ void run()
 	{
 		SHADER_BEGIN(Vertex2Pixel, Pixel, Uniforms, PixelShaderTemp)
 			SHADER_UNIFORM_BUFFER(2, object);
+			SHADER_SAMPLER(0, 2D, Float2);
 			INPUT_SEMANTIC(position, VertexPosition);
 			OUTPUT_SEMANTIC(target, TargetColor0);
 

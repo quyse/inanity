@@ -26,7 +26,11 @@ BEGIN_INANITY_SHADERS
 
 /// Указать константный буфер.
 #define SHADER_UNIFORM_BUFFER(slot, bufferField) \
-	shaderBuilder.uniformBuffer(slot, &ShaderTypes::UniformsStruct::bufferField)
+	shaderBuilder.RegisterUniformBuffer(slot, &ShaderTypes::UniformsStruct::bufferField)
+
+/// Указать семплер.
+#define SHADER_SAMPLER(slot, samplerType, dataType) \
+	shaderBuilder.RegisterSampler(slot, SamplerTypes::_##samplerType, DataTypes::dataType)
 
 /// Входная семантика.
 #define INPUT_SEMANTIC(name, semanticName) IN(name); shaderBuilder.semantic(&ShaderTypes::InputStruct::name, Semantics::semanticName)

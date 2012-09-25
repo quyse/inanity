@@ -1,18 +1,24 @@
 #include "ShaderBuilder.hpp"
+#include <sstream>
 
 UniformBuffer::UniformBuffer(int slot, int offset, int size)
 : slot(slot), offset(offset), size(size) {}
 
-void ShaderBuilderBase::uniformBuffer(int slot, int offset, int size)
+void ShaderBuilderBase::RegisterUniformBuffer(int slot, int offset, int size)
 {
-	RegisterUniformBuffer(slot);
+	Shader::RegisterUniformBuffer(slot);
 	uniformBuffers.push_back(UniformBuffer(slot, offset, size));
 }
 
 Expression ShaderBuilderBase::sampler(int slot)
 {
-	// зарегистрировать слот семплера
-	samplerSlotsMask |= 1 << slot;
+	// проверить, что есть семплер
+	if(slot >= (int)samplers.size() || samplers[slot].samplerType == SamplerTypes::_None)
+	{
+		std::ostringstream s;
+		s << "Sampler " << slot << " is not registered";
+		THROW_PRIMARY_EXCEPTION(s.str());
+	}
 
 	// вернуть семплер
 	return NEW(SamplerExpressionObject(slot));

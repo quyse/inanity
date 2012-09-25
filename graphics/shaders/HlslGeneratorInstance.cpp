@@ -433,15 +433,38 @@ std::string HlslGeneratorInstance::Generate()
 	}
 
 	// семплеры
-	int samplerSlotMask = shader.GetSamplerSlotsMask();
-	for(int i = 0; i < 32; ++i)
-		if(samplerSlotMask & (1 << i))
+	const std::vector<Shader::Sampler>& samplers = shader.GetSamplers();
+	for(size_t i = 0; i < samplers.size(); ++i)
+	{
+		const Shader::Sampler& sampler = samplers[i];
+		if(sampler.samplerType != SamplerTypes::_None)
 		{
+			const char* textureStr;
+			switch(sampler.samplerType)
+			{
+			case SamplerTypes::_1D:
+				textureStr = "Texture1D";
+				break;
+			case SamplerTypes::_2D:
+				textureStr = "Texture2D";
+				break;
+			case SamplerTypes::_3D:
+				textureStr = "Texture3D";
+				break;
+			case SamplerTypes::_Cube:
+				textureStr = "TextureCube";
+				break;
+			default:
+				THROW_PRIMARY_EXCEPTION("Invalid sampler type");
+			}
 			// текстура
-			hlsl << "Texture t" << i << " : register(t" << i << ");\n";
+			hlsl << textureStr << '<';
+			PrintDataType(sampler.dataType);
+			hlsl << "> t" << i << " : register(t" << i << ");\n";
 			// семплер
 			hlsl << "SamplerState s" << i << " : register(s" << i << ");\n";
 		}
+	}
 
 	// функция шейдера
 	hlsl << "Output Main(Input input)\n{\n\tOutput output;\n";
