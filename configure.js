@@ -72,7 +72,9 @@ var libraries = {
 	},
 	// ******* общая графика
 	'libinanity-graphics': {
-		objects: ['graphics.Context', 'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.VertexLayout', 'graphics.IndexBuffer']
+		objects: [
+			'graphics.Context', 'graphics.ContextState',
+			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.VertexLayout', 'graphics.IndexBuffer']
 	},
 	// ******* подсистема DirectX 11
 	'libinanity-dx': {

@@ -1,115 +1,28 @@
 #ifndef ___INANITY_GRAPHICS_CONTEXT_HPP___
 #define ___INANITY_GRAPHICS_CONTEXT_HPP___
 
-#include "graphics.hpp"
+#include "ContextState.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
-class RenderBuffer;
-class DepthStencilBuffer;
-class Texture;
-class Sampler;
-class UniformBuffer;
-class VertexShader;
-class PixelShader;
-class VertexBuffer;
-class VertexLayout;
-class IndexBuffer;
-
 /// Абстрактный класс графического контекста.
-/** Контекст управляет рисованием.
-В контексте указываются различные настройки рендеринга,
-задаются источники данных и так далее. Контекст должен
-работать лениво, то есть передавать в своё API эти данные
-только тогда, когда это действительно нужно (команда на
-рисование).
+/** Контекст выполняет собственно рисование.
+Передаёт состояние контекста в графическое API,
+обновляя только то, что изменилось, и только тогда,
+когда нужно.
+Контекст удерживает ссылки как на объекты, уже
+установленные в конвейер, так и на объекты, которым
+это предстоит.
 */
 class Context : public Object
 {
 protected:
-	/// Количество рендертаргетов.
-	static const int renderTargetSlotsCount = 8;
-	/// Привязанные рендертаргеты.
-	ptr<RenderBuffer> boundRenderBuffers[renderTargetSlotsCount];
-	bool dirtyRenderBuffers[renderTargetSlotsCount];
-	/// Привязанный depth-stencil буфер.
-	ptr<DepthStencilBuffer> boundDepthStencilBuffer;
-	bool dirtyDepthStencilBuffer;
-
-	/// Количество текстурных слотов.
-	static const int textureSlotsCount = 16;
-	/// Привязанные текстуры.
-	ptr<Texture> boundTextures[textureSlotsCount];
-	bool dirtyTextures[textureSlotsCount];
-	/// Привязанные семплеры.
-	/** Семплеры привязываются в той же нумерации, что и текстурные слоты. */
-	ptr<Sampler> boundSamplers[textureSlotsCount];
-	bool dirtySamplers[textureSlotsCount];
-
-	/// Количество слотов для константных буферов.
-	static const int uniformBufferSlotsCount = 16;
-	/// Привязанные константные буферы.
-	ptr<UniformBuffer> boundUniformBuffers[uniformBufferSlotsCount];
-	bool dirtyUniformBuffers[uniformBufferSlotsCount];
-
-	/// Привязанный вершинный шейдер.
-	ptr<VertexShader> boundVertexShader;
-	bool dirtyVertexShader;
-	/// Привязанный пиксельный шейдер.
-	ptr<PixelShader> boundPixelShader;
-	bool dirtyPixelShader;
-
-	/// Привязанный вершинный буфер.
-	ptr<VertexBuffer> boundVertexBuffer;
-	bool dirtyVertexBuffer;
-	/// Привязанный индексный буфер.
-	ptr<IndexBuffer> boundIndexBuffer;
-	bool dirtyIndexBuffer;
-
-	//******* Параметры растеризации.
-	/// Режим заливки.
-	enum FillMode
-	{
-		fillModeWireframe,
-		fillModeSolid
-	};
-	FillMode fillMode;
-	bool dirtyFillMode;
-	/// Режим culling.
-	enum CullMode
-	{
-		cullModeNone,
-		cullModeBack,
-		cullModeFront
-	};
-	CullMode cullMode;
-	bool dirtyCullMode;
-
-	/// Viewport.
-	int viewportWidth, viewportHeight;
-	bool dirtyViewport;
-
-	/// Функция, сравнивающая глубину.
-	/** Для отключения теста глубины нужно просто выставить эту функцию в always. */
-	enum DepthTestFunc
-	{
-		depthTestFuncNever,
-		depthTestFuncLess,
-		depthTestFuncLessOrEqual,
-		depthTestFuncEqual,
-		depthTestFuncNonEqual,
-		depthTestFuncGreaterOrEqual,
-		depthTestFuncGreater,
-		depthTestFuncAlways
-	};
-	DepthTestFunc depthTestFunc;
-	bool dirtyDepthTestFunc;
-	/// Запись в буфер глубины.
-	bool depthWrite;
-	bool dirtyDepthWrite;
+	/// Реальное состояние контекста.
+	ContextState boundState;
+	/// Требуемое состояние контекста.
+	ContextState targetState;
 
 protected:
-	/// Выполнить инициализацию всех флажков и прочего.
 	Context();
 
 public:
@@ -124,44 +37,13 @@ public:
 	/// Очистить глубину и трафарет в depth-stencil буфере.
 	virtual void ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, float depth, unsigned stencil) = 0;
 
-	//******* Методы для привязки данных к конвейеру.
-	/* Работают лениво, то есть реальный вызов к API происходит, только когда нужно рисовать. */
-	/// Очистить все слоты вывода.
-	void ResetTargets();
-	/// Указать рендербуфер в слот вывода.
-	void BindTargetRenderBuffer(int slot, ptr<RenderBuffer> renderBuffer);
-	/// Указать depth-stencil буфер.
-	void BindTargetDepthStencilBuffer(ptr<DepthStencilBuffer> depthStencilBuffer);
-	/// Очистить все текстурные слоты.
-	void ResetTextures();
-	/// Указать текстуру в текстурный слот.
-	void BindTexture(int slot, ptr<Texture> texture);
-	/// Очистить все семплерные слоты.
-	void ResetSamplers();
-	/// Указать семплер в семплерный слот.
-	void BindSampler(int slot, ptr<Sampler> sampler);
-	/// Очистить все uniform-буферы.
-	void ResetUniformBuffers();
-	/// Указать uniform-буфер в слот буферов.
-	void BindUniformBuffer(int slot, ptr<UniformBuffer> buffer);
-	/// Указать вершинный шейдер.
-	void BindVertexShader(ptr<VertexShader> vertexShader);
-	/// Указать пиксельный шейдер.
-	void BindPixelShader(ptr<PixelShader> pixelShader);
-	/// Указать вершинный буфер.
-	void BindVertexBuffer(ptr<VertexBuffer> vertexBuffer);
-	/// Указать индексный буфер.
-	void BindIndexBuffer(ptr<IndexBuffer> indexBuffer);
-	/// Указать режим заливки.
-	void SetFillMode(FillMode fillMode);
-	/// Указать режим culling.
-	void SetCullMode(CullMode cullMode);
-	/// Указать viewport.
-	void SetViewport(int viewportWidth, int viewportHeight);
-	/// Указать фукцию для теста глубины.
-	void SetDepthTestFunc(DepthTestFunc depthTestFunc);
-	/// Указать, включена ли запись глубины.
-	void SetDepthWrite(bool depthWrite);
+	/// Получить актуальное состояние контекста.
+	/** Может использоваться, чтобы сделать из него
+	новое состояние с минимальным количеством изменений. */
+	const ContextState& GetBoundState() const;
+	/// Получить требуемое состояние контекста.
+	/** Его можно менять, чтобы задать то, что требуется. */
+	ContextState& GetTargetState();
 
 	//******* Методы для передачи данных.
 	/* Непосредственные методы. */

@@ -1,0 +1,42 @@
+#include "ContextState.hpp"
+#include "RenderBuffer.hpp"
+#include "DepthStencilBuffer.hpp"
+#include "Texture.hpp"
+#include "Sampler.hpp"
+#include "UniformBuffer.hpp"
+#include "VertexShader.hpp"
+#include "PixelShader.hpp"
+#include "VertexBuffer.hpp"
+#include "IndexBuffer.hpp"
+
+ContextState::ContextState() :
+	fillMode(fillModeSolid), cullMode(cullModeBack),
+	viewportWidth(1), viewportHeight(1),
+	depthTestFunc(depthTestFuncLess), depthWrite(true)
+{
+}
+
+void ContextState::ResetTargets()
+{
+	for(int i = 0; i < renderTargetSlotsCount; ++i)
+		renderBuffers[i] = 0;
+	depthStencilBuffer = 0;
+}
+
+void ContextState::ResetTextures()
+{
+	for(int i = 0; i < textureSlotsCount; ++i)
+		textures[i] = 0;
+}
+
+void ContextState::ResetSamplers()
+{
+	for(int i = 0; i < textureSlotsCount; ++i)
+		samplers[i] = 0;
+}
+
+void ContextState::ResetUniformBuffers()
+{
+	for(int i = 0; i < uniformBufferSlotsCount; ++i)
+		uniformBuffers[i] = 0;
+}
