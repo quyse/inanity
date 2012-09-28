@@ -144,17 +144,17 @@ void DxContext::Update()
 	{
 		// сейчас единственная оптимизация - количество обновляемых рендертаргетов
 		int end;
-		for(end = renderTargetSlotsCount - 1; end >= 0; --end)
-			if(dirtyRenderBuffers[end])
+		for(end = ContextState::renderTargetSlotsCount - 1; end >= 0; --end)
+			if(targetState.renderBuffers[end] != boundState.renderBuffers[end])
 				break;
 		++end;
 
-		if(end > 0 || dirtyDepthStencilBuffer)
+		if(end > 0 || targetState.depthStencilBuffer != boundState.depthStencilBuffer)
 		{
-			ID3D11RenderTargetView* views[renderTargetSlotsCount];
+			ID3D11RenderTargetView* views[ContextState::renderTargetSlotsCount];
 			for(int i = 0; i < end; ++i)
 			{
-				RenderBuffer* abstractRenderBuffer = boundRenderBuffers[i];
+				RenderBuffer* abstractRenderBuffer = targetState.renderBuffers[i];
 				if(abstractRenderBuffer)
 				{
 					DxRenderBuffer* renderBuffer = fast_cast<DxRenderBuffer*>(abstractRenderBuffer);
@@ -165,7 +165,7 @@ void DxContext::Update()
 			}
 
 			ID3D11DepthStencilView* depthStencilView;
-			DepthStencilBuffer* abstractDepthStencilBuffer = boundDepthStencilBuffer;
+			DepthStencilBuffer* abstractDepthStencilBuffer = targetState.depthStencilBuffer;
 			if(abstractDepthStencilBuffer)
 			{
 				DxDepthStencilBuffer* depthStencilBuffer = fast_cast<DxDepthStencilBuffer*>(abstractDepthStencilBuffer);
@@ -177,10 +177,10 @@ void DxContext::Update()
 			// выполнить вызов
 			deviceContext->OMSetRenderTargets(end, views, depthStencilView);
 
-			// обновить флажки
+			// обновить актуальное состояние
 			for(int i = 0; i < end; ++i)
-				dirtyRenderBuffers[i] = false;
-			dirtyDepthStencilBuffer = false;
+				boundState.renderBuffers[i] = targetState.renderBuffers[i];
+			boundState.depthStencilBuffer = targetState.depthStencilBuffer;
 		}
 	}
 
@@ -188,21 +188,21 @@ void DxContext::Update()
 	{
 		// сейчас единственная оптимизация - начало и конец в списке обновляемых текстур
 		int end;
-		for(end = textureSlotsCount - 1; end >= 0; --end)
-			if(dirtyTextures[end])
+		for(end = ContextState::textureSlotsCount - 1; end >= 0; --end)
+			if(targetState.textures[end] != boundState.textures[end])
 				break;
 		++end;
 		int begin;
 		for(begin = 0; begin < end; ++begin)
-			if(dirtyTextures[begin])
+			if(targetState.textures[begin] != boundState.textures[begin])
 				break;
 
 		if(begin < end)
 		{
-			ID3D11ShaderResourceView* views[textureSlotsCount];
+			ID3D11ShaderResourceView* views[ContextState::textureSlotsCount];
 			for(int i = begin; i < end; ++i)
 			{
-				Texture* abstractTexture = boundTextures[i];
+				Texture* abstractTexture = targetState.textures[i];
 				if(abstractTexture)
 				{
 					DxTexture* texture = fast_cast<DxTexture*>(abstractTexture);
@@ -216,9 +216,9 @@ void DxContext::Update()
 			deviceContext->VSSetShaderResources(begin, end - begin, views + begin);
 			deviceContext->PSSetShaderResources(begin, end - begin, views + begin);
 
-			// обновить флажки
+			// обновить актуальное состояние
 			for(int i = begin; i < end; ++i)
-				dirtyTextures[i] = false;
+				boundState.textures[i] = targetState.textures[i];
 		}
 	}
 
@@ -226,21 +226,21 @@ void DxContext::Update()
 	{
 		// сейчас единственная оптимизация - начало и конец в списке обновляемых семплеров
 		int end;
-		for(end = textureSlotsCount - 1; end >= 0; --end)
-			if(dirtySamplers[end])
+		for(end = ContextState::textureSlotsCount - 1; end >= 0; --end)
+			if(targetState.samplers[end] != boundState.samplers[end])
 				break;
 		++end;
 		int begin;
 		for(begin = 0; begin < end; ++begin)
-			if(dirtySamplers[begin])
+			if(targetState.samplers[begin] != boundState.samplers[begin])
 				break;
 
 		if(begin < end)
 		{
-			ID3D11SamplerState* states[textureSlotsCount];
+			ID3D11SamplerState* states[ContextState::textureSlotsCount];
 			for(int i = begin; i < end; ++i)
 			{
-				Sampler* abstractSampler = boundSamplers[i];
+				Sampler* abstractSampler = targetState.samplers[i];
 				if(abstractSampler)
 				{
 					DxSampler* sampler = fast_cast<DxSampler*>(abstractSampler);
@@ -254,9 +254,9 @@ void DxContext::Update()
 			deviceContext->VSSetSamplers(begin, end - begin, states + begin);
 			deviceContext->PSSetSamplers(begin, end - begin, states + begin);
 
-			// обновить флажки
+			// обновить актуальное состояние
 			for(int i = begin; i < end; ++i)
-				dirtySamplers[i] = false;
+				boundState.samplers[i] = targetState.samplers[i];
 		}
 	}
 
@@ -264,21 +264,21 @@ void DxContext::Update()
 	{
 		// сейчас единственная оптимизация - начало и конец в списке обновляемых текстур
 		int end;
-		for(end = uniformBufferSlotsCount - 1; end >= 0; --end)
-			if(dirtyUniformBuffers[end])
+		for(end = ContextState::uniformBufferSlotsCount - 1; end >= 0; --end)
+			if(targetState.uniformBuffers[end] != boundState.uniformBuffers[end])
 				break;
 		++end;
 		int begin;
 		for(begin = 0; begin < end; ++begin)
-			if(dirtyUniformBuffers[begin])
+			if(targetState.uniformBuffers[begin] != boundState.uniformBuffers[begin])
 				break;
 
 		if(begin < end)
 		{
-			ID3D11Buffer* buffers[uniformBufferSlotsCount];
+			ID3D11Buffer* buffers[ContextState::uniformBufferSlotsCount];
 			for(int i = begin; i < end; ++i)
 			{
-				UniformBuffer* abstractUniformBuffer = boundUniformBuffers[i];
+				UniformBuffer* abstractUniformBuffer = targetState.uniformBuffers[i];
 				if(abstractUniformBuffer)
 				{
 					DxUniformBuffer* uniformBuffer = fast_cast<DxUniformBuffer*>(abstractUniformBuffer);
@@ -292,16 +292,16 @@ void DxContext::Update()
 			deviceContext->VSSetConstantBuffers(begin, end - begin, buffers + begin);
 			deviceContext->PSSetConstantBuffers(begin, end - begin, buffers + begin);
 
-			// обновить флажки
+			// обновить актуальное состояние
 			for(int i = begin; i < end; ++i)
-				dirtyUniformBuffers[i] = false;
+				boundState.uniformBuffers[i] = targetState.uniformBuffers[i];
 		}
 	}
 
 	// входная разметка
-	if(dirtyVertexBuffer || dirtyVertexShader)
+	if(targetState.vertexBuffer != boundState.vertexBuffer || targetState.vertexShader != boundState.vertexShader)
 	{
-		ptr<DxInternalInputLayout> inputLayout = inputLayoutCache->GetInputLayout(boundVertexBuffer->GetVertexLayout(), fast_cast<DxVertexShader*>(&*boundVertexShader));
+		ptr<DxInternalInputLayout> inputLayout = inputLayoutCache->GetInputLayout(targetState.vertexBuffer->GetVertexLayout(), fast_cast<DxVertexShader*>(&*targetState.vertexShader));
 		if(inputLayout != boundInputLayout)
 		{
 			deviceContext->IASetInputLayout(inputLayout->GetInputLayoutInterface());
@@ -310,29 +310,29 @@ void DxContext::Update()
 	}
 
 	// вершинный шейдер
-	if(dirtyVertexShader)
+	if(targetState.vertexShader != boundState.vertexShader)
 	{
 		ID3D11VertexShader* shader;
-		if(boundVertexShader)
-			shader = fast_cast<DxVertexShader*>(&*boundVertexShader)->GetVertexShaderInterface();
+		if(targetState.vertexShader)
+			shader = fast_cast<DxVertexShader*>(&*targetState.vertexShader)->GetVertexShaderInterface();
 		else
 			shader = 0;
 		deviceContext->VSSetShader(shader, NULL, 0);
 
-		dirtyVertexShader = false;
+		boundState.vertexShader = targetState.vertexShader;
 	}
 
 	// пиксельный шейдер
-	if(dirtyPixelShader)
+	if(targetState.pixelShader != boundState.pixelShader)
 	{
 		ID3D11PixelShader* shader;
-		if(boundPixelShader)
-			shader = fast_cast<DxPixelShader*>(&*boundPixelShader)->GetPixelShaderInterface();
+		if(targetState.pixelShader)
+			shader = fast_cast<DxPixelShader*>(&*targetState.pixelShader)->GetPixelShaderInterface();
 		else
 			shader = 0;
 		deviceContext->PSSetShader(shader, NULL, 0);
 
-		dirtyPixelShader = false;
+		boundState.pixelShader = targetState.pixelShader;
 	}
 }
 
@@ -361,18 +361,18 @@ void DxContext::Draw()
 {
 	Update();
 
-	if(boundIndexBuffer)
-		deviceContext->DrawIndexed(boundIndexBuffer->GetIndicesCount(), 0, 0);
+	if(boundState.indexBuffer)
+		deviceContext->DrawIndexed(boundState.indexBuffer->GetIndicesCount(), 0, 0);
 	else
-		deviceContext->Draw(boundVertexBuffer->GetVerticesCount(), 0);
+		deviceContext->Draw(boundState.vertexBuffer->GetVerticesCount(), 0);
 }
 
 void DxContext::DrawInstanced(int instancesCount)
 {
 	Update();
 
-	if(boundIndexBuffer)
-		deviceContext->DrawIndexedInstanced(boundIndexBuffer->GetIndicesCount(), instancesCount, 0, 0, 0);
+	if(boundState.indexBuffer)
+		deviceContext->DrawIndexedInstanced(boundState.indexBuffer->GetIndicesCount(), instancesCount, 0, 0, 0);
 	else
-		deviceContext->DrawInstanced(boundVertexBuffer->GetVerticesCount(), instancesCount, 0, 0);
+		deviceContext->DrawInstanced(boundState.vertexBuffer->GetVerticesCount(), instancesCount, 0, 0);
 }
