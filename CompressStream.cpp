@@ -118,7 +118,7 @@ void CompressStream::Write(const void* data, size_t size)
 }
 
 /*
-Во время и после Finalize указанный для Write инвариант не выполняется.
+Во время и после Flush указанный для Write инвариант не выполняется.
 */
 void CompressStream::Flush()
 {
