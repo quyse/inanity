@@ -1,9 +1,9 @@
-#ifndef ___INANITY_GRAPHICS_SHADERS_DATA_TYPE_HPP___
-#define ___INANITY_GRAPHICS_SHADERS_DATA_TYPE_HPP___
+#ifndef ___INANITY_GRAPHICS_DATA_TYPE_HPP___
+#define ___INANITY_GRAPHICS_DATA_TYPE_HPP___
 
-#include "shaders.hpp"
+#include "graphics.hpp"
 
-BEGIN_INANITY_SHADERS
+BEGIN_INANITY_GRAPHICS
 
 /// Типы данных в шейдерах.
 struct DataTypes
@@ -47,6 +47,6 @@ static DataType GetDataType<float4x4>() { return DataTypes::Float4x4; }
 template <>
 static DataType GetDataType<unsigned int>() { return DataTypes::UInt; }
 
-END_INANITY_SHADERS
+END_INANITY_GRAPHICS
 
 #endif
