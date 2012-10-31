@@ -5,6 +5,8 @@
 
 BEGIN_INANITY_GRAPHICS
 
+class Layout;
+
 /// Абстрактный класс вершинного шейдера.
 class VertexShader : public Object
 {

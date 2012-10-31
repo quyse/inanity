@@ -6,6 +6,8 @@
 
 BEGIN_INANITY_GRAPHICS
 
+class Layout;
+
 /// Класс привязки - связь между двумя разметками.
 /** Описывает перестановку данных между разметками. */
 class LayoutBinding : public Object

@@ -4,7 +4,6 @@
 #include "GlInternalProgram.hpp"
 #include "GlInternalAttributeBinding.hpp"
 #include "GlInternalAttributeBindingCache.hpp"
-#include "VertexLayout.hpp"
 #include "GlRenderBuffer.hpp"
 #include "GlDepthStencilBuffer.hpp"
 #include "GlTexture.hpp"
@@ -14,6 +13,7 @@
 #include "GlPixelShader.hpp"
 #include "GlVertexBuffer.hpp"
 #include "GlIndexBuffer.hpp"
+#include "Layout.hpp"
 #include "../Exception.hpp"
 
 GlContext::GlContext() :
@@ -41,11 +41,11 @@ void GlContext::BindServiceFramebuffer()
 	dirtyCurrentFramebuffer = true;
 }
 
-ptr<GlInternalAttributeBinding> GlContext::CreateInternalAttributeBinding(VertexLayout* vertexLayout, GlInternalProgram* program)
+ptr<GlInternalAttributeBinding> GlContext::CreateInternalAttributeBinding(Layout* vertexLayout, GlInternalProgram* program)
 {
 	try
 	{
-		const std::vector<VertexLayout::Element>& layoutElements = vertexLayout->GetElements();
+		const std::vector<Layout::Element>& layoutElements = vertexLayout->GetElements();
 		if(layoutElements.empty())
 			THROW_PRIMARY_EXCEPTION("Vertex layout is empty");
 
@@ -70,13 +70,13 @@ ptr<GlInternalAttributeBinding> GlContext::CreateInternalAttributeBinding(Vertex
 			if(layoutElementIndex >= layoutElements.size())
 				THROW_PRIMARY_EXCEPTION("Can't find element for attribute");
 
-			const VertexLayout::Element& layoutElement = layoutElements[layoutElementIndex];
+			const Layout::Element& layoutElement = layoutElements[layoutElementIndex];
 
 			// получить количество необходимых результирующих элементов, и размер элемента в байтах
 			int needResultElementsCount;
-			switch(layoutElement.type)
+			switch(layoutElement.dataType)
 			{
-			case VertexLayout::typeFloat4x4:
+			case DataTypes::Float4x4:
 				needResultElementsCount = 4;
 				break;
 			default:
@@ -86,38 +86,38 @@ ptr<GlInternalAttributeBinding> GlContext::CreateInternalAttributeBinding(Vertex
 			// выбрать формат и размер
 			GLint size;
 			GLenum type;
-			switch(layoutElement.type)
+			switch(layoutElement.dataType)
 			{
-			case VertexLayout::typeFloat:
+			case DataTypes::Float:
 				size = 1;
 				type = GL_FLOAT;
 				break;
-			case VertexLayout::typeFloat2:
+			case DataTypes::Float2:
 				size = 2;
 				type = GL_FLOAT;
 				break;
-			case VertexLayout::typeFloat3:
+			case DataTypes::Float3:
 				size = 3;
 				type = GL_FLOAT;
 				break;
-			case VertexLayout::typeFloat4:
-			case VertexLayout::typeFloat4x4:
+			case DataTypes::Float4:
+			case DataTypes::Float4x4:
 				size = 4;
 				type = GL_FLOAT;
 				break;
-			case VertexLayout::typeUInt:
+			case DataTypes::UInt:
 				size = 1;
 				type = GL_UNSIGNED_INT;
 				break;
-			case VertexLayout::typeUInt2:
+			case DataTypes::UInt2:
 				size = 2;
 				type = GL_UNSIGNED_INT;
 				break;
-			case VertexLayout::typeUInt3:
+			case DataTypes::UInt3:
 				size = 3;
 				type = GL_UNSIGNED_INT;
 				break;
-			case VertexLayout::typeUInt4:
+			case DataTypes::UInt4:
 				size = 4;
 				type = GL_UNSIGNED_INT;
 				break;
@@ -275,7 +275,7 @@ void GlContext::Update()
 	// привязка к атрибутам
 	if(dirtyAttributeBinding)
 	{
-		ptr<VertexLayout> vertexLayout = boundVertexBuffer->GetVertexLayout();
+		ptr<Layout> vertexLayout = boundVertexBuffer->GetLayout();
 		ptr<GlInternalAttributeBinding> attributeBinding = attributeBindingCache->GetBinding(vertexLayout, boundProgram);
 		if(boundAttributeBinding != attributeBinding)
 		{

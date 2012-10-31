@@ -11,6 +11,7 @@ class GlInternalAttributeBinding;
 class GlInternalAttributeBindingCache;
 class GlVertexLayout;
 class GlInternalProgram;
+class Layout;
 
 /// Класс контекста OpenGL.
 class GlContext : public Context
@@ -49,7 +50,7 @@ public:
 	~GlContext();
 
 	/// Создать привязку атрибутов.
-	ptr<GlInternalAttributeBinding> CreateInternalAttributeBinding(VertexLayout* vertexLayout, GlInternalProgram* program);
+	ptr<GlInternalAttributeBinding> CreateInternalAttributeBinding(Layout* vertexLayout, GlInternalProgram* program);
 
 	// методы Context
 

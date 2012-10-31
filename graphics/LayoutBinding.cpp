@@ -1,4 +1,7 @@
 #include "LayoutBinding.hpp"
+#include "Layout.hpp"
+#include "../Exception.hpp"
+#include <unordered_map>
 #include <algorithm>
 
 LayoutBinding::Element::Element(int sourceOffset, int destOffset, int size)
@@ -76,6 +79,8 @@ ptr<LayoutBinding> LayoutBinding::Create(Layout* sourceLayout, Layout* destLayou
 				THROW_PRIMARY_EXCEPTION("Types not conform");
 			elements.push_back(Element(sourceElement.offset, destElement.offset, GetDataTypeSize(sourceElement.dataType)));
 		}
+
+		return NEW(LayoutBinding(elements));
 	}
 	catch(Exception* exception)
 	{

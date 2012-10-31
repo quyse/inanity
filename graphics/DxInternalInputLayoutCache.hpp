@@ -6,7 +6,7 @@
 
 BEGIN_INANITY_GRAPHICS
 
-class VertexLayout;
+class Layout;
 class DxVertexShader;
 class DxContext;
 class DxInternalInputLayout;
@@ -18,9 +18,9 @@ class DxInternalInputLayoutCache : public Object
 private:
 	struct Key
 	{
-		VertexLayout* vertexLayout;
+		Layout* vertexLayout;
 		DxVertexShader* vertexShader;
-		Key(VertexLayout* vertexLayout, DxVertexShader* vertexShader);
+		Key(Layout* vertexLayout, DxVertexShader* vertexShader);
 		operator size_t() const;
 	};
 	typedef std::unordered_map<Key, ptr<DxInternalInputLayout> > InputLayouts;
@@ -31,7 +31,7 @@ private:
 public:
 	DxInternalInputLayoutCache(DxContext* context);
 
-	ptr<DxInternalInputLayout> GetInputLayout(VertexLayout* vertexLayout, DxVertexShader* vertexShader);
+	ptr<DxInternalInputLayout> GetInputLayout(Layout* vertexLayout, DxVertexShader* vertexShader);
 };
 
 END_INANITY_GRAPHICS

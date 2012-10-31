@@ -2,6 +2,7 @@
 #define ___INANITY_GRAPHICS_LAYOUT_HPP___
 
 #include "DataType.hpp"
+#include <vector>
 
 BEGIN_INANITY_GRAPHICS
 
@@ -27,14 +28,17 @@ public:
 protected:
 	/// Элементы разметки.
 	std::vector<Element> elements;
-	/// Размер буфера.
+	/// Размер полезных данных разметки.
 	int size;
+	/// Размер разметки (включающий зазор между последовательными экземплярами).
+	int stride;
 
 public:
-	Layout(const std::vector<Element>& elements, int size);
+	Layout(const std::vector<Element>& elements, int size, int stride = -1);
 
 	const std::vector<Element>& GetElements() const;
 	int GetSize() const;
+	int GetStride() const;
 };
 
 END_INANITY_GRAPHICS

@@ -8,10 +8,10 @@
 #include "DxVertexShader.hpp"
 #include "DxPixelShader.hpp"
 #include "DxVertexBuffer.hpp"
-#include "VertexLayout.hpp"
 #include "DxInternalInputLayout.hpp"
 #include "DxInternalInputLayoutCache.hpp"
 #include "DxIndexBuffer.hpp"
+#include "Layout.hpp"
 #include "../File.hpp"
 #include "../Exception.hpp"
 
@@ -22,12 +22,12 @@ DxContext::DxContext(ID3D11Device* device, ID3D11DeviceContext* deviceContext)
 	inputLayoutCache = NEW(DxInternalInputLayoutCache(this));
 }
 
-ptr<DxInternalInputLayout> DxContext::CreateInternalInputLayout(VertexLayout* vertexLayout, DxVertexShader* vertexShader)
+ptr<DxInternalInputLayout> DxContext::CreateInternalInputLayout(Layout* vertexLayout, DxVertexShader* vertexShader)
 {
 	try
 	{
 		// получить элементы разметки
-		const std::vector<VertexLayout::Element>& elements = vertexLayout->GetElements();
+		const std::vector<Layout::Element>& elements = vertexLayout->GetElements();
 		if(elements.empty())
 			THROW_PRIMARY_EXCEPTION("Vertex layout is empty");
 
@@ -40,13 +40,13 @@ ptr<DxInternalInputLayout> DxContext::CreateInternalInputLayout(VertexLayout* ve
 		// и заполнить их
 		for(size_t i = 0; i < elements.size(); ++i)
 		{
-			const VertexLayout::Element& element = elements[i];
+			const Layout::Element& element = elements[i];
 
 			// получить количество необходимых описаний для элемента
 			int needDescsCount;
-			switch(element.type)
+			switch(element.dataType)
 			{
-			case VertexLayout::typeFloat4x4:
+			case DataTypes::Float4x4:
 				needDescsCount = 4;
 				break;
 			default:
@@ -56,33 +56,33 @@ ptr<DxInternalInputLayout> DxContext::CreateInternalInputLayout(VertexLayout* ve
 
 			// выбрать формат элемента
 			DXGI_FORMAT format;
-			switch(element.type)
+			switch(element.dataType)
 			{
-			case VertexLayout::typeFloat:
+			case DataTypes::Float:
 				format = DXGI_FORMAT_R32_FLOAT;
 				break;
-			case VertexLayout::typeFloat2:
+			case DataTypes::Float2:
 				format = DXGI_FORMAT_R32G32_FLOAT;
 				break;
-			case VertexLayout::typeFloat3:
+			case DataTypes::Float3:
 				format = DXGI_FORMAT_R32G32B32_FLOAT;
 				break;
-			case VertexLayout::typeFloat4:
+			case DataTypes::Float4:
 				format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 				break;
-			case VertexLayout::typeFloat4x4:
+			case DataTypes::Float4x4:
 				format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 				break;
-			case VertexLayout::typeUInt:
+			case DataTypes::UInt:
 				format = DXGI_FORMAT_R32_UINT;
 				break;
-			case VertexLayout::typeUInt2:
+			case DataTypes::UInt2:
 				format = DXGI_FORMAT_R32G32_UINT;
 				break;
-			case VertexLayout::typeUInt3:
+			case DataTypes::UInt3:
 				format = DXGI_FORMAT_R32G32B32_UINT;
 				break;
-			case VertexLayout::typeUInt4:
+			case DataTypes::UInt4:
 				format = DXGI_FORMAT_R32G32B32A32_UINT;
 				break;
 			default:
@@ -301,7 +301,7 @@ void DxContext::Update()
 	// входная разметка
 	if(targetState.vertexBuffer != boundState.vertexBuffer || targetState.vertexShader != boundState.vertexShader)
 	{
-		ptr<DxInternalInputLayout> inputLayout = inputLayoutCache->GetInputLayout(targetState.vertexBuffer->GetVertexLayout(), fast_cast<DxVertexShader*>(&*targetState.vertexShader));
+		ptr<DxInternalInputLayout> inputLayout = inputLayoutCache->GetInputLayout(targetState.vertexBuffer->GetLayout(), fast_cast<DxVertexShader*>(&*targetState.vertexShader));
 		if(inputLayout != boundInputLayout)
 		{
 			deviceContext->IASetInputLayout(inputLayout->GetInputLayoutInterface());

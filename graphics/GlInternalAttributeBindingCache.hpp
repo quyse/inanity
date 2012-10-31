@@ -8,7 +8,7 @@
 BEGIN_INANITY_GRAPHICS
 
 class GlInternalAttributeBinding;
-class VertexLayout;
+class Layout;
 class GlInternalProgram;
 class GlContext;
 
@@ -18,9 +18,9 @@ class GlInternalAttributeBindingCache : public Object
 private:
 	struct Key
 	{
-		VertexLayout* vertexLayout;
+		Layout* vertexLayout;
 		GlInternalProgram* program;
-		Key(VertexLayout* vertexLayout, GlInternalProgram* program);
+		Key(Layout* vertexLayout, GlInternalProgram* program);
 		operator size_t() const;
 	};
 	typedef std::unordered_map<Key, ptr<GlInternalAttributeBinding> > Bindings;
@@ -31,7 +31,7 @@ private:
 public:
 	GlInternalAttributeBindingCache(GlContext* context);
 
-	ptr<GlInternalAttributeBinding> GetBinding(VertexLayout* vertexLayout, GlInternalProgram* program);
+	ptr<GlInternalAttributeBinding> GetBinding(Layout* vertexLayout, GlInternalProgram* program);
 };
 
 END_INANITY_GRAPHICS

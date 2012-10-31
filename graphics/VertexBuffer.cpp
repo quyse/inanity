@@ -1,15 +1,15 @@
 #include "VertexBuffer.hpp"
-#include "VertexLayout.hpp"
+#include "Layout.hpp"
 
-VertexBuffer::VertexBuffer(int verticesCount, ptr<VertexLayout> vertexLayout)
-: verticesCount(verticesCount), vertexLayout(vertexLayout) {}
+VertexBuffer::VertexBuffer(int verticesCount, ptr<Layout> layout)
+: verticesCount(verticesCount), layout(layout) {}
 
 int VertexBuffer::GetVerticesCount() const
 {
 	return verticesCount;
 }
 
-ptr<VertexLayout> VertexBuffer::GetVertexLayout() const
+ptr<Layout> VertexBuffer::GetLayout() const
 {
-	return vertexLayout;
+	return layout;
 }

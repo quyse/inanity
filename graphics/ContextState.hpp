@@ -13,7 +13,6 @@ class UniformBuffer;
 class VertexShader;
 class PixelShader;
 class VertexBuffer;
-class VertexLayout;
 class IndexBuffer;
 
 /// Структура с состоянием контекста рисования.

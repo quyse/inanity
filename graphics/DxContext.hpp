@@ -10,6 +10,7 @@ BEGIN_INANITY_GRAPHICS
 class DxInternalInputLayoutCache;
 class DxInternalInputLayout;
 class DxVertexShader;
+class Layout;
 
 /// Класс контекста DirectX 11.
 class DxContext : public Context
@@ -30,7 +31,7 @@ public:
 	DxContext(ID3D11Device* device, ID3D11DeviceContext* deviceContext);
 
 	/// Создать входную разметку.
-	ptr<DxInternalInputLayout> CreateInternalInputLayout(VertexLayout* vertexLayout, DxVertexShader* vertexShader);
+	ptr<DxInternalInputLayout> CreateInternalInputLayout(Layout* vertexLayout, DxVertexShader* vertexShader);
 
 	// методы Context
 

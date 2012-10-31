@@ -1,13 +1,13 @@
 #include "GlInternalAttributeBindingCache.hpp"
 #include "GlInternalAttributeBinding.hpp"
-#include "VertexLayout.hpp"
 #include "GlInternalProgram.hpp"
 #include "GlContext.hpp"
+#include "Layout.hpp"
 
 GlInternalAttributeBindingCache::GlInternalAttributeBindingCache(GlContext* context)
 : context(context) {}
 
-ptr<GlInternalAttributeBinding> GlInternalAttributeBindingCache::GetBinding(VertexLayout* vertexLayout, GlInternalProgram* program)
+ptr<GlInternalAttributeBinding> GlInternalAttributeBindingCache::GetBinding(Layout* vertexLayout, GlInternalProgram* program)
 {
 	Key key(vertexLayout, program);
 	Bindings::const_iterator i = bindings.find(key);

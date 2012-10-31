@@ -74,7 +74,7 @@ var libraries = {
 	'libinanity-graphics': {
 		objects: [
 			'graphics.Context', 'graphics.ContextState',
-			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.VertexLayout', 'graphics.IndexBuffer']
+			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.Layout', 'graphics.LayoutBinding', 'graphics.IndexBuffer']
 	},
 	// ******* подсистема DirectX 11
 	'libinanity-dx': {

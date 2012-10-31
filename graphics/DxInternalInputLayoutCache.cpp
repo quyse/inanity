@@ -1,5 +1,5 @@
 #include "DxInternalInputLayoutCache.hpp"
-#include "VertexLayout.hpp"
+#include "Layout.hpp"
 #include "DxVertexShader.hpp"
 #include "DxInternalInputLayout.hpp"
 #include "DxContext.hpp"
@@ -12,7 +12,7 @@ DxInternalInputLayoutCache::Key::operator size_t() const
 DxInternalInputLayoutCache::DxInternalInputLayoutCache(DxContext* context)
 : context(context) {}
 
-ptr<DxInternalInputLayout> DxInternalInputLayoutCache::GetInputLayout(VertexLayout* vertexLayout, DxVertexShader* vertexShader)
+ptr<DxInternalInputLayout> DxInternalInputLayoutCache::GetInputLayout(Layout* vertexLayout, DxVertexShader* vertexShader)
 {
 	Key key(vertexLayout, vertexShader);
 	InputLayouts::const_iterator i = inputLayouts.find(key);
