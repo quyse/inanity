@@ -262,7 +262,7 @@ void DxContext::Update()
 
 	// константные буферы
 	{
-		// сейчас единственная оптимизация - начало и конец в списке обновляемых текстур
+		// сейчас единственная оптимизация - начало и конец в списке обновляемых константных буферов
 		int end;
 		for(end = ContextState::uniformBufferSlotsCount - 1; end >= 0; --end)
 			if(targetState.uniformBuffers[end] != boundState.uniformBuffers[end])
