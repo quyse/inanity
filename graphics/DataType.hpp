@@ -19,6 +19,10 @@ struct DataTypes
 		UInt2,
 		UInt3,
 		UInt4,
+		Int,
+		Int2,
+		Int3,
+		Int4,
 		_Count
 	};
 };
@@ -33,19 +37,19 @@ inline int GetDataTypeSize(DataType dataType)
 
 /// Перевести тип на этапе компиляции в константу типа.
 template <typename T>
-static DataType GetDataType();
+DataType GetDataType();
 template <>
-static DataType GetDataType<float>() { return DataTypes::Float; }
+DataType GetDataType<float>() { return DataTypes::Float; }
 template <>
-static DataType GetDataType<float2>() { return DataTypes::Float2; }
+DataType GetDataType<float2>() { return DataTypes::Float2; }
 template <>
-static DataType GetDataType<float3>() { return DataTypes::Float3; }
+DataType GetDataType<float3>() { return DataTypes::Float3; }
 template <>
-static DataType GetDataType<float4>() { return DataTypes::Float4; }
+DataType GetDataType<float4>() { return DataTypes::Float4; }
 template <>
-static DataType GetDataType<float4x4>() { return DataTypes::Float4x4; }
+DataType GetDataType<float4x4>() { return DataTypes::Float4x4; }
 template <>
-static DataType GetDataType<unsigned int>() { return DataTypes::UInt; }
+DataType GetDataType<unsigned int>() { return DataTypes::UInt; }
 
 END_INANITY_GRAPHICS
 
