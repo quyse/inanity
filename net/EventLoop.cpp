@@ -1,7 +1,7 @@
 #include "EventLoop.hpp"
 #include "ServerSocket.hpp"
 #include "ClientSocket.hpp"
-#include "Exception.hpp"
+#include "../Exception.hpp"
 #include <string.h>
 #include <stdio.h>
 
@@ -113,7 +113,7 @@ ptr<Exception> EventLoop::GetLastError()
 	return err.code ? NEW(Exception(uv_strerror(err))) : 0;
 }
 
-ptr<ServerSocket> EventLoop::Listen(int port, ptr<ServerSocket::Handler> handler)
+ptr<ServerSocket> EventLoop::Listen(int port, ptr<ServerSocket::SocketHandler> handler)
 {
 	try
 	{

@@ -1,7 +1,7 @@
 #include "ServerSocket.hpp"
 #include "EventLoop.hpp"
 #include "ClientSocket.hpp"
-#include "Exception.hpp"
+#include "../Exception.hpp"
 #include <string.h>
 
 ServerSocket::ServerSocket(ptr<EventLoop> eventLoop, uv_tcp_t* stream, ptr<SocketHandler> handler) :

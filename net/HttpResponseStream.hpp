@@ -1,12 +1,13 @@
-#ifndef ___INANITY_HTTP_RESPONSE_STREAM_HPP___
-#define ___INANITY_HTTP_RESPONSE_STREAM_HPP___
+#ifndef ___INANITY_NET_HTTP_RESPONSE_STREAM_HPP___
+#define ___INANITY_NET_HTTP_RESPONSE_STREAM_HPP___
 
-#include "OutputStream.hpp"
-#include "String.hpp"
+#include "net.hpp"
 #include "http_parser.h"
+#include "../OutputStream.hpp"
+#include "../String.hpp"
 #include <vector>
 
-BEGIN_INANITY
+BEGIN_INANITY_NET
 
 /// Класс фильтрующего потока, выполняющего разбор HTTP-ответа, и выводящего только тело ответа.
 class HttpResponseStream : public OutputStream
@@ -44,6 +45,6 @@ public:
 	const Headers& GetHeaders() const;
 };
 
-END_INANITY
+END_INANITY_NET
 
 #endif

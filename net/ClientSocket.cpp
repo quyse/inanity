@@ -1,6 +1,7 @@
 #include "ClientSocket.hpp"
 #include "EventLoop.hpp"
-#include "MemoryFile.hpp"
+#include "../MemoryFile.hpp"
+#include "../Exception.hpp"
 #include <string.h>
 
 ClientSocket::ClientSocket(ptr<EventLoop> eventLoop, uv_tcp_t* stream) :
@@ -77,18 +78,19 @@ void ClientSocket::SocketOutputStream::WriteCallback(uv_write_t* req, int status
 		// закрыть сокет
 		socket->Close();
 	}
-	// в любом случае выполнить очистку
+
+	// в любом случае удалить структуру
 	delete (WriteRequest*)req->data;
 }
 
-void ClientSocket::SocketOutputStream::WriteFile(ptr<File> file)
+void ClientSocket::SocketOutputStream::WriteAsync(ptr<File> file)
 {
 	WriteRequest* request = new WriteRequest;
 	request->req.data = request;
 	request->file = file;
 	uv_buf_t buf = uv_buf_init((char*)file->GetData(), file->GetSize());
 	uv_write(&request->req, (uv_stream_t*)clientSocket->stream, &buf, 1, WriteCallback);
-}
+	}
 
 void ClientSocket::SocketOutputStream::Flush()
 {

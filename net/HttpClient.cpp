@@ -1,9 +1,10 @@
 #include "HttpClient.hpp"
 #include "EventLoop.hpp"
-#include "OutputStream.hpp"
 #include "ClientSocket.hpp"
 #include "HttpResponseStream.hpp"
-#include "Exception.hpp"
+#include "../Delegate.ipp"
+#include "../OutputStream.hpp"
+#include "../Exception.hpp"
 #include <cstdlib>
 #include <sstream>
 
@@ -84,8 +85,10 @@ void HttpClient::Fetch(ptr<EventLoop> eventLoop, const String& url, ptr<OutputSt
 		request << "User-Agent: Inanity/1.0\r\n";
 		request << "\r\n";
 
+		// создать HTTP-клиент
+		ptr<HttpClient> httpClient = NEW(HttpClient(request.str(), outputStream));
 		// выполнить подключение
-		eventLoop->Connect(host, port, EventLoop::ConnectHandler::Create(NEW(HttpClient(request.str(), outputStream)), &HttpClient::OnConnect));
+		eventLoop->Connect(host, port, EventLoop::ConnectHandler::CreateDelegate(httpClient, &HttpClient::OnConnect));
 	}
 	catch(Exception* exception)
 	{

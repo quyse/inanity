@@ -1,22 +1,23 @@
-#ifndef ___INANITY_EVENT_LOOP_HPP___
-#define ___INANITY_EVENT_LOOP_HPP___
+#ifndef ___INANITY_NET_EVENT_LOOP_HPP___
+#define ___INANITY_NET_EVENT_LOOP_HPP___
 
-#include "Object.hpp"
-#include "Handler.hpp"
-#include "ServerSocket.hpp"
-#include "String.hpp"
+#include "net.hpp"
 #include "uv.hpp"
-
-/*
- * Файл содержит класс цикла обработки асинхронных событий,
- * основанного на библиотеке libuv.
- */
+#include "ServerSocket.hpp"
+#include "../Handler.hpp"
+#include "../String.hpp"
 
 BEGIN_INANITY
 
 class Exception;
+
+END_INANITY
+
+BEGIN_INANITY_NET
+
 class ClientSocket;
 
+/// Класс цикла обработки асинхронных сообщений для библиотеки libuv.
 class EventLoop : public Object
 {
 	friend class ServerSocket;
@@ -51,13 +52,13 @@ public:
 	ptr<Exception> GetLastError();
 
 	/// Открыть серверный сокет для приёма входящих соединений.
-	ptr<ServerSocket> Listen(int port, ptr<ServerSocket::Handler> handler);
+	ptr<ServerSocket> Listen(int port, ptr<ServerSocket::SocketHandler> handler);
 	/// Подключиться к серверу.
 	void Connect(const String& host, int port, ptr<ConnectHandler> handler);
 
 	void Run();
 };
 
-END_INANITY
+END_INANITY_NET
 
 #endif

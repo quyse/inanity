@@ -1,10 +1,10 @@
-#ifndef ___INANITY_SERVER_SOCKET_HPP___
-#define ___INANITY_SERVER_SOCKET_HPP___
+#ifndef ___INANITY_NET_SERVER_SOCKET_HPP___
+#define ___INANITY_NET_SERVER_SOCKET_HPP___
 
 #include "Socket.hpp"
-#include "Handler.hpp"
+#include "../Handler.hpp"
 
-BEGIN_INANITY
+BEGIN_INANITY_NET
 
 class EventLoop;
 class ClientSocket;
@@ -22,6 +22,6 @@ public:
 	ServerSocket(ptr<EventLoop> eventLoop, uv_tcp_t* stream, ptr<SocketHandler> handler);
 };
 
-END_INANITY
+END_INANITY_NET
 
 #endif

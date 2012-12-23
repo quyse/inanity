@@ -1,12 +1,12 @@
-#ifndef ___INANITY_HTTP_CLIENT_HPP___
-#define ___INANITY_HTTP_CLIENT_HPP___
+#ifndef ___INANITY_NET_HTTP_CLIENT_HPP___
+#define ___INANITY_NET_HTTP_CLIENT_HPP___
 
-#include "Object.hpp"
-#include "OutputStream.hpp"
+#include "net.hpp"
 #include "EventLoop.hpp"
-#include "String.hpp"
+#include "../OutputStream.hpp"
+#include "../String.hpp"
 
-BEGIN_INANITY
+BEGIN_INANITY_NET
 
 /// Класс HTTP-клиента.
 class HttpClient : public Object
@@ -23,6 +23,6 @@ public:
 	static void Fetch(ptr<EventLoop> eventLoop, const String& url, ptr<OutputStream> outputStream);
 };
 
-END_INANITY
+END_INANITY_NET
 
 #endif

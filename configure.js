@@ -56,11 +56,11 @@ var libraries = {
 	'libinanity-net': {
 		objects: [
 		// базовая часть
-		'EventLoop',
+		'net.EventLoop',
 		// сокеты
-		'Socket', 'ClientSocket', 'ServerSocket',
+		'net.Socket', 'net.ClientSocket', 'net.ServerSocket',
 		// HTTP
-		'HttpClient', 'HttpResponseStream', 'http_parser']
+		'net.HttpClient', 'net.HttpResponseStream', 'net.http_parser']
 	},
 	// ******* скрипты на lua
 	'libinanity-lua': {

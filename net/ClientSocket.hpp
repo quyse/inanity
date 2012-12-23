@@ -1,12 +1,16 @@
-#ifndef ___INANITY_CLIENT_SOCKET_HPP___
-#define ___INANITY_CLIENT_SOCKET_HPP___
+#ifndef ___INANITY_NET_CLIENT_SOCKET_HPP___
+#define ___INANITY_NET_CLIENT_SOCKET_HPP___
 
 #include "Socket.hpp"
-#include "OutputStream.hpp"
+#include "../OutputStream.hpp"
 
 BEGIN_INANITY
 
 class Exception;
+
+END_INANITY
+
+BEGIN_INANITY_NET
 
 /// Класс клиентского сокета.
 /** Олицетворяет собственно сокет на соединении. */
@@ -32,7 +36,7 @@ private:
 
 		static void WriteCallback(uv_write_t* req, int status);
 
-		void WriteFile(ptr<File> file);
+		void WriteAsync(ptr<File> file);
 		/// Закрыть сокет после завершения всех операций записи.
 		void Flush();
 	};
@@ -52,6 +56,6 @@ public:
 	ptr<Exception> GetError() const;
 };
 
-END_INANITY
+END_INANITY_NET
 
 #endif
