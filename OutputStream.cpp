@@ -1,7 +1,6 @@
 #include "OutputStream.hpp"
 #include "InputStream.hpp"
 #include "MemoryFile.hpp"
-#include "Future.hpp"
 #include "scripting_impl.hpp"
 #include <string.h>
 
@@ -9,19 +8,14 @@ SCRIPTABLE_MAP_BEGIN(OutputStream, Inanity.OutputStream);
 	SCRIPTABLE_METHOD(OutputStream, Flush);
 SCRIPTABLE_MAP_END();
 
-ptr<Future<int> > OutputStream::WriteAsync(ptr<File> file)
+void OutputStream::Write(const void* data, size_t size)
 {
-	ptr<Future<int> > future = NEW(Future<int>());
-	try
-	{
-		Write(file->GetData(), file->GetSize());
-		future->Result(0);
-	}
-	catch(Exception* exception)
-	{
-		future->Error(exception);
-	}
-	return future;
+	WriteFile(MemoryFile::CreateViaCopy(data, size));
+}
+
+void OutputStream::WriteFile(ptr<File> file)
+{
+	Write(file->GetData(), file->GetSize());
 }
 
 void OutputStream::Flush()
