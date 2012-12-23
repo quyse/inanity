@@ -17,32 +17,9 @@ private:
 	Method method;
 
 public:
-	Delegate(ptr<Class> object, Method method) : object(object), method(method) {}
+	Delegate(ptr<Class> object, Method method);
 
-	void OnEvent(T data)
-	{
-		(object->*method)(data);
-	}
-};
-
-/// Класс делегата без параметра.
-template <typename T>
-class VoidDelegate : public VoidHandler
-{
-public:
-	typedef void (Class::*Method)();
-
-private:
-	ptr<Class> object;
-	Method method;
-
-public:
-	Delegate(ptr<Class> object, Method method) : object(object), method(method) {}
-
-	void OnEvent()
-	{
-		(object->*method)();
-	}
+	void OnEvent(T data);
 };
 
 END_INANITY

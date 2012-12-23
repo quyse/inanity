@@ -1,9 +1,12 @@
-#ifndef ___INANITY_EVENT_HANDLER_HPP___
-#define ___INANITY_EVENT_HANDLER_HPP___
+#ifndef ___INANITY_HANDLER_HPP___
+#define ___INANITY_HANDLER_HPP___
 
 #include "Object.hpp"
 
 BEGIN_INANITY
+
+template <typename T, typename Class>
+class Delegate;
 
 /// Абстрактный класс обработчика.
 class VoidHandler : public Object
@@ -32,6 +35,12 @@ public:
 	void Fire(T data)
 	{
 		OnEvent(data);
+	}
+
+	template <typename Class>
+	static ptr<Handler> CreateDelegate(ptr<Class> object, void (Class::*method)(T data))
+	{
+		return NEW(Delegate<T, Class>(object, method));
 	}
 };
 
