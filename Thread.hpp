@@ -1,7 +1,7 @@
 #ifndef ___INANITY_THREAD_HPP___
 #define ___INANITY_THREAD_HPP___
 
-#include "EventHandler.hpp"
+#include "Handler.hpp"
 #ifdef ___INANITY_WINDOWS
 #include "Handle.hpp"
 #include "windows.hpp"
@@ -16,10 +16,10 @@ BEGIN_INANITY
 class Thread : public Object
 {
 public:
-	typedef EventHandler<ptr<Thread> > Handler;
+	typedef Handler<ptr<Thread> > ThreadHandler;
 
 private:
-	ptr<Handler> handler;
+	ptr<ThreadHandler> handler;
 
 #ifdef ___INANITY_WINDOWS
 
@@ -40,7 +40,7 @@ private:
 	void Run();
 
 public:
-	Thread(ptr<Handler> handler);
+	Thread(ptr<ThreadHandler> handler);
 
 	void WaitEnd();
 };

@@ -6,9 +6,11 @@ exports.configureCompiler = function(objectFile, compiler) {
 	// если оканчивается на .c - это .c-файл, иначе .cpp
 	var source = a[2];
 	var b = /^(.*)\.c$/.exec(source);
-	if(b)
+	if(b) {
 		// .c-файл
 		source = b[1].replace(/\./g, '/') + '.c';
+		compiler.cppMode = false;
+	}
 	else
 		// .cpp-файл
 		source = source.replace(/\./g, '/') + '.cpp';
@@ -31,8 +33,10 @@ var libraries = {
 		'Profiling',
 		// синхронизация и потоки выполнения
 		'Thread', 'CriticalSection', 'CriticalCode', 'Semaphore',
+		// очереди и обработчики
+		'HandlerQueue',
 		// общее: файлы и потоки
-		'File', 'EmptyFile', 'PartFile', 'MemoryFile', 'OutputStream', 'FileInputStream', 'StreamReader', 'StreamWriter', 'BufferedInputStream', 'BufferedOutputStream', 'MemoryStream',
+		'File', 'EmptyFile', 'PartFile', 'MemoryFile', 'InputStream', 'OutputStream', 'FileInputStream', 'StreamReader', 'StreamWriter', 'BufferedInputStream', 'BufferedOutputStream', 'MemoryStream',
 		// преобразующие потоки
 		'Base64OutputStream', 'Out2InStream',
 		// файловые системы
@@ -60,7 +64,7 @@ var libraries = {
 	},
 	// ******* скрипты на lua
 	'libinanity-lua': {
-		objects: ['LuaState']
+		objects: ['lua.stuff', 'lua.reflection', 'lua.State', 'lua.Script']
 	},
 	// ******* криптография
 	'libinanity-crypto': {
@@ -132,6 +136,12 @@ var executables = {
 		staticLibraries: ['libinanity-base', 'libinanity-dx'],
 		dynamicLibraries: []
 	}
+	// TEST
+	, luatest: {
+		objects: ['lua.test'],
+		staticLibraries: ['libinanity-base', 'libinanity-compress', 'libinanity-lua', 'deps/lua//liblua'],
+		dynamicLibraries: []
+	}
 };
 
 exports.configureComposer = function(libraryFile, composer) {
@@ -152,8 +162,15 @@ exports.configureLinker = function(executableFile, linker) {
 	var executable = executables[a[3]];
 	for ( var i = 0; i < executable.objects.length; ++i)
 		linker.addObjectFile(confDir + executable.objects[i]);
-	for ( var i = 0; i < executable.staticLibraries.length; ++i)
-		linker.addStaticLibrary(confDir + executable.staticLibraries[i]);
+	for ( var i = 0; i < executable.staticLibraries.length; ++i) {
+		var staticLibrary = executable.staticLibraries[i];
+		var confPos = staticLibrary.indexOf('//');
+		if(confPos >= 0)
+			staticLibrary = staticLibrary.replace('//', '/' + confDir);
+		else
+			staticLibrary = confDir + staticLibrary;
+		linker.addStaticLibrary(staticLibrary);
+	}
 	for ( var i = 0; i < executable.dynamicLibraries.length; ++i)
 		linker.addDynamicLibrary(executable.dynamicLibraries[i]);
 };

@@ -1,7 +1,18 @@
 #include "FileSystem.hpp"
 #include "File.hpp"
 #include "FileInputStream.hpp"
+#include "OutputStream.hpp"
+#include "Future.hpp"
 #include "Exception.hpp"
+#include "scripting_impl.hpp"
+
+SCRIPTABLE_MAP_BEGIN(FileSystem, Inanity.FileSystem);
+	SCRIPTABLE_METHOD(FileSystem, LoadFile);
+	SCRIPTABLE_METHOD(FileSystem, TryLoadFile);
+	SCRIPTABLE_METHOD(FileSystem, LoadFileAsStream);
+	SCRIPTABLE_METHOD(FileSystem, SaveFile);
+	SCRIPTABLE_METHOD(FileSystem, SaveFileAsStream);
+SCRIPTABLE_MAP_END();
 
 ptr<File> FileSystem::LoadFile(const String& fileName)
 {
@@ -9,6 +20,20 @@ ptr<File> FileSystem::LoadFile(const String& fileName)
 	if(file)
 		return file;
 	THROW_PRIMARY_EXCEPTION("Can't load file " + fileName);
+}
+
+ptr<Future<ptr<File> > > FileSystem::LoadFileAsync(const String& fileName)
+{
+	ptr<Future<ptr<File> > > future = NEW(Future<ptr<File> >());
+	try
+	{
+		future->Result(LoadFile(fileName));
+	}
+	catch(Exception* exception)
+	{
+		future->Error(exception);
+	}
+	return future;
 }
 
 ptr<File> FileSystem::TryLoadFile(const String& fileName)
@@ -39,6 +64,21 @@ ptr<InputStream> FileSystem::LoadFileAsStream(const String& fileName)
 void FileSystem::SaveFile(ptr<File> file, const String& fileName)
 {
 	THROW_PRIMARY_EXCEPTION("Saving files in this filesystem is not supported");
+}
+
+ptr<Future<int> > FileSystem::SaveFileAsync(ptr<File> file, const String& fileName)
+{
+	ptr<Future<int> > future = NEW(Future<int>());
+	try
+	{
+		SaveFile(file, fileName);
+		future->Result(0);
+	}
+	catch(Exception* exception)
+	{
+		future->Error(exception);
+	}
+	return future;
 }
 
 ptr<OutputStream> FileSystem::SaveFileAsStream(const String& fileName)
@@ -77,24 +117,3 @@ void FileSystem::GetAllDirectoryEntries(const String& directoryName, std::vector
 			GetAllDirectoryEntries(String(entry), entries);
 	}
 }
-
-#ifdef ___INANITY_SCRIPTING
-
-void FileSystem::Script_loadFile(ScriptCall& call)
-{
-	call.EnsureArgumentsCount(1);
-	call.Return(LoadFile(call.GetString(1)));
-}
-
-void FileSystem::Script_saveFile(ScriptCall& call)
-{
-	call.EnsureArgumentsCount(2);
-	SaveFile(call.GetPointer<File>(1), call.GetString(2));
-}
-
-SCRIPTABLE_MAP_BEGIN(FileSystem);
-	SCRIPTABLE_METHOD(FileSystem, loadFile);
-	SCRIPTABLE_METHOD(FileSystem, saveFile);
-SCRIPTABLE_MAP_END();
-
-#endif

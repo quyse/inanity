@@ -1,7 +1,13 @@
 #include "Strings.hpp"
 #include "MemoryFile.hpp"
+#include "scripting_impl.hpp"
 #include "utf8.h"
 #include <cstring>
+
+SCRIPTABLE_MAP_BEGIN(Strings, Inanity.Strings);
+	SCRIPTABLE_METHOD(Strings, String2File);
+	SCRIPTABLE_METHOD(Strings, File2String);
+SCRIPTABLE_MAP_END();
 
 std::string Strings::Unicode2UTF8(const std::wstring& str)
 {

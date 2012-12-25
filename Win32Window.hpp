@@ -3,7 +3,7 @@
 
 #include "Window.hpp"
 #include "../String.hpp"
-#include "../EventHandler.hpp"
+#include "../Handler.hpp"
 
 #ifdef ___INANITY_WINDOWS
 
@@ -15,7 +15,7 @@ class Win32Window : public Window
 {
 public:
 	/// Тип обработчика активного окна.
-	typedef EventHandler<int> ActiveHandler;
+	typedef Handler<int> ActiveHandler;
 
 private:
 	//дескриптор окна

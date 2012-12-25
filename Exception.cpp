@@ -1,13 +1,20 @@
 #include "Exception.hpp"
 #include "Strings.hpp"
+
 #ifdef ___INANITY_WINDOWS
 #include "windows.hpp"
 #endif // ___INANITY_WINDOWS
+
 #ifdef ___INANITY_LINUX
 #include <errno.h>
 // для strerror
 #include <cstring>
 #endif // ___INANITY_LINUX
+
+#include "scripting_impl.hpp"
+
+SCRIPTABLE_MAP_BEGIN(Exception, Inanity.Exception);
+SCRIPTABLE_MAP_END();
 
 Exception::Exception(const String& message) : message(message)
 {

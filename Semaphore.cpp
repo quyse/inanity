@@ -38,6 +38,28 @@ void Semaphore::Acquire()
 		THROW_SECONDARY_EXCEPTION("Can't acquire semaphore", Exception::SystemError());
 }
 
+bool Semaphore::TryAcquire()
+{
+#ifdef ___INANITY_WINDOWS
+	switch(WaitForSingleObject(handle, 0))
+	{
+	case WAIT_OBJECT_0:
+		return true;
+	case WAIT_TIMEOUT:
+		return false;
+	}
+#endif
+
+#ifdef ___INANITY_LINUX
+	if(sem_trywait(&sem) == 0)
+		return true;
+	if(errno == EAGAIN)
+		return false;
+#endif
+
+	THROW_SECONDARY_EXCEPTION("Error trying acquire semaphore", Exception::SystemError());
+}
+
 void Semaphore::Release(int count)
 {
 #ifdef ___INANITY_WINDOWS

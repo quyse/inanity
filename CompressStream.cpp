@@ -2,10 +2,16 @@
 #include "MemoryFile.hpp"
 #include "MemoryStream.hpp"
 #include "Exception.hpp"
+#include "scripting_impl.hpp"
 #include <memory.h>
 
+SCRIPTABLE_MAP_BEGIN(CompressStream, Inanity.CompressStream);
+	SCRIPTABLE_PARENT(OutputStream);
+	SCRIPTABLE_METHOD(CompressStream, CreateMax);
+SCRIPTABLE_MAP_END();
+
 CompressStream::CompressStream(ptr<OutputStream> outputStream, CompressionLevel compressionLevel)
-: outputStream(outputStream), inputFile(NEW(MemoryFile(inputBufferSize))), finalized(false)
+: inputFile(NEW(MemoryFile(inputBufferSize))), outputStream(outputStream), finalized(false)
 {
 	try
 	{
@@ -193,4 +199,9 @@ ptr<File> CompressStream::CompressFile(ptr<File> file, CompressionLevel compress
 	{
 		THROW_SECONDARY_EXCEPTION("Can't decompress to file", exception);
 	}
+}
+
+ptr<CompressStream> CompressStream::CreateMax(ptr<OutputStream> outputStream)
+{
+	return NEW(CompressStream(outputStream, compressionMax));
 }

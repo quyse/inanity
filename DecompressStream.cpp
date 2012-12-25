@@ -3,10 +3,17 @@
 #include "FileInputStream.hpp"
 #include "MemoryStream.hpp"
 #include "Exception.hpp"
+#include "scripting_impl.hpp"
 #include <memory.h>
 
+SCRIPTABLE_MAP_BEGIN(DecompressStream, Inanity.DecompressStream);
+	SCRIPTABLE_PARENT(InputStream);
+	SCRIPTABLE_CONSTRUCTOR(DecompressStream, ptr<InputStream>);
+	SCRIPTABLE_METHOD(DecompressStream, DecompressFile);
+SCRIPTABLE_MAP_END();
+
 DecompressStream::DecompressStream(ptr<InputStream> inputStream)
-: inputStream(inputStream), inputFile(NEW(MemoryFile(inputBufferSize))), finished(false)
+: inputFile(NEW(MemoryFile(inputBufferSize))), inputStream(inputStream), finished(false)
 {
 	try
 	{
