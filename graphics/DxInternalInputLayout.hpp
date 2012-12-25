@@ -14,7 +14,7 @@ private:
 	ComPointer<ID3D11InputLayout> inputLayout;
 
 public:
-	DxInternalInputLayout(ID3D11InputLayout* inputLayout);
+	DxInternalInputLayout(ComPointer<ID3D11InputLayout> inputLayout);
 
 	ID3D11InputLayout* GetInputLayoutInterface() const;
 };

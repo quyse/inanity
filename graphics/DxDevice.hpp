@@ -19,13 +19,19 @@ class DxDevice : public Device
 private:
 	/// Графическая система.
 	ptr<DxSystem> system;
+	/// 3D-адаптер.
+	ComPointer<IDXGIAdapter> adapter;
 	/// 3D-устройство.
 	ComPointer<ID3D11Device> device;
 	/// Основной графический контекст.
 	ptr<DxContext> context;
 
+	/// Получить ближайший поддерживаемый режим экрана.
+	/** Получается для output по умолчанию (нулевого). */
+	DXGI_MODE_DESC GetClosestSupportedMode(const DXGI_MODE_DESC& desc) const;
+
 public:
-	DxDevice(ptr<DxSystem> system, ComPointer<ID3D11Device> device, ptr<DxContext> context);
+	DxDevice(ptr<DxSystem> system, ComPointer<IDXGIAdapter> adapter, ComPointer<ID3D11Device> device, ptr<DxContext> context);
 
 	// методы Device
 	ptr<System> GetSystem() const;
@@ -35,7 +41,7 @@ public:
 	ptr<VertexShader> CreateVertexShader(ptr<File> file);
 	ptr<PixelShader> CreatePixelShader(ptr<File> file);
 	ptr<UniformBuffer> CreateUniformBuffer(size_t size);
-	ptr<VertexBuffer> CreateVertexBuffer(ptr<File> file, size_t vertexStride);
+	ptr<VertexBuffer> CreateVertexBuffer(ptr<File> file, ptr<Layout> layout);
 	ptr<IndexBuffer> CreateIndexBuffer(ptr<File> file, size_t indexSize);
 	ptr<Texture> CreateStaticTexture(ptr<File> file);
 

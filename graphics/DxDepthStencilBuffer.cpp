@@ -1,7 +1,7 @@
 #include "DxDepthStencilBuffer.hpp"
 #include "DxTexture.hpp"
 
-DxDepthStencilBuffer::DxDepthStencilBuffer(ID3D11DepthStencilView* depthStencilView, ptr<DxTexture> texture)
+DxDepthStencilBuffer::DxDepthStencilBuffer(ComPointer<ID3D11DepthStencilView> depthStencilView, ptr<DxTexture> texture)
 : depthStencilView(depthStencilView), texture(texture)
 {
 }

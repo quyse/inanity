@@ -29,14 +29,14 @@ private:
 	/// Текущий режим экрана.
 	PresentMode currentMode;
 
-	/// Получить структуру режима экрана DXGI.
-	static DXGI_MODE_DESC GetModeDesc(const PresentMode& mode);
 	/// Привести указанный режим экрана к самому похожему, но поддерживаемому.
 	DXGI_MODE_DESC GetClosestSupportedMode(const DXGI_MODE_DESC& mode) const;
 
 public:
 	/// Создать presenter.
-	DxPresenter(ptr<DxDevice> device, ptr<Win32Output> output, const PresentMode& mode);
+	DxPresenter(ptr<DxDevice> device, ptr<Win32Output> output, ComPointer<IDXGISwapChain> swapChain);
+	/// Уничтожить presenter.
+	~DxPresenter();
 
 	// методы Presenter
 	ptr<Device> GetDevice();

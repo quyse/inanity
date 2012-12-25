@@ -28,7 +28,7 @@ private:
 	void Update();
 
 public:
-	DxContext(ID3D11Device* device, ID3D11DeviceContext* deviceContext);
+	DxContext(ComPointer<ID3D11Device> device, ComPointer<ID3D11DeviceContext> deviceContext);
 
 	/// Создать входную разметку.
 	ptr<DxInternalInputLayout> CreateInternalInputLayout(Layout* vertexLayout, DxVertexShader* vertexShader);

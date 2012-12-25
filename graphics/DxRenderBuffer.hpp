@@ -17,7 +17,7 @@ private:
 	ptr<DxTexture> texture;
 
 public:
-	DxRenderBuffer(ID3D11RenderTargetView* renderTargetView, ptr<DxTexture> texture = 0);
+	DxRenderBuffer(ComPointer<ID3D11RenderTargetView> renderTargetView, ptr<DxTexture> texture = 0);
 
 	// методы RenderBuffer
 	ptr<Texture> GetTexture();

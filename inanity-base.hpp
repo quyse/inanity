@@ -40,5 +40,7 @@
 #include "TempFileSystem.hpp"
 #include "ResourceManager.hpp"
 #include "ResourceLoader.hpp"
+#include "Handler.hpp"
+#include "Delegate.ipp"
 
 #endif

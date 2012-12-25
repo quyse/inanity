@@ -14,7 +14,7 @@ private:
 	ComPointer<ID3D11ShaderResourceView> shaderResourceView;
 
 public:
-	DxTexture(ID3D11ShaderResourceView* shaderResourceView);
+	DxTexture(ComPointer<ID3D11ShaderResourceView> shaderResourceView);
 
 	ID3D11ShaderResourceView* GetShaderResourceViewInterface();
 };

@@ -1,7 +1,7 @@
 #include "DxVertexBuffer.hpp"
 #include "Layout.hpp"
 
-DxVertexBuffer::DxVertexBuffer(ID3D11Buffer* buffer, int verticesCount, ptr<Layout> layout)
+DxVertexBuffer::DxVertexBuffer(ComPointer<ID3D11Buffer> buffer, int verticesCount, ptr<Layout> layout)
 : VertexBuffer(verticesCount, layout), buffer(buffer) {}
 
 ID3D11Buffer* DxVertexBuffer::GetBufferInterface() const

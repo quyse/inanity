@@ -13,7 +13,7 @@ private:
 	ComPointer<ID3D11PixelShader> pixelShader;
 
 public:
-	DxPixelShader(ID3D11PixelShader* pixelShader);
+	DxPixelShader(ComPointer<ID3D11PixelShader> pixelShader);
 
 	ID3D11PixelShader* GetPixelShaderInterface() const;
 };

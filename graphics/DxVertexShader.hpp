@@ -20,7 +20,7 @@ private:
 	ComPointer<ID3D11VertexShader> vertexShader;
 
 public:
-	DxVertexShader(ptr<File> code, ID3D11VertexShader* vertexShader);
+	DxVertexShader(ptr<File> code, ComPointer<ID3D11VertexShader> vertexShader);
 
 	ptr<Layout> GetAttributesLayout();
 

@@ -4,18 +4,11 @@
 #include "Window.hpp"
 #include "String.hpp"
 #include "Handler.hpp"
-#include "graphics/graphics.hpp"
 #include "input/input.hpp"
 
 #ifdef ___INANITY_WINDOWS
 
 #include "windows.hpp"
-
-BEGIN_INANITY_GRAPHICS
-
-class System;
-
-END_INANITY_GRAPHICS
 
 BEGIN_INANITY_INPUT
 
@@ -63,13 +56,16 @@ public:
 	static ptr<Win32Window> CreateForOpenGL();
 
 	//получить окно
-	HWND GetWindowHandle() const;
+	HWND GetHWND() const;
 	//получить активность окна
 	bool IsActive() const;
 
 	/// Закрыть окно.
 	/** Также прекращает оконный цикл. */
 	void Close();
+
+	/// Установить менеджер ввода.
+	void SetInputManager(ptr<Input::Manager> inputManager);
 
 	/// Запустить оконный цикл.
 	void Run(ptr<ActiveHandler> activeHandler);

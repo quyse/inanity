@@ -6,54 +6,15 @@
 #include "Win32Output.hpp"
 #include "../Exception.hpp"
 
-DxPresenter::DxPresenter(ptr<DxDevice> device, ptr<Win32Output> output, const PresentMode& mode)
-: device(device), output(output)
+DxPresenter::DxPresenter(ptr<DxDevice> device, ptr<Win32Output> output, ComPointer<IDXGISwapChain> swapChain)
+: device(device), output(output), swapChain(swapChain)
 {
 	try
 	{
-		// сформировать структуру настроек swap chain
-		DXGI_SWAP_CHAIN_DESC desc;
-
-		// подзадача - сформировать структуру режима экрана
-		DXGI_MODE_DESC& modeDesc = desc.BufferDesc;
-		modeDesc = GetModeDesc(mode);
-		// если режим - полноэкранный, необходимо его скорректировать,
-		// то есть привести к поддерживаемому
-		if(mode.fullscreen)
-			modeDesc = GetClosestSupportedMode(modeDesc);
-
-		// мультисемплинга пока нет
-		desc.SampleDesc.Count = 1;
-		desc.SampleDesc.Quality = 0;
-		desc.BufferUsage = DXGI_USAGE_BACK_BUFFER | DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		desc.BufferCount = 2;
-		desc.OutputWindow = output->GetWindowHandle();
-		// согласно рекомендации SDK, даже в случае полного экрана, лучше
-		// создавать в оконном режиме, а потом переключать
-		desc.Windowed = TRUE;
-		desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-		desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-
-		// создать swap chain
-		IDXGISwapChain* swapChainInterface;
-		if(FAILED(device->GetSystem().StaticCast<DxSystem>()->GetDXGIFactory()->CreateSwapChain(device->GetDeviceInterface(), &desc, &swapChainInterface)))
-			THROW_PRIMARY_EXCEPTION("Can't create swap chain");
-
-		swapChain = swapChainInterface;
-
-		/* Есть некая странная процедура отсюда:
-		http://msdn.microsoft.com/en-us/library/ee417025(v=VS.85).aspx#Full_Screen_Issues,
-		но она не работает в полноэкранном режиме. Поэтому сделано так.
-		*/
 		// текущий режим поставим неправильный, чтобы потом он переключился
 		currentMode.width = 1;
 		currentMode.height = 1;
-		currentMode.fullscreen = true;
-		currentMode.pixelFormat = mode.pixelFormat;
-		// переключить режим на тот, который нужен
-		SetMode(mode);
-
-		// всё
+		currentMode.fullscreen = false;
 	}
 	catch(Exception* exception)
 	{
@@ -61,17 +22,11 @@ DxPresenter::DxPresenter(ptr<DxDevice> device, ptr<Win32Output> output, const Pr
 	}
 }
 
-DXGI_MODE_DESC DxPresenter::GetModeDesc(const PresentMode& mode)
+DxPresenter::~DxPresenter()
 {
-	DXGI_MODE_DESC modeDesc;
-	modeDesc.Width = (UINT)mode.width;
-	modeDesc.Height = (UINT)mode.height;
-	modeDesc.Format = DxSystem::GetDXGIFormat(mode.pixelFormat);
-	modeDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-	modeDesc.RefreshRate.Numerator = 0;
-	modeDesc.RefreshRate.Denominator = 0;
-	modeDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-	return modeDesc;
+	// перед уничтожением swap chain, необходимо выключить полноэкранность
+	if(currentMode.fullscreen)
+		swapChain->SetFullscreenState(FALSE, NULL);
 }
 
 DXGI_MODE_DESC DxPresenter::GetClosestSupportedMode(const DXGI_MODE_DESC& mode) const
@@ -129,7 +84,7 @@ void DxPresenter::SetMode(const PresentMode& mode)
 
 		// если режим изменился, изменить его
 		if(currentMode.width != mode.width || currentMode.height != mode.height)
-			if(FAILED(swapChain->ResizeTarget(&GetModeDesc(mode))))
+			if(FAILED(swapChain->ResizeTarget(&DxSystem::GetModeDesc(mode))))
 				THROW_PRIMARY_EXCEPTION("Can't resize target");
 		//если полноэкранность изменилась, изменить её
 		if(currentMode.fullscreen != mode.fullscreen)

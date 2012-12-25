@@ -6,7 +6,7 @@
 чтобы его вставлять вместо конкретных d3dx10.h, d3dx10_1.h или d3dx11.h.
 */
 
-#include "../../windows.hpp"
+#include "../windows.hpp"
 #include <d3dx11.h>
 #include <d3dx10.h>
 

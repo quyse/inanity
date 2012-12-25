@@ -3,6 +3,7 @@
 
 #include "System.hpp"
 #include "PixelFormat.hpp"
+#include "PresentMode.hpp"
 #include "d3d.hpp"
 #include "../ComPointer.hpp"
 
@@ -18,6 +19,8 @@ private:
 public:
 	/// Преобразовать формат пикселей из общего перечисления в DXGI.
 	static DXGI_FORMAT GetDXGIFormat(PixelFormat format);
+	/// Преобразовать режим экрана в структуру для DXGI.
+	static DXGI_MODE_DESC DxSystem::GetModeDesc(const PresentMode& mode);
 
 	// методы System
 	ptr<Window> CreateDefaultWindow();

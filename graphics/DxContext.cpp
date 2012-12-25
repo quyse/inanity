@@ -15,7 +15,7 @@
 #include "../File.hpp"
 #include "../Exception.hpp"
 
-DxContext::DxContext(ID3D11Device* device, ID3D11DeviceContext* deviceContext)
+DxContext::DxContext(ComPointer<ID3D11Device> device, ComPointer<ID3D11DeviceContext> deviceContext)
 : device(device), deviceContext(deviceContext)
 {
 	// создать кэш входных разметок
@@ -334,6 +334,34 @@ void DxContext::Update()
 
 		boundState.pixelShader = targetState.pixelShader;
 	}
+}
+
+void DxContext::ClearRenderBuffer(RenderBuffer* renderBuffer, const float* color)
+{
+	deviceContext->ClearRenderTargetView(
+		fast_cast<DxRenderBuffer*>(renderBuffer)->GetRenderTargetViewInterface(),
+		color);
+}
+
+void DxContext::ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, float depth)
+{
+	deviceContext->ClearDepthStencilView(
+		fast_cast<DxDepthStencilBuffer*>(depthStencilBuffer)->GetDepthStencilViewInterface(),
+		D3D11_CLEAR_DEPTH, depth, 0);
+}
+
+void DxContext::ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, unsigned stencil)
+{
+	deviceContext->ClearDepthStencilView(
+		fast_cast<DxDepthStencilBuffer*>(depthStencilBuffer)->GetDepthStencilViewInterface(),
+		D3D11_CLEAR_STENCIL, 0, stencil);
+}
+
+void DxContext::ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, float depth, unsigned stencil)
+{
+	deviceContext->ClearDepthStencilView(
+		fast_cast<DxDepthStencilBuffer*>(depthStencilBuffer)->GetDepthStencilViewInterface(),
+		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, stencil);
 }
 
 void DxContext::SetUniformBufferData(UniformBuffer* abstractUniformBuffer, const void* data, size_t size)

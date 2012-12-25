@@ -1,6 +1,6 @@
 #include "DxUniformBuffer.hpp"
 
-DxUniformBuffer::DxUniformBuffer(ID3D11Buffer* buffer, size_t size)
+DxUniformBuffer::DxUniformBuffer(ComPointer<ID3D11Buffer> buffer, size_t size)
 : UniformBuffer(size), buffer(buffer)
 {
 }

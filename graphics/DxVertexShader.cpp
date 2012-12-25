@@ -2,7 +2,7 @@
 #include "Layout.hpp"
 #include "../File.hpp"
 
-DxVertexShader::DxVertexShader(ptr<File> code, ID3D11VertexShader* vertexShader)
+DxVertexShader::DxVertexShader(ptr<File> code, ComPointer<ID3D11VertexShader> vertexShader)
 : code(code), vertexShader(vertexShader)
 {
 }

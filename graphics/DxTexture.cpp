@@ -1,6 +1,6 @@
 #include "DxTexture.hpp"
 
-DxTexture::DxTexture(ID3D11ShaderResourceView* shaderResourceView)
+DxTexture::DxTexture(ComPointer<ID3D11ShaderResourceView> shaderResourceView)
 : shaderResourceView(shaderResourceView)
 {
 }

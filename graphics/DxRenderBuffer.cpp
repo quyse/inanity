@@ -1,7 +1,7 @@
 #include "DxRenderBuffer.hpp"
 #include "DxTexture.hpp"
 
-DxRenderBuffer::DxRenderBuffer(ID3D11RenderTargetView* renderTargetView, ptr<DxTexture> texture)
+DxRenderBuffer::DxRenderBuffer(ComPointer<ID3D11RenderTargetView> renderTargetView, ptr<DxTexture> texture)
 : renderTargetView(renderTargetView), texture(texture)
 {
 }

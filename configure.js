@@ -76,13 +76,14 @@ var libraries = {
 	},
 	// ******* подсистема окон
 	'libinanity-win32window': {
-		objects: ['Win32Window']
+		objects: ['Win32Window', 'graphics.Win32Output']
 	},
 	// ******* общая графика
 	'libinanity-graphics': {
 		objects: [
 			'graphics.Context', 'graphics.ContextState',
-			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.Layout', 'graphics.LayoutBinding', 'graphics.IndexBuffer']
+			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.Layout', 'graphics.LayoutBinding', 'graphics.IndexBuffer',
+			'graphics.Sampler']
 	},
 	// ******* подсистема DirectX 11
 	'libinanity-dx': {
@@ -91,7 +92,8 @@ var libraries = {
 			'graphics.DxInternalInputLayout', 'graphics.DxInternalInputLayoutCache',
 			'graphics.DxRenderBuffer', 'graphics.DxDepthStencilBuffer', 'graphics.DxTexture', 'graphics.DxUniformBuffer',
 			'graphics.DxVertexBuffer', 'graphics.DxIndexBuffer',
-			'graphics.DxVertexShader', 'graphics.DxPixelShader'
+			'graphics.DxVertexShader', 'graphics.DxPixelShader',
+			'graphics.DxSampler'
 		]
 	},
 	// ******* подсистема OpenGl

@@ -17,7 +17,7 @@ private:
 	ptr<DxTexture> texture;
 
 public:
-	DxDepthStencilBuffer(ID3D11DepthStencilView* depthStencilView, ptr<DxTexture> texture = 0);
+	DxDepthStencilBuffer(ComPointer<ID3D11DepthStencilView> depthStencilView, ptr<DxTexture> texture = 0);
 
 	// методы DepthStencilBuffer
 	ptr<Texture> GetTexture();

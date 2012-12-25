@@ -1,5 +1,4 @@
 #include "Win32Window.hpp"
-#include "graphics/System.hpp"
 #include "input/Manager.hpp"
 #include "Strings.hpp"
 #include "Exception.hpp"
@@ -16,9 +15,9 @@ Win32Window::Win32Window(ATOM windowClass, const String& title) : active(true)
 			THROW_PRIMARY_EXCEPTION("Can't create second game window");
 
 		//создать окно
-		int primaryWidth = GetSystemMetrics(SM_CXSCREEN);
-		int primaryHeight = GetSystemMetrics(SM_CYSCREEN);
-		hWnd = CreateWindow((LPCTSTR)windowClass, Strings::UTF82Unicode(title).c_str(), WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 0, 0, 1, 1, NULL, NULL, GetModuleHandle(NULL), NULL);
+		int primaryWidth = 1;//GetSystemMetrics(SM_CXSCREEN);
+		int primaryHeight = 1;//GetSystemMetrics(SM_CYSCREEN);
+		hWnd = CreateWindow((LPCTSTR)windowClass, Strings::UTF82Unicode(title).c_str(), WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 0, 0, primaryWidth, primaryHeight, NULL, NULL, GetModuleHandle(NULL), NULL);
 		if(!hWnd)
 			THROW_PRIMARY_EXCEPTION("Can't create window");
 		ShowCursor(FALSE);
@@ -89,7 +88,7 @@ ptr<Win32Window> Win32Window::CreateForOpenGL()
 	return NEW(Win32Window(windowClass));
 }
 
-HWND Win32Window::GetWindowHandle() const
+HWND Win32Window::GetHWND() const
 {
 	return hWnd;
 }
@@ -126,10 +125,10 @@ LRESULT CALLBACK Win32Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 		return 0;
 	case WM_MOVE:
 		return 0;
-	case WM_SIZE:
+/*	case WM_SIZE:
 		if(singleWindow && singleWindow->graphicsSystem)
 			singleWindow->graphicsSystem->Resize(LOWORD(lParam), HIWORD(lParam));
-		return 0;
+		return 0;*/
 	case WM_CLOSE:
 		singleWindow->Close();
 		return 0;
@@ -139,11 +138,6 @@ LRESULT CALLBACK Win32Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 		return 0;
 	}
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
-}
-
-void Win32Window::SetGraphicsSystem(ptr<Graphics::System> graphicsSystem)
-{
-	this->graphicsSystem = graphicsSystem;
 }
 
 void Win32Window::SetInputManager(ptr<Input::Manager> inputManager)

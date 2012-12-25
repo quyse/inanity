@@ -4,6 +4,9 @@
 #include "DxInternalInputLayout.hpp"
 #include "DxContext.hpp"
 
+DxInternalInputLayoutCache::Key::Key(Layout* vertexLayout, DxVertexShader* vertexShader)
+: vertexLayout(vertexLayout), vertexShader(vertexShader) {}
+
 DxInternalInputLayoutCache::Key::operator size_t() const
 {
 	return size_t(vertexLayout) ^ size_t(vertexShader);

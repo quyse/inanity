@@ -5,7 +5,7 @@ Win32Output::Win32Output(ptr<Win32Window> window) : window(window)
 {
 }
 
-HWND Win32Output::GetWindowHandle() const
+HWND Win32Output::GetHWND() const
 {
-	return window->GetWindowHandle();
+	return window->GetHWND();
 }

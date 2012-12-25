@@ -16,7 +16,7 @@ private:
 	ComPointer<ID3D11Buffer> buffer;
 
 public:
-	DxVertexBuffer(ID3D11Buffer* buffer, int verticesCount, ptr<Layout> layout);
+	DxVertexBuffer(ComPointer<ID3D11Buffer> buffer, int verticesCount, ptr<Layout> layout);
 
 	ID3D11Buffer* GetBufferInterface() const;
 };

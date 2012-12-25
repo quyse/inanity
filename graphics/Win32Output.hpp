@@ -2,6 +2,7 @@
 #define ___INANITY_GRAPHICS_WIN32_OUTPUT_HPP___
 
 #include "Output.hpp"
+#include "../windows.hpp"
 
 BEGIN_INANITY
 
@@ -22,7 +23,7 @@ private:
 public:
 	Win32Output(ptr<Win32Window> window);
 
-	HWND GetWindowHandle() const;
+	HWND GetHWND() const;
 };
 
 END_INANITY_GRAPHICS

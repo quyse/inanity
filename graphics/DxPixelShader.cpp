@@ -1,6 +1,6 @@
 #include "DxPixelShader.hpp"
 
-DxPixelShader::DxPixelShader(ID3D11PixelShader* pixelShader)
+DxPixelShader::DxPixelShader(ComPointer<ID3D11PixelShader> pixelShader)
 : pixelShader(pixelShader)
 {
 }

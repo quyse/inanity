@@ -21,6 +21,7 @@ class RenderBuffer;
 class VertexShader;
 class PixelShader;
 class UniformBuffer;
+class Layout;
 class VertexBuffer;
 class IndexBuffer;
 class Texture;
@@ -60,7 +61,7 @@ public:
 	/// Создать константный буфер.
 	virtual ptr<UniformBuffer> CreateUniformBuffer(size_t size) = 0;
 	/// Создать вершинный буфер.
-	virtual ptr<VertexBuffer> CreateVertexBuffer(ptr<File> file, size_t vertexStride) = 0;
+	virtual ptr<VertexBuffer> CreateVertexBuffer(ptr<File> file, ptr<Layout> layout) = 0;
 	/// Создать индексный буфер.
 	/**
 	\param indexSize Размер одного индекса - 2 или 4.
