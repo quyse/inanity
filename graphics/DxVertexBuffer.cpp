@@ -1,8 +1,8 @@
 #include "DxVertexBuffer.hpp"
-#include "VertexLayout.hpp"
+#include "Layout.hpp"
 
-DxVertexBuffer::DxVertexBuffer(ID3D11Buffer* buffer, int verticesCount, ptr<VertexLayout> vertexLayout)
-: VertexBuffer(verticesCount, vertexLayout), buffer(buffer) {}
+DxVertexBuffer::DxVertexBuffer(ID3D11Buffer* buffer, int verticesCount, ptr<Layout> layout)
+: VertexBuffer(verticesCount, layout), buffer(buffer) {}
 
 ID3D11Buffer* DxVertexBuffer::GetBufferInterface() const
 {

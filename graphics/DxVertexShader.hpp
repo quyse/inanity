@@ -22,6 +22,8 @@ private:
 public:
 	DxVertexShader(ptr<File> code, ID3D11VertexShader* vertexShader);
 
+	ptr<Layout> GetAttributesLayout();
+
 	ID3D11VertexShader* GetVertexShaderInterface() const;
 
 	ptr<File> GetCode() const;

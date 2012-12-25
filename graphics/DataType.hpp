@@ -39,17 +39,17 @@ inline int GetDataTypeSize(DataType dataType)
 template <typename T>
 DataType GetDataType();
 template <>
-DataType GetDataType<float>() { return DataTypes::Float; }
+inline DataType GetDataType<float>() { return DataTypes::Float; }
 template <>
-DataType GetDataType<float2>() { return DataTypes::Float2; }
+inline DataType GetDataType<float2>() { return DataTypes::Float2; }
 template <>
-DataType GetDataType<float3>() { return DataTypes::Float3; }
+inline DataType GetDataType<float3>() { return DataTypes::Float3; }
 template <>
-DataType GetDataType<float4>() { return DataTypes::Float4; }
+inline DataType GetDataType<float4>() { return DataTypes::Float4; }
 template <>
-DataType GetDataType<float4x4>() { return DataTypes::Float4x4; }
+inline DataType GetDataType<float4x4>() { return DataTypes::Float4x4; }
 template <>
-DataType GetDataType<unsigned int>() { return DataTypes::UInt; }
+inline DataType GetDataType<unsigned int>() { return DataTypes::UInt; }
 
 END_INANITY_GRAPHICS
 

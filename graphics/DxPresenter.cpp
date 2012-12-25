@@ -145,6 +145,12 @@ void DxPresenter::SetMode(const PresentMode& mode)
 	}
 }
 
+void DxPresenter::Present()
+{
+	if(FAILED(swapChain->Present(0, 0)))
+		THROW_PRIMARY_EXCEPTION("Can't present");
+}
+
 void DxPresenter::Resize(size_t width, size_t height)
 {
 	// сбросить ссылку на вторичный буфер

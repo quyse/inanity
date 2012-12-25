@@ -70,6 +70,10 @@ var libraries = {
 	'libinanity-input': {
 		objects: ['input.Frame', 'input.Manager', 'input.Mux', 'input.Processor', 'input.RawManager']
 	},
+	// ******* подсистема окон
+	'libinanity-win32window': {
+		objects: ['Win32Window']
+	},
 	// ******* общая графика
 	'libinanity-graphics': {
 		objects: [

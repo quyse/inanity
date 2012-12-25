@@ -8,7 +8,7 @@
 #include "DxVertexShader.hpp"
 #include "DxPixelShader.hpp"
 #include "DxUniformBuffer.hpp"
-#include "VertexLayout.hpp"
+#include "Layout.hpp"
 #include "DxInternalInputLayout.hpp"
 #include "../File.hpp"
 #include "../Exception.hpp"

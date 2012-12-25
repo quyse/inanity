@@ -1,8 +1,8 @@
 #include "Win32Window.hpp"
-#include "System.hpp"
-#include "../input/Manager.hpp"
-#include "../Strings.hpp"
-#include "../Exception.hpp"
+#include "graphics/System.hpp"
+#include "input/Manager.hpp"
+#include "Strings.hpp"
+#include "Exception.hpp"
 #include "graphics/Win32Output.hpp"
 #include <windowsx.h>
 
@@ -18,7 +18,7 @@ Win32Window::Win32Window(ATOM windowClass, const String& title) : active(true)
 		//создать окно
 		int primaryWidth = GetSystemMetrics(SM_CXSCREEN);
 		int primaryHeight = GetSystemMetrics(SM_CYSCREEN);
-		hWnd = CreateWindow((LPCTSTR)windowClass, Strings::UTF82Unicode(windowTitle).c_str(), WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 0, 0, 1, 1, NULL, NULL, GetModuleHandle(NULL), NULL);
+		hWnd = CreateWindow((LPCTSTR)windowClass, Strings::UTF82Unicode(title).c_str(), WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 0, 0, 1, 1, NULL, NULL, GetModuleHandle(NULL), NULL);
 		if(!hWnd)
 			THROW_PRIMARY_EXCEPTION("Can't create window");
 		ShowCursor(FALSE);
@@ -39,7 +39,7 @@ Win32Window::~Win32Window()
 
 void Win32Window::SetTitle(const String& title)
 {
-	SetWindowText(hWnd, title.c_str());
+	SetWindowText(hWnd, Strings::UTF82Unicode(title).c_str());
 }
 
 ptr<Graphics::Output> Win32Window::CreateOutput()

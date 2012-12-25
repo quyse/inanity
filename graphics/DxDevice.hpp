@@ -9,7 +9,7 @@ BEGIN_INANITY_GRAPHICS
 
 class DxSystem;
 class DxContext;
-class VertexLayout;
+class Layout;
 class DxVertexShader;
 class DxInternalInputLayout;
 

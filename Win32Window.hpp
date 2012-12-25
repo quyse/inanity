@@ -2,12 +2,26 @@
 #define ___INANITY_WIN32_WINDOW_HPP___
 
 #include "Window.hpp"
-#include "../String.hpp"
-#include "../EventHandler.hpp"
+#include "String.hpp"
+#include "EventHandler.hpp"
+#include "graphics/graphics.hpp"
+#include "input/input.hpp"
 
 #ifdef ___INANITY_WINDOWS
 
 #include "windows.hpp"
+
+BEGIN_INANITY_GRAPHICS
+
+class System;
+
+END_INANITY_GRAPHICS
+
+BEGIN_INANITY_INPUT
+
+class Manager;
+
+END_INANITY_INPUT
 
 BEGIN_INANITY
 
@@ -18,14 +32,17 @@ public:
 	typedef EventHandler<int> ActiveHandler;
 
 private:
-	//дескриптор окна
+	/// Дескриптор окна.
 	HWND hWnd;
-	//активность окна
+	/// Активность окна.
 	bool active;
+
+	/// Менеждер ввода.
+	ptr<Input::Manager> inputManager;
 
 	/// Единственный экземпляр главного окна.
 	/** больше одного не разрешается, для ускорения обработки сообщений */
-	static Window* singleWindow;
+	static Win32Window* singleWindow;
 
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
