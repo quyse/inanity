@@ -38,7 +38,7 @@ public:
 	}
 
 	template <typename Class>
-	static ptr<Handler> CreateDelegate(ptr<Class> object, void (Class::*method)(T data))
+	static ptr<Handler> Bind(ptr<Class> object, void (Class::*method)(T data))
 	{
 		return NEW(Delegate<T, Class>(object, method));
 	}

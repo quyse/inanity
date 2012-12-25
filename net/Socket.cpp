@@ -1,8 +1,8 @@
 #include "Socket.hpp"
 #include "EventLoop.hpp"
 
-Socket::Socket(ptr<EventLoop> eventLoop, uv_tcp_t* stream) :
-	eventLoop(eventLoop), stream(stream)
+Socket::Socket(ptr<EventLoop> eventLoop) :
+	eventLoop(eventLoop), socket(eventLoop->GetIoService())
 {
 	// запомнить себя
 	stream->data = this;

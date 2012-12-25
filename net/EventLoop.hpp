@@ -2,7 +2,7 @@
 #define ___INANITY_NET_EVENT_LOOP_HPP___
 
 #include "net.hpp"
-#include "uv.hpp"
+#include "asio.hpp"
 #include "ServerSocket.hpp"
 #include "../Handler.hpp"
 #include "../String.hpp"
@@ -26,37 +26,62 @@ public:
 	typedef Handler<ptr<ClientSocket> > ConnectHandler;
 
 private:
-	uv_loop_t* loop;
+	typedef Handler<const std::vector<asio::ip::tcp::endpoint>&> ResolveHandler;
 
-	/// Структура, содержащая всё необходимое для выполнения запроса на соединение.
-	struct ConnectRequest
+	asio::io_service ioService;
+	asio::tcp::resolver resolver;
+
+	/// Класс запроса на разрешение имени.
+	class ResolveRequest : public Object
 	{
+	private:
+		ptr<EventLoop> eventLoop;
+		ptr<ResolveHandler> resolveHandler;
+
+	public:
+		ResolveRequest(ptr<EventLoop> eventLoop, ptr<ResolveHandler> resolveHandler);
+		void Handle(const asio::error_code& error, resolver::iterator iterator);
+	};
+
+	/// Класс запроса на соединение.
+	class ConnectRequest : public Object
+	{
+	private:
 		ptr<EventLoop> eventLoop;
 		ptr<ConnectHandler> connectHandler;
-		uv_getaddrinfo_t getaddrinfoReq;
-		uv_tcp_t* stream;
-		uv_connect_t connectReq;
+		std::vector<asio::ip::tcp::endpoint> endpoints;
+		size_t currentEndpointIndex;
+		ptr<ClientSocket> clientSocket;
 
+		void TryConnect();
+		void HandleTryConnect(const asio::error_code& error);
+
+	public:
 		ConnectRequest(ptr<EventLoop> eventLoop, ptr<ConnectHandler> connectHandler);
+
+		void HandleResolveResult(const std::vector<asio::ip::tcp::endpoint>& endpoints);
 	};
+
+	/// Разрешить имя.
+	void Resolve(const String& host, int port, ptr<ResolveHandler> resolveHandler);
 
 public:
 	EventLoop();
 	~EventLoop();
 
-	static uv_buf_t AllocCallback(uv_handle_t* handle, size_t size);
-	static void Free(uv_buf_t buf);
-	static void GetAddrInfoCallback(uv_getaddrinfo_t* handle, int status, struct addrinfo* res);
-	static void ConnectCallback(uv_connect_t* req, int status);
-
+	asio::io_service& GetIoService();
 	ptr<Exception> GetLastError();
 
 	/// Открыть серверный сокет для приёма входящих соединений.
-	ptr<ServerSocket> Listen(int port, ptr<ServerSocket::SocketHandler> handler);
+	ptr<ServerSocket> Listen(int port, ptr<ServerSocket::SocketHandler> listenHandler);
 	/// Подключиться к серверу.
-	void Connect(const String& host, int port, ptr<ConnectHandler> handler);
+	void Connect(const String& host, int port, ptr<ConnectHandler> connectHandler);
 
+	/// Запустить цикл обработки сообщений.
 	void Run();
+
+	/// Выбросить исключение, соответствующее ошибке ASIO.
+	void HandleAsioError(const asio::system_error& error);
 };
 
 END_INANITY_NET

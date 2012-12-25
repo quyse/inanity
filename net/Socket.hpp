@@ -2,7 +2,6 @@
 #define ___INANITY_NET_SOCKET_HPP___
 
 #include "net.hpp"
-#include "uv.hpp"
 
 BEGIN_INANITY_NET
 
@@ -13,13 +12,10 @@ class Socket : public Object
 {
 protected:
 	ptr<EventLoop> eventLoop;
-	uv_tcp_t* stream;
-
-protected:
-	static void CloseCallback(uv_handle_t* handle);
+	asio::tcp::socket socket;
 
 public:
-	Socket(ptr<EventLoop> eventLoop, uv_tcp_t* stream);
+	Socket(ptr<EventLoop> eventLoop);
 	~Socket();
 
 	void Close();
