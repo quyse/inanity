@@ -3,7 +3,7 @@
 
 #include "Window.hpp"
 #include "String.hpp"
-#include "EventHandler.hpp"
+#include "Handler.hpp"
 #include "graphics/graphics.hpp"
 #include "input/input.hpp"
 
@@ -29,7 +29,7 @@ class Win32Window : public Window
 {
 public:
 	/// Тип обработчика активного окна.
-	typedef EventHandler<int> ActiveHandler;
+	typedef Handler<int> ActiveHandler;
 
 private:
 	/// Дескриптор окна.

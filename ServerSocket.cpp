@@ -4,7 +4,7 @@
 #include "Exception.hpp"
 #include <string.h>
 
-ServerSocket::ServerSocket(ptr<EventLoop> eventLoop, uv_tcp_t* stream, ptr<Handler> handler) :
+ServerSocket::ServerSocket(ptr<EventLoop> eventLoop, uv_tcp_t* stream, ptr<SocketHandler> handler) :
 	Socket(eventLoop, stream), handler(handler)
 {
 	try

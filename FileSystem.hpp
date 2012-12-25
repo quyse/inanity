@@ -3,7 +3,7 @@
 
 #include "Object.hpp"
 #include "String.hpp"
-#include "scripting.hpp"
+#include "scripting_decl.hpp"
 #include <vector>
 
 BEGIN_INANITY
@@ -18,6 +18,8 @@ TryLoadFile может выдавать нулевую ссылку (при от
 class File;
 class InputStream;
 class OutputStream;
+template <typename T>
+class Future;
 /// Абстрактный класс файловой системы.
 /** Файловая система - это набор файлов, к которым можно обращаться по именам.
 Файловая система не гарантирует постоянство этого набора.
@@ -46,6 +48,10 @@ public:
 	*/
 	virtual ptr<File> LoadFile(const String& fileName);
 
+	/// Загрузить файл асинхронно.
+	/** Реализация по умолчанию грузит файл синхронно через LoadFile. */
+	virtual ptr<Future<ptr<File> > > LoadFileAsync(const String& fileName);
+
 	/// Загрузить файл.
 	/** Возвращает объект File для заданного файла. При отсутствии файла
 	с заданным именем возвращает null.
@@ -69,6 +75,10 @@ public:
 	\param fileName Имя в файловой системе, под которым сохраняются данные.
 	*/
 	virtual void SaveFile(ptr<File> file, const String& fileName);
+
+	/// Сохранить файл асинхронно.
+	/** Реализация по умолчанию делает это синхронно через SaveFile. */
+	virtual ptr<Future<int> > SaveFileAsync(ptr<File> file, const String& fileName);
 
 	/// Открыть файл как поток вывода.
 	/** Возвращает поток вывода, предназначенный для записи в файл.
@@ -100,11 +110,7 @@ public:
 	*/
 	virtual void GetAllDirectoryEntries(const String& directoryName, std::vector<String>& entries) const;
 
-#ifdef ___INANITY_SCRIPTING
-	SCRIPTABLE_CALL(loadFile);
-	SCRIPTABLE_CALL(saveFile);
-	SCRIPTABLE_CLASS();
-#endif
+	SCRIPTABLE_CLASS(FileSystem);
 };
 
 END_INANITY

@@ -3,7 +3,13 @@
 #include "FileInputStream.hpp"
 #include "StreamReader.hpp"
 #include "Exception.hpp"
+#include "scripting_impl.hpp"
 #include <string.h>
+
+SCRIPTABLE_MAP_BEGIN(BlobFileSystem, Inanity.BlobFileSystem);
+	SCRIPTABLE_PARENT(FileSystem);
+	SCRIPTABLE_CONSTRUCTOR(BlobFileSystem, ptr<File>);
+SCRIPTABLE_MAP_END();
 
 const char BlobFileSystem::Terminator::magicValue[4] = { 'B', 'L', 'O', 'B' };
 

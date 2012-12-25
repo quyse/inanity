@@ -85,11 +85,12 @@ uLong ZEXPORT zlibCompileFlags()
 #ifdef FASTEST
     flags += 1L << 21;
 #endif
-#ifdef Z_SOLO
+// commented out by quyse: no gzlib
+//#ifdef Z_SOLO
     return flags;
-#else
-    return flags + gzflags();
-#endif
+//#else
+//    return flags + gzflags();
+//#endif
 }
 
 #ifdef DEBUG

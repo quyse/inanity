@@ -2,7 +2,7 @@
 #define ___INANITY_SERVER_SOCKET_HPP___
 
 #include "Socket.hpp"
-#include "EventHandler.hpp"
+#include "Handler.hpp"
 
 BEGIN_INANITY
 
@@ -12,14 +12,14 @@ class ClientSocket;
 class ServerSocket : public Socket
 {
 public:
-	typedef EventHandler<ptr<ClientSocket> > Handler;
+	typedef Handler<ptr<ClientSocket> > SocketHandler;
 
 private:
-	ptr<Handler> handler;
+	ptr<SocketHandler> handler;
 	static void ConnectionCallback(uv_stream_t* stream, int status);
 
 public:
-	ServerSocket(ptr<EventLoop> eventLoop, uv_tcp_t* stream, ptr<Handler> handler);
+	ServerSocket(ptr<EventLoop> eventLoop, uv_tcp_t* stream, ptr<SocketHandler> handler);
 };
 
 END_INANITY

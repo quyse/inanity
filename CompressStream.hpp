@@ -2,7 +2,8 @@
 #define ___INANITY_COMPRESS_STREAM_HPP___
 
 #include "OutputStream.hpp"
-#include "deps/zlib/zlib.h"
+#include "scripting_decl.hpp"
+#include "zlib.hpp"
 
 /*
 Файл содержит класс потока для сжатия данных.
@@ -50,6 +51,10 @@ public:
 
 	void Write(const void* data, size_t size);
 	void Flush();
+
+	static ptr<CompressStream> CreateMax(ptr<OutputStream> outputStream);
+
+	SCRIPTABLE_CLASS(CompressStream);
 };
 
 END_INANITY
