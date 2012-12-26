@@ -67,9 +67,9 @@ ptr<Device> DxSystem::CreatePrimaryDevice()
 		ComPointer<IDXGIAdapter> adapter = adapterInterface;
 
 		// флаги устройства
-		UINT flags = 0//D3D11_CREATE_DEVICE_SINGLETHREADED
+		UINT flags = D3D11_CREATE_DEVICE_SINGLETHREADED
 #ifdef _DEBUG
-//			| D3D11_CREATE_DEVICE_DEBUG
+			| D3D11_CREATE_DEVICE_DEBUG
 #endif
 			;
 		// уровень устройства - DirectX 10
