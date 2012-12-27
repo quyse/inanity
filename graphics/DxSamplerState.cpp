@@ -1,18 +1,18 @@
-#include "DxSamplingState.hpp"
+#include "DxSamplerState.hpp"
 #include "DxDevice.hpp"
 #include "../Exception.hpp"
 
-DxSamplingState::DxSamplingState(ptr<DxDevice> device) : device(device)
+DxSamplerState::DxSamplerState(ptr<DxDevice> device) : device(device)
 {
 }
 
-ID3D11SamplerState* DxSamplingState::GetSamplerStateInterface()
+ID3D11SamplerState* DxSamplerState::GetSamplerStateInterface()
 {
 	Update();
 	return samplerState;
 }
 
-D3D11_TEXTURE_ADDRESS_MODE DxSamplingState::ConvertWrap(Wrap wrap)
+D3D11_TEXTURE_ADDRESS_MODE DxSamplerState::ConvertWrap(Wrap wrap)
 {
 	switch(wrap)
 	{
@@ -28,7 +28,7 @@ D3D11_TEXTURE_ADDRESS_MODE DxSamplingState::ConvertWrap(Wrap wrap)
 	THROW_PRIMARY_EXCEPTION("Invalid wrap mode");
 }
 
-void DxSamplingState::Update()
+void DxSamplerState::Update()
 {
 	if(!dirty)
 		return;

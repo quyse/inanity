@@ -2,7 +2,7 @@
 #include "RenderBuffer.hpp"
 #include "DepthStencilBuffer.hpp"
 #include "Texture.hpp"
-#include "Sampler.hpp"
+#include "SamplerState.hpp"
 #include "UniformBuffer.hpp"
 #include "VertexShader.hpp"
 #include "PixelShader.hpp"
@@ -29,10 +29,10 @@ void ContextState::ResetTextures()
 		textures[i] = 0;
 }
 
-void ContextState::ResetSamplers()
+void ContextState::ResetSamplerStates()
 {
 	for(int i = 0; i < textureSlotsCount; ++i)
-		samplers[i] = 0;
+		samplerStates[i] = 0;
 }
 
 void ContextState::ResetUniformBuffers()

@@ -3,7 +3,7 @@
 #include "DxRenderBuffer.hpp"
 #include "DxDepthStencilBuffer.hpp"
 #include "DxTexture.hpp"
-#include "DxSampler.hpp"
+#include "DxSamplerState.hpp"
 #include "DxUniformBuffer.hpp"
 #include "DxVertexShader.hpp"
 #include "DxPixelShader.hpp"
@@ -227,12 +227,12 @@ void DxContext::Update()
 		// сейчас единственная оптимизация - начало и конец в списке обновляемых семплеров
 		int end;
 		for(end = ContextState::textureSlotsCount - 1; end >= 0; --end)
-			if(targetState.samplers[end] != boundState.samplers[end])
+			if(targetState.samplerStates[end] != boundState.samplerStates[end])
 				break;
 		++end;
 		int begin;
 		for(begin = 0; begin < end; ++begin)
-			if(targetState.samplers[begin] != boundState.samplers[begin])
+			if(targetState.samplerStates[begin] != boundState.samplerStates[begin])
 				break;
 
 		if(begin < end)
@@ -240,11 +240,11 @@ void DxContext::Update()
 			ID3D11SamplerState* states[ContextState::textureSlotsCount];
 			for(int i = begin; i < end; ++i)
 			{
-				Sampler* abstractSampler = targetState.samplers[i];
-				if(abstractSampler)
+				SamplerState* abstractSamplerState = targetState.samplerStates[i];
+				if(abstractSamplerState)
 				{
-					DxSampler* sampler = fast_cast<DxSampler*>(abstractSampler);
-					states[i] = sampler->GetSamplerStateInterface();
+					DxSamplerState* samplerState = fast_cast<DxSamplerState*>(abstractSamplerState);
+					states[i] = samplerState->GetSamplerStateInterface();
 				}
 				else
 					states[i] = 0;
@@ -256,7 +256,7 @@ void DxContext::Update()
 
 			// обновить актуальное состояние
 			for(int i = begin; i < end; ++i)
-				boundState.samplers[i] = targetState.samplers[i];
+				boundState.samplerStates[i] = targetState.samplerStates[i];
 		}
 	}
 

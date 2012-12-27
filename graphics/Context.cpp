@@ -2,7 +2,7 @@
 #include "RenderBuffer.hpp"
 #include "DepthStencilBuffer.hpp"
 #include "Texture.hpp"
-#include "Sampler.hpp"
+#include "SamplerState.hpp"
 #include "UniformBuffer.hpp"
 #include "VertexShader.hpp"
 #include "PixelShader.hpp"

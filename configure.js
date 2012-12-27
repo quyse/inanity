@@ -84,7 +84,7 @@ var libraries = {
 			'graphics.DataType',
 			'graphics.Context', 'graphics.ContextState',
 			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.Layout', 'graphics.LayoutBinding', 'graphics.IndexBuffer',
-			'graphics.SamplingState',
+			'graphics.SamplerState',
 			'graphics.EditableFont']
 	},
 	// ******* подсистема DirectX 11
@@ -95,7 +95,7 @@ var libraries = {
 			'graphics.DxRenderBuffer', 'graphics.DxDepthStencilBuffer', 'graphics.DxTexture', 'graphics.DxUniformBuffer',
 			'graphics.DxVertexBuffer', 'graphics.DxIndexBuffer',
 			'graphics.DxVertexShader', 'graphics.DxPixelShader',
-			'graphics.DxSamplingState'
+			'graphics.DxSamplerState'
 		]
 	},
 	// ******* подсистема OpenGl

@@ -8,7 +8,7 @@ BEGIN_INANITY_GRAPHICS
 class RenderBuffer;
 class DepthStencilBuffer;
 class Texture;
-class Sampler;
+class SamplerState;
 class UniformBuffer;
 class VertexShader;
 class PixelShader;
@@ -33,7 +33,7 @@ struct ContextState
 	ptr<Texture> textures[textureSlotsCount];
 	/// Привязанные семплеры.
 	/** Семплеры привязываются в той же нумерации, что и текстурные слоты. */
-	ptr<Sampler> samplers[textureSlotsCount];
+	ptr<SamplerState> samplerStates[textureSlotsCount];
 
 	/// Количество слотов для константных буферов.
 	static const int uniformBufferSlotsCount = 16;
@@ -94,7 +94,7 @@ struct ContextState
 	/// Очистить все текстурные слоты.
 	void ResetTextures();
 	/// Очистить все семплерные слоты.
-	void ResetSamplers();
+	void ResetSamplerStates();
 	/// Очистить все uniform-буферы.
 	void ResetUniformBuffers();
 };
