@@ -1,8 +1,14 @@
 #include "IndexBuffer.hpp"
 
-IndexBuffer::IndexBuffer(size_t indicesCount) : indicesCount(indicesCount) {}
+IndexBuffer::IndexBuffer(int indicesCount, int indexSize)
+: indicesCount(indicesCount), indexSize(indexSize) {}
 
-size_t IndexBuffer::GetIndicesCount() const
+int IndexBuffer::GetIndicesCount() const
 {
 	return indicesCount;
+}
+
+int IndexBuffer::GetIndexSize() const
+{
+	return indexSize;
 }

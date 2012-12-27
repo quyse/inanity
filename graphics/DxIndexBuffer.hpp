@@ -14,7 +14,7 @@ private:
 	ComPointer<ID3D11Buffer> buffer;
 
 public:
-	DxIndexBuffer(ComPointer<ID3D11Buffer> buffer, size_t indicesCount);
+	DxIndexBuffer(ComPointer<ID3D11Buffer> buffer, int indicesCount, int indexSize);
 
 	ID3D11Buffer* GetBufferInterface() const;
 };

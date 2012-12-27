@@ -1,13 +1,12 @@
-#ifndef ___INANITY_GRAPHICS_SAMPLER_HPP___
-#define ___INANITY_GRAPHICS_SAMPLER_HPP___
+#ifndef ___INANITY_GRAPHICS_SAMPLING_STATE_HPP___
+#define ___INANITY_GRAPHICS_SAMPLING_STATE_HPP___
 
 #include "graphics.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
-/// Абстрактный класс семплера.
-/** Хранит настройки семплирования. */
-class Sampler : public Object
+/// Абстрактный класс настроек семплера.
+class SamplingState : public Object
 {
 public:
 	/// Режим свёртки координат, выходящих за пределы текстуры.
@@ -60,7 +59,7 @@ protected:
 
 protected:
 	/// Инициализация.
-	Sampler();
+	SamplingState();
 
 public:
 	/// Установить фильтрацию.

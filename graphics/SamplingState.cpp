@@ -1,6 +1,6 @@
-#include "Sampler.hpp"
+#include "SamplingState.hpp"
 
-Sampler::Sampler() :
+SamplingState::SamplingState() :
 	minFilter(filterPoint), mipFilter(filterPoint), magFilter(filterPoint),
 	mipMapping(false),
 	wrapU(wrapRepeat), wrapV(wrapRepeat), wrapW(wrapRepeat),
@@ -11,7 +11,7 @@ Sampler::Sampler() :
 		borderColor[i] = 0;
 }
 
-void Sampler::SetFilter(Filter minFilter, Filter mipFilter, Filter magFilter)
+void SamplingState::SetFilter(Filter minFilter, Filter mipFilter, Filter magFilter)
 {
 	this->minFilter = minFilter;
 	this->mipFilter = mipFilter;
@@ -19,13 +19,13 @@ void Sampler::SetFilter(Filter minFilter, Filter mipFilter, Filter magFilter)
 	dirty = true;
 }
 
-void Sampler::SetMipMapping(bool mipMapping)
+void SamplingState::SetMipMapping(bool mipMapping)
 {
 	this->mipMapping = mipMapping;
 	dirty = true;
 }
 
-void Sampler::SetWrap(Wrap wrapU, Wrap wrapV, Wrap wrapW)
+void SamplingState::SetWrap(Wrap wrapU, Wrap wrapV, Wrap wrapW)
 {
 	this->wrapU = wrapU;
 	this->wrapV = wrapV;
@@ -33,14 +33,14 @@ void Sampler::SetWrap(Wrap wrapU, Wrap wrapV, Wrap wrapW)
 	dirty = true;
 }
 
-void Sampler::SetLODLimits(float minLOD, float maxLOD)
+void SamplingState::SetLODLimits(float minLOD, float maxLOD)
 {
 	this->minLOD = minLOD;
 	this->maxLOD = maxLOD;
 	dirty = true;
 }
 
-void Sampler::SetBorderColor(const float* borderColor)
+void SamplingState::SetBorderColor(const float* borderColor)
 {
 	for(int i = 0; i < 4; ++i)
 		this->borderColor[i] = borderColor[i];

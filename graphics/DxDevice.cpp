@@ -110,7 +110,7 @@ ptr<Context> DxDevice::GetContext()
 	return context;
 }
 
-ptr<RenderBuffer> DxDevice::CreateRenderBuffer(size_t width, size_t height, PixelFormat pixelFormat)
+ptr<RenderBuffer> DxDevice::CreateRenderBuffer(int width, int height, PixelFormat pixelFormat)
 {
 	try
 	{
@@ -182,13 +182,13 @@ ptr<PixelShader> DxDevice::CreatePixelShader(ptr<File> file)
 	}
 }
 
-ptr<UniformBuffer> DxDevice::CreateUniformBuffer(size_t size)
+ptr<UniformBuffer> DxDevice::CreateUniformBuffer(int size)
 {
 	try
 	{
 		D3D11_BUFFER_DESC desc;
 		//округлить размер вверх, чтобы он был кратен sizeof(float4)
-		size_t ceiledSize = (size + sizeof(float4) - 1) & ~(sizeof(float4) - 1);
+		int ceiledSize = (size + sizeof(float4) - 1) & ~(sizeof(float4) - 1);
 		desc.ByteWidth = ceiledSize;
 		desc.Usage = D3D11_USAGE_DYNAMIC;
 		desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -233,7 +233,7 @@ ptr<VertexBuffer> DxDevice::CreateVertexBuffer(ptr<File> file, ptr<Layout> layou
 	}
 }
 
-ptr<IndexBuffer> DxDevice::CreateIndexBuffer(ptr<File> file, size_t indexSize)
+ptr<IndexBuffer> DxDevice::CreateIndexBuffer(ptr<File> file, int indexSize)
 {
 	try
 	{
@@ -252,7 +252,7 @@ ptr<IndexBuffer> DxDevice::CreateIndexBuffer(ptr<File> file, size_t indexSize)
 		if(FAILED(device->CreateBuffer(&desc, &data, &indexBufferInterface)))
 			THROW_PRIMARY_EXCEPTION("Can't create index buffer");
 
-		return NEW(DxIndexBuffer(indexBufferInterface, file->GetSize() / indexSize));
+		return NEW(DxIndexBuffer(indexBufferInterface, file->GetSize() / indexSize, indexSize));
 	}
 	catch(Exception* exception)
 	{

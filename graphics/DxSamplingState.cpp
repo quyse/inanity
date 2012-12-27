@@ -1,17 +1,18 @@
-#include "DxSampler.hpp"
+#include "DxSamplingState.hpp"
 #include "DxDevice.hpp"
 #include "../Exception.hpp"
 
-DxSampler::DxSampler(ptr<DxDevice> device) : device(device)
+DxSamplingState::DxSamplingState(ptr<DxDevice> device) : device(device)
 {
 }
 
-ID3D11SamplerState* DxSampler::GetSamplerStateInterface() const
+ID3D11SamplerState* DxSamplingState::GetSamplerStateInterface()
 {
+	Update();
 	return samplerState;
 }
 
-D3D11_TEXTURE_ADDRESS_MODE DxSampler::ConvertWrap(Wrap wrap)
+D3D11_TEXTURE_ADDRESS_MODE DxSamplingState::ConvertWrap(Wrap wrap)
 {
 	switch(wrap)
 	{
@@ -27,7 +28,7 @@ D3D11_TEXTURE_ADDRESS_MODE DxSampler::ConvertWrap(Wrap wrap)
 	THROW_PRIMARY_EXCEPTION("Invalid wrap mode");
 }
 
-void DxSampler::Update()
+void DxSamplingState::Update()
 {
 	if(!dirty)
 		return;
@@ -47,6 +48,7 @@ void DxSampler::Update()
 		if(!haveFilterConversionMap)
 		{
 #ifdef _DEBUG
+			// если добавили ещё фильтры, то нужно дописать таблицу ниже
 			if(filterCount != 2)
 				THROW_PRIMARY_EXCEPTION("Please recode conversion map");
 #endif

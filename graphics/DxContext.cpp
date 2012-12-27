@@ -334,6 +334,37 @@ void DxContext::Update()
 
 		boundState.pixelShader = targetState.pixelShader;
 	}
+
+	// вершинный буфер
+	if(targetState.vertexBuffer != boundState.vertexBuffer)
+	{
+		ID3D11Buffer* buffer = fast_cast<DxVertexBuffer*>(&*targetState.vertexBuffer)->GetBufferInterface();
+		UINT stride = targetState.vertexBuffer->GetLayout()->GetStride();
+		UINT offset = 0;
+		deviceContext->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
+
+		boundState.vertexBuffer = targetState.vertexBuffer;
+	}
+
+	// индексный буфер
+	if(targetState.indexBuffer != boundState.indexBuffer)
+	{
+		ID3D11Buffer* buffer;
+		DXGI_FORMAT format;
+		if(targetState.indexBuffer)
+		{
+			buffer = fast_cast<DxIndexBuffer*>(&*targetState.indexBuffer)->GetBufferInterface();
+			format = targetState.indexBuffer->GetIndexSize() == 4 ? DXGI_FORMAT_R32_UINT : DXGI_FORMAT_R16_UINT;
+		}
+		else
+		{
+			buffer = 0;
+			format = DXGI_FORMAT_R16_UINT;
+		}
+		deviceContext->IASetIndexBuffer(buffer, format, 0);
+
+		boundState.indexBuffer = targetState.indexBuffer;
+	}
 }
 
 void DxContext::ClearRenderBuffer(RenderBuffer* renderBuffer, const float* color)

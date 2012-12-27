@@ -37,12 +37,12 @@ public:
 	ptr<System> GetSystem() const;
 	ptr<Presenter> CreatePresenter(ptr<Output> output, const PresentMode& mode);
 	ptr<Context> GetContext();
-	ptr<RenderBuffer> CreateRenderBuffer(size_t width, size_t height, PixelFormat pixelFormat);
+	ptr<RenderBuffer> CreateRenderBuffer(int width, int height, PixelFormat pixelFormat);
 	ptr<VertexShader> CreateVertexShader(ptr<File> file);
 	ptr<PixelShader> CreatePixelShader(ptr<File> file);
-	ptr<UniformBuffer> CreateUniformBuffer(size_t size);
+	ptr<UniformBuffer> CreateUniformBuffer(int size);
 	ptr<VertexBuffer> CreateVertexBuffer(ptr<File> file, ptr<Layout> layout);
-	ptr<IndexBuffer> CreateIndexBuffer(ptr<File> file, size_t indexSize);
+	ptr<IndexBuffer> CreateIndexBuffer(ptr<File> file, int indexSize);
 	ptr<Texture> CreateStaticTexture(ptr<File> file);
 
 	/// Получить интерфейс устройства DirectX 11.

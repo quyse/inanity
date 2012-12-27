@@ -1,7 +1,7 @@
-#ifndef ___INANITY_GRAPHICS_DX_SAMPLER_HPP___
-#define ___INANITY_GRAPHICS_DX_SAMPLER_HPP___
+#ifndef ___INANITY_GRAPHICS_DX_SAMPLING_STATE_HPP___
+#define ___INANITY_GRAPHICS_DX_SAMPLING_STATE_HPP___
 
-#include "Sampler.hpp"
+#include "SamplingState.hpp"
 #include "../ComPointer.hpp"
 #include "d3d.hpp"
 
@@ -10,7 +10,7 @@ BEGIN_INANITY_GRAPHICS
 class DxDevice;
 
 /// Класс семплера DirectX.
-class DxSampler : public Sampler
+class DxSamplingState : public SamplingState
 {
 private:
 	ptr<DxDevice> device;
@@ -18,13 +18,13 @@ private:
 
 	static D3D11_TEXTURE_ADDRESS_MODE ConvertWrap(Wrap wrap);
 
-public:
-	DxSampler(ptr<DxDevice> device);
-
-	ID3D11SamplerState* GetSamplerStateInterface() const;
-
 	/// Обновить настройки семплера, если они менялись.
 	void Update();
+
+public:
+	DxSamplingState(ptr<DxDevice> device);
+
+	ID3D11SamplerState* GetSamplerStateInterface();
 };
 
 END_INANITY_GRAPHICS

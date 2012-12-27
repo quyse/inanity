@@ -1,7 +1,7 @@
 #include "GlIndexBuffer.hpp"
 
-GlIndexBuffer::GlIndexBuffer(GLuint name, size_t indicesCount)
-: IndexBuffer(indicesCount), name(name) {}
+GlIndexBuffer::GlIndexBuffer(GLuint name, int indicesCount, int indexSize)
+: IndexBuffer(indicesCount, indexSize), name(name) {}
 
 GlIndexBuffer::~GlIndexBuffer()
 {

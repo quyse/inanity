@@ -9,14 +9,19 @@ BEGIN_INANITY_GRAPHICS
 class IndexBuffer : public Object
 {
 protected:
-	size_t indicesCount;
+	/// Количество индексов.
+	int indicesCount;
+	/// Размер одного индекса - 2 или 4.
+	int indexSize;
 
 protected:
-	IndexBuffer(size_t indicesCount);
+	IndexBuffer(int indicesCount, int indexSize);
 
 public:
 	/// Получить количество индексов в буфере.
-	size_t GetIndicesCount() const;
+	int GetIndicesCount() const;
+	/// Получить размер одного индекса.
+	int GetIndexSize() const;
 };
 
 END_INANITY_GRAPHICS

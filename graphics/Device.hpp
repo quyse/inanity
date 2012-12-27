@@ -51,7 +51,7 @@ public:
 	// ******* Методы для создания ресурсов устройства.
 
 	/// Создать рендербуфер.
-	virtual ptr<RenderBuffer> CreateRenderBuffer(size_t width, size_t height, PixelFormat pixelFormat) = 0;
+	virtual ptr<RenderBuffer> CreateRenderBuffer(int width, int height, PixelFormat pixelFormat) = 0;
 
 	/// Создать вершинный шейдер из скомпилированного бинарного файла.
 	virtual ptr<VertexShader> CreateVertexShader(ptr<File> file) = 0;
@@ -59,14 +59,14 @@ public:
 	virtual ptr<PixelShader> CreatePixelShader(ptr<File> file) = 0;
 
 	/// Создать константный буфер.
-	virtual ptr<UniformBuffer> CreateUniformBuffer(size_t size) = 0;
+	virtual ptr<UniformBuffer> CreateUniformBuffer(int size) = 0;
 	/// Создать вершинный буфер.
 	virtual ptr<VertexBuffer> CreateVertexBuffer(ptr<File> file, ptr<Layout> layout) = 0;
 	/// Создать индексный буфер.
 	/**
 	\param indexSize Размер одного индекса - 2 или 4.
 	*/
-	virtual ptr<IndexBuffer> CreateIndexBuffer(ptr<File> file, size_t indexSize) = 0;
+	virtual ptr<IndexBuffer> CreateIndexBuffer(ptr<File> file, int indexSize) = 0;
 
 	/// Создать статическую текстуру из графического файла.
 	virtual ptr<Texture> CreateStaticTexture(ptr<File> file) = 0;

@@ -13,7 +13,7 @@ private:
 	GLuint name;
 
 public:
-	GlIndexBuffer(GLuint name, size_t indicesCount);
+	GlIndexBuffer(GLuint name, int indicesCount, int indexSize);
 	~GlIndexBuffer();
 
 	GLuint GetName() const;

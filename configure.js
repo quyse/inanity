@@ -81,9 +81,11 @@ var libraries = {
 	// ******* общая графика
 	'libinanity-graphics': {
 		objects: [
+			'graphics.DataType',
 			'graphics.Context', 'graphics.ContextState',
 			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.Layout', 'graphics.LayoutBinding', 'graphics.IndexBuffer',
-			'graphics.Sampler']
+			'graphics.SamplingState',
+			'graphics.EditableFont']
 	},
 	// ******* подсистема DirectX 11
 	'libinanity-dx': {
@@ -93,7 +95,7 @@ var libraries = {
 			'graphics.DxRenderBuffer', 'graphics.DxDepthStencilBuffer', 'graphics.DxTexture', 'graphics.DxUniformBuffer',
 			'graphics.DxVertexBuffer', 'graphics.DxIndexBuffer',
 			'graphics.DxVertexShader', 'graphics.DxPixelShader',
-			'graphics.DxSampler'
+			'graphics.DxSamplingState'
 		]
 	},
 	// ******* подсистема OpenGl
@@ -110,11 +112,9 @@ var libraries = {
 	// ******* подсистема шейдеров
 	'libinanity-shaders': {
 		objects: [
-			'graphics.shaders.DataType',
-			'graphics.shaders.Expression', 'graphics.shaders.ExpressionObjects',
-			'graphics.shaders.Statement', 'graphics.shaders.StatementObjects',
-			'graphics.shaders.Shader', 'graphics.shaders.ShaderBuilder',
-			'graphics.shaders.HlslGenerator', 'graphics.shaders.HlslGeneratorInstance'
+			'graphics.shaders.AttributeNode', 'graphics.shaders.SamplerNode',
+			'graphics.shaders.UniformNode', 'graphics.shaders.UniformGroup',
+			'graphics.shaders.SwizzleNode', 'graphics.shaders.OperationNode'
 		]
 	},
 	// ******* подсистема GUI
@@ -127,7 +127,7 @@ var libraries = {
 var executables = {
 	archi: {
 		objects: ['archi.main', 'archi.BlobCreator', /*'archi.FontCreator',*/ /*'archi.SimpleGeometryCreator',*/ 'archi.SystemFontCreator'/*, 'archi.WavefrontObj', 'archi.XafConverter'*/],
-		staticLibraries: ['libinanity-base', 'libinanity-graphics',],
+		staticLibraries: ['libinanity-base', 'libinanity-graphics', 'libinanity-lua', 'deps/lua//liblua'],
 		dynamicLibraries: ['user32.lib', 'gdi32.lib', 'comdlg32.lib']
 	}
 	// TEST
