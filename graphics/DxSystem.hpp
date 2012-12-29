@@ -6,6 +6,7 @@
 #include "PresentMode.hpp"
 #include "d3d.hpp"
 #include "../ComPointer.hpp"
+#include "../String.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
@@ -20,7 +21,9 @@ public:
 	/// Преобразовать формат пикселей из общего перечисления в DXGI.
 	static DXGI_FORMAT GetDXGIFormat(PixelFormat format);
 	/// Преобразовать режим экрана в структуру для DXGI.
-	static DXGI_MODE_DESC DxSystem::GetModeDesc(const PresentMode& mode);
+	static DXGI_MODE_DESC GetModeDesc(const PresentMode& mode);
+	/// Преобразовать номер сематники атрибута в строку.
+	static String GetSemanticString(int semantic);
 
 	// методы System
 	ptr<Window> CreateDefaultWindow();

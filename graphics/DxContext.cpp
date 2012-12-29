@@ -1,4 +1,5 @@
 #include "DxContext.hpp"
+#include "DxSystem.hpp"
 #include "DxDevice.hpp"
 #include "DxRenderBuffer.hpp"
 #include "DxDepthStencilBuffer.hpp"
@@ -95,13 +96,7 @@ ptr<DxInternalInputLayout> DxContext::CreateInternalInputLayout(Layout* vertexLa
 
 			// имя семантики получается переводом кода семантики в 26-ричную систему (буквы)
 			String& semanticName = semanticNames[i];
-			semanticName.assign('A', 8);
-			int semantic = element.semantic;
-			for(int j = 0; semantic; ++j)
-			{
-				semanticName[j] = 'A' + semantic % 26;
-				semantic /= 26;
-			}
+			semanticName = DxSystem::GetSemanticString(element.semantic);
 
 			// цикл по вот этим требуемым элементам
 			for(int descIndex = 0; descIndex < needDescsCount; ++descIndex)

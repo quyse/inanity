@@ -51,6 +51,19 @@ DXGI_MODE_DESC DxSystem::GetModeDesc(const PresentMode& mode)
 	return modeDesc;
 }
 
+String DxSystem::GetSemanticString(int semantic)
+{
+	// имя семантики получается переводом кода семантики в 26-ричную систему (буквы)
+	String name;
+	name.assign('A', 8);
+	for(int j = 0; semantic; ++j)
+	{
+		name[j] = 'A' + semantic % 26;
+		semantic /= 26;
+	}
+	return name;
+}
+
 ptr<Window> DxSystem::CreateDefaultWindow()
 {
 	return Win32Window::CreateForDirectX();
