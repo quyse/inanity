@@ -1,19 +1,25 @@
 #include "UniformNode.hpp"
+#include "UniformGroup.hpp"
 
-UniformNode::UniformNode(ptr<UniformBuffer> buffer, int offset, DataType valueType)
-: buffer(buffer), offset(offset), valueType(valueType) {}
+UniformNode::UniformNode(ptr<UniformGroup> group, DataType valueType, int offset)
+: group(group), valueType(valueType), offset(offset) {}
 
-ptr<UniformBuffer> UniformNode::GetBuffer() const
+Node::Type UniformNode::GetType() const
 {
-	return buffer;
+	return typeUniform;
 }
 
-int UniformNode::GetOffset() const
+ptr<UniformGroup> UniformNode::GetGroup() const
 {
-	return offset;
+	return group;
 }
 
 DataType UniformNode::GetValueType() const
 {
 	return valueType;
+}
+
+int UniformNode::GetOffset() const
+{
+	return offset;
 }

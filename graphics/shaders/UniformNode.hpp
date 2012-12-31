@@ -5,20 +5,24 @@
 
 BEGIN_INANITY_SHADERS
 
+class UniformGroup;
+
 /// Класс узла Uniform-переменной.
 class UniformNode : public Node
 {
 private:
-	ptr<UniformBuffer> buffer;
-	int offset;
+	ptr<UniformGroup> group;
 	DataType valueType;
+	int offset;
 
 public:
-	UniformNode(ptr<UniformBuffer> buffer, int offset, DataType valueType);
+	UniformNode(ptr<UniformGroup> buffer, DataType valueType, int offset);
 
-	ptr<UniformBuffer> GetBuffer() const;
-	int GetOffset() const;
+	Type GetType() const;
+
+	ptr<UniformGroup> GetGroup() const;
 	DataType GetValueType() const;
+	int GetOffset() const;
 };
 
 END_INANITY_SHADERS
