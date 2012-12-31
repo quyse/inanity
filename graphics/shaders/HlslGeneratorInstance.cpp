@@ -1,16 +1,29 @@
 #include "HlslGeneratorInstance.hpp"
-#include "StatementObject.hpp"
-#include "StatementObjects.hpp"
-#include "ExpressionObject.hpp"
-#include "ExpressionObjects.hpp"
+#include "Node.hpp"
+#include "AttributeNode.hpp"
+#include "FloatConstNode.hpp"
+#include "OperationNode.hpp"
+#include "SampleNode.hpp"
+#include "SamplerNode.hpp"
+#include "SequenceNode.hpp"
+#include "SwizzleNode.hpp"
+#include "UniformGroup.hpp"
+#include "UniformNode.hpp"
+#include "TempNode.hpp"
+#include "TransitionalNode.hpp"
+#include "../DxSystem.hpp"
 #include "../../Exception.hpp"
 #include <algorithm>
 #include <iomanip>
 
 BEGIN_INANITY_SHADERS
 
-HlslGeneratorInstance::HlslGeneratorInstance(const Shader& shader)
-: shader(shader), tabsCount(0) {}
+HlslGeneratorInstance::Structured::Structured(DataType valueType, Semantic semantic)
+: valueType(valueType), semantic(semantic) {}
+
+HlslGeneratorInstance::HlslGeneratorInstance(ptr<Node> rootNode, ShaderType shaderType)
+: rootNode(rootNode), shaderType(shaderType), tabsCount(0), tempsCount(0)
+{}
 
 void HlslGeneratorInstance::PrintTabs()
 {
@@ -20,386 +33,403 @@ void HlslGeneratorInstance::PrintTabs()
 
 void HlslGeneratorInstance::PrintDataType(DataType dataType)
 {
-	static const char* const names[DataTypes::_Count] = { "float", "float2", "float3", "float4", "float4x4", "uint", "uint2", "uint3", "uint4" };
-	hlsl << names[dataType];
+	const char* name;
+	switch(dataType)
+	{
+	case DataTypes::Float:			name = "float";			break;
+	case DataTypes::Float2:			name = "float2";		break;
+	case DataTypes::Float3:			name = "float3";		break;
+	case DataTypes::Float4:			name = "float4";		break;
+	case DataTypes::Float4x4:		name = "float4x4";	break;
+	case DataTypes::UInt:				name = "uint";			break;
+	case DataTypes::UInt2:			name = "uint2";			break;
+	case DataTypes::UInt3:			name = "uint3";			break;
+	case DataTypes::UInt4:			name = "uint4";			break;
+	case DataTypes::Int:				name = "int";				break;
+	case DataTypes::Int2:				name = "int2";			break;
+	case DataTypes::Int3:				name = "int3";			break;
+	case DataTypes::Int4:				name = "int4";			break;
+	default:
+		THROW_PRIMARY_EXCEPTION("Unknown data type");
+	}
+	hlsl << name;
 }
 
-void HlslGeneratorInstance::PrintVariables(Shader::Variables variables, const char* variableNamePrefix, bool printPackOffsets)
+void HlslGeneratorInstance::RegisterNode(Node* node)
 {
-	try
+	switch(node->GetType())
 	{
-		// сортировщик переменных по смещениям
-		struct Sorter
-		{
-			bool operator()(const Shader::Variable& a, const Shader::Variable& b) const
-			{
-				return a.offset < b.offset;
-			}
-		};
-		// отсортировать переменные по смещениям
-		std::sort(variables.begin(), variables.end(), Sorter());
-
-		for(size_t i = 0; i < variables.size(); ++i)
-			try
-			{
-				const Shader::Variable& variable = variables[i];
-
-				// переменная должна лежать на границе float'а, как минимум
-				if(variable.offset % sizeof(float))
-					THROW_PRIMARY_EXCEPTION("Wrong variable offset: should be on 4-byte boundary");
-
-				// печатаем определение переменной
-
-				// тип переменной
-				PrintTabs();
-				PrintDataType(variable.dataType);
-				// имя переменной
-				hlsl << ' ' << variableNamePrefix << variable.offset;
-
-				//** семантика
-
-				const char* semanticStr = 0;
-				char semanticBuffer[16];
-				// автоматическая семантика
-				if(variable.semantic == Semantics::None)
-				{
-					// получается по смещению элемента
-					strcpy(semanticBuffer, "AUTO");
-					int o = variable.offset;
-					int i;
-					for(i = 4; o; ++i)
-					{
-						semanticBuffer[i] = 'a' + o % 26;
-						o /= 26;
-					}
-					semanticBuffer[i] = 0;
-					semanticStr = semanticBuffer;
-				}
-				// специальная семантика
-				else if(variable.semantic >= Semantics::_SpecialBegin && variable.semantic < Semantics::_SpecialEnd)
-				{
-					if(variable.semantic == Semantics::Instance)
-						semanticStr = "SV_InstanceID";
-					else if(variable.semantic == Semantics::VertexPosition)
-						semanticStr = "SV_Position";
-					else if(variable.semantic >= Semantics::_TargetColorBegin && variable.semantic < Semantics::_TargetColorEnd)
-					{
-						sprintf(semanticBuffer, "SV_Target%d", variable.semantic - Semantics::TargetColor0);
-						semanticStr = semanticBuffer;
-					}
-					else if(variable.semantic >= Semantics::_TargetDepthBegin && variable.semantic < Semantics::_TargetDepthEnd)
-					{
-						sprintf(semanticBuffer, "SV_Depth%d", variable.semantic - Semantics::TargetDepth0);
-						semanticStr = semanticBuffer;
-					}
-				}
-				// пользовательская семантика
-				else if(variable.semantic >= Semantics::_CustomBegin && variable.semantic < Semantics::_CustomEnd)
-				{
-					strcpy(semanticBuffer, "CUSTOM");
-					int o = variable.semantic - Semantics::Custom0;
-					int i;
-					for(i = 6; o; ++i)
-					{
-						semanticBuffer[i] = 'a' + o % 26;
-						o /= 26;
-					}
-					semanticBuffer[i] = 0;
-					semanticStr = semanticBuffer;
-				}
-
-				// если семантика осталась не указанной
-				if(!semanticStr)
-					THROW_PRIMARY_EXCEPTION("Can't determine semantic");
-
-				hlsl << " : " << semanticStr;
-
-				if(printPackOffsets)
-				{
-					// регистр и положение в нём переменной
-					hlsl << " : packoffset(c" << (variable.offset / sizeof(float4));
-					// если переменная не начинается ровно на границе регистра, нужно дописать ещё компоненты регистра
-					int registerOffset = variable.offset % sizeof(float4);
-					if(registerOffset)
-					{
-						// получить размер данных
-						int variableSize = GetDataTypeSize(variable.dataType);
-						// переменная не должна пересекать границу регистра
-						if(registerOffset + variableSize > sizeof(float4))
-							THROW_PRIMARY_EXCEPTION("Variable should not intersect a register boundary");
-						// выложить столько буков, сколько нужно
-						registerOffset /= sizeof(float);
-						int endRegisterOffset = registerOffset + variableSize / sizeof(float);
-						hlsl << '.';
-						for(int j = registerOffset; j < endRegisterOffset; ++j)
-							hlsl << "xyzw"[j];
-					}
-					// конец упаковки
-					hlsl << ")";
-				}
-
-				// конец переменной
-				hlsl << ";\n";
-			}
-			catch(Exception* exception)
-			{
-				std::ostringstream s;
-				s << "Can't print variable " << i;
-				THROW_SECONDARY_EXCEPTION(s.str(), exception);
-			}
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY_EXCEPTION(String("Can't print variables (prefix ") + variableNamePrefix + ")", exception);
-	}
-}
-
-void HlslGeneratorInstance::PrintStatement(Statement statement)
-{
-	StatementObject* object = statement.GetObject();
-
-	switch(object->GetType())
-	{
-	case StatementObject::typeExpression:
-		PrintTabs();
-		PrintExpression(static_cast<ExpressionStatementObject*>(object)->GetExpression());
-		hlsl << ";\n";
+	case Node::typeFloatConst:
 		break;
-	case StatementObject::typeComma:
+	case Node::typeAttribute:
 		{
-			CommaStatementObject* commaObject = static_cast<CommaStatementObject*>(object);
-			PrintStatement(commaObject->GetLeft());
-			PrintStatement(commaObject->GetRight());
+			// атрибуты допустимы только в вершинном шейдере
+			if(shaderType != ShaderTypes::vertex)
+				THROW_PRIMARY_EXCEPTION("Only vertex shader can have attribute nodes");
+
+			ptr<AttributeNode> attributeNode = fast_cast<AttributeNode*>(node);
+			// просто добавляем, дубликаты удалим потом
+			attributes.push_back(attributeNode);
 		}
 		break;
-	case StatementObject::typeIf:
+	case Node::typeUniform:
 		{
-			IfStatementObject* ifObject = static_cast<IfStatementObject*>(object);
-			// печатаем условие
-			PrintTabs();
-			hlsl << "\tif(";
-			PrintExpression(ifObject->GetCondition());
-			hlsl << ")\n";
-			// печатаем блок после if
-			PrintTabs();
-			hlsl << "{\n";
-			++tabsCount;
-			PrintStatement(ifObject->GetTrueBody());
-			--tabsCount;
-			PrintTabs();
-			hlsl << "}\n";
-			// если есть блок else, напечатать его
-			Statement falseBody = ifObject->GetFalseBody();
-			if(falseBody.GetObject())
-			{
-				PrintTabs();
-				hlsl << "else\n";
-				PrintTabs();
-				hlsl << "{\n";
-				++tabsCount;
-				PrintStatement(falseBody);
-				--tabsCount;
-				PrintTabs();
-				hlsl << "}\n";
-			}
+			UniformNode* uniformNode = fast_cast<UniformNode*>(node);
+			// просто добавляем, дубликаты удалим потом
+			uniforms.push_back(std::make_pair(uniformNode->GetGroup(), uniformNode));
+		}
+		break;
+	case Node::typeSampler:
+		// просто добавляем, дубликаты удалим потом
+		samplers.push_back(fast_cast<SamplerNode*>(node));
+		break;
+	case Node::typeTemp:
+		{
+			TempNode* tempNode = fast_cast<TempNode*>(node);
+			if(temps.find(tempNode) == temps.end())
+				temps[tempNode] = tempsCount++;
+		}
+		break;
+	case Node::typeTransformed:
+		transformed.push_back(fast_cast<TransitionalNode*>(node));
+		break;
+	case Node::typeRasterized:
+		// rasterized-переменые дапустимы только в пиксельном шейдере
+		if(shaderType != ShaderTypes::pixel)
+			THROW_PRIMARY_EXCEPTION("Only pixel shader can have attribute nodes");
+		rasterized.push_back(fast_cast<TransitionalNode*>(node));
+		break;
+	case Node::typeSequence:
+		{
+			SequenceNode* sequenceNode = fast_cast<SequenceNode*>(node);
+			RegisterNode(sequenceNode->GetA());
+			RegisterNode(sequenceNode->GetB());
+		}
+		break;
+	case Node::typeSwizzle:
+		RegisterNode(fast_cast<SwizzleNode*>(node)->GetA());
+		break;
+	case Node::typeOperation:
+		{
+			OperationNode* operationNode = fast_cast<OperationNode*>(node);
+			int argumentsCount = operationNode->GetArgumentsCount();
+			for(int i = 0; i < argumentsCount; ++i)
+				RegisterNode(operationNode->GetArgument(i));
+		}
+		break;
+	case Node::typeSample:
+		{
+			SampleNode* sampleNode = fast_cast<SampleNode*>(node);
+			RegisterNode(sampleNode->GetSamplerNode());
+			RegisterNode(sampleNode->GetCoordsNode());
 		}
 		break;
 	default:
-		THROW_PRIMARY_EXCEPTION("Invalid statement type");
+		THROW_PRIMARY_EXCEPTION("Unknown node type");
 	}
 }
 
-void HlslGeneratorInstance::PrintExpression(Expression expression)
+void HlslGeneratorInstance::PrintNode(Node* node)
 {
-	ExpressionObject* object = expression.GetObject();
-
-	switch(object->GetType())
+	switch(node->GetType())
 	{
-	case ExpressionObject::typeIn:
-		hlsl << "input.i" << fast_cast<InExpressionObject*>(object)->GetOffset();
+	case Node::typeFloatConst:
+		hlsl << std::fixed << std::setprecision(10) << fast_cast<FloatConstNode*>(node)->GetValue() << 'f';
 		break;
-	case ExpressionObject::typeOut:
-		hlsl << "output.o" << fast_cast<OutExpressionObject*>(object)->GetOffset();
+	case Node::typeAttribute:
+		hlsl << "a.a" << fast_cast<AttributeNode*>(node)->GetSemantic();
 		break;
-	case ExpressionObject::typeUniform:
+	case Node::typeUniform:
 		{
-			UniformExpressionObject* uniformObject = fast_cast<UniformExpressionObject*>(object);
-			hlsl << 'u' << uniformObject->GetBuffer() << '_' << uniformObject->GetOffset();
+			UniformNode* uniformNode = fast_cast<UniformNode*>(node);
+			ptr<UniformGroup> uniformGroup = uniformNode->GetGroup();
+			hlsl << 'u' << uniformGroup->GetSlot() << '_' << uniformNode->GetOffset();
 		}
 		break;
-	case ExpressionObject::typeSampler:
-		// в живом виде семплер не должен попадаться
+	case Node::typeSampler:
+		// семплер может участвовать, только в операции семплирования
+		// он никогда не должен приходить в PrintNode
 		THROW_PRIMARY_EXCEPTION("Invalid use of sampler");
-	case ExpressionObject::typeTemp:
-		hlsl << 'loc' << fast_cast<TempExpressionObject*>(object)->GetOffset();
+	case Node::typeTemp:
+		{
+			// выяснить смещение переменной
+			std::unordered_map<ptr<TempNode>, int>::const_iterator i = temps.find(fast_cast<TempNode*>(node));
+			if(i == temps.end())
+				THROW_PRIMARY_EXCEPTION("Temp node is not registered");
+
+			// напечатать
+			hlsl << '_' << i->second;
+		}
 		break;
-	case ExpressionObject::typeConstFloat:
-		hlsl << std::fixed << std::setprecision(10) << fast_cast<ConstFloatExpressionObject*>(object)->GetValue() << 'f';
+	case Node::typeTransformed:
+		hlsl << 'v.v' << fast_cast<TransitionalNode*>(node)->GetSemantic();
 		break;
-	case ExpressionObject::typeConstInt:
-		hlsl << fast_cast<ConstIntExpressionObject*>(object)->GetValue();
+	case Node::typeRasterized:
+		hlsl << 'r.r' << fast_cast<TransitionalNode*>(node)->GetSemantic();
 		break;
-	case ExpressionObject::typeNegate:
-		hlsl << "(-";
-		PrintExpression(fast_cast<NegateExpressionObject*>(object)->GetInner());
+	case Node::typeSequence:
+		{
+			SequenceNode* sequenceNode = fast_cast<SequenceNode*>(node);
+			PrintNode(sequenceNode->GetA());
+			hlsl << ";\n";
+			PrintNode(sequenceNode->GetB());
+		}
+		break;
+	case Node::typeSwizzle:
+		{
+			SwizzleNode* swizzleNode = fast_cast<SwizzleNode*>(node);
+			hlsl << '(';
+			PrintNode(swizzleNode->GetA());
+			hlsl << ")." << swizzleNode->GetMap();
+		}
+		break;
+	case Node::typeOperation:
+		PrintOperationNode(fast_cast<OperationNode*>(node));
+		break;
+	case Node::typeSample:
+		{
+			SampleNode* sampleNode = fast_cast<SampleNode*>(node);
+			int slot = sampleNode->GetSamplerNode()->GetSlot();
+			hlsl << 't' << slot << ".Sample(s" << slot << ", ";
+			PrintNode(sampleNode->GetCoordsNode());
+			hlsl << ')';
+		}
+		break;
+	default:
+		THROW_PRIMARY_EXCEPTION("Unknown node type");
+	}
+}
+
+void HlslGeneratorInstance::PrintOperationNode(OperationNode* node)
+{
+	OperationNode::Operation operation = node->GetOperation();
+	switch(operation)
+	{
+	case OperationNode::operationAssign:
+		PrintNode(node->GetA());
+		hlsl << " = (";
+		PrintNode(node->GetB());
 		hlsl << ')';
 		break;
-	case ExpressionObject::typeSwizzle:
-		{
-			SwizzleExpressionObject* swizzleObject = fast_cast<SwizzleExpressionObject*>(object);
-			hlsl << '(';
-			PrintExpression(swizzleObject->GetInner());
-			hlsl << '.' << swizzleObject->GetComponents() << ')';
-		}
+	case OperationNode::operationNegate:
+		hlsl << "-(";
+		PrintNode(node->GetA());
+		hlsl << ')';
 		break;
-	case ExpressionObject::typeAssign:
-		{
-			AssignExpressionObject* assignObject = fast_cast<AssignExpressionObject*>(object);
-			hlsl << '(';
-			PrintExpression(assignObject->GetLeft());
-			hlsl << " = ";
-			PrintExpression(assignObject->GetRight());
-			hlsl << ')';
-		}
+	case OperationNode::operationAdd:
+		hlsl << '(';
+		PrintNode(node->GetA());
+		hlsl << ") + (";
+		PrintNode(node->GetB());
+		hlsl << ')';
 		break;
-	case ExpressionObject::typeSubscript:
-		{
-			SubscriptExpressionObject* subscriptObject = fast_cast<SubscriptExpressionObject*>(object);
-			PrintExpression(subscriptObject->GetLeft());
-			hlsl << '[';
-			PrintExpression(subscriptObject->GetRight());
-			hlsl << ']';
-		}
+	case OperationNode::operationSubtract:
+		hlsl << '(';
+		PrintNode(node->GetA());
+		hlsl << ") - (";
+		PrintNode(node->GetB());
+		hlsl << ')';
 		break;
-	case ExpressionObject::typeAdd:
-		{
-			AddExpressionObject* addObject = fast_cast<AddExpressionObject*>(object);
-			hlsl << '(';
-			PrintExpression(addObject->GetLeft());
-			hlsl << " + ";
-			PrintExpression(addObject->GetRight());
-			hlsl << ')';
-		}
+	case OperationNode::operationMultiply:
+		hlsl << '(';
+		PrintNode(node->GetA());
+		hlsl << ") * (";
+		PrintNode(node->GetB());
+		hlsl << ')';
 		break;
-	case ExpressionObject::typeSubtract:
-		{
-			SubtractExpressionObject* subtractObject = fast_cast<SubtractExpressionObject*>(object);
-			hlsl << '(';
-			PrintExpression(subtractObject->GetLeft());
-			hlsl << " - ";
-			PrintExpression(subtractObject->GetRight());
-			hlsl << ')';
-		}
-		break;
-	case ExpressionObject::typeMultiply:
-		{
-			MultiplyExpressionObject* multiplyObject = fast_cast<MultiplyExpressionObject*>(object);
-			hlsl << '(';
-			PrintExpression(multiplyObject->GetLeft());
-			hlsl << " * ";
-			PrintExpression(multiplyObject->GetRight());
-			hlsl << ')';
-		}
-		break;
-	case ExpressionObject::typeDivide:
-		{
-			DivideExpressionObject* divideObject = fast_cast<DivideExpressionObject*>(object);
-			hlsl << '(';
-			PrintExpression(divideObject->GetLeft());
-			hlsl << " / ";
-			PrintExpression(divideObject->GetRight());
-			hlsl << ')';
-		}
-		break;
-	case ExpressionObject::typeCall1:
-		{
-			Call1ExpressionObject* call1Object = fast_cast<Call1ExpressionObject*>(object);
-
-			const char* functionName = GetRealFunctionName(call1Object->GetName());
-
-			hlsl << functionName << '(';
-			PrintExpression(call1Object->GetArg1());
-			hlsl << ')';
-		}
-		break;
-	case ExpressionObject::typeCall2:
-		{
-			Call2ExpressionObject* call2Object = fast_cast<Call2ExpressionObject*>(object);
-
-			const char* functionName = GetRealFunctionName(call2Object->GetName());
-
-			// особая функция sample
-			if(strcmp(functionName, "sample") == 0)
-			{
-				// первый параметр должен быть семплером
-				ExpressionObject* a1 = call2Object->GetArg1().GetObject();
-				if(a1->GetType() != ExpressionObject::typeSampler)
-					THROW_PRIMARY_EXCEPTION("First parameter of sample function should be a sampler");
-				int samplerSlot = fast_cast<SamplerExpressionObject*>(a1)->GetSlot();
-				hlsl << 't' << samplerSlot << ".Sample(s" << samplerSlot << ", ";
-				PrintExpression(call2Object->GetArg2());
-				hlsl << ')';
-			}
-			// остальные функции
-			else
-			{
-				hlsl << functionName << '(';
-				PrintExpression(call2Object->GetArg1());
-				hlsl << ", ";
-				PrintExpression(call2Object->GetArg2());
-				hlsl << ')';
-			}
-		}
-		break;
-	case ExpressionObject::typeCall3:
-		{
-			Call3ExpressionObject* call3Object = fast_cast<Call3ExpressionObject*>(object);
-
-			const char* functionName = GetRealFunctionName(call3Object->GetName());
-
-			hlsl << functionName << '(';
-			PrintExpression(call3Object->GetArg1());
-			hlsl << ", ";
-			PrintExpression(call3Object->GetArg2());
-			hlsl << ", ";
-			PrintExpression(call3Object->GetArg3());
-			hlsl << ')';
-		}
-		break;
-	case ExpressionObject::typeCall4:
-		{
-			Call4ExpressionObject* call4Object = fast_cast<Call4ExpressionObject*>(object);
-
-			const char* functionName = GetRealFunctionName(call4Object->GetName());
-
-			hlsl << functionName << '(';
-			PrintExpression(call4Object->GetArg1());
-			hlsl << ", ";
-			PrintExpression(call4Object->GetArg2());
-			hlsl << ", ";
-			PrintExpression(call4Object->GetArg3());
-			hlsl << ", ";
-			PrintExpression(call4Object->GetArg4());
-			hlsl << ')';
-		}
+	case OperationNode::operationDivide:
+		hlsl << '(';
+		PrintNode(node->GetA());
+		hlsl << ") / (";
+		PrintNode(node->GetB());
+		hlsl << ')';
 		break;
 	default:
-		THROW_PRIMARY_EXCEPTION("Invalid expression type");
+		{
+			// остались только функции, которые делаются простым преобразованием имени
+			const char* name;
+			switch(operation)
+			{
+#define OP(o, n) case OperationNode::operation##o: name = #n; break
+				OP(Float1111to4, float4);
+				OP(Float31to4, float4);
+				OP(Dot, dot);
+				OP(Cross, cross);
+				OP(Mul, mul);
+#undef OP
+			default:
+				THROW_PRIMARY_EXCEPTION("Unknown operation type");
+			}
+
+			// вывести
+			hlsl << name << '(';
+			int argumentsCount = node->GetArgumentsCount();
+			for(int i = 0; i < argumentsCount; ++i)
+			{
+				if(i)
+					hlsl << ", ";
+				hlsl << '(';
+				PrintNode(node->GetArgument(i));
+				hlsl << ')';
+			}
+			hlsl << ')';
+		}
 	}
 }
 
-const char* HlslGeneratorInstance::GetRealFunctionName(const char* functionName)
+void HlslGeneratorInstance::PrintStructure(const std::vector<Structured>& variables, const char* variableNamePrefix)
 {
-	static const char* const names[][2] =
+	for(size_t i = 0; i < variables.size(); ++i)
+		try
+		{
+			const Structured& variable = variables[i];
+
+			// печатаем определение переменной
+
+			// тип переменной
+			hlsl << "\t\t";
+			PrintDataType(variable.valueType);
+			// имя переменной
+			hlsl << ' ' << variableNamePrefix << variable.semantic;
+
+			//** семантика
+
+			const char* semanticStr = 0;
+			char semanticBuffer[16];
+			// нет семантики - плохо
+			if(variable.semantic == Semantics::None)
+				THROW_PRIMARY_EXCEPTION("Structured variables should have semantic");
+			// специальная семантика
+			else if(variable.semantic >= Semantics::_SpecialBegin && variable.semantic < Semantics::_SpecialEnd)
+			{
+				if(variable.semantic == Semantics::Instance)
+					semanticStr = "SV_InstanceID";
+				else if(variable.semantic == Semantics::VertexPosition)
+					semanticStr = "SV_Position";
+				else if(variable.semantic >= Semantics::_TargetColorBegin && variable.semantic < Semantics::_TargetColorEnd)
+				{
+					sprintf(semanticBuffer, "SV_Target%d", variable.semantic - Semantics::TargetColor0);
+					semanticStr = semanticBuffer;
+				}
+				else if(variable.semantic >= Semantics::_TargetDepthBegin && variable.semantic < Semantics::_TargetDepthEnd)
+				{
+					sprintf(semanticBuffer, "SV_Depth%d", variable.semantic - Semantics::TargetDepth0);
+					semanticStr = semanticBuffer;
+				}
+			}
+			// пользовательская семантика
+			else if(variable.semantic >= Semantics::_CustomBegin && variable.semantic < Semantics::_CustomEnd)
+			{
+				strcpy(semanticBuffer, DxSystem::GetSemanticString(variable.semantic - Semantics::Custom0).c_str());
+				semanticStr = semanticBuffer;
+			}
+
+			// если семантика осталась не указанной
+			if(!semanticStr)
+				THROW_PRIMARY_EXCEPTION("Can't determine semantic");
+
+			hlsl << " : " << semanticStr;
+
+			// конец переменной
+			hlsl << ";\n";
+		}
+		catch(Exception* exception)
+		{
+			std::ostringstream s;
+			s << "Can't print variable " << i;
+			THROW_SECONDARY_EXCEPTION(s.str(), exception);
+		}
+}
+
+void HlslGeneratorInstance::PrintUniforms()
+{
+	// uniform-буферы и переменные
+	// отсортировать их
+	struct Sorter
 	{
-		{ "float4_xyz_w", "float4" },
-		{ "float4_xy_z_w", "float4" },
-		{ "cast4x4to3x3", "(float3x3)" }
+		bool operator()(const std::pair<ptr<UniformGroup>, ptr<UniformNode> >& a, const std::pair<ptr<UniformGroup>, ptr<UniformNode> >& b) const
+		{
+			int slotA = a.first->GetSlot();
+			int slotB = b.first->GetSlot();
+
+			return slotA < slotB || slotA == slotB && a.second->GetOffset() < b.second->GetOffset();
+		}
 	};
-	for(int i = 0; i < sizeof(names) / sizeof(names[0]); ++i)
-		if(strcmp(names[i][0], functionName) == 0)
-			return names[i][1];
-	return functionName;
+	std::sort(uniforms.begin(), uniforms.end(), Sorter());
+	// удалить дубликаты
+	uniforms.resize(std::unique(uniforms.begin(), uniforms.end()) - uniforms.begin());
+
+	// вывести буферы
+	for(size_t i = 0; i < uniforms.size(); )
+	{
+		size_t j;
+		for(j = i + 1; j < uniforms.size() && uniforms[j].first == uniforms[i].first; ++j);
+
+		// вывести заголовок
+		int slot = uniforms[i].first->GetSlot();
+		hlsl << "cbuffer CB" << slot << " : register(b" << slot << ")\n{\n";
+
+		// вывести переменные
+		for(size_t k = i; k < j; ++k)
+		{
+			ptr<UniformNode> uniformNode = uniforms[k].second;
+			int offset = uniformNode->GetOffset();
+			DataType valueType = uniformNode->GetValueType();
+
+			// переменная должна лежать на границе float'а, как минимум
+			if(offset % sizeof(float))
+				THROW_PRIMARY_EXCEPTION("Wrong variable offset: should be on 4-byte boundary");
+
+			// печатаем определение переменной
+
+			hlsl << "\t\t";
+			PrintDataType(valueType);
+			// имя переменной
+			hlsl << " u" << slot << '_' << offset;
+
+			// регистр и положение в нём переменной
+			hlsl << " : packoffset(c" << (offset / sizeof(float4));
+			// если переменная не начинается ровно на границе регистра, нужно дописать ещё компоненты регистра
+			int registerOffset = offset % sizeof(float4);
+			if(registerOffset)
+			{
+				// получить размер данных
+				int variableSize = GetDataTypeSize(valueType);
+				// переменная не должна пересекать границу регистра
+				if(registerOffset + variableSize > sizeof(float4))
+					THROW_PRIMARY_EXCEPTION("Variable should not intersect a register boundary");
+				// выложить столько буков, сколько нужно
+				registerOffset /= sizeof(float);
+				int endRegisterOffset = registerOffset + variableSize / sizeof(float);
+				hlsl << '.';
+				for(int j = registerOffset; j < endRegisterOffset; ++j)
+					hlsl << "xyzw"[j];
+			}
+			// конец упаковки
+			hlsl << ")";
+
+			// конец переменной
+			hlsl << ";\n";
+		}
+
+		// окончание
+		hlsl << "};\n";
+
+		i = j;
+	}
+}
+
+/// Вспомогательная функция: обработать вектор узлов и сделать из него вектор Structured.
+template <typename NodeType>
+void HlslGeneratorInstance::ProcessTransitionalNodes(std::vector<ptr<NodeType> >& nodes, std::vector<Structured>& structure)
+{
+	std::sort(nodes.begin(), nodes.end());
+	nodes.resize(std::unique(nodes.begin(), nodes.end()) - nodes.begin());
+	for(size_t i = 0; i < nodes.size(); ++i)
+	{
+		ptr<NodeType> node = nodes[i];
+		structure.push_back(Structured(node->GetValueType(), node->GetSemantic()));
+	}
 }
 
 std::string HlslGeneratorInstance::Generate()
@@ -407,71 +437,113 @@ std::string HlslGeneratorInstance::Generate()
 	// установить количество табуляций для вызываемых функций
 	tabsCount = 1;
 
+	// выборы в зависимости от типа шейдера
+	const char* mainFunctionName;
+	const char* inputTypeName;
+	const char* inputName;
+	const char* outputTypeName;
+	const char* outputName;
+	std::vector<Structured> inputs;
+	std::vector<Structured> outputs;
+
+	switch(shaderType)
+	{
+	case ShaderTypes::vertex:
+		mainFunctionName = "VS";
+		inputTypeName = "A";
+		inputName = "a";
+		outputTypeName = "V";
+		outputName = "v";
+
+		ProcessTransitionalNodes<AttributeNode>(attributes, inputs);
+		ProcessTransitionalNodes<TransitionalNode>(transformed, outputs);
+		break;
+	case ShaderTypes::pixel:
+		mainFunctionName = "PS";
+		inputTypeName = "V";
+		inputName = "v";
+		outputTypeName = "R";
+		outputName = "r";
+
+		ProcessTransitionalNodes<TransitionalNode>(transformed, inputs);
+		ProcessTransitionalNodes<TransitionalNode>(rasterized, outputs);
+		break;
+	default:
+		THROW_PRIMARY_EXCEPTION("Unknown shader type");
+	}
+
+	// первый проход: зарегистрировать все переменные
+	RegisterNode(rootNode);
+
 	// структура входных данных
-	hlsl << "struct Input\n{\n";
-	PrintVariables(shader.GetInputVariables(), "i", false);
+	hlsl << "struct " << inputTypeName << "\n{\n";
+	PrintStructure(inputs, inputName);
+	//PrintVariables(shader.GetInputVariables(), "i", false);
 	hlsl << "};\n";
 
 	// структура выходных данных
-	hlsl << "struct Output\n{\n";
-	PrintVariables(shader.GetOutputVariables(), "o", false);
+	hlsl << "struct " << outputTypeName << "\n{\n";
+	PrintStructure(outputs, outputName);
+	//PrintVariables(shader.GetOutputVariables(), "o", false);
 	hlsl << "};\n";
 
-	// структуры константных буферов
-	const std::vector<Shader::Variables>& uniformsVariables = shader.GetUniformsVariables();
-	for(size_t i = 0; i < uniformsVariables.size(); ++i)
-	{
-		const Shader::Variables& variables = uniformsVariables[i];
-		if(variables.empty())
-			continue;
-
-		hlsl << "cbuffer CBuffer" << i << " : register(b" << i << ")\n{\n";
-		char bufferPrefix[20];
-		sprintf(bufferPrefix, "u%u_", (unsigned int)i);
-		PrintVariables(variables, bufferPrefix, true);
-		hlsl << "};\n";
-	}
+	// вывести uniform-буферы
+	PrintUniforms();
 
 	// семплеры
-	const std::vector<Shader::Sampler>& samplers = shader.GetSamplers();
 	for(size_t i = 0; i < samplers.size(); ++i)
 	{
-		const Shader::Sampler& sampler = samplers[i];
-		if(sampler.samplerType != SamplerTypes::_None)
+		ptr<SamplerNode> samplerNode = samplers[i];
+		const char* textureStr;
+		switch(samplerNode->GetCoordType())
 		{
-			const char* textureStr;
-			switch(sampler.samplerType)
-			{
-			case SamplerTypes::_1D:
-				textureStr = "Texture1D";
-				break;
-			case SamplerTypes::_2D:
-				textureStr = "Texture2D";
-				break;
-			case SamplerTypes::_3D:
-				textureStr = "Texture3D";
-				break;
-			case SamplerTypes::_Cube:
-				textureStr = "TextureCube";
-				break;
-			default:
-				THROW_PRIMARY_EXCEPTION("Invalid sampler type");
-			}
-			// текстура
-			hlsl << textureStr << '<';
-			PrintDataType(sampler.dataType);
-			hlsl << "> t" << i << " : register(t" << i << ");\n";
-			// семплер
-			hlsl << "SamplerState s" << i << " : register(s" << i << ");\n";
+		case DataTypes::Float:
+			textureStr = "Texture1D";
+			break;
+		case DataTypes::Float2:
+			textureStr = "Texture2D";
+			break;
+		case DataTypes::Float3:
+			textureStr = "Texture3D";
+			break;
+		default:
+			THROW_PRIMARY_EXCEPTION("Invalid sampler coord type");
+		}
+		// текстура
+		hlsl << textureStr << '<';
+		PrintDataType(samplerNode->GetValueType());
+		int slot = samplerNode->GetSlot();
+		hlsl << "> t" << slot << " : register(t" << slot << ");\n";
+		// семплер
+		hlsl << "SamplerState s" << slot << " : register(s" << slot << ");\n";
+	}
+
+	// заголовок функции шейдера
+	hlsl << outputTypeName << ' ' << mainFunctionName << '(' << inputTypeName << ' ' << inputName << ")\n{\n\t"
+		<< outputTypeName << ' ' << outputName << ";\n";
+
+	// временные переменные
+	{
+		// отсортировать по индексу
+		std::vector<std::pair<int, DataType> > v;
+		for(std::unordered_map<ptr<TempNode>, int>::const_iterator i = temps.begin(); i != temps.end(); ++i)
+			v.push_back(std::make_pair(i->second, i->first->GetValueType()));
+		std::sort(v.begin(), v.end());
+
+		// вывести
+		for(size_t i = 0; i < v.size(); ++i)
+		{
+			PrintTabs();
+			PrintDataType(v[i].second);
+			hlsl << " t" << v[i].first << ";\n";
 		}
 	}
 
-	// функция шейдера
-	hlsl << "Output Main(Input input)\n{\n\tOutput output;\n";
 	// код шейдера
-	PrintStatement(shader.GetCode());
-	// возврат значения и конец
-	hlsl << "\treturn output;\n}\n";
+	PrintNode(rootNode);
+
+	// завершение шейдера
+	hlsl << "\treturn " << outputName << ";\n}\n";
 
 	return hlsl.str();
 }

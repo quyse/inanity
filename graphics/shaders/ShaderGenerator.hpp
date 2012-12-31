@@ -1,18 +1,18 @@
 #ifndef ___INANITY_GRAPHICS_SHADERS_SHADER_GENERATOR_HPP___
 #define ___INANITY_GRAPHICS_SHADERS_SHADER_GENERATOR_HPP___
 
-#include "shaders.hpp"
+#include "ShaderType.hpp"
 #include "../../String.hpp"
 
 BEGIN_INANITY_SHADERS
 
-class Shader;
+class Expression;
 
 /// Абстрактный класс генератора шейдеров.
 class ShaderGenerator : public Object
 {
 public:
-	virtual String Generate(const Shader& shader) = 0;
+	virtual String Generate(Expression code, ShaderType shaderType) = 0;
 };
 
 END_INANITY_SHADERS

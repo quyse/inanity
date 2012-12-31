@@ -114,7 +114,11 @@ var libraries = {
 		objects: [
 			'graphics.shaders.AttributeNode', 'graphics.shaders.SamplerNode',
 			'graphics.shaders.UniformNode', 'graphics.shaders.UniformGroup',
-			'graphics.shaders.SwizzleNode', 'graphics.shaders.OperationNode'
+			'graphics.shaders.SwizzleNode', 'graphics.shaders.OperationNode',
+			'graphics.shaders.SampleNode', 'graphics.shaders.FloatConstNode',
+			'graphics.shaders.SequenceNode', 'graphics.shaders.TransitionalNode',
+			'graphics.shaders.Expression',
+			'graphics.shaders.HlslGenerator', 'graphics.shaders.HlslGeneratorInstance',
 		]
 	},
 	// ******* подсистема GUI
