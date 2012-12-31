@@ -11,7 +11,7 @@ template <typename ValueType>
 class LValue : public Value<ValueType>
 {
 public:
-	LValue(ptr<ValueNode> node);
+	LValue(ptr<Node> node);
 
 	/// Оператор присваивания.
 	Value<ValueType> operator=(Value<ValueType> a);

@@ -3,19 +3,16 @@
 
 #include "Value.hpp"
 #include "OperationNode.hpp"
-#include "../../Exception.hpp"
 
 BEGIN_INANITY_SHADERS
 
 template <typename ValueType>
-Value<ValueType>::Value(ptr<ValueNode> node)
-: node(node)
-{
-#ifdef _DEBUG
-	if(node->GetValueType() != GetDataType<ValueType>())
-		THROW_PRIMARY_EXCEPTION("Wrong value expression value type");
-#endif
-}
+Value<ValueType>::Value(ptr<Node> node)
+: Expression(node) {}
+
+template <>
+Value<float>::Value(float constValue)
+: Expression(NEW(FloatConstNode(constValue))) {}
 
 template <typename ValueType>
 void Value<ValueType>::operator=(Value<ValueType> a)
@@ -24,9 +21,10 @@ void Value<ValueType>::operator=(Value<ValueType> a)
 }
 
 template <typename ValueType>
-ptr<ValueNode> Value<ValueType>::GetNode() const
+template <typename ResultValueType>
+Value<ResultValueType> Value<ValueType>::Swizzle(const char* map) const
 {
-	return node;
+	return NEW(SwizzleNode(node, map));
 }
 
 template <typename ValueType>

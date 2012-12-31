@@ -9,7 +9,7 @@ BEGIN_INANITY_SHADERS
 
 template <typename ValueType>
 Uniform<ValueType>::Uniform(ptr<UniformNode> node)
-: LValueExpession(node)
+: LValue(node)
 {
 #ifdef _DEBUG
 	if(node->GetValueType() != GetDataType<ValueType>())

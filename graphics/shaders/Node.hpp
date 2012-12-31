@@ -1,8 +1,8 @@
 #ifndef ___INANITY_GRAPHICS_SHADERS_NODE_HPP___
 #define ___INANITY_GRAPHICS_SHADERS_NODE_HPP___
 
-#include "../DataType.hpp"
 #include "shaders.hpp"
+#include "../DataType.hpp"
 
 BEGIN_INANITY_SHADERS
 
@@ -14,28 +14,26 @@ public:
 	/** Типы соответствуют классам, к которым можно привести класс. */
 	enum Type
 	{
-		/// Константа.
-		typeConst,
+		/// Константа float.
+		typeFloatConst,
 		/// Атрибут.
 		typeAttribute,
 		/// Uniform-переменная.
 		typeUniform,
+		/// Семплер.
+		typeSampler,
 		/// Временная переменная.
 		typeTemp,
-		/// Выход вершинного шейдера (и вход пиксельного).
+		/// Выходная переменная вершинного шейдера.
 		typeTransformed,
-		/// Выход пиксельного шейдера.
+		/// Выходная переменная пиксельного шейдера.
 		typeRasterized,
-		/// Операция без аргументов.
-		typeOperation0,
-		/// Операция с одним аргументом.
-		typeOperation1,
-		/// Операция с двумя аргументами.
-		typeOperation2,
-		/// Операция с тремя аргументами.
-		typeOperation3,
-		/// Операция с четырьмя аргументами.
-		typeOperation4,
+		/// Последовательность выражений.
+		typeSequence,
+		/// Операция перестановки компонент.
+		typeSwizzle,
+		/// Операция.
+		typeOperation,
 		/// Семплирование.
 		typeSample
 	};

@@ -5,6 +5,8 @@
 
 BEGIN_INANITY_SHADERS
 
+class UniformNode;
+
 template <typename ValueType>
 class Uniform : public LValue<ValueType>
 {

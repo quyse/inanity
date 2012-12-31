@@ -1,12 +1,12 @@
 #ifndef ___INANITY_GRAPHICS_SHADERS_OPERATION_NODE_HPP___
 #define ___INANITY_GRAPHICS_SHADERS_OPERATION_NODE_HPP___
 
-#include "ValueNode.hpp"
+#include "Node.hpp"
 
 BEGIN_INANITY_SHADERS
 
 /// Класс выражения-операции.
-class OperationNode : public ValueNode
+class OperationNode : public Node
 {
 public:
 	/// Максимальное количество аргументов.
@@ -15,40 +15,46 @@ public:
 	/// Операция.
 	enum Operation
 	{
-		operationSwizzle,
 		operationAssign,
 		operationNegate,
 		operationAdd,
 		operationSubtract,
 		operationMultiply,
 		operationDivide,
+		operationFloat1111to4,
+		operationFloat31to4,
 		operationDot,
 		operationCross,
+		operationMul
 	};
 
 private:
 	/// Операция.
 	Operation operation;
 	/// Аргументы.
-	ptr<ValueNode> a, b, c, d;
+	ptr<Node> a, b, c, d;
 	/// Количество аргументов.
 	int argumentsCount;
 
 public:
 	/// Конструкторы.
 	OperationNode(Operation operation);
-	OperationNode(Operation operation, ptr<ValueNode> a);
-	OperationNode(Operation operation, ptr<ValueNode> a, ptr<ValueNode> b);
-	OperationNode(Operation operation, ptr<ValueNode> a, ptr<ValueNode> b, ptr<ValueNode> c);
-	OperationNode(Operation operation, ptr<ValueNode> a, ptr<ValueNode> b, ptr<ValueNode> c, ptr<ValueNode> d);
+	OperationNode(Operation operation, ptr<Node> a);
+	OperationNode(Operation operation, ptr<Node> a, ptr<Node> b);
+	OperationNode(Operation operation, ptr<Node> a, ptr<Node> b, ptr<Node> c);
+	OperationNode(Operation operation, ptr<Node> a, ptr<Node> b, ptr<Node> c, ptr<Node> d);
+
+	Type GetType() const;
 
 	Operation GetOperation() const;
 	int GetArgumentsCount() const;
 
-	ptr<ValueNode> GetA() const;
-	ptr<ValueNode> GetB() const;
-	ptr<ValueNode> GetC() const;
-	ptr<ValueNode> GetD() const;
+	ptr<Node> GetA() const;
+	ptr<Node> GetB() const;
+	ptr<Node> GetC() const;
+	ptr<Node> GetD() const;
+
+	ptr<Node> GetArgument(int number) const;
 };
 
 END_INANITY_SHADERS
