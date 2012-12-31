@@ -9,7 +9,7 @@ BEGIN_INANITY_SHADERS
 
 template <typename ValueType>
 Uniform<ValueType>::Uniform(ptr<UniformNode> node)
-: LValue(node)
+: Value<ValueType>(node)
 {
 #ifdef _DEBUG
 	if(node->GetValueType() != GetDataType<ValueType>())
@@ -17,11 +17,26 @@ Uniform<ValueType>::Uniform(ptr<UniformNode> node)
 #endif
 }
 
+/// Скопировать данные переменной.
 template <typename ValueType>
-void Uniform<ValueType>::SetValue(ValueType value)
+inline void CopyUniformData(ValueType& data, const ValueType& v)
+{
+	data = v;
+}
+// Для матриц требуется транспонирование.
+template <>
+inline void CopyUniformData(float4x4& data, const float4x4& v)
+{
+	for(int i = 0; i < 4; ++i)
+		for(int j = 0; j < 4; ++j)
+			data.t[i][j] = v.t[j][i];
+}
+
+template <typename ValueType>
+void Uniform<ValueType>::SetValue(const ValueType& value)
 {
 	UniformNode* uniformNode = fast_cast<UniformNode*>(&*node);
-	*(ValueType*)((char*)uniformNode->GetBuffer()->GetData() + uniformNode->GetOffset()) = value;
+	CopyUniformData<ValueType>(*(ValueType*)((char*)uniformNode->GetGroup()->GetData() + uniformNode->GetOffset()), value);
 }
 
 END_INANITY_SHADERS

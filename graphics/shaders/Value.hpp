@@ -13,10 +13,6 @@ class Node;
 template <typename ValueType>
 class Value : public Expression
 {
-protected:
-	/// Объект выражения.
-	ptr<Node> node;
-
 private:
 	/// Оператор присваивания запрещён (приватный).
 	void operator=(Value a);
