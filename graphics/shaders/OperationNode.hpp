@@ -25,7 +25,8 @@ public:
 		operationFloat31to4,
 		operationDot,
 		operationCross,
-		operationMul
+		operationMul,
+		operationNormalize
 	};
 
 private:

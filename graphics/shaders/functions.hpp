@@ -6,6 +6,7 @@
 
 BEGIN_INANITY_SHADERS
 
+#define OP1(op) NEW(OperationNode(OperationNode::operation##op, a.GetNode()))
 #define OP2(op) NEW(OperationNode(OperationNode::operation##op, a.GetNode(), b.GetNode()))
 #define OP4(op) NEW(OperationNode(OperationNode::operation##op, a.GetNode(), b.GetNode(), c.GetNode(), d.GetNode()))
 
@@ -47,6 +48,13 @@ template <int n, int m>
 Value<vector<n> > mul(Value<matrix<n, m> > a, Value<vector<m> > b)
 {
 	return OP2(Mul);
+}
+
+// normalize
+template <int n>
+Value<vector<n> > normalize(Value<vector<n> > a)
+{
+	return OP1(Normalize);
 }
 
 #undef OP2

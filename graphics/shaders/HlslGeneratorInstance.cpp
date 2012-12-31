@@ -254,6 +254,7 @@ void HlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 				OP(Dot, dot);
 				OP(Cross, cross);
 				OP(Mul, mul);
+				OP(Normalize, normalize);
 #undef OP
 			default:
 				THROW_PRIMARY_EXCEPTION("Unknown operation type");
