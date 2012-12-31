@@ -6,8 +6,8 @@ Layout::Element::Element(DataType dataType, int offset, int semantic)
 Layout::Layout(const std::vector<Element>& elements, int size, int stride)
 : elements(elements), size(size), stride(stride)
 {
-	if(stride < 0)
-		stride = size;
+	if(this->stride < 0)
+		this->stride = size;
 }
 
 const std::vector<Layout::Element>& Layout::GetElements() const
