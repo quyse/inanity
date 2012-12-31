@@ -9,8 +9,8 @@
 
 #include "../graphics.hpp"
 
-#define BEGIN_INANITY_SHADERS BEGIN_INANITY namespace Shaders {
-#define END_INANITY_SHADERS } END_INANITY
+#define BEGIN_INANITY_SHADERS BEGIN_INANITY_GRAPHICS namespace Shaders {
+#define END_INANITY_SHADERS } END_INANITY_GRAPHICS
 
 // Выбор языка для генерации шейдеров.
 #ifdef ___INANITY_GRAPHICS_DX

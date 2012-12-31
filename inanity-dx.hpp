@@ -20,7 +20,7 @@
 #include "graphics/DxPixelShader.hpp"
 #include "graphics/DxPresenter.hpp"
 #include "graphics/DxRenderBuffer.hpp"
-#include "graphics/DxSampler.hpp"
+#include "graphics/DxSamplerState.hpp"
 #include "graphics/DxSystem.hpp"
 #include "graphics/DxTexture.hpp"
 #include "graphics/DxUniformBuffer.hpp"

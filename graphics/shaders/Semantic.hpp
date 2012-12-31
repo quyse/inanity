@@ -35,6 +35,7 @@ struct Semantics
 		_SpecialEnd = _TargetDepthEnd,
 
 		//******* Пользовательские семантики.
+		/* Для атрибутов: Custom0 + номер атрибутной семантики. */
 
 		_CustomBegin = _SpecialEnd,
 

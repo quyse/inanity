@@ -40,7 +40,7 @@
 #include "graphics/PresentMode.hpp"
 #include "graphics/RenderBuffer.hpp"
 #include "graphics/RenderStage.hpp"
-#include "graphics/Sampler.hpp"
+#include "graphics/SamplerState.hpp"
 #include "graphics/Shader.hpp"
 #include "graphics/ShaderSource.hpp"
 #include "graphics/System.hpp"
