@@ -63,6 +63,20 @@ public:
 			writer->Write(&*indices.begin(), indices.size() * sizeof(Index));
 	}
 
+	ptr<File> SerializeVertices() const
+	{
+		ptr<File> file = NEW(MemoryFile(vertices.size() * sizeof(Vertex)));
+		memcpy(file->GetData(), &*vertices.begin(), vertices.size() * sizeof(Vertex));
+		return file;
+	}
+
+	ptr<File> SerializeIndices() const
+	{
+		ptr<File> file = NEW(MemoryFile(indices.size() * sizeof(Index)));
+		memcpy(file->GetData(), &*indices.begin(), indices.size() * sizeof(Index));
+		return file;
+	}
+
 	/// Оптимизировать геометрию
 	/** Выполняется объединение одинаковых вершин, с заданием соответствующих индексов.
 	Для типа Vertex требуется наличие operator< и operator==.

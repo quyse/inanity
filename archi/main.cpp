@@ -2,7 +2,7 @@
 //#include "SimpleGeometryCreator.hpp"
 //#include "FontCreator.hpp"
 #include "SystemFontCreator.hpp"
-//#include "WavefrontObj.hpp"
+#include "WavefrontObj.hpp"
 //#include "XafConverter.hpp"
 #include <string>
 #include <iostream>
@@ -29,7 +29,7 @@ int wmain(int argc, const wchar_t** argv)
 	ptr<Processor> processors[] =
 	{
 		NEW(BlobCreator()),
-//		NEW(WavefrontObj()),
+		NEW(WavefrontObj()),
 //		NEW(SimpleGeometryCreator()),
 		NEW(SystemFontCreator())
 	};

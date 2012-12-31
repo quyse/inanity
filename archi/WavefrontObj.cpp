@@ -4,7 +4,6 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
-using namespace std;
 
 bool operator<(const Vertex& a, const Vertex& b)
 {
@@ -46,16 +45,22 @@ void WavefrontObj::Run(const std::vector<String>& arguments)
 	if(arguments.size() < 3)
 		THROW_PRIMARY_EXCEPTION("Must be at least 3 arguments for command");
 
-	if(!_wfreopen(Strings::UTF82Unicode(arguments[0]), L"r", stdin))
+	if(!_wfreopen(Strings::UTF82Unicode(arguments[0]).c_str(), L"r", stdin))
 		THROW_PRIMARY_EXCEPTION("Can't open source file");
 
 	ptr<Graphics::EditableGeometry<Vertex> > geometry = WavefrontObj::Convert();
-	
+
+	ptr<FileSystem> fileSystem = FolderFileSystem::GetNativeFileSystem();
+
+	fileSystem->SaveFile(geometry->SerializeVertices(), arguments[1] + ".vertices");
+	fileSystem->SaveFile(geometry->SerializeIndices(), arguments[1] + ".indices");
+
+#if 0
 	ptr<EditableGeometry> eGeometry;
 	wstring format = arguments[2];
-	if(format == L"pnt")
+	if(format == "pnt")
 		eGeometry = geometry->Untype(argumentsCount >= 4 ? arguments[3] : format);
-	else if(format == L"pbt")
+	else if(format == "pbt")
 		eGeometry = geometry->CreateBumpTransformations<NormalVertex>()->SmoothBump<&NormalVertex::transform1, &NormalVertex::transform2, &NormalVertex::transform3>()->Optimize()->Untype(argumentsCount >= 4 ? arguments[3] : format);
 //		eGeometry = geometry->CreateBumpTransformations<NormalVertex>()/*->Optimize()*/->Untype(argumentsCount >= 4 ? arguments[3] : format);
 /*	{
@@ -66,18 +71,19 @@ void WavefrontObj::Run(const std::vector<String>& arguments)
 		eGeometry = eGeometry->CreateTangentGeometry(true, argumentsCount >= 4 ? arguments[3] : format);
 	}*/
 	else
-		THROW_PRIMARY_EXCEPTION(L"Unknown geometry format");
+		THROW_PRIMARY_EXCEPTION("Unknown geometry format");
 
-	MakePointer(new FolderFileSystem(L""))->SaveFile(GeometryFileFormatter::Save(eGeometry), arguments[1]);
+	MakePointer(new FolderFileSystem(""))->SaveFile(GeometryFileFormatter::Save(eGeometry), arguments[1]);
+#endif
 }
 
-ptr<TypedGeometry<Vertex> > WavefrontObj::Convert()
+ptr<EditableGeometry<Vertex> > WavefrontObj::Convert()
 {
-	vector<float3> points;
-	vector<float3> normals;
-	vector<float2> texPoints;
-	string geometryName;
-	vector<Vertex> vertices;
+	std::vector<float3> points;
+	std::vector<float3> normals;
+	std::vector<float2> texPoints;
+	std::string geometryName;
+	std::vector<Vertex> vertices;
 
 	//цикл по строкам файла
 	char ss[1000];
@@ -89,8 +95,8 @@ ptr<TypedGeometry<Vertex> > WavefrontObj::Convert()
 		if(isspace(ss[0]) || ss[0] == '#') continue;
 
 		//считать первое слово (команду)
-		stringstream s(ss);
-		string command;
+		std::stringstream s(ss);
+		std::string command;
 		s >> command;
 
 		//вершина
@@ -135,10 +141,10 @@ ptr<TypedGeometry<Vertex> > WavefrontObj::Convert()
 				vertices.push_back(vertex);
 			}
 			//поменять порядок вершин (надо!)
-			swap(vertices[vertices.size() - 1], vertices[vertices.size() - 3]);
+			std::swap(vertices[vertices.size() - 1], vertices[vertices.size() - 3]);
 		}
 	}
 
 	//создать модель, оптимизировать и вернуть
-	return MakePointer(new TypedGeometry<Vertex>(vertices))->Optimize();
+	return MakePointer(NEW(EditableGeometry<Vertex>(vertices)))->Optimize();
 }
