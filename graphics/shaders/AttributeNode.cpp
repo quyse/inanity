@@ -1,19 +1,24 @@
 #include "AttributeNode.hpp"
 
-AttributeNode::AttributeNode(int offset, DataType valueType)
-: offset(offset), valueType(valueType) {}
+AttributeNode::AttributeNode(DataType valueType, int layoutSemantic)
+: valueType(valueType), layoutSemantic(layoutSemantic) {}
 
 Node::Type AttributeNode::GetType() const
 {
 	return typeAttribute;
 }
 
-int AttributeNode::GetOffset() const
-{
-	return offset;
-}
-
 DataType AttributeNode::GetValueType() const
 {
 	return valueType;
+}
+
+int AttributeNode::GetLayoutSemantic() const
+{
+	return layoutSemantic;
+}
+
+Semantic AttributeNode::GetSemantic() const
+{
+	return Semantic(Semantics::Custom0 + layoutSemantic);
 }

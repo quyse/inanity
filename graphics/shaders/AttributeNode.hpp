@@ -1,7 +1,8 @@
 #ifndef ___INANITY_GRAPHICS_SHADERS_ATTRIBUTE_NODE_HPP___
 #define ___INANITY_GRAPHICS_SHADERS_ATTRIBUTE_NODE_HPP___
 
-#include "ValueNode.hpp"
+#include "Node.hpp"
+#include "Semantic.hpp"
 
 BEGIN_INANITY_SHADERS
 
@@ -9,16 +10,18 @@ BEGIN_INANITY_SHADERS
 class AttributeNode : public Node
 {
 protected:
-	int offset;
 	DataType valueType;
+	/// Семантика атрибута - тот же номер, что и в семантике Layout.
+	int layoutSemantic;
 
 public:
-	AttributeNode(int offset, DataType valueType);
+	AttributeNode(DataType valueType, int layoutSemantic);
 
 	Type GetType() const;
 
-	int GetOffset() const;
 	DataType GetValueType() const;
+	int GetLayoutSemantic() const;
+	Semantic GetSemantic() const;
 };
 
 END_INANITY_SHADERS
