@@ -8,6 +8,7 @@
 #include "graphics/shaders/functions.hpp"
 #include "graphics/shaders/Attribute.ipp"
 #include "graphics/shaders/AttributeNode.hpp"
+#include "graphics/shaders/CastNode.hpp"
 #include "graphics/shaders/Expression.hpp"
 #include "graphics/shaders/FloatConstNode.hpp"
 #include "graphics/shaders/Fragment.ipp"

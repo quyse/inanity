@@ -35,7 +35,9 @@ public:
 		/// Операция.
 		typeOperation,
 		/// Семплирование.
-		typeSample
+		typeSample,
+		/// Преобразование типа.
+		typeCast
 	};
 
 public:
