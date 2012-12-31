@@ -39,8 +39,6 @@ private:
 	ShaderType shaderType;
 	/// Результирующий текст шейдера на HLSL.
 	std::ostringstream hlsl;
-	/// Текущее количество табов в начале строки.
-	int tabsCount;
 
 	/// Атрибутные переменные.
 	std::vector<ptr<AttributeNode> > attributes;
@@ -58,8 +56,6 @@ private:
 	std::vector<ptr<TransitionalNode> > rasterized;
 
 private:
-	/// Напечатать отступ нужной длины.
-	void PrintTabs();
 	/// Напечатать имя типа.
 	void PrintDataType(DataType dataType);
 	/// Зарегистрировать узел.

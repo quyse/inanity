@@ -55,7 +55,7 @@ String DxSystem::GetSemanticString(int semantic)
 {
 	// имя семантики получается переводом кода семантики в 26-ричную систему (буквы)
 	String name;
-	name.assign('A', 8);
+	name.assign(8, 'A');
 	for(int j = 0; semantic; ++j)
 	{
 		name[j] = 'A' + semantic % 26;

@@ -22,14 +22,8 @@ HlslGeneratorInstance::Structured::Structured(DataType valueType, Semantic seman
 : valueType(valueType), semantic(semantic) {}
 
 HlslGeneratorInstance::HlslGeneratorInstance(ptr<Node> rootNode, ShaderType shaderType)
-: rootNode(rootNode), shaderType(shaderType), tabsCount(0), tempsCount(0)
+: rootNode(rootNode), shaderType(shaderType), tempsCount(0)
 {}
-
-void HlslGeneratorInstance::PrintTabs()
-{
-	for(int i = 0; i < tabsCount; ++i)
-		hlsl << '\t';
-}
 
 void HlslGeneratorInstance::PrintDataType(DataType dataType)
 {
@@ -162,16 +156,16 @@ void HlslGeneratorInstance::PrintNode(Node* node)
 		}
 		break;
 	case Node::typeTransformed:
-		hlsl << 'v.v' << fast_cast<TransitionalNode*>(node)->GetSemantic();
+		hlsl << "v.v" << (int)fast_cast<TransitionalNode*>(node)->GetSemantic();
 		break;
 	case Node::typeRasterized:
-		hlsl << 'r.r' << fast_cast<TransitionalNode*>(node)->GetSemantic();
+		hlsl << "r.r" << (int)fast_cast<TransitionalNode*>(node)->GetSemantic();
 		break;
 	case Node::typeSequence:
 		{
 			SequenceNode* sequenceNode = fast_cast<SequenceNode*>(node);
 			PrintNode(sequenceNode->GetA());
-			hlsl << ";\n";
+			hlsl << ";\n\t";
 			PrintNode(sequenceNode->GetB());
 		}
 		break;
@@ -287,7 +281,7 @@ void HlslGeneratorInstance::PrintStructure(const std::vector<Structured>& variab
 			// печатаем определение переменной
 
 			// тип переменной
-			hlsl << "\t\t";
+			hlsl << '\t';
 			PrintDataType(variable.valueType);
 			// имя переменной
 			hlsl << ' ' << variableNamePrefix << variable.semantic;
@@ -295,7 +289,7 @@ void HlslGeneratorInstance::PrintStructure(const std::vector<Structured>& variab
 			//** семантика
 
 			const char* semanticStr = 0;
-			char semanticBuffer[16];
+			char semanticBuffer[32];
 			// нет семантики - плохо
 			if(variable.semantic == Semantics::None)
 				THROW_PRIMARY_EXCEPTION("Structured variables should have semantic");
@@ -382,7 +376,7 @@ void HlslGeneratorInstance::PrintUniforms()
 
 			// печатаем определение переменной
 
-			hlsl << "\t\t";
+			hlsl << '\t';
 			PrintDataType(valueType);
 			// имя переменной
 			hlsl << " u" << slot << '_' << offset;
@@ -434,8 +428,8 @@ void HlslGeneratorInstance::ProcessTransitionalNodes(std::vector<ptr<NodeType> >
 
 std::string HlslGeneratorInstance::Generate()
 {
-	// установить количество табуляций для вызываемых функций
-	tabsCount = 1;
+	// первый проход: зарегистрировать все переменные
+	RegisterNode(rootNode);
 
 	// выборы в зависимости от типа шейдера
 	const char* mainFunctionName;
@@ -472,19 +466,14 @@ std::string HlslGeneratorInstance::Generate()
 		THROW_PRIMARY_EXCEPTION("Unknown shader type");
 	}
 
-	// первый проход: зарегистрировать все переменные
-	RegisterNode(rootNode);
-
 	// структура входных данных
 	hlsl << "struct " << inputTypeName << "\n{\n";
 	PrintStructure(inputs, inputName);
-	//PrintVariables(shader.GetInputVariables(), "i", false);
 	hlsl << "};\n";
 
 	// структура выходных данных
 	hlsl << "struct " << outputTypeName << "\n{\n";
 	PrintStructure(outputs, outputName);
-	//PrintVariables(shader.GetOutputVariables(), "o", false);
 	hlsl << "};\n";
 
 	// вывести uniform-буферы
@@ -533,17 +522,19 @@ std::string HlslGeneratorInstance::Generate()
 		// вывести
 		for(size_t i = 0; i < v.size(); ++i)
 		{
-			PrintTabs();
+			hlsl << '\t';
 			PrintDataType(v[i].second);
-			hlsl << " t" << v[i].first << ";\n";
+			hlsl << " _" << v[i].first << ";\n";
 		}
 	}
+
+	hlsl << '\t';
 
 	// код шейдера
 	PrintNode(rootNode);
 
 	// завершение шейдера
-	hlsl << "\treturn " << outputName << ";\n}\n";
+	hlsl << ";\n\treturn " << outputName << ";\n}\n";
 
 	return hlsl.str();
 }

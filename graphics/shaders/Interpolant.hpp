@@ -11,6 +11,9 @@ class Interpolant : public LValue<ValueType>
 {
 public:
 	Interpolant(Semantic semantic);
+
+	/// Явный оператор присваивания.
+	Value<ValueType> operator=(Value<ValueType> a);
 };
 
 END_INANITY_SHADERS

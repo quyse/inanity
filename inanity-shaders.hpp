@@ -27,6 +27,7 @@
 #include "graphics/shaders/UniformGroup.hpp"
 #include "graphics/shaders/UniformNode.hpp"
 #include "graphics/shaders/Value.ipp"
+#include "graphics/shaders/Temp.ipp"
 #include "graphics/shaders/TempNode.hpp"
 #include "graphics/shaders/TransitionalNode.hpp"
 

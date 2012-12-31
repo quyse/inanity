@@ -11,7 +11,10 @@ template <typename ValueType>
 class Fragment : public LValue<ValueType>
 {
 public:
-	Fragment(Semantic semantic)
+	Fragment(Semantic semantic);
+
+	/// Явный оператор присваивания.
+	Value<ValueType> operator=(Value<ValueType> a);
 };
 
 END_INANITY_SHADERS
