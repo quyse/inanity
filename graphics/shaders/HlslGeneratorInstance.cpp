@@ -1,4 +1,5 @@
 #include "HlslGeneratorInstance.hpp"
+#include "../ShaderSource.hpp"
 #include "Node.hpp"
 #include "AttributeNode.hpp"
 #include "FloatConstNode.hpp"
@@ -12,6 +13,9 @@
 #include "TempNode.hpp"
 #include "TransitionalNode.hpp"
 #include "../DxSystem.hpp"
+#include "../../File.hpp"
+#include "../../FileSystem.hpp"
+#include "../../Strings.hpp"
 #include "../../Exception.hpp"
 #include <algorithm>
 #include <iomanip>
@@ -426,7 +430,7 @@ void HlslGeneratorInstance::ProcessTransitionalNodes(std::vector<ptr<NodeType> >
 	}
 }
 
-std::string HlslGeneratorInstance::Generate()
+ptr<ShaderSource> HlslGeneratorInstance::Generate()
 {
 	// первый проход: зарегистрировать все переменные
 	RegisterNode(rootNode);
@@ -437,6 +441,7 @@ std::string HlslGeneratorInstance::Generate()
 	const char* inputName;
 	const char* outputTypeName;
 	const char* outputName;
+	const char* profile;
 	std::vector<Structured> inputs;
 	std::vector<Structured> outputs;
 
@@ -448,6 +453,7 @@ std::string HlslGeneratorInstance::Generate()
 		inputName = "a";
 		outputTypeName = "V";
 		outputName = "v";
+		profile = "vs_4_0";
 
 		ProcessTransitionalNodes<AttributeNode>(attributes, inputs);
 		ProcessTransitionalNodes<TransitionalNode>(transformed, outputs);
@@ -458,6 +464,7 @@ std::string HlslGeneratorInstance::Generate()
 		inputName = "v";
 		outputTypeName = "R";
 		outputName = "r";
+		profile = "ps_4_0";
 
 		ProcessTransitionalNodes<TransitionalNode>(transformed, inputs);
 		ProcessTransitionalNodes<TransitionalNode>(rasterized, outputs);
@@ -536,7 +543,7 @@ std::string HlslGeneratorInstance::Generate()
 	// завершение шейдера
 	hlsl << ";\n\treturn " << outputName << ";\n}\n";
 
-	return hlsl.str();
+	return NEW(ShaderSource(Strings::String2File(hlsl.str()), 0, mainFunctionName, profile));
 }
 
 END_INANITY_SHADERS

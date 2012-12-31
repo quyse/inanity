@@ -85,6 +85,7 @@ var libraries = {
 			'graphics.Context', 'graphics.ContextState',
 			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.Layout', 'graphics.LayoutBinding', 'graphics.IndexBuffer',
 			'graphics.SamplerState',
+			'graphics.ShaderSource',
 			'graphics.EditableFont']
 	},
 	// ******* подсистема DirectX 11
@@ -95,7 +96,8 @@ var libraries = {
 			'graphics.DxRenderBuffer', 'graphics.DxDepthStencilBuffer', 'graphics.DxTexture', 'graphics.DxUniformBuffer',
 			'graphics.DxVertexBuffer', 'graphics.DxIndexBuffer',
 			'graphics.DxVertexShader', 'graphics.DxPixelShader',
-			'graphics.DxSamplerState'
+			'graphics.DxSamplerState',
+			'graphics.D3D10BlobFile', 'graphics.DxShaderCompiler'
 		]
 	},
 	// ******* подсистема OpenGl
@@ -130,7 +132,7 @@ var libraries = {
 
 var executables = {
 	archi: {
-		objects: ['archi.main', 'archi.BlobCreator', /*'archi.FontCreator',*/ /*'archi.SimpleGeometryCreator',*/ 'archi.SystemFontCreator'/*, 'archi.WavefrontObj', 'archi.XafConverter'*/],
+		objects: ['archi.main', 'archi.BlobCreator', /*'archi.FontCreator',*/ /*'archi.SimpleGeometryCreator',*/ 'archi.SystemFontCreator', 'archi.WavefrontObj', /*'archi.XafConverter'*/],
 		staticLibraries: ['libinanity-base', 'libinanity-graphics', 'libinanity-lua', 'deps/lua//liblua'],
 		dynamicLibraries: ['user32.lib', 'gdi32.lib', 'comdlg32.lib']
 	}

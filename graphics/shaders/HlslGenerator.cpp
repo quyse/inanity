@@ -1,5 +1,6 @@
 #include "HlslGenerator.hpp"
 #include "HlslGeneratorInstance.hpp"
+#include "../ShaderSource.hpp"
 #include "Expression.hpp"
 #include "AttributeNode.hpp"
 #include "TempNode.hpp"
@@ -9,7 +10,7 @@
 #include "TransitionalNode.hpp"
 #include "OperationNode.hpp"
 
-String HlslGenerator::Generate(Expression code, ShaderType shaderType)
+ptr<ShaderSource> HlslGenerator::Generate(Expression code, ShaderType shaderType)
 {
 	HlslGeneratorInstance instance(code.GetNode(), shaderType);
 

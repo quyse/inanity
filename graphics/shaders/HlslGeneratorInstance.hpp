@@ -8,6 +8,12 @@
 #include <unordered_map>
 #include <sstream>
 
+BEGIN_INANITY_GRAPHICS
+
+class ShaderSource;
+
+END_INANITY_GRAPHICS
+
 BEGIN_INANITY_SHADERS
 
 class Node;
@@ -75,7 +81,7 @@ private:
 public:
 	HlslGeneratorInstance(ptr<Node> rootNode, ShaderType shaderType);
 
-	std::string Generate();
+	ptr<ShaderSource> Generate();
 };
 
 END_INANITY_SHADERS

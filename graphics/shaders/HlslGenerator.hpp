@@ -9,7 +9,7 @@ BEGIN_INANITY_SHADERS
 class HlslGenerator : public ShaderGenerator
 {
 public:
-	String Generate(Expression code, ShaderType shaderType);
+	ptr<ShaderSource> Generate(Expression code, ShaderType shaderType);
 };
 
 END_INANITY_SHADERS

@@ -11,6 +11,7 @@
 #error DirectX works only on Windows.
 #endif
 
+#include "graphics/D3D10BlobFile.hpp"
 #include "graphics/DxContext.hpp"
 #include "graphics/DxDepthStencilBuffer.hpp"
 #include "graphics/DxDevice.hpp"
@@ -21,6 +22,7 @@
 #include "graphics/DxPresenter.hpp"
 #include "graphics/DxRenderBuffer.hpp"
 #include "graphics/DxSamplerState.hpp"
+#include "graphics/DxShaderCompiler.hpp"
 #include "graphics/DxSystem.hpp"
 #include "graphics/DxTexture.hpp"
 #include "graphics/DxUniformBuffer.hpp"
