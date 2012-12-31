@@ -5,6 +5,7 @@
 #include "Win32Output.hpp"
 #include "DxPresenter.hpp"
 #include "DxRenderBuffer.hpp"
+#include "DxDepthStencilBuffer.hpp"
 #include "DxVertexShader.hpp"
 #include "DxPixelShader.hpp"
 #include "DxUniformBuffer.hpp"
@@ -149,6 +150,68 @@ ptr<RenderBuffer> DxDevice::CreateRenderBuffer(int width, int height, PixelForma
 	catch(Exception* exception)
 	{
 		THROW_SECONDARY_EXCEPTION("Can't create render buffer", exception);
+	}
+}
+
+ptr<DepthStencilBuffer> DxDevice::CreateDepthStencilBuffer(int width, int height)
+{
+	try
+	{
+		bool canBeResource = false;
+
+		ID3D11Texture2D* bufferInterface;
+		ComPointer<ID3D11Texture2D> buffer;
+		{
+			D3D11_TEXTURE2D_DESC desc;
+			desc.Width = width;
+			desc.Height = height;
+			desc.MipLevels = 1;
+			desc.ArraySize = 1;
+			desc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+			desc.SampleDesc.Count = 1;
+			desc.SampleDesc.Quality = 0;
+			desc.Usage = D3D11_USAGE_DEFAULT;
+			desc.BindFlags = (canBeResource ? D3D11_BIND_SHADER_RESOURCE : 0) | D3D11_BIND_DEPTH_STENCIL;
+			desc.CPUAccessFlags = 0;
+			desc.MiscFlags = 0;
+			if(FAILED(device->CreateTexture2D(&desc, 0, &bufferInterface)))
+				THROW_PRIMARY_EXCEPTION("Can't create buffer");
+			buffer = bufferInterface;
+		}
+
+		ID3D11DepthStencilView* depthStencilViewInterface;
+		ComPointer<ID3D11DepthStencilView> depthStencilView;
+		{
+			D3D11_DEPTH_STENCIL_VIEW_DESC desc;
+			desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+			desc.Flags = 0;
+			desc.Texture2D.MipSlice = 0;
+			if(FAILED(device->CreateDepthStencilView(buffer, &desc, &depthStencilViewInterface)))
+				THROW_PRIMARY_EXCEPTION("Can't create depth stencil view");
+			depthStencilView = depthStencilViewInterface;
+		}
+
+		if(canBeResource)
+		{
+			ID3D11ShaderResourceView* shaderResourceViewInterface;
+			ComPointer<ID3D11ShaderResourceView> shaderResourceView;
+			D3D11_SHADER_RESOURCE_VIEW_DESC desc;
+			desc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+			desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			desc.Texture2D.MostDetailedMip = 0;
+			desc.Texture2D.MipLevels = 1;
+			if(FAILED(device->CreateShaderResourceView(buffer, &desc, &shaderResourceViewInterface)))
+				THROW_PRIMARY_EXCEPTION("Can't create shader resource view");
+			shaderResourceView = shaderResourceViewInterface;
+			return NEW(DxDepthStencilBuffer(depthStencilView, NEW(DxTexture(shaderResourceView))));
+		}
+
+		return NEW(DxDepthStencilBuffer(depthStencilView));
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create depth stencil buffer", exception);
 	}
 }
 

@@ -38,6 +38,7 @@ public:
 	ptr<Presenter> CreatePresenter(ptr<Output> output, const PresentMode& mode);
 	ptr<Context> GetContext();
 	ptr<RenderBuffer> CreateRenderBuffer(int width, int height, PixelFormat pixelFormat);
+	ptr<DepthStencilBuffer> CreateDepthStencilBuffer(int width, int height);
 	ptr<VertexShader> CreateVertexShader(ptr<File> file);
 	ptr<PixelShader> CreatePixelShader(ptr<File> file);
 	ptr<UniformBuffer> CreateUniformBuffer(int size);

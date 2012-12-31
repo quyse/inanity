@@ -18,6 +18,7 @@ class Output;
 struct PresentMode;
 class Context;
 class RenderBuffer;
+class DepthStencilBuffer;
 class VertexShader;
 class PixelShader;
 class UniformBuffer;
@@ -52,6 +53,8 @@ public:
 
 	/// Создать рендербуфер.
 	virtual ptr<RenderBuffer> CreateRenderBuffer(int width, int height, PixelFormat pixelFormat) = 0;
+	/// Создать depth-stencil буфер.
+	virtual ptr<DepthStencilBuffer> CreateDepthStencilBuffer(int width, int height) = 0;
 
 	/// Создать вершинный шейдер из скомпилированного бинарного файла.
 	virtual ptr<VertexShader> CreateVertexShader(ptr<File> file) = 0;
