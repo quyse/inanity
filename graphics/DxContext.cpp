@@ -139,10 +139,15 @@ void DxContext::Update()
 	{
 		// сейчас единственная оптимизация - количество обновляемых рендертаргетов
 		int end;
-		for(end = ContextState::renderTargetSlotsCount - 1; end >= 0; --end)
-			if(targetState.renderBuffers[end] != boundState.renderBuffers[end])
-				break;
-		++end;
+		if(forceReset)
+			end = ContextState::renderTargetSlotsCount;
+		else
+		{
+			for(end = ContextState::renderTargetSlotsCount - 1; end >= 0; --end)
+				if(targetState.renderBuffers[end] != boundState.renderBuffers[end])
+					break;
+			++end;
+		}
 
 		if(end > 0 || targetState.depthStencilBuffer != boundState.depthStencilBuffer)
 		{
@@ -183,14 +188,24 @@ void DxContext::Update()
 	{
 		// сейчас единственная оптимизация - начало и конец в списке обновляемых текстур
 		int end;
-		for(end = ContextState::textureSlotsCount - 1; end >= 0; --end)
-			if(targetState.textures[end] != boundState.textures[end])
-				break;
-		++end;
+		if(forceReset)
+			end = ContextState::textureSlotsCount;
+		else
+		{
+			for(end = ContextState::textureSlotsCount - 1; end >= 0; --end)
+				if(targetState.textures[end] != boundState.textures[end])
+					break;
+			++end;
+		}
 		int begin;
-		for(begin = 0; begin < end; ++begin)
-			if(targetState.textures[begin] != boundState.textures[begin])
-				break;
+		if(forceReset)
+			begin = 0;
+		else
+		{
+			for(begin = 0; begin < end; ++begin)
+				if(targetState.textures[begin] != boundState.textures[begin])
+					break;
+		}
 
 		if(begin < end)
 		{
@@ -221,14 +236,24 @@ void DxContext::Update()
 	{
 		// сейчас единственная оптимизация - начало и конец в списке обновляемых семплеров
 		int end;
-		for(end = ContextState::textureSlotsCount - 1; end >= 0; --end)
-			if(targetState.samplerStates[end] != boundState.samplerStates[end])
-				break;
-		++end;
+		if(forceReset)
+			end = ContextState::textureSlotsCount;
+		else
+		{
+			for(end = ContextState::textureSlotsCount - 1; end >= 0; --end)
+				if(targetState.samplerStates[end] != boundState.samplerStates[end])
+					break;
+			++end;
+		}
 		int begin;
-		for(begin = 0; begin < end; ++begin)
-			if(targetState.samplerStates[begin] != boundState.samplerStates[begin])
-				break;
+		if(forceReset)
+			begin = 0;
+		else
+		{
+			for(begin = 0; begin < end; ++begin)
+				if(targetState.samplerStates[begin] != boundState.samplerStates[begin])
+					break;
+		}
 
 		if(begin < end)
 		{
@@ -259,14 +284,24 @@ void DxContext::Update()
 	{
 		// сейчас единственная оптимизация - начало и конец в списке обновляемых константных буферов
 		int end;
-		for(end = ContextState::uniformBufferSlotsCount - 1; end >= 0; --end)
-			if(targetState.uniformBuffers[end] != boundState.uniformBuffers[end])
-				break;
-		++end;
+		if(forceReset)
+			end = ContextState::uniformBufferSlotsCount;
+		else
+		{
+			for(end = ContextState::uniformBufferSlotsCount - 1; end >= 0; --end)
+				if(targetState.uniformBuffers[end] != boundState.uniformBuffers[end])
+					break;
+			++end;
+		}
 		int begin;
-		for(begin = 0; begin < end; ++begin)
-			if(targetState.uniformBuffers[begin] != boundState.uniformBuffers[begin])
-				break;
+		if(forceReset)
+			begin = 0;
+		else
+		{
+			for(begin = 0; begin < end; ++begin)
+				if(targetState.uniformBuffers[begin] != boundState.uniformBuffers[begin])
+					break;
+		}
 
 		if(begin < end)
 		{
@@ -294,10 +329,10 @@ void DxContext::Update()
 	}
 
 	// входная разметка
-	if(targetState.vertexBuffer != boundState.vertexBuffer || targetState.vertexShader != boundState.vertexShader)
+	if(forceReset || targetState.vertexBuffer != boundState.vertexBuffer || targetState.vertexShader != boundState.vertexShader)
 	{
 		ptr<DxInternalInputLayout> inputLayout = inputLayoutCache->GetInputLayout(targetState.vertexBuffer->GetLayout(), fast_cast<DxVertexShader*>(&*targetState.vertexShader));
-		if(inputLayout != boundInputLayout)
+		if(forceReset || inputLayout != boundInputLayout)
 		{
 			deviceContext->IASetInputLayout(inputLayout->GetInputLayoutInterface());
 			boundInputLayout = inputLayout;
@@ -305,7 +340,7 @@ void DxContext::Update()
 	}
 
 	// вершинный шейдер
-	if(targetState.vertexShader != boundState.vertexShader)
+	if(forceReset || targetState.vertexShader != boundState.vertexShader)
 	{
 		ID3D11VertexShader* shader;
 		if(targetState.vertexShader)
@@ -318,7 +353,7 @@ void DxContext::Update()
 	}
 
 	// пиксельный шейдер
-	if(targetState.pixelShader != boundState.pixelShader)
+	if(forceReset || targetState.pixelShader != boundState.pixelShader)
 	{
 		ID3D11PixelShader* shader;
 		if(targetState.pixelShader)
@@ -331,18 +366,19 @@ void DxContext::Update()
 	}
 
 	// вершинный буфер
-	if(targetState.vertexBuffer != boundState.vertexBuffer)
+	if(forceReset || targetState.vertexBuffer != boundState.vertexBuffer)
 	{
 		ID3D11Buffer* buffer = fast_cast<DxVertexBuffer*>(&*targetState.vertexBuffer)->GetBufferInterface();
 		UINT stride = targetState.vertexBuffer->GetLayout()->GetStride();
 		UINT offset = 0;
 		deviceContext->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
+		deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		boundState.vertexBuffer = targetState.vertexBuffer;
 	}
 
 	// индексный буфер
-	if(targetState.indexBuffer != boundState.indexBuffer)
+	if(forceReset || targetState.indexBuffer != boundState.indexBuffer)
 	{
 		ID3D11Buffer* buffer;
 		DXGI_FORMAT format;
@@ -360,6 +396,27 @@ void DxContext::Update()
 
 		boundState.indexBuffer = targetState.indexBuffer;
 	}
+
+	// TODO: fill mode
+	// TODO: cull mode
+
+	// viewport
+	if(forceReset || targetState.viewportWidth != boundState.viewportWidth || targetState.viewportHeight != boundState.viewportHeight)
+	{
+		D3D11_VIEWPORT viewport;
+		viewport.TopLeftX = 0;
+		viewport.TopLeftY = 0;
+		viewport.Width = targetState.viewportWidth;
+		viewport.Height = targetState.viewportHeight;
+		viewport.MinDepth = 0;
+		viewport.MaxDepth = 1;
+		deviceContext->RSSetViewports(1, &viewport);
+
+		boundState.viewportWidth = targetState.viewportWidth;
+		boundState.viewportHeight = targetState.viewportHeight;
+	}
+
+	forceReset = false;
 }
 
 void DxContext::ClearRenderBuffer(RenderBuffer* renderBuffer, const float* color)

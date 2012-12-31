@@ -36,7 +36,7 @@ struct ContextState
 	ptr<SamplerState> samplerStates[textureSlotsCount];
 
 	/// Количество слотов для константных буферов.
-	static const int uniformBufferSlotsCount = 16;
+	static const int uniformBufferSlotsCount = 8;
 	/// Привязанные константные буферы.
 	ptr<UniformBuffer> uniformBuffers[uniformBufferSlotsCount];
 

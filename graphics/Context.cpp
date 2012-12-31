@@ -9,9 +9,7 @@
 #include "VertexBuffer.hpp"
 #include "IndexBuffer.hpp"
 
-Context::Context()
-{
-}
+Context::Context() : forceReset(true) {}
 
 const ContextState& Context::GetBoundState() const
 {
@@ -21,4 +19,9 @@ const ContextState& Context::GetBoundState() const
 ContextState& Context::GetTargetState()
 {
 	return targetState;
+}
+
+void Context::Reset()
+{
+	forceReset = true;
 }
