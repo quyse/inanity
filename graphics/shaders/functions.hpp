@@ -7,8 +7,13 @@
 BEGIN_INANITY_SHADERS
 
 #define OP2(op) NEW(OperationNode(OperationNode::operation##op, a.GetNode(), b.GetNode()))
+#define OP4(op) NEW(OperationNode(OperationNode::operation##op, a.GetNode(), b.GetNode(), c.GetNode(), d.GetNode()))
 
 // construction values
+Value<float4> newfloat4(Value<float> a, Value<float> b, Value<float> c, Value<float> d)
+{
+	return OP4(Float1111to4);
+}
 Value<float4> newfloat4(Value<float3> a, Value<float> b)
 {
 	return OP2(Float31to4);
