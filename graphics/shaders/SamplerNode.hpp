@@ -5,8 +5,9 @@
 
 BEGIN_INANITY_GRAPHICS
 
+struct ContextState;
 class Texture;
-class Sampler;
+class SamplerState;
 
 END_INANITY_GRAPHICS
 
@@ -19,15 +20,17 @@ private:
 	int slot;
 	DataType valueType;
 	DataType coordType;
-	ptr<Texture> texture;
-	ptr<SamplerState> samplerState;
 
 public:
 	SamplerNode(int slot, DataType valueType, DataType coordType);
 
+	Type GetType() const;
+
 	int GetSlot() const;
 	DataType GetValueType() const;
 	DataType GetCoordType() const;
+
+	void Apply(ContextState* contextState, ptr<Texture> texture, ptr<SamplerState> samplerState);
 };
 
 END_INANITY_SHADERS

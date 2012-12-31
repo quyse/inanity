@@ -2,13 +2,18 @@
 #define ___INANITY_GRAPHICS_SHADERS_SAMPLER_IPP___
 
 #include "Sampler.hpp"
+#include "SamplerNode.hpp"
 #include "SampleNode.hpp"
 
 BEGIN_INANITY_SHADERS
 
 template <typename ValueType, typename CoordType>
 Sampler<ValueType, CoordType>::Sampler(ptr<SamplerNode> node)
-: node(node) {}
+: Expression(node) {}
+
+template <typename ValueType, typename CoordType>
+Sampler<ValueType, CoordType>::Sampler(int slot)
+: Expression(NEW(SamplerNode(slot, GetDataType<ValueType>(), GetDataType<CoordType>()))) {}
 
 template <typename ValueType, typename CoordType>
 void Sampler<ValueType, CoordType>::operator=(Sampler<ValueType, CoordType> a)
@@ -17,15 +22,9 @@ void Sampler<ValueType, CoordType>::operator=(Sampler<ValueType, CoordType> a)
 }
 
 template <typename ValueType, typename CoordType>
-ptr<SamplerNode> Sampler<ValueType, CoordType>::GetNode() const
+Value<ValueType> Sampler<ValueType, CoordType>::Sample(Value<CoordType> coords)
 {
-	return node;
-}
-
-template <typename ValueType, typename CoordType>
-ValueExpression<ValueType> Sampler<ValueType, CoordType>::Sample(ValueExpression<CoordType> coords)
-{
-	return NEW(SampleNode(node, coords));
+	return NEW(SampleNode(node.FastCast<SamplerNode>(), coords.GetNode()));
 }
 
 END_INANITY_SHADERS
