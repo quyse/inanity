@@ -329,6 +329,16 @@ inline vector<4> operator*(const vector<3>& a, const matrix<4, 4>& b)
 	return vector<4>(a.x, a.y, a.z, 1) * b;
 }
 
+template <int sn, int sm, int n, int m>
+inline matrix<sn, sm> submatrix(const matrix<n, m>& a, int si = 0, int sj = 0)
+{
+	matrix<sn, sm> r;
+	for(int i = 0; i < sn; ++i)
+		for(int j = 0; j < sm; ++j)
+			r.t[i][j] = a.t[i + si][j + sj];
+	return r;
+}
+
 inline matrix<4, 4> CreateTranslationMatrix(scalar x, scalar y, scalar z)
 {
 	matrix<4, 4> r;
