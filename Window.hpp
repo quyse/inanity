@@ -18,6 +18,8 @@ class Window : public Object
 public:
 	/// Указать заголовок окна.
 	virtual void SetTitle(const String& title) = 0;
+	/// Закрыть окно.
+	virtual void Close() = 0;
 
 	/// Создать область вывода.
 	virtual ptr<Graphics::Output> CreateOutput() = 0;

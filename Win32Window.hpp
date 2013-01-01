@@ -56,6 +56,7 @@ public:
 
 	// методы Window
 	void SetTitle(const String& title);
+	void Close();
 	ptr<Graphics::Output> CreateOutput();
 
 	/// Создать окно для DirectX.
@@ -67,10 +68,6 @@ public:
 	HWND GetHWND() const;
 	//получить активность окна
 	bool IsActive() const;
-
-	/// Закрыть окно.
-	/** Также прекращает оконный цикл. */
-	void Close();
 
 	/// Установить presenter для оповещений.
 	void SetGraphicsPresenter(Graphics::Presenter* graphicsPresenter);
