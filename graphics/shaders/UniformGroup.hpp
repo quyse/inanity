@@ -41,7 +41,10 @@ public:
 		// получить размер данных переменной
 		int valueSize = GetDataTypeSize(valueType);
 		// получить смещение до переменной с соответствующим выравниванием
-		int offset = (bufferSize + valueSize - 1) / valueSize * valueSize;
+		// на границу float4-регистра
+		int offset = bufferSize;
+		if(offset % sizeof(float4) + valueSize > sizeof(float4))
+			offset = (offset + sizeof(float4) - 1) & ~(sizeof(float4) - 1);
 		// увеличить размер буфера
 		bufferSize = offset + valueSize;
 
