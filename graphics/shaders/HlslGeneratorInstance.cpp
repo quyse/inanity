@@ -1,5 +1,4 @@
 #include "HlslGeneratorInstance.hpp"
-#include "../ShaderSource.hpp"
 #include "Node.hpp"
 #include "AttributeNode.hpp"
 #include "FloatConstNode.hpp"
@@ -12,6 +11,8 @@
 #include "UniformNode.hpp"
 #include "TempNode.hpp"
 #include "TransitionalNode.hpp"
+#include "CastNode.hpp"
+#include "../ShaderSource.hpp"
 #include "../DxSystem.hpp"
 #include "../../File.hpp"
 #include "../../FileSystem.hpp"
@@ -38,6 +39,7 @@ void HlslGeneratorInstance::PrintDataType(DataType dataType)
 	case DataTypes::Float2:			name = "float2";		break;
 	case DataTypes::Float3:			name = "float3";		break;
 	case DataTypes::Float4:			name = "float4";		break;
+	case DataTypes::Float3x3:		name = "float3x3";	break;
 	case DataTypes::Float4x4:		name = "float4x4";	break;
 	case DataTypes::UInt:				name = "uint";			break;
 	case DataTypes::UInt2:			name = "uint2";			break;
@@ -122,6 +124,9 @@ void HlslGeneratorInstance::RegisterNode(Node* node)
 			RegisterNode(sampleNode->GetCoordsNode());
 		}
 		break;
+	case Node::typeCast:
+		RegisterNode(fast_cast<CastNode*>(node)->GetA());
+		break;
 	default:
 		THROW_PRIMARY_EXCEPTION("Unknown node type");
 	}
@@ -193,6 +198,16 @@ void HlslGeneratorInstance::PrintNode(Node* node)
 			hlsl << ')';
 		}
 		break;
+	case Node::typeCast:
+		{
+			CastNode* castNode = fast_cast<CastNode*>(node);
+			hlsl << '(';
+			PrintDataType(castNode->GetCastDataType());
+			hlsl << ")(";
+			PrintNode(castNode->GetA());
+			hlsl << ')';
+		}
+		break;
 	default:
 		THROW_PRIMARY_EXCEPTION("Unknown node type");
 	}
@@ -255,6 +270,9 @@ void HlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 				OP(Cross, cross);
 				OP(Mul, mul);
 				OP(Normalize, normalize);
+				OP(Pow, pow);
+				OP(Min, min);
+				OP(Max, max);
 #undef OP
 			default:
 				THROW_PRIMARY_EXCEPTION("Unknown operation type");

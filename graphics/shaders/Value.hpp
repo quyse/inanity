@@ -26,6 +26,10 @@ public:
 	ResultValueType должно соответствовать строке в map. */
 	template <typename ResultValueType>
 	Value<ResultValueType> Swizzle(const char* map) const;
+
+	/// Преобразовать тип.
+	template <typename CastValueType>
+	Value<CastValueType> Cast() const;
 };
 
 END_INANITY_SHADERS

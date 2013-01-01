@@ -112,6 +112,15 @@ inline bool operator==(const vector<n>& a, const vector<n>& b)
 }
 
 template <int n>
+inline vector<n> operator-(const vector<n>& a)
+{
+	vector<n> r;
+	for(int i = 0; i < n; ++i)
+		r.t[i] = -a.t[i];
+	return r;
+}
+
+template <int n>
 inline vector<n> operator+(const vector<n>& a, const vector<n>& b)
 {
 	vector<n> r;
@@ -410,6 +419,7 @@ inline matrix<4, 4> CreateProjectionPerspectiveFovMatrix(scalar fovY, scalar asp
 typedef vector<2> float2;
 typedef vector<3> float3;
 typedef vector<4> float4;
+typedef matrix<3, 3> float3x3;
 typedef matrix<4, 4> float4x4;
 
 END_INANITY_MATH

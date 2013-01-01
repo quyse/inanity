@@ -26,7 +26,10 @@ public:
 		operationDot,
 		operationCross,
 		operationMul,
-		operationNormalize
+		operationNormalize,
+		operationPow,
+		operationMin,
+		operationMax
 	};
 
 private:

@@ -2,6 +2,8 @@
 #define ___INANITY_GRAPHICS_SHADERS_VALUE_IPP___
 
 #include "Value.hpp"
+#include "SwizzleNode.hpp"
+#include "CastNode.hpp"
 #include "OperationNode.hpp"
 
 BEGIN_INANITY_SHADERS
@@ -25,6 +27,13 @@ template <typename ResultValueType>
 Value<ResultValueType> Value<ValueType>::Swizzle(const char* map) const
 {
 	return NEW(SwizzleNode(node, map));
+}
+
+template <typename ValueType>
+template <typename CastValueType>
+Value<CastValueType> Value<ValueType>::Cast() const
+{
+	return NEW(CastNode(GetDataType<CastValueType>(), GetNode()));
 }
 
 template <typename ValueType>

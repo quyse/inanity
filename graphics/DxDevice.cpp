@@ -249,9 +249,13 @@ ptr<UniformBuffer> DxDevice::CreateUniformBuffer(int size)
 {
 	try
 	{
+		// округлить размер вверх, чтобы он был кратен sizeof(float4)
+		// кроме того, если размер 0, то сделать не 0
+		int ceiledSize = size;
+		if(!ceiledSize) ceiledSize = 1;
+		ceiledSize = (ceiledSize + sizeof(float4) - 1) & ~(sizeof(float4) - 1);
+
 		D3D11_BUFFER_DESC desc;
-		//округлить размер вверх, чтобы он был кратен sizeof(float4)
-		int ceiledSize = (size + sizeof(float4) - 1) & ~(sizeof(float4) - 1);
 		desc.ByteWidth = ceiledSize;
 		desc.Usage = D3D11_USAGE_DYNAMIC;
 		desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -265,7 +269,7 @@ ptr<UniformBuffer> DxDevice::CreateUniformBuffer(int size)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create shader constant buffer", exception);
+		THROW_SECONDARY_EXCEPTION("Can't create uniform buffer", exception);
 	}
 }
 
