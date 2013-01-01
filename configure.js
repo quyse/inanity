@@ -81,7 +81,6 @@ var libraries = {
 	// ******* общая графика
 	'libinanity-graphics': {
 		objects: [
-			'graphics.DataType',
 			'graphics.Context', 'graphics.ContextState',
 			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.Layout', 'graphics.LayoutBinding', 'graphics.IndexBuffer',
 			'graphics.SamplerState',
