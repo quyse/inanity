@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Demos">
+      <UniqueIdentifier>{100E49C6-59DD-C946-9E85-EDE6E0AFB331}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Demos\BulletXmlImportDemo">
+      <UniqueIdentifier>{3ED1622B-7804-8D40-A412-6ECFB1365AC0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Demos\BulletXmlImportDemo\BulletXmlImportDemo.h">
+      <Filter>Demos\BulletXmlImportDemo</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Demos\BulletXmlImportDemo\BulletXmlImportDemo.cpp">
+      <Filter>Demos\BulletXmlImportDemo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Demos\BulletXmlImportDemo\main.cpp">
+      <Filter>Demos\BulletXmlImportDemo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Demos\BulletXmlImportDemo\Win32BulletXmlImportDemo.cpp">
+      <Filter>Demos\BulletXmlImportDemo</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\bullet.rc" />
+  </ItemGroup>
+</Project>

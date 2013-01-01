@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Demos">
+      <UniqueIdentifier>{1901AD8A-EFA3-8A4C-AD45-8A9800C3D063}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Demos\ConvexHullDistance">
+      <UniqueIdentifier>{07D9AA10-D5C8-BC4D-8E77-57A3A45C5843}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Demos\ConvexHullDistance\ConvexHullDistanceDemo.cpp">
+      <Filter>Demos\ConvexHullDistance</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\bullet.rc" />
+  </ItemGroup>
+</Project>
