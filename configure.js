@@ -123,6 +123,18 @@ var libraries = {
 			'graphics.shaders.HlslGenerator', 'graphics.shaders.HlslGeneratorInstance',
 		]
 	},
+	// ******* общая физика
+	'libinanity-physics': {
+		objects: [
+			'physics.Shape', 'physics.RigidBody'
+		]
+	},
+	// ******* физика bullet
+	'libinanity-bullet': {
+		objects: [
+			'physics.BtWorld', 'physics.BtShape', 'physics.BtRigidBody'
+		]
+	},
 	// ******* подсистема GUI
 	'libinanity-gui': {
 		objects: [
