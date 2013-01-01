@@ -43,10 +43,7 @@ public:
 	ptr<RenderBuffer> GetBackBuffer();
 	void SetMode(const PresentMode& mode);
 	void Present();
-
-	/// Изменить размер области вывода.
-	/** Вызывается окном, когда его размер изменяется. */
-	void Resize(size_t width, size_t height);
+	void Resize(int width, int height);
 };
 
 END_INANITY_GRAPHICS

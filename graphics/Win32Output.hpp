@@ -23,6 +23,7 @@ private:
 public:
 	Win32Output(ptr<Win32Window> window);
 
+	ptr<Win32Window> GetWindow() const;
 	HWND GetHWND() const;
 };
 

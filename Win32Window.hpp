@@ -10,6 +10,12 @@
 
 #include "windows.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
+class Presenter;
+
+END_INANITY_GRAPHICS
+
 BEGIN_INANITY_INPUT
 
 class Manager;
@@ -30,6 +36,8 @@ private:
 	/// Активность окна.
 	bool active;
 
+	/// Presenter для графики.
+	Graphics::Presenter* graphicsPresenter;
 	/// Менеждер ввода.
 	ptr<Input::Manager> inputManager;
 
@@ -64,6 +72,8 @@ public:
 	/** Также прекращает оконный цикл. */
 	void Close();
 
+	/// Установить presenter для оповещений.
+	void SetGraphicsPresenter(Graphics::Presenter* graphicsPresenter);
 	/// Установить менеджер ввода.
 	void SetInputManager(ptr<Input::Manager> inputManager);
 

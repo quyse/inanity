@@ -2,12 +2,13 @@
 #include "input/Manager.hpp"
 #include "Strings.hpp"
 #include "Exception.hpp"
+#include "graphics/Presenter.hpp"
 #include "graphics/Win32Output.hpp"
 #include <windowsx.h>
 
 Win32Window* Win32Window::singleWindow = 0;
 
-Win32Window::Win32Window(ATOM windowClass, const String& title) : active(true)
+Win32Window::Win32Window(ATOM windowClass, const String& title) : active(true), graphicsPresenter(0)
 {
 	try
 	{
@@ -15,9 +16,9 @@ Win32Window::Win32Window(ATOM windowClass, const String& title) : active(true)
 			THROW_PRIMARY_EXCEPTION("Can't create second game window");
 
 		//создать окно
-		int primaryWidth = 1;//GetSystemMetrics(SM_CXSCREEN);
-		int primaryHeight = 1;//GetSystemMetrics(SM_CYSCREEN);
-		hWnd = CreateWindow((LPCTSTR)windowClass, Strings::UTF82Unicode(title).c_str(), WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 0, 0, primaryWidth, primaryHeight, NULL, NULL, GetModuleHandle(NULL), NULL);
+		int primaryWidth = 1;
+		int primaryHeight = 1;
+		hWnd = CreateWindow((LPCTSTR)windowClass, Strings::UTF82Unicode(title).c_str(), WS_OVERLAPPEDWINDOW | WS_VISIBLE /*WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS*/, 0, 0, primaryWidth, primaryHeight, NULL, NULL, GetModuleHandle(NULL), NULL);
 		if(!hWnd)
 			THROW_PRIMARY_EXCEPTION("Can't create window");
 		ShowCursor(FALSE);
@@ -125,10 +126,10 @@ LRESULT CALLBACK Win32Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 		return 0;
 	case WM_MOVE:
 		return 0;
-/*	case WM_SIZE:
-		if(singleWindow && singleWindow->graphicsSystem)
-			singleWindow->graphicsSystem->Resize(LOWORD(lParam), HIWORD(lParam));
-		return 0;*/
+	case WM_SIZE:
+		if(singleWindow && singleWindow->graphicsPresenter)
+			singleWindow->graphicsPresenter->Resize(LOWORD(lParam), HIWORD(lParam));
+		return 0;
 	case WM_CLOSE:
 		singleWindow->Close();
 		return 0;
@@ -140,6 +141,11 @@ LRESULT CALLBACK Win32Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
+void Win32Window::SetGraphicsPresenter(Graphics::Presenter* presenter)
+{
+	this->graphicsPresenter = graphicsPresenter;
+}
+
 void Win32Window::SetInputManager(ptr<Input::Manager> inputManager)
 {
 	this->inputManager = inputManager;
@@ -147,11 +153,17 @@ void Win32Window::SetInputManager(ptr<Input::Manager> inputManager)
 
 bool Win32Window::Do(ActiveHandler* activeHandler)
 {
+	/* По-видимому, PeekMessage может обрабатывать некоторые сообщения (в том числе WM_ACTIVATE)
+	синхронно, не возвращая их в msg. Поэтому потом, определяя выход из GetMessage по WM_QUIT,
+	нужно опираться на значение lastActive, так как active может поменяться внутри PeekMessage.
+	*/
+
 	MSG msg;
 	bool lastActive;
 	while((lastActive = active) ? PeekMessage(&msg, 0, 0, 0, PM_REMOVE) : GetMessage(&msg, 0, 0, 0))
 	{
-		if(msg.message == WM_QUIT) return false;
+		if(msg.message == WM_QUIT)
+			return false;
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 		if(active != lastActive)
@@ -164,14 +176,15 @@ bool Win32Window::Do(ActiveHandler* activeHandler)
 		}
 	}
 
+	// если окно активно, работаем
 	if(active)
 	{
 		if(inputManager)
 			inputManager->Update();
 		activeHandler->Fire(0);
 	}
-	else
-		//если не активно, то значит, вышли из цикла по GetMessage(), и сообщение - WM_QUIT
+	// иначе если окно неактивно, и вышли мы из цикла по GetMessage(), то это сообщение WM_QUIT
+	else if(!lastActive)
 		return false;
 
 	return true;

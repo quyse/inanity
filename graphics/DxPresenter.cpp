@@ -4,6 +4,7 @@
 #include "DxRenderBuffer.hpp"
 #include "DxTexture.hpp"
 #include "Win32Output.hpp"
+#include "../Win32Window.hpp"
 #include "../Exception.hpp"
 
 DxPresenter::DxPresenter(ptr<DxDevice> device, ptr<Win32Output> output, ComPointer<IDXGISwapChain> swapChain)
@@ -15,6 +16,9 @@ DxPresenter::DxPresenter(ptr<DxDevice> device, ptr<Win32Output> output, ComPoint
 		currentMode.width = 1;
 		currentMode.height = 1;
 		currentMode.fullscreen = false;
+
+		// указать себя окну
+		output->GetWindow()->SetGraphicsPresenter(this);
 	}
 	catch(Exception* exception)
 	{
@@ -24,6 +28,9 @@ DxPresenter::DxPresenter(ptr<DxDevice> device, ptr<Win32Output> output, ComPoint
 
 DxPresenter::~DxPresenter()
 {
+	// отменить указание себя окну
+	output->GetWindow()->SetGraphicsPresenter(0);
+
 	// перед уничтожением swap chain, необходимо выключить полноэкранность
 	if(currentMode.fullscreen)
 		swapChain->SetFullscreenState(FALSE, NULL);
@@ -106,7 +113,7 @@ void DxPresenter::Present()
 		THROW_PRIMARY_EXCEPTION("Can't present");
 }
 
-void DxPresenter::Resize(size_t width, size_t height)
+void DxPresenter::Resize(int width, int height)
 {
 	// сбросить ссылку на вторичный буфер
 	backBuffer = 0;

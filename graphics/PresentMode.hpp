@@ -9,9 +9,9 @@ BEGIN_INANITY_GRAPHICS
 struct PresentMode
 {
 	/// Ширина экрана.
-	size_t width;
+	int width;
 	/// Высота экрана.
-	size_t height;
+	int height;
 	/// Полноэкранный режим?
 	bool fullscreen;
 	/// Формат пикселов экрана.
