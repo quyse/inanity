@@ -257,6 +257,34 @@ void HlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 		PrintNode(node->GetB());
 		hlsl << ')';
 		break;
+	case OperationNode::operationLess:
+		hlsl << '(';
+		PrintNode(node->GetA());
+		hlsl << ") < (";
+		PrintNode(node->GetB());
+		hlsl << ')';
+		break;
+	case OperationNode::operationLessEqual:
+		hlsl << '(';
+		PrintNode(node->GetA());
+		hlsl << ") <= (";
+		PrintNode(node->GetB());
+		hlsl << ')';
+		break;
+	case OperationNode::operationEqual:
+		hlsl << '(';
+		PrintNode(node->GetA());
+		hlsl << ") == (";
+		PrintNode(node->GetB());
+		hlsl << ')';
+		break;
+	case OperationNode::operationNotEqual:
+		hlsl << '(';
+		PrintNode(node->GetA());
+		hlsl << ") != (";
+		PrintNode(node->GetB());
+		hlsl << ')';
+		break;
 	default:
 		{
 			// остались только функции, которые делаются простым преобразованием имени
@@ -264,6 +292,8 @@ void HlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 			switch(operation)
 			{
 #define OP(o, n) case OperationNode::operation##o: name = #n; break
+				OP(Float11to2, float2);
+				OP(Float111to3, float3);
 				OP(Float1111to4, float4);
 				OP(Float31to4, float4);
 				OP(Dot, dot);
