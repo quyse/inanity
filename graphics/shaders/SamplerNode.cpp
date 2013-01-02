@@ -26,8 +26,8 @@ DataType SamplerNode::GetCoordType() const
 	return coordType;
 }
 
-void SamplerNode::Apply(ContextState* contextState, ptr<Texture> texture, ptr<SamplerState> samplerState)
+void SamplerNode::Apply(ContextState& contextState, ptr<Texture> texture, ptr<SamplerState> samplerState) const
 {
-	contextState->textures[slot] = texture;
-	contextState->samplerStates[slot] = samplerState;
+	contextState.textures[slot] = texture;
+	contextState.samplerStates[slot] = samplerState;
 }

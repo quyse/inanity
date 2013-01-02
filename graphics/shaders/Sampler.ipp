@@ -9,11 +9,11 @@ BEGIN_INANITY_SHADERS
 
 template <typename ValueType, typename CoordType>
 Sampler<ValueType, CoordType>::Sampler(ptr<SamplerNode> node)
-: Expression(node) {}
+: SamplerBase(node) {}
 
 template <typename ValueType, typename CoordType>
 Sampler<ValueType, CoordType>::Sampler(int slot)
-: Expression(NEW(SamplerNode(slot, GetDataType<ValueType>(), GetDataType<CoordType>()))) {}
+: SamplerBase(NEW(SamplerNode(slot, GetDataType<ValueType>(), GetDataType<CoordType>()))) {}
 
 template <typename ValueType, typename CoordType>
 void Sampler<ValueType, CoordType>::operator=(Sampler<ValueType, CoordType> a)

@@ -30,7 +30,7 @@ public:
 	DataType GetValueType() const;
 	DataType GetCoordType() const;
 
-	void Apply(ContextState* contextState, ptr<Texture> texture, ptr<SamplerState> samplerState);
+	void Apply(ContextState& contextState, ptr<Texture> texture, ptr<SamplerState> samplerState) const;
 };
 
 END_INANITY_SHADERS

@@ -119,7 +119,7 @@ var libraries = {
 			'graphics.shaders.SampleNode', 'graphics.shaders.FloatConstNode',
 			'graphics.shaders.SequenceNode', 'graphics.shaders.TransitionalNode',
 			'graphics.shaders.TempNode', 'graphics.shaders.CastNode',
-			'graphics.shaders.Expression',
+			'graphics.shaders.Expression', 'graphics.shaders.Sampler',
 			'graphics.shaders.HlslGenerator', 'graphics.shaders.HlslGeneratorInstance',
 		]
 	},
