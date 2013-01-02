@@ -22,6 +22,9 @@ public:
 	Expression(ptr<Node> node);
 
 	ptr<Node> GetNode() const;
+
+	/// Вместо оператора присваивания.
+	void Assign(Expression expression);
 };
 
 Expression operator,(Expression a, Expression b);

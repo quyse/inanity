@@ -8,6 +8,11 @@ ptr<Node> Expression::GetNode() const
 	return node;
 }
 
+void Expression::Assign(Expression expression)
+{
+	node = expression.node;
+}
+
 BEGIN_INANITY_SHADERS
 
 Expression operator,(Expression a, Expression b)
