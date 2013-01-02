@@ -83,6 +83,8 @@ void DxSamplerState::Update()
 			THROW_PRIMARY_EXCEPTION("Can't create sampler state");
 
 		this->samplerState = samplerState;
+
+		dirty = false;
 	}
 	catch(Exception* exception)
 	{

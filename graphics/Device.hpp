@@ -26,6 +26,7 @@ class Layout;
 class VertexBuffer;
 class IndexBuffer;
 class Texture;
+class SamplerState;
 
 /// Абстрактный класс устройства вывода.
 /** Основной класс графической подсистемы. Обычно олицетворяет видеокарту.
@@ -54,7 +55,7 @@ public:
 	/// Создать рендербуфер.
 	virtual ptr<RenderBuffer> CreateRenderBuffer(int width, int height, PixelFormat pixelFormat) = 0;
 	/// Создать depth-stencil буфер.
-	virtual ptr<DepthStencilBuffer> CreateDepthStencilBuffer(int width, int height) = 0;
+	virtual ptr<DepthStencilBuffer> CreateDepthStencilBuffer(int width, int height, bool canBeResource = false) = 0;
 
 	/// Создать вершинный шейдер из скомпилированного бинарного файла.
 	virtual ptr<VertexShader> CreateVertexShader(ptr<File> file) = 0;
@@ -73,6 +74,9 @@ public:
 
 	/// Создать статическую текстуру из графического файла.
 	virtual ptr<Texture> CreateStaticTexture(ptr<File> file) = 0;
+
+	/// Создать объект настроек семплирования.
+	virtual ptr<SamplerState> CreateSamplerState() = 0;
 };
 
 END_INANITY_GRAPHICS

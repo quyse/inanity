@@ -13,6 +13,7 @@
 #include "DxIndexBuffer.hpp"
 #include "Layout.hpp"
 #include "DxInternalInputLayout.hpp"
+#include "DxSamplerState.hpp"
 #include "../File.hpp"
 #include "../Exception.hpp"
 #include "d3dx.hpp"
@@ -153,12 +154,10 @@ ptr<RenderBuffer> DxDevice::CreateRenderBuffer(int width, int height, PixelForma
 	}
 }
 
-ptr<DepthStencilBuffer> DxDevice::CreateDepthStencilBuffer(int width, int height)
+ptr<DepthStencilBuffer> DxDevice::CreateDepthStencilBuffer(int width, int height, bool canBeResource)
 {
 	try
 	{
-		bool canBeResource = false;
-
 		ID3D11Texture2D* bufferInterface;
 		ComPointer<ID3D11Texture2D> buffer;
 		{
@@ -360,6 +359,11 @@ ptr<Texture> DxDevice::CreateStaticTexture(ptr<File> file)
 	{
 		THROW_SECONDARY_EXCEPTION("Can't create static texture", exception);
 	}
+}
+
+ptr<SamplerState> DxDevice::CreateSamplerState()
+{
+	return NEW(DxSamplerState(this));
 }
 
 ID3D11Device* DxDevice::GetDeviceInterface() const

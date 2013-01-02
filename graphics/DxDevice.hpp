@@ -38,13 +38,14 @@ public:
 	ptr<Presenter> CreatePresenter(ptr<Output> output, const PresentMode& mode);
 	ptr<Context> GetContext();
 	ptr<RenderBuffer> CreateRenderBuffer(int width, int height, PixelFormat pixelFormat);
-	ptr<DepthStencilBuffer> CreateDepthStencilBuffer(int width, int height);
+	ptr<DepthStencilBuffer> CreateDepthStencilBuffer(int width, int height, bool canBeResource = false);
 	ptr<VertexShader> CreateVertexShader(ptr<File> file);
 	ptr<PixelShader> CreatePixelShader(ptr<File> file);
 	ptr<UniformBuffer> CreateUniformBuffer(int size);
 	ptr<VertexBuffer> CreateVertexBuffer(ptr<File> file, ptr<Layout> layout);
 	ptr<IndexBuffer> CreateIndexBuffer(ptr<File> file, int indexSize);
 	ptr<Texture> CreateStaticTexture(ptr<File> file);
+	ptr<SamplerState> CreateSamplerState();
 
 	/// Получить интерфейс устройства DirectX 11.
 	ID3D11Device* GetDeviceInterface() const;
