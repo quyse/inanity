@@ -359,6 +359,10 @@ inline matrix<4, 4> CreateScalingMatrix(scalar x, scalar y, scalar z)
 	r.t[3][3] = 1;
 	return r;
 }
+inline matrix<4, 4> CreateScalingMatrix(const vector<3>& scale)
+{
+	return CreateScalingMatrix(scale.x, scale.y, scale.z);
+}
 
 inline matrix<4, 4> CreateRotationXMatrix(scalar alpha)
 {

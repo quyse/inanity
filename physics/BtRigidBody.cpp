@@ -10,7 +10,10 @@ BtRigidBody::BtRigidBody(ptr<BtWorld> world, ptr<BtShape> shape, const btTransfo
 BtRigidBody::~BtRigidBody()
 {
 	if(rigidBody)
+	{
+		world.FastCast<BtWorld>()->GetInternalDynamicsWorld()->removeRigidBody(rigidBody);
 		delete rigidBody;
+	}
 }
 
 void BtRigidBody::SetInternalObject(btRigidBody* rigidBody)

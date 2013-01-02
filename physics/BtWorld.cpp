@@ -37,6 +37,11 @@ BtWorld::~BtWorld()
 		delete collisionConfiguration;
 }
 
+btDynamicsWorld* BtWorld::GetInternalDynamicsWorld() const
+{
+	return dynamicsWorld;
+}
+
 ptr<Shape> BtWorld::CreateBoxShape(const float3& halfSize)
 {
 	try
@@ -66,7 +71,10 @@ ptr<RigidBody> BtWorld::CreateRigidBody(ptr<Shape> abstractShape, float mass, co
 
 		ptr<BtRigidBody> rigidBody = NEW(BtRigidBody(this, shape, toBt(startTransform)));
 		btRigidBody::btRigidBodyConstructionInfo info(mass, &*rigidBody, shape->GetInternalObject(), localInertia);
-		rigidBody->SetInternalObject(new btRigidBody(info));
+		btRigidBody* internalRigidBody = new btRigidBody(info);
+		rigidBody->SetInternalObject(internalRigidBody);
+
+		dynamicsWorld->addRigidBody(internalRigidBody);
 
 		return rigidBody;
 	}

@@ -20,6 +20,8 @@ public:
 	BtWorld();
 	~BtWorld();
 
+	btDynamicsWorld* GetInternalDynamicsWorld() const;
+
 	ptr<Shape> CreateBoxShape(const float3& halfSize);
 	ptr<RigidBody> CreateRigidBody(ptr<Shape> shape, float mass, const float4x4& startTransform);
 	void Simulate(float time);
