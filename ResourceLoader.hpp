@@ -1,38 +1,47 @@
 #ifndef ___INANITY_RESOURCE_LOADER_HPP___
 #define ___INANITY_RESOURCE_LOADER_HPP___
 
-#include "ResourceLoader_decl.hpp"
-#include "ResourceManager_decl.hpp"
+#include "String.hpp"
 
 BEGIN_INANITY
 
-/* Файл содержит реализацию шаблонных методов класса
-ResourceLoader, определённого в ResourceLoader_decl.hpp.
-*/
+class ResourceManager;
 
-template <typename T>
-ptr<T> ResourceLoader::LoadResource(const String& fileName)
+/// Вспомогательный класс для загрузки связанных ресурсов.
+/** Просто разрешает относительные ссылки. */
+class ResourceLoader
 {
-	return resourceManager->LoadResource<T>(TransformName(fileName));
-}
+private:
+	/// Менеджер ресурсов.
+	ptr<ResourceManager> resourceManager;
+	/// Префикс пути (со слешем в конце).
+	const String pathPrefix;
 
-template <typename T>
-ptr<T> ResourceLoader::GetResource(const String& fileName)
-{
-	return resourceManager->GetResource<T>(TransformName(fileName));
-}
+public:
+	ResourceLoader(ptr<ResourceManager> resourceManager, const String& pathPrefix);
 
-template <typename T>
-ptr<T> ResourceLoader::GetStaticResource()
-{
-	return resourceManager->GetStaticResource<T>();
-}
+	/// Преобразовать имя ресурса в соответствии с состоянием загрузчика.
+	String TransformName(const String& fileName) const;
 
-template <typename T>
-ptr<T> ResourceLoader::LoadStaticResource()
-{
-	return resourceManager->LoadStaticResource<T>();
-}
+	/// Получить менеджер ресурсов.
+	ptr<ResourceManager> GetResourceManager() const;
+
+	/// Загрузить ресурс.
+	template <typename T>
+	ptr<T> LoadResource(const String& fileName);
+
+	/// Получить ресурс.
+	template <typename T>
+	ptr<T> GetResource(const String& fileName);
+
+	/// Получить статический ресурс.
+	template <typename T>
+	ptr<T> GetStaticResource();
+
+	/// Загрузить статический ресурс.
+	template <typename T>
+	ptr<T> LoadStaticResource();
+};
 
 END_INANITY
 

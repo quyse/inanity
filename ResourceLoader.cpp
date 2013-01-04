@@ -1,5 +1,5 @@
-#include "ResourceLoader.hpp"
-#include "ResourceManager.hpp"
+#include "ResourceLoader.ipp"
+#include "ResourceManager.ipp"
 
 ResourceLoader::ResourceLoader(ptr<ResourceManager> resourceManager, const String& pathPrefix)
 	: resourceManager(resourceManager), pathPrefix(pathPrefix)

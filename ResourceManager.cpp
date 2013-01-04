@@ -1,4 +1,4 @@
-#include "ResourceManager.hpp"
+#include "ResourceManager.ipp"
 
 String ResourceManager::GetFileNamePrefix(const String& fileName)
 {
