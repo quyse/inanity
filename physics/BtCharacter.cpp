@@ -22,9 +22,9 @@ btKinematicCharacterController* BtCharacter::GetInternalController() const
 	return controller;
 }
 
-void BtCharacter::Walk(const float3& movement)
+void BtCharacter::Walk(const float3& speed)
 {
-	controller->setWalkDirection(toBt(movement));
+	controller->setVelocityForTimeInterval(toBt(speed), 1);
 }
 
 float4x4 BtCharacter::GetTransform() const
