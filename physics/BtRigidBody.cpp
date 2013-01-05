@@ -3,7 +3,7 @@
 #include "BtShape.hpp"
 
 BtRigidBody::BtRigidBody(ptr<BtWorld> world, ptr<BtShape> shape, const btTransform& startTransform)
-: RigidBody(world, shape), rigidBody(rigidBody), transform(startTransform)
+: RigidBody(world, shape), rigidBody(0), transform(startTransform)
 {
 }
 
@@ -21,6 +21,11 @@ void BtRigidBody::SetInternalObject(btRigidBody* rigidBody)
 	this->rigidBody = rigidBody;
 }
 
+btRigidBody* BtRigidBody::GetInternalObject() const
+{
+	return rigidBody;
+}
+
 float3 BtRigidBody::GetPosition() const
 {
 	return fromBt(transform.getOrigin());
@@ -34,6 +39,11 @@ float3x3 BtRigidBody::GetOrientation() const
 float4x4 BtRigidBody::GetTransform() const
 {
 	return fromBt(transform);
+}
+
+void BtRigidBody::ApplyImpulse(const float3& impulse)
+{
+	rigidBody->applyCentralImpulse(toBt(impulse));
 }
 
 void BtRigidBody::getWorldTransform(btTransform& transform) const

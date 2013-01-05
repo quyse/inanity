@@ -126,13 +126,13 @@ var libraries = {
 	// ******* общая физика
 	'libinanity-physics': {
 		objects: [
-			'physics.Shape', 'physics.RigidBody'
+			'physics.Shape', 'physics.RigidBody', 'physics.Character'
 		]
 	},
 	// ******* физика bullet
 	'libinanity-bullet': {
 		objects: [
-			'physics.BtWorld', 'physics.BtShape', 'physics.BtRigidBody'
+			'physics.BtWorld', 'physics.BtShape', 'physics.BtRigidBody', 'physics.BtCharacter'
 		]
 	},
 	// ******* подсистема GUI

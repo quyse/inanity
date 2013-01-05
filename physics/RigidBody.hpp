@@ -30,6 +30,9 @@ public:
 	virtual float3x3 GetOrientation() const = 0;
 	/// Получить текущую трансформацию твёрдого тела.
 	virtual float4x4 GetTransform() const = 0;
+
+	/// Применить импульс к телу.
+	virtual void ApplyImpulse(const float3& impulse) = 0;
 };
 
 END_INANITY_PHYSICS

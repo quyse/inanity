@@ -23,14 +23,17 @@ public:
 	BtRigidBody(ptr<BtWorld> world, ptr<BtShape> shape, const btTransform& startTransform);
 	~BtRigidBody();
 
-	// Указать объект bullet.
+	/// Указать объект bullet.
 	/** Вызывается BtWorld при создании объекта. */
 	void SetInternalObject(btRigidBody* rigidBody);
+	/// Получить объект bullet.
+	btRigidBody* GetInternalObject() const;
 
 	// методы RigidBody
 	float3 GetPosition() const;
 	float3x3 GetOrientation() const;
 	float4x4 GetTransform() const;
+	void ApplyImpulse(const float3& impulse);
 
 	// методы btMotionState
 	void getWorldTransform(btTransform& transform) const;

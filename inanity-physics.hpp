@@ -6,5 +6,6 @@
 #include "physics/World.hpp"
 #include "physics/Shape.hpp"
 #include "physics/RigidBody.hpp"
+#include "physics/Character.hpp"
 
 #endif

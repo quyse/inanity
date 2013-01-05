@@ -348,6 +348,10 @@ inline matrix<4, 4> CreateTranslationMatrix(scalar x, scalar y, scalar z)
 	r.t[3][2] = z;
 	return r;
 }
+inline matrix<4, 4> CreateTranslationMatrix(const vector<3>& translation)
+{
+	return CreateTranslationMatrix(translation.x, translation.y, translation.z);
+}
 
 inline matrix<4, 4> CreateScalingMatrix(scalar x, scalar y, scalar z)
 {

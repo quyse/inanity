@@ -6,5 +6,6 @@
 #include "physics/BtWorld.hpp"
 #include "physics/BtShape.hpp"
 #include "physics/BtRigidBody.hpp"
+#include "physics/BtCharacter.hpp"
 
 #endif

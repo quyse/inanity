@@ -5,6 +5,8 @@
 
 #include "../deps/bullet/src/btBulletCollisionCommon.h"
 #include "../deps/bullet/src/btBulletDynamicsCommon.h"
+#include "../deps/bullet/src/BulletCollision/CollisionDispatch/btGhostObject.h"
+#include "../deps/bullet/src/BulletDynamics/Character/btKinematicCharacterController.h"
 
 BEGIN_INANITY_PHYSICS
 
