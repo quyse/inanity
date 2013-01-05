@@ -146,5 +146,5 @@ ptr<EditableGeometry<Vertex> > WavefrontObj::Convert()
 	}
 
 	//создать модель, оптимизировать и вернуть
-	return MakePointer(NEW(EditableGeometry<Vertex>(vertices)))->Optimize();
+	return MakePointer(NEW(EditableGeometry<Vertex, unsigned>(vertices)))->Optimize()->CastIndices<unsigned short>();
 }

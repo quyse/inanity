@@ -37,6 +37,13 @@ public:
 			indices[i] = i;
 	}
 
+	/// Преобразовать тип индексов.
+	template <typename ToIndex>
+	ptr<EditableGeometry<Vertex, ToIndex> > CastIndices() const
+	{
+		return NEW(EditableGeometry<Vertex, ToIndex>(vertices, std::vector<ToIndex>(indices.begin(), indices.end())));
+	}
+
 	/// Сериализовать геометрию.
 	void Serialize(ptr<OutputStream> outputStream, const String& formatFileName)
 	{
