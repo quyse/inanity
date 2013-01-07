@@ -2,6 +2,7 @@
 #define ___INANITY_GRAPHICS_SHADERS_UNIFORM_GROUP_HPP___
 
 #include "Uniform.hpp"
+#include "UniformArray.hpp"
 
 BEGIN_INANITY
 
@@ -49,6 +50,24 @@ public:
 		bufferSize = offset + valueSize;
 
 		return Uniform<ValueType>(NEW(UniformNode(this, valueType, offset)));
+	}
+
+	/// Добавить узел uniform-массива.
+	template <typename ValueType>
+	UniformArray<ValueType> AddUniformArray(int count)
+	{
+		DataType valueType = GetDataType<ValueType>();
+		// получить размер данных переменной
+		int valueSize = GetDataTypeSize(valueType) * count;
+		// получить смещение до переменной с соответствующим выравниванием
+		// на границу float4-регистра
+		int offset = bufferSize;
+		if(offset % sizeof(float4) + valueSize > sizeof(float4))
+			offset = (offset + sizeof(float4) - 1) & ~(sizeof(float4) - 1);
+		// увеличить размер буфера
+		bufferSize = offset + valueSize;
+
+		return UniformArray<ValueType>(NEW(UniformNode(this, valueType, offset, count)));
 	}
 
 	/// Финализировать группу.

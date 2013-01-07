@@ -10,19 +10,25 @@ class UniformGroup;
 /// Класс узла Uniform-переменной.
 class UniformNode : public Node
 {
-private:
+protected:
+	/// Группа uniform-переменных.
 	ptr<UniformGroup> group;
+	/// Тип данных переменной.
 	DataType valueType;
+	/// Смещение в группе.
 	int offset;
+	/// Размер массива (1, если не массив).
+	int count;
 
 public:
-	UniformNode(ptr<UniformGroup> buffer, DataType valueType, int offset);
+	UniformNode(ptr<UniformGroup> group, DataType valueType, int offset, int count = 1);
 
 	Type GetType() const;
 
 	ptr<UniformGroup> GetGroup() const;
 	DataType GetValueType() const;
 	int GetOffset() const;
+	int GetCount() const;
 };
 
 END_INANITY_SHADERS

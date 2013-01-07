@@ -1,8 +1,8 @@
 #include "UniformNode.hpp"
 #include "UniformGroup.hpp"
 
-UniformNode::UniformNode(ptr<UniformGroup> group, DataType valueType, int offset)
-: group(group), valueType(valueType), offset(offset) {}
+UniformNode::UniformNode(ptr<UniformGroup> group, DataType valueType, int offset, int count)
+: group(group), valueType(valueType), offset(offset), count(count) {}
 
 Node::Type UniformNode::GetType() const
 {
@@ -22,4 +22,9 @@ DataType UniformNode::GetValueType() const
 int UniformNode::GetOffset() const
 {
 	return offset;
+}
+
+int UniformNode::GetCount() const
+{
+	return count;
 }

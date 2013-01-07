@@ -19,6 +19,7 @@ BEGIN_INANITY_SHADERS
 class Node;
 class AttributeNode;
 class TempNode;
+class SpecialNode;
 class UniformGroup;
 class UniformNode;
 class SamplerNode;
@@ -52,6 +53,8 @@ private:
 	/** Мап узел-индекс. */
 	std::unordered_map<ptr<TempNode>, int> temps;
 	int tempsCount;
+	/// Специальные переменные.
+	std::vector<std::pair<Semantic, ptr<SpecialNode> > > specials;
 	/// uniform-переменные по группам.
 	std::vector<std::pair<ptr<UniformGroup>, ptr<UniformNode> > > uniforms;
 	/// Семплеры.
@@ -70,6 +73,8 @@ private:
 	void PrintNode(Node* node);
 	/// Напечатать узел операции.
 	void PrintOperationNode(OperationNode* node);
+	/// Напечатать семантику.
+	void PrintSemantic(Semantic semantic);
 	/// Вывести структуру.
 	void PrintStructure(const std::vector<Structured>& elements, const char* variableNamePrefix);
 	/// Вывести uniform-буферы.

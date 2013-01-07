@@ -16,6 +16,7 @@ public:
 	enum Operation
 	{
 		operationAssign,
+		operationIndex,
 		operationNegate,
 		operationAdd,
 		operationSubtract,

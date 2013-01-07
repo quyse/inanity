@@ -10,6 +10,7 @@
 #include "UniformGroup.hpp"
 #include "UniformNode.hpp"
 #include "TempNode.hpp"
+#include "SpecialNode.hpp"
 #include "TransitionalNode.hpp"
 #include "CastNode.hpp"
 #include "../ShaderSource.hpp"
@@ -90,6 +91,12 @@ void HlslGeneratorInstance::RegisterNode(Node* node)
 				temps[tempNode] = tempsCount++;
 		}
 		break;
+	case Node::typeSpecial:
+		{
+			SpecialNode* specialNode = fast_cast<SpecialNode*>(node);
+			specials.push_back(std::make_pair(specialNode->GetSemantic(), specialNode));
+		}
+		break;
 	case Node::typeTransformed:
 		transformed.push_back(fast_cast<TransitionalNode*>(node));
 		break;
@@ -164,6 +171,9 @@ void HlslGeneratorInstance::PrintNode(Node* node)
 			hlsl << '_' << i->second;
 		}
 		break;
+	case Node::typeSpecial:
+		hlsl << "sl" << fast_cast<SpecialNode*>(node)->GetSemantic();
+		break;
 	case Node::typeTransformed:
 		hlsl << "v.v" << (int)fast_cast<TransitionalNode*>(node)->GetSemantic();
 		break;
@@ -223,6 +233,12 @@ void HlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 		hlsl << " = (";
 		PrintNode(node->GetB());
 		hlsl << ')';
+		break;
+	case OperationNode::operationIndex:
+		PrintNode(node->GetA());
+		hlsl << '[';
+		PrintNode(node->GetB());
+		hlsl << ']';
 		break;
 	case OperationNode::operationNegate:
 		hlsl << "-(";
@@ -324,6 +340,45 @@ void HlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 	}
 }
 
+void HlslGeneratorInstance::PrintSemantic(Semantic semantic)
+{
+	const char* semanticStr = 0;
+	char semanticBuffer[32];
+	// нет семантики - плохо
+	if(semantic == Semantics::None)
+		THROW_PRIMARY_EXCEPTION("Structured variables should have semantic");
+	// специальная семантика
+	else if(semantic >= Semantics::_SpecialBegin && semantic < Semantics::_SpecialEnd)
+	{
+		if(semantic == Semantics::Instance)
+			semanticStr = "SV_InstanceID";
+		else if(semantic == Semantics::VertexPosition)
+			semanticStr = "SV_Position";
+		else if(semantic >= Semantics::_TargetColorBegin && semantic < Semantics::_TargetColorEnd)
+		{
+			sprintf(semanticBuffer, "SV_Target%d", semantic - Semantics::TargetColor0);
+			semanticStr = semanticBuffer;
+		}
+		else if(semantic >= Semantics::_TargetDepthBegin && semantic < Semantics::_TargetDepthEnd)
+		{
+			sprintf(semanticBuffer, "SV_Depth%d", semantic - Semantics::TargetDepth0);
+			semanticStr = semanticBuffer;
+		}
+	}
+	// пользовательская семантика
+	else if(semantic >= Semantics::_CustomBegin && semantic < Semantics::_CustomEnd)
+	{
+		strcpy(semanticBuffer, DxSystem::GetSemanticString(semantic - Semantics::Custom0).c_str());
+		semanticStr = semanticBuffer;
+	}
+
+	// если семантика осталась не указанной
+	if(!semanticStr)
+		THROW_PRIMARY_EXCEPTION("Can't determine semantic");
+
+	hlsl << semanticStr;
+}
+
 void HlslGeneratorInstance::PrintStructure(const std::vector<Structured>& variables, const char* variableNamePrefix)
 {
 	for(size_t i = 0; i < variables.size(); ++i)
@@ -339,43 +394,9 @@ void HlslGeneratorInstance::PrintStructure(const std::vector<Structured>& variab
 			// имя переменной
 			hlsl << ' ' << variableNamePrefix << variable.semantic;
 
-			//** семантика
-
-			const char* semanticStr = 0;
-			char semanticBuffer[32];
-			// нет семантики - плохо
-			if(variable.semantic == Semantics::None)
-				THROW_PRIMARY_EXCEPTION("Structured variables should have semantic");
-			// специальная семантика
-			else if(variable.semantic >= Semantics::_SpecialBegin && variable.semantic < Semantics::_SpecialEnd)
-			{
-				if(variable.semantic == Semantics::Instance)
-					semanticStr = "SV_InstanceID";
-				else if(variable.semantic == Semantics::VertexPosition)
-					semanticStr = "SV_Position";
-				else if(variable.semantic >= Semantics::_TargetColorBegin && variable.semantic < Semantics::_TargetColorEnd)
-				{
-					sprintf(semanticBuffer, "SV_Target%d", variable.semantic - Semantics::TargetColor0);
-					semanticStr = semanticBuffer;
-				}
-				else if(variable.semantic >= Semantics::_TargetDepthBegin && variable.semantic < Semantics::_TargetDepthEnd)
-				{
-					sprintf(semanticBuffer, "SV_Depth%d", variable.semantic - Semantics::TargetDepth0);
-					semanticStr = semanticBuffer;
-				}
-			}
-			// пользовательская семантика
-			else if(variable.semantic >= Semantics::_CustomBegin && variable.semantic < Semantics::_CustomEnd)
-			{
-				strcpy(semanticBuffer, DxSystem::GetSemanticString(variable.semantic - Semantics::Custom0).c_str());
-				semanticStr = semanticBuffer;
-			}
-
-			// если семантика осталась не указанной
-			if(!semanticStr)
-				THROW_PRIMARY_EXCEPTION("Can't determine semantic");
-
-			hlsl << " : " << semanticStr;
+			// семантика
+			hlsl << " : ";
+			PrintSemantic(variable.semantic);
 
 			// конец переменной
 			hlsl << ";\n";
@@ -420,8 +441,9 @@ void HlslGeneratorInstance::PrintUniforms()
 		for(size_t k = i; k < j; ++k)
 		{
 			ptr<UniformNode> uniformNode = uniforms[k].second;
-			int offset = uniformNode->GetOffset();
 			DataType valueType = uniformNode->GetValueType();
+			int offset = uniformNode->GetOffset();
+			int count = uniformNode->GetCount();
 
 			// переменная должна лежать на границе float'а, как минимум
 			if(offset % sizeof(float))
@@ -433,6 +455,13 @@ void HlslGeneratorInstance::PrintUniforms()
 			PrintDataType(valueType);
 			// имя переменной
 			hlsl << " u" << slot << '_' << offset;
+
+			// размер массива
+			if(count > 1)
+				hlsl << '[' << count << ']';
+			// если массив, размер элемента должен быть кратен размеру float4
+			if(count > 1 && GetDataTypeSize(valueType) % sizeof(float4))
+				THROW_PRIMARY_EXCEPTION("Size of element of array should be multiply of float4 size");
 
 			// регистр и положение в нём переменной
 			hlsl << " : packoffset(c" << (offset / sizeof(float4));
@@ -563,9 +592,25 @@ ptr<ShaderSource> HlslGeneratorInstance::Generate()
 		hlsl << "SamplerState s" << slot << " : register(s" << slot << ");\n";
 	}
 
-	// заголовок функции шейдера
-	hlsl << outputTypeName << ' ' << mainFunctionName << '(' << inputTypeName << ' ' << inputName << ")\n{\n\t"
-		<< outputTypeName << ' ' << outputName << ";\n";
+	//** заголовок функции шейдера
+
+	hlsl << outputTypeName << ' ' << mainFunctionName << '(' << inputTypeName << ' ' << inputName;
+
+	// вывести специальные переменные дополнительными аргументами
+	std::sort(specials.begin(), specials.end());
+	specials.resize(std::unique(specials.begin(), specials.end()) - specials.begin());
+	for(size_t i = 0; i < specials.size(); ++i)
+	{
+		ptr<SpecialNode> specialNode = specials[i].second;
+		Semantic semantic = specialNode->GetSemantic();
+		hlsl << ", ";
+		PrintDataType(specialNode->GetValueType());
+		hlsl << " sl" << semantic << " : ";
+		PrintSemantic(semantic);
+	}
+
+	// завершить заголовок
+	hlsl << ")\n{\n\t" << outputTypeName << ' ' << outputName << ";\n";
 
 	// временные переменные
 	{
