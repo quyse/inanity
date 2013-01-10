@@ -33,10 +33,12 @@ public:
 		operationDot,
 		operationCross,
 		operationMul,
+		operationLength,
 		operationNormalize,
 		operationPow,
 		operationMin,
-		operationMax
+		operationMax,
+		operationExp
 	};
 
 private:

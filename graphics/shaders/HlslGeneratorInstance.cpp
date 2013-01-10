@@ -315,10 +315,12 @@ void HlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 				OP(Dot, dot);
 				OP(Cross, cross);
 				OP(Mul, mul);
+				OP(Length, length);
 				OP(Normalize, normalize);
 				OP(Pow, pow);
 				OP(Min, min);
 				OP(Max, max);
+				OP(Exp, exp);
 #undef OP
 			default:
 				THROW_PRIMARY_EXCEPTION("Unknown operation type");
@@ -565,6 +567,8 @@ ptr<ShaderSource> HlslGeneratorInstance::Generate()
 	PrintUniforms();
 
 	// семплеры
+	std::sort(samplers.begin(), samplers.end());
+	samplers.resize(std::unique(samplers.begin(), samplers.end()) - samplers.begin());
 	for(size_t i = 0; i < samplers.size(); ++i)
 	{
 		ptr<SamplerNode> samplerNode = samplers[i];

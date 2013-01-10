@@ -46,8 +46,18 @@ inline Value<ValueType> operator+(Value<ValueType> a, Value<ValueType> b)
 {
 	return NEW(OperationNode(OperationNode::operationAdd, a.GetNode(), b.GetNode()));
 }
+template <int n>
+inline Value<vector<n> > operator+(Value<vector<n> > a, Value<float> b)
+{
+	return NEW(OperationNode(OperationNode::operationAdd, a.GetNode(), b.GetNode()));
+}
 template <typename ValueType>
 inline Value<ValueType> operator-(Value<ValueType> a, Value<ValueType> b)
+{
+	return NEW(OperationNode(OperationNode::operationSubtract, a.GetNode(), b.GetNode()));
+}
+template <int n>
+inline Value<vector<n> > operator-(Value<vector<n> > a, Value<float> b)
 {
 	return NEW(OperationNode(OperationNode::operationSubtract, a.GetNode(), b.GetNode()));
 }

@@ -32,6 +32,9 @@ inline Value<vector<m> > mul(Value<vector<n> > a, Value<matrix<n, m> > b) { retu
 template <int n, int m>
 inline Value<vector<n> > mul(Value<matrix<n, m> > a, Value<vector<m> > b) { return OP2(Mul); }
 
+// length
+template <int n>
+inline Value<float> length(Value<vector<n> > a) { return OP1(Length); }
 // normalize
 template <int n>
 inline Value<vector<n> > normalize(Value<vector<n> > a) { return OP1(Normalize); }
@@ -43,6 +46,9 @@ inline Value<float> pow(Value<float> a, Value<float> b) { return OP2(Pow); }
 inline Value<float> min(Value<float> a, Value<float> b) { return OP2(Min); }
 // max
 inline Value<float> max(Value<float> a, Value<float> b) { return OP2(Max); }
+
+// exp
+inline Value<float> exp(Value<float> a) { return OP1(Exp); }
 
 #undef OP2
 
