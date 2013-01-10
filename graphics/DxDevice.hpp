@@ -46,6 +46,7 @@ public:
 	ptr<IndexBuffer> CreateIndexBuffer(ptr<File> file, int indexSize);
 	ptr<Texture> CreateStaticTexture(ptr<File> file);
 	ptr<SamplerState> CreateSamplerState();
+	ptr<BlendState> CreateBlendState();
 
 	/// Получить интерфейс устройства DirectX 11.
 	ID3D11Device* GetDeviceInterface() const;

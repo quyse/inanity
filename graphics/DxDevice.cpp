@@ -14,6 +14,7 @@
 #include "Layout.hpp"
 #include "DxInternalInputLayout.hpp"
 #include "DxSamplerState.hpp"
+#include "DxBlendState.hpp"
 #include "../File.hpp"
 #include "../Exception.hpp"
 #include "d3dx.hpp"
@@ -364,6 +365,11 @@ ptr<Texture> DxDevice::CreateStaticTexture(ptr<File> file)
 ptr<SamplerState> DxDevice::CreateSamplerState()
 {
 	return NEW(DxSamplerState(this));
+}
+
+ptr<BlendState> DxDevice::CreateBlendState()
+{
+	return NEW(DxBlendState(this));
 }
 
 ID3D11Device* DxDevice::GetDeviceInterface() const

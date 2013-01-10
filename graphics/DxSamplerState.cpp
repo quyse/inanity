@@ -2,9 +2,7 @@
 #include "DxDevice.hpp"
 #include "../Exception.hpp"
 
-DxSamplerState::DxSamplerState(ptr<DxDevice> device) : device(device)
-{
-}
+DxSamplerState::DxSamplerState(ptr<DxDevice> device) : device(device) {}
 
 ID3D11SamplerState* DxSamplerState::GetSamplerStateInterface()
 {
@@ -78,11 +76,11 @@ void DxSamplerState::Update()
 			desc.BorderColor[i] = borderColor[i];
 
 		// создать sampler state
-		ID3D11SamplerState* samplerState;
-		if(FAILED(device->GetDeviceInterface()->CreateSamplerState(&desc, &samplerState)))
+		ID3D11SamplerState* samplerStateInterface;
+		if(FAILED(device->GetDeviceInterface()->CreateSamplerState(&desc, &samplerStateInterface)))
 			THROW_PRIMARY_EXCEPTION("Can't create sampler state");
 
-		this->samplerState = samplerState;
+		samplerState = samplerStateInterface;
 
 		dirty = false;
 	}

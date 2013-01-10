@@ -12,6 +12,7 @@
 #endif
 
 #include "graphics/D3D10BlobFile.hpp"
+#include "graphics/DxBlendState.hpp"
 #include "graphics/DxContext.hpp"
 #include "graphics/DxDepthStencilBuffer.hpp"
 #include "graphics/DxDevice.hpp"

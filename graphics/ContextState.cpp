@@ -8,6 +8,7 @@
 #include "PixelShader.hpp"
 #include "VertexBuffer.hpp"
 #include "IndexBuffer.hpp"
+#include "BlendState.hpp"
 
 ContextState::ContextState() :
 	fillMode(fillModeSolid), cullMode(cullModeBack),

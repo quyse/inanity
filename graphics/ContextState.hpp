@@ -14,6 +14,7 @@ class VertexShader;
 class PixelShader;
 class VertexBuffer;
 class IndexBuffer;
+class BlendState;
 
 /// Структура с состоянием контекста рисования.
 /** В контексте указываются различные настройки рендеринга,
@@ -86,6 +87,9 @@ struct ContextState
 	DepthTestFunc depthTestFunc;
 	/// Запись в буфер глубины.
 	bool depthWrite;
+
+	/// Смешивание.
+	ptr<BlendState> blendState;
 
 	ContextState();
 

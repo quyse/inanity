@@ -16,6 +16,7 @@
 #endif
 
 #include "graphics/graphics.hpp"
+#include "graphics/BlendState.hpp"
 #include "graphics/Context.hpp"
 #include "graphics/ContextState.hpp"
 #include "graphics/DataType.hpp"

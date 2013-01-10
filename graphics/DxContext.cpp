@@ -12,6 +12,7 @@
 #include "DxInternalInputLayout.hpp"
 #include "DxInternalInputLayoutCache.hpp"
 #include "DxIndexBuffer.hpp"
+#include "DxBlendState.hpp"
 #include "Layout.hpp"
 #include "../File.hpp"
 #include "../Exception.hpp"
@@ -414,6 +415,19 @@ void DxContext::Update()
 
 		boundState.viewportWidth = targetState.viewportWidth;
 		boundState.viewportHeight = targetState.viewportHeight;
+	}
+
+	// blend state
+	if(forceReset || targetState.blendState != boundState.blendState)
+	{
+		ID3D11BlendState* blendState;
+		if(targetState.blendState)
+			blendState = fast_cast<DxBlendState*>(&*targetState.blendState)->GetBlendStateInterface();
+		else
+			blendState = 0;
+		deviceContext->OMSetBlendState(blendState, 0, 0xffffffff);
+
+		boundState.blendState = targetState.blendState;
 	}
 
 	forceReset = false;

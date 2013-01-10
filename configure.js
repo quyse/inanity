@@ -83,7 +83,7 @@ var libraries = {
 		objects: [
 			'graphics.Context', 'graphics.ContextState',
 			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.Layout', 'graphics.LayoutBinding', 'graphics.IndexBuffer',
-			'graphics.SamplerState',
+			'graphics.SamplerState', 'graphics.BlendState',
 			'graphics.ShaderSource',
 			'graphics.EditableFont']
 	},
@@ -95,7 +95,7 @@ var libraries = {
 			'graphics.DxRenderBuffer', 'graphics.DxDepthStencilBuffer', 'graphics.DxTexture', 'graphics.DxUniformBuffer',
 			'graphics.DxVertexBuffer', 'graphics.DxIndexBuffer',
 			'graphics.DxVertexShader', 'graphics.DxPixelShader',
-			'graphics.DxSamplerState',
+			'graphics.DxSamplerState', 'graphics.DxBlendState',
 			'graphics.D3D10BlobFile', 'graphics.DxShaderCompiler'
 		]
 	},

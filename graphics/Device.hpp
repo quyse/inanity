@@ -27,6 +27,7 @@ class VertexBuffer;
 class IndexBuffer;
 class Texture;
 class SamplerState;
+class BlendState;
 
 /// Абстрактный класс устройства вывода.
 /** Основной класс графической подсистемы. Обычно олицетворяет видеокарту.
@@ -77,6 +78,9 @@ public:
 
 	/// Создать объект настроек семплирования.
 	virtual ptr<SamplerState> CreateSamplerState() = 0;
+
+	/// Создать объект настроек смешивания.
+	virtual ptr<BlendState> CreateBlendState() = 0;
 };
 
 END_INANITY_GRAPHICS
