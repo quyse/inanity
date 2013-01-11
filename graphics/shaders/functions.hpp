@@ -47,8 +47,16 @@ inline Value<float> min(Value<float> a, Value<float> b) { return OP2(Min); }
 // max
 inline Value<float> max(Value<float> a, Value<float> b) { return OP2(Max); }
 
+// sin
+inline Value<float> sin(Value<float> a) { return OP1(Sin); }
+// cos
+inline Value<float> cos(Value<float> a) { return OP1(Cos); }
+
 // exp
 inline Value<float> exp(Value<float> a) { return OP1(Exp); }
+
+// saturate
+inline Value<float> saturate(Value<float> a) { return OP1(Saturate); }
 
 #undef OP2
 

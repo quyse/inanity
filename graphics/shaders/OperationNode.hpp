@@ -38,7 +38,10 @@ public:
 		operationPow,
 		operationMin,
 		operationMax,
-		operationExp
+		operationSin,
+		operationCos,
+		operationExp,
+		operationSaturate
 	};
 
 private:

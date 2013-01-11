@@ -320,7 +320,10 @@ void HlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 				OP(Pow, pow);
 				OP(Min, min);
 				OP(Max, max);
+				OP(Sin, sin);
+				OP(Cos, cos);
 				OP(Exp, exp);
+				OP(Saturate, saturate);
 #undef OP
 			default:
 				THROW_PRIMARY_EXCEPTION("Unknown operation type");
