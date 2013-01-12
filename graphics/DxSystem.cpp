@@ -26,6 +26,8 @@ DXGI_FORMAT DxSystem::GetDXGIFormat(PixelFormat format)
 		return DXGI_FORMAT_R8G8B8A8_UNORM;
 	case PixelFormats::floatR11G11B10:
 		return DXGI_FORMAT_R11G11B10_FLOAT;
+	case PixelFormats::floatR16:
+		return DXGI_FORMAT_R16_FLOAT;
 	case PixelFormats::typelessR32:
 		return DXGI_FORMAT_R32_TYPELESS;
 	case PixelFormats::floatR32:

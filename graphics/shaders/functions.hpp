@@ -58,6 +58,8 @@ inline Value<float> cos(Value<float> a) { return OP1(Cos); }
 
 // exp
 inline Value<float> exp(Value<float> a) { return OP1(Exp); }
+// log
+inline Value<float> log(Value<float> a) { return OP1(Log); }
 
 // saturate
 inline Value<float> saturate(Value<float> a) { return OP1(Saturate); }

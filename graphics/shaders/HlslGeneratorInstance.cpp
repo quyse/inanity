@@ -323,6 +323,7 @@ void HlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 				OP(Sin, sin);
 				OP(Cos, cos);
 				OP(Exp, exp);
+				OP(Log, log);
 				OP(Saturate, saturate);
 #undef OP
 			default:

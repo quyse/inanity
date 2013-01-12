@@ -41,6 +41,7 @@ public:
 		operationSin,
 		operationCos,
 		operationExp,
+		operationLog,
 		operationSaturate
 	};
 

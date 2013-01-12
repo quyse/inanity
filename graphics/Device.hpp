@@ -54,6 +54,7 @@ public:
 	// ******* Методы для создания ресурсов устройства.
 
 	/// Создать рендербуфер.
+	/** Всегда доступен для чтения GPU. */
 	virtual ptr<RenderBuffer> CreateRenderBuffer(int width, int height, PixelFormat pixelFormat) = 0;
 	/// Создать depth-stencil буфер.
 	virtual ptr<DepthStencilBuffer> CreateDepthStencilBuffer(int width, int height, bool canBeResource = false) = 0;

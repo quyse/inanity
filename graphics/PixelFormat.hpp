@@ -13,6 +13,7 @@ struct PixelFormats
 		unknown,
 		intR8G8B8A8,
 		floatR11G11B10,
+		floatR16,
 		typelessR32,
 		floatR32,
 		floatR32Depth,
