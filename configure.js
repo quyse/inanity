@@ -62,6 +62,10 @@ var libraries = {
 		// HTTP
 		'HttpClient', 'HttpResponseStream', 'http_parser']
 	},
+	// ******* файловая система на SQLite
+	'libinanity-sqlitefs': {
+		objects: ['SQLiteFileSystem', 'deps.sqlite.sqlite3.c']
+	},
 	// ******* скрипты на lua
 	'libinanity-lua': {
 		objects: ['lua.stuff', 'lua.reflection', 'lua.State', 'lua.Script']
