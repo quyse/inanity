@@ -1,6 +1,7 @@
 #include "UniformGroup.hpp"
 #include "UniformNode.hpp"
 #include "../../MemoryFile.hpp"
+#include "../../Exception.hpp"
 
 UniformGroup::UniformGroup(int slot)
 : slot(slot), bufferSize(0), data(0) {}
@@ -18,6 +19,10 @@ void UniformGroup::Finalize()
 
 void* UniformGroup::GetData() const
 {
+#ifdef _DEBUG
+	if(!dataFile)
+		THROW_PRIMARY_EXCEPTION("Uniform group has not finalized");
+#endif
 	return data;
 }
 

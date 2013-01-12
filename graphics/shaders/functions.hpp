@@ -44,8 +44,12 @@ inline Value<float> pow(Value<float> a, Value<float> b) { return OP2(Pow); }
 
 // min
 inline Value<float> min(Value<float> a, Value<float> b) { return OP2(Min); }
+template <int n>
+Value<vector<n> > min(Value<vector<n> > a, Value<vector<n> > b) { return OP2(Min); }
 // max
 inline Value<float> max(Value<float> a, Value<float> b) { return OP2(Max); }
+template <int n>
+Value<vector<n> > max(Value<vector<n> > a, Value<vector<n> > b) { return OP2(Max); }
 
 // sin
 inline Value<float> sin(Value<float> a) { return OP1(Sin); }

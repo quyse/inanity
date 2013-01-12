@@ -25,6 +25,8 @@ public:
 
 	/// Вместо оператора присваивания.
 	void Assign(Expression expression);
+	/// Приделать к выражению другое выражение через запятую.
+	void Append(Expression expression);
 };
 
 Expression operator,(Expression a, Expression b);

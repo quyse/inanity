@@ -13,6 +13,11 @@ void Expression::Assign(Expression expression)
 	node = expression.node;
 }
 
+void Expression::Append(Expression expression)
+{
+	Assign((*this, expression));
+}
+
 BEGIN_INANITY_SHADERS
 
 Expression operator,(Expression a, Expression b)
