@@ -117,6 +117,8 @@ void DxBlendState::Update()
 			THROW_PRIMARY_EXCEPTION("Can't create blend state");
 
 		blendState = blendStateInterface;
+
+		dirty = false;
 	}
 	catch(Exception* exception)
 	{
