@@ -440,6 +440,16 @@ typedef vector<4> float4;
 typedef matrix<3, 3> float3x3;
 typedef matrix<4, 4> float4x4;
 
+//*** Целочисленные вектора (заглушка для шейдеров).
+
+template <int n>
+struct uintvector {};
+
+typedef unsigned int uint;
+typedef uintvector<2> uint2;
+typedef uintvector<3> uint3;
+typedef uintvector<4> uint4;
+
 END_INANITY_MATH
 
 #endif
