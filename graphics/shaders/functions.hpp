@@ -41,6 +41,8 @@ inline Value<vector<n> > normalize(Value<vector<n> > a) { return OP1(Normalize);
 
 // pow
 inline Value<float> pow(Value<float> a, Value<float> b) { return OP2(Pow); }
+template <int n>
+inline Value<vector<n> > pow(Value<vector<n> > a, Value<vector<n> > b) { return OP2(Pow); }
 
 // min
 inline Value<float> min(Value<float> a, Value<float> b) { return OP2(Min); }
