@@ -67,12 +67,17 @@ SQLiteFileSystem::SQLiteFileSystem(const String& fileName)
 			"name TEXT NOT NULL UNIQUE COLLATE BINARY, "
 			"data BLOB NOT NULL)",
 			0, 0, 0) != SQLITE_OK)
-			THROW_PRIMARY_EXCEPTION("Can't create table");
+			Throw("Can't create table");
 	}
 	catch(Exception* exception)
 	{
 		THROW_SECONDARY_EXCEPTION("Can't open SQLite file system in " + fileName, exception);
 	}
+}
+
+void SQLiteFileSystem::Throw(const char* message) const
+{
+	THROW_SECONDARY_EXCEPTION(message, NEW(Exception(sqlite3_errmsg(*db))));
 }
 
 void SQLiteFileSystem::ensureLoadFileStmt() const
@@ -81,7 +86,7 @@ void SQLiteFileSystem::ensureLoadFileStmt() const
 	{
 		sqlite3_stmt* stmtPtr;
 		if(sqlite3_prepare_v2(*db, "SELECT data FROM files WHERE name = ?1", -1, &stmtPtr, 0) != SQLITE_OK)
-			THROW_PRIMARY_EXCEPTION("Can't create load file statement");
+			Throw("Can't create load file statement");
 		loadFileStmt = NEW(Statement(db, stmtPtr));
 	}
 }
@@ -91,8 +96,8 @@ void SQLiteFileSystem::ensureSaveFileStmt() const
 	if(!saveFileStmt)
 	{
 		sqlite3_stmt* stmtPtr;
-		if(sqlite3_prepare_v2(*db, "INSERT OR REPLACE files (name, data) VALUES (?1, ?2)", -1, &stmtPtr, 0) != SQLITE_OK)
-			THROW_PRIMARY_EXCEPTION("Can't create save file statement");
+		if(sqlite3_prepare_v2(*db, "INSERT OR REPLACE INTO files (name, data) VALUES (?1, ?2)", -1, &stmtPtr, 0) != SQLITE_OK)
+			Throw("Can't create save file statement");
 		saveFileStmt = NEW(Statement(db, stmtPtr));
 	}
 }
@@ -103,7 +108,7 @@ void SQLiteFileSystem::ensureEntriesStmt() const
 	{
 		sqlite3_stmt* stmtPtr;
 		if(sqlite3_prepare_v2(*db, "SELECT name FROM files WHERE name LIKE ?1 ORDER BY name ASC", -1, &stmtPtr, 0) != SQLITE_OK)
-			THROW_PRIMARY_EXCEPTION("Can't create entries file statement");
+			Throw("Can't create entries file statement");
 		entriesStmt = NEW(Statement(db, stmtPtr));
 	}
 }
@@ -114,7 +119,7 @@ void SQLiteFileSystem::ensureAllEntriesStmt() const
 	{
 		sqlite3_stmt* stmtPtr;
 		if(sqlite3_prepare_v2(*db, "SELECT name FROM files ORDER BY name ASC", -1, &stmtPtr, 0) != SQLITE_OK)
-			THROW_PRIMARY_EXCEPTION("Can't create all entries file statement");
+			Throw("Can't create all entries file statement");
 		allEntriesStmt = NEW(Statement(db, stmtPtr));
 	}
 }
@@ -143,7 +148,7 @@ ptr<File> SQLiteFileSystem::TryLoadFile(const String& fileName)
 		QueryHandle query(loadFileStmt);
 		// установить имя файла в запросе
 		if(sqlite3_bind_text(*loadFileStmt, 1, fileName.c_str(), -1, SQLITE_TRANSIENT) != SQLITE_OK)
-			THROW_PRIMARY_EXCEPTION("Can't bind name parameter");
+			Throw("Can't bind name parameter");
 
 		// выполнить запрос
 		switch(sqlite3_step(*loadFileStmt))
@@ -151,10 +156,10 @@ ptr<File> SQLiteFileSystem::TryLoadFile(const String& fileName)
 		case SQLITE_ROW: // файл найден
 			{
 				// получить указатель на данные
-				const void* fileData = sqlite3_column_blob(*loadFileStmt, 1);
+				const void* fileData = sqlite3_column_blob(*loadFileStmt, 0);
 				if(!fileData)
-					THROW_PRIMARY_EXCEPTION("Can't get file data");
-				size_t fileSize = sqlite3_column_bytes(*loadFileStmt, 1);
+					Throw("Can't get file data");
+				size_t fileSize = sqlite3_column_bytes(*loadFileStmt, 0);
 				// скопировать данные в память
 				ptr<MemoryFile> file = NEW(MemoryFile(fileSize));
 				memcpy(file->GetData(), fileData, fileSize);
@@ -164,7 +169,7 @@ ptr<File> SQLiteFileSystem::TryLoadFile(const String& fileName)
 		case SQLITE_DONE: // файл не найден
 			return nullptr;
 		default:
-			THROW_PRIMARY_EXCEPTION("Error with statement step");
+			Throw("Error with statement step");
 		}
 	}
 	catch(Exception* exception)
@@ -182,17 +187,17 @@ void SQLiteFileSystem::SaveFile(ptr<File> file, const String& fileName)
 		QueryHandle query(saveFileStmt);
 		// установить имя файла и данные в запросе
 		if(sqlite3_bind_text(*saveFileStmt, 1, fileName.c_str(), -1, SQLITE_TRANSIENT) != SQLITE_OK)
-			THROW_PRIMARY_EXCEPTION("Can't bind name parameter");
+			Throw("Can't bind name parameter");
 		AcquireFile(file);
 		if(sqlite3_bind_blob(*saveFileStmt, 2, file->GetData(), file->GetSize(), FreeFile) != SQLITE_OK)
-			THROW_PRIMARY_EXCEPTION("Can't bind data parameter");
+			Throw("Can't bind data parameter");
 
 		// выполнить запрос
 		int result = sqlite3_step(*saveFileStmt);
 
 		// если была ошибка
 		if(result != SQLITE_DONE)
-			THROW_PRIMARY_EXCEPTION("Can't execute statement");
+			Throw("Can't execute statement");
 	}
 	catch(Exception* exception)
 	{
@@ -210,7 +215,7 @@ void SQLiteFileSystem::GetEntries(const String& directoryName, std::vector<Strin
 
 		// установить имя каталога в запросе
 		if(sqlite3_bind_text(*entriesStmt, 1, (directoryName + "%").c_str(), -1, SQLITE_TRANSIENT) != SQLITE_OK)
-			THROW_PRIMARY_EXCEPTION("Can't bind name parameter");
+			Throw("Can't bind name parameter");
 
 		// запомнить границу, с которой начались наши результаты
 		size_t size1 = entries.size();
@@ -248,7 +253,7 @@ void SQLiteFileSystem::GetEntries(const String& directoryName, std::vector<Strin
 					entries.push_back(fileName);
 			}
 			else
-				THROW_PRIMARY_EXCEPTION("Can't execute statement");
+				Throw("Can't execute statement");
 		}
 	}
 	catch(Exception* exception)
@@ -275,7 +280,7 @@ void SQLiteFileSystem::GetFileNames(std::vector<String>& fileNames) const
 				// получить имя файла и добавить в список
 				fileNames.push_back((const char*)sqlite3_column_text(*entriesStmt, 0));
 			else
-				THROW_PRIMARY_EXCEPTION("Can't execute statement");
+				Throw("Can't execute statement");
 		}
 	}
 	catch(Exception* exception)

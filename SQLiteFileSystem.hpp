@@ -68,6 +68,9 @@ private:
 	/// Statement для получения всех файлов.
 	mutable ptr<Statement> allEntriesStmt;
 
+	/// Выбросить исключение SQLite.
+	void Throw(const char* message) const;
+
 	void ensureLoadFileStmt() const;
 	void ensureSaveFileStmt() const;
 	void ensureEntriesStmt() const;
@@ -89,7 +92,6 @@ private:
 public:
 	/// Создать или открыть файловую систему в заданном файле.
 	SQLiteFileSystem(const String& fileName);
-	~SQLiteFileSystem();
 
 	ptr<File> TryLoadFile(const String& fileName);
 	void SaveFile(ptr<File> file, const String& fileName);
