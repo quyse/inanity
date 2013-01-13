@@ -105,7 +105,7 @@ ptr<File> DxShaderCompiler::Compile(ptr<ShaderSource> shaderSource)
 
 		//если ошибка
 		if(FAILED(result))
-			THROW_PRIMARY_EXCEPTION("Compile error(s): " + Strings::File2String(errorsFile));
+			THROW_PRIMARY_EXCEPTION("Compile error(s): " + Strings::File2String(errorsFile) + "\n" + Strings::File2String(code));
 
 		//вернуть файл с шейдером
 		return shaderFile;
