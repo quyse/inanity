@@ -3,12 +3,17 @@
 
 #include "graphics.hpp"
 
+BEGIN_INANITY
+
+class InputStream;
+class OutputStream;
+
+END_INANITY
+
 BEGIN_INANITY_GRAPHICS
 
 class VertexBuffer;
 class IndexBuffer;
-class OutputStream;
-class InputStream;
 
 /// Класс геометрии.
 /** Просто объединяет вершинный и индексный буферы. */
