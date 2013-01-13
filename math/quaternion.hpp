@@ -32,6 +32,12 @@ struct quaternion : float4
 		w = angleCos;
 	}
 
+	/// Инверсия.
+	inline quaternion conjugate() const
+	{
+		return quaternion(-x, -y, -z, w);
+	}
+
 	/// Квадрат длины кватерниона.
 	inline float length2() const
 	{
