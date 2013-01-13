@@ -72,6 +72,12 @@ template <>
 inline DataType GetDataType<float4x4>() { return DataTypes::Float4x4; }
 template <>
 inline DataType GetDataType<unsigned int>() { return DataTypes::UInt; }
+template <>
+inline DataType GetDataType<uint2>() { return DataTypes::UInt2; }
+template <>
+inline DataType GetDataType<uint3>() { return DataTypes::UInt3; }
+template <>
+inline DataType GetDataType<uint4>() { return DataTypes::UInt4; }
 
 END_INANITY_GRAPHICS
 
