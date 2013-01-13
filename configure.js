@@ -89,6 +89,7 @@ var libraries = {
 			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.Layout', 'graphics.LayoutBinding', 'graphics.IndexBuffer',
 			'graphics.SamplerState', 'graphics.BlendState',
 			'graphics.ShaderSource',
+			'graphics.Geometry',
 			'graphics.EditableFont']
 	},
 	// ******* подсистема DirectX 11
