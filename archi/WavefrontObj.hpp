@@ -19,11 +19,20 @@ struct NormalVertex
 	float2 texcoord;
 };
 
+struct SkinnedVertex
+{
+	float3 position;
+	float3 normal;
+	float2 texcoord;
+	uint boneNumbers[4];
+	float boneWeights[4];
+};
+
 class WavefrontObj : public Processor
 {
 private:
 	//конвертировать файл из входного потока данных в геометрию
-	ptr<Graphics::EditableGeometry<Vertex> > Convert();
+	ptr<Graphics::EditableGeometry<Vertex, unsigned> > Convert(std::vector<int>& positionNumbers);
 
 public:
 	String GetCommand() const;

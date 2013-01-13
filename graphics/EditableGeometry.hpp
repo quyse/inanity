@@ -25,9 +25,7 @@ private:
 public:
 	/// Создать типизированную геометрию.
 	EditableGeometry(const std::vector<Vertex>& vertices, const std::vector<Index>& indices)
-		: vertices(vertices), indices(indices)
-	{
-	}
+		: vertices(vertices), indices(indices) {}
 
 	/// Создать типизированную геометрию из неиндексированных вершин.
 	EditableGeometry(const std::vector<Vertex>& vertices) : vertices(vertices)
@@ -35,6 +33,18 @@ public:
 		indices.resize(vertices.size());
 		for(size_t i = 0; i < indices.size(); ++i)
 			indices[i] = i;
+	}
+
+	/// Получить вершины.
+	std::vector<Vertex>& GetVertices()
+	{
+		return vertices;
+	}
+
+	/// Получить индексы.
+	std::vector<Index>& GetIndices()
+	{
+		return indices;
 	}
 
 	/// Преобразовать тип индексов.

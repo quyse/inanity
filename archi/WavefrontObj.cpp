@@ -29,6 +29,33 @@ bool operator == (const NormalVertex& a, const NormalVertex& b)
 	return a.position == b.position && a.transform1 == b.transform1 && a.transform2 == b.transform2 && a.transform3 == b.transform3 && a.texcoord == b.texcoord;
 }
 
+bool operator<(const SkinnedVertex& a, const SkinnedVertex& b)
+{
+	for(int i = 0; i < 4; ++i)
+	{
+		if(a.boneNumbers[i] < b.boneNumbers[i])
+			return true;
+		if(a.boneNumbers[i] > b.boneNumbers[i])
+			return false;
+		if(a.boneWeights[i] < b.boneWeights[i])
+			return true;
+		if(a.boneWeights[i] > b.boneWeights[i])
+			return false;
+	}
+	return a.position < b.position || a.position == b.position &&
+		(a.normal < b.normal || a.normal == b.normal &&
+		(a.texcoord < b.texcoord// || a.texcoord == b.texcoord &&
+		));
+}
+
+bool operator == (const SkinnedVertex& a, const SkinnedVertex& b)
+{
+	for(int i = 0; i < 4; ++i)
+		if(a.boneNumbers[i] != b.boneNumbers[i] || a.boneWeights[i] != b.boneWeights[i])
+			return false;
+	return a.position == b.position && a.normal == b.normal && a.texcoord == b.texcoord;
+}
+
 String WavefrontObj::GetCommand() const
 {
 	return "wobj";
@@ -36,48 +63,114 @@ String WavefrontObj::GetCommand() const
 
 void WavefrontObj::PrintHelp() const
 {
-	std::cout << "Converts a Wavefront OBJ formatted geometry to Inanity geometry. Usage:\n";
-	std::cout << "wobj <source .obj> <result .geo> <format> [<format file name>]\n";
+	std::cout << "Converts a Wavefront OBJ formatted geometry to Inanity geometry.\n";
+	std::cout << "Optional with skin dronimal-formatted text file. Usage:\n";
+	std::cout << "wobj <source .obj> <result .geo> [<skin text file>]\n";
 }
 
 void WavefrontObj::Run(const std::vector<String>& arguments)
 {
-	if(arguments.size() < 3)
-		THROW_PRIMARY_EXCEPTION("Must be at least 3 arguments for command");
+	if(arguments.size() < 2)
+		THROW_PRIMARY_EXCEPTION("Must be at least 2 arguments for command");
 
 	if(!_wfreopen(Strings::UTF82Unicode(arguments[0]).c_str(), L"r", stdin))
 		THROW_PRIMARY_EXCEPTION("Can't open source file");
 
-	ptr<Graphics::EditableGeometry<Vertex> > geometry = WavefrontObj::Convert();
+	std::vector<int> positionNumbers;
+	ptr<Graphics::EditableGeometry<Vertex, unsigned> > geometry = WavefrontObj::Convert(positionNumbers);
 
 	ptr<FileSystem> fileSystem = FolderFileSystem::GetNativeFileSystem();
 
-	fileSystem->SaveFile(geometry->SerializeVertices(), arguments[1] + ".vertices");
-	fileSystem->SaveFile(geometry->SerializeIndices(), arguments[1] + ".indices");
+	if(arguments.size() >= 3)
+	{
+		std::vector<Vertex>& vertices = geometry->GetVertices();
+		std::vector<SkinnedVertex> skinnedVertices(vertices.size());
 
-#if 0
-	ptr<EditableGeometry> eGeometry;
-	wstring format = arguments[2];
-	if(format == "pnt")
-		eGeometry = geometry->Untype(argumentsCount >= 4 ? arguments[3] : format);
-	else if(format == "pbt")
-		eGeometry = geometry->CreateBumpTransformations<NormalVertex>()->SmoothBump<&NormalVertex::transform1, &NormalVertex::transform2, &NormalVertex::transform3>()->Optimize()->Untype(argumentsCount >= 4 ? arguments[3] : format);
-//		eGeometry = geometry->CreateBumpTransformations<NormalVertex>()/*->Optimize()*/->Untype(argumentsCount >= 4 ? arguments[3] : format);
-/*	{
-		eGeometry = geometry->Untype(argumentsCount >= 4 ? arguments[3] : format);
-		eGeometry->AddVertexMapping(VertexMapping::Position, 0);
-		eGeometry->AddVertexMapping(VertexMapping::Normal, 12);
-		eGeometry->AddVertexMapping(VertexMapping::Texcoord, 24);
-		eGeometry = eGeometry->CreateTangentGeometry(true, argumentsCount >= 4 ? arguments[3] : format);
-	}*/
+		if(!_wfreopen(Strings::UTF82Unicode(arguments[2]).c_str(), L"r", stdin))
+			THROW_PRIMARY_EXCEPTION("Can't open skin file");
+
+		// считать коэффициенты для кожи
+		size_t skinVerticesCount;
+		std::cin >> skinVerticesCount;
+
+		struct SkinCoef
+		{
+			uint boneNumbers[4];
+			float boneWeights[4];
+		};
+		std::vector<SkinCoef> skinCoefs(skinVerticesCount);
+
+		std::vector<std::pair<float, int> > bones;
+		for(size_t i = 0; i < skinVerticesCount; ++i)
+		{
+			// считать веса и номера костей
+			size_t bonesCount;
+			std::cin >> bonesCount;
+			bones.resize(bonesCount);
+			for(size_t j = 0; j < bonesCount; ++j)
+				std::cin >> bones[j].second >> bones[j].first;
+			std::sort(bones.begin(), bones.end());
+			// если костей слишком много
+			if(bones.size() > 4)
+				// выбрать самые важные
+				bones.erase(bones.begin(), bones.end() - 4);
+			// если костей слишком мало, дополнить нулями
+			while(bones.size() < 4)
+				bones.push_back(std::make_pair(0.0f, 0));
+			// нормализовать веса
+			float weightsSum = 0;
+			for(int j = 0; j < 4; ++j)
+				weightsSum += bones[j].first;
+			if(weightsSum <= 1e-8f)
+				THROW_PRIMARY_EXCEPTION("Bone with zero sum weight");
+			float weightCoef = 1.0f / weightsSum;
+			for(int j = 0; j < 4; ++j)
+				bones[j].first *= weightCoef;
+
+			// записать
+			for(int j = 0; j < 4; ++j)
+			{
+				skinCoefs[i].boneNumbers[j] = bones[j].second;
+				skinCoefs[i].boneWeights[j] = bones[j].first;
+			}
+		}
+
+		// сформировать вершины
+		for(size_t i = 0; i < vertices.size(); ++i)
+		{
+			const Vertex& v = vertices[i];
+			SkinnedVertex& sv = skinnedVertices[i];
+
+			sv.position = v.position;
+			sv.normal = v.normal;
+			sv.texcoord = v.texcoord;
+
+			int skinNumber = positionNumbers[i];
+			SkinCoef& skinCoef = skinCoefs[skinNumber];
+			for(int j = 0; j < 4; ++j)
+			{
+				sv.boneNumbers[j] = skinCoef.boneNumbers[j];
+				sv.boneWeights[j] = skinCoef.boneWeights[j];
+			}
+		}
+
+		ptr<Graphics::EditableGeometry<SkinnedVertex, unsigned> > skinnedGeometry = NEW(Graphics::EditableGeometry<SkinnedVertex, unsigned>(skinnedVertices, geometry->GetIndices()));
+
+		ptr<Graphics::EditableGeometry<SkinnedVertex> > optimizedSkinnedGeometry = skinnedGeometry->Optimize()->CastIndices<unsigned short>();
+
+		fileSystem->SaveFile(optimizedSkinnedGeometry->SerializeVertices(), arguments[1] + ".vertices");
+		fileSystem->SaveFile(optimizedSkinnedGeometry->SerializeIndices(), arguments[1] + ".indices");
+	}
 	else
-		THROW_PRIMARY_EXCEPTION("Unknown geometry format");
+	{
+		ptr<Graphics::EditableGeometry<Vertex> > optimizedGeometry = geometry->Optimize()->CastIndices<unsigned short>();
 
-	MakePointer(new FolderFileSystem(""))->SaveFile(GeometryFileFormatter::Save(eGeometry), arguments[1]);
-#endif
+		fileSystem->SaveFile(optimizedGeometry->SerializeVertices(), arguments[1] + ".vertices");
+		fileSystem->SaveFile(optimizedGeometry->SerializeIndices(), arguments[1] + ".indices");
+	}
 }
 
-ptr<EditableGeometry<Vertex> > WavefrontObj::Convert()
+ptr<EditableGeometry<Vertex, unsigned> > WavefrontObj::Convert(std::vector<int>& positionNumbers)
 {
 	std::vector<float3> points;
 	std::vector<float3> normals;
@@ -139,6 +232,7 @@ ptr<EditableGeometry<Vertex> > WavefrontObj::Convert()
 				vertex.normal = normals[normalNumber - 1];
 				vertex.texcoord = texPoints[texPointNumber - 1];
 				vertices.push_back(vertex);
+				positionNumbers.push_back(pointNumber - 1);
 			}
 			//поменять порядок вершин (надо!)
 			std::swap(vertices[vertices.size() - 1], vertices[vertices.size() - 3]);
@@ -146,5 +240,5 @@ ptr<EditableGeometry<Vertex> > WavefrontObj::Convert()
 	}
 
 	//создать модель, оптимизировать и вернуть
-	return MakePointer(NEW(EditableGeometry<Vertex, unsigned>(vertices)))->Optimize()->CastIndices<unsigned short>();
+	return MakePointer(NEW(EditableGeometry<Vertex, unsigned>(vertices)));
 }
