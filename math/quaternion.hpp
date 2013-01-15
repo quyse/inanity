@@ -56,6 +56,29 @@ struct quaternion : float4
 		float invLength = 1.0f / length();
 		return quaternion(x * invLength, y * invLength, z * invLength, w * invLength);
 	}
+
+	/// Матрица поворота.
+	operator float4x4() const
+	{
+		float4x4 r;
+		r.t[0][0] = 1 - (y * y + z * z) * 2;
+		r.t[0][1] = (x * y - w * z) * 2;
+		r.t[0][2] = (x * z + w * y) * 2;
+		r.t[0][3] = 0;
+		r.t[1][0] = (x * y + w * z) * 2;
+		r.t[1][1] = 1 - (x * x + z * z) * 2;
+		r.t[1][2] = (y * z - w * x) * 2;
+		r.t[1][3] = 0;
+		r.t[2][0] = (x * z - w * y) * 2;
+		r.t[2][1] = (y * z + w * x) * 2;
+		r.t[2][2] = 1 - (x * x + y * y) * 2;
+		r.t[2][3] = 0;
+		r.t[3][0] = 0;
+		r.t[3][1] = 0;
+		r.t[3][2] = 0;
+		r.t[3][3] = 1;
+		return r;
+	}
 };
 
 /// Умножение кватернионов.
@@ -63,7 +86,7 @@ struct quaternion : float4
 */
 inline quaternion operator*(const quaternion& a, const quaternion& b)
 {
-#if 0
+#if 1
 	return quaternion(
 		 a.x * b.w + a.y * b.z - a.z * b.y + a.w * b.x,
 		-a.x * b.z + a.y * b.w + a.z * b.x + a.w * b.y,
@@ -90,8 +113,15 @@ inline quaternion operator*(const quaternion& a, const quaternion& b)
 /// Применение кватерниона к вектору.
 inline float3 operator*(const float3& v, const quaternion& q)
 {
+#if 1
+	quaternion V(v.x, v.y, v.z, 0);
+	V = q * V * q.conjugate();
+	//V = q.conjugate() * V * q;
+	return float3(V.x, V.y, V.z);
+#else
 	float3 qv(q.x, q.y, q.z);
 	return v + cross(qv, cross(qv, v) + v * q.w) * 2;
+#endif
 }
 
 inline quaternion slerp(const quaternion& a, const quaternion& b, float t)

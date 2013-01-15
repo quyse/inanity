@@ -56,6 +56,11 @@ bool operator == (const SkinnedVertex& a, const SkinnedVertex& b)
 	return a.position == b.position && a.normal == b.normal && a.texcoord == b.texcoord;
 }
 
+std::ostream& operator<<(std::ostream& s, const float3& p)
+{
+	return s << p.x << ' ' << p.y << ' ' << p.z;
+}
+
 String WavefrontObj::GetCommand() const
 {
 	return "wobj";
@@ -97,6 +102,7 @@ void WavefrontObj::Run(const std::vector<String>& arguments)
 		{
 			uint boneNumbers[4];
 			float boneWeights[4];
+			float3 position;
 		};
 		std::vector<SkinCoef> skinCoefs(skinVerticesCount);
 
@@ -127,12 +133,17 @@ void WavefrontObj::Run(const std::vector<String>& arguments)
 			for(int j = 0; j < 4; ++j)
 				bones[j].first *= weightCoef;
 
+			// считать позицию для проверки
+			float3 position;
+			std::cin >> position.x >> position.y >> position.z;
+
 			// записать
 			for(int j = 0; j < 4; ++j)
 			{
 				skinCoefs[i].boneNumbers[j] = bones[j].second;
 				skinCoefs[i].boneWeights[j] = bones[j].first;
 			}
+			skinCoefs[i].position = position;
 		}
 
 		// сформировать вершины
@@ -146,7 +157,13 @@ void WavefrontObj::Run(const std::vector<String>& arguments)
 			sv.texcoord = v.texcoord;
 
 			int skinNumber = positionNumbers[i];
-			SkinCoef& skinCoef = skinCoefs[skinNumber];
+			const SkinCoef& skinCoef = skinCoefs[skinNumber];
+			// проверить, что позиция совпадает
+			if(fabs(length(sv.position - skinCoef.position)) > 1e-5f)
+			{
+				printf("Vertex %d: position: %f %f %f, skin position: %f %f %f\n", i, sv.position.x, sv.position.y, sv.position.z,
+					skinCoef.position.x, skinCoef.position.y, skinCoef.position.z);
+			}
 			for(int j = 0; j < 4; ++j)
 			{
 				sv.boneNumbers[j] = skinCoef.boneNumbers[j];
@@ -157,6 +174,19 @@ void WavefrontObj::Run(const std::vector<String>& arguments)
 		ptr<Graphics::EditableGeometry<SkinnedVertex, unsigned> > skinnedGeometry = NEW(Graphics::EditableGeometry<SkinnedVertex, unsigned>(skinnedVertices, geometry->GetIndices()));
 
 		ptr<Graphics::EditableGeometry<SkinnedVertex> > optimizedSkinnedGeometry = skinnedGeometry->Optimize()->CastIndices<unsigned short>();
+
+		if(0)
+		{
+			const std::vector<SkinnedVertex>& vs = optimizedSkinnedGeometry->GetVertices();
+			const std::vector<unsigned short>& is = optimizedSkinnedGeometry->GetIndices();
+			for(size_t i = 0; i < vs.size(); ++i)
+			{
+				std::cout << vs[i].position;
+				for(size_t j = 0; j < 4; ++j)
+					std::cout << " (" << vs[i].boneNumbers[j] << ' ' << vs[i].boneWeights[j] << ")";
+				std::cout << '\n';
+			}
+		}
 
 		fileSystem->SaveFile(optimizedSkinnedGeometry->SerializeVertices(), arguments[1] + ".vertices");
 		fileSystem->SaveFile(optimizedSkinnedGeometry->SerializeIndices(), arguments[1] + ".indices");
@@ -236,6 +266,7 @@ ptr<EditableGeometry<Vertex, unsigned> > WavefrontObj::Convert(std::vector<int>&
 			}
 			//поменять порядок вершин (надо!)
 			std::swap(vertices[vertices.size() - 1], vertices[vertices.size() - 3]);
+			std::swap(positionNumbers[vertices.size() - 1], positionNumbers[vertices.size() - 3]);
 		}
 	}
 

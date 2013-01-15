@@ -12,6 +12,18 @@ void SkeletonConverter::PrintHelp() const
 	std::cout << "skeleton <source .tskeleton> <result .skeleton>\n";
 }
 
+void dfs(const std::vector<std::vector<int> >& h, int i)
+{
+	static int level = 0;
+	for(int j = 0; j < level; ++j)
+		printf("  ");
+	printf("%d\n", i);
+	++level;
+	for(int j = 0; j < (int)h[i].size(); ++j)
+		dfs(h, h[i][j]);
+	--level;
+}
+
 void SkeletonConverter::Run(const std::vector<String>& arguments)
 {
 	if(arguments.size() < 2)
@@ -24,53 +36,23 @@ void SkeletonConverter::Run(const std::vector<String>& arguments)
 
 	size_t bonesCount;
 	std::cin >> bonesCount;
+	writer.WriteShortly(bonesCount);
 
-	struct Bone
+	std::vector<std::vector<int> > h(bonesCount);
+	for(size_t i = 0; i < bonesCount; ++i)
 	{
 		int parent;
 		quaternion worldOrientation;
 		float3 worldOffset;
-	};
-
-	std::vector<Bone> bones(bonesCount);
-
-	for(size_t i = 0; i < bonesCount; ++i)
-	{
-		Bone& bone = bones[i];
-		std::cin >> bone.parent
-			>> bone.worldOrientation.x >> bone.worldOrientation.y >> bone.worldOrientation.z >> bone.worldOrientation.w
-			>> bone.worldOffset.x >> bone.worldOffset.y >> bone.worldOffset.z;
+		std::cin >> parent
+			>> worldOrientation.x >> worldOrientation.y >> worldOrientation.z >> worldOrientation.w
+			>> worldOffset.x >> worldOffset.y >> worldOffset.z;
+		if(i)
+			h[parent].push_back(i);
+		writer.WriteShortly(parent);
+		writer.Write(worldOrientation);
+		writer.Write(worldOffset);
 	}
 
-	writer.WriteShortly(bonesCount);
-
-	// преобразовать из мировых координат
-	for(size_t i = 0; i < bonesCount; ++i)
-	{
-		Bone& bone = bones[i];
-
-		// оригинальные ориентация и смещение для кости
-		quaternion orientation;
-		float3 offset;
-
-		if(i == 0)
-		{
-			orientation = bone.worldOrientation;
-			offset = float3(0, 0, 0);
-		}
-		else
-		{
-			quaternion inverseParentWorldOrientation = bones[bone.parent].worldOrientation.conjugate();
-
-			// относительная ориентация
-			orientation = inverseParentWorldOrientation * bone.worldOrientation;
-			// относительный сдвиг
-			offset = (bone.worldOffset - bones[bone.parent].worldOffset) * inverseParentWorldOrientation;
-		}
-
-		// записать
-		writer.WriteShortly(bone.parent);
-		writer.Write(orientation);
-		writer.Write(offset);
-	}
+	dfs(h, 0);
 }
