@@ -32,6 +32,10 @@ struct quaternion : float4
 		w = angleCos;
 	}
 
+	/// Явный конструктор из float4.
+	inline explicit quaternion(const float4& v)
+	: float4(v) {}
+
 	/// Инверсия.
 	inline quaternion conjugate() const
 	{
@@ -126,9 +130,26 @@ inline float3 operator*(const float3& v, const quaternion& q)
 
 inline quaternion slerp(const quaternion& a, const quaternion& b, float t)
 {
+#if 1
+	float d = dot(a, b);
+	float4 q;
+	if(d < 0)
+	{
+		d = -d;
+		q = -b;
+	}
+	else
+		q = b;
+	if(d < 0.995f)
+	{
+		float angle = acos(d);
+		return quaternion((a * sin(angle * (1 - t)) + q * sin(angle * t)) / sin(angle));
+	}
+	return quaternion(lerp<float4>(a, q, t));
+#else
 	// вычисление взято из btQuaternion.h
 
-	float magnitude = sqrt(a.length2() * b.length2()); 
+	float magnitude = sqrt(a.length2() * b.length2());
 
 	float product = dot(a, b) / magnitude;
 	if (fabs(product) != 1.0f)
@@ -137,7 +158,9 @@ inline quaternion slerp(const quaternion& a, const quaternion& b, float t)
 		const float sign = (product < 0) ? -1.0f : 1.0f;
 
 		const float theta = acos(sign * product);
-		const float s1 = sin(sign * t * theta);   
+		if(fabs(theta) < 1e-8)
+			throw 0;
+		const float s1 = sin(sign * t * theta);
 		const float d = 1.0f / sin(theta);
 		const float s0 = sin((1.0f - t) * theta);
 
@@ -150,6 +173,7 @@ inline quaternion slerp(const quaternion& a, const quaternion& b, float t)
 	}
 	else
 		return a;
+#endif
 }
 
 END_INANITY_MATH

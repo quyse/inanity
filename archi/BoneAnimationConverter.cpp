@@ -59,11 +59,11 @@ void BoneAnimationConverter::Run(const std::vector<String>& arguments)
 			quaternion parentWorldOrientation;
 			std::cin >> parentWorldOrientation.x >> parentWorldOrientation.y >> parentWorldOrientation.z >> parentWorldOrientation.w;
 
-			key.orientation = worldOrientation * parentWorldOrientation.conjugate();
+			key.orientation = (worldOrientation * parentWorldOrientation.conjugate()).normalize();
 		}
 		else
 		{
-			key.orientation = worldOrientation;
+			key.orientation = worldOrientation.normalize();
 			std::cin >> key.rootOffset.x >> key.rootOffset.y >> key.rootOffset.z;
 		}
 
