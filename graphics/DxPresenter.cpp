@@ -87,16 +87,27 @@ void DxPresenter::SetMode(const PresentMode& mode)
 {
 	try
 	{
+		// получить режим DXGI
+		DXGI_MODE_DESC desc = DxSystem::GetModeDesc(mode);
+		// если режим полноэкранный, его нужно привести к поддерживаемому
+		if(mode.fullscreen)
+			desc = GetClosestSupportedMode(desc);
+
 		// В MSDN рекомендуется сначала изменять размер, а потом переключать полноэкранность.
 
 		// если режим изменился, изменить его
 		if(currentMode.width != mode.width || currentMode.height != mode.height)
-			if(FAILED(swapChain->ResizeTarget(&DxSystem::GetModeDesc(mode))))
+			if(FAILED(swapChain->ResizeTarget(&desc)))
 				THROW_PRIMARY_EXCEPTION("Can't resize target");
 		//если полноэкранность изменилась, изменить её
 		if(currentMode.fullscreen != mode.fullscreen)
+		{
 			if(FAILED(swapChain->SetFullscreenState(mode.fullscreen, NULL)))
 				THROW_PRIMARY_EXCEPTION("Can't set fullscreen state");
+
+			// и при этом нужно изменить размеры буфера
+			Resize(mode.width, mode.height);
+		}
 
 		//запомнить новый режим
 		currentMode = mode;
@@ -118,6 +129,6 @@ void DxPresenter::Resize(int width, int height)
 	// сбросить ссылку на вторичный буфер
 	backBuffer = 0;
 	// изменить размеры буфера
-	if(FAILED(swapChain->ResizeBuffers(1, width, height, DxSystem::GetDXGIFormat(currentMode.pixelFormat), DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH)))
+	if(FAILED(swapChain->ResizeBuffers(2, width, height, DxSystem::GetDXGIFormat(currentMode.pixelFormat), DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH)))
 		THROW_PRIMARY_EXCEPTION("Can't resize buffers");
 }

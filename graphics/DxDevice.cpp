@@ -87,8 +87,7 @@ ptr<Presenter> DxDevice::CreatePresenter(ptr<Output> abstractOutput, const Prese
 
 		// создать swap chain
 		IDXGISwapChain* swapChainInterface;
-		HRESULT hr;
-		if(FAILED(hr = system->GetDXGIFactory()->CreateSwapChain(device, &desc, &swapChainInterface)))
+		if(FAILED(system->GetDXGIFactory()->CreateSwapChain(device, &desc, &swapChainInterface)))
 			THROW_PRIMARY_EXCEPTION("Can't create swap chain");
 
 		ComPointer<IDXGISwapChain> swapChain = swapChainInterface;
