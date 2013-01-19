@@ -2,6 +2,7 @@
 #define ___INANITY_GRAPHICS_GEOMETRY_HPP___
 
 #include "graphics.hpp"
+#include "../scripting_decl.hpp"
 
 BEGIN_INANITY
 
@@ -31,6 +32,8 @@ public:
 
 	void Serialize(ptr<OutputStream> outputStream) const;
 	static ptr<Geometry> Deserialize(ptr<InputStream> inputStream);
+
+	SCRIPTABLE_CLASS(Geometry);
 };
 
 END_INANITY_GRAPHICS

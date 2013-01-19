@@ -2,6 +2,7 @@
 #define ___INANITY_GRAPHICS_TEXTURE_HPP___
 
 #include "graphics.hpp"
+#include "../scripting_decl.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
@@ -11,6 +12,7 @@ BEGIN_INANITY_GRAPHICS
 class Texture : public Object
 {
 public:
+	SCRIPTABLE_CLASS(Texture);
 };
 
 END_INANITY_GRAPHICS
