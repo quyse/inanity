@@ -42,6 +42,8 @@ inline Value<vector<n> > normalize(Value<vector<n> > a) { return OP1(Normalize);
 // pow
 inline Value<float> pow(Value<float> a, Value<float> b) { return OP2(Pow); }
 template <int n>
+inline Value<vector<n> > pow(Value<vector<n> > a, Value<float> b) { return OP2(Pow); }
+template <int n>
 inline Value<vector<n> > pow(Value<vector<n> > a, Value<vector<n> > b) { return OP2(Pow); }
 
 // min
@@ -53,6 +55,9 @@ inline Value<float> max(Value<float> a, Value<float> b) { return OP2(Max); }
 template <int n>
 Value<vector<n> > max(Value<vector<n> > a, Value<vector<n> > b) { return OP2(Max); }
 
+// abs
+inline Value<float> abs(Value<float> a) { return OP1(Abs); }
+
 // sin
 inline Value<float> sin(Value<float> a) { return OP1(Sin); }
 // cos
@@ -60,11 +65,24 @@ inline Value<float> cos(Value<float> a) { return OP1(Cos); }
 
 // exp
 inline Value<float> exp(Value<float> a) { return OP1(Exp); }
+// exp2 (возведение 2 в степень)
+inline Value<float> exp2(Value<float> a) { return OP1(Exp2); }
 // log
 inline Value<float> log(Value<float> a) { return OP1(Log); }
 
 // saturate
 inline Value<float> saturate(Value<float> a) { return OP1(Saturate); }
+template <int n>
+inline Value<vector<n> > saturate(Value<vector<n> > a) { return OP1(Saturate); }
+
+// ddx
+inline Value<float> ddx(Value<float> a) { return OP1(Ddx); }
+template <int n>
+inline Value<vector<n> > ddx(Value<vector<n> > a) { return OP1(Ddx); }
+// ddy
+inline Value<float> ddy(Value<float> a) { return OP1(Ddy); }
+template <int n>
+inline Value<vector<n> > ddy(Value<vector<n> > a) { return OP1(Ddy); }
 
 #undef OP2
 

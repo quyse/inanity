@@ -38,11 +38,15 @@ public:
 		operationPow,
 		operationMin,
 		operationMax,
+		operationAbs,
 		operationSin,
 		operationCos,
 		operationExp,
+		operationExp2,
 		operationLog,
-		operationSaturate
+		operationSaturate,
+		operationDdx,
+		operationDdy
 	};
 
 private:
