@@ -14,6 +14,12 @@ struct Format
 	char bitsPerSample;
 	/// Количество каналов.
 	char channelsCount;
+
+	/// Оператор для хеширования.
+	operator size_t() const
+	{
+		return samplesPerSecond | (bitsPerSample << 20) | (channelsCount << 26);
+	}
 };
 
 END_INANITY_AUDIO

@@ -16,6 +16,9 @@ public:
 	virtual ptr<Sound> CreateSound(ptr<Source> source) = 0;
 	/// Создать потоковый звук из источника звуковых данных.
 	virtual ptr<Sound> CreateStreamedSound(pr<Source> source) = 0;
+
+	/// Выполнить обработку звуковых изменений.
+	virtual void Tick() = 0;
 };
 
 END_INANITY_AUDIO

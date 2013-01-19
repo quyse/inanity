@@ -9,6 +9,10 @@ BEGIN_INANITY_AUDIO
 class Device : public Object
 {
 public:
+	/// Создать плейер буферизованного звука.
+	virtual ptr<BufferedPlayer> CreateBufferedPlayer(ptr<Source> source) = 0;
+	/// Создать плейер потокового звука.
+	virtual ptr<StreamedPlayer> CreateStreamedPlayer(ptr<Source> source) = 0;
 };
 
 END_INANITY_AUDIO

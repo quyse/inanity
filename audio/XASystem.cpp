@@ -23,6 +23,35 @@ XASystem::XASystem()
 	}
 }
 
+ptr<XASourceVoice> XASystem::AllocateSourceVoice(const Format& format)
+{
+	try
+	{
+		// попробовать найти voice нужного формата в кэше
+		std::unordered_multimap<Format, ptr<XASourceVoice> >::iterator i = freeSourceVoices.find(format);
+		if(i != freeSourceVoices.end())
+		{
+			ptr<XASourceVoice> voice = i->second;
+			freeSourceVoices.erase(i);
+			return voice;
+		}
+
+		// создать новый voice
+		ptr<XASourceVoice> voice = NEW(XASourceVoice(this));
+
+		IXAudio2SourceVoice* voiceInterface;
+		if(FAILED(xAudio2->CreateSourceVoice(&voiceInterface, &ConvertFormat(format), 0, XAUDIO2_DEFAULT_FREQ_RATIO, &*voice, NULL, NULL)))
+			THROW_PRIMARY_EXCEPTION("Can't create source voice");
+		voice->SetVoice(voiceInterface);
+
+		return voice;
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't allocate source XAudio2 voice", exception);
+	}
+}
+
 ptr<Device> XASystem::CreateDefaultDevice()
 {
 	try
@@ -85,4 +114,5 @@ WAVEFORMATEX XASystem::ConvertFormat(const Format& format)
 
 ptr<Sound> XASystem::CreateSound(ptr<Source> source)
 {
+	return NEW(XABufferedSound(source->GetData()));
 }

@@ -6,6 +6,7 @@
 BEGIN_INANITY_AUDIO
 
 class Player;
+class Player3D;
 
 /// Абстрактный класс звука.
 class Sound : public Object
