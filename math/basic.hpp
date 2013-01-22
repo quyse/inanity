@@ -2,6 +2,7 @@
 #define ___INANITY_MATH_BASIC_HPP___
 
 #include <cmath>
+#include <iostream>
 #include "math.hpp"
 
 BEGIN_INANITY_MATH
@@ -263,6 +264,34 @@ template <typename T>
 inline T lerp(const T& a, const T& b, scalar t)
 {
 	return a * (1 - t) + b * t;
+}
+
+template <int n>
+inline std::ostream& operator<<(std::ostream& a, const vector<n>& b)
+{
+	for(int i = 0; i < n; ++i)
+	{
+		if(i)
+			a << ' ';
+		a << b.t[i];
+	}
+	return a;
+}
+
+template <int n, int m>
+inline std::ostream& operator<<(std::ostream& a, const matrix<n, m>& b)
+{
+	for(int i = 0; i < n; ++i)
+	{
+		for(int j = 0; j < m; ++j)
+		{
+			if(j)
+				a << ' ';
+			a << b.t[i][j];
+		}
+		a << '\n';
+	}
+	return a;
 }
 
 template <int n, int m>
