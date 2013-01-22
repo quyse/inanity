@@ -14,6 +14,7 @@ public:
 	LValue(ptr<Node> node);
 
 	/// Оператор присваивания.
+	Value<ValueType> operator=(LValue<ValueType> a);
 	Value<ValueType> operator=(Value<ValueType> a);
 };
 
