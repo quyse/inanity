@@ -16,6 +16,7 @@ inline Value<float2> newfloat2(Value<float> a, Value<float> b) { return OP2(Floa
 inline Value<float3> newfloat3(Value<float> a, Value<float> b, Value<float> c) { return OP3(Float111to3); }
 inline Value<float4> newfloat4(Value<float> a, Value<float> b, Value<float> c, Value<float> d) { return OP4(Float1111to4); }
 inline Value<float4> newfloat4(Value<float3> a, Value<float> b) { return OP2(Float31to4); }
+inline Value<float4> newfloat4(Value<float2> a, Value<float> b, Value<float> c) { return OP3(Float211to4); }
 
 // dot
 template <int n>
@@ -83,6 +84,9 @@ inline Value<vector<n> > ddx(Value<vector<n> > a) { return OP1(Ddx); }
 inline Value<float> ddy(Value<float> a) { return OP1(Ddy); }
 template <int n>
 inline Value<vector<n> > ddy(Value<vector<n> > a) { return OP1(Ddy); }
+
+// clip
+inline Expression clip(Value<float> a) { return OP1(Clip); }
 
 #undef OP2
 

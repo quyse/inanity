@@ -312,6 +312,7 @@ void HlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 				OP(Float111to3, float3);
 				OP(Float1111to4, float4);
 				OP(Float31to4, float4);
+				OP(Float211to4, float4);
 				OP(Dot, dot);
 				OP(Cross, cross);
 				OP(Mul, mul);
@@ -329,6 +330,7 @@ void HlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 				OP(Saturate, saturate);
 				OP(Ddx, ddx);
 				OP(Ddy, ddy);
+				OP(Clip, clip);
 #undef OP
 			default:
 				THROW_PRIMARY_EXCEPTION("Unknown operation type");

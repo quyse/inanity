@@ -30,6 +30,7 @@ public:
 		operationFloat111to3,
 		operationFloat1111to4,
 		operationFloat31to4,
+		operationFloat211to4,
 		operationDot,
 		operationCross,
 		operationMul,
@@ -46,7 +47,8 @@ public:
 		operationLog,
 		operationSaturate,
 		operationDdx,
-		operationDdy
+		operationDdy,
+		operationClip
 	};
 
 private:
