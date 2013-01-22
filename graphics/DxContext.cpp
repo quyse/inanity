@@ -138,22 +138,24 @@ void DxContext::Update()
 {
 	// рендертаргеты
 	{
-		// сейчас единственная оптимизация - количество обновляемых рендертаргетов
-		int end;
-		if(forceReset)
-			end = ContextState::renderTargetSlotsCount;
+		// определить, изменился ли хотя бы один рендертаргет
+		bool dirty = false;
+		if(forceReset || targetState.depthStencilBuffer != boundState.depthStencilBuffer)
+			dirty = true;
 		else
 		{
-			for(end = ContextState::renderTargetSlotsCount - 1; end >= 0; --end)
-				if(targetState.renderBuffers[end] != boundState.renderBuffers[end])
+			for(int i = 0; i < ContextState::renderTargetSlotsCount; ++i)
+				if(targetState.renderBuffers[i] != boundState.renderBuffers[i])
+				{
+					dirty = true;
 					break;
-			++end;
+				}
 		}
 
-		if(end > 0 || targetState.depthStencilBuffer != boundState.depthStencilBuffer)
+		if(dirty)
 		{
 			ID3D11RenderTargetView* views[ContextState::renderTargetSlotsCount];
-			for(int i = 0; i < end; ++i)
+			for(int i = 0; i < ContextState::renderTargetSlotsCount; ++i)
 			{
 				RenderBuffer* abstractRenderBuffer = targetState.renderBuffers[i];
 				if(abstractRenderBuffer)
@@ -176,10 +178,10 @@ void DxContext::Update()
 				depthStencilView = 0;
 
 			// выполнить вызов
-			deviceContext->OMSetRenderTargets(end, views, depthStencilView);
+			deviceContext->OMSetRenderTargets(ContextState::renderTargetSlotsCount, views, depthStencilView);
 
 			// обновить актуальное состояние
-			for(int i = 0; i < end; ++i)
+			for(int i = 0; i < ContextState::renderTargetSlotsCount; ++i)
 				boundState.renderBuffers[i] = targetState.renderBuffers[i];
 			boundState.depthStencilBuffer = targetState.depthStencilBuffer;
 		}
