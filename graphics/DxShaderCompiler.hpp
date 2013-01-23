@@ -1,23 +1,15 @@
 #ifndef ___INANITY_GRAPHICS_DX_SHADER_COMPILER_HPP___
 #define ___INANITY_GRAPHICS_DX_SHADER_COMPILER_HPP___
 
-#include "graphics.hpp"
-
-BEGIN_INANITY
-
-class File;
-
-END_INANITY
+#include "ShaderCompiler.hpp"
 
 BEGIN_INANITY_GRAPHICS
-
-class ShaderSource;
 
 /// Класс компилятора шейдеров из исходников.
 /** Данный класс компилирует исходный код шейдера в конкретный шейдер в байт-коде,
 принимая список значений параметров.
 */
-class DxShaderCompiler : public Object
+class DxShaderCompiler : public ShaderCompiler
 {
 private:
 	/// Включить возможность отладки шейдеров.
@@ -33,7 +25,6 @@ public:
 	/// Создать компилятор с указанными параметрами.
 	DxShaderCompiler(bool debug, bool optimize, bool columnMajorMatrices = true);
 
-	/// Скомпилировать шейдер.
 	ptr<File> Compile(ptr<ShaderSource> shaderSource);
 };
 

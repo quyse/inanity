@@ -42,6 +42,7 @@
 #include "graphics/RenderBuffer.hpp"
 #include "graphics/RenderStage.hpp"
 #include "graphics/SamplerState.hpp"
+#include "graphics/ShaderCache.hpp"
 #include "graphics/ShaderSource.hpp"
 #include "graphics/System.hpp"
 #include "graphics/SystemSettings.hpp"

@@ -90,6 +90,7 @@ var libraries = {
 			'graphics.SamplerState', 'graphics.BlendState',
 			'graphics.ShaderSource',
 			'graphics.Geometry', 'graphics.Texture',
+			'graphics.ShaderCache',
 			'graphics.EditableFont']
 	},
 	// ******* подсистема DirectX 11
