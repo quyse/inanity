@@ -41,8 +41,7 @@ var libraries = {
 		'Base64OutputStream', 'Out2InStream',
 		// файловые системы
 		'FileSystem', 'FolderFileSystem', 'FolderFile', 'Handle', 'DiskInputStream', 'DiskOutputStream', 'BlobFileSystem', 'BlobFileSystemBuilder', 'CompositeFileSystem', 'TempFileSystem',
-		// ресурсы
-		'ResourceManager', 'ResourceLoader']
+		]
 	},
 	// ******* сжатие
 	'libinanity-compress': {
