@@ -30,9 +30,9 @@ class Future;
 производительности (за счет перехвата исключений из LoadFile). Реализация LoadFile
 вполне эффективна (так как перехват исключений не требуется). Поэтому рекомендуется
 реализовывать хотя бы TryLoadFile.
-Для реализации также можно определить методы LoadFileAsStream и SaveFileAsStream.
-Реализация LoadFileAsStream по умолчанию использует метод LoadFile вместе с классом
-MemoryStream. Реализация SaveFileAsStream только бросает исключение.
+Для реализации также можно определить методы LoadStream и SaveStream.
+Реализация LoadStream по умолчанию использует метод LoadFile вместе с классом
+MemoryStream. Реализация SaveStream только бросает исключение.
 В качестве разделителя каталогов используется прямой слеш /.
 Путь должен начинаться со слеша.
 Имя каталога должно заканчиваться слешем.
@@ -66,7 +66,7 @@ public:
 	\param fileName Имя файла.
 	\return Поток ввода.
 	*/
-	virtual ptr<InputStream> LoadFileAsStream(const String& fileName);
+	virtual ptr<InputStream> LoadStream(const String& fileName);
 
 	/// Сохранить файл.
 	/** Сохраняет файл в файловой системе, с заданным именем. Если файловая
@@ -85,7 +85,7 @@ public:
 	\param fileName Имя файла.
 	\return Поток вывода.
 	*/
-	virtual ptr<OutputStream> SaveFileAsStream(const String& fileName);
+	virtual ptr<OutputStream> SaveStream(const String& fileName);
 
 	/// Получить список имен файлов в файловой системе.
 	/** Получает список имен файлов. Не гарантируется, что он будет полным

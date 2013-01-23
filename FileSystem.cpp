@@ -9,9 +9,9 @@
 SCRIPTABLE_MAP_BEGIN(FileSystem, Inanity.FileSystem);
 	SCRIPTABLE_METHOD(FileSystem, LoadFile);
 	SCRIPTABLE_METHOD(FileSystem, TryLoadFile);
-	SCRIPTABLE_METHOD(FileSystem, LoadFileAsStream);
+	SCRIPTABLE_METHOD(FileSystem, LoadStream);
 	SCRIPTABLE_METHOD(FileSystem, SaveFile);
-	SCRIPTABLE_METHOD(FileSystem, SaveFileAsStream);
+	SCRIPTABLE_METHOD(FileSystem, SaveStream);
 SCRIPTABLE_MAP_END();
 
 ptr<File> FileSystem::LoadFile(const String& fileName)
@@ -49,7 +49,7 @@ ptr<File> FileSystem::TryLoadFile(const String& fileName)
 	}
 }
 
-ptr<InputStream> FileSystem::LoadFileAsStream(const String& fileName)
+ptr<InputStream> FileSystem::LoadStream(const String& fileName)
 {
 	try
 	{
@@ -81,7 +81,7 @@ ptr<Future<int> > FileSystem::SaveFileAsync(ptr<File> file, const String& fileNa
 	return future;
 }
 
-ptr<OutputStream> FileSystem::SaveFileAsStream(const String& fileName)
+ptr<OutputStream> FileSystem::SaveStream(const String& fileName)
 {
 	THROW_PRIMARY_EXCEPTION("Saving files as stream in this filesystem is not supported");
 }

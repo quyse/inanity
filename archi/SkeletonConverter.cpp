@@ -32,7 +32,7 @@ void SkeletonConverter::Run(const std::vector<String>& arguments)
 	if(!_wfreopen(Strings::UTF82Unicode(arguments[0]).c_str(), L"r", stdin))
 		THROW_PRIMARY_EXCEPTION("Can't open source file");
 
-	StreamWriter writer(FolderFileSystem::GetNativeFileSystem()->SaveFileAsStream(arguments[1]));
+	StreamWriter writer(FolderFileSystem::GetNativeFileSystem()->SaveStream(arguments[1]));
 
 	size_t bonesCount;
 	std::cin >> bonesCount;

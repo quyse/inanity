@@ -203,7 +203,7 @@ void SimpleGeometryCreator::Run(const std::vector<String>& arguments)
 	//создать геометрию
 	ptr<Graphics::Geometry> geometry = NEW(Graphics::Geometry(stream->ToFile(), vertexStride, indicesFile, indexed ? sizeof(short) : 0, nullptr));
 	//сохранить файл
-	geometry->Serialize(fileSystem->SaveFileAsStream(arguments[1]), arguments[2]);
+	geometry->Serialize(fileSystem->SaveStream(arguments[1]), arguments[2]);
 }
 
 bool SimpleGeometryCreator::ReadField(const Field& field)
