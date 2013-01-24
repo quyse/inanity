@@ -40,7 +40,9 @@ var libraries = {
 		// преобразующие потоки
 		'Base64OutputStream', 'Out2InStream',
 		// файловые системы
-		'FileSystem', 'FolderFileSystem', 'FolderFile', 'Handle', 'DiskInputStream', 'DiskOutputStream', 'BlobFileSystem', 'BlobFileSystemBuilder', 'CompositeFileSystem', 'TempFileSystem',
+		'FileSystem', 'FolderFileSystem', 'FolderFile', 'Handle', 'DiskInputStream', 'DiskOutputStream',
+		'BlobFileSystem', 'BlobFileSystemBuilder', 'CompositeFileSystem', 'TempFileSystem',
+		'FilterFileSystem', 'BufferedFileSystem'
 		]
 	},
 	// ******* сжатие

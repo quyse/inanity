@@ -38,6 +38,8 @@
 #include "BlobFileSystemBuilder.hpp"
 #include "CompositeFileSystem.hpp"
 #include "TempFileSystem.hpp"
+#include "FilterFileSystem.hpp"
+#include "BufferedFileSystem.hpp"
 #include "ResourceManager.ipp"
 #include "Handler.hpp"
 #include "Delegate.ipp"
