@@ -4,6 +4,9 @@
 #include "ShaderSource.hpp"
 #include "VertexShader.hpp"
 #include "PixelShader.hpp"
+#include "shaders/ShaderGenerator.hpp"
+#include "shaders/Expression.hpp"
+#include "shaders/Node.hpp"
 #include "../File.hpp"
 #include "../FileSystem.hpp"
 #include "../StreamWriter.hpp"
@@ -11,8 +14,8 @@
 #include "../File.hpp"
 #include "../Exception.hpp"
 
-ShaderCache::ShaderCache(ptr<FileSystem> fileSystem, ptr<Device> device, ptr<ShaderCompiler> shaderCompiler, ptr<HashStream> hashStream)
-: fileSystem(fileSystem), device(device), shaderCompiler(shaderCompiler), hashStream(hashStream)
+ShaderCache::ShaderCache(ptr<FileSystem> fileSystem, ptr<Device> device, ptr<ShaderCompiler> shaderCompiler, ptr<ShaderGenerator> shaderGenerator, ptr<HashStream> hashStream)
+: fileSystem(fileSystem), device(device), shaderCompiler(shaderCompiler), shaderGenerator(shaderGenerator), hashStream(hashStream)
 {}
 
 String ShaderCache::CalculateHash(ptr<ShaderSource> shaderSource)
@@ -55,10 +58,48 @@ ptr<File> ShaderCache::GetShader(ptr<ShaderSource> shaderSource)
 
 ptr<VertexShader> ShaderCache::GetVertexShader(ptr<ShaderSource> shaderSource)
 {
-	return device->CreateVertexShader(GetShader(shaderSource));
+	try
+	{
+		return device->CreateVertexShader(GetShader(shaderSource));
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't get vertex shader", exception);
+	}
+}
+
+ptr<VertexShader> ShaderCache::GetVertexShader(Expression shaderExpression)
+{
+	try
+	{
+		return GetVertexShader(shaderGenerator->Generate(shaderExpression, ShaderTypes::vertex));
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't get vertex shader from expression", exception);
+	}
 }
 
 ptr<PixelShader> ShaderCache::GetPixelShader(ptr<ShaderSource> shaderSource)
 {
-	return device->CreatePixelShader(GetShader(shaderSource));
+	try
+	{
+		return device->CreatePixelShader(GetShader(shaderSource));
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't get pixel shader", exception);
+	}
+}
+
+ptr<PixelShader> ShaderCache::GetPixelShader(Expression shaderExpression)
+{
+	try
+	{
+		return GetPixelShader(shaderGenerator->Generate(shaderExpression, ShaderTypes::pixel));
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't get pixel shader from expression", exception);
+	}
 }

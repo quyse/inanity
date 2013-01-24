@@ -35,28 +35,21 @@ struct Semantics
 		_SpecialEnd = _TargetDepthEnd,
 
 		//******* Пользовательские семантики.
-		/* Для атрибутов: Custom0 + номер атрибутной семантики. */
+		/* Для атрибутов и интерполянтов: Custom0 + номер атрибутной семантики. */
 
 		_CustomBegin = _SpecialEnd,
 
 		Custom0 = _CustomBegin,
 
-		/// Положение вершины.
-		CustomPosition = Custom0,
-		/// Нормаль вершины.
-		CustomNormal,
-		/// Бинормаль.
-		CustomBinormal,
-		/// Тангента,
-		CustomTangent,
-		/// Текстурные координаты вершины
-		CustomTexcoord0,
-		// ...
-		/// Коэффициенты локальной трансформации (переводящей из пространства модели в пространство
-		CustomLocalTransform = CustomTexcoord0 + 8,
-
 		_CustomEnd = _CustomBegin + 64
 	};
+
+	/// Получить custom семантику с заданным номером.
+	/** Метод для красоты. */
+	static inline _ Custom(int customSemanticIndex)
+	{
+		return _(Semantics::Custom0 + customSemanticIndex);
+	}
 };
 typedef Semantics::_ Semantic;
 

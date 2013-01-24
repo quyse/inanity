@@ -87,10 +87,10 @@ var libraries = {
 			'graphics.Context', 'graphics.ContextState',
 			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.Layout', 'graphics.LayoutBinding', 'graphics.IndexBuffer',
 			'graphics.SamplerState', 'graphics.BlendState',
-			'graphics.ShaderSource',
-			'graphics.Geometry', 'graphics.Texture',
-			'graphics.ShaderCache',
-			'graphics.EditableFont']
+			'graphics.Geometry',
+			'graphics.ShaderSource', 'graphics.ShaderCache',
+			'graphics.Texture', 'graphics.TextureManager',
+			'graphics.EditableFont', 'graphics.Font', 'graphics.FontManager', 'graphics.TextDrawer']
 	},
 	// ******* подсистема DirectX 11
 	'libinanity-dx': {

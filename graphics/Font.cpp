@@ -1,9 +1,9 @@
 #include "Font.hpp"
-#include "../File.hpp"
-#include "../FileInputStream.hpp"
+#include "Texture.hpp"
+#include "TextureManager.hpp"
+#include "../InputStream.hpp"
 #include "../StreamReader.hpp"
-#include "../ResourceManager.hpp"
-#include "../ResourceLoader.hpp"
+#include "../ResourceManager.ipp"
 #include "../Exception.hpp"
 
 FontChar Font::defaultFontChar;
@@ -47,18 +47,18 @@ float Font::GetKerning(wchar_t first, wchar_t second)
 	return (i == kerningPairs.end()) ? 0 : i->second;
 }
 
-ptr<Font> Font::Deserialize(ptr<File> file, ResourceLoader* resourceLoader)
+ptr<Font> Font::Deserialize(ptr<InputStream> inputStream, ptr<TextureManager> textureManager)
 {
 	try
 	{
-		ptr<Inanity::StreamReader> reader = NEW(StreamReader(NEW(FileInputStream(file))));
+		ptr<StreamReader> reader = NEW(StreamReader(inputStream));
 
 		// считать заголовок файла
 		String textureName = reader->ReadString();
 		float charHeight = reader->Read<float>();
 
-		// загрузить текстуру
-		ptr<Texture> texture = resourceLoader->LoadResource<Texture>(textureName);
+		// получить текстуру
+		ptr<Texture> texture = textureManager->Get(textureName);
 
 		// считать символы
 		size_t charsetSize = reader->ReadShortly();
