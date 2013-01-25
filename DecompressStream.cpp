@@ -146,7 +146,6 @@ ptr<File> DecompressStream::DecompressFile(ptr<File> file)
 		//цикл распаковки
 		while(size_t read = stream->Read(buffer, bufferSize))
 			outputStream->Write(buffer, read);
-		outputStream->Flush();
 		return outputStream->ToFile();
 	}
 	catch(Exception* exception)

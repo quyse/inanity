@@ -170,9 +170,6 @@ void CompressStream::Flush()
 
 		//установить флажок завершенности
 		finalized = true;
-
-		//выполнить финализацию потока
-		outputStream->Flush();
 	}
 	catch(Exception* exception)
 	{
@@ -187,7 +184,7 @@ ptr<File> CompressStream::CompressFile(ptr<File> file, CompressionLevel compress
 		//создать выходной поток
 		ptr<MemoryStream> outputStream = NEW(MemoryStream);
 		//создать поток для сжатия
-		ptr<OutputStream> stream = NEW(CompressStream(&*outputStream, compressionLevel));
+		ptr<CompressStream> stream = NEW(CompressStream(&*outputStream, compressionLevel));
 
 		//сжать данные
 		stream->Write(file->GetData(), file->GetSize());

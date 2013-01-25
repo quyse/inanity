@@ -17,6 +17,11 @@ Base64OutputStream::Base64OutputStream(bool encoding, ptr<OutputStream> outputSt
 	}
 }
 
+Base64OutputStream::~Base64OutputStream()
+{
+	Flush();
+}
+
 void Base64OutputStream::WriteEncode(unsigned char byte)
 {
 	// добавить байт в буфер, начиная со старших байт
@@ -108,6 +113,9 @@ void Base64OutputStream::ProcessDecodeBuffer()
 
 void Base64OutputStream::Write(const void* data, size_t size)
 {
+	if(flushed)
+		THROW_PRIMARY_EXCEPTION("Can't write to flushed base64 output stream");
+
 	const unsigned char* bytes = (const unsigned char*)data;
 	if(encoding)
 		for(size_t i = 0; i < size; ++i)
@@ -119,12 +127,13 @@ void Base64OutputStream::Write(const void* data, size_t size)
 
 void Base64OutputStream::Flush()
 {
+	if(flushed)
+		return;
+
 	flushed = true;
 	// обработать последние байты
 	if(encoding)
 		ProcessEncodeBuffer();
 	else
 		ProcessDecodeBuffer();
-	// передать Flush
-	outputStream->Flush();
 }

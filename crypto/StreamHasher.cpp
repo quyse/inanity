@@ -9,12 +9,12 @@ StreamHasher::StreamHasher(ptr<HashAlgorithm> hashAlgorithm, size_t blockSize)
 {
 }
 
-ptr<OutputStream> StreamHasher::CreateHasherStream(ptr<OutputStream> destStream)
+ptr<StreamHasher::HasherStream> StreamHasher::CreateHasherStream(ptr<OutputStream> destStream)
 {
 	return NEW(HasherStream(this, destStream));
 }
 
-ptr<InputStream> StreamHasher::CreateVerifyStream(ptr<InputStream> sourceDataStream, ptr<InputStream> sourceHashStream)
+ptr<StreamHasher::VerifyStream> StreamHasher::CreateVerifyStream(ptr<InputStream> sourceDataStream, ptr<InputStream> sourceHashStream)
 {
 	return NEW(VerifyStream(this, sourceDataStream, sourceHashStream));
 }
@@ -31,7 +31,7 @@ void StreamHasher::HasherStream::WriteBlock()
 {
 	hashStream->Reset();
 	hashStream->Write(block, blockDataSize);
-	hashStream->Flush();
+	hashStream->End();
 	void* hash = alloca(hashSize);
 	hashStream->GetHash(hash);
 	destStream->Write(hash, hashSize);
@@ -61,8 +61,6 @@ void StreamHasher::HasherStream::Flush()
 {
 	if(blockDataSize)
 		WriteBlock();
-
-	destStream->Flush();
 }
 
 StreamHasher::VerifyStream::VerifyStream(ptr<StreamHasher> streamHasher, ptr<InputStream> sourceDataStream, ptr<InputStream> sourceHashStream)
@@ -102,7 +100,7 @@ void StreamHasher::VerifyStream::ReadBlock()
 		// получить хеш исходных данных
 		hashStream->Reset();
 		hashStream->Write(block, blockDataSize);
-		hashStream->Flush();
+		hashStream->End();
 		void* dataHash = alloca(hashSize);
 		hashStream->GetHash(dataHash);
 

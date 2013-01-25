@@ -54,8 +54,6 @@ public:
 	/** Выравнивание должно быть степенью двойки!
 	Для профилактики ошибок записываются байты 0xCC, а не нули. */
 	void WriteGap(size_t alignment);
-
-	void Flush();
 };
 
 END_INANITY

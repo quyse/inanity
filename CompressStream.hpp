@@ -50,6 +50,7 @@ public:
 	static ptr<File> CompressFile(ptr<File> file, CompressionLevel compressionLevel);
 
 	void Write(const void* data, size_t size);
+
 	void Flush();
 
 	static ptr<CompressStream> CreateMax(ptr<OutputStream> outputStream);

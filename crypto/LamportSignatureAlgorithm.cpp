@@ -46,7 +46,7 @@ void LamportSignatureAlgorithm::GenerateKeyPair(ptr<RandomAlgorithm> randomAlgor
 	{
 		hashStream->Reset();
 		hashStream->Write((char*)privateKey + i * hashSize, hashSize);
-		hashStream->Flush();
+		hashStream->End();
 		hashStream->GetHash((char*)publicKey + i * hashSize);
 	}
 }
@@ -70,7 +70,7 @@ bool LamportSignatureAlgorithm::Verify(const void* data, const void* publicKey, 
 	{
 		hashStream->Reset();
 		hashStream->Write((char*)signature + i * hashSize, hashSize);
-		hashStream->Flush();
+		hashStream->End();
 		hashStream->GetHash(tempHash);
 		if(memcmp((char*)publicKey + (i * 2 + ((dataBytes[i / 8] >> (i % 8)) & 1)) * hashSize, tempHash, hashSize) != 0)
 			return false;

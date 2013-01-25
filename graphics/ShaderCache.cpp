@@ -26,7 +26,7 @@ String ShaderCache::CalculateHash(ptr<ShaderSource> shaderSource)
 	writer.WriteString(shaderSource->GetFunctionName());
 	writer.WriteString(shaderSource->GetProfile());
 	hashStream->WriteFile(shaderSource->GetCode());
-	hashStream->Flush();
+	hashStream->End();
 
 	return hashStream->GetHashString();
 }

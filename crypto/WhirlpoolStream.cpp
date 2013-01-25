@@ -1111,11 +1111,11 @@ void WhirlpoolStream::add(const unsigned char * const source, unsigned long sour
  * 
  * This method uses the invariant: bufferBits < DIGESTBITS
  */
-void WhirlpoolStream::Flush()
+void WhirlpoolStream::End()
 {
-	if(flushed)
+	if(ended)
 		return;
-	flushed = true;
+	ended = true;
 
 	int i;
 	u8 *buffer    = this->buffer;
@@ -1194,14 +1194,14 @@ size_t WhirlpoolStream::GetHashSize() const
 
 void WhirlpoolStream::GetHash(void* data) const
 {
-	if(!flushed)
-		THROW_PRIMARY_EXCEPTION("Whirlpool stream is not flushed");
+	if(!ended)
+		THROW_PRIMARY_EXCEPTION("Whirlpool stream is not ended");
 	memcpy(data, digest, sizeof(digest));
 }
 
 void WhirlpoolStream::Reset()
 {
-	flushed = false;
+	ended = false;
 
 	int i;
 

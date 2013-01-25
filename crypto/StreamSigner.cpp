@@ -42,7 +42,7 @@ void StreamSigner::WriteSigningHeader(ptr<InputStream> sourceStream, ptr<OutputS
 		{
 			ptr<StreamHasher> hasher = NEW(StreamHasher(blockHashAlgorithm, blockSize));
 			ptr<MemoryStream> hashesStream = NEW(MemoryStream());
-			ptr<OutputStream> hasherStream = hasher->CreateHasherStream(hashesStream);
+			ptr<StreamHasher::HasherStream> hasherStream = hasher->CreateHasherStream(hashesStream);
 			sourceDataSize = hasherStream->ReadAllFromStream(sourceStream);
 			hasherStream->Flush();
 			hashes = hashesStream->ToFile();
@@ -59,7 +59,7 @@ void StreamSigner::WriteSigningHeader(ptr<InputStream> sourceStream, ptr<OutputS
 			// для этого получить хеш от хешей
 			ptr<HashStream> hashStream = signatureHashAlgorithm->CreateHashStream();
 			hashStream->Write(hashes->GetData(), hashes->GetSize());
-			hashStream->Flush();
+			hashStream->End();
 			ptr<MemoryFile> hashesHash = NEW(MemoryFile(hashStream->GetHashSize()));
 			hashStream->GetHash(hashesHash->GetData());
 			// сделать подпись
@@ -111,7 +111,7 @@ void StreamSigner::VerifyStream::ReadHeader()
 		ptr<MemoryFile> hashesHash = NEW(MemoryFile(signer->signatureHashAlgorithm->GetHashSize()));
 		ptr<HashStream> hashStream = signer->signatureHashAlgorithm->CreateHashStream();
 		hashStream->Write(hashes->GetData(), hashes->GetSize());
-		hashStream->Flush();
+		hashStream->End();
 		hashStream->GetHash(hashesHash->GetData());
 		// считать цифровую подпись хешей
 		ptr<MemoryFile> signature = NEW(MemoryFile(signer->signatureAlgorithm->GetSignatureSize()));
