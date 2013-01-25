@@ -8,6 +8,72 @@
 
 BEGIN_INANITY_SHADERS
 
+/// Класс для получения базового типа из типа-вектора.
+template <typename MaybeVectorType>
+class BaseTypeHelper;
+template <int n>
+class BaseTypeHelper<vector<n> >
+{
+public:
+	typedef scalar Type;
+};
+template <>
+class BaseTypeHelper<scalar>
+{
+public:
+	typedef scalar Type;
+};
+template <int n>
+class BaseTypeHelper<uintvector<n> >
+{
+public:
+	typedef uint Type;
+};
+template <>
+class BaseTypeHelper<uint>
+{
+public:
+	typedef uint Type;
+};
+
+/// Класс для получения типа по длине строки.
+/** Принимает базовый тип. */
+template <typename BaseType, int n>
+class SwizzleTypedHelper;
+template <int n>
+class SwizzleTypedHelper<float, n>
+{
+public:
+	typedef vector<n - 1> Type;
+};
+template <>
+class SwizzleTypedHelper<float, 2>
+{
+public:
+	typedef scalar Type;
+};
+template <int n>
+class SwizzleTypedHelper<uint, n>
+{
+public:
+	typedef uintvector<n - 1> Type;
+};
+template <>
+class SwizzleTypedHelper<uint, 2>
+{
+public:
+	typedef uint Type;
+};
+
+/// Класс для получения типа вектора по длине строки.
+/** Принимает тип вектора или скаляра. */
+template <typename MaybeVectorType, int n>
+class SwizzleHelper
+{
+public:
+	typedef typename SwizzleTypedHelper<typename BaseTypeHelper<MaybeVectorType>::Type, n>::Type Type;
+};
+
 template <typename ValueType>
 inline Value<ValueType>::Value(ptr<Node> node)
 : Expression(node) {}
@@ -23,8 +89,8 @@ inline void Value<ValueType>::operator=(Value<ValueType> a)
 }
 
 template <typename ValueType>
-template <typename ResultValueType>
-inline Value<ResultValueType> Value<ValueType>::Swizzle(const char* map) const
+template <int n>
+inline Value<typename SwizzleHelper<ValueType, n>::Type> Value<ValueType>::operator[](const char (&map)[n])
 {
 	return NEW(SwizzleNode(node, map));
 }

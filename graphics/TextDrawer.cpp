@@ -99,12 +99,12 @@ struct TextDrawerHelper : public Object
 				tmpColor = uColors[tmpInstance],
 
 				iPosition = newfloat4(
-					dot(aCorner.Swizzle<float2>("xz"), tmpPosition.Swizzle<float2>("xz")),
-					dot(aCorner.Swizzle<float2>("yw"), tmpPosition.Swizzle<float2>("yw")),
+					dot(aCorner["xz"], tmpPosition["xz"]),
+					dot(aCorner["yw"], tmpPosition["yw"]),
 					0, 1),
 				iTexcoord = newfloat2(
-					dot(aCorner.Swizzle<float2>("xz"), tmpTexcoord.Swizzle<float2>("xz")),
-					dot(aCorner.Swizzle<float2>("yw"), tmpTexcoord.Swizzle<float2>("yw"))),
+					dot(aCorner["xz"], tmpTexcoord["xz"]),
+					dot(aCorner["yw"], tmpTexcoord["yw"])),
 				iColor = tmpColor
 			));
 
@@ -114,7 +114,7 @@ struct TextDrawerHelper : public Object
 				iTexcoord,
 				iColor,
 
-				fTarget = newfloat4(iColor.Swizzle<float3>("xyz"), iColor.Swizzle<float>("w") * uFontSampler.Sample(iTexcoord))
+				fTarget = newfloat4(iColor["xyz"], iColor["w"] * uFontSampler.Sample(iTexcoord))
 			));
 
 			// настройки смешивания
