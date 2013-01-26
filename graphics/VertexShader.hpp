@@ -11,8 +11,6 @@ class Layout;
 class VertexShader : public Object
 {
 public:
-	/// Получить разметку атрибутов.
-	virtual ptr<Layout> GetAttributesLayout() = 0;
 };
 
 END_INANITY_GRAPHICS

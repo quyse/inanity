@@ -7,12 +7,6 @@ DxVertexShader::DxVertexShader(ptr<File> code, ComPointer<ID3D11VertexShader> ve
 {
 }
 
-ptr<Layout> DxVertexShader::GetAttributesLayout()
-{
-	// TODO
-	return 0;
-}
-
 ID3D11VertexShader* DxVertexShader::GetVertexShaderInterface() const
 {
 	return vertexShader;
