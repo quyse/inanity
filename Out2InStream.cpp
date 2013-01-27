@@ -85,7 +85,7 @@ void Out2InStream::WriteFile(ptr<File> file)
 		(*i)->Push(file);
 }
 
-void Out2InStream::Flush()
+void Out2InStream::End()
 {
 	// просто передать всем
 	CriticalCode code(criticalSection);
