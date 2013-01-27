@@ -57,7 +57,7 @@ public:
 	/** Всегда доступен для чтения GPU. */
 	virtual ptr<RenderBuffer> CreateRenderBuffer(int width, int height, PixelFormat pixelFormat) = 0;
 	/// Создать depth-stencil буфер.
-	virtual ptr<DepthStencilBuffer> CreateDepthStencilBuffer(int width, int height, bool canBeResource = false) = 0;
+	virtual ptr<DepthStencilBuffer> CreateDepthStencilBuffer(int width, int height, bool canBeResource) = 0;
 
 	/// Создать вершинный шейдер из скомпилированного бинарного файла.
 	virtual ptr<VertexShader> CreateVertexShader(ptr<File> file) = 0;
