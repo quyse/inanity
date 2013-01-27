@@ -28,6 +28,8 @@ public:
 	// методы System
 	ptr<Window> CreateDefaultWindow();
 	ptr<Device> CreatePrimaryDevice();
+	ptr<ShaderCompiler> CreateShaderCompiler();
+	ptr<Shaders::ShaderGenerator> CreateShaderGenerator();
 
 	/// Получить фабрику DXGI.
 	/** Создаёт её, если ещё не создана. */

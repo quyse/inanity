@@ -2,6 +2,7 @@
 #define ___INANITY_GRAPHICS_SYSTEM_HPP___
 
 #include "graphics.hpp"
+#include "shaders/shaders.hpp"
 
 BEGIN_INANITY
 
@@ -9,9 +10,16 @@ class Window;
 
 END_INANITY
 
+BEGIN_INANITY_SHADERS
+
+class ShaderGenerator;
+
+END_INANITY_SHADERS
+
 BEGIN_INANITY_GRAPHICS
 
 class Device;
+class ShaderCompiler;
 
 /// Класс графической подсистемы.
 /** Абстрактная фабрика для создания объектов
@@ -29,6 +37,11 @@ public:
 	virtual ptr<Window> CreateDefaultWindow() = 0;
 	/// Создать главное графическое устройство.
 	virtual ptr<Device> CreatePrimaryDevice() = 0;
+
+	/// Создать компилятор шейдеров.
+	virtual ptr<ShaderCompiler> CreateShaderCompiler() = 0;
+	/// Создать генератор шейдеров.
+	virtual ptr<Shaders::ShaderGenerator> CreateShaderGenerator() = 0;
 };
 
 END_INANITY_GRAPHICS

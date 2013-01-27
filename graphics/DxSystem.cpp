@@ -1,6 +1,8 @@
 #include "DxSystem.hpp"
 #include "DxDevice.hpp"
 #include "DxContext.hpp"
+#include "DxShaderCompiler.hpp"
+#include "shaders/HlslGenerator.hpp"
 #include "../Win32Window.hpp"
 #include "../Exception.hpp"
 
@@ -110,4 +112,14 @@ ptr<Device> DxSystem::CreatePrimaryDevice()
 	{
 		THROW_SECONDARY_EXCEPTION("Can't create primary device", exception);
 	}
+}
+
+ptr<ShaderCompiler> DxSystem::CreateShaderCompiler()
+{
+	return NEW(DxShaderCompiler());
+}
+
+ptr<Shaders::ShaderGenerator> DxSystem::CreateShaderGenerator()
+{
+	return NEW(HlslGenerator());
 }
