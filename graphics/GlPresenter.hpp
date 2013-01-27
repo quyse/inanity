@@ -38,6 +38,7 @@ public:
 	ptr<RenderBuffer> GetBackBuffer();
 	void SetMode(const PresentMode& mode);
 	void Present();
+	void Resize(int width, int height);
 };
 
 END_INANITY_GRAPHICS

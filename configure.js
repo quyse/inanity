@@ -114,7 +114,9 @@ var libraries = {
 			'graphics.GlInternalAttributeBinding', 'graphics.GlInternalAttributeBindingCache',
 			'graphics.GlRenderBuffer', 'graphics.GlDepthStencilBuffer', 'graphics.GlTexture', 'graphics.GlUniformBuffer',
 			'graphics.GlVertexBuffer', 'graphics.GlIndexBuffer',
-			'graphics.GlVertexShader', 'graphics.GlPixelShader'
+			'graphics.GlVertexShader', 'graphics.GlPixelShader',
+			'graphics.GlSamplerState', 'graphics.GlBlendState',
+			'graphics.GlShaderCompiler'
 		]
 	},
 	// ******* подсистема шейдеров
@@ -129,6 +131,7 @@ var libraries = {
 			'graphics.shaders.SpecialNode',
 			'graphics.shaders.Expression', 'graphics.shaders.Sampler',
 			'graphics.shaders.HlslGenerator', 'graphics.shaders.HlslGeneratorInstance',
+			'graphics.shaders.GlslGenerator', 'graphics.shaders.GlslGeneratorInstance'
 		]
 	},
 	// ******* общая физика

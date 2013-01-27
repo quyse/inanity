@@ -12,6 +12,8 @@
 #include "graphics/shaders/Expression.hpp"
 #include "graphics/shaders/FloatConstNode.hpp"
 #include "graphics/shaders/Fragment.ipp"
+#include "graphics/shaders/GlslGenerator.hpp"
+#include "graphics/shaders/GlslGeneratorInstance.hpp"
 #include "graphics/shaders/HlslGenerator.hpp"
 #include "graphics/shaders/HlslGeneratorInstance.hpp"
 #include "graphics/shaders/Interpolant.ipp"

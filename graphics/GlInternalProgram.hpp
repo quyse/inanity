@@ -21,7 +21,7 @@ public:
 	~GlInternalProgram();
 
 	GLuint GetName() const;
-	std::vector<String>& GetAttributes();
+	const std::vector<String>& GetAttributes();
 };
 
 END_INANITY_GRAPHICS

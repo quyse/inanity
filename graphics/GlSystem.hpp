@@ -15,6 +15,8 @@ public:
 	// методы System
 	ptr<Window> CreateDefaultWindow();
 	ptr<Device> CreatePrimaryDevice();
+	ptr<ShaderCompiler> CreateShaderCompiler();
+	ptr<Shaders::ShaderGenerator> CreateShaderGenerator();
 
 	/// Инициализация GLEW.
 	/** Нужно вызывать после создания контекста OpenGL. */

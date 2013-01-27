@@ -1,5 +1,5 @@
 #include "GlVertexBuffer.hpp"
-#include "VertexLayout.hpp"
+#include "Layout.hpp"
 
 GlVertexBuffer::GlVertexBuffer(GLuint name, int verticesCount, ptr<Layout> layout)
 : VertexBuffer(verticesCount, layout), name(name) {}

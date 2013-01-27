@@ -43,13 +43,16 @@ public:
 	ptr<System> GetSystem() const;
 	ptr<Presenter> CreatePresenter(ptr<Output> output, const PresentMode& mode);
 	ptr<Context> GetContext();
-	ptr<RenderBuffer> CreateRenderBuffer(size_t width, size_t height, PixelFormat pixelFormat);
+	ptr<RenderBuffer> CreateRenderBuffer(int width, int height, PixelFormat pixelFormat);
+	ptr<DepthStencilBuffer> CreateDepthStencilBuffer(int width, int height, bool canBeResource);
 	ptr<VertexShader> CreateVertexShader(ptr<File> file);
 	ptr<PixelShader> CreatePixelShader(ptr<File> file);
-	ptr<UniformBuffer> CreateUniformBuffer(size_t size);
-	ptr<VertexBuffer> CreateVertexBuffer(ptr<File> file, size_t vertexStride);
-	ptr<IndexBuffer> CreateIndexBuffer(ptr<File> file, size_t indexSize);
+	ptr<UniformBuffer> CreateUniformBuffer(int size);
+	ptr<VertexBuffer> CreateVertexBuffer(ptr<File> file, ptr<Layout> layout);
+	ptr<IndexBuffer> CreateIndexBuffer(ptr<File> file, int indexSize);
 	ptr<Texture> CreateStaticTexture(ptr<File> file);
+	ptr<SamplerState> CreateSamplerState();
+	ptr<BlendState> CreateBlendState();
 };
 
 END_INANITY_GRAPHICS

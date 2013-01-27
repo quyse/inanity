@@ -1,6 +1,8 @@
 #include "GlSystem.hpp"
 #include "GlDevice.hpp"
 #include "GlContext.hpp"
+#include "GlShaderCompiler.hpp"
+#include "shaders/GlslGenerator.hpp"
 #ifdef ___INANITY_WINDOWS
 #include "../Win32Window.hpp"
 #include "../Strings.hpp"
@@ -39,6 +41,16 @@ ptr<Device> GlSystem::CreatePrimaryDevice()
 	{
 		THROW_SECONDARY_EXCEPTION("Can't create primary device", exception);
 	}
+}
+
+ptr<ShaderCompiler> GlSystem::CreateShaderCompiler()
+{
+	return NEW(GlShaderCompiler());
+}
+
+ptr<Shaders::ShaderGenerator> GlSystem::CreateShaderGenerator()
+{
+	return NEW(GlslGenerator());
 }
 
 void GlSystem::InitGLEW()

@@ -7,12 +7,13 @@
 #include "GlRenderBuffer.hpp"
 #include "GlDepthStencilBuffer.hpp"
 #include "GlTexture.hpp"
-#include "GlSampler.hpp"
+#include "GlSamplerState.hpp"
 #include "GlUniformBuffer.hpp"
 #include "GlVertexShader.hpp"
 #include "GlPixelShader.hpp"
 #include "GlVertexBuffer.hpp"
 #include "GlIndexBuffer.hpp"
+#include "GlBlendState.hpp"
 #include "Layout.hpp"
 #include "../Exception.hpp"
 
@@ -167,23 +168,27 @@ void GlContext::Update()
 
 	// проверить, если первый рендербуфер - по умолчанию (а непервым он быть не может),
 	// то он должен быть единственным, и depth-stencil буфера не может быть
-	if(boundRenderBuffers[0] && fast_cast<GlRenderBuffer*>(&*boundRenderBuffers[0])->GetName() == 0)
+	if(targetState.renderBuffers[0] && fast_cast<GlRenderBuffer*>(&*targetState.renderBuffers[0])->GetName() == 0)
 	{
-		if(boundDepthStencilBuffer)
+		if(targetState.depthStencilBuffer)
 			THROW_PRIMARY_EXCEPTION("Default renderbuffer can be bound only without depth-stencil buffer");
-		for(int i = 1; i < renderTargetSlotsCount; ++i)
-			if(boundRenderBuffers[i])
+		for(int i = 1; i < ContextState::renderTargetSlotsCount; ++i)
+			if(targetState.renderBuffers[i])
 				THROW_PRIMARY_EXCEPTION("Default renderbuffer can be bound only without other buffers");
 
 		// привязать фреймбуфер по умолчанию
 		if(currentFramebuffer != 0)
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, currentFramebuffer = 0);
 
-		// больше ничего привязывать не надо, только очистить флажки
-		for(int i = 0; i < renderTargetSlotsCount; ++i)
-			dirtyRenderBuffers[i] = false;
+		// больше ничего привязывать не надо
+
+		// установить, что всё привязано
+		for(int i = 0; i < ContextState::renderTargetSlotsCount; ++i)
+			boundState.renderBuffers[i] = targetState.renderBuffers[i];
+		boundState.depthStencilBuffer = targetState.depthStencilBuffer;
 	}
 	// иначе все рендербуферы - не по умолчанию
+	// определяем, что поменялось, и меняем
 	else
 	{
 		// привязать нужный фреймбуфер
@@ -191,96 +196,107 @@ void GlContext::Update()
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, currentFramebuffer = targetsFramebuffer);
 
 		// привязать изменившиеся рендербуферы
-		for(int i = 0; i < renderTargetSlotsCount; ++i)
-			if(dirtyRenderBuffers[i])
+		for(int i = 0; i < ContextState::renderTargetSlotsCount; ++i)
+			if(targetState.renderBuffers[i] != boundState.renderBuffers[i])
 			{
-				GLuint name = fast_cast<GlRenderBuffer*>(&*boundRenderBuffers[i])->GetName();
-				if(name == 0)
-					THROW_PRIMARY_EXCEPTION("Default renderbuffer can't be bound with other buffers");
-				glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, name, 0);
-				dirtyRenderBuffers[i] = false;
+				RenderBuffer* abstractRenderBuffer = targetState.renderBuffers[i];
+				if(abstractRenderBuffer)
+				{
+					GLuint name = fast_cast<GlRenderBuffer*>(abstractRenderBuffer)->GetName();
+					if(name == 0)
+						THROW_PRIMARY_EXCEPTION("Default renderbuffer can't be bound with other buffers");
+					glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, name, 0);
+				}
+				else
+					glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, 0, 0);
+
+				boundState.renderBuffers[i] = targetState.renderBuffers[i];
 			}
 
 		// привязать изменившийся depth-stencil буфер
-		if(dirtyDepthStencilBuffer)
+		if(targetState.depthStencilBuffer != boundState.depthStencilBuffer)
 		{
-			glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, fast_cast<GlDepthStencilBuffer*>(&*boundDepthStencilBuffer)->GetName(), 0);
+			DepthStencilBuffer* abstractDepthStencilBuffer = targetState.depthStencilBuffer;
+			glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+				abstractDepthStencilBuffer ? fast_cast<GlDepthStencilBuffer*>(abstractDepthStencilBuffer)->GetName() : 0, 0);
 
-			dirtyDepthStencilBuffer = false;
+			boundState.depthStencilBuffer = targetState.depthStencilBuffer;
 		}
 	}
 
 	// текстуры
-	for(int i = 0; i < textureSlotsCount; ++i)
-		if(dirtyTextures[i])
+	for(int i = 0; i < ContextState::textureSlotsCount; ++i)
+		if(targetState.textures[i] != boundState.textures[i])
 		{
 			glActiveTexture(GL_TEXTURE0 + i);
-			glBindTexture(GL_TEXTURE_2D, fast_cast<GlTexture*>(&*boundTextures[i])->GetName());
+			Texture* abstractTexture = targetState.textures[i];
+			glBindTexture(GL_TEXTURE_2D, abstractTexture ? fast_cast<GlTexture*>(abstractTexture)->GetName() : 0);
 
-			dirtyTextures[i] = false;
+			boundState.textures[i] = targetState.textures[i];
 		}
 	// семплеры
-	for(int i = 0; i < textureSlotsCount; ++i)
-		if(dirtySamplers[i])
+	for(int i = 0; i < ContextState::textureSlotsCount; ++i)
+		if(targetState.samplerStates[i] != boundState.samplerStates[i])
 		{
-			glBindSampler(i, fast_cast<GlSampler*>(&*boundSamplers[i])->GetName());
+			SamplerState* abstractSamplerState = targetState.samplerStates[i];
+			glBindSampler(i, abstractSamplerState ? fast_cast<GlSamplerState*>(abstractSamplerState)->GetName() : 0);
 
-			dirtySamplers[i] = false;
+			boundState.samplerStates[i] = targetState.samplerStates[i];
 		}
 
 	// uniform-буферы
-	for(int i = 0; i < uniformBufferSlotsCount; ++i)
-		if(dirtyUniformBuffers[i])
+	for(int i = 0; i < ContextState::uniformBufferSlotsCount; ++i)
+		if(targetState.uniformBuffers[i] != boundState.uniformBuffers[i])
 		{
-			glBindBufferBase(GL_UNIFORM_BUFFER, i, fast_cast<GlUniformBuffer*>(&*boundUniformBuffers[i])->GetName());
+			UniformBuffer* abstractUniformBuffer = targetState.uniformBuffers[i];
+			glBindBufferBase(GL_UNIFORM_BUFFER, i, abstractUniformBuffer ? fast_cast<GlUniformBuffer*>(abstractUniformBuffer)->GetName() : 0);
 
-			dirtyUniformBuffers[i] = false;
+			boundState.uniformBuffers[i] = targetState.uniformBuffers[i];
 		}
 
 	bool dirtyAttributeBinding = false;
 
 	// вершинный и пиксельный шейдеры
-	if(dirtyVertexShader || dirtyPixelShader)
+	if(targetState.vertexShader != boundState.vertexShader || targetState.pixelShader != boundState.pixelShader)
 	{
-		ptr<GlInternalProgram> program = programCache->GetProgram(fast_cast<GlVertexShader*>(&*boundVertexShader), fast_cast<GlPixelShader*>(&*boundPixelShader));
+		ptr<GlInternalProgram> program = programCache->GetProgram(fast_cast<GlVertexShader*>(&*targetState.vertexShader), fast_cast<GlPixelShader*>(&*targetState.pixelShader));
 		if(boundProgram != program)
 		{
-			boundProgram = program;
 			glUseProgram(boundProgram->GetName());
+			boundProgram = program;
 		}
 
-		dirtyVertexShader = false;
-		dirtyPixelShader = false;
+		boundState.vertexShader = targetState.vertexShader;
+		boundState.pixelShader = targetState.pixelShader;
 		dirtyAttributeBinding = true;
 	}
 
 	// вершинный буфер
-	if(dirtyVertexBuffer)
+	if(targetState.vertexBuffer != boundState.vertexBuffer)
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, fast_cast<GlVertexBuffer*>(&*boundVertexBuffer)->GetName());
+		glBindBuffer(GL_ARRAY_BUFFER, fast_cast<GlVertexBuffer*>(&*targetState.vertexBuffer)->GetName());
 
-		dirtyVertexBuffer = false;
+		boundState.vertexBuffer = targetState.vertexBuffer;
 		dirtyAttributeBinding = true;
 	}
 
 	// индексный буфер
-	if(dirtyIndexBuffer)
+	if(targetState.indexBuffer != boundState.indexBuffer)
 	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, boundIndexBuffer ? fast_cast<GlVertexBuffer*>(&*boundIndexBuffer)->GetName() : 0);
+		IndexBuffer* abstractIndexBuffer = targetState.indexBuffer;
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, abstractIndexBuffer ? fast_cast<GlVertexBuffer*>(abstractIndexBuffer)->GetName() : 0);
 
-		dirtyIndexBuffer = false;
+		boundState.indexBuffer = targetState.indexBuffer;
 		dirtyAttributeBinding = true;
 	}
 
 	// привязка к атрибутам
 	if(dirtyAttributeBinding)
 	{
-		ptr<Layout> vertexLayout = boundVertexBuffer->GetLayout();
+		ptr<Layout> vertexLayout = targetState.vertexBuffer->GetLayout();
 		ptr<GlInternalAttributeBinding> attributeBinding = attributeBindingCache->GetBinding(vertexLayout, boundProgram);
 		if(boundAttributeBinding != attributeBinding)
 		{
-			boundAttributeBinding = attributeBinding;
-
 			// выполнить привязку
 			int stride = vertexLayout->GetStride();
 			const std::vector<GlInternalAttributeBinding::Element>& elements = boundAttributeBinding->GetElements();
@@ -290,96 +306,115 @@ void GlContext::Update()
 
 				glVertexAttribPointer(element.index, element.size, element.type, element.normalized, stride, element.pointer);
 			}
+
+			boundAttributeBinding = attributeBinding;
 		}
 
 		dirtyAttributeBinding = false;
 	}
 
-	if(dirtyFillMode)
+	if(targetState.fillMode != boundState.fillMode)
 	{
-		switch(fillMode)
+		switch(targetState.fillMode)
 		{
-		case fillModeWireframe:
+		case ContextState::fillModeWireframe:
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			break;
-		case fillModeSolid:
+		case ContextState::fillModeSolid:
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			break;
+		default:
+			THROW_PRIMARY_EXCEPTION("Unknown fill mode");
 		}
 
-		dirtyFillMode = false;
+		boundState.fillMode = targetState.fillMode;
 	}
 
-	if(dirtyCullMode)
+	if(targetState.cullMode != boundState.cullMode)
 	{
-		switch(cullMode)
+		switch(targetState.cullMode)
 		{
-		case cullModeNone:
+		case ContextState::cullModeNone:
 			glDisable(GL_CULL_FACE);
 			break;
-		case cullModeBack:
+		case ContextState::cullModeBack:
 			glEnable(GL_CULL_FACE);
 			glCullFace(GL_BACK);
 			break;
-		case cullModeFront:
+		case ContextState::cullModeFront:
 			glEnable(GL_CULL_FACE);
 			glCullFace(GL_FRONT);
 			break;
+		default:
+			THROW_PRIMARY_EXCEPTION("Unknown cull mode");
 		}
 
-		dirtyCullMode = false;
+		boundState.cullMode = targetState.cullMode;
 	}
 
-	if(dirtyViewport)
+	if(targetState.viewportWidth != boundState.viewportWidth || targetState.viewportHeight != boundState.viewportHeight)
 	{
-		glViewport(0, 0, viewportWidth, viewportHeight);
+		glViewport(0, 0, targetState.viewportWidth, targetState.viewportHeight);
 
-		dirtyViewport = false;
+		boundState.viewportWidth = targetState.viewportWidth;
+		boundState.viewportHeight = targetState.viewportHeight;
 	}
 
-	if(dirtyDepthTestFunc)
+	if(targetState.depthTestFunc != boundState.depthTestFunc)
 	{
-		GLenum func = GL_NEVER;
-		switch(depthTestFunc)
+		GLenum func;
+		switch(targetState.depthTestFunc)
 		{
-		case depthTestFuncNever:
+		case ContextState::depthTestFuncNever:
 			func = GL_NEVER;
 			break;
-		case depthTestFuncLess:
+		case ContextState::depthTestFuncLess:
 			func = GL_LESS;
 			break;
-		case depthTestFuncLessOrEqual:
+		case ContextState::depthTestFuncLessOrEqual:
 			func = GL_LEQUAL;
 			break;
-		case depthTestFuncEqual:
+		case ContextState::depthTestFuncEqual:
 			func = GL_EQUAL;
 			break;
-		case depthTestFuncNonEqual:
+		case ContextState::depthTestFuncNonEqual:
 			func = GL_NOTEQUAL;
 			break;
-		case depthTestFuncGreaterOrEqual:
+		case ContextState::depthTestFuncGreaterOrEqual:
 			func = GL_GEQUAL;
 			break;
-		case depthTestFuncGreater:
+		case ContextState::depthTestFuncGreater:
 			func = GL_GREATER;
 			break;
-		case depthTestFuncAlways:
+		case ContextState::depthTestFuncAlways:
 			func = GL_ALWAYS;
 			break;
+		default:
+			THROW_PRIMARY_EXCEPTION("Unknown depth test func");
 		}
 
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(func);
 
-		dirtyDepthTestFunc = false;
+		boundState.depthTestFunc = targetState.depthTestFunc;
 	}
 
-	if(dirtyDepthWrite)
+	if(targetState.depthWrite != boundState.depthWrite)
 	{
-		glDepthMask(depthWrite ? GL_TRUE : GL_FALSE);
+		glDepthMask(targetState.depthWrite ? GL_TRUE : GL_FALSE);
 
-		dirtyDepthWrite = false;
+		boundState.depthWrite = targetState.depthWrite;
 	}
+
+	if(targetState.blendState != boundState.blendState)
+	{
+		if(targetState.blendState)
+			fast_cast<GlBlendState*>(&*targetState.blendState)->Apply();
+
+		boundState.blendState = targetState.blendState;
+	}
+
+	GlSystem::CheckErrors("Can't update context");
 }
 
 void GlContext::ClearRenderBuffer(RenderBuffer* renderBuffer, const float* color)
@@ -439,12 +474,12 @@ void GlContext::Draw()
 {
 	Update();
 
-	glDrawArrays(GL_TRIANGLES, 0, boundIndexBuffer ? boundIndexBuffer->GetIndicesCount() : boundVertexBuffer->GetVerticesCount());
+	glDrawArrays(GL_TRIANGLES, 0, boundState.indexBuffer ? boundState.indexBuffer->GetIndicesCount() : boundState.vertexBuffer->GetVerticesCount());
 }
 
 void GlContext::DrawInstanced(int instancesCount)
 {
 	Update();
 
-	glDrawArraysInstanced(GL_TRIANGLES, 0, boundIndexBuffer ? boundIndexBuffer->GetIndicesCount() : boundVertexBuffer->GetVerticesCount(), instancesCount);
+	glDrawArraysInstanced(GL_TRIANGLES, 0, boundState.indexBuffer ? boundState.indexBuffer->GetIndicesCount() : boundState.vertexBuffer->GetVerticesCount(), instancesCount);
 }

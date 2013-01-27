@@ -59,7 +59,7 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, const Prese
 		}
 
 		// получить дескриптор окна
-		HDC hdc = GetDC(output->GetWindowHandle());
+		HDC hdc = GetDC(output->GetHWND());
 		if(!hdc)
 			THROW_PRIMARY_EXCEPTION("Can't get hdc");
 
@@ -108,14 +108,14 @@ ptr<Context> GlDevice::GetContext()
 	return context;
 }
 
-ptr<RenderBuffer> GlDevice::CreateRenderBuffer(size_t width, size_t height, PixelFormat pixelFormat)
+ptr<RenderBuffer> GlDevice::CreateRenderBuffer(int width, int height, PixelFormat pixelFormat)
 {
 	try
 	{
-		// FIXME: обернуть textureName в какой-нибудь класс, чтобы оно не утекало
 		GLuint textureName;
 		glGenTextures(1, &textureName);
-		GlSystem::CheckErrors("Can't get textures");
+		GlSystem::CheckErrors("Can't gen texture");
+		ptr<GlInternalTexture> internalTexture = NEW(GlInternalTexture(textureName));
 		glBindTexture(GL_TEXTURE_2D, textureName);
 		GlSystem::CheckErrors("Can't bind texture");
 
@@ -134,12 +134,43 @@ ptr<RenderBuffer> GlDevice::CreateRenderBuffer(size_t width, size_t height, Pixe
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 		GlSystem::CheckErrors("Can't set texture parameters");
 
-		ptr<GlInternalTexture> internalTexture = NEW(GlInternalTexture(textureName));
 		return NEW(GlRenderBuffer(internalTexture, NEW(GlTexture(internalTexture))));
 	}
 	catch(Exception* exception)
 	{
 		THROW_SECONDARY_EXCEPTION("Can't create render buffer", exception);
+	}
+}
+
+ptr<DepthStencilBuffer> GlDevice::CreateDepthStencilBuffer(int width, int height, bool canBeResource)
+{
+	try
+	{
+		GLuint textureName;
+		glGenTextures(1, &textureName);
+		GlSystem::CheckErrors("Can't gen textures");
+		ptr<GlInternalTexture> internalTexture = NEW(GlInternalTexture(textureName));
+		glBindTexture(GL_TEXTURE_2D, textureName);
+		GlSystem::CheckErrors("Can't bind texture");
+
+		GLint internalFormat;
+		GLenum format;
+		GLenum type;
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, (GLsizei)width, (GLsizei)height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, 0);
+		GlSystem::CheckErrors("Can't initialize texture");
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		GlSystem::CheckErrors("Can't set texture parameters");
+
+		return NEW(GlDepthStencilBuffer(internalTexture, NEW(GlTexture(internalTexture))));
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create depth stencil buffer", exception);
 	}
 }
 
@@ -205,5 +236,107 @@ ptr<PixelShader> GlDevice::CreatePixelShader(ptr<File> file)
 	catch(Exception* exception)
 	{
 		THROW_SECONDARY_EXCEPTION("Can't create pixel shader", exception);
+	}
+}
+
+ptr<UniformBuffer> GlDevice::CreateUniformBuffer(int size)
+{
+	try
+	{
+		GLuint bufferName;
+		glGenBuffers(1, &bufferName);
+		GlSystem::CheckErrors("Can't gen buffer");
+		ptr<GlUniformBuffer> uniformBuffer = NEW(GlUniformBuffer(bufferName, size));
+
+		glBindBuffer(GL_UNIFORM_BUFFER, bufferName);
+		GlSystem::CheckErrors("Can't bind buffer");
+
+		glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
+		GlSystem::CheckErrors("Can't setup buffer data");
+
+		return uniformBuffer;
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create uniform buffer", exception);
+	}
+}
+
+ptr<VertexBuffer> GlDevice::CreateVertexBuffer(ptr<File> file, ptr<Layout> layout)
+{
+	try
+	{
+		GLuint bufferName;
+		glGenBuffers(1, &bufferName);
+		GlSystem::CheckErrors("Can't gen buffer");
+		ptr<GlVertexBuffer> vertexBuffer = NEW(GlVertexBuffer(bufferName, file->GetSize() / layout->GetStride(), layout));
+
+		glBindBuffer(GL_ARRAY_BUFFER, bufferName);
+		GlSystem::CheckErrors("Can't bind buffer");
+
+		glBufferData(GL_ARRAY_BUFFER, file->GetSize(), file->GetData(), GL_STATIC_DRAW);
+		GlSystem::CheckErrors("Can't setup buffer data");
+
+		return vertexBuffer;
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create vertex buffer", exception);
+	}
+}
+
+ptr<IndexBuffer> GlDevice::CreateIndexBuffer(ptr<File> file, int indexSize)
+{
+	try
+	{
+		GLuint bufferName;
+		glGenBuffers(1, &bufferName);
+		GlSystem::CheckErrors("Can't gen buffer");
+		ptr<GlIndexBuffer> indexBuffer = NEW(GlIndexBuffer(bufferName, file->GetSize() / indexSize, indexSize));
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName);
+		GlSystem::CheckErrors("Can't bind buffer");
+
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, file->GetSize(), file->GetData(), GL_STATIC_DRAW);
+		GlSystem::CheckErrors("Can't setup buffer data");
+
+		return indexBuffer;
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create index buffer", exception);
+	}
+}
+
+ptr<Texture> GlDevice::CreateStaticTexture(ptr<File> file)
+{
+	try
+	{
+		GLuint textureName;
+		glGenTextures(1, &textureName);
+		GlSystem::CheckErrors("Can't gen texture");
+		ptr<GlInternalTexture> internalTexture = NEW(GlInternalTexture(textureName));
+		glBindTexture(GL_TEXTURE_2D, textureName);
+		GlSystem::CheckErrors("Can't bind texture");
+
+#error Work is not finished...
+		GLint internalFormat;
+		GLenum format;
+		GLenum type;
+		if(!GlSystem::GetTextureFormat(pixelFormat, internalFormat, format, type))
+			THROW_PRIMARY_EXCEPTION("Invalid pixel format");
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, (GLsizei)width, (GLsizei)height, 0, format, type, 0);
+		GlSystem::CheckErrors("Can't initialize texture");
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		GlSystem::CheckErrors("Can't set texture parameters");
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create static texture", exception);
 	}
 }

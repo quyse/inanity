@@ -12,7 +12,7 @@ GLuint GlInternalProgram::GetName() const
 	return name;
 }
 
-std::vector<String>& GlInternalProgram::GetAttributes()
+const std::vector<String>& GlInternalProgram::GetAttributes()
 {
 	return attributes;
 }

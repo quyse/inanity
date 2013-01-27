@@ -30,3 +30,8 @@ void GlPresenter::Present()
 	SwapBuffers(hdc);
 #endif
 }
+
+void GlPresenter::Resize(int width, int height)
+{
+	// TODO.
+}

@@ -1,13 +1,13 @@
-#ifndef ___INANITY_GRAPHICS_GL_SAMPLER_HPP___
-#define ___INANITY_GRAPHICS_GL_SAMPLER_HPP___
+#ifndef ___INANITY_GRAPHICS_GL_SAMPLER_STATE_HPP___
+#define ___INANITY_GRAPHICS_GL_SAMPLER_STATE_HPP___
 
-#include "Sampler.hpp"
+#include "SamplerState.hpp"
 #include "opengl.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
-/// Класс семплера OpenGL.
-class GlSampler : public Sampler
+/// Класс настроек семплера OpenGL.
+class GlSamplerState : public SamplerState
 {
 private:
 	GLuint samplerName;
@@ -15,14 +15,14 @@ private:
 	/// Преобразовать режим свёртки в константу OpenGL.
 	static GLint ConvertWrap(Wrap wrap);
 
-public:
-	GlSampler(GLuint samplerName);
-	~GlSampler();
-
-	GLuint GetName() const;
-
 	/// Обновить настройки семплера, если они менялись.
 	void Update();
+
+public:
+	GlSamplerState(GLuint samplerName);
+	~GlSamplerState();
+
+	GLuint GetName();
 };
 
 END_INANITY_GRAPHICS

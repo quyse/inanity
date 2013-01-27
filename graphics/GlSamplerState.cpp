@@ -1,17 +1,17 @@
-#include "GlSampler.hpp"
+#include "GlSamplerState.hpp"
 #include "GlSystem.hpp"
 #include "../Exception.hpp"
 
-GlSampler::GlSampler(GLuint samplerName) : samplerName(samplerName)
+GlSamplerState::GlSamplerState(GLuint samplerName) : samplerName(samplerName)
 {
 }
 
-GlSampler::~GlSampler()
+GlSamplerState::~GlSamplerState()
 {
 	glDeleteSamplers(1, &samplerName);
 }
 
-GLint GlSampler::ConvertWrap(Wrap wrap)
+GLint GlSamplerState::ConvertWrap(Wrap wrap)
 {
 	switch(wrap)
 	{
@@ -27,12 +27,13 @@ GLint GlSampler::ConvertWrap(Wrap wrap)
 	THROW_PRIMARY_EXCEPTION("Invalid wrap mode");
 }
 
-GLuint GlSampler::GetName() const
+GLuint GlSamplerState::GetName()
 {
+	Update();
 	return samplerName;
 }
 
-void GlSampler::Update()
+void GlSamplerState::Update()
 {
 	if(!dirty)
 		return;
@@ -119,6 +120,8 @@ void GlSampler::Update()
 		// установить цвет границы
 		glSamplerParameterfv(samplerName, GL_TEXTURE_BORDER_COLOR, borderColor);
 		GlSystem::CheckErrors("Can't set border color");
+
+		dirty = false;
 	}
 	catch(Exception* exception)
 	{

@@ -4,6 +4,14 @@
 #include "GlContext.hpp"
 #include "Layout.hpp"
 
+GlInternalAttributeBindingCache::Key::Key(Layout* vertexLayout, GlInternalProgram* program)
+: vertexLayout(vertexLayout), program(program) {}
+
+GlInternalAttributeBindingCache::Key::operator size_t() const
+{
+	return (size_t)vertexLayout | (size_t)program;
+}
+
 GlInternalAttributeBindingCache::GlInternalAttributeBindingCache(GlContext* context)
 : context(context) {}
 
