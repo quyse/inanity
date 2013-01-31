@@ -2,10 +2,15 @@
 #include "GlSystem.hpp"
 #include "GlPresenter.hpp"
 #include "GlRenderBuffer.hpp"
+#include "GlDepthStencilBuffer.hpp"
 #include "GlContext.hpp"
 #include "GlTexture.hpp"
 #include "GlVertexShader.hpp"
 #include "GlPixelShader.hpp"
+#include "GlUniformBuffer.hpp"
+#include "GlVertexBuffer.hpp"
+#include "GlIndexBuffer.hpp"
+#include "Layout.hpp"
 #include "GlInternalTexture.hpp"
 #include "Win32Output.hpp"
 #include "../File.hpp"
@@ -153,9 +158,6 @@ ptr<DepthStencilBuffer> GlDevice::CreateDepthStencilBuffer(int width, int height
 		glBindTexture(GL_TEXTURE_2D, textureName);
 		GlSystem::CheckErrors("Can't bind texture");
 
-		GLint internalFormat;
-		GLenum format;
-		GLenum type;
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, (GLsizei)width, (GLsizei)height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, 0);
 		GlSystem::CheckErrors("Can't initialize texture");
 
