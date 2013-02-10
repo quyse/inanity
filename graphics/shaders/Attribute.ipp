@@ -2,6 +2,7 @@
 #define ___INANITY_GRAPHICS_SHADERS_ATTRIBUTE_IPP___
 
 #include "Attribute.hpp"
+#include "AttributeNode.hpp"
 
 BEGIN_INANITY_SHADERS
 

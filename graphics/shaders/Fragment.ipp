@@ -2,6 +2,7 @@
 #define ___INANITY_GRAPHICS_SHADERS_FRAGMENT_IPP___
 
 #include "Fragment.hpp"
+#include "TransitionalNode.hpp"
 
 BEGIN_INANITY_SHADERS
 

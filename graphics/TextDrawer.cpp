@@ -12,6 +12,8 @@
 #include "Context.hpp"
 #include "ShaderCache.hpp"
 #include "Layout.hpp"
+#include "RenderBuffer.hpp"
+#include "DepthStencilBuffer.hpp"
 #include "../MemoryFile.hpp"
 #include "../StringTraveler.hpp"
 #include "../Exception.hpp"
@@ -195,10 +197,6 @@ void TextDrawer::DrawSymbol(const float4& position, const float4& texcoord, cons
 void TextDrawer::DrawTextLine(const String& text, float x, float y, const float4& color, int alignment)
 {
 	Font* font = currentFont;
-
-	// получить данные шрифта
-	const Font::Charset& charset = font->GetCharset();
-	const Font::KerningPairs& kerningPairs = font->GetKerningPairs();
 
 	//получить высоту символов
 	float charHeight = font->GetCharHeight() * scaleY;

@@ -3,6 +3,7 @@
 #include "../Exception.hpp"
 #include <unordered_map>
 #include <algorithm>
+#include <cstring>
 
 LayoutBinding::Element::Element(int sourceOffset, int destOffset, int size)
 : sourceOffset(sourceOffset), destOffset(destOffset), size(size) {}

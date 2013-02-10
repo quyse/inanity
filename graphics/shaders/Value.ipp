@@ -92,103 +92,103 @@ template <typename ValueType>
 template <int n>
 inline Value<typename SwizzleHelper<ValueType, n>::Type> Value<ValueType>::operator[](const char (&map)[n])
 {
-	return NEW(SwizzleNode(node, map));
+	return Value<typename SwizzleHelper<ValueType, n>::Type>(NEW(SwizzleNode(node, map)));
 }
 
 template <typename ValueType>
 template <typename CastValueType>
 inline Value<CastValueType> Value<ValueType>::Cast() const
 {
-	return NEW(CastNode(GetDataType<CastValueType>(), GetNode()));
+	return Value<CastValueType>(NEW(CastNode(GetDataType<CastValueType>(), GetNode())));
 }
 
 template <typename ValueType>
 inline Value<ValueType> operator-(Value<ValueType> a)
 {
-	return NEW(OperationNode(OperationNode::operationNegate, a.GetNode()));
+	return Value<ValueType>(NEW(OperationNode(OperationNode::operationNegate, a.GetNode())));
 }
 template <typename ValueType>
 inline Value<ValueType> operator+(Value<ValueType> a, Value<ValueType> b)
 {
-	return NEW(OperationNode(OperationNode::operationAdd, a.GetNode(), b.GetNode()));
+	return Value<ValueType>(NEW(OperationNode(OperationNode::operationAdd, a.GetNode(), b.GetNode())));
 }
 template <int n>
 inline Value<vector<n> > operator+(Value<vector<n> > a, Value<float> b)
 {
-	return NEW(OperationNode(OperationNode::operationAdd, a.GetNode(), b.GetNode()));
+	return Value<vector<n> >(NEW(OperationNode(OperationNode::operationAdd, a.GetNode(), b.GetNode())));
 }
 template <typename ValueType>
 inline Value<ValueType> operator-(Value<ValueType> a, Value<ValueType> b)
 {
-	return NEW(OperationNode(OperationNode::operationSubtract, a.GetNode(), b.GetNode()));
+	return Value<ValueType>(NEW(OperationNode(OperationNode::operationSubtract, a.GetNode(), b.GetNode())));
 }
 template <int n>
 inline Value<vector<n> > operator-(Value<vector<n> > a, Value<float> b)
 {
-	return NEW(OperationNode(OperationNode::operationSubtract, a.GetNode(), b.GetNode()));
+	return Value<vector<n> >(NEW(OperationNode(OperationNode::operationSubtract, a.GetNode(), b.GetNode())));
 }
 
 template <typename ValueType>
 inline Value<ValueType> operator*(Value<ValueType> a, Value<ValueType> b)
 {
-	return NEW(OperationNode(OperationNode::operationMultiply, a.GetNode(), b.GetNode()));
+	return Value<ValueType>(NEW(OperationNode(OperationNode::operationMultiply, a.GetNode(), b.GetNode())));
 }
 template <int n>
 inline Value<vector<n> > operator*(Value<vector<n> > a, Value<float> b)
 {
-	return NEW(OperationNode(OperationNode::operationMultiply, a.GetNode(), b.GetNode()));
+	return Value<vector<n> >(NEW(OperationNode(OperationNode::operationMultiply, a.GetNode(), b.GetNode())));
 }
 template <int n>
 inline Value<vector<n> > operator*(Value<float> a, Value<vector<n> > b)
 {
-	return NEW(OperationNode(OperationNode::operationMultiply, a.GetNode(), b.GetNode()));
+	return Value<vector<n> >(NEW(OperationNode(OperationNode::operationMultiply, a.GetNode(), b.GetNode())));
 }
 
 template <typename ValueType>
 inline Value<ValueType> operator/(Value<ValueType> a, Value<ValueType> b)
 {
-	return NEW(OperationNode(OperationNode::operationDivide, a.GetNode(), b.GetNode()));
+	return Value<ValueType>(NEW(OperationNode(OperationNode::operationDivide, a.GetNode(), b.GetNode())));
 }
 template <int n>
 inline Value<vector<n> > operator/(Value<vector<n> > a, Value<float> b)
 {
-	return NEW(OperationNode(OperationNode::operationDivide, a.GetNode(), b.GetNode()));
+	return Value<vector<n> >(NEW(OperationNode(OperationNode::operationDivide, a.GetNode(), b.GetNode())));
 }
 template <int n>
 inline Value<vector<n> > operator/(Value<float> a, Value<vector<n> > b)
 {
-	return NEW(OperationNode(OperationNode::operationDivide, a.GetNode(), b.GetNode()));
+	return Value<vector<n> >(NEW(OperationNode(OperationNode::operationDivide, a.GetNode(), b.GetNode())));
 }
 
 template <typename ValueType>
 inline Value<ValueType> operator<(Value<ValueType> a, Value<ValueType> b)
 {
-	return NEW(OperationNode(OperationNode::operationLess, a.GetNode(), b.GetNode()));
+	return Value<ValueType>(NEW(OperationNode(OperationNode::operationLess, a.GetNode(), b.GetNode())));
 }
 template <typename ValueType>
 inline Value<ValueType> operator<=(Value<ValueType> a, Value<ValueType> b)
 {
-	return NEW(OperationNode(OperationNode::operationLessEqual, a.GetNode(), b.GetNode()));
+	return Value<ValueType>(NEW(OperationNode(OperationNode::operationLessEqual, a.GetNode(), b.GetNode())));
 }
 template <typename ValueType>
 inline Value<ValueType> operator>(Value<ValueType> a, Value<ValueType> b)
 {
-	return NEW(OperationNode(OperationNode::operationLess, b.GetNode(), a.GetNode()));
+	return Value<ValueType>(NEW(OperationNode(OperationNode::operationLess, b.GetNode(), a.GetNode())));
 }
 template <typename ValueType>
 inline Value<ValueType> operator>=(Value<ValueType> a, Value<ValueType> b)
 {
-	return NEW(OperationNode(OperationNode::operationLessEqual, b.GetNode(), a.GetNode()));
+	return Value<ValueType>(NEW(OperationNode(OperationNode::operationLessEqual, b.GetNode(), a.GetNode())));
 }
 template <typename ValueType>
 inline Value<ValueType> operator==(Value<ValueType> a, Value<ValueType> b)
 {
-	return NEW(OperationNode(OperationNode::operationEqual, a.GetNode(), b.GetNode()));
+	return Value<ValueType>(NEW(OperationNode(OperationNode::operationEqual, a.GetNode(), b.GetNode())));
 }
 template <typename ValueType>
 inline Value<ValueType> operator!=(Value<ValueType> a, Value<ValueType> b)
 {
-	return NEW(OperationNode(OperationNode::operationNotEqual, a.GetNode(), b.GetNode()));
+	return Value<ValueType>(NEW(OperationNode(OperationNode::operationNotEqual, a.GetNode(), b.GetNode())));
 }
 
 END_INANITY_SHADERS

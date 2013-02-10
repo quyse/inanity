@@ -6,10 +6,10 @@
 
 BEGIN_INANITY_SHADERS
 
-#define OP1(op) NEW(OperationNode(OperationNode::operation##op, a.GetNode()))
-#define OP2(op) NEW(OperationNode(OperationNode::operation##op, a.GetNode(), b.GetNode()))
-#define OP3(op) NEW(OperationNode(OperationNode::operation##op, a.GetNode(), b.GetNode(), c.GetNode()))
-#define OP4(op) NEW(OperationNode(OperationNode::operation##op, a.GetNode(), b.GetNode(), c.GetNode(), d.GetNode()))
+#define OP1(op) ptr<Node>(NEW(OperationNode(OperationNode::operation ## op, a.GetNode())))
+#define OP2(op) ptr<Node>(NEW(OperationNode(OperationNode::operation ## op, a.GetNode(), b.GetNode())))
+#define OP3(op) ptr<Node>(NEW(OperationNode(OperationNode::operation ## op, a.GetNode(), b.GetNode(), c.GetNode())))
+#define OP4(op) ptr<Node>(NEW(OperationNode(OperationNode::operation ## op, a.GetNode(), b.GetNode(), c.GetNode(), d.GetNode())))
 
 // construction values
 inline Value<float2> newfloat2(Value<float> a, Value<float> b) { return OP2(Float11to2); }

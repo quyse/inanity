@@ -3,6 +3,7 @@
 
 #include "Uniform.hpp"
 #include "UniformNode.hpp"
+#include "UniformGroup.hpp"
 #include "uniform-translation.ipp"
 #include "../../Exception.hpp"
 
@@ -21,7 +22,7 @@ Uniform<ValueType>::Uniform(ptr<UniformNode> node)
 template <typename ValueType>
 void Uniform<ValueType>::SetValue(const ValueType& value)
 {
-	UniformNode* uniformNode = fast_cast<UniformNode*>(&*node);
+	UniformNode* uniformNode = fast_cast<UniformNode*>(&*this->node);
 	CopyUniformData<ValueType>(*(ValueType*)((char*)uniformNode->GetGroup()->GetData() + uniformNode->GetOffset()), value);
 }
 

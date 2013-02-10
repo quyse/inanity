@@ -17,7 +17,7 @@ ptr<Resource> ResourceManager<Resource>::Get(const String& resourceName)
 	try
 	{
 		// попробовать найти ресурс в кэше
-		std::unordered_map<String, ptr<Resource> >::const_iterator i = resources.find(resourceName);
+		typename std::unordered_map<String, ptr<Resource> >::const_iterator i = resources.find(resourceName);
 		if(i != resources.end())
 			return i->second;
 

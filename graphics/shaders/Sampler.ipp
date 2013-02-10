@@ -24,7 +24,7 @@ void Sampler<ValueType, CoordType>::operator=(Sampler<ValueType, CoordType> a)
 template <typename ValueType, typename CoordType>
 Value<ValueType> Sampler<ValueType, CoordType>::Sample(Value<CoordType> coords)
 {
-	return NEW(SampleNode(node.FastCast<SamplerNode>(), coords.GetNode()));
+	return Value<ValueType>(NEW(SampleNode(node.FastCast<SamplerNode>(), coords.GetNode())));
 }
 
 END_INANITY_SHADERS
