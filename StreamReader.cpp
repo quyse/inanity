@@ -125,4 +125,5 @@ bigsize_t StreamReader::Skip(bigsize_t size)
 	bigsize_t skipped = stream->Skip(size);
 	if(skipped != size)
 		THROW_PRIMARY_EXCEPTION("Not enough data to skip");
+	return skipped;
 }

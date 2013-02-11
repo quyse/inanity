@@ -92,7 +92,9 @@ var libraries = {
 			'graphics.Geometry',
 			'graphics.ShaderSource', 'graphics.ShaderCache',
 			'graphics.Texture', 'graphics.TextureManager',
-			'graphics.EditableFont', 'graphics.Font', 'graphics.FontManager', 'graphics.TextDrawer']
+			'graphics.EditableFont', 'graphics.Font', 'graphics.FontManager', 'graphics.TextDrawer',
+			'graphics.Image2DData', 'graphics.PngImageLoader'
+		]
 	},
 	// ******* подсистема DirectX 11
 	'libinanity-dx': {

@@ -1,7 +1,7 @@
 #ifndef ___INANITY_GRAPHICS_IMAGE_2D_DATA_HPP___
 #define ___INANITY_GRAPHICS_IMAGE_2D_DATA_HPP___
 
-#include "graphics.hpp"
+#include "PixelFormat.hpp"
 
 BEGIN_INANITY
 

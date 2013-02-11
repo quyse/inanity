@@ -20,6 +20,7 @@ exports.configureCompiler = function(objectFile, compiler) {
 };
 
 var objects = [
+	'png',
 	'pngerror',
 	'pngget',
 	'pngmem',

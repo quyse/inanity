@@ -13,6 +13,7 @@
 #include "DxIndexBuffer.hpp"
 #include "Layout.hpp"
 #include "DxInternalInputLayout.hpp"
+#include "Image2DData.hpp"
 #include "DxSamplerState.hpp"
 #include "DxBlendState.hpp"
 #include "../File.hpp"
@@ -358,6 +359,62 @@ ptr<Texture> DxDevice::CreateStaticTexture(ptr<File> file)
 	catch(Exception* exception)
 	{
 		THROW_SECONDARY_EXCEPTION("Can't create static texture", exception);
+	}
+}
+
+ptr<Texture> DxDevice::CreateStatic2DTexture(ptr<Image2DData> imageData)
+{
+	try
+	{
+		// получить формат пикселов текстуры
+		DXGI_FORMAT pixelFormat = DxSystem::GetDXGIFormat(imageData->GetPixelFormat());
+
+		// создать текстуру
+		ComPointer<ID3D11Texture2D> texture;
+		{
+			D3D11_TEXTURE2D_DESC desc;
+			desc.Width = imageData->GetWidth();
+			desc.Height = imageData->GetHeight();
+			desc.MipLevels = 1;
+			desc.ArraySize = 1;
+			desc.Format = pixelFormat;
+			desc.SampleDesc.Count = 1;
+			desc.SampleDesc.Quality = 0;
+			desc.Usage = D3D11_USAGE_IMMUTABLE;
+			desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+			desc.CPUAccessFlags = 0;
+			desc.MiscFlags = 0;
+			D3D11_SUBRESOURCE_DATA dataDesc;
+			dataDesc.pSysMem = imageData->GetData()->GetData();
+			dataDesc.SysMemPitch = imageData->GetPitch();
+
+			ID3D11Texture2D* textureInterface;
+			if(FAILED(device->CreateTexture2D(&desc, &dataDesc, &textureInterface)))
+				THROW_PRIMARY_EXCEPTION("Can't create texture 2D");
+			texture = textureInterface;
+		}
+
+		// создать shader resource
+		ComPointer<ID3D11ShaderResourceView> shaderResourceView;
+		{
+			D3D11_SHADER_RESOURCE_VIEW_DESC desc;
+			desc.Format = pixelFormat;
+			desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			desc.Texture2D.MostDetailedMip = 0;
+			desc.Texture2D.MipLevels = -1;
+
+			ID3D11ShaderResourceView* shaderResourceViewInterface;
+			if(FAILED(device->CreateShaderResourceView(texture, &desc, &shaderResourceViewInterface)))
+				THROW_PRIMARY_EXCEPTION("Can't create shader resource");
+			shaderResourceView = shaderResourceViewInterface;
+		}
+
+		// вернуть текстуру
+		return NEW(DxTexture(shaderResourceView));
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create static 2D texture", exception);
 	}
 }
 

@@ -26,6 +26,7 @@ class Layout;
 class VertexBuffer;
 class IndexBuffer;
 class Texture;
+class Image2DData;
 class SamplerState;
 class BlendState;
 
@@ -75,7 +76,11 @@ public:
 	virtual ptr<IndexBuffer> CreateIndexBuffer(ptr<File> file, int indexSize) = 0;
 
 	/// Создать статическую текстуру из графического файла.
+	/** FIXME: Метод должен быть удалён. Для создания текстур нужно использовать
+	общий метод, принимающий ImageData. */
 	virtual ptr<Texture> CreateStaticTexture(ptr<File> file) = 0;
+	/// Создать статическую 2D-текстуру из графических данных.
+	virtual ptr<Texture> CreateStatic2DTexture(ptr<Image2DData> imageData) = 0;
 
 	/// Создать объект настроек семплирования.
 	virtual ptr<SamplerState> CreateSamplerState() = 0;

@@ -8,12 +8,16 @@ BEGIN_INANITY_GRAPHICS
 
 class Device;
 class Texture;
+class ImageLoader;
 
 /// Класс менеджера текстур.
 class TextureManager : public ResourceManager<Texture>
 {
 private:
 	ptr<Device> device;
+
+	/// Загрузчики изображений по расширениям обрабатываемых файлов.
+	std::unordered_map<String, ptr<ImageLoader> > imageLoaders;
 
 	ptr<Texture> Load(const String& textureName);
 

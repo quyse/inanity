@@ -1,6 +1,6 @@
 #include "PngImageLoader.hpp"
 #include "Image2DData.hpp"
-#include "../deps/libpng/png.hpp"
+#include "../deps/libpng/png.h"
 #include "../MemoryFile.hpp"
 #include "../Exception.hpp"
 #include <sstream>
@@ -122,6 +122,12 @@ ptr<Image2DData> PngImageLoader::Load(ptr<File> file)
 		// если изображение в оттенках серого, и меньше 8 бит на пиксел, сделать 8 бит
 		if(colorType == PNG_COLOR_TYPE_GRAY && bitDepth < 8)
 			png_set_expand_gray_1_2_4_to_8(pngPtr);
+		// если изображение с 16 битами на пиксел, сделать 8
+		if(bitDepth == 16)
+			png_set_scale_16(pngPtr);
+		// если изображение без альфа-канала, добавить его
+		if (colorType == PNG_COLOR_TYPE_RGB || colorType == PNG_COLOR_TYPE_GRAY)
+			png_set_add_alpha(pngPtr, 255, PNG_FILLER_AFTER);
 		// установить режим обработки прозрачности
 		png_set_alpha_mode(pngPtr, PNG_ALPHA_PNG, PNG_DEFAULT_sRGB);
 

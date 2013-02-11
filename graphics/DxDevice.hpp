@@ -45,6 +45,7 @@ public:
 	ptr<VertexBuffer> CreateVertexBuffer(ptr<File> file, ptr<Layout> layout);
 	ptr<IndexBuffer> CreateIndexBuffer(ptr<File> file, int indexSize);
 	ptr<Texture> CreateStaticTexture(ptr<File> file);
+	ptr<Texture> CreateStatic2DTexture(ptr<Image2DData> imageData);
 	ptr<SamplerState> CreateSamplerState();
 	ptr<BlendState> CreateBlendState();
 
