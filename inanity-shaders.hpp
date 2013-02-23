@@ -26,7 +26,6 @@
 #include "graphics/shaders/SamplerNode.hpp"
 #include "graphics/shaders/SamplerType.hpp"
 #include "graphics/shaders/SequenceNode.hpp"
-#include "graphics/shaders/SpecialNode.hpp"
 #include "graphics/shaders/SwizzleNode.hpp"
 #include "graphics/shaders/Uniform.ipp"
 #include "graphics/shaders/UniformArray.ipp"

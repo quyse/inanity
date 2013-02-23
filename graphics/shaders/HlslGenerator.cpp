@@ -4,7 +4,6 @@
 #include "Expression.hpp"
 #include "AttributeNode.hpp"
 #include "TempNode.hpp"
-#include "SpecialNode.hpp"
 #include "UniformGroup.hpp"
 #include "UniformNode.hpp"
 #include "SamplerNode.hpp"

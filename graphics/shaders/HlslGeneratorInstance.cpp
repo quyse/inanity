@@ -10,7 +10,6 @@
 #include "UniformGroup.hpp"
 #include "UniformNode.hpp"
 #include "TempNode.hpp"
-#include "SpecialNode.hpp"
 #include "TransformedNode.hpp"
 #include "RasterizedNode.hpp"
 #include "CastNode.hpp"
@@ -26,7 +25,7 @@
 BEGIN_INANITY_SHADERS
 
 HlslGeneratorInstance::HlslGeneratorInstance(ptr<Node> rootNode, ShaderType shaderType)
-: rootNode(rootNode), shaderType(shaderType), tempsCount(0)
+: rootNode(rootNode), shaderType(shaderType), tempsCount(0), needInstanceID(false)
 {}
 
 void HlslGeneratorInstance::PrintDataType(DataType dataType)
@@ -89,12 +88,6 @@ void HlslGeneratorInstance::RegisterNode(Node* node)
 				temps[tempNode] = tempsCount++;
 		}
 		break;
-	case Node::typeSpecial:
-		{
-			SpecialNode* specialNode = fast_cast<SpecialNode*>(node);
-			specials.push_back(std::make_pair(specialNode->GetSpecialType(), specialNode));
-		}
-		break;
 	case Node::typeTransformed:
 		transformed.push_back(fast_cast<TransformedNode*>(node));
 		break;
@@ -120,6 +113,9 @@ void HlslGeneratorInstance::RegisterNode(Node* node)
 			int argumentsCount = operationNode->GetArgumentsCount();
 			for(int i = 0; i < argumentsCount; ++i)
 				RegisterNode(operationNode->GetArgument(i));
+
+			if(operationNode->GetOperation() == OperationNode::operationGetInstanceID)
+				needInstanceID = true;
 		}
 		break;
 	case Node::typeSample:
@@ -167,19 +163,6 @@ void HlslGeneratorInstance::PrintNode(Node* node)
 
 			// напечатать
 			hlsl << '_' << i->second;
-		}
-		break;
-	case Node::typeSpecial:
-		switch(fast_cast<SpecialNode*>(node)->GetSpecialType())
-		{
-		case SpecialNode::specialTypeTransformedPosition:
-			hlsl << "v.vTP";
-			break;
-		case SpecialNode::specialTypeInstance:
-			hlsl << "sI";
-			break;
-		default:
-			THROW_PRIMARY_EXCEPTION("Invalid special type");
 		}
 		break;
 	case Node::typeTransformed:
@@ -308,6 +291,14 @@ void HlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 		hlsl << ") != (";
 		PrintNode(node->GetB());
 		hlsl << ')';
+		break;
+	case OperationNode::operationSetPosition:
+		hlsl << "(v.vTP = ";
+		PrintNode(node->GetA());
+		hlsl << ')';
+		break;
+	case OperationNode::operationGetInstanceID:
+		hlsl << "sI";
 		break;
 	default:
 		{
@@ -451,10 +442,6 @@ ptr<ShaderSource> HlslGeneratorInstance::Generate()
 	// первый проход: зарегистрировать все переменные
 	RegisterNode(rootNode);
 
-	// заранее обработать специальные переменные
-	std::sort(specials.begin(), specials.end());
-	specials.resize(std::unique(specials.begin(), specials.end()) - specials.begin());
-
 	// выборы в зависимости от типа шейдера
 	const char* mainFunctionName;
 	const char* inputTypeName;
@@ -505,21 +492,8 @@ ptr<ShaderSource> HlslGeneratorInstance::Generate()
 	{
 		hlsl << "struct V\n{\n";
 
-		// но сначала вывести некоторые специальные переменные
-		for(size_t i = 0; i < specials.size(); ++i)
-		{
-			ptr<SpecialNode> node = specials[i].second;
-			switch(node->GetSpecialType())
-			{
-			case SpecialNode::specialTypeTransformedPosition:
-				{
-					hlsl << '\t';
-					PrintDataType(node->GetValueType());
-					hlsl << " vTP : SV_Position;\n";
-				}
-				break;
-			}
-		}
+		// вывести SV_Position
+		hlsl << "\tfloat4 vTP : SV_Position;\n";
 
 		std::sort(transformed.begin(), transformed.end());
 		transformed.resize(std::unique(transformed.begin(), transformed.end()) - transformed.begin());
@@ -588,19 +562,9 @@ ptr<ShaderSource> HlslGeneratorInstance::Generate()
 
 	hlsl << outputTypeName << ' ' << mainFunctionName << '(' << inputTypeName << ' ' << inputName;
 
-	// вывести некоторые специальные переменные дополнительными аргументами
-	for(size_t i = 0; i < specials.size(); ++i)
-	{
-		ptr<SpecialNode> specialNode = specials[i].second;
-		switch(specialNode->GetSpecialType())
-		{
-		case SpecialNode::specialTypeInstance:
-			hlsl << ", ";
-			PrintDataType(specialNode->GetValueType());
-			hlsl << " sI : SV_InstanceID";
-			break;
-		}
-	}
+	// если шейдер использует instance ID, добавить аргумент
+	if(needInstanceID)
+		hlsl << ", uint sI : SV_InstanceID";
 
 	// завершить заголовок
 	hlsl << ")\n{\n\t" << outputTypeName << ' ' << outputName << ";\n";

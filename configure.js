@@ -131,7 +131,6 @@ var libraries = {
 			'graphics.shaders.SequenceNode',
 			'graphics.shaders.TransformedNode', 'graphics.shaders.RasterizedNode',
 			'graphics.shaders.TempNode', 'graphics.shaders.CastNode',
-			'graphics.shaders.SpecialNode',
 			'graphics.shaders.Expression', 'graphics.shaders.Sampler',
 			'graphics.shaders.HlslGenerator', 'graphics.shaders.HlslGeneratorInstance',
 			'graphics.shaders.GlslGenerator', 'graphics.shaders.GlslGeneratorInstance'

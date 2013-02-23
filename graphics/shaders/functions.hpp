@@ -6,6 +6,7 @@
 
 BEGIN_INANITY_SHADERS
 
+#define OP0(op) ptr<Node>(NEW(OperationNode(OperationNode::operation ## op)))
 #define OP1(op) ptr<Node>(NEW(OperationNode(OperationNode::operation ## op, a.GetNode())))
 #define OP2(op) ptr<Node>(NEW(OperationNode(OperationNode::operation ## op, a.GetNode(), b.GetNode())))
 #define OP3(op) ptr<Node>(NEW(OperationNode(OperationNode::operation ## op, a.GetNode(), b.GetNode(), c.GetNode())))
@@ -17,6 +18,11 @@ inline Value<float3> newfloat3(Value<float> a, Value<float> b, Value<float> c) {
 inline Value<float4> newfloat4(Value<float> a, Value<float> b, Value<float> c, Value<float> d) { return OP4(Float1111to4); }
 inline Value<float4> newfloat4(Value<float3> a, Value<float> b) { return OP2(Float31to4); }
 inline Value<float4> newfloat4(Value<float2> a, Value<float> b, Value<float> c) { return OP3(Float211to4); }
+
+// setPosition
+inline Expression setPosition(Value<float4> a) { return OP1(SetPosition); }
+// getInstanceID
+inline Value<uint> getInstanceID() { return OP0(GetInstanceID); }
 
 // dot
 template <int n>

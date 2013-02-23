@@ -3,7 +3,6 @@
 
 #include "ShaderType.hpp"
 #include "../DataType.hpp"
-#include "SpecialNode.hpp"
 #include <vector>
 #include <unordered_map>
 #include <sstream>
@@ -43,8 +42,8 @@ private:
 	/** Мап узел-индекс. */
 	std::unordered_map<ptr<TempNode>, int> temps;
 	int tempsCount;
-	/// Специальные переменные.
-	std::vector<std::pair<SpecialNode::SpecialType, ptr<SpecialNode> > > specials;
+	/// Нужен ли шейдеру Instance ID.
+	bool needInstanceID;
 	/// uniform-переменные по группам.
 	std::vector<std::pair<ptr<UniformGroup>, ptr<UniformNode> > > uniforms;
 	/// Семплеры.

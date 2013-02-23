@@ -29,7 +29,6 @@ struct TextDrawerHelper : public Object
 
 	Attribute<float4> aCorner;
 
-	LValue<float4> iPosition;
 	Interpolant<float2> iTexcoord;
 	Interpolant<float4> iColor;
 
@@ -57,7 +56,6 @@ struct TextDrawerHelper : public Object
 	TextDrawerHelper(ptr<Device> device, ptr<ShaderCache> shaderCache) :
 		aCorner(0),
 
-		iPosition(NEW(SpecialNode(DataTypes::Float4, SpecialNode::specialTypeTransformedPosition))),
 		iTexcoord(1),
 		iColor(2),
 
@@ -94,16 +92,16 @@ struct TextDrawerHelper : public Object
 			Temp<uint> tmpInstance;
 			Temp<float4> tmpPosition, tmpTexcoord, tmpColor;
 			vs = shaderCache->GetVertexShader((
-				tmpInstance = Value<uint>(NEW(SpecialNode(DataTypes::UInt, SpecialNode::specialTypeInstance))),
+				tmpInstance = getInstanceID(),
 
 				tmpPosition = uPositions[tmpInstance],
 				tmpTexcoord = uTexcoords[tmpInstance],
 				tmpColor = uColors[tmpInstance],
 
-				iPosition = newfloat4(
+				setPosition(newfloat4(
 					dot(aCorner["xz"], tmpPosition["xz"]),
 					dot(aCorner["yw"], tmpPosition["yw"]),
-					0, 1),
+					0, 1)),
 				iTexcoord = newfloat2(
 					dot(aCorner["xz"], tmpTexcoord["xz"]),
 					dot(aCorner["yw"], tmpTexcoord["yw"])),
@@ -112,7 +110,6 @@ struct TextDrawerHelper : public Object
 
 			// пиксельный шейдер
 			ps = shaderCache->GetPixelShader((
-				iPosition,
 				iTexcoord,
 				iColor,
 
