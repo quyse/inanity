@@ -12,6 +12,9 @@
 #include "GlIndexBuffer.hpp"
 #include "Layout.hpp"
 #include "GlInternalTexture.hpp"
+#include "Image2DData.hpp"
+#include "GlSamplerState.hpp"
+#include "GlBlendState.hpp"
 #include "Win32Output.hpp"
 #include "../File.hpp"
 #include "../Exception.hpp"
@@ -85,8 +88,28 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, const Prese
 		if(!SetPixelFormat(hdc, pixelFormat, &pfd))
 			THROW_PRIMARY_EXCEPTION("Can't set pixel format");
 
-		// создать контекст
-		hglrc = wglCreateContext(hdc);
+		// создать временный контекст
+		HGLRC hglrcTemp = wglCreateContext(hdc);
+		// сделать его текущим
+		if(!wglMakeCurrent(hdc, hglrcTemp))
+			THROW_SECONDARY_EXCEPTION("Can't make temp OpenGL context current", Exception::SystemError());
+
+		// время для инициализации GLEW
+		GlSystem::InitGLEW();
+
+		// создать настоящий контекст
+		int attribs[] =
+		{
+			WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+			WGL_CONTEXT_MINOR_VERSION_ARB, 2,
+			WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+			WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+			0, 0
+		};
+		hglrc = wglCreateContextAttribsARB(hdc, 0, attribs);
+		PFNWGLCREATECONTEXTATTRIBSARBPROC p = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
+		if(!p)
+			THROW_PRIMARY_EXCEPTION("ppp");
 		if(!hglrc)
 			THROW_PRIMARY_EXCEPTION("Can't create OpenGL window context");
 
@@ -94,8 +117,8 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, const Prese
 		if(!wglMakeCurrent(hdc, hglrc))
 			THROW_SECONDARY_EXCEPTION("Can't make OpenGL context current", Exception::SystemError());
 
-		// время для инициализации GLEW
-		GlSystem::InitGLEW();
+		// удалить временный контекст
+		wglDeleteContext(hglrcTemp);
 
 		// создать и вернуть Presenter
 		return NEW(GlPresenter(this, hdc, NEW(GlRenderBuffer(0, 0))));
@@ -202,7 +225,7 @@ void GlDevice::CompileShader(GLuint shaderName, ptr<File> file)
 			GlSystem::ClearErrors();
 
 			// выбросить ошибку
-			THROW_PRIMARY_EXCEPTION("Can't compile shader:\n" + log);
+			THROW_PRIMARY_EXCEPTION("Can't compile shader:\n" + Strings::File2String(file) + "\n" + log);
 		}
 	}
 }
@@ -312,6 +335,11 @@ ptr<IndexBuffer> GlDevice::CreateIndexBuffer(ptr<File> file, int indexSize)
 
 ptr<Texture> GlDevice::CreateStaticTexture(ptr<File> file)
 {
+	THROW_PRIMARY_EXCEPTION("This method is unsupported on GlDevice");
+}
+
+ptr<Texture> GlDevice::CreateStatic2DTexture(ptr<Image2DData> imageData)
+{
 	try
 	{
 		GLuint textureName;
@@ -321,13 +349,12 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<File> file)
 		glBindTexture(GL_TEXTURE_2D, textureName);
 		GlSystem::CheckErrors("Can't bind texture");
 
-#error Work is not finished...
 		GLint internalFormat;
 		GLenum format;
 		GLenum type;
-		if(!GlSystem::GetTextureFormat(pixelFormat, internalFormat, format, type))
+		if(!GlSystem::GetTextureFormat(imageData->GetPixelFormat(), internalFormat, format, type))
 			THROW_PRIMARY_EXCEPTION("Invalid pixel format");
-		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, (GLsizei)width, (GLsizei)height, 0, format, type, 0);
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, (GLsizei)imageData->GetWidth(), (GLsizei)imageData->GetHeight(), 0, format, type, imageData->GetData());
 		GlSystem::CheckErrors("Can't initialize texture");
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -336,9 +363,39 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<File> file)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 		GlSystem::CheckErrors("Can't set texture parameters");
+
+		return NEW(GlTexture(internalTexture));
 	}
 	catch(Exception* exception)
 	{
 		THROW_SECONDARY_EXCEPTION("Can't create static texture", exception);
+	}
+}
+
+ptr<SamplerState> GlDevice::CreateSamplerState()
+{
+	try
+	{
+		GLuint samplerName;
+		glGenSamplers(1, &samplerName);
+		GlSystem::CheckErrors("Can't gen sampler");
+
+		return NEW(GlSamplerState(samplerName));
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create OpenGL sampler state", exception);
+	}
+}
+
+ptr<BlendState> GlDevice::CreateBlendState()
+{
+	try
+	{
+		return NEW(GlBlendState());
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create OpenGL blend state", exception);
 	}
 }

@@ -125,6 +125,11 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, GLint& internalFormat, 
 		format = GL_RGB;
 		type = GL_UNSIGNED_BYTE;
 		return true;
+	case PixelFormats::floatR16:
+		internalFormat = GL_R16F;
+		format = GL_RED;
+		type = GL_UNSIGNED_BYTE;
+		return true;
 	//case PixelFormats::typelessR32:
 	case PixelFormats::floatR32:
 		internalFormat = GL_R32F;
