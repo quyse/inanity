@@ -32,7 +32,7 @@ ptr<Image2DData> BmpImageLoader::Load(ptr<File> file)
 		const unsigned char* pixelData = fileData + bfh->bfOffBits;
 		int lineStep;
 		const unsigned char* lineData;
-		if(height < 0)
+		if(bih->biHeight < 0)
 		{
 			// top-to-bottom format
 			lineStep = pitch;
