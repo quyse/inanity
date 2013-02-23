@@ -9,7 +9,6 @@
 #include "shaders/Node.hpp"
 #include "../File.hpp"
 #include "../FileSystem.hpp"
-#include "../StreamWriter.hpp"
 #include "../crypto/HashStream.hpp"
 #include "../File.hpp"
 #include "../Exception.hpp"
@@ -20,12 +19,8 @@ ShaderCache::ShaderCache(ptr<FileSystem> fileSystem, ptr<Device> device, ptr<Sha
 
 String ShaderCache::CalculateHash(ptr<ShaderSource> shaderSource)
 {
-	StreamWriter writer(hashStream);
 	hashStream->Reset();
-
-	writer.WriteString(shaderSource->GetFunctionName());
-	writer.WriteString(shaderSource->GetProfile());
-	hashStream->WriteFile(shaderSource->GetCode());
+	shaderSource->Serialize(hashStream);
 	hashStream->End();
 
 	return hashStream->GetHashString();

@@ -74,7 +74,7 @@ private:
 	/// Напечатать узел операции.
 	void PrintOperationNode(OperationNode* node);
 	/// Вывести структуру.
-	void PrintStructure(const std::vector<Structured>& elements, const char* variableNamePrefix);
+	void PrintStructure(const std::vector<Structured>& elements, const char* variableNamePrefix, const char* specifier);
 	/// Вывести uniform-буферы.
 	void PrintUniforms();
 

@@ -90,7 +90,7 @@ var libraries = {
 			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.Layout', 'graphics.LayoutBinding', 'graphics.IndexBuffer',
 			'graphics.SamplerState', 'graphics.BlendState',
 			'graphics.Geometry',
-			'graphics.ShaderSource', 'graphics.ShaderCache',
+			'graphics.ShaderCache',
 			'graphics.Texture', 'graphics.TextureManager',
 			'graphics.EditableFont', 'graphics.Font', 'graphics.FontManager', 'graphics.TextDrawer',
 			'graphics.Image2DData', 'graphics.BmpImageLoader', 'graphics.PngImageLoader'
@@ -105,7 +105,7 @@ var libraries = {
 			'graphics.DxVertexBuffer', 'graphics.DxIndexBuffer',
 			'graphics.DxVertexShader', 'graphics.DxPixelShader',
 			'graphics.DxSamplerState', 'graphics.DxBlendState',
-			'graphics.D3D10BlobFile', 'graphics.DxShaderCompiler'
+			'graphics.D3D10BlobFile', 'graphics.DxShaderCompiler', 'graphics.HlslSource'
 		]
 	},
 	// ******* подсистема OpenGl
@@ -118,7 +118,7 @@ var libraries = {
 			'graphics.GlVertexBuffer', 'graphics.GlIndexBuffer',
 			'graphics.GlVertexShader', 'graphics.GlPixelShader',
 			'graphics.GlSamplerState', 'graphics.GlBlendState',
-			'graphics.GlShaderCompiler'
+			'graphics.GlShaderCompiler', 'graphics.GlslSource'
 		]
 	},
 	// ******* подсистема шейдеров

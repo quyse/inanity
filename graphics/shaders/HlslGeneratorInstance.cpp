@@ -13,7 +13,7 @@
 #include "SpecialNode.hpp"
 #include "TransitionalNode.hpp"
 #include "CastNode.hpp"
-#include "../ShaderSource.hpp"
+#include "../HlslSource.hpp"
 #include "../DxSystem.hpp"
 #include "../../File.hpp"
 #include "../../FileSystem.hpp"
@@ -651,7 +651,7 @@ ptr<ShaderSource> HlslGeneratorInstance::Generate()
 	// завершение шейдера
 	hlsl << ";\n\treturn " << outputName << ";\n}\n";
 
-	return NEW(ShaderSource(Strings::String2File(hlsl.str()), 0, mainFunctionName, profile));
+	return NEW(HlslSource(Strings::String2File(hlsl.str()), mainFunctionName, profile, 0));
 }
 
 END_INANITY_SHADERS

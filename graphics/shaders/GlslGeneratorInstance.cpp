@@ -13,7 +13,7 @@
 #include "SpecialNode.hpp"
 #include "TransitionalNode.hpp"
 #include "CastNode.hpp"
-#include "../ShaderSource.hpp"
+#include "../GlslSource.hpp"
 #include "../GlSystem.hpp"
 #include "../../File.hpp"
 #include "../../FileSystem.hpp"
@@ -147,7 +147,7 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 		glsl << std::fixed << std::setprecision(10) << fast_cast<FloatConstNode*>(node)->GetValue() << 'f';
 		break;
 	case Node::typeAttribute:
-		glsl << "a.a" << fast_cast<AttributeNode*>(node)->GetSemantic();
+		glsl << "a" << fast_cast<AttributeNode*>(node)->GetSemantic();
 		break;
 	case Node::typeUniform:
 		{
@@ -185,10 +185,10 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 		}
 		break;
 	case Node::typeTransformed:
-		glsl << "v.v" << (int)fast_cast<TransitionalNode*>(node)->GetSemantic();
+		glsl << "v" << (int)fast_cast<TransitionalNode*>(node)->GetSemantic();
 		break;
 	case Node::typeRasterized:
-		glsl << "r.r" << (int)fast_cast<TransitionalNode*>(node)->GetSemantic();
+		glsl << "r" << (int)fast_cast<TransitionalNode*>(node)->GetSemantic();
 		break;
 	case Node::typeSequence:
 		{
@@ -351,11 +351,11 @@ void GlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 			switch(operation)
 			{
 #define OP(o, n) case OperationNode::operation##o: name = #n; break
-				OP(Float11to2, float2);
-				OP(Float111to3, float3);
-				OP(Float1111to4, float4);
-				OP(Float31to4, float4);
-				OP(Float211to4, float4);
+				OP(Float11to2, vec2);
+				OP(Float111to3, vec3);
+				OP(Float1111to4, vec4);
+				OP(Float31to4, vec4);
+				OP(Float211to4, vec4);
 				OP(Dot, dot);
 				OP(Cross, cross);
 				OP(Mul, mul);
@@ -395,7 +395,7 @@ void GlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 	}
 }
 
-void GlslGeneratorInstance::PrintStructure(const std::vector<Structured>& variables, const char* variableNamePrefix)
+void GlslGeneratorInstance::PrintStructure(const std::vector<Structured>& variables, const char* variableNamePrefix, const char* specifier)
 {
 	for(size_t i = 0; i < variables.size(); ++i)
 		try
@@ -404,9 +404,9 @@ void GlslGeneratorInstance::PrintStructure(const std::vector<Structured>& variab
 
 			// печатаем определение переменной
 
-			glsl << '\t';
+			//glsl << '\t';
 			// привязка
-			glsl << "layout(location = " << (int)variable.semantic << ") ";
+			glsl << "layout(location = " << (int)variable.semantic << ") " << specifier << ' ';
 			// тип переменной
 			PrintDataType(variable.valueType);
 			// имя переменной
@@ -563,17 +563,17 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 	}
 
 	// заголовок файла
-	glsl << "#version 420\n";
+	glsl << "#version 150\n";
 
 	// интерфейс входных данных
-	glsl << "in " << inputTypeName << "\n{\n";
-	PrintStructure(inputs, inputName);
-	glsl << "} " << inputName << ";\n";
+	//glsl << "in " << inputTypeName << "\n{\n";
+	PrintStructure(inputs, inputName, "in");
+	//glsl << "} " << inputName << ";\n";
 
 	// структура выходных данных
-	glsl << "out " << outputTypeName << "\n{\n";
-	PrintStructure(outputs, outputName);
-	glsl << "} " << outputName << ";\n";
+	//glsl << "out " << outputTypeName << "\n{\n";
+	PrintStructure(outputs, outputName, "out");
+	//glsl << "} " << outputName << ";\n";
 
 	// вывести uniform-буферы
 	PrintUniforms();
@@ -661,7 +661,7 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 	// завершение шейдера
 	glsl << ";\n}\n";
 
-	return NEW(ShaderSource(Strings::String2File(glsl.str()), 0, "main", profile));
+	return NEW(GlslSource(Strings::String2File(glsl.str())));
 }
 
 END_INANITY_SHADERS

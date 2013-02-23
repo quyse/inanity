@@ -29,5 +29,6 @@
 #include "graphics/DxUniformBuffer.hpp"
 #include "graphics/DxVertexBuffer.hpp"
 #include "graphics/DxVertexShader.hpp"
+#include "graphics/HlslSource.hpp"
 
 #endif

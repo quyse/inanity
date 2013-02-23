@@ -20,6 +20,7 @@
 #include "graphics/GlRenderBuffer.hpp"
 #include "graphics/GlSamplerState.hpp"
 #include "graphics/GlShaderCompiler.hpp"
+#include "graphics/GlslSource.hpp"
 #include "graphics/GlSystem.hpp"
 #include "graphics/GlTexture.hpp"
 #include "graphics/GlUniformBuffer.hpp"
