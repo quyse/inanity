@@ -29,7 +29,7 @@ struct TextDrawerHelper : public Object
 
 	Attribute<float4> aCorner;
 
-	Interpolant<float4> iPosition;
+	LValue<float4> iPosition;
 	Interpolant<float2> iTexcoord;
 	Interpolant<float4> iColor;
 
@@ -57,11 +57,11 @@ struct TextDrawerHelper : public Object
 	TextDrawerHelper(ptr<Device> device, ptr<ShaderCache> shaderCache) :
 		aCorner(0),
 
-		iPosition(Semantics::VertexPosition),
-		iTexcoord(Semantics::Custom(0)),
-		iColor(Semantics::Custom(1)),
+		iPosition(NEW(SpecialNode(DataTypes::Float4, SpecialNode::specialTypeTransformedPosition))),
+		iTexcoord(1),
+		iColor(2),
 
-		fTarget(Semantics::TargetColor0),
+		fTarget(0),
 
 		ugSymbols(NEW(UniformGroup(0))),
 		uPositions(ugSymbols->AddUniformArray<float4>(maxSymbolsCount)),
@@ -94,7 +94,7 @@ struct TextDrawerHelper : public Object
 			Temp<uint> tmpInstance;
 			Temp<float4> tmpPosition, tmpTexcoord, tmpColor;
 			vs = shaderCache->GetVertexShader((
-				tmpInstance = Value<uint>(NEW(SpecialNode(DataTypes::UInt, Semantics::Instance))),
+				tmpInstance = Value<uint>(NEW(SpecialNode(DataTypes::UInt, SpecialNode::specialTypeInstance))),
 
 				tmpPosition = uPositions[tmpInstance],
 				tmpTexcoord = uTexcoords[tmpInstance],

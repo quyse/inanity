@@ -2,8 +2,8 @@
 #define ___INANITY_GRAPHICS_SHADERS_HLSL_GENERATOR_INSTANCE_HPP___
 
 #include "ShaderType.hpp"
-#include "Semantic.hpp"
 #include "../DataType.hpp"
+#include "SpecialNode.hpp"
 #include <vector>
 #include <unordered_map>
 #include <sstream>
@@ -19,26 +19,16 @@ BEGIN_INANITY_SHADERS
 class Node;
 class AttributeNode;
 class TempNode;
-class SpecialNode;
 class UniformGroup;
 class UniformNode;
 class SamplerNode;
-class TransitionalNode;
+class TransformedNode;
+class RasterizedNode;
 class OperationNode;
 
 /// Экземпляр генератора шейдеров на HLSL.
 class HlslGeneratorInstance
 {
-private:
-	/// Элемент структурированного буфера (атрибуты, промежуточные и выходные переменные).
-	struct Structured
-	{
-		DataType valueType;
-		Semantic semantic;
-
-		Structured(DataType valueType, Semantic semantic);
-	};
-
 private:
 	/// Исходный код шейдера.
 	ptr<Node> rootNode;
@@ -54,15 +44,15 @@ private:
 	std::unordered_map<ptr<TempNode>, int> temps;
 	int tempsCount;
 	/// Специальные переменные.
-	std::vector<std::pair<Semantic, ptr<SpecialNode> > > specials;
+	std::vector<std::pair<SpecialNode::SpecialType, ptr<SpecialNode> > > specials;
 	/// uniform-переменные по группам.
 	std::vector<std::pair<ptr<UniformGroup>, ptr<UniformNode> > > uniforms;
 	/// Семплеры.
 	std::vector<ptr<SamplerNode> > samplers;
 	/// transformed-переменные.
-	std::vector<ptr<TransitionalNode> > transformed;
+	std::vector<ptr<TransformedNode> > transformed;
 	/// rasterized-переменные.
-	std::vector<ptr<TransitionalNode> > rasterized;
+	std::vector<ptr<RasterizedNode> > rasterized;
 
 private:
 	/// Напечатать имя типа.
@@ -73,15 +63,8 @@ private:
 	void PrintNode(Node* node);
 	/// Напечатать узел операции.
 	void PrintOperationNode(OperationNode* node);
-	/// Напечатать семантику.
-	void PrintSemantic(Semantic semantic);
-	/// Вывести структуру.
-	void PrintStructure(const std::vector<Structured>& elements, const char* variableNamePrefix);
 	/// Вывести uniform-буферы.
 	void PrintUniforms();
-
-	template <typename NodeType>
-	static void ProcessTransitionalNodes(std::vector<ptr<NodeType> >& nodes, std::vector<Structured>& structure);
 
 public:
 	HlslGeneratorInstance(ptr<Node> rootNode, ShaderType shaderType);

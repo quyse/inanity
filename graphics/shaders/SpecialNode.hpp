@@ -3,7 +3,6 @@
 
 #include "Node.hpp"
 #include "../DataType.hpp"
-#include "Semantic.hpp"
 
 BEGIN_INANITY_SHADERS
 
@@ -11,17 +10,24 @@ BEGIN_INANITY_SHADERS
 /** Это значение, которое принимается во входных параметрах шейдера. */
 class SpecialNode : public Node
 {
+public:
+	enum SpecialType
+	{
+		specialTypeTransformedPosition,
+		specialTypeInstance
+	};
+
 private:
 	DataType valueType;
-	Semantic semantic;
+	SpecialType specialType;
 
 public:
-	SpecialNode(DataType valueType, Semantic semantic);
+	SpecialNode(DataType valueType, SpecialType specialType);
 
 	Type GetType() const;
 
 	DataType GetValueType() const;
-	Semantic GetSemantic() const;
+	SpecialType GetSpecialType() const;
 };
 
 END_INANITY_SHADERS

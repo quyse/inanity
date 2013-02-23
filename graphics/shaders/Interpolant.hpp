@@ -10,7 +10,7 @@ template <typename ValueType>
 class Interpolant : public LValue<ValueType>
 {
 public:
-	Interpolant(Semantic semantic);
+	Interpolant(int semantic);
 
 	/// Явный оператор присваивания.
 	Value<ValueType> operator=(Value<ValueType> a);

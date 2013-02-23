@@ -1,7 +1,7 @@
 #include "SpecialNode.hpp"
 
-SpecialNode::SpecialNode(DataType valueType, Semantic semantic)
-: valueType(valueType), semantic(semantic) {}
+SpecialNode::SpecialNode(DataType valueType, SpecialType specialType)
+: valueType(valueType), specialType(specialType) {}
 
 Node::Type SpecialNode::GetType() const
 {
@@ -13,7 +13,7 @@ DataType SpecialNode::GetValueType() const
 	return valueType;
 }
 
-Semantic SpecialNode::GetSemantic() const
+SpecialNode::SpecialType SpecialNode::GetSpecialType() const
 {
-	return semantic;
+	return specialType;
 }

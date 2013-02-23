@@ -19,7 +19,7 @@ public:
 		int offset;
 		/// Семантика элемента.
 		/** Это просто число, которое имеет смысл положения, текстурных координат,
-		нормали или ещё чего-то. Соответствует Shaders::Semantics::Custom0 + номер. */
+		нормали или ещё чего-то. */
 		int semantic;
 
 		Element(DataType dataType, int offset, int semantic);

@@ -8,7 +8,8 @@
 #include "UniformGroup.hpp"
 #include "UniformNode.hpp"
 #include "SamplerNode.hpp"
-#include "TransitionalNode.hpp"
+#include "TransformedNode.hpp"
+#include "RasterizedNode.hpp"
 #include "OperationNode.hpp"
 
 ptr<ShaderSource> HlslGenerator::Generate(Expression code, ShaderType shaderType)

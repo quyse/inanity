@@ -2,13 +2,13 @@
 #define ___INANITY_GRAPHICS_SHADERS_FRAGMENT_IPP___
 
 #include "Fragment.hpp"
-#include "TransitionalNode.hpp"
+#include "RasterizedNode.hpp"
 
 BEGIN_INANITY_SHADERS
 
 template <typename ValueType>
-Fragment<ValueType>::Fragment(Semantic semantic)
-: LValue<ValueType>(NEW(TransitionalNode(GetDataType<ValueType>(), TransitionalNode::transitionalTypeRasterized, semantic)))
+Fragment<ValueType>::Fragment(int semantic)
+: LValue<ValueType>(NEW(RasterizedNode(GetDataType<ValueType>(), semantic)))
 {}
 
 template <typename ValueType>

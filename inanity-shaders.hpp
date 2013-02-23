@@ -20,11 +20,11 @@
 #include "graphics/shaders/LValue.ipp"
 #include "graphics/shaders/Node.hpp"
 #include "graphics/shaders/OperationNode.hpp"
+#include "graphics/shaders/RasterizedNode.hpp"
 #include "graphics/shaders/SampleNode.hpp"
 #include "graphics/shaders/Sampler.ipp"
 #include "graphics/shaders/SamplerNode.hpp"
 #include "graphics/shaders/SamplerType.hpp"
-#include "graphics/shaders/Semantic.hpp"
 #include "graphics/shaders/SequenceNode.hpp"
 #include "graphics/shaders/SpecialNode.hpp"
 #include "graphics/shaders/SwizzleNode.hpp"
@@ -35,6 +35,6 @@
 #include "graphics/shaders/Value.ipp"
 #include "graphics/shaders/Temp.ipp"
 #include "graphics/shaders/TempNode.hpp"
-#include "graphics/shaders/TransitionalNode.hpp"
+#include "graphics/shaders/TransformedNode.hpp"
 
 #endif

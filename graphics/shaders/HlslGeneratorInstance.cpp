@@ -11,7 +11,8 @@
 #include "UniformNode.hpp"
 #include "TempNode.hpp"
 #include "SpecialNode.hpp"
-#include "TransitionalNode.hpp"
+#include "TransformedNode.hpp"
+#include "RasterizedNode.hpp"
 #include "CastNode.hpp"
 #include "../HlslSource.hpp"
 #include "../DxSystem.hpp"
@@ -23,9 +24,6 @@
 #include <iomanip>
 
 BEGIN_INANITY_SHADERS
-
-HlslGeneratorInstance::Structured::Structured(DataType valueType, Semantic semantic)
-: valueType(valueType), semantic(semantic) {}
 
 HlslGeneratorInstance::HlslGeneratorInstance(ptr<Node> rootNode, ShaderType shaderType)
 : rootNode(rootNode), shaderType(shaderType), tempsCount(0)
@@ -94,17 +92,17 @@ void HlslGeneratorInstance::RegisterNode(Node* node)
 	case Node::typeSpecial:
 		{
 			SpecialNode* specialNode = fast_cast<SpecialNode*>(node);
-			specials.push_back(std::make_pair(specialNode->GetSemantic(), specialNode));
+			specials.push_back(std::make_pair(specialNode->GetSpecialType(), specialNode));
 		}
 		break;
 	case Node::typeTransformed:
-		transformed.push_back(fast_cast<TransitionalNode*>(node));
+		transformed.push_back(fast_cast<TransformedNode*>(node));
 		break;
 	case Node::typeRasterized:
 		// rasterized-переменые дапустимы только в пиксельном шейдере
 		if(shaderType != ShaderTypes::pixel)
-			THROW_PRIMARY_EXCEPTION("Only pixel shader can have attribute nodes");
-		rasterized.push_back(fast_cast<TransitionalNode*>(node));
+			THROW_PRIMARY_EXCEPTION("Only pixel shader can have rasterized nodes");
+		rasterized.push_back(fast_cast<RasterizedNode*>(node));
 		break;
 	case Node::typeSequence:
 		{
@@ -172,13 +170,23 @@ void HlslGeneratorInstance::PrintNode(Node* node)
 		}
 		break;
 	case Node::typeSpecial:
-		hlsl << "sl" << fast_cast<SpecialNode*>(node)->GetSemantic();
+		switch(fast_cast<SpecialNode*>(node)->GetSpecialType())
+		{
+		case SpecialNode::specialTypeTransformedPosition:
+			hlsl << "v.vTP";
+			break;
+		case SpecialNode::specialTypeInstance:
+			hlsl << "sI";
+			break;
+		default:
+			THROW_PRIMARY_EXCEPTION("Invalid special type");
+		}
 		break;
 	case Node::typeTransformed:
-		hlsl << "v.v" << (int)fast_cast<TransitionalNode*>(node)->GetSemantic();
+		hlsl << "v.v" << fast_cast<TransformedNode*>(node)->GetSemantic();
 		break;
 	case Node::typeRasterized:
-		hlsl << "r.r" << (int)fast_cast<TransitionalNode*>(node)->GetSemantic();
+		hlsl << "r.r" << fast_cast<RasterizedNode*>(node)->GetTarget();
 		break;
 	case Node::typeSequence:
 		{
@@ -352,75 +360,6 @@ void HlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 	}
 }
 
-void HlslGeneratorInstance::PrintSemantic(Semantic semantic)
-{
-	const char* semanticStr = 0;
-	char semanticBuffer[32];
-	// нет семантики - плохо
-	if(semantic == Semantics::None)
-		THROW_PRIMARY_EXCEPTION("Structured variables should have semantic");
-	// специальная семантика
-	else if(semantic >= Semantics::_SpecialBegin && semantic < Semantics::_SpecialEnd)
-	{
-		if(semantic == Semantics::Instance)
-			semanticStr = "SV_InstanceID";
-		else if(semantic == Semantics::VertexPosition)
-			semanticStr = "SV_Position";
-		else if(semantic >= Semantics::_TargetColorBegin && semantic < Semantics::_TargetColorEnd)
-		{
-			sprintf(semanticBuffer, "SV_Target%d", semantic - Semantics::TargetColor0);
-			semanticStr = semanticBuffer;
-		}
-		else if(semantic >= Semantics::_TargetDepthBegin && semantic < Semantics::_TargetDepthEnd)
-		{
-			sprintf(semanticBuffer, "SV_Depth%d", semantic - Semantics::TargetDepth0);
-			semanticStr = semanticBuffer;
-		}
-	}
-	// пользовательская семантика
-	else if(semantic >= Semantics::_CustomBegin && semantic < Semantics::_CustomEnd)
-	{
-		strcpy(semanticBuffer, DxSystem::GetSemanticString(semantic - Semantics::Custom0).c_str());
-		semanticStr = semanticBuffer;
-	}
-
-	// если семантика осталась не указанной
-	if(!semanticStr)
-		THROW_PRIMARY_EXCEPTION("Can't determine semantic");
-
-	hlsl << semanticStr;
-}
-
-void HlslGeneratorInstance::PrintStructure(const std::vector<Structured>& variables, const char* variableNamePrefix)
-{
-	for(size_t i = 0; i < variables.size(); ++i)
-		try
-		{
-			const Structured& variable = variables[i];
-
-			// печатаем определение переменной
-
-			// тип переменной
-			hlsl << '\t';
-			PrintDataType(variable.valueType);
-			// имя переменной
-			hlsl << ' ' << variableNamePrefix << variable.semantic;
-
-			// семантика
-			hlsl << " : ";
-			PrintSemantic(variable.semantic);
-
-			// конец переменной
-			hlsl << ";\n";
-		}
-		catch(Exception* exception)
-		{
-			std::ostringstream s;
-			s << "Can't print variable " << i;
-			THROW_SECONDARY_EXCEPTION(s.str(), exception);
-		}
-}
-
 void HlslGeneratorInstance::PrintUniforms()
 {
 	// uniform-буферы и переменные
@@ -507,23 +446,14 @@ void HlslGeneratorInstance::PrintUniforms()
 	}
 }
 
-/// Вспомогательная функция: обработать вектор узлов и сделать из него вектор Structured.
-template <typename NodeType>
-void HlslGeneratorInstance::ProcessTransitionalNodes(std::vector<ptr<NodeType> >& nodes, std::vector<Structured>& structure)
-{
-	std::sort(nodes.begin(), nodes.end());
-	nodes.resize(std::unique(nodes.begin(), nodes.end()) - nodes.begin());
-	for(size_t i = 0; i < nodes.size(); ++i)
-	{
-		ptr<NodeType> node = nodes[i];
-		structure.push_back(Structured(node->GetValueType(), node->GetSemantic()));
-	}
-}
-
 ptr<ShaderSource> HlslGeneratorInstance::Generate()
 {
 	// первый проход: зарегистрировать все переменные
 	RegisterNode(rootNode);
+
+	// заранее обработать специальные переменные
+	std::sort(specials.begin(), specials.end());
+	specials.resize(std::unique(specials.begin(), specials.end()) - specials.begin());
 
 	// выборы в зависимости от типа шейдера
 	const char* mainFunctionName;
@@ -532,9 +462,6 @@ ptr<ShaderSource> HlslGeneratorInstance::Generate()
 	const char* outputTypeName;
 	const char* outputName;
 	const char* profile;
-	std::vector<Structured> inputs;
-	std::vector<Structured> outputs;
-
 	switch(shaderType)
 	{
 	case ShaderTypes::vertex:
@@ -544,9 +471,6 @@ ptr<ShaderSource> HlslGeneratorInstance::Generate()
 		outputTypeName = "V";
 		outputName = "v";
 		profile = "vs_4_0";
-
-		ProcessTransitionalNodes<AttributeNode>(attributes, inputs);
-		ProcessTransitionalNodes<TransitionalNode>(transformed, outputs);
 		break;
 	case ShaderTypes::pixel:
 		mainFunctionName = "PS";
@@ -555,23 +479,77 @@ ptr<ShaderSource> HlslGeneratorInstance::Generate()
 		outputTypeName = "R";
 		outputName = "r";
 		profile = "ps_4_0";
-
-		ProcessTransitionalNodes<TransitionalNode>(transformed, inputs);
-		ProcessTransitionalNodes<TransitionalNode>(rasterized, outputs);
 		break;
 	default:
 		THROW_PRIMARY_EXCEPTION("Unknown shader type");
 	}
 
-	// структура входных данных
-	hlsl << "struct " << inputTypeName << "\n{\n";
-	PrintStructure(inputs, inputName);
-	hlsl << "};\n";
+	// вывести атрибуты, если вершинный шейдер
+	if(shaderType == ShaderTypes::vertex)
+	{
+		hlsl << "struct A\n{\n";
+		std::sort(attributes.begin(), attributes.end());
+		attributes.resize(std::unique(attributes.begin(), attributes.end()) - attributes.begin());
+		for(size_t i = 0; i < attributes.size(); ++i)
+		{
+			ptr<AttributeNode> node = attributes[i];
+			hlsl << '\t';
+			PrintDataType(node->GetValueType());
+			int semantic = node->GetSemantic();
+			hlsl << " a" << semantic << " : " << DxSystem::GetSemanticString(semantic) << ";\n";
+		}
+		hlsl << "};\n";
+	}
 
-	// структура выходных данных
-	hlsl << "struct " << outputTypeName << "\n{\n";
-	PrintStructure(outputs, outputName);
-	hlsl << "};\n";
+	// вывести промежуточные переменные в любом случае
+	{
+		hlsl << "struct V\n{\n";
+
+		// но сначала вывести некоторые специальные переменные
+		for(size_t i = 0; i < specials.size(); ++i)
+		{
+			ptr<SpecialNode> node = specials[i].second;
+			switch(node->GetSpecialType())
+			{
+			case SpecialNode::specialTypeTransformedPosition:
+				{
+					hlsl << '\t';
+					PrintDataType(node->GetValueType());
+					hlsl << " vTP : SV_Position;\n";
+				}
+				break;
+			}
+		}
+
+		std::sort(transformed.begin(), transformed.end());
+		transformed.resize(std::unique(transformed.begin(), transformed.end()) - transformed.begin());
+		for(size_t i = 0; i < transformed.size(); ++i)
+		{
+			ptr<TransformedNode> node = transformed[i];
+			hlsl << '\t';
+			PrintDataType(node->GetValueType());
+			int semantic = node->GetSemantic();
+			hlsl << " v" << semantic << " : " << DxSystem::GetSemanticString(semantic) << ";\n";
+		}
+		hlsl << "};\n";
+	}
+
+	// вывести пиксельные переменные, если это пиксельный шейдер
+	if(shaderType == ShaderTypes::pixel)
+	{
+		hlsl << "struct R\n{\n";
+		std::sort(rasterized.begin(), rasterized.end());
+		rasterized.resize(std::unique(rasterized.begin(), rasterized.end()) - rasterized.begin());
+		for(size_t i = 0; i < rasterized.size(); ++i)
+		{
+			ptr<RasterizedNode> node = rasterized[i];
+			hlsl << '\t';
+			PrintDataType(node->GetValueType());
+			int target = node->GetTarget();
+			hlsl << " r" << target << " : SV_Target" << target << ";\n";
+		}
+		hlsl << "};\n";
+	}
 
 	// вывести uniform-буферы
 	PrintUniforms();
@@ -610,17 +588,18 @@ ptr<ShaderSource> HlslGeneratorInstance::Generate()
 
 	hlsl << outputTypeName << ' ' << mainFunctionName << '(' << inputTypeName << ' ' << inputName;
 
-	// вывести специальные переменные дополнительными аргументами
-	std::sort(specials.begin(), specials.end());
-	specials.resize(std::unique(specials.begin(), specials.end()) - specials.begin());
+	// вывести некоторые специальные переменные дополнительными аргументами
 	for(size_t i = 0; i < specials.size(); ++i)
 	{
 		ptr<SpecialNode> specialNode = specials[i].second;
-		Semantic semantic = specialNode->GetSemantic();
-		hlsl << ", ";
-		PrintDataType(specialNode->GetValueType());
-		hlsl << " sl" << semantic << " : ";
-		PrintSemantic(semantic);
+		switch(specialNode->GetSpecialType())
+		{
+		case SpecialNode::specialTypeInstance:
+			hlsl << ", ";
+			PrintDataType(specialNode->GetValueType());
+			hlsl << " sI : SV_InstanceID";
+			break;
+		}
 	}
 
 	// завершить заголовок
