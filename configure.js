@@ -93,7 +93,7 @@ var libraries = {
 			'graphics.ShaderSource', 'graphics.ShaderCache',
 			'graphics.Texture', 'graphics.TextureManager',
 			'graphics.EditableFont', 'graphics.Font', 'graphics.FontManager', 'graphics.TextDrawer',
-			'graphics.Image2DData', 'graphics.PngImageLoader'
+			'graphics.Image2DData', 'graphics.BmpImageLoader', 'graphics.PngImageLoader'
 		]
 	},
 	// ******* подсистема DirectX 11

@@ -1,6 +1,7 @@
 #include "TextureManager.hpp"
 #include "Device.hpp"
 #include "Texture.hpp"
+#include "BmpImageLoader.hpp"
 #include "PngImageLoader.hpp"
 #include "Image2DData.hpp"
 #include "../ResourceManager.ipp"
@@ -10,6 +11,7 @@
 TextureManager::TextureManager(ptr<FileSystem> fileSystem, ptr<Device> device)
 : ResourceManager(fileSystem), device(device)
 {
+	imageLoaders["bmp"] = NEW(BmpImageLoader());
 	imageLoaders["png"] = NEW(PngImageLoader());
 }
 
