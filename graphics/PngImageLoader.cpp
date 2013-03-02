@@ -120,8 +120,11 @@ ptr<Image2DData> PngImageLoader::Load(ptr<File> file)
 		if(colorType == PNG_COLOR_TYPE_PALETTE)
 			png_set_palette_to_rgb(pngPtr);
 		// если изображение в оттенках серого, и меньше 8 бит на пиксел, сделать 8 бит
-		if(colorType == PNG_COLOR_TYPE_GRAY && bitDepth < 8)
+		if((colorType == PNG_COLOR_TYPE_GRAY || colorType == PNG_COLOR_TYPE_GRAY_ALPHA) && bitDepth < 8)
 			png_set_expand_gray_1_2_4_to_8(pngPtr);
+		// если изображение в оттенках серого, преобразовать в RGB
+		if(colorType == PNG_COLOR_TYPE_GRAY || colorType == PNG_COLOR_TYPE_GRAY_ALPHA)
+			png_set_gray_to_rgb(pngPtr);
 		// если изображение с 16 битами на пиксел, сделать 8
 		if(bitDepth == 16)
 			png_set_scale_16(pngPtr);
