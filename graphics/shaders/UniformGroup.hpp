@@ -29,8 +29,6 @@ class UniformNode;
 class UniformGroup : public Object
 {
 private:
-	/// Устройство.
-	ptr<Device> device;
 	/// Uniform-буфер.
 	ptr<UniformBuffer> buffer;
 	/// Номер слота для uniform-буфера.
@@ -43,7 +41,7 @@ private:
 	void* data;
 
 public:
-	UniformGroup(ptr<Device> device, int slot);
+	UniformGroup(int slot);
 
 	int GetSlot() const;
 
@@ -85,7 +83,7 @@ public:
 
 	/// Финализировать группу.
 	/** Выделить память для буфера. После этого добавлять переменные нельзя. */
-	void Finalize();
+	void Finalize(ptr<Device> device);
 
 	/// Получить данные группы.
 	void* GetData() const;

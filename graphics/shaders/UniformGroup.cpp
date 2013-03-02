@@ -7,15 +7,15 @@
 #include "../../MemoryFile.hpp"
 #include "../../Exception.hpp"
 
-UniformGroup::UniformGroup(ptr<Device> device, int slot)
-: device(device), slot(slot), bufferSize(0), data(0) {}
+UniformGroup::UniformGroup(int slot)
+: slot(slot), bufferSize(0), data(0) {}
 
 int UniformGroup::GetSlot() const
 {
 	return slot;
 }
 
-void UniformGroup::Finalize()
+void UniformGroup::Finalize(ptr<Device> device)
 {
 	dataFile = NEW(MemoryFile(bufferSize));
 	data = dataFile->GetData();

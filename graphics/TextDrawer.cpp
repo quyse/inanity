@@ -59,7 +59,7 @@ struct TextDrawerHelper : public Object
 
 		fTarget(0),
 
-		ugSymbols(NEW(UniformGroup(device, 0))),
+		ugSymbols(NEW(UniformGroup(0))),
 		uPositions(ugSymbols->AddUniformArray<float4>(maxSymbolsCount)),
 		uTexcoords(ugSymbols->AddUniformArray<float4>(maxSymbolsCount)),
 		uColors(ugSymbols->AddUniformArray<float4>(maxSymbolsCount)),
@@ -68,7 +68,7 @@ struct TextDrawerHelper : public Object
 	{
 		try
 		{
-			ugSymbols->Finalize();
+			ugSymbols->Finalize(device);
 
 			// создать геометрию
 			static const float4 vertices[6] =
