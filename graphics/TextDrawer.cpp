@@ -42,8 +42,6 @@ struct TextDrawerHelper : public Object
 	/// Цвета символов.
 	UniformArray<float4> uColors;
 
-	ptr<UniformBuffer> ubSymbols;
-
 	/// Текстура шрифта.
 	/** Задаёт альфу для шрифта. */
 	Sampler<float, float2> uFontSampler;
@@ -61,12 +59,10 @@ struct TextDrawerHelper : public Object
 
 		fTarget(0),
 
-		ugSymbols(NEW(UniformGroup(0))),
+		ugSymbols(NEW(UniformGroup(device, 0))),
 		uPositions(ugSymbols->AddUniformArray<float4>(maxSymbolsCount)),
 		uTexcoords(ugSymbols->AddUniformArray<float4>(maxSymbolsCount)),
 		uColors(ugSymbols->AddUniformArray<float4>(maxSymbolsCount)),
-
-		ubSymbols(device->CreateUniformBuffer(ugSymbols->GetSize())),
 
 		uFontSampler(0)
 	{
@@ -151,7 +147,7 @@ void TextDrawer::Prepare(ptr<Context> context)
 	cs.vertexShader = helper->vs;
 	cs.pixelShader = helper->ps;
 	cs.blendState = helper->bs;
-	cs.uniformBuffers[helper->ugSymbols->GetSlot()] = helper->ubSymbols;
+	helper->ugSymbols->Apply(cs);
 
 	// сбросить текущий шрифт и текстуру
 	currentFont = 0;
@@ -289,7 +285,7 @@ void TextDrawer::Flush()
 	helper->uFontSampler.Apply(context->GetTargetState());
 
 	// загрузить символы
-	context->SetUniformBufferData(helper->ubSymbols, helper->ugSymbols->GetData(), helper->ugSymbols->GetSize());
+	helper->ugSymbols->Upload(context);
 
 	// нарисовать
 	context->DrawInstanced(queuedCharsCount);

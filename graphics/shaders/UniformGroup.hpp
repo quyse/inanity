@@ -10,6 +10,15 @@ class MemoryFile;
 
 END_INANITY
 
+BEGIN_INANITY_GRAPHICS
+
+class Device;
+class UniformBuffer;
+struct ContextState;
+class Context;
+
+END_INANITY_GRAPHICS
+
 BEGIN_INANITY_SHADERS
 
 class UniformNode;
@@ -20,6 +29,10 @@ class UniformNode;
 class UniformGroup : public Object
 {
 private:
+	/// Устройство.
+	ptr<Device> device;
+	/// Uniform-буфер.
+	ptr<UniformBuffer> buffer;
 	/// Номер слота для uniform-буфера.
 	int slot;
 	/// Требуемый размер буфера.
@@ -30,7 +43,7 @@ private:
 	void* data;
 
 public:
-	UniformGroup(int slot);
+	UniformGroup(ptr<Device> device, int slot);
 
 	int GetSlot() const;
 
@@ -78,6 +91,10 @@ public:
 	void* GetData() const;
 	/// Получить размер данных группы.
 	int GetSize() const;
+	/// Применить группу к состоянию контекста.
+	void Apply(ContextState& contextState);
+	/// Загрузить данные буфера в контекст.
+	void Upload(Context* context);
 };
 
 END_INANITY_SHADERS

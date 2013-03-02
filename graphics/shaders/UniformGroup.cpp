@@ -1,10 +1,14 @@
 #include "UniformGroup.hpp"
 #include "UniformNode.hpp"
+#include "../Device.hpp"
+#include "../UniformBuffer.hpp"
+#include "../ContextState.hpp"
+#include "../Context.hpp"
 #include "../../MemoryFile.hpp"
 #include "../../Exception.hpp"
 
-UniformGroup::UniformGroup(int slot)
-: slot(slot), bufferSize(0), data(0) {}
+UniformGroup::UniformGroup(ptr<Device> device, int slot)
+: device(device), slot(slot), bufferSize(0), data(0) {}
 
 int UniformGroup::GetSlot() const
 {
@@ -15,6 +19,7 @@ void UniformGroup::Finalize()
 {
 	dataFile = NEW(MemoryFile(bufferSize));
 	data = dataFile->GetData();
+	buffer = device->CreateUniformBuffer(bufferSize);
 }
 
 void* UniformGroup::GetData() const
@@ -29,4 +34,14 @@ void* UniformGroup::GetData() const
 int UniformGroup::GetSize() const
 {
 	return bufferSize;
+}
+
+void UniformGroup::Apply(ContextState& contextState)
+{
+	contextState.uniformBuffers[slot] = buffer;
+}
+
+void UniformGroup::Upload(Context* context)
+{
+	context->SetUniformBufferData(buffer, data, bufferSize);
 }
