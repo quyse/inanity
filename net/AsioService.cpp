@@ -27,14 +27,7 @@ void AsioService::Stop()
 
 ptr<TcpListener> AsioService::ListenTcp(int port, ptr<TcpSocketHandler> socketHandler)
 {
-	try
-	{
-		return NEW(AsioTcpListener(this, port, socketHandler));
-	}
-	catch(Exception* exception)
-	{
-		socketHandler->FireError(NEW(Exception("Can't listen Asio TCP", exception)));
-	}
+	return NEW(AsioTcpListener(this, port, socketHandler));
 }
 
 void AsioService::ConnectTcp(const String& host, int port, ptr<TcpSocketHandler> socketHandler)
