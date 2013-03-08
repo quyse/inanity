@@ -43,6 +43,60 @@ struct Value<int>
 };
 
 template <>
+struct Value<unsigned int>
+{
+	static inline unsigned int Get(lua_State* state, int index)
+	{
+		int isnum;
+		lua_Integer res = lua_tointegerx(state, index, &isnum);
+		if(!isnum)
+			THROW_PRIMARY_EXCEPTION("Expected an integer for argument");
+		return (unsigned int)res;
+	}
+
+	static inline void Push(lua_State* state, unsigned int value)
+	{
+		lua_pushinteger(state, (lua_Integer)value);
+	}
+};
+
+template <>
+struct Value<long>
+{
+	static inline int Get(lua_State* state, int index)
+	{
+		int isnum;
+		lua_Integer res = lua_tointegerx(state, index, &isnum);
+		if(!isnum)
+			THROW_PRIMARY_EXCEPTION("Expected an integer for argument");
+		return (long)res;
+	}
+
+	static inline void Push(lua_State* state, long value)
+	{
+		lua_pushinteger(state, (lua_Integer)value);
+	}
+};
+
+template <>
+struct Value<unsigned long>
+{
+	static inline unsigned long Get(lua_State* state, int index)
+	{
+		int isnum;
+		lua_Integer res = lua_tointegerx(state, index, &isnum);
+		if(!isnum)
+			THROW_PRIMARY_EXCEPTION("Expected an integer for argument");
+		return (unsigned long)res;
+	}
+
+	static inline void Push(lua_State* state, unsigned long value)
+	{
+		lua_pushinteger(state, (lua_Integer)value);
+	}
+};
+
+template <>
 struct Value<double>
 {
 	static inline double Get(lua_State* state, int index)
@@ -75,24 +129,6 @@ struct Value<float>
 	static inline void Push(lua_State* state, float value)
 	{
 		lua_pushnumber(state, (lua_Number)value);
-	}
-};
-
-template <>
-struct Value<unsigned int>
-{
-	static inline unsigned int Get(lua_State* state, int index)
-	{
-		int isnum;
-		lua_Integer res = lua_tointegerx(state, index, &isnum);
-		if(!isnum)
-			THROW_PRIMARY_EXCEPTION("Expected an integer for argument");
-		return (unsigned int)res;
-	}
-
-	static inline void Push(lua_State* state, unsigned int value)
-	{
-		lua_pushinteger(state, (lua_Integer)value);
 	}
 };
 
