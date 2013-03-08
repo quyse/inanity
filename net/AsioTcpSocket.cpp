@@ -127,8 +127,6 @@ boost::asio::ip::tcp::socket& AsioTcpSocket::GetSocket()
 
 void AsioTcpSocket::StartSending()
 {
-	CriticalCode cc(sendQueueCS);
-
 	// если в очереди ничего нет, проверить, не закрыт ли сокет
 	if(sendQueue.empty())
 	{
