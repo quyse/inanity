@@ -61,6 +61,11 @@ var libraries = {
 		// HTTP
 		'net.HttpClient', 'net.HttpResponseStream', 'net.http_parser']
 	},
+	// ******* сетевая библиотека ASIO
+	'libinanity-asio': {
+		objects: [
+		'net.asio', 'net.AsioService', 'net.AsioTcpListener', 'net.AsioTcpSocket']
+	},
 	// ******* файловая система на SQLite
 	'libinanity-sqlitefs': {
 		objects: ['SQLiteFileSystem', 'deps.sqlite.sqlite3.c']
