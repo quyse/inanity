@@ -79,7 +79,7 @@ private:
 	/// Класс делегата.
 	/** Для упрощения привязки методов. */
 	template <typename Class>
-	class Delegate
+	class Delegate : public DataHandler
 	{
 	public:
 		typedef void (Class::*Method)(const Result& result);
@@ -94,12 +94,12 @@ private:
 
 		void OnError(ptr<Exception> exception)
 		{
-			object->method(ErrorResult(exception));
+			(object->*method)(ErrorResult(exception));
 		}
 
 		void OnData(T data)
 		{
-			object->method(DataResult(data));
+			(object->*method)(DataResult(data));
 		}
 	};
 

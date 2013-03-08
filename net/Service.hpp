@@ -23,6 +23,8 @@ public:
 public:
 	/// Выполнять работу.
 	virtual void Run() = 0;
+	/// Остановить работу.
+	virtual void Stop() = 0;
 
 	/// Открыть порт и начать ожидать входящие TCP соединения.
 	/** Один раз будет вызван listenerHandler, и затем вызывается socketHandler

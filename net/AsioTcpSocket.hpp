@@ -34,6 +34,8 @@ private:
 	std::deque<SendItem> sendQueue;
 	/// Сколько данных из первого файла в очереди уже передано.
 	size_t firstItemSent;
+	/// Запланировано ли закрытие передачи.
+	bool sendClosed;
 	/// Критическая секция для доступа к очереди.
 	CriticalSection sendQueueCS;
 
@@ -54,6 +56,7 @@ public:
 
 	//*** Методы TcpSocket.
 	void Send(ptr<File> file, ptr<SendHandler> sendHandler);
+	void CloseSend();
 	void SetReceiveHandler(ptr<ReceiveHandler> receiveHandler);
 };
 

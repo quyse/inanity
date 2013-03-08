@@ -42,6 +42,5 @@
 #include "BufferedFileSystem.hpp"
 #include "ResourceManager.ipp"
 #include "Handler.hpp"
-#include "Delegate.ipp"
 
 #endif

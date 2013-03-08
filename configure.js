@@ -184,6 +184,12 @@ var executables = {
 		staticLibraries: ['libinanity-base', 'libinanity-compress', 'libinanity-lua', 'deps/lua//liblua'],
 		dynamicLibraries: []
 	}
+	// TEST
+	, nettest: {
+		objects: ['net.test'],
+		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-lua', 'deps/lua//liblua'],
+		dynamicLibraries: []
+	}
 };
 
 exports.configureComposer = function(libraryFile, composer) {

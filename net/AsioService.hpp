@@ -22,6 +22,7 @@ public:
 
 	//*** Методы Service.
 	void Run();
+	void Stop();
 	ptr<TcpListener> ListenTcp(int port, ptr<TcpSocketHandler> socketHandler);
 	void ConnectTcp(const String& host, int port, ptr<TcpSocketHandler> socketHandler);
 	void ListenUdp(int port, ptr<UdpSocketHandler> socketHandler, ptr<UdpPacketHandler> packetHandler);

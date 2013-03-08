@@ -11,7 +11,7 @@ ManagedHeap managedHeap;
 
 END_INANITY
 
-#ifdef ___INANITY_WINDOWS
+#ifdef ___INANITY_WINDOWSfdsfds
 #define DEBUG_PRINT(x) OutputDebugStringA(x)
 #else
 #define DEBUG_PRINT(x) printf("%s", (x))
@@ -52,7 +52,7 @@ ManagedHeap::~ManagedHeap()
 	//выдать отчет по памяти
 	DEBUG_PRINT("======= INANITY MANAGED HEAP REPORT =======\n");
 	static char s[100];
-	sprintf(s, "Allocations count: %zu\nAllocations size: %zu\n", allocationsCount, allAllocationsSize);
+	sprintf(s, "Allocations count: %u\nAllocations size: %u\n", (unsigned int)allocationsCount, (unsigned int)allAllocationsSize);
 	DEBUG_PRINT(s);
 	if(allocations.size())
 	{
@@ -74,7 +74,7 @@ void ManagedHeap::PrintAllocations()
 	static char s[1024];
 	for(std::map<void*, AllocationInfo>::const_iterator i = allocations.begin(); i != allocations.end(); ++i)
 	{
-		sprintf(s, "%p : #%zu, %zu bytes\n", i->first, i->second.number, i->second.size);
+		sprintf(s, "%p : #%u, %u bytes\n", i->first, (unsigned int)i->second.number, (unsigned int)i->second.size);
 		DEBUG_PRINT(s);
 		if(i->second.info)
 		{

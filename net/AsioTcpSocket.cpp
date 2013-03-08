@@ -118,7 +118,7 @@ public:
 
 AsioTcpSocket::AsioTcpSocket(ptr<AsioService> service)
 	: service(service), socket(service->GetIoService()),
-	firstItemSent(0) {}
+	firstItemSent(0), sendClosed(false) {}
 
 boost::asio::ip::tcp::socket& AsioTcpSocket::GetSocket()
 {
@@ -129,8 +129,25 @@ void AsioTcpSocket::StartSending()
 {
 	CriticalCode cc(sendQueueCS);
 
-	socket.async_write_some(Buffers(sendQueue.begin(), sendQueue.end(), firstItemSent),
-		boost::bind(&AsioTcpSocket::Sent, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+	// если в очереди ничего нет, проверить, не закрыт ли сокет
+	if(sendQueue.empty())
+	{
+		if(sendClosed)
+			try
+			{
+				socket.shutdown(boost::asio::ip::tcp::socket::shutdown_send);
+			}
+			catch(boost::system::error_code error)
+			{
+				THROW_SECONDARY_EXCEPTION("Can't close Asio TCP socket", AsioService::ConvertError(error));
+			}
+	}
+	else
+	{
+		// очередь не пуста, начинаем отправку
+		socket.async_write_some(Buffers(sendQueue.begin(), sendQueue.end(), firstItemSent),
+			boost::bind(&AsioTcpSocket::Sent, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+	}
 }
 
 void AsioTcpSocket::Sent(const boost::system::error_code& error, size_t transferred)
@@ -193,35 +210,62 @@ void AsioTcpSocket::Received(const boost::system::error_code& error, size_t tran
 {
 	if(error)
 	{
-		receiveHandler->FireError(AsioService::ConvertError(error));
+		// если корректный конец файла, это не ошибка
+		if(error == boost::asio::error::eof)
+			receiveHandler->FireData(0);
+		else
+			receiveHandler->FireError(AsioService::ConvertError(error));
+
+		// в любом случае больше данные мы не получаем
 		receiveHandler = 0;
 	}
 	else
 	{
-		receiveHandler->FireData(NEW(PartFile(receiveFile, 0, transferred)));
+		receiveHandler->FireData(NEW(PartFile(receiveFile, receiveFile->GetData(), transferred)));
 		StartReceiving();
 	}
 }
 
 void AsioTcpSocket::Send(ptr<File> file, ptr<SendHandler> sendHandler)
 {
+	try
+	{
+		CriticalCode cc(sendQueueCS);
+
+		// если запланировано закрытие передачи, то больше в очередь добавлять ничего нельзя
+		if(sendClosed)
+			THROW_PRIMARY_EXCEPTION("Sending closed");
+
+		// производится ли сейчас отправка
+		bool nowSending = !sendQueue.empty();
+		if(!nowSending)
+			firstItemSent = 0;
+		// добавить элемент в очередь
+		sendQueue.push_back(SendItem(file, sendHandler));
+
+		// начать отправку, если она не начата
+		if(!nowSending)
+			StartSending();
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't send data to Asio TCP socket", exception);
+	}
+}
+
+void AsioTcpSocket::CloseSend()
+{
 	CriticalCode cc(sendQueueCS);
 
-	// производится ли сейчас отправка
-	bool nowSending = !sendQueue.empty();
-	if(!nowSending)
-		firstItemSent = 0;
-	// добавить элемент в очередь
-	sendQueue.push_back(SendItem(file, sendHandler));
+	sendClosed = true;
 
-	// начать отправку, если она не начата
-	if(!nowSending)
+	if(sendQueue.empty())
 		StartSending();
 }
 
 void AsioTcpSocket::SetReceiveHandler(ptr<ReceiveHandler> receiveHandler)
 {
-	bool firstTime = !!this->receiveHandler;
+	bool firstTime = !this->receiveHandler;
 	this->receiveHandler = receiveHandler;
 
 	if(firstTime)
