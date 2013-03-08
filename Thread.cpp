@@ -41,7 +41,7 @@ void* Thread::ThreadRoutine(void* self)
 
 void Thread::Run()
 {
-	handler->Fire(this);
+	handler->FireData(this);
 }
 
 void Thread::WaitEnd()

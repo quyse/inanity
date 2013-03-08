@@ -2,45 +2,123 @@
 #define ___INANITY_HANDLER_HPP___
 
 #include "Object.hpp"
+#include "Exception.hpp"
 
 BEGIN_INANITY
 
 template <typename T, typename Class>
 class Delegate;
 
-/// Абстрактный класс обработчика.
-class VoidHandler : public Object
+/// Класс обработчика, который может обрабатывать ошибки.
+class ErrorHandler : public Object
 {
 protected:
-	virtual void OnEvent() = 0;
+	/// Обработать исключение.
+	virtual void OnError(ptr<Exception> exception) = 0;
 
 public:
-	void Fire()
+	/// Передать ошибку.
+	void FireError(ptr<Exception> exception)
 	{
-		OnEvent();
+		OnError(exception);
+	}
+};
+
+/// Абстрактный класс обработчика без параметров.
+class SuccessHandler : public ErrorHandler
+{
+protected:
+	virtual void OnSuccess() = 0;
+
+public:
+	void FireSuccess()
+	{
+		OnSuccess();
 	}
 };
 
 /// Абстрактный класс обработчика с одним параметром.
 template <typename T>
-class Handler : public Object
+class DataHandler : public ErrorHandler
 {
+public:
+	/// Класс результата.
+	/** Позволяет получить данные, если они есть, или настоящее исключение. */
+	class Result
+	{
+	public:
+		virtual T GetData() const = 0;
+	};
+
+private:
+	class DataResult : public Result
+	{
+	private:
+		T data;
+
+	public:
+		DataResult(T data) : data(data) {}
+
+		T GetData() const { return data; }
+	};
+	class ErrorResult : public Result
+	{
+	private:
+		ptr<Exception> exception;
+
+	public:
+		ErrorResult(ptr<Exception> exception) : exception(exception) {}
+
+		T GetData() const
+		{
+			THROW_SECONDARY_EXCEPTION("Async exception", exception);
+		}
+	};
+
+private:
+	/// Класс делегата.
+	/** Для упрощения привязки методов. */
+	template <typename Class>
+	class Delegate
+	{
+	public:
+		typedef void (Class::*Method)(const Result& result);
+
+	private:
+		ptr<Class> object;
+		Method method;
+
+	public:
+		Delegate(ptr<Class> object, Method method)
+		: object(object), method(method) {}
+
+		void OnError(ptr<Exception> exception)
+		{
+			object->method(ErrorResult(exception));
+		}
+
+		void OnData(T data)
+		{
+			object->method(DataResult(data));
+		}
+	};
+
 protected:
-	/// Обработать событие.
-	/** Собственно, метод, который нужно перегружать в производном классе. */
-	virtual void OnEvent(T data) = 0;
+	/// Обработать данные.
+	virtual void OnData(T data) = 0;
 
 public:
-	/// Сообщить о наступлении события.
-	void Fire(T data)
+	/// Передать данные.
+	void FireData(T data)
 	{
-		OnEvent(data);
+		OnData(data);
 	}
 
+	/// Привязать класс с методом.
 	template <typename Class>
-	static ptr<Handler> Bind(ptr<Class> object, void (Class::*method)(T data))
+	static ptr<DataHandler> Bind(ptr<Class> object, typename Delegate<Class>::Method method)
 	{
-		return NEW(Delegate<T, Class>(object, method));
+		return NEW(Delegate<Class>(object, method));
 	}
 };
 
