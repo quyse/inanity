@@ -40,9 +40,10 @@ var libraries = {
 		// преобразующие потоки
 		'Base64OutputStream', 'Out2InStream',
 		// файловые системы
-		'FileSystem', 'FolderFileSystem', 'FolderFile', 'Handle', 'DiskInputStream', 'DiskOutputStream', 'BlobFileSystem', 'BlobFileSystemBuilder', 'CompositeFileSystem', 'TempFileSystem',
-		// ресурсы
-		'ResourceManager', 'ResourceLoader']
+		'FileSystem', 'FolderFileSystem', 'FolderFile', 'Handle', 'DiskInputStream', 'DiskOutputStream',
+		'BlobFileSystem', 'BlobFileSystemBuilder', 'CompositeFileSystem', 'TempFileSystem',
+		'FilterFileSystem', 'BufferedFileSystem'
+		]
 	},
 	// ******* сжатие
 	'libinanity-compress': {
@@ -62,6 +63,10 @@ var libraries = {
 		// HTTP
 		'net.HttpClient', 'net.HttpResponseStream', 'net.http_parser']
 	},
+	// ******* файловая система на SQLite
+	'libinanity-sqlitefs': {
+		objects: ['SQLiteFileSystem', 'deps.sqlite.sqlite3.c']
+	},
 	// ******* скрипты на lua
 	'libinanity-lua': {
 		objects: ['lua.stuff', 'lua.reflection', 'lua.State', 'lua.Script']
@@ -74,18 +79,74 @@ var libraries = {
 	'libinanity-input': {
 		objects: ['input.Frame', 'input.Manager', 'input.Mux', 'input.Processor', 'input.RawManager']
 	},
+	// ******* подсистема окон
+	'libinanity-win32window': {
+		objects: ['Win32Window', 'graphics.Win32Output']
+	},
 	// ******* общая графика
 	'libinanity-graphics': {
-		objects: ['graphics.RenderStage', 'graphics.Window', 'graphics.GeometryFormat', 'graphics.EditableFont', 'graphics.Font', 'graphics.ShaderSource']
+		objects: [
+			'graphics.Context', 'graphics.ContextState',
+			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.Layout', 'graphics.LayoutBinding', 'graphics.IndexBuffer',
+			'graphics.SamplerState', 'graphics.BlendState',
+			'graphics.Geometry',
+			'graphics.ShaderCache',
+			'graphics.Texture', 'graphics.TextureManager',
+			'graphics.EditableFont', 'graphics.Font', 'graphics.FontManager', 'graphics.TextDrawer',
+			'graphics.Image2DData', 'graphics.BmpImageLoader', 'graphics.PngImageLoader'
+		]
 	},
-	// ******* подсистема DX
+	// ******* подсистема DirectX 11
 	'libinanity-dx': {
 		objects: [
-			'graphics.dx.System', 'graphics.dx.Buffer', 'graphics.dx.Context', 'graphics.dx.RenderBuffer', 'graphics.dx.DepthStencilBuffer',
-			'graphics.dx.DepthStencilState', 'graphics.dx.BlendState', 'graphics.dx.RasterizerState', 'graphics.dx.SamplerState',
-			'graphics.dx.Geometry', 'graphics.dx.Texture',
-			'graphics.dx.ShaderLayout', 'graphics.dx.ShaderReflection', 'graphics.dx.ConstantBuffer', 'graphics.dx.Shader', 'graphics.dx.VertexShader', 'graphics.dx.PixelShader',
-			'graphics.dx.ShaderCompiler', 'graphics.dx.D3D10BlobFile', 'graphics.dx.FontDrawer']
+			'graphics.DxSystem', 'graphics.DxDevice', 'graphics.DxPresenter', 'graphics.DxContext',
+			'graphics.DxInternalInputLayout', 'graphics.DxInternalInputLayoutCache',
+			'graphics.DxRenderBuffer', 'graphics.DxDepthStencilBuffer', 'graphics.DxTexture', 'graphics.DxUniformBuffer',
+			'graphics.DxVertexBuffer', 'graphics.DxIndexBuffer',
+			'graphics.DxVertexShader', 'graphics.DxPixelShader',
+			'graphics.DxSamplerState', 'graphics.DxBlendState',
+			'graphics.D3D10BlobFile', 'graphics.DxShaderCompiler', 'graphics.HlslSource'
+		]
+	},
+	// ******* подсистема OpenGl
+	'libinanity-gl': {
+		objects: [
+			'graphics.GlSystem', 'graphics.GlDevice', 'graphics.GlPresenter', 'graphics.GlContext',
+			'graphics.GlInternalTexture', 'graphics.GlInternalProgram', 'graphics.GlInternalProgramCache',
+			'graphics.GlInternalAttributeBinding', 'graphics.GlInternalAttributeBindingCache',
+			'graphics.GlRenderBuffer', 'graphics.GlDepthStencilBuffer', 'graphics.GlTexture', 'graphics.GlUniformBuffer',
+			'graphics.GlVertexBuffer', 'graphics.GlIndexBuffer',
+			'graphics.GlVertexShader', 'graphics.GlPixelShader',
+			'graphics.GlSamplerState', 'graphics.GlBlendState',
+			'graphics.GlShaderCompiler', 'graphics.GlslSource'
+		]
+	},
+	// ******* подсистема шейдеров
+	'libinanity-shaders': {
+		objects: [
+			'graphics.shaders.AttributeNode', 'graphics.shaders.SamplerNode',
+			'graphics.shaders.UniformNode', 'graphics.shaders.UniformGroup',
+			'graphics.shaders.SwizzleNode', 'graphics.shaders.OperationNode',
+			'graphics.shaders.SampleNode', 'graphics.shaders.FloatConstNode',
+			'graphics.shaders.SequenceNode',
+			'graphics.shaders.TransformedNode', 'graphics.shaders.RasterizedNode',
+			'graphics.shaders.TempNode', 'graphics.shaders.CastNode',
+			'graphics.shaders.Expression', 'graphics.shaders.Sampler',
+			'graphics.shaders.HlslGenerator', 'graphics.shaders.HlslGeneratorInstance',
+			'graphics.shaders.GlslGenerator', 'graphics.shaders.GlslGeneratorInstance'
+		]
+	},
+	// ******* общая физика
+	'libinanity-physics': {
+		objects: [
+			'physics.Shape', 'physics.RigidBody', 'physics.Character'
+		]
+	},
+	// ******* физика bullet
+	'libinanity-bullet': {
+		objects: [
+			'physics.BtWorld', 'physics.BtShape', 'physics.BtRigidBody', 'physics.BtCharacter'
+		]
 	},
 	// ******* подсистема GUI
 	'libinanity-gui': {
@@ -96,14 +157,22 @@ var libraries = {
 
 var executables = {
 	archi: {
-		objects: ['archi.main', 'archi.BlobCreator', /*'archi.FontCreator',*/ /*'archi.SimpleGeometryCreator',*/ 'archi.SystemFontCreator'/*, 'archi.WavefrontObj', 'archi.XafConverter'*/],
-		staticLibraries: ['libinanity-base', 'libinanity-graphics'],
+		objects: ['archi.main', 'archi.BlobCreator', /*'archi.FontCreator',*/ /*'archi.SimpleGeometryCreator',*/
+			'archi.SystemFontCreator', 'archi.WavefrontObj', /*'archi.XafConverter'*/ 'archi.SkeletonConverter',
+			'archi.BoneAnimationConverter'],
+		staticLibraries: ['libinanity-base', 'libinanity-graphics', 'libinanity-lua', 'deps/lua//liblua'],
 		dynamicLibraries: ['user32.lib', 'gdi32.lib', 'comdlg32.lib']
 	}
 	// TEST
-	, shaderlanguagetest: {
-		objects: ['graphics.dx.ShaderLanguageTest'],
-		staticLibraries: ['libinanity-base', 'libinanity-graphics'],
+	, shaderstest: {
+		objects: ['graphics.shaders.test'],
+		staticLibraries: ['libinanity-base', 'libinanity-shaders'],
+		dynamicLibraries: []
+	}
+	// TEST
+	, graphicstest: {
+		objects: ['graphics.test'],
+		staticLibraries: ['libinanity-base', 'libinanity-dx'],
 		dynamicLibraries: []
 	}
 	// TEST

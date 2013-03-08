@@ -43,6 +43,42 @@ struct Value<int>
 };
 
 template <>
+struct Value<double>
+{
+	static inline double Get(lua_State* state, int index)
+	{
+		int isnum;
+		lua_Number res = lua_tonumberx(state, index, &isnum);
+		if(!isnum)
+			THROW_PRIMARY_EXCEPTION("Expected a double for argument");
+		return (double)res;
+	}
+
+	static inline void Push(lua_State* state, double value)
+	{
+		lua_pushnumber(state, (lua_Number)value);
+	}
+};
+
+template <>
+struct Value<float>
+{
+	static inline float Get(lua_State* state, int index)
+	{
+		int isnum;
+		lua_Number res = lua_tonumberx(state, index, &isnum);
+		if(!isnum)
+			THROW_PRIMARY_EXCEPTION("Expected a float for argument");
+		return (float)res;
+	}
+
+	static inline void Push(lua_State* state, float value)
+	{
+		lua_pushnumber(state, (lua_Number)value);
+	}
+};
+
+template <>
 struct Value<unsigned int>
 {
 	static inline unsigned int Get(lua_State* state, int index)

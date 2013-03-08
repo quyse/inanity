@@ -11,12 +11,15 @@ class InputStream;
 /// Класс читателя из потока ввода.
 /** По сути является просто вспомогательным объектом. Предоставляет
 сервис чтения из потока ввода бинарных простых типов данных.
+Читатель ужесточает семантику InputStream - всё, что запрашивается,
+должно считываться целиком, если возникает конец потока, выбрасывается
+исключение.
 */
 class StreamReader : public InputStream
 {
 private:
 	ptr<InputStream> stream;
-	size_t read;
+	bigsize_t read;
 
 public:
 	/// Создать читатель.
@@ -26,7 +29,7 @@ public:
 	StreamReader(ptr<InputStream> stream);
 
 	/// Получить значение счётчика считываемых данных.
-	size_t GetReadSize() const;
+	bigsize_t GetReadSize() const;
 
 	/// Прочитать произвольные данные.
 	size_t Read(void* data, size_t size);
@@ -59,6 +62,9 @@ public:
 	/** Выравнивание должно быть степенью двойки!
 	Сами байты не считываются. */
 	void ReadGap(size_t alignment);
+
+	/// Пропустить заданное количество байт.
+	bigsize_t Skip(bigsize_t size);
 };
 
 END_INANITY

@@ -2,6 +2,7 @@
 #define ___INANITY_MATH_BASIC_HPP___
 
 #include <cmath>
+#include <iostream>
 #include "math.hpp"
 
 BEGIN_INANITY_MATH
@@ -109,6 +110,15 @@ inline bool operator==(const vector<n>& a, const vector<n>& b)
 	for(int i = 0; i < n; ++i)
 		if(a.t[i] != b.t[i]) return false;
 	return true;
+}
+
+template <int n>
+inline vector<n> operator-(const vector<n>& a)
+{
+	vector<n> r;
+	for(int i = 0; i < n; ++i)
+		r.t[i] = -a.t[i];
+	return r;
 }
 
 template <int n>
@@ -256,6 +266,34 @@ inline T lerp(const T& a, const T& b, scalar t)
 	return a * (1 - t) + b * t;
 }
 
+template <int n>
+inline std::ostream& operator<<(std::ostream& a, const vector<n>& b)
+{
+	for(int i = 0; i < n; ++i)
+	{
+		if(i)
+			a << ' ';
+		a << b.t[i];
+	}
+	return a;
+}
+
+template <int n, int m>
+inline std::ostream& operator<<(std::ostream& a, const matrix<n, m>& b)
+{
+	for(int i = 0; i < n; ++i)
+	{
+		for(int j = 0; j < m; ++j)
+		{
+			if(j)
+				a << ' ';
+			a << b.t[i][j];
+		}
+		a << '\n';
+	}
+	return a;
+}
+
 template <int n, int m>
 inline matrix<n, m> operator+(const matrix<n, m>& a, const matrix<n, m>& b)
 {
@@ -320,6 +358,16 @@ inline vector<4> operator*(const vector<3>& a, const matrix<4, 4>& b)
 	return vector<4>(a.x, a.y, a.z, 1) * b;
 }
 
+template <int sn, int sm, int n, int m>
+inline matrix<sn, sm> submatrix(const matrix<n, m>& a, int si = 0, int sj = 0)
+{
+	matrix<sn, sm> r;
+	for(int i = 0; i < sn; ++i)
+		for(int j = 0; j < sm; ++j)
+			r.t[i][j] = a.t[i + si][j + sj];
+	return r;
+}
+
 inline matrix<4, 4> CreateTranslationMatrix(scalar x, scalar y, scalar z)
 {
 	matrix<4, 4> r;
@@ -328,6 +376,10 @@ inline matrix<4, 4> CreateTranslationMatrix(scalar x, scalar y, scalar z)
 	r.t[3][1] = y;
 	r.t[3][2] = z;
 	return r;
+}
+inline matrix<4, 4> CreateTranslationMatrix(const vector<3>& translation)
+{
+	return CreateTranslationMatrix(translation.x, translation.y, translation.z);
 }
 
 inline matrix<4, 4> CreateScalingMatrix(scalar x, scalar y, scalar z)
@@ -339,6 +391,10 @@ inline matrix<4, 4> CreateScalingMatrix(scalar x, scalar y, scalar z)
 	r.t[2][2] = z;
 	r.t[3][3] = 1;
 	return r;
+}
+inline matrix<4, 4> CreateScalingMatrix(const vector<3>& scale)
+{
+	return CreateScalingMatrix(scale.x, scale.y, scale.z);
 }
 
 inline matrix<4, 4> CreateRotationXMatrix(scalar alpha)
@@ -410,7 +466,18 @@ inline matrix<4, 4> CreateProjectionPerspectiveFovMatrix(scalar fovY, scalar asp
 typedef vector<2> float2;
 typedef vector<3> float3;
 typedef vector<4> float4;
+typedef matrix<3, 3> float3x3;
 typedef matrix<4, 4> float4x4;
+
+//*** Целочисленные вектора (заглушка для шейдеров).
+
+template <int n>
+struct uintvector {};
+
+typedef unsigned int uint;
+typedef uintvector<2> uint2;
+typedef uintvector<3> uint3;
+typedef uintvector<4> uint4;
 
 END_INANITY_MATH
 

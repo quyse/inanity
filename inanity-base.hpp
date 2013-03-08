@@ -38,7 +38,10 @@
 #include "BlobFileSystemBuilder.hpp"
 #include "CompositeFileSystem.hpp"
 #include "TempFileSystem.hpp"
-#include "ResourceManager.hpp"
-#include "ResourceLoader.hpp"
+#include "FilterFileSystem.hpp"
+#include "BufferedFileSystem.hpp"
+#include "ResourceManager.ipp"
+#include "Handler.hpp"
+#include "Delegate.ipp"
 
 #endif

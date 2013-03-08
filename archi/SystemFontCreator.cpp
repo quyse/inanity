@@ -258,7 +258,7 @@ void SystemFontCreator::CreateImage(const String& alphabatFileName, const String
 
 	//записать картинку BMP
 	{
-		ptr<StreamWriter> writer = NEW(StreamWriter(FolderFileSystem::GetNativeFileSystem()->SaveFileAsStream(textureFileName)));
+		ptr<StreamWriter> writer = NEW(StreamWriter(FolderFileSystem::GetNativeFileSystem()->SaveStream(textureFileName)));
 
 		BITMAPFILEHEADER bfh;
 		bfh.bfType = 'MB';
@@ -322,5 +322,5 @@ void SystemFontCreator::Run(const std::vector<String>& arguments)
 	}
 
 	CreateImage(arguments[0], arguments[1]);
-	MakePointer(NEW(EditableFont(arguments[1], charset, kerningPairs, (float)charHeight)))->Serialize(FolderFileSystem::GetNativeFileSystem()->SaveFileAsStream(arguments[2]));
+	MakePointer(NEW(EditableFont(arguments[1], charset, kerningPairs, (float)charHeight)))->Serialize(FolderFileSystem::GetNativeFileSystem()->SaveStream(arguments[2]));
 }

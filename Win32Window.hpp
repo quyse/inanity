@@ -1,0 +1,89 @@
+#ifndef ___INANITY_WIN32_WINDOW_HPP___
+#define ___INANITY_WIN32_WINDOW_HPP___
+
+#include "Window.hpp"
+#include "String.hpp"
+#include "Handler.hpp"
+#include "input/input.hpp"
+
+#ifdef ___INANITY_WINDOWS
+
+#include "windows.hpp"
+
+BEGIN_INANITY_GRAPHICS
+
+class Presenter;
+
+END_INANITY_GRAPHICS
+
+BEGIN_INANITY_INPUT
+
+class Manager;
+
+END_INANITY_INPUT
+
+BEGIN_INANITY
+
+class Win32Window : public Window
+{
+public:
+	/// Тип обработчика активного окна.
+	typedef Handler<int> ActiveHandler;
+
+private:
+	/// Дескриптор окна.
+	HWND hWnd;
+	/// Активность окна.
+	bool active;
+
+	/// Presenter для графики.
+	Graphics::Presenter* graphicsPresenter;
+	/// Менеждер ввода.
+	ptr<Input::Manager> inputManager;
+
+	/// Единственный экземпляр главного окна.
+	/** больше одного не разрешается, для ускорения обработки сообщений */
+	static Win32Window* singleWindow;
+
+	static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+	/// Выполнить одну итерацию оконного цикла.
+	bool Do(ActiveHandler* activeHandler);
+
+public:
+	Win32Window(ATOM windowClass, const String& title = String());
+	~Win32Window();
+
+	// методы Window
+	void SetTitle(const String& title);
+	void Close();
+	ptr<Graphics::Output> CreateOutput();
+
+	/// Создать окно для DirectX.
+	static ptr<Win32Window> CreateForDirectX();
+	/// Создать окно для OpenGL.
+	static ptr<Win32Window> CreateForOpenGL();
+
+	//получить окно
+	HWND GetHWND() const;
+	//получить активность окна
+	bool IsActive() const;
+
+	/// Установить presenter для оповещений.
+	void SetGraphicsPresenter(Graphics::Presenter* graphicsPresenter);
+	/// Установить менеджер ввода.
+	void SetInputManager(ptr<Input::Manager> inputManager);
+
+	/// Запустить оконный цикл.
+	void Run(ptr<ActiveHandler> activeHandler);
+};
+
+END_INANITY
+
+#else
+
+#error Win32Window is implemented only on Windows.
+
+#endif
+
+#endif

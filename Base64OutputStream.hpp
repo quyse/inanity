@@ -29,8 +29,10 @@ private:
 
 public:
 	Base64OutputStream(bool encoding, ptr<OutputStream> outputStream);
+	~Base64OutputStream();
 
 	void Write(const void* data, size_t size);
+
 	void Flush();
 };
 

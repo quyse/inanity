@@ -124,6 +124,18 @@ public:
 	{
 		return dynamic_cast<TT*>(object);
 	}
+
+	/// Оператор для быстрого преобразования типа.
+	/** В отладочном режиме он всё проверяет, в релизе - нет. */
+	template <typename TT>
+	ptr<TT> FastCast() const
+	{
+#ifdef _DEBUG
+		return dynamic_cast<TT*>(object);
+#else
+		return static_cast<TT*>(object);
+#endif
+	}
 };
 
 /// Специальная функция для явного создания управляемого указателя

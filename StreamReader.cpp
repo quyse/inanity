@@ -9,7 +9,7 @@ StreamReader::StreamReader(ptr<InputStream> stream) : stream(stream), read(0)
 {
 }
 
-size_t StreamReader::GetReadSize() const
+bigsize_t StreamReader::GetReadSize() const
 {
 	return read;
 }
@@ -118,4 +118,12 @@ void StreamReader::ReadGap(size_t alignment)
 		char* data = (char*)alloca(alignment);
 		Read(data, alignment);
 	}
+}
+
+bigsize_t StreamReader::Skip(bigsize_t size)
+{
+	bigsize_t skipped = stream->Skip(size);
+	if(skipped != size)
+		THROW_PRIMARY_EXCEPTION("Not enough data to skip");
+	return skipped;
 }

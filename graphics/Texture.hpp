@@ -2,11 +2,19 @@
 #define ___INANITY_GRAPHICS_TEXTURE_HPP___
 
 #include "graphics.hpp"
+#include "../scripting_decl.hpp"
 
-#ifdef ___INANITY_GRAPHICS_DX
+BEGIN_INANITY_GRAPHICS
 
-#include "dx/Texture.hpp"
+/// Абстрактный класс текстуры.
+/** Текстура - это нечто, которое может быть привязано
+к текстурному слоту в шейдере. */
+class Texture : public Object
+{
+public:
+	SCRIPTABLE_CLASS(Texture);
+};
 
-#endif
+END_INANITY_GRAPHICS
 
 #endif

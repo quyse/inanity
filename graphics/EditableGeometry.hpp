@@ -25,9 +25,7 @@ private:
 public:
 	/// Создать типизированную геометрию.
 	EditableGeometry(const std::vector<Vertex>& vertices, const std::vector<Index>& indices)
-		: vertices(vertices), indices(indices)
-	{
-	}
+		: vertices(vertices), indices(indices) {}
 
 	/// Создать типизированную геометрию из неиндексированных вершин.
 	EditableGeometry(const std::vector<Vertex>& vertices) : vertices(vertices)
@@ -35,6 +33,25 @@ public:
 		indices.resize(vertices.size());
 		for(size_t i = 0; i < indices.size(); ++i)
 			indices[i] = i;
+	}
+
+	/// Получить вершины.
+	std::vector<Vertex>& GetVertices()
+	{
+		return vertices;
+	}
+
+	/// Получить индексы.
+	std::vector<Index>& GetIndices()
+	{
+		return indices;
+	}
+
+	/// Преобразовать тип индексов.
+	template <typename ToIndex>
+	ptr<EditableGeometry<Vertex, ToIndex> > CastIndices() const
+	{
+		return NEW(EditableGeometry<Vertex, ToIndex>(vertices, std::vector<ToIndex>(indices.begin(), indices.end())));
 	}
 
 	/// Сериализовать геометрию.
@@ -61,6 +78,20 @@ public:
 		writer->Write(&*vertices.begin(), vertices.size() * sizeof(Vertex));
 		if(needIndices)
 			writer->Write(&*indices.begin(), indices.size() * sizeof(Index));
+	}
+
+	ptr<File> SerializeVertices() const
+	{
+		ptr<File> file = NEW(MemoryFile(vertices.size() * sizeof(Vertex)));
+		memcpy(file->GetData(), &*vertices.begin(), vertices.size() * sizeof(Vertex));
+		return file;
+	}
+
+	ptr<File> SerializeIndices() const
+	{
+		ptr<File> file = NEW(MemoryFile(indices.size() * sizeof(Index)));
+		memcpy(file->GetData(), &*indices.begin(), indices.size() * sizeof(Index));
+		return file;
 	}
 
 	/// Оптимизировать геометрию

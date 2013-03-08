@@ -5,7 +5,6 @@
 #include <string.h>
 
 SCRIPTABLE_MAP_BEGIN(OutputStream, Inanity.OutputStream);
-	SCRIPTABLE_METHOD(OutputStream, Flush);
 SCRIPTABLE_MAP_END();
 
 void OutputStream::Write(const void* data, size_t size)
@@ -16,10 +15,6 @@ void OutputStream::Write(const void* data, size_t size)
 void OutputStream::WriteFile(ptr<File> file)
 {
 	Write(file->GetData(), file->GetSize());
-}
-
-void OutputStream::Flush()
-{
 }
 
 bigsize_t OutputStream::ReadAllFromStream(ptr<InputStream> inputStream)

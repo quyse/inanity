@@ -2,6 +2,7 @@
 #define ___INANITY_PUSH_ALLOCATOR_HPP___
 
 #include "MemoryFile.hpp"
+#include <vector>
 
 BEGIN_INANITY
 

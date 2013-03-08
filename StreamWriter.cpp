@@ -130,8 +130,3 @@ void StreamWriter::WriteGap(size_t alignment)
 		Write(data, alignment);
 	}
 }
-
-void StreamWriter::Flush()
-{
-	stream->Flush();
-}

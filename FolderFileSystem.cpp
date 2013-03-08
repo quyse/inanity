@@ -165,7 +165,7 @@ void FolderFileSystem::SaveFile(ptr<File> file, const String& fileName)
 	}
 }
 
-ptr<InputStream> FolderFileSystem::LoadFileAsStream(const String& fileName)
+ptr<InputStream> FolderFileSystem::LoadStream(const String& fileName)
 {
 	String name = GetFullName(fileName);
 	try
@@ -181,7 +181,7 @@ ptr<InputStream> FolderFileSystem::LoadFileAsStream(const String& fileName)
 	}
 }
 
-ptr<OutputStream> FolderFileSystem::SaveFileAsStream(const String& fileName)
+ptr<OutputStream> FolderFileSystem::SaveStream(const String& fileName)
 {
 	String name = GetFullName(fileName);
 	try
@@ -354,7 +354,7 @@ void FolderFileSystem::SaveFile(ptr<File> file, const String& fileName)
 	}
 }
 
-ptr<InputStream> FolderFileSystem::LoadFileAsStream(const String& fileName)
+ptr<InputStream> FolderFileSystem::LoadStream(const String& fileName)
 {
 	String name = GetFullName(fileName);
 	try
@@ -370,7 +370,7 @@ ptr<InputStream> FolderFileSystem::LoadFileAsStream(const String& fileName)
 	}
 }
 
-ptr<OutputStream> FolderFileSystem::SaveFileAsStream(const String& fileName)
+ptr<OutputStream> FolderFileSystem::SaveStream(const String& fileName)
 {
 	String name = GetFullName(fileName);
 	try

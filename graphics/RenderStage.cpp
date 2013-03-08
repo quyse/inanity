@@ -3,7 +3,7 @@
 
 RenderStage::RenderTarget::RenderTarget() : clear(false)
 {
-	std::fill(clearColor, clearColor + 4, 0);
+	std::fill(clearColor, clearColor + 4, 0.0f);
 }
 
 RenderStage::RenderStage() : clearDepth(false), clearStencil(false)

@@ -9,6 +9,11 @@ BufferedOutputStream::BufferedOutputStream(ptr<OutputStream> stream, size_t buff
 	bufferFile = NEW(MemoryFile(bufferSize));
 }
 
+BufferedOutputStream::~BufferedOutputStream()
+{
+	FlushBuffer();
+}
+
 void BufferedOutputStream::Write(const void* data, size_t size)
 {
 	unsigned char* dataPtr = (unsigned char*)data;
@@ -53,5 +58,4 @@ void BufferedOutputStream::FlushBuffer()
 void BufferedOutputStream::Flush()
 {
 	FlushBuffer();
-	stream->Flush();
 }

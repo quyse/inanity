@@ -43,9 +43,9 @@ public:
 
 	//методы, унаследованные из FileSystem
 	ptr<File> LoadFile(const String& fileName);
-	ptr<InputStream> LoadFileAsStream(const String& fileName);
+	ptr<InputStream> LoadStream(const String& fileName);
 	void SaveFile(ptr<File> file, const String& fileName);
-	ptr<OutputStream> SaveFileAsStream(const String& fileName);
+	ptr<OutputStream> SaveStream(const String& fileName);
 	void GetFileNames(std::vector<String>& fileNames) const;
 	void GetDirectoryEntries(const String& directoryName, std::vector<String>& fileNames) const;
 

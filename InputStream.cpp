@@ -1,21 +1,21 @@
 #include "InputStream.hpp"
-#include "File.hpp"
-#include "Future.hpp"
 #include "scripting_impl.hpp"
+#include <algorithm>
 
 SCRIPTABLE_MAP_BEGIN(InputStream, Inanity.InputStream);
 SCRIPTABLE_MAP_END();
 
-ptr<Future<size_t> > InputStream::ReadAsync(ptr<File> file)
+bigsize_t InputStream::Skip(bigsize_t size)
 {
-	ptr<Future<size_t> > future = NEW(Future<size_t>());
-	try
+	char buffer[0x1000];
+	bigsize_t skipped = 0;
+	while(size)
 	{
-		future->Result(Read(file->GetData(), file->GetSize()));
+		size_t read = Read(buffer, std::min<bigsize_t>(size, sizeof(buffer)));
+		if(!read)
+			break;
+		size -= read;
+		skipped += read;
 	}
-	catch(Exception* exception)
-	{
-		future->Error(exception);
-	}
-	return future;
+	return skipped;
 }

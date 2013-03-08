@@ -2,8 +2,10 @@
 //#include "SimpleGeometryCreator.hpp"
 //#include "FontCreator.hpp"
 #include "SystemFontCreator.hpp"
-//#include "WavefrontObj.hpp"
+#include "WavefrontObj.hpp"
 //#include "XafConverter.hpp"
+#include "SkeletonConverter.hpp"
+#include "BoneAnimationConverter.hpp"
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -29,9 +31,11 @@ int wmain(int argc, const wchar_t** argv)
 	ptr<Processor> processors[] =
 	{
 		NEW(BlobCreator()),
-//		NEW(WavefrontObj()),
+		NEW(WavefrontObj()),
 //		NEW(SimpleGeometryCreator()),
-		NEW(SystemFontCreator())
+		NEW(SystemFontCreator()),
+		NEW(SkeletonConverter()),
+		NEW(BoneAnimationConverter())
 	};
 	const size_t processorsCount = sizeof(processors) / sizeof(processors[0]);
 
