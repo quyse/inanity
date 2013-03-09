@@ -4,7 +4,7 @@
 #include "../inanity-base.hpp"
 using namespace Inanity::Net;
 #include <iostream>
-#include <unordered_set>
+#include <vector>
 
 class ChatBase : public Object
 {
@@ -156,7 +156,7 @@ private:
 		}
 	};
 
-	std::unordered_set<ptr<Client> > clients;
+	std::vector<ptr<Client> > clients;
 
 	void Accepted(const Service::TcpSocketHandler::Result& result)
 	{
@@ -164,7 +164,7 @@ private:
 		try
 		{
 			ptr<Client> client = NEW(Client(this, result.GetData()));
-			clients.insert(client);
+			clients.push_back(client);
 			std::cout << "Client " << client << " accepted.\n";
 			PrintClients();
 		}
@@ -178,13 +178,13 @@ private:
 	void Received(ptr<Client> client, ptr<File> file)
 	{
 		std::cout << "Client " << client << " wrote:\n" << Strings::File2String(file) << "\n";
-		for(std::unordered_set<ptr<Client> >::const_iterator i = clients.begin(); i != clients.end(); ++i)
-			(*i)->Send(file);
+		for(size_t i = 0; i < clients.size(); ++i)
+			clients[i]->Send(file);
 	}
 
 	void Closed(ptr<Client> client)
 	{
-		clients.erase(client);
+		clients.erase(std::find(clients.begin(), clients.end(), client));
 		std::cout << "Client " << client << " closed.\n";
 		PrintClients();
 	}
@@ -206,7 +206,7 @@ public:
 		{
 			listener->Close();
 			listener = 0;
-			std::vector<ptr<Client> > clientsCopy(clients.begin(), clients.end());
+			std::vector<ptr<Client> > clientsCopy(clients);
 			for(size_t i = 0; i < clientsCopy.size(); ++i)
 				clientsCopy[i]->Close();
 			return false;
