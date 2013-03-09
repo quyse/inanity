@@ -17,6 +17,7 @@ Thread::Thread(ptr<ThreadHandler> handler) : handler(handler)
 		if(pthread_create(&thread, 0, ThreadRoutine, this))
 			THROW_SECONDARY_EXCEPTION("pthread_create failed", Exception::SystemError());
 #endif
+		Reference();
 	}
 	catch(Exception* exception)
 	{
@@ -42,6 +43,7 @@ void* Thread::ThreadRoutine(void* self)
 void Thread::Run()
 {
 	handler->FireData(this);
+	Dereference();
 }
 
 void Thread::WaitEnd()
