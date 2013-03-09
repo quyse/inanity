@@ -4,90 +4,233 @@
 #include "../inanity-base.hpp"
 using namespace Inanity::Net;
 #include <iostream>
+#include <unordered_set>
 
-class ClientWorker : public Object
+class ChatBase : public Object
+{
+public:
+	virtual bool Command(const String& command) = 0;
+};
+
+class ChatClient : public ChatBase
 {
 private:
-	int number;
 	ptr<TcpSocket> socket;
+	CriticalSection cs;
 
-public:
-	ClientWorker(int number, ptr<TcpSocket> socket) : number(number), socket(socket) {}
-
-	void Receive(const TcpSocket::ReceiveHandler::Result& result)
+	void Connected(const Service::TcpSocketHandler::Result& result)
 	{
 		try
 		{
-			ptr<File> file = result.GetData();
+			socket = result.GetData();
 
-			if(file)
-			{
-				std::cout << "Client " << number << " received:\n" << Strings::File2String(file) << "\n=======================\n";
-
-				const char* response =
-					"HTTP/1.1 200 OK\r\n"
-					"Server: Inanity\r\n"
-					"Content-Type: text/plain; charset=utf-8\r\n"
-					"Connection: close\r\n"
-					"Pragma: no-cache\r\n"
-					"Cache-control: no-store\r\n"
-					"\r\n"
-					"The test text.\r\n";
-				socket->Send(Strings::String2File(response));
-				socket->End();
-			}
-			else
-			{
-				std::cout << "Client " << number << " received end of stream.\n";
-				socket = 0;
-			}
+			socket->SetReceiveHandler(TcpSocket::ReceiveHandler::Bind<ChatClient>(this, &ChatClient::Received));
 		}
 		catch(Exception* exception)
 		{
-			socket = 0;
-			std::cout << "Error receiving " << number << " client.\n";
+			std::cout << "Can't connect to chat server\n";
 			MakePointer(exception)->PrintStack(std::cout);
+		}
+	}
+
+	void Received(const TcpSocket::ReceiveHandler::Result& result)
+	{
+		CriticalCode cc(cs);
+		try
+		{
+			ptr<File> file = result.GetData();
+			if(!file)
+			{
+				std::cout << "Server closed connection\n";
+				Close();
+				return;
+			}
+
+			std::cout << Strings::File2String(file);
+		}
+		catch(Exception* exception)
+		{
+			std::cout << "Can't receive data\n";
+			MakePointer(exception)->PrintStack(std::cout);
+			Close();
+		}
+	}
+
+	void Close()
+	{
+		if(socket)
+		{
+			socket->Close();
+			socket = 0;
+		}
+	}
+
+public:
+	ChatClient(ptr<Service> service, const String& host)
+	{
+		service->ConnectTcp(host, 8080, Service::TcpSocketHandler::Bind<ChatClient>(this, &ChatClient::Connected));
+	}
+
+	bool Command(const String& command)
+	{
+		CriticalCode cc(cs);
+
+		if(!socket)
+		{
+			std::cout << "Already exited.\n";
+			return false;
+		}
+
+		if(command.length() && command[0] == '@')
+		{
+			if(command == "@exit")
+			{
+				Close();
+				return false;
+			}
+			else
+			{
+				std::cout << "Unknown chat client command: " << command << ".\n";
+				return true;
+			}
+		}
+
+		socket->Send(Strings::String2File(command));
+		return true;
+	}
+};
+
+class ChatServer : public ChatBase
+{
+private:
+	ptr<TcpListener> listener;
+	CriticalSection cs;
+
+	class Client : public Object
+	{
+	private:
+		ptr<ChatServer> server;
+		ptr<TcpSocket> socket;
+
+		void Received(const TcpSocket::ReceiveHandler::Result& result)
+		{
+			try
+			{
+				ptr<File> file = result.GetData();
+				if(!file)
+				{
+					std::cout << "Client " << this << " disconnected.\n";
+					Close();
+					return;
+				}
+				server->Received(this, file);
+			}
+			catch(Exception* exception)
+			{
+				std::cout << "Can't receive data from client\n";
+				MakePointer(exception)->PrintStack(std::cout);
+				Close();
+			}
+		}
+
+	public:
+		Client(ptr<ChatServer> server, ptr<TcpSocket> socket)
+		: server(server), socket(socket)
+		{
+			socket->SetReceiveHandler(TcpSocket::ReceiveHandler::Bind<Client>(this, &Client::Received));
+		}
+
+		void Send(ptr<File> file)
+		{
+			socket->Send(file);
+		}
+
+		void Close()
+		{
+			if(socket)
+			{
+				socket->Close();
+				socket = 0;
+				server->Closed(this);
+			}
+		}
+	};
+
+	std::unordered_set<ptr<Client> > clients;
+
+	void Accepted(const Service::TcpSocketHandler::Result& result)
+	{
+		CriticalCode cc(cs);
+		try
+		{
+			ptr<Client> client = NEW(Client(this, result.GetData()));
+			clients.insert(client);
+			std::cout << "Client " << client << " accepted.\n";
+			PrintClients();
+		}
+		catch(Exception* exception)
+		{
+			std::cout << "Can't accept client\n";
+			MakePointer(exception)->PrintStack(std::cout);
+		}
+	}
+
+	void Received(ptr<Client> client, ptr<File> file)
+	{
+		std::cout << "Client " << client << " wrote:\n" << Strings::File2String(file) << "\n";
+		for(std::unordered_set<ptr<Client> >::const_iterator i = clients.begin(); i != clients.end(); ++i)
+			(*i)->Send(file);
+	}
+
+	void Closed(ptr<Client> client)
+	{
+		clients.erase(client);
+		std::cout << "Client " << client << " closed.\n";
+		PrintClients();
+	}
+
+	void PrintClients()
+	{
+		std::cout << "Clients count: " << clients.size() << ".\n";
+	}
+
+public:
+	ChatServer(ptr<Service> service)
+	{
+		listener = service->ListenTcp(8080, Service::TcpSocketHandler::Bind<ChatServer>(this, &ChatServer::Accepted));
+	}
+
+	bool Command(const String& command)
+	{
+		if(command == "@exit")
+		{
+			listener->Close();
+			listener = 0;
+			std::vector<ptr<Client> > clientsCopy(clients.begin(), clients.end());
+			for(size_t i = 0; i < clientsCopy.size(); ++i)
+				clientsCopy[i]->Close();
+			return false;
+		}
+		else
+		{
+			std::cout << "Unknown chat server command: " << command << ".\n";
+			return true;
 		}
 	}
 };
 
-class Worker : public Object
+class Processor : public Object
 {
 private:
-	int clientCount;
 	ptr<Service> service;
-	ptr<TcpListener> listener;
 
 public:
-	Worker(ptr<Service> service) : clientCount(0), service(service)
+	Processor(ptr<Service> service) : service(service) {}
+
+	void Process(const Thread::ThreadHandler::Result& result)
 	{
-		listener = service->ListenTcp(8080, Service::TcpSocketHandler::Bind<Worker>(this, &Worker::Accept));
-	}
-
-	void Accept(const Service::TcpSocketHandler::Result& result)
-	{
-		try
-		{
-			++clientCount;
-
-			ptr<TcpSocket> socket = result.GetData();
-
-			std::cout << "Accepted client " << clientCount << ".\n";
-
-			ptr<ClientWorker> clientWorker = NEW(ClientWorker(clientCount, socket));
-			socket->SetReceiveHandler(TcpSocket::ReceiveHandler::Bind(clientWorker, &ClientWorker::Receive));
-
-			if(clientCount > 10)
-			{
-				listener->Close();
-				listener = 0;
-			}
-		}
-		catch(Exception* exception)
-		{
-			std::cout << "Error accepting " << clientCount << " connection.\n";
-			MakePointer(exception)->PrintStack(std::cout);
-		}
+		service->Run();
+		std::cout << "Processor exiting.\n";
 	}
 };
 
@@ -97,9 +240,37 @@ int main()
 	{
 		ptr<Service> service = NEW(AsioService());
 
-		ptr<Worker> worker = NEW(Worker(service));
+		std::cout << "Server or client? (s/c): ";
+		String sc;
+		std::cin >> sc;
 
-		service->Run();
+		ptr<ChatBase> chat;
+
+		if(sc == "s")
+		{
+			chat = NEW(ChatServer(service));
+		}
+		else if(sc == "c")
+		{
+			std::cout << "Host: ";
+			String host;
+			std::cin >> host;
+			chat = NEW(ChatClient(service, host));
+		}
+		else
+			THROW_PRIMARY_EXCEPTION("Wrong answer");
+
+		ptr<Thread> thread = NEW(Thread(Thread::ThreadHandler::Bind<Processor>(NEW(Processor(service)), &Processor::Process)));
+
+		for(;;)
+		{
+			std::string command;
+			std::cin >> command;
+			if(!chat->Command(command))
+				break;
+		}
+
+		thread->WaitEnd();
 	}
 	catch(Exception* exception)
 	{
