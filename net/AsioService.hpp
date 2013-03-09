@@ -13,6 +13,8 @@ private:
 	boost::asio::io_service ioService;
 	boost::asio::ip::tcp::resolver resolver;
 
+	class ConnectTcpRequest;
+
 public:
 	AsioService();
 
