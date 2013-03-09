@@ -2,6 +2,7 @@
 #include "AsioTcpListener.hpp"
 #include "AsioTcpSocket.hpp"
 #include <vector>
+#include <sstream>
 
 /// Вспомогательный класс запроса на соединение.
 class AsioService::ConnectTcpRequest : public Object
@@ -94,14 +95,14 @@ public:
 	: service(service), socketHandler(socketHandler)
 	{
 		// преобразовать порт в строку
-		char portStr[16];
-		sprintf_s(portStr, "%d", port);
+		std::ostringstream ss;
+		ss << port;
 		// разрешить имя хоста
 		service->resolver.async_resolve(
 			boost::asio::ip::tcp::resolver::query(
 				boost::asio::ip::tcp::v4(),
 				host,
-				portStr
+				ss.str()
 			),
 			ResolvedBinder(this)
 		);

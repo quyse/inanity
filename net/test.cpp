@@ -165,7 +165,7 @@ private:
 		{
 			ptr<Client> client = NEW(Client(this, result.GetData()));
 			clients.push_back(client);
-			std::cout << "Client " << client << " accepted.\n";
+			std::cout << "Client " << &*client << " accepted.\n";
 			PrintClients();
 		}
 		catch(Exception* exception)
@@ -177,7 +177,7 @@ private:
 
 	void Received(ptr<Client> client, ptr<File> file)
 	{
-		std::cout << "Client " << client << " wrote:\n" << Strings::File2String(file) << "\n";
+		std::cout << "Client " << &*client << " wrote:\n" << Strings::File2String(file) << "\n";
 		for(size_t i = 0; i < clients.size(); ++i)
 			clients[i]->Send(file);
 	}
@@ -185,7 +185,7 @@ private:
 	void Closed(ptr<Client> client)
 	{
 		clients.erase(std::find(clients.begin(), clients.end(), client));
-		std::cout << "Client " << client << " closed.\n";
+		std::cout << "Client " << &*client << " closed.\n";
 		PrintClients();
 	}
 
