@@ -9,10 +9,10 @@ class ClientWorker : public Object
 {
 private:
 	int number;
-	TcpSocket* socket;
+	ptr<TcpSocket> socket;
 
 public:
-	ClientWorker(int number, TcpSocket* socket) : number(number), socket(socket) {}
+	ClientWorker(int number, ptr<TcpSocket> socket) : number(number), socket(socket) {}
 
 	void Receive(const TcpSocket::ReceiveHandler::Result& result)
 	{
@@ -34,16 +34,17 @@ public:
 					"\r\n"
 					"The test text.\r\n";
 				socket->Send(Strings::String2File(response));
-				socket->CloseSend();
+				socket->End();
 			}
 			else
 			{
 				std::cout << "Client " << number << " received end of stream.\n";
-				socket->Dereference();
+				socket = 0;
 			}
 		}
 		catch(Exception* exception)
 		{
+			socket = 0;
 			std::cout << "Error receiving " << number << " client.\n";
 			MakePointer(exception)->PrintStack(std::cout);
 		}
@@ -54,10 +55,14 @@ class Worker : public Object
 {
 private:
 	int clientCount;
-	Service* service;
+	ptr<Service> service;
+	ptr<TcpListener> listener;
 
 public:
-	Worker(Service* service) : clientCount(0), service(service) {}
+	Worker(ptr<Service> service) : clientCount(0), service(service)
+	{
+		listener = service->ListenTcp(8080, Service::TcpSocketHandler::Bind<Worker>(this, &Worker::Accept));
+	}
 
 	void Accept(const Service::TcpSocketHandler::Result& result)
 	{
@@ -71,10 +76,12 @@ public:
 
 			ptr<ClientWorker> clientWorker = NEW(ClientWorker(clientCount, socket));
 			socket->SetReceiveHandler(TcpSocket::ReceiveHandler::Bind(clientWorker, &ClientWorker::Receive));
-			socket->Reference();
 
-			if(clientCount > 3)
-				service->Stop();
+			if(clientCount > 10)
+			{
+				listener->Close();
+				listener = 0;
+			}
 		}
 		catch(Exception* exception)
 		{
@@ -91,7 +98,6 @@ int main()
 		ptr<Service> service = NEW(AsioService());
 
 		ptr<Worker> worker = NEW(Worker(service));
-		ptr<TcpListener> listener = service->ListenTcp(8080, Service::TcpSocketHandler::Bind(worker, &Worker::Accept));
 
 		service->Run();
 	}

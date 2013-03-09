@@ -25,11 +25,16 @@ private:
 	/** То есть, просто пока содержит внутренний объект Asio. */
 	ptr<AsioTcpSocket> acceptingSocket;
 
+	class AcceptedBinder;
+
 	void StartAccept();
 	void Accepted(const boost::system::error_code& error);
 
 public:
 	AsioTcpListener(ptr<AsioService> service, int port, ptr<SocketHandler> socketHandler);
+
+	//*** Методы TcpListener.
+	void Close();
 };
 
 END_INANITY_NET

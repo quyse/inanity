@@ -3,7 +3,6 @@
 
 #include "TcpSocket.hpp"
 #include "asio.hpp"
-#include "../CriticalSection.hpp"
 #include <deque>
 
 BEGIN_INANITY_NET
@@ -36,13 +35,14 @@ private:
 	size_t firstItemSent;
 	/// Запланировано ли закрытие передачи.
 	bool sendClosed;
-	/// Критическая секция для доступа к очереди.
-	CriticalSection sendQueueCS;
 
 	/// Размер одного файла для приёма данных.
 	static const size_t receiveFileSize;
 	/// Файл для приёма данных.
 	ptr<File> receiveFile;
+
+	class SentBinder;
+	class ReceivedBinder;
 
 	void StartSending();
 	void Sent(const boost::system::error_code& error, size_t transferred);
@@ -56,8 +56,9 @@ public:
 
 	//*** Методы TcpSocket.
 	void Send(ptr<File> file, ptr<SendHandler> sendHandler);
-	void CloseSend();
+	void End();
 	void SetReceiveHandler(ptr<ReceiveHandler> receiveHandler);
+	void Close();
 };
 
 END_INANITY_NET

@@ -9,6 +9,8 @@ BEGIN_INANITY_NET
 class TcpListener : public Object
 {
 public:
+	/// Закрыть сокет.
+	virtual void Close() = 0;
 };
 
 END_INANITY_NET

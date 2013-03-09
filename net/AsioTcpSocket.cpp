@@ -2,7 +2,6 @@
 #include "AsioService.hpp"
 #include "../MemoryFile.hpp"
 #include "../PartFile.hpp"
-#include "../CriticalCode.hpp"
 #include <boost/bind.hpp>
 
 const size_t AsioTcpSocket::receiveFileSize = 0x1000;
@@ -116,6 +115,36 @@ public:
 	}
 };
 
+/// Вспомогательный класс для обработчика завершения отправки.
+class AsioTcpSocket::SentBinder
+{
+private:
+	ptr<AsioTcpSocket> socket;
+
+public:
+	SentBinder(ptr<AsioTcpSocket> socket) : socket(socket) {}
+
+	void operator()(const boost::system::error_code& error, size_t transferred) const
+	{
+		socket->Sent(error, transferred);
+	}
+};
+
+/// Вспомогательный класс для обработчика принятия данных.
+class AsioTcpSocket::ReceivedBinder
+{
+private:
+	ptr<AsioTcpSocket> socket;
+
+public:
+	ReceivedBinder(ptr<AsioTcpSocket> socket) : socket(socket) {}
+
+	void operator()(const boost::system::error_code& error, size_t transferred) const
+	{
+		socket->Received(error, transferred);
+	}
+};
+
 AsioTcpSocket::AsioTcpSocket(ptr<AsioService> service)
 	: service(service), socket(service->GetIoService()),
 	firstItemSent(0), sendClosed(false) {}
@@ -143,15 +172,12 @@ void AsioTcpSocket::StartSending()
 	else
 	{
 		// очередь не пуста, начинаем отправку
-		socket.async_write_some(Buffers(sendQueue.begin(), sendQueue.end(), firstItemSent),
-			boost::bind(&AsioTcpSocket::Sent, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+		socket.async_write_some(Buffers(sendQueue.begin(), sendQueue.end(), firstItemSent), SentBinder(this));
 	}
 }
 
 void AsioTcpSocket::Sent(const boost::system::error_code& error, size_t transferred)
 {
-	CriticalCode cc(sendQueueCS);
-
 	std::deque<SendItem>::iterator i;
 
 	// если произошла ошибка
@@ -200,8 +226,7 @@ void AsioTcpSocket::Sent(const boost::system::error_code& error, size_t transfer
 void AsioTcpSocket::StartReceiving()
 {
 	receiveFile = NEW(MemoryFile(receiveFileSize));
-	socket.async_read_some(boost::asio::buffer(receiveFile->GetData(), receiveFileSize),
-		boost::bind(&AsioTcpSocket::Received, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+	socket.async_read_some(boost::asio::buffer(receiveFile->GetData(), receiveFileSize), ReceivedBinder(this));
 }
 
 void AsioTcpSocket::Received(const boost::system::error_code& error, size_t transferred)
@@ -215,7 +240,7 @@ void AsioTcpSocket::Received(const boost::system::error_code& error, size_t tran
 			receiveHandler->FireError(AsioService::ConvertError(error));
 
 		// в любом случае больше данные мы не получаем
-		receiveHandler = 0;
+		Close();
 	}
 	else
 	{
@@ -228,8 +253,6 @@ void AsioTcpSocket::Send(ptr<File> file, ptr<SendHandler> sendHandler)
 {
 	try
 	{
-		CriticalCode cc(sendQueueCS);
-
 		// если запланировано закрытие передачи, то больше в очередь добавлять ничего нельзя
 		if(sendClosed)
 			THROW_PRIMARY_EXCEPTION("Sending closed");
@@ -251,10 +274,8 @@ void AsioTcpSocket::Send(ptr<File> file, ptr<SendHandler> sendHandler)
 	}
 }
 
-void AsioTcpSocket::CloseSend()
+void AsioTcpSocket::End()
 {
-	CriticalCode cc(sendQueueCS);
-
 	sendClosed = true;
 
 	if(sendQueue.empty())
@@ -269,4 +290,15 @@ void AsioTcpSocket::SetReceiveHandler(ptr<ReceiveHandler> receiveHandler)
 	if(firstTime)
 		// запустить приём
 		StartReceiving();
+}
+
+void AsioTcpSocket::Close()
+{
+	try
+	{
+		socket.close();
+	}
+	catch(boost::system::error_code error)
+	{
+	}
 }
