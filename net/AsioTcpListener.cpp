@@ -35,7 +35,7 @@ void AsioTcpListener::Close()
 	{
 		acceptor.close();
 	}
-	catch(boost::system::error_code error)
+	catch(boost::system::system_error error)
 	{
 	}
 }

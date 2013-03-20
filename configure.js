@@ -64,7 +64,7 @@ var libraries = {
 	// ******* сетевая библиотека ASIO
 	'libinanity-asio': {
 		objects: [
-		'net.asio', 'net.AsioService', 'net.AsioTcpListener', 'net.AsioTcpSocket']
+		'net.asio', 'net.AsioService', 'net.AsioTcpListener', 'net.AsioTcpSocket', 'net.AsioInternalUdpSocket', 'net.AsioUdpListener', 'net.AsioUdpSocket']
 	},
 	// ******* файловая система на SQLite
 	'libinanity-sqlitefs': {
@@ -185,8 +185,14 @@ var executables = {
 		dynamicLibraries: []
 	}
 	// TEST
-	, nettest: {
-		objects: ['net.test'],
+	, nettesttcp: {
+		objects: ['net.test-chat-tcp'],
+		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-lua', 'deps/lua//liblua'],
+		dynamicLibraries: []
+	}
+	// TEST
+	, nettestudp: {
+		objects: ['net.test-chat-udp'],
 		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-lua', 'deps/lua//liblua'],
 		dynamicLibraries: []
 	}

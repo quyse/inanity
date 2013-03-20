@@ -164,7 +164,7 @@ void AsioTcpSocket::StartSending()
 			{
 				socket.shutdown(boost::asio::ip::tcp::socket::shutdown_send);
 			}
-			catch(boost::system::error_code error)
+			catch(boost::system::system_error error)
 			{
 				THROW_SECONDARY_EXCEPTION("Can't close Asio TCP socket", AsioService::ConvertError(error));
 			}
@@ -298,7 +298,7 @@ void AsioTcpSocket::Close()
 	{
 		socket.close();
 	}
-	catch(boost::system::error_code error)
+	catch(boost::system::system_error error)
 	{
 	}
 }

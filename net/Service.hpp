@@ -9,6 +9,7 @@ BEGIN_INANITY_NET
 
 class TcpListener;
 class TcpSocket;
+class UdpListener;
 class UdpSocket;
 class UdpPacket;
 
@@ -17,8 +18,8 @@ class Service : public Object
 {
 public:
 	typedef DataHandler<ptr<TcpSocket> > TcpSocketHandler;
-	typedef DataHandler<ptr<UdpSocket> > UdpSocketHandler;
 	typedef DataHandler<ptr<UdpPacket> > UdpPacketHandler;
+	typedef DataHandler<ptr<UdpSocket> > UdpSocketHandler;
 
 public:
 	/// Выполнять работу.
@@ -35,11 +36,9 @@ public:
 	virtual void ConnectTcp(const String& host, int port, ptr<TcpSocketHandler> socketHandler) = 0;
 
 	/// Открыть порт и начать ожидать UDP-пакеты.
-	/** Один раз будет вызван listenerHandler, и затем вызывается packetHandler
-	по разу на каждый входящий UDP-пакет. */
-	virtual void ListenUdp(int port, ptr<UdpSocketHandler> socketHandler, ptr<UdpPacketHandler> packetHandler) = 0;
+	virtual ptr<UdpListener> ListenUdp(int port, ptr<UdpPacketHandler> receiveHandler) = 0;
 	/// Создать исходящее UDP-подключение.
-	virtual void ConnectUdp(const String& host, int port, ptr<UdpSocketHandler> connectHandler, ptr<UdpPacketHandler> packetHandler) = 0;
+	virtual void ConnectUdp(const String& host, int port, ptr<UdpSocketHandler> socketHandler) = 0;
 };
 
 END_INANITY_NET

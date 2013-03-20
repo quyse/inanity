@@ -11,9 +11,11 @@ class AsioService : public Service
 {
 private:
 	boost::asio::io_service ioService;
-	boost::asio::ip::tcp::resolver resolver;
+	boost::asio::ip::tcp::resolver tcpResolver;
+	boost::asio::ip::udp::resolver udpResolver;
 
 	class ConnectTcpRequest;
+	class ConnectUdpRequest;
 
 public:
 	AsioService();
@@ -21,14 +23,15 @@ public:
 	boost::asio::io_service& GetIoService();
 
 	static ptr<Exception> ConvertError(const boost::system::error_code& error);
+	static ptr<Exception> ConvertError(const boost::system::system_error& error);
 
 	//*** Методы Service.
 	void Run();
 	void Stop();
 	ptr<TcpListener> ListenTcp(int port, ptr<TcpSocketHandler> socketHandler);
 	void ConnectTcp(const String& host, int port, ptr<TcpSocketHandler> socketHandler);
-	void ListenUdp(int port, ptr<UdpSocketHandler> socketHandler, ptr<UdpPacketHandler> packetHandler);
-	void ConnectUdp(const String& host, int port, ptr<UdpSocketHandler> connectHandler, ptr<UdpPacketHandler> packetHandler);
+	ptr<UdpListener> ListenUdp(int port, ptr<UdpPacketHandler> receiveHandler);
+	void ConnectUdp(const String& host, int port, ptr<UdpSocketHandler> socketHandler);
 };
 
 END_INANITY_NET
