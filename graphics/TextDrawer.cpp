@@ -4,6 +4,7 @@
 #include "UniformBuffer.hpp"
 #include "VertexBuffer.hpp"
 #include "IndexBuffer.hpp"
+#include "Geometry.hpp"
 #include "VertexShader.hpp"
 #include "PixelShader.hpp"
 #include "BlendState.hpp"
@@ -46,7 +47,7 @@ struct TextDrawerHelper : public Object
 	/** Задаёт альфу для шрифта. */
 	Sampler<float, float2> uFontSampler;
 
-	ptr<VertexBuffer> vb;
+	ptr<Geometry> geometry;
 	ptr<VertexShader> vs;
 	ptr<PixelShader> ps;
 	ptr<BlendState> bs;
@@ -82,7 +83,7 @@ struct TextDrawerHelper : public Object
 			};
 			ptr<Layout> layout = NEW(Layout(std::vector<Layout::Element>(1, Layout::Element(DataTypes::Float4, 0, 0)), 16));
 
-			vb = device->CreateVertexBuffer(MemoryFile::CreateViaCopy(vertices, sizeof(vertices)), layout);
+			geometry = device->CreateGeometry(device->CreateVertexBuffer(MemoryFile::CreateViaCopy(vertices, sizeof(vertices)), layout), 0);
 
 			// вершинный шейдер
 			Temp<uint> tmpInstance;
@@ -142,8 +143,7 @@ void TextDrawer::Prepare(ptr<Context> context)
 
 	// установить всё, что можно, в состояние контекста
 	ContextState& cs = context->GetTargetState();
-	cs.vertexBuffer = helper->vb;
-	cs.indexBuffer = 0;
+	cs.geometry = helper->geometry;
 	cs.vertexShader = helper->vs;
 	cs.pixelShader = helper->ps;
 	cs.blendState = helper->bs;

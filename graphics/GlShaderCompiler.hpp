@@ -6,9 +6,6 @@
 BEGIN_INANITY_GRAPHICS
 
 /// Класс компилятора шейдеров OpenGL.
-/** Пока является заглушкой, то есть он не транслирует GLSL
-в бинарный вид (из-за проблем с бинарными шейдерами).
-Он просто возвращает текст шейдера. */
 class GlShaderCompiler : public ShaderCompiler
 {
 public:

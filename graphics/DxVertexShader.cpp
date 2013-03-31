@@ -3,9 +3,7 @@
 #include "../File.hpp"
 
 DxVertexShader::DxVertexShader(ptr<File> code, ComPointer<ID3D11VertexShader> vertexShader)
-: code(code), vertexShader(vertexShader)
-{
-}
+: code(code), vertexShader(vertexShader) {}
 
 ID3D11VertexShader* DxVertexShader::GetVertexShaderInterface() const
 {

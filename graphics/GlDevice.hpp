@@ -9,6 +9,10 @@ BEGIN_INANITY_GRAPHICS
 
 class GlSystem;
 class GlContext;
+class GlInternalAttributeBinding;
+class GlInternalAttributeBindingCache;
+class GlShaderBindings;
+class Layout;
 
 /// Класс графического устройства OpenGL.
 /** Текущие ограничения:
@@ -30,14 +34,20 @@ private:
 	/// Основной графический контекст.
 	ptr<GlContext> context;
 
+	/// Кэш привязок аттрибутов.
+	ptr<GlInternalAttributeBindingCache> attributeBindingCache;
+
 	/// Скомпилировать шейдер.
-	static void CompileShader(GLuint shaderName, ptr<File> file);
+	static void CompileShader(GLuint shaderName, ptr<File> file, ptr<GlShaderBindings>& shaderBindings);
 
 public:
 #ifdef ___INANITY_WINDOWS
 	GlDevice(ptr<GlSystem> system, const String& deviceName, ptr<GlContext> context);
 	~GlDevice();
 #endif
+
+	/// Создать привязку атрибутов.
+	ptr<GlInternalAttributeBinding> CreateInternalAttributeBinding(Layout* vertexLayout);
 
 	// методы Device
 	ptr<System> GetSystem() const;
@@ -50,6 +60,7 @@ public:
 	ptr<UniformBuffer> CreateUniformBuffer(int size);
 	ptr<VertexBuffer> CreateVertexBuffer(ptr<File> file, ptr<Layout> layout);
 	ptr<IndexBuffer> CreateIndexBuffer(ptr<File> file, int indexSize);
+	ptr<Geometry> CreateGeometry(ptr<VertexBuffer> vertexBuffer, ptr<IndexBuffer> indexBuffer);
 	ptr<Texture> CreateStaticTexture(ptr<File> file);
 	ptr<Texture> CreateStatic2DTexture(ptr<Image2DData> imageData);
 	ptr<SamplerState> CreateSamplerState();

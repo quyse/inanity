@@ -12,6 +12,7 @@
 #include "DxInternalInputLayout.hpp"
 #include "DxInternalInputLayoutCache.hpp"
 #include "DxIndexBuffer.hpp"
+#include "DxGeometry.hpp"
 #include "DxBlendState.hpp"
 #include "Layout.hpp"
 #include "../File.hpp"
@@ -332,9 +333,9 @@ void DxContext::Update()
 	}
 
 	// входная разметка
-	if(forceReset || targetState.vertexBuffer != boundState.vertexBuffer || targetState.vertexShader != boundState.vertexShader)
+	if(forceReset || targetState.geometry != boundState.geometry)
 	{
-		ptr<DxInternalInputLayout> inputLayout = inputLayoutCache->GetInputLayout(targetState.vertexBuffer->GetLayout(), fast_cast<DxVertexShader*>(&*targetState.vertexShader));
+		ptr<DxInternalInputLayout> inputLayout = inputLayoutCache->GetInputLayout(fast_cast<DxGeometry*>(&*targetState.geometry)->GetVertexBuffer()->GetLayout(), fast_cast<DxVertexShader*>(&*targetState.vertexShader));
 		if(forceReset || inputLayout != boundInputLayout)
 		{
 			deviceContext->IASetInputLayout(inputLayout->GetInputLayoutInterface());
@@ -368,36 +369,40 @@ void DxContext::Update()
 		boundState.pixelShader = targetState.pixelShader;
 	}
 
-	// вершинный буфер
-	if(forceReset || targetState.vertexBuffer != boundState.vertexBuffer)
+	// геометрия
+	if(forceReset || targetState.geometry != boundState.geometry)
 	{
-		ID3D11Buffer* buffer = fast_cast<DxVertexBuffer*>(&*targetState.vertexBuffer)->GetBufferInterface();
-		UINT stride = targetState.vertexBuffer->GetLayout()->GetStride();
-		UINT offset = 0;
-		deviceContext->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
-		deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		DxGeometry* geometry = fast_cast<DxGeometry*>(&*targetState.geometry);
 
-		boundState.vertexBuffer = targetState.vertexBuffer;
-	}
-
-	// индексный буфер
-	if(forceReset || targetState.indexBuffer != boundState.indexBuffer)
-	{
-		ID3D11Buffer* buffer;
-		DXGI_FORMAT format;
-		if(targetState.indexBuffer)
+		// вершинный буфер
 		{
-			buffer = fast_cast<DxIndexBuffer*>(&*targetState.indexBuffer)->GetBufferInterface();
-			format = targetState.indexBuffer->GetIndexSize() == 4 ? DXGI_FORMAT_R32_UINT : DXGI_FORMAT_R16_UINT;
+			DxVertexBuffer* vertexBuffer = geometry->GetVertexBuffer();
+			ID3D11Buffer* buffer = vertexBuffer->GetBufferInterface();
+			UINT stride = vertexBuffer->GetLayout()->GetStride();
+			UINT offset = 0;
+			deviceContext->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
+			deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		}
-		else
-		{
-			buffer = 0;
-			format = DXGI_FORMAT_R16_UINT;
-		}
-		deviceContext->IASetIndexBuffer(buffer, format, 0);
 
-		boundState.indexBuffer = targetState.indexBuffer;
+		// индексный буфер
+		{
+			DxIndexBuffer* indexBuffer = geometry->GetIndexBuffer();
+			ID3D11Buffer* buffer;
+			DXGI_FORMAT format;
+			if(indexBuffer)
+			{
+				buffer = indexBuffer->GetBufferInterface();
+				format = indexBuffer->GetIndexSize() == 4 ? DXGI_FORMAT_R32_UINT : DXGI_FORMAT_R16_UINT;
+			}
+			else
+			{
+				buffer = 0;
+				format = DXGI_FORMAT_R16_UINT;
+			}
+			deviceContext->IASetIndexBuffer(buffer, format, 0);
+		}
+
+		boundState.geometry = targetState.geometry;
 	}
 
 	// TODO: fill mode
@@ -488,18 +493,24 @@ void DxContext::Draw()
 {
 	Update();
 
-	if(boundState.indexBuffer)
-		deviceContext->DrawIndexed(boundState.indexBuffer->GetIndicesCount(), 0, 0);
+	DxGeometry* geometry = fast_cast<DxGeometry*>(&*boundState.geometry);
+	DxIndexBuffer* indexBuffer = geometry->GetIndexBuffer();
+
+	if(indexBuffer)
+		deviceContext->DrawIndexed(indexBuffer->GetIndicesCount(), 0, 0);
 	else
-		deviceContext->Draw(boundState.vertexBuffer->GetVerticesCount(), 0);
+		deviceContext->Draw(geometry->GetVertexBuffer()->GetVerticesCount(), 0);
 }
 
 void DxContext::DrawInstanced(int instancesCount)
 {
 	Update();
 
-	if(boundState.indexBuffer)
-		deviceContext->DrawIndexedInstanced(boundState.indexBuffer->GetIndicesCount(), instancesCount, 0, 0, 0);
+	DxGeometry* geometry = fast_cast<DxGeometry*>(&*boundState.geometry);
+	DxIndexBuffer* indexBuffer = geometry->GetIndexBuffer();
+
+	if(indexBuffer)
+		deviceContext->DrawIndexedInstanced(indexBuffer->GetIndicesCount(), instancesCount, 0, 0, 0);
 	else
-		deviceContext->DrawInstanced(boundState.vertexBuffer->GetVerticesCount(), instancesCount, 0, 0);
+		deviceContext->DrawInstanced(geometry->GetVertexBuffer()->GetVerticesCount(), instancesCount, 0, 0);
 }

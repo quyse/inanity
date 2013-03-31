@@ -36,6 +36,16 @@ struct quaternion : float4
 	inline explicit quaternion(const float4& v)
 	: float4(v) {}
 
+	/// Оператор присваивания.
+	inline quaternion& operator=(const float4& v)
+	{
+		x = v.x;
+		y = v.y;
+		z = v.z;
+		w = v.w;
+		return *this;
+	}
+
 	/// Инверсия.
 	inline quaternion conjugate() const
 	{

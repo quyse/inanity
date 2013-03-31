@@ -2,8 +2,6 @@
 #include "GlSystem.hpp"
 #include "GlInternalProgramCache.hpp"
 #include "GlInternalProgram.hpp"
-#include "GlInternalAttributeBinding.hpp"
-#include "GlInternalAttributeBindingCache.hpp"
 #include "GlRenderBuffer.hpp"
 #include "GlDepthStencilBuffer.hpp"
 #include "GlTexture.hpp"
@@ -13,7 +11,9 @@
 #include "GlPixelShader.hpp"
 #include "GlVertexBuffer.hpp"
 #include "GlIndexBuffer.hpp"
+#include "GlGeometry.hpp"
 #include "GlBlendState.hpp"
+#include "GlInternalTexture.hpp"
 #include "Layout.hpp"
 #include "../Exception.hpp"
 
@@ -32,127 +32,27 @@ GlContext::~GlContext()
 		glDeleteFramebuffers(1, &serviceFramebuffer);
 }
 
+void GlContext::BindTargetsFramebuffer()
+{
+	if(!targetsFramebuffer)
+		glGenFramebuffers(1, &targetsFramebuffer);
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetsFramebuffer);
+	GlSystem::CheckErrors("Can't bind targets framebuffer");
+
+	currentFramebuffer = targetsFramebuffer;
+	dirtyCurrentFramebuffer = false;
+}
+
 void GlContext::BindServiceFramebuffer()
 {
 	if(!serviceFramebuffer)
 		glGenFramebuffers(1, &serviceFramebuffer);
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, serviceFramebuffer);
+	GlSystem::CheckErrors("Can't bind service framebuffer");
 
 	dirtyCurrentFramebuffer = true;
-}
-
-ptr<GlInternalAttributeBinding> GlContext::CreateInternalAttributeBinding(Layout* vertexLayout, GlInternalProgram* program)
-{
-	try
-	{
-		const std::vector<Layout::Element>& layoutElements = vertexLayout->GetElements();
-		if(layoutElements.empty())
-			THROW_PRIMARY_EXCEPTION("Vertex layout is empty");
-
-		const std::vector<String>& attributes = program->GetAttributes();
-
-		GLuint programName = program->GetName();
-
-		ptr<GlInternalAttributeBinding> binding = NEW(GlInternalAttributeBinding());
-		std::vector<GlInternalAttributeBinding::Element>& resultElements = binding->GetElements();
-
-		for(size_t i = 0; i < attributes.size(); ++i)
-		{
-			const String& attribute = attributes[i];
-
-			// получить соответствующий элемент разметки вершины
-			// для этого преобразовать имя атрибута в семантику
-			int semantic = GlSystem::AttributeNameToSemantic(attributes[i]);
-			size_t layoutElementIndex;
-			for(layoutElementIndex = 0; layoutElementIndex < layoutElements.size(); ++layoutElementIndex)
-				if(layoutElements[layoutElementIndex].semantic == semantic)
-					break;
-			if(layoutElementIndex >= layoutElements.size())
-				THROW_PRIMARY_EXCEPTION("Can't find element for attribute");
-
-			const Layout::Element& layoutElement = layoutElements[layoutElementIndex];
-
-			// получить количество необходимых результирующих элементов, и размер элемента в байтах
-			int needResultElementsCount;
-			switch(layoutElement.dataType)
-			{
-			case DataTypes::Float4x4:
-				needResultElementsCount = 4;
-				break;
-			default:
-				needResultElementsCount = 1;
-				break;
-			}
-			// выбрать формат и размер
-			GLint size;
-			GLenum type;
-			switch(layoutElement.dataType)
-			{
-			case DataTypes::Float:
-				size = 1;
-				type = GL_FLOAT;
-				break;
-			case DataTypes::Float2:
-				size = 2;
-				type = GL_FLOAT;
-				break;
-			case DataTypes::Float3:
-				size = 3;
-				type = GL_FLOAT;
-				break;
-			case DataTypes::Float4:
-			case DataTypes::Float4x4:
-				size = 4;
-				type = GL_FLOAT;
-				break;
-			case DataTypes::UInt:
-				size = 1;
-				type = GL_UNSIGNED_INT;
-				break;
-			case DataTypes::UInt2:
-				size = 2;
-				type = GL_UNSIGNED_INT;
-				break;
-			case DataTypes::UInt3:
-				size = 3;
-				type = GL_UNSIGNED_INT;
-				break;
-			case DataTypes::UInt4:
-				size = 4;
-				type = GL_UNSIGNED_INT;
-				break;
-			default:
-				THROW_PRIMARY_EXCEPTION("Unknown element type");
-			}
-
-			// размер элемента - пока всегда один вектор (float4 или uint4),
-			// так как он нужен только для матриц float4x4
-			const int elementSize = 16;
-
-			// получить локацию атрибута
-			GLuint location = glGetAttribLocation(programName, attribute.c_str());
-
-			// цикл по результирующим элементам
-			for(int resultElementIndex = 0; resultElementIndex < needResultElementsCount; ++resultElementIndex)
-			{
-				resultElements.push_back(GlInternalAttributeBinding::Element());
-				GlInternalAttributeBinding::Element& resultElement = resultElements.back();
-
-				resultElement.index = location + resultElementIndex;
-				resultElement.size = size;
-				resultElement.type = type;
-				resultElement.normalized = false;
-				resultElement.pointer = (GLvoid*)((char*)0 + layoutElement.offset + resultElementIndex * elementSize);
-			}
-		}
-
-		return binding;
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY_EXCEPTION("Can't create GL internal input layout", exception);
-	}
 }
 
 void GlContext::Update()
@@ -163,6 +63,7 @@ void GlContext::Update()
 	if(dirtyCurrentFramebuffer)
 	{
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, currentFramebuffer);
+		GlSystem::CheckErrors("Can't bind current framebuffer");
 		dirtyCurrentFramebuffer = false;
 	}
 
@@ -186,14 +87,16 @@ void GlContext::Update()
 		for(int i = 0; i < ContextState::renderTargetSlotsCount; ++i)
 			boundState.renderBuffers[i] = targetState.renderBuffers[i];
 		boundState.depthStencilBuffer = targetState.depthStencilBuffer;
+
+		GlSystem::CheckErrors("qqq1");
 	}
 	// иначе все рендербуферы - не по умолчанию
 	// определяем, что поменялось, и меняем
 	else
 	{
 		// привязать нужный фреймбуфер
-		if(currentFramebuffer != targetsFramebuffer)
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, currentFramebuffer = targetsFramebuffer);
+		BindTargetsFramebuffer();
+		GlSystem::CheckErrors("qqq1_0");
 
 		// привязать изменившиеся рендербуферы
 		for(int i = 0; i < ContextState::renderTargetSlotsCount; ++i)
@@ -212,6 +115,7 @@ void GlContext::Update()
 
 				boundState.renderBuffers[i] = targetState.renderBuffers[i];
 			}
+		GlSystem::CheckErrors("qqq1_1");
 
 		// привязать изменившийся depth-stencil буфер
 		if(targetState.depthStencilBuffer != boundState.depthStencilBuffer)
@@ -222,7 +126,11 @@ void GlContext::Update()
 
 			boundState.depthStencilBuffer = targetState.depthStencilBuffer;
 		}
+
+		GlSystem::CheckErrors("qqq2");
 	}
+
+	GlSystem::CheckErrors("Can't bind render buffers and depth stencil buffers");
 
 	// текстуры
 	for(int i = 0; i < ContextState::textureSlotsCount; ++i)
@@ -243,6 +151,7 @@ void GlContext::Update()
 
 			boundState.samplerStates[i] = targetState.samplerStates[i];
 		}
+	GlSystem::CheckErrors("Can't bind textures and samplers");
 
 	// uniform-буферы
 	for(int i = 0; i < ContextState::uniformBufferSlotsCount; ++i)
@@ -253,8 +162,7 @@ void GlContext::Update()
 
 			boundState.uniformBuffers[i] = targetState.uniformBuffers[i];
 		}
-
-	bool dirtyAttributeBinding = false;
+	GlSystem::CheckErrors("Can't bind uniform buffers");
 
 	// вершинный и пиксельный шейдеры
 	if(targetState.vertexShader != boundState.vertexShader || targetState.pixelShader != boundState.pixelShader)
@@ -262,55 +170,22 @@ void GlContext::Update()
 		ptr<GlInternalProgram> program = programCache->GetProgram(fast_cast<GlVertexShader*>(&*targetState.vertexShader), fast_cast<GlPixelShader*>(&*targetState.pixelShader));
 		if(boundProgram != program)
 		{
-			glUseProgram(boundProgram->GetName());
+			glUseProgram(program->GetName());
+			GlSystem::CheckErrors("Can't bind program");
 			boundProgram = program;
 		}
 
 		boundState.vertexShader = targetState.vertexShader;
 		boundState.pixelShader = targetState.pixelShader;
-		dirtyAttributeBinding = true;
 	}
 
-	// вершинный буфер
-	if(targetState.vertexBuffer != boundState.vertexBuffer)
+	// геометрия
+	if(targetState.geometry != boundState.geometry)
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, fast_cast<GlVertexBuffer*>(&*targetState.vertexBuffer)->GetName());
+		glBindVertexArray(fast_cast<GlGeometry*>(&*targetState.geometry)->GetVertexArrayName());
+		GlSystem::CheckErrors("Can't bind geometry");
 
-		boundState.vertexBuffer = targetState.vertexBuffer;
-		dirtyAttributeBinding = true;
-	}
-
-	// индексный буфер
-	if(targetState.indexBuffer != boundState.indexBuffer)
-	{
-		IndexBuffer* abstractIndexBuffer = targetState.indexBuffer;
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, abstractIndexBuffer ? fast_cast<GlVertexBuffer*>(abstractIndexBuffer)->GetName() : 0);
-
-		boundState.indexBuffer = targetState.indexBuffer;
-		dirtyAttributeBinding = true;
-	}
-
-	// привязка к атрибутам
-	if(dirtyAttributeBinding)
-	{
-		ptr<Layout> vertexLayout = targetState.vertexBuffer->GetLayout();
-		ptr<GlInternalAttributeBinding> attributeBinding = attributeBindingCache->GetBinding(vertexLayout, boundProgram);
-		if(boundAttributeBinding != attributeBinding)
-		{
-			// выполнить привязку
-			int stride = vertexLayout->GetStride();
-			const std::vector<GlInternalAttributeBinding::Element>& elements = boundAttributeBinding->GetElements();
-			for(size_t i = 0; i < elements.size(); ++i)
-			{
-				const GlInternalAttributeBinding::Element& element = elements[i];
-
-				glVertexAttribPointer(element.index, element.size, element.type, element.normalized, stride, element.pointer);
-			}
-
-			boundAttributeBinding = attributeBinding;
-		}
-
-		dirtyAttributeBinding = false;
+		boundState.geometry = targetState.geometry;
 	}
 
 	if(targetState.fillMode != boundState.fillMode)
@@ -326,6 +201,7 @@ void GlContext::Update()
 		default:
 			THROW_PRIMARY_EXCEPTION("Unknown fill mode");
 		}
+		GlSystem::CheckErrors("Can't bind fill mode");
 
 		boundState.fillMode = targetState.fillMode;
 	}
@@ -348,6 +224,7 @@ void GlContext::Update()
 		default:
 			THROW_PRIMARY_EXCEPTION("Unknown cull mode");
 		}
+		GlSystem::CheckErrors("Can't bind cull mode");
 
 		boundState.cullMode = targetState.cullMode;
 	}
@@ -355,6 +232,7 @@ void GlContext::Update()
 	if(targetState.viewportWidth != boundState.viewportWidth || targetState.viewportHeight != boundState.viewportHeight)
 	{
 		glViewport(0, 0, targetState.viewportWidth, targetState.viewportHeight);
+		GlSystem::CheckErrors("Can't bind viewport");
 
 		boundState.viewportWidth = targetState.viewportWidth;
 		boundState.viewportHeight = targetState.viewportHeight;
@@ -396,12 +274,16 @@ void GlContext::Update()
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(func);
 
+		GlSystem::CheckErrors("Can't bind depth test func");
+
 		boundState.depthTestFunc = targetState.depthTestFunc;
 	}
 
 	if(targetState.depthWrite != boundState.depthWrite)
 	{
 		glDepthMask(targetState.depthWrite ? GL_TRUE : GL_FALSE);
+
+		GlSystem::CheckErrors("Can't bind depth write");
 
 		boundState.depthWrite = targetState.depthWrite;
 	}
@@ -411,39 +293,115 @@ void GlContext::Update()
 		if(targetState.blendState)
 			fast_cast<GlBlendState*>(&*targetState.blendState)->Apply();
 
+		GlSystem::CheckErrors("Can't bind blend state");
+
 		boundState.blendState = targetState.blendState;
 	}
 
 	GlSystem::CheckErrors("Can't update context");
 }
 
+ptr<GlRenderBuffer> GlContext::GetDummyRenderBuffer(int width, int height)
+{
+	std::pair<int, int> key(width, height);
+	std::map<std::pair<int, int>, ptr<GlRenderBuffer> >::const_iterator i = dummyRenderBuffers.find(key);
+	if(i != dummyRenderBuffers.end())
+		return i->second;
+
+	try
+	{
+		GLuint textureName;
+		glGenTextures(1, &textureName);
+		GlSystem::CheckErrors("Can't gen texture");
+		ptr<GlInternalTexture> internalTexture = NEW(GlInternalTexture(textureName));
+		glBindTexture(GL_TEXTURE_2D, textureName);
+		GlSystem::CheckErrors("Can't bind texture");
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, (GLsizei)width, (GLsizei)height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+		GlSystem::CheckErrors("Can't initialize texture");
+
+		ptr<GlRenderBuffer> renderBuffer = NEW(GlRenderBuffer(internalTexture, 0));
+		dummyRenderBuffers[key] = renderBuffer;
+		return renderBuffer;
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't get dummy render buffer", exception);
+	}
+}
+
 void GlContext::ClearRenderBuffer(RenderBuffer* renderBuffer, const float* color)
 {
-	BindServiceFramebuffer();
-	glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, fast_cast<GlRenderBuffer*>(renderBuffer)->GetName(), 0);
+	GLuint name = fast_cast<GlRenderBuffer*>(renderBuffer)->GetName();
+	if(name)
+	{
+		BindServiceFramebuffer();
+		glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, name, 0);
+		glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, 0, 0);
+	}
+	else
+	{
+		if(currentFramebuffer != 0)
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, currentFramebuffer = 0);
+	}
+
 	glClearBufferfv(GL_COLOR, 0, color);
+	GlSystem::CheckErrors("Can't clear render buffer");
 }
 
-void GlContext::ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, float depth)
+void GlContext::ClearDepthStencilBuffer(DepthStencilBuffer* abstractDepthStencilBuffer, float depth)
 {
 	BindServiceFramebuffer();
-	glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, fast_cast<GlDepthStencilBuffer*>(depthStencilBuffer)->GetName(), 0);
+
+	GlDepthStencilBuffer* depthStencilBuffer = fast_cast<GlDepthStencilBuffer*>(abstractDepthStencilBuffer);
+
+	glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GetDummyRenderBuffer(depthStencilBuffer->GetWidth(), depthStencilBuffer->GetHeight())->GetName(), 0);
+	glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, depthStencilBuffer->GetName(), 0);
+	GlSystem::CheckErrors("CCCC1");
+	GLenum r = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+	switch(r)
+	{
+#define P(a) case a: printf("Framebuffer status: " #a "\n"); break
+		P(GL_FRAMEBUFFER_COMPLETE);
+		P(GL_FRAMEBUFFER_UNDEFINED);
+		P(GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT);
+		P(GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT);
+		P(GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER);
+		P(GL_FRAMEBUFFER_UNSUPPORTED);
+		P(GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE);
+		P(GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS);
+#undef P
+	default:
+		printf("Framebuffer status: %d\n", (int)r);
+		break;
+	}
 	glClearBufferfv(GL_DEPTH, 0, &depth);
+	GlSystem::CheckErrors("CCCC2");//"Can't clear depth");
 }
 
-void GlContext::ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, unsigned stencil)
+void GlContext::ClearDepthStencilBuffer(DepthStencilBuffer* abstractDepthStencilBuffer, unsigned stencil)
 {
 	BindServiceFramebuffer();
-	glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, fast_cast<GlDepthStencilBuffer*>(depthStencilBuffer)->GetName(), 0);
+
+	GlDepthStencilBuffer* depthStencilBuffer = fast_cast<GlDepthStencilBuffer*>(abstractDepthStencilBuffer);
+
+	glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GetDummyRenderBuffer(depthStencilBuffer->GetWidth(), depthStencilBuffer->GetHeight())->GetName(), 0);
+	glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, depthStencilBuffer->GetName(), 0);
 	GLint s = stencil;
 	glClearBufferiv(GL_STENCIL, 0, &s);
+	GlSystem::CheckErrors("Can't clear stencil");
 }
 
-void GlContext::ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, float depth, unsigned stencil)
+void GlContext::ClearDepthStencilBuffer(DepthStencilBuffer* abstractDepthStencilBuffer, float depth, unsigned stencil)
 {
 	BindServiceFramebuffer();
-	glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, fast_cast<GlDepthStencilBuffer*>(depthStencilBuffer)->GetName(), 0);
+
+	GlDepthStencilBuffer* depthStencilBuffer = fast_cast<GlDepthStencilBuffer*>(abstractDepthStencilBuffer);
+
+	glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GetDummyRenderBuffer(depthStencilBuffer->GetWidth(), depthStencilBuffer->GetHeight())->GetName(), 0);
+	glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, depthStencilBuffer->GetName(), 0);
 	glClearBufferfi(GL_DEPTH_STENCIL, 0, depth, stencil);
+	GlSystem::CheckErrors("Can't clear depth and stencil");
 }
 
 void GlContext::SetUniformBufferData(UniformBuffer* abstractUniformBuffer, const void* data, size_t size)
@@ -459,27 +417,26 @@ void GlContext::SetUniformBufferData(UniformBuffer* abstractUniformBuffer, const
 	// через glBindBufferBase. Верим, но надо проверить.
 	glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer->GetName());
 	void* bufferData = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-	if(!bufferData)
-	{
-		GlSystem::CheckErrors("Can't map uniform buffer");
-		return;
-	}
+	GlSystem::CheckErrors("Can't map uniform buffer");
 
 	memcpy(bufferData, data, size);
 
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
+	GlSystem::CheckErrors("Can't unmap uniform buffer");
 }
 
 void GlContext::Draw()
 {
 	Update();
 
-	glDrawArrays(GL_TRIANGLES, 0, boundState.indexBuffer ? boundState.indexBuffer->GetIndicesCount() : boundState.vertexBuffer->GetVerticesCount());
+	fast_cast<GlGeometry*>(&*boundState.geometry)->IssueDraw();
+	GlSystem::CheckErrors("Can't draw");
 }
 
 void GlContext::DrawInstanced(int instancesCount)
 {
 	Update();
 
-	glDrawArraysInstanced(GL_TRIANGLES, 0, boundState.indexBuffer ? boundState.indexBuffer->GetIndicesCount() : boundState.vertexBuffer->GetVerticesCount(), instancesCount);
+	fast_cast<GlGeometry*>(&*boundState.geometry)->IssueDrawInstanced(instancesCount);
+	GlSystem::CheckErrors("Can't draw instanced");
 }

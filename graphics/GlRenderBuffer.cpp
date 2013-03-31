@@ -9,7 +9,7 @@ GlRenderBuffer::GlRenderBuffer(ptr<GlInternalTexture> internalTexture, ptr<GlTex
 
 GLuint GlRenderBuffer::GetName() const
 {
-	return internalTexture->GetName();
+	return internalTexture ? internalTexture->GetName() : 0;
 }
 
 ptr<Texture> GlRenderBuffer::GetTexture()

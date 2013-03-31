@@ -44,6 +44,7 @@ public:
 	ptr<UniformBuffer> CreateUniformBuffer(int size);
 	ptr<VertexBuffer> CreateVertexBuffer(ptr<File> file, ptr<Layout> layout);
 	ptr<IndexBuffer> CreateIndexBuffer(ptr<File> file, int indexSize);
+	ptr<Geometry> CreateGeometry(ptr<VertexBuffer> vertexBuffer, ptr<IndexBuffer> indexBuffer);
 	ptr<Texture> CreateStaticTexture(ptr<File> file);
 	ptr<Texture> CreateStatic2DTexture(ptr<Image2DData> imageData);
 	ptr<SamplerState> CreateSamplerState();
