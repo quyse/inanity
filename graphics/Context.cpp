@@ -13,11 +13,6 @@
 
 Context::Context() : forceReset(true) {}
 
-const ContextState& Context::GetBoundState() const
-{
-	return boundState;
-}
-
 ContextState& Context::GetTargetState()
 {
 	return targetState;

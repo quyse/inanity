@@ -40,10 +40,6 @@ public:
 	/// Очистить глубину и трафарет в depth-stencil буфере.
 	virtual void ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, float depth, unsigned stencil) = 0;
 
-	/// Получить актуальное состояние контекста.
-	/** Может использоваться, чтобы сделать из него
-	новое состояние с минимальным количеством изменений. */
-	const ContextState& GetBoundState() const;
 	/// Получить требуемое состояние контекста.
 	/** Его можно менять, чтобы задать то, что требуется. */
 	ContextState& GetTargetState();
