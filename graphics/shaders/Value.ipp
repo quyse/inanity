@@ -82,6 +82,14 @@ template <>
 inline Value<float>::Value(float constValue)
 : Expression(NEW(FloatConstNode(constValue))) {}
 
+template <>
+inline Value<int>::Value(int constValue)
+: Expression(NEW(IntConstNode(constValue))) {}
+
+template <>
+inline Value<uint>::Value(uint constValue)
+: Expression(NEW(IntConstNode(constValue))) {}
+
 template <typename ValueType>
 inline void Value<ValueType>::operator=(Value<ValueType> a)
 {

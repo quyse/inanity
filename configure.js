@@ -127,7 +127,7 @@ var libraries = {
 			'graphics.shaders.AttributeNode', 'graphics.shaders.SamplerNode',
 			'graphics.shaders.UniformNode', 'graphics.shaders.UniformGroup',
 			'graphics.shaders.SwizzleNode', 'graphics.shaders.OperationNode',
-			'graphics.shaders.SampleNode', 'graphics.shaders.FloatConstNode',
+			'graphics.shaders.SampleNode', 'graphics.shaders.FloatConstNode', 'graphics.shaders.IntConstNode',
 			'graphics.shaders.SequenceNode',
 			'graphics.shaders.TransformedNode', 'graphics.shaders.RasterizedNode',
 			'graphics.shaders.TempNode', 'graphics.shaders.CastNode',

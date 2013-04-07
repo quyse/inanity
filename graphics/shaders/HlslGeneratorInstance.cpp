@@ -2,6 +2,7 @@
 #include "Node.hpp"
 #include "AttributeNode.hpp"
 #include "FloatConstNode.hpp"
+#include "IntConstNode.hpp"
 #include "OperationNode.hpp"
 #include "SampleNode.hpp"
 #include "SamplerNode.hpp"
@@ -58,6 +59,7 @@ void HlslGeneratorInstance::RegisterNode(Node* node)
 	switch(node->GetType())
 	{
 	case Node::typeFloatConst:
+	case Node::typeIntConst:
 		break;
 	case Node::typeAttribute:
 		{
@@ -139,6 +141,9 @@ void HlslGeneratorInstance::PrintNode(Node* node)
 	{
 	case Node::typeFloatConst:
 		hlsl << std::fixed << std::setprecision(10) << fast_cast<FloatConstNode*>(node)->GetValue() << 'f';
+		break;
+	case Node::typeIntConst:
+		hlsl << fast_cast<IntConstNode*>(node)->GetValue();
 		break;
 	case Node::typeAttribute:
 		hlsl << "a.a" << fast_cast<AttributeNode*>(node)->GetSemantic();
