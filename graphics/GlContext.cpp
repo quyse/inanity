@@ -17,56 +17,52 @@
 #include "Layout.hpp"
 #include "../Exception.hpp"
 
-GlContext::GlContext() :
-	targetsFramebuffer(0), serviceFramebuffer(0),
-	currentFramebuffer(0), dirtyCurrentFramebuffer(true)
+/*
+Примечание к реализации. GlContext использует boundState.renderBuffers и boundState.depthStencilBuffer
+для хранения только нестандартных таргетов. Соответственно, эта информация актуальна только в то время,
+когда к контексту привязан targetFramebuffer. Когда к контексту привязан фреймбуфер по умолчанию (0),
+всё равно всё ясно, что привязано.
+*/
+
+GlContext::GlContext() : targetFramebuffer(0), boundFramebuffer(0)
 {
 	programCache = NEW(GlInternalProgramCache());
 }
 
 GlContext::~GlContext()
 {
-	if(targetsFramebuffer)
-		glDeleteFramebuffers(1, &targetsFramebuffer);
-	if(serviceFramebuffer)
-		glDeleteFramebuffers(1, &serviceFramebuffer);
+	if(targetFramebuffer)
+		glDeleteFramebuffers(1, &targetFramebuffer);
 }
 
 void GlContext::BindTargetsFramebuffer()
 {
-	if(!targetsFramebuffer)
-		glGenFramebuffers(1, &targetsFramebuffer);
+	if(!targetFramebuffer)
+	{
+		glGenFramebuffers(1, &targetFramebuffer);
+		GlSystem::CheckErrors("Can't gen targets framebuffer");
+	}
 
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetsFramebuffer);
-	GlSystem::CheckErrors("Can't bind targets framebuffer");
-
-	currentFramebuffer = targetsFramebuffer;
-	dirtyCurrentFramebuffer = false;
+	if(forceReset || targetFramebuffer != boundFramebuffer)
+	{
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetFramebuffer);
+		GlSystem::CheckErrors("Can't bind targets framebuffer");
+		boundFramebuffer = targetFramebuffer;
+	}
 }
 
-void GlContext::BindServiceFramebuffer()
+void GlContext::BindDefaultFramebuffer()
 {
-	if(!serviceFramebuffer)
-		glGenFramebuffers(1, &serviceFramebuffer);
-
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, serviceFramebuffer);
-	GlSystem::CheckErrors("Can't bind service framebuffer");
-
-	dirtyCurrentFramebuffer = true;
+	if(forceReset || boundFramebuffer != 0)
+	{
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		GlSystem::CheckErrors("Can't bind service framebuffer");
+		boundFramebuffer = 0;
+	}
 }
 
 void GlContext::Update()
 {
-	// установить фреймбуфер в то, чем он был
-	// далее его могут поменять, но здесь мы гарантируем, что он
-	// соответствует тому, что в currentFramebuffer
-	if(dirtyCurrentFramebuffer)
-	{
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, currentFramebuffer);
-		GlSystem::CheckErrors("Can't bind current framebuffer");
-		dirtyCurrentFramebuffer = false;
-	}
-
 	// проверить, если первый рендербуфер - по умолчанию (а непервым он быть не может),
 	// то он должен быть единственным, и depth-stencil буфера не может быть
 	if(targetState.renderBuffers[0] && fast_cast<GlRenderBuffer*>(&*targetState.renderBuffers[0])->GetName() == 0)
@@ -78,29 +74,20 @@ void GlContext::Update()
 				THROW_PRIMARY_EXCEPTION("Default renderbuffer can be bound only without other buffers");
 
 		// привязать фреймбуфер по умолчанию
-		if(currentFramebuffer != 0)
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, currentFramebuffer = 0);
+		BindDefaultFramebuffer();
 
 		// больше ничего привязывать не надо
-
-		// установить, что всё привязано
-		for(int i = 0; i < ContextState::renderTargetSlotsCount; ++i)
-			boundState.renderBuffers[i] = targetState.renderBuffers[i];
-		boundState.depthStencilBuffer = targetState.depthStencilBuffer;
-
-		GlSystem::CheckErrors("qqq1");
 	}
 	// иначе все рендербуферы - не по умолчанию
 	// определяем, что поменялось, и меняем
 	else
 	{
-		// привязать нужный фреймбуфер
+		// привязать целевой фреймбуфер
 		BindTargetsFramebuffer();
-		GlSystem::CheckErrors("qqq1_0");
 
 		// привязать изменившиеся рендербуферы
 		for(int i = 0; i < ContextState::renderTargetSlotsCount; ++i)
-			if(targetState.renderBuffers[i] != boundState.renderBuffers[i])
+			if(forceReset || targetState.renderBuffers[i] != boundState.renderBuffers[i])
 			{
 				RenderBuffer* abstractRenderBuffer = targetState.renderBuffers[i];
 				if(abstractRenderBuffer)
@@ -110,6 +97,8 @@ void GlContext::Update()
 						THROW_PRIMARY_EXCEPTION("Default renderbuffer can't be bound with other buffers");
 					glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, name, 0);
 				}
+				else if(i == 0)
+					THROW_PRIMARY_EXCEPTION("Zero color attachment can't be not set");
 				else
 					glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, 0, 0);
 
@@ -118,7 +107,7 @@ void GlContext::Update()
 		GlSystem::CheckErrors("qqq1_1");
 
 		// привязать изменившийся depth-stencil буфер
-		if(targetState.depthStencilBuffer != boundState.depthStencilBuffer)
+		if(forceReset || targetState.depthStencilBuffer != boundState.depthStencilBuffer)
 		{
 			DepthStencilBuffer* abstractDepthStencilBuffer = targetState.depthStencilBuffer;
 			glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
@@ -134,7 +123,7 @@ void GlContext::Update()
 
 	// текстуры
 	for(int i = 0; i < ContextState::textureSlotsCount; ++i)
-		if(targetState.textures[i] != boundState.textures[i])
+		if(forceReset || targetState.textures[i] != boundState.textures[i])
 		{
 			glActiveTexture(GL_TEXTURE0 + i);
 			Texture* abstractTexture = targetState.textures[i];
@@ -144,7 +133,7 @@ void GlContext::Update()
 		}
 	// семплеры
 	for(int i = 0; i < ContextState::textureSlotsCount; ++i)
-		if(targetState.samplerStates[i] != boundState.samplerStates[i])
+		if(forceReset || targetState.samplerStates[i] != boundState.samplerStates[i])
 		{
 			SamplerState* abstractSamplerState = targetState.samplerStates[i];
 			glBindSampler(i, abstractSamplerState ? fast_cast<GlSamplerState*>(abstractSamplerState)->GetName() : 0);
@@ -155,7 +144,7 @@ void GlContext::Update()
 
 	// uniform-буферы
 	for(int i = 0; i < ContextState::uniformBufferSlotsCount; ++i)
-		if(targetState.uniformBuffers[i] != boundState.uniformBuffers[i])
+		if(forceReset || targetState.uniformBuffers[i] != boundState.uniformBuffers[i])
 		{
 			UniformBuffer* abstractUniformBuffer = targetState.uniformBuffers[i];
 			glBindBufferBase(GL_UNIFORM_BUFFER, i, abstractUniformBuffer ? fast_cast<GlUniformBuffer*>(abstractUniformBuffer)->GetName() : 0);
@@ -165,10 +154,10 @@ void GlContext::Update()
 	GlSystem::CheckErrors("Can't bind uniform buffers");
 
 	// вершинный и пиксельный шейдеры
-	if(targetState.vertexShader != boundState.vertexShader || targetState.pixelShader != boundState.pixelShader)
+	if(forceReset || targetState.vertexShader != boundState.vertexShader || targetState.pixelShader != boundState.pixelShader)
 	{
 		ptr<GlInternalProgram> program = programCache->GetProgram(fast_cast<GlVertexShader*>(&*targetState.vertexShader), fast_cast<GlPixelShader*>(&*targetState.pixelShader));
-		if(boundProgram != program)
+		if(forceReset || boundProgram != program)
 		{
 			glUseProgram(program->GetName());
 			GlSystem::CheckErrors("Can't bind program");
@@ -180,7 +169,7 @@ void GlContext::Update()
 	}
 
 	// геометрия
-	if(targetState.geometry != boundState.geometry)
+	if(forceReset || targetState.geometry != boundState.geometry)
 	{
 		glBindVertexArray(fast_cast<GlGeometry*>(&*targetState.geometry)->GetVertexArrayName());
 		GlSystem::CheckErrors("Can't bind geometry");
@@ -188,7 +177,7 @@ void GlContext::Update()
 		boundState.geometry = targetState.geometry;
 	}
 
-	if(targetState.fillMode != boundState.fillMode)
+	if(forceReset || targetState.fillMode != boundState.fillMode)
 	{
 		switch(targetState.fillMode)
 		{
@@ -206,7 +195,7 @@ void GlContext::Update()
 		boundState.fillMode = targetState.fillMode;
 	}
 
-	if(targetState.cullMode != boundState.cullMode)
+	if(forceReset || targetState.cullMode != boundState.cullMode)
 	{
 		switch(targetState.cullMode)
 		{
@@ -229,7 +218,7 @@ void GlContext::Update()
 		boundState.cullMode = targetState.cullMode;
 	}
 
-	if(targetState.viewportWidth != boundState.viewportWidth || targetState.viewportHeight != boundState.viewportHeight)
+	if(forceReset || targetState.viewportWidth != boundState.viewportWidth || targetState.viewportHeight != boundState.viewportHeight)
 	{
 		glViewport(0, 0, targetState.viewportWidth, targetState.viewportHeight);
 		GlSystem::CheckErrors("Can't bind viewport");
@@ -238,7 +227,12 @@ void GlContext::Update()
 		boundState.viewportHeight = targetState.viewportHeight;
 	}
 
-	if(targetState.depthTestFunc != boundState.depthTestFunc)
+	if(forceReset || targetState.depthTestFunc != boundState.depthTestFunc || targetState.depthWrite != boundState.depthWrite)
+	{
+		((targetState.depthTestFunc != ContextState::depthTestFuncAlways || targetState.depthWrite) ? glEnable : glDisable)(GL_DEPTH_TEST);
+	}
+
+	if(forceReset || targetState.depthTestFunc != boundState.depthTestFunc)
 	{
 		GLenum func;
 		switch(targetState.depthTestFunc)
@@ -271,7 +265,6 @@ void GlContext::Update()
 			THROW_PRIMARY_EXCEPTION("Unknown depth test func");
 		}
 
-		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(func);
 
 		GlSystem::CheckErrors("Can't bind depth test func");
@@ -279,7 +272,7 @@ void GlContext::Update()
 		boundState.depthTestFunc = targetState.depthTestFunc;
 	}
 
-	if(targetState.depthWrite != boundState.depthWrite)
+	if(forceReset || targetState.depthWrite != boundState.depthWrite)
 	{
 		glDepthMask(targetState.depthWrite ? GL_TRUE : GL_FALSE);
 
@@ -288,10 +281,12 @@ void GlContext::Update()
 		boundState.depthWrite = targetState.depthWrite;
 	}
 
-	if(targetState.blendState != boundState.blendState)
+	if(forceReset || targetState.blendState != boundState.blendState)
 	{
 		if(targetState.blendState)
 			fast_cast<GlBlendState*>(&*targetState.blendState)->Apply();
+		else
+			GlBlendState::ApplyDefault();
 
 		GlSystem::CheckErrors("Can't bind blend state");
 
@@ -299,6 +294,8 @@ void GlContext::Update()
 	}
 
 	GlSystem::CheckErrors("Can't update context");
+
+	forceReset = false;
 }
 
 ptr<GlRenderBuffer> GlContext::GetDummyRenderBuffer(int width, int height)
@@ -335,14 +332,16 @@ void GlContext::ClearRenderBuffer(RenderBuffer* renderBuffer, const float* color
 	GLuint name = fast_cast<GlRenderBuffer*>(renderBuffer)->GetName();
 	if(name)
 	{
-		BindServiceFramebuffer();
-		glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, name, 0);
-		glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, 0, 0);
+		BindTargetsFramebuffer();
+		if(renderBuffer != (RenderBuffer*)boundState.renderBuffers[0])
+		{
+			glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, name, 0);
+			boundState.renderBuffers[0] = renderBuffer;
+		}
 	}
 	else
 	{
-		if(currentFramebuffer != 0)
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, currentFramebuffer = 0);
+		BindDefaultFramebuffer();
 	}
 
 	glClearBufferfv(GL_COLOR, 0, color);
@@ -351,42 +350,64 @@ void GlContext::ClearRenderBuffer(RenderBuffer* renderBuffer, const float* color
 
 void GlContext::ClearDepthStencilBuffer(DepthStencilBuffer* abstractDepthStencilBuffer, float depth)
 {
-	BindServiceFramebuffer();
-
 	GlDepthStencilBuffer* depthStencilBuffer = fast_cast<GlDepthStencilBuffer*>(abstractDepthStencilBuffer);
+	GLuint name = depthStencilBuffer->GetName();
 
-	glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GetDummyRenderBuffer(depthStencilBuffer->GetWidth(), depthStencilBuffer->GetHeight())->GetName(), 0);
-	glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, depthStencilBuffer->GetName(), 0);
-	GlSystem::CheckErrors("CCCC1");
-	GLenum r = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
-	switch(r)
+	if(name)
 	{
-#define P(a) case a: printf("Framebuffer status: " #a "\n"); break
-		P(GL_FRAMEBUFFER_COMPLETE);
-		P(GL_FRAMEBUFFER_UNDEFINED);
-		P(GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT);
-		P(GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT);
-		P(GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER);
-		P(GL_FRAMEBUFFER_UNSUPPORTED);
-		P(GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE);
-		P(GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS);
-#undef P
-	default:
-		printf("Framebuffer status: %d\n", (int)r);
-		break;
+		BindTargetsFramebuffer();
+		GlRenderBuffer* dummyRenderBuffer = GetDummyRenderBuffer(depthStencilBuffer->GetWidth(), depthStencilBuffer->GetHeight());
+		if(dummyRenderBuffer != (RenderBuffer*)boundState.renderBuffers[0])
+		{
+			glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, dummyRenderBuffer->GetName(), 0);
+			boundState.renderBuffers[0] = dummyRenderBuffer;
+		}
+		if(depthStencilBuffer != (DepthStencilBuffer*)boundState.depthStencilBuffer)
+		{
+			glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, name, 0);
+			boundState.depthStencilBuffer = depthStencilBuffer;
+		}
 	}
+	else
+	{
+		BindDefaultFramebuffer();
+	}
+
+	// необходимо для очистки
+	glEnable(GL_DEPTH_TEST);
+	boundState.depthTestFunc = ContextState::depthTestFuncAlways;
+	glDepthFunc(GL_ALWAYS);
+	boundState.depthWrite = true;
+	glDepthMask(GL_TRUE);
 	glClearBufferfv(GL_DEPTH, 0, &depth);
-	GlSystem::CheckErrors("CCCC2");//"Can't clear depth");
+	GlSystem::CheckErrors("Can't clear depth");
 }
 
 void GlContext::ClearDepthStencilBuffer(DepthStencilBuffer* abstractDepthStencilBuffer, unsigned stencil)
 {
-	BindServiceFramebuffer();
-
 	GlDepthStencilBuffer* depthStencilBuffer = fast_cast<GlDepthStencilBuffer*>(abstractDepthStencilBuffer);
+	GLuint name = depthStencilBuffer->GetName();
 
-	glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GetDummyRenderBuffer(depthStencilBuffer->GetWidth(), depthStencilBuffer->GetHeight())->GetName(), 0);
-	glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, depthStencilBuffer->GetName(), 0);
+	if(name)
+	{
+		BindTargetsFramebuffer();
+		GlRenderBuffer* dummyRenderBuffer = GetDummyRenderBuffer(depthStencilBuffer->GetWidth(), depthStencilBuffer->GetHeight());
+		if(dummyRenderBuffer != (RenderBuffer*)boundState.renderBuffers[0])
+		{
+			glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, dummyRenderBuffer->GetName(), 0);
+			boundState.renderBuffers[0] = dummyRenderBuffer;
+		}
+		if(depthStencilBuffer != (DepthStencilBuffer*)boundState.depthStencilBuffer)
+		{
+			glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, name, 0);
+			boundState.depthStencilBuffer = depthStencilBuffer;
+		}
+	}
+	else
+	{
+		BindDefaultFramebuffer();
+	}
+
 	GLint s = stencil;
 	glClearBufferiv(GL_STENCIL, 0, &s);
 	GlSystem::CheckErrors("Can't clear stencil");
@@ -394,12 +415,29 @@ void GlContext::ClearDepthStencilBuffer(DepthStencilBuffer* abstractDepthStencil
 
 void GlContext::ClearDepthStencilBuffer(DepthStencilBuffer* abstractDepthStencilBuffer, float depth, unsigned stencil)
 {
-	BindServiceFramebuffer();
-
 	GlDepthStencilBuffer* depthStencilBuffer = fast_cast<GlDepthStencilBuffer*>(abstractDepthStencilBuffer);
+	GLuint name = depthStencilBuffer->GetName();
 
-	glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GetDummyRenderBuffer(depthStencilBuffer->GetWidth(), depthStencilBuffer->GetHeight())->GetName(), 0);
-	glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, depthStencilBuffer->GetName(), 0);
+	if(name)
+	{
+		BindTargetsFramebuffer();
+		GlRenderBuffer* dummyRenderBuffer = GetDummyRenderBuffer(depthStencilBuffer->GetWidth(), depthStencilBuffer->GetHeight());
+		if(dummyRenderBuffer != (RenderBuffer*)boundState.renderBuffers[0])
+		{
+			glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, dummyRenderBuffer->GetName(), 0);
+			boundState.renderBuffers[0] = dummyRenderBuffer;
+		}
+		if(depthStencilBuffer != (DepthStencilBuffer*)boundState.depthStencilBuffer)
+		{
+			glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, name, 0);
+			boundState.depthStencilBuffer = depthStencilBuffer;
+		}
+	}
+	else
+	{
+		BindDefaultFramebuffer();
+	}
+
 	glClearBufferfi(GL_DEPTH_STENCIL, 0, depth, stencil);
 	GlSystem::CheckErrors("Can't clear depth and stencil");
 }

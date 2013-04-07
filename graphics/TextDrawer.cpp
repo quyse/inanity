@@ -147,6 +147,9 @@ void TextDrawer::Prepare(ptr<Context> context)
 	cs.vertexShader = helper->vs;
 	cs.pixelShader = helper->ps;
 	cs.blendState = helper->bs;
+	cs.cullMode = ContextState::cullModeNone;
+	cs.depthTestFunc = ContextState::depthTestFuncAlways;
+	cs.depthWrite = false;
 	helper->ugSymbols->Apply(cs);
 
 	// сбросить текущий шрифт и текстуру

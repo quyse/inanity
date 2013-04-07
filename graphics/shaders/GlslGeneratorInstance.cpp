@@ -307,6 +307,7 @@ void GlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 		glsl << ')';
 		break;
 	case OperationNode::operationMultiply:
+	case OperationNode::operationMul:
 		glsl << '(';
 		PrintNode(node->GetA());
 		glsl << ") * (";
@@ -505,7 +506,7 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 	RegisterNode(rootNode);
 
 	// заголовок файла
-	glsl << "#version 150\n";
+	glsl << "#version 330\n";
 
 	// вывести атрибуты в качестве входных переменных, если это вершинный шейдер
 	if(shaderType == ShaderTypes::vertex)

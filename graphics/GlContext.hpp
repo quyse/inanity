@@ -15,19 +15,10 @@ class GlRenderBuffer;
 class GlContext : public Context
 {
 private:
-	/// Фреймбуфер для установки нестандартных рендертаргетов.
-	GLuint targetsFramebuffer;
-	/// Фреймбуфер для вспомогательных операций.
-	GLuint serviceFramebuffer;
+	/// Фреймбуфер для установки нестандартных рендертаргетов (целевой фреймбуфер).
+	GLuint targetFramebuffer;
 	/// Текущий фреймбуфер.
-	/** То есть тот, который должен быть. Если флажок грязности фреймбуфера
-	установлен, то он может быть неправильным.
-	В сущности, может быть равен только targetsFramebuffer или 0 (нет фреймбуфера).
-	*/
-	GLuint currentFramebuffer;
-	/// Флажок "грязности" текущего фреймбуфера.
-	/** Если он стоит, то буфер следует установить в currentFramebuffer. */
-	bool dirtyCurrentFramebuffer;
+	GLuint boundFramebuffer;
 
 	/// Кэш программ.
 	ptr<GlInternalProgramCache> programCache;
@@ -35,7 +26,7 @@ private:
 	ptr<GlInternalProgram> boundProgram;
 
 	void BindTargetsFramebuffer();
-	void BindServiceFramebuffer();
+	void BindDefaultFramebuffer();
 	/// Выполнить обновление в API всех "грязных" состояний.
 	void Update();
 

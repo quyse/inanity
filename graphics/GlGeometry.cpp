@@ -16,10 +16,8 @@ int GlGeometry::GetIndicesType() const
 	{
 	case 1:
 		return GL_UNSIGNED_BYTE;
-		break;
 	case 2:
 		return GL_UNSIGNED_SHORT;
-		break;
 	case 4:
 		return GL_UNSIGNED_INT;
 	default:

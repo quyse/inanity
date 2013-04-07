@@ -195,22 +195,23 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, const Prese
 		if(!wglMakeCurrent(hdc, hglrcTemp))
 			THROW_SECONDARY_EXCEPTION("Can't make temp OpenGL context current", Exception::SystemError());
 
-		// время для инициализации GLEW
-		GlSystem::InitGLEW();
-
 		// создать настоящий контекст
 		int attribs[] =
 		{
 			WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
 			WGL_CONTEXT_MINOR_VERSION_ARB, 2,
-			WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+			WGL_CONTEXT_FLAGS_ARB, 0
+#ifdef _DEBUG
+				| WGL_CONTEXT_DEBUG_BIT_ARB
+#endif
+			,
 			WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
 			0, 0
 		};
-		hglrc = wglCreateContextAttribsARB(hdc, 0, attribs);
 		PFNWGLCREATECONTEXTATTRIBSARBPROC p = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
 		if(!p)
 			THROW_PRIMARY_EXCEPTION("ppp");
+		hglrc = p(hdc, 0, attribs);
 		if(!hglrc)
 			THROW_PRIMARY_EXCEPTION("Can't create OpenGL window context");
 
@@ -220,6 +221,11 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, const Prese
 
 		// удалить временный контекст
 		wglDeleteContext(hglrcTemp);
+
+		// инициализировать GLEW ещё раз
+		GlSystem::InitGLEW();
+
+		GlSystem::ClearErrors();
 
 		// установить размер окна
 		SetWindowPos(output->GetHWND(), NULL, 0, 0, mode.width, mode.height, SWP_NOMOVE | SWP_NOZORDER);
