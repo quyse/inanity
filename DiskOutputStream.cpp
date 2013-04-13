@@ -8,6 +8,8 @@ DiskOutputStream::DiskOutputStream(ptr<Handle> handle) : handle(handle)
 
 #ifdef ___INANITY_WINDOWS
 
+#include "windows.hpp"
+
 void DiskOutputStream::Write(const void *data, size_t size)
 {
 	if((DWORD)size != size)
@@ -20,6 +22,8 @@ void DiskOutputStream::Write(const void *data, size_t size)
 #endif // ___INANITY_WINDOWS
 
 #ifdef ___INANITY_LINUX
+
+#include <unistd.h>
 
 void DiskOutputStream::Write(const void *data, size_t size)
 {
