@@ -2,13 +2,19 @@
 #include "Handle.hpp"
 #include "Exception.hpp"
 
+BEGIN_INANITY
+
 DiskOutputStream::DiskOutputStream(ptr<Handle> handle) : handle(handle)
 {
 }
 
+END_INANITY
+
 #ifdef ___INANITY_WINDOWS
 
 #include "windows.hpp"
+
+BEGIN_INANITY
 
 void DiskOutputStream::Write(const void *data, size_t size)
 {
@@ -19,11 +25,15 @@ void DiskOutputStream::Write(const void *data, size_t size)
 		THROW_PRIMARY_EXCEPTION("Disk write error");
 }
 
+END_INANITY
+
 #endif // ___INANITY_WINDOWS
 
 #ifdef ___INANITY_LINUX
 
 #include <unistd.h>
+
+BEGIN_INANITY
 
 void DiskOutputStream::Write(const void *data, size_t size)
 {
@@ -37,5 +47,7 @@ void DiskOutputStream::Write(const void *data, size_t size)
 		dataPtr += written;
 	}
 }
+
+END_INANITY
 
 #endif // ___INANITY_LINUX

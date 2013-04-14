@@ -5,6 +5,8 @@
 #include <string.h>
 #include <stdio.h>
 
+BEGIN_INANITY
+
 EventLoop::ConnectRequest::ConnectRequest(ptr<EventLoop> eventLoop, ptr<ConnectHandler> connectHandler)
 	: eventLoop(eventLoop), connectHandler(connectHandler), stream(0)
 {
@@ -173,3 +175,5 @@ void EventLoop::Run()
 {
 	uv_run(loop);
 }
+
+END_INANITY

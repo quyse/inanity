@@ -8,8 +8,6 @@ BEGIN_INANITY
 
 ManagedHeap managedHeap;
 
-END_INANITY
-
 #ifdef ___INANITY_TRACE_HEAP
 ManagedHeap::AllocationInfo::AllocationInfo(size_t number, size_t size) : number(number), size(size)
 {
@@ -122,8 +120,6 @@ void ManagedHeap::SetAllocationInfo(void* data, const char* info)
 	if(i != allocations.end())
 		i->second.info = info;
 }
-
-BEGIN_INANITY
 
 void ManagedHeapSetAllocationInfo(void* data, const char* info)
 {

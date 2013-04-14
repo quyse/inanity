@@ -1,6 +1,8 @@
 #include "HandlerQueue.hpp"
 #include "CriticalCode.hpp"
 
+BEGIN_INANITY
+
 HandlerQueue::EnqueueHandler::EnqueueHandler(ptr<VoidHandler> handler)
 : handler(handler) {}
 
@@ -79,3 +81,5 @@ ptr<VoidHandler> HandlerQueue::CreateEnqueueHandler(ptr<VoidHandler> handler)
 {
 	return NEW(EnqueueHandler(handler));
 }
+
+END_INANITY

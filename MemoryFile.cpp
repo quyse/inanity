@@ -1,6 +1,8 @@
 #include "MemoryFile.hpp"
 #include <string.h>
 
+BEGIN_INANITY
+
 MemoryFile::MemoryFile(size_t size) : size(size)
 {
 	data = size ? new char[size] : 0;
@@ -32,3 +34,5 @@ size_t MemoryFile::GetSize() const
 {
 	return size;
 }
+
+END_INANITY

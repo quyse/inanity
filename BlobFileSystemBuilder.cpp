@@ -10,6 +10,8 @@
 #include "scripting_impl.hpp"
 #include <cstring>
 
+BEGIN_INANITY
+
 SCRIPTABLE_MAP_BEGIN(BlobFileSystemBuilder, Inanity.BlobFileSystemBuilder);
 	SCRIPTABLE_CONSTRUCTOR(BlobFileSystemBuilder, ptr<OutputStream>);
 	SCRIPTABLE_METHOD(BlobFileSystemBuilder, AddFile);
@@ -86,3 +88,5 @@ void BlobFileSystemBuilder::Finalize()
 		THROW_SECONDARY_EXCEPTION("Can't finalize blob file system", exception);
 	}
 }
+
+END_INANITY

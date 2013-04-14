@@ -5,6 +5,8 @@
 #include "Exception.hpp"
 #include "scripting_impl.hpp"
 
+BEGIN_INANITY
+
 SCRIPTABLE_MAP_BEGIN(FileSystem, Inanity.FileSystem);
 	SCRIPTABLE_METHOD(FileSystem, LoadFile);
 	SCRIPTABLE_METHOD(FileSystem, TryLoadFile);
@@ -87,3 +89,5 @@ void FileSystem::GetAllDirectoryEntries(const String& directoryName, std::vector
 			GetAllDirectoryEntries(String(entry), entries);
 	}
 }
+
+END_INANITY

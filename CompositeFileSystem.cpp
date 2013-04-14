@@ -2,6 +2,8 @@
 #include "File.hpp"
 #include "Exception.hpp"
 
+BEGIN_INANITY
+
 ptr<FileSystem> CompositeFileSystem::GetFileSystemForPath(String& path)
 {
 	//перебрать файловые системы
@@ -88,3 +90,5 @@ void CompositeFileSystem::SaveFile(ptr<File> file, const String& fileName)
 		THROW_SECONDARY_EXCEPTION("Can't save file " + fileName + " into composite file system", exception);
 	}
 }
+
+END_INANITY

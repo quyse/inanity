@@ -5,6 +5,8 @@
 #include "scripting_impl.hpp"
 #include <memory.h>
 
+BEGIN_INANITY
+
 SCRIPTABLE_MAP_BEGIN(CompressStream, Inanity.CompressStream);
 	SCRIPTABLE_PARENT(OutputStream);
 	SCRIPTABLE_METHOD(CompressStream, CreateMax);
@@ -202,3 +204,5 @@ ptr<CompressStream> CompressStream::CreateMax(ptr<OutputStream> outputStream)
 {
 	return NEW(CompressStream(outputStream, compressionMax));
 }
+
+END_INANITY

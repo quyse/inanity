@@ -4,6 +4,8 @@
 #include "Exception.hpp"
 #include <cstring>
 
+BEGIN_INANITY
+
 Out2InStream::Reader::Reader(ptr<Out2InStream> stream)
 	: stream(stream), firstOffset(0), flushed(false)
 {
@@ -106,3 +108,5 @@ ptr<InputStream> Out2InStream::CreateInputStream()
 		reader->Push(0);
 	return reader;
 }
+
+END_INANITY

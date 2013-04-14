@@ -4,6 +4,8 @@
 #include <pthread.h>
 #endif
 
+BEGIN_INANITY
+
 CriticalSection::CriticalSection()
 {
 	try
@@ -53,3 +55,5 @@ void CriticalSection::Leave()
 		THROW_SECONDARY_EXCEPTION("Can't leave critical section", Exception::SystemError());
 #endif
 }
+
+END_INANITY

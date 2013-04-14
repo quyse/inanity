@@ -4,6 +4,8 @@
 #include "utf8.h"
 #include <cstring>
 
+BEGIN_INANITY
+
 SCRIPTABLE_MAP_BEGIN(Strings, Inanity.Strings);
 	SCRIPTABLE_METHOD(Strings, String2File);
 	SCRIPTABLE_METHOD(Strings, File2String);
@@ -56,3 +58,5 @@ String Strings::ToHex(const void* data, size_t size)
 	}
 	return str;
 }
+
+END_INANITY

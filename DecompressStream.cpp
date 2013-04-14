@@ -6,6 +6,8 @@
 #include "scripting_impl.hpp"
 #include <memory.h>
 
+BEGIN_INANITY
+
 SCRIPTABLE_MAP_BEGIN(DecompressStream, Inanity.DecompressStream);
 	SCRIPTABLE_PARENT(InputStream);
 	SCRIPTABLE_CONSTRUCTOR(DecompressStream, ptr<InputStream>);
@@ -153,3 +155,5 @@ ptr<File> DecompressStream::DecompressFile(ptr<File> file)
 		THROW_SECONDARY_EXCEPTION("Can't decompress to file", exception);
 	}
 }
+
+END_INANITY

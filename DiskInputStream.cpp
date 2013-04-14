@@ -6,6 +6,8 @@
 
 #include "windows.hpp"
 
+BEGIN_INANITY
+
 size_t DiskInputStream::Read(void *data, size_t size)
 {
 	if((DWORD)size != size)
@@ -26,6 +28,8 @@ size_t DiskInputStream::GetSize() const
 	return returnSize;
 }
 
+END_INANITY
+
 #endif // ___INANITY_WINDOWS
 
 #ifdef ___INANITY_LINUX
@@ -34,6 +38,8 @@ size_t DiskInputStream::GetSize() const
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+BEGIN_INANITY
 
 size_t DiskInputStream::Read(void *data, size_t size)
 {
@@ -64,8 +70,14 @@ size_t DiskInputStream::GetSize() const
 	return st.st_size;
 }
 
+END_INANITY
+
 #endif // ___INANITY_LINUX
+
+BEGIN_INANITY
 
 DiskInputStream::DiskInputStream(ptr<Handle> handle) : handle(handle)
 {
 }
+
+END_INANITY

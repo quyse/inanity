@@ -2,6 +2,8 @@
 #include "scripting_impl.hpp"
 #include <algorithm>
 
+BEGIN_INANITY
+
 SCRIPTABLE_MAP_BEGIN(InputStream, Inanity.InputStream);
 SCRIPTABLE_MAP_END();
 
@@ -19,3 +21,5 @@ bigsize_t InputStream::Skip(bigsize_t size)
 	}
 	return skipped;
 }
+
+END_INANITY

@@ -25,14 +25,6 @@ typedef unsigned long long bigsize_t;
 #define BEGIN_INANITY namespace Inanity {
 #define END_INANITY }
 
-#ifdef INANITY_LIB
-
-BEGIN_INANITY
-END_INANITY
-using namespace Inanity;
-
-#endif
-
 BEGIN_INANITY
 
 /// "Быстрое" преобразование типа.

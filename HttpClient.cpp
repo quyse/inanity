@@ -7,6 +7,8 @@
 #include <cstdlib>
 #include <sstream>
 
+BEGIN_INANITY
+
 // простой URL-парсер, выделяющий хост, порт и путь
 static void parseUrl(const String& url, String& host, int& port, String& path)
 {
@@ -92,3 +94,5 @@ void HttpClient::Fetch(ptr<EventLoop> eventLoop, const String& url, ptr<OutputSt
 		THROW_SECONDARY_EXCEPTION("Can't fetch http", exception);
 	}
 }
+
+END_INANITY

@@ -13,6 +13,8 @@
 
 #include "scripting_impl.hpp"
 
+BEGIN_INANITY
+
 SCRIPTABLE_MAP_BEGIN(Exception, Inanity.Exception);
 SCRIPTABLE_MAP_END();
 
@@ -81,3 +83,5 @@ ptr<Exception> Exception::SystemError(int errorCode)
 
 #endif // ___INANITY_LINUX
 }
+
+END_INANITY

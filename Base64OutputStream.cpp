@@ -1,6 +1,8 @@
 #include "Base64OutputStream.hpp"
 #include "Exception.hpp"
 
+BEGIN_INANITY
+
 const char Base64OutputStream::schema[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 unsigned char Base64OutputStream::inverseSchema[256];
 
@@ -137,3 +139,5 @@ void Base64OutputStream::Flush()
 	else
 		ProcessDecodeBuffer();
 }
+
+END_INANITY

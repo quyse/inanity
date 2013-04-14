@@ -4,6 +4,8 @@
 #include "Exception.hpp"
 #include <memory.h>
 
+BEGIN_INANITY
+
 /* Реализация в базе SQLite файловой системы.
 Структура базы описана в конструкторе.
 Сейчас операции выполняются эффективно, кроме GetDirectoryEntries -
@@ -298,3 +300,5 @@ void SQLiteFileSystem::GetAllDirectoryEntries(const String& directoryName, std::
 {
 	GetEntries(directoryName, entries, true);
 }
+
+END_INANITY

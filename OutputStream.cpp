@@ -4,6 +4,8 @@
 #include "scripting_impl.hpp"
 #include <string.h>
 
+BEGIN_INANITY
+
 SCRIPTABLE_MAP_BEGIN(OutputStream, Inanity.OutputStream);
 SCRIPTABLE_MAP_END();
 
@@ -30,3 +32,5 @@ bigsize_t OutputStream::ReadAllFromStream(ptr<InputStream> inputStream)
 	}
 	return totalRead;
 }
+
+END_INANITY

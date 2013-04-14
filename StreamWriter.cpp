@@ -5,6 +5,8 @@
 #include <alloca.h>
 #endif
 
+BEGIN_INANITY
+
 StreamWriter::StreamWriter(ptr<OutputStream> stream) : stream(stream), written(0)
 {
 }
@@ -130,3 +132,5 @@ void StreamWriter::WriteGap(size_t alignment)
 		Write(data, alignment);
 	}
 }
+
+END_INANITY

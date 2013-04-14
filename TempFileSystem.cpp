@@ -1,6 +1,8 @@
 ﻿#include "TempFileSystem.hpp"
 #include "File.hpp"
 
+BEGIN_INANITY
+
 String TempFileSystem::staticResourceName = "/inanity/tempfs";
 
 ptr<File> TempFileSystem::TryLoadFile(const String& fileName)
@@ -18,3 +20,5 @@ ptr<TempFileSystem> TempFileSystem::CreateStaticResource(ResourceLoader* resourc
 {
 	return NEW(TempFileSystem());
 }
+
+END_INANITY

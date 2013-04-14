@@ -3,6 +3,8 @@
 #include "BufferedOutputStream.hpp"
 #include "Exception.hpp"
 
+BEGIN_INANITY
+
 BufferedFileSystem::BufferedFileSystem(ptr<FileSystem> fileSystem)
 : FilterFileSystem(fileSystem) {}
 
@@ -29,3 +31,5 @@ ptr<OutputStream> BufferedFileSystem::SaveStream(const String& fileName)
 		THROW_SECONDARY_EXCEPTION("Can't save stream in buffered file system", exception);
 	}
 }
+
+END_INANITY

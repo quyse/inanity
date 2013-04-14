@@ -3,6 +3,8 @@
 #include "MemoryFile.hpp"
 #include <string.h>
 
+BEGIN_INANITY
+
 ClientSocket::ClientSocket(ptr<EventLoop> eventLoop, uv_tcp_t* stream) :
 	Socket(eventLoop, stream)
 {
@@ -94,3 +96,5 @@ void ClientSocket::SocketOutputStream::Flush()
 {
 	clientSocket->Shutdown();
 }
+
+END_INANITY

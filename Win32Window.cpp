@@ -6,6 +6,8 @@
 #include "graphics/Win32Output.hpp"
 #include <windowsx.h>
 
+BEGIN_INANITY
+
 Win32Window* Win32Window::singleWindow = 0;
 
 Win32Window::Win32Window(ATOM windowClass, const String& title) : active(true), graphicsPresenter(0)
@@ -200,3 +202,5 @@ void Win32Window::Run(ptr<ActiveHandler> activeHandler)
 {
 	while(Do(activeHandler));
 }
+
+END_INANITY

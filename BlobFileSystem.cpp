@@ -6,6 +6,8 @@
 #include "scripting_impl.hpp"
 #include <string.h>
 
+BEGIN_INANITY
+
 SCRIPTABLE_MAP_BEGIN(BlobFileSystem, Inanity.BlobFileSystem);
 	SCRIPTABLE_PARENT(FileSystem);
 	SCRIPTABLE_CONSTRUCTOR(BlobFileSystem, ptr<File>);
@@ -85,3 +87,5 @@ bool BlobFileSystem::IsFileExists(const String& fileName) const
 {
 	return files.find(fileName) != files.end();
 }
+
+END_INANITY
