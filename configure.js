@@ -15,7 +15,6 @@ exports.configureCompiler = function(objectFile, compiler) {
 		// .cpp-файл
 		source = source.replace(/\./g, '/') + '.cpp';
 	compiler.setSourceFile(source);
-	compiler.addMacro('INANITY_LIB');
 };
 
 /**
