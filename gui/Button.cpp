@@ -3,6 +3,8 @@
 #include "Visuals.hpp"
 #include "Notifications.hpp"
 
+BEGIN_INANITY_GUI
+
 Button::Button(ptr<Visualizer> visualizer) : Element(visualizer), pressed(false)
 {
 }
@@ -42,3 +44,5 @@ void Button::EventMouseLeave()
 	Element::EventMouseLeave();
 	pressed = false;
 }
+
+END_INANITY_GUI

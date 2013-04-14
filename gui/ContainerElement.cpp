@@ -2,6 +2,8 @@
 #include "Visualizer.hpp"
 #include "Notificator.hpp"
 
+BEGIN_INANITY_GUI
+
 ContainerElement::ContainerElement(ptr<Visualizer> visualizer) : Element(visualizer)
 {
 }
@@ -121,3 +123,5 @@ void ContainerElement::EventKeyPress(wchar_t key)
 	if(focusedElement)
 		focusedElement->EventKeyPress(key);
 }
+
+END_INANITY_GUI

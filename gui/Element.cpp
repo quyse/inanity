@@ -2,6 +2,8 @@
 #include "Visualizer.hpp"
 #include "ContainerElement.hpp"
 
+BEGIN_INANITY_GUI
+
 Element::Element(ptr<Visualizer> visualizer)
 	: visualizer(visualizer), parent(0), position(0, 0), size(1, 1), focused(false), moused(false)
 {
@@ -52,6 +54,7 @@ void Element::SetFocus()
 {
 	//если мы еще не в фокусе
 	if(!focused)
+	{
 		//если есть родительский элемент
 		if(parent)
 			//запросить у него фокус
@@ -59,6 +62,7 @@ void Element::SetFocus()
 		//иначе мы являемся корневым элементом, и ничего запрашивать не надо
 		else
 			EventSetFocus();
+	}
 }
 
 bool Element::IsPositionInto(Position position) const
@@ -109,3 +113,5 @@ void Element::EventKeyUp(Key key)
 void Element::EventKeyPress(wchar_t key)
 {
 }
+
+END_INANITY_GUI

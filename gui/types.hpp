@@ -7,9 +7,9 @@
 BEGIN_INANITY_GUI
 
 /// Тип, используемый для указания позиции.
-typedef float2 Position;
+typedef Math::float2 Position;
 /// Тип, используемый для указания размера.
-typedef float2 Size;
+typedef Math::float2 Size;
 
 /// Кнопки мыши.
 enum MouseButton
