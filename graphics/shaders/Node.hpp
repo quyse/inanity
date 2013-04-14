@@ -16,6 +16,8 @@ public:
 	{
 		/// Константа float.
 		typeFloatConst,
+		/// Константа int.
+		typeIntConst,
 		/// Атрибут.
 		typeAttribute,
 		/// Uniform-переменная.

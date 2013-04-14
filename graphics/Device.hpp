@@ -25,6 +25,7 @@ class UniformBuffer;
 class Layout;
 class VertexBuffer;
 class IndexBuffer;
+class Geometry;
 class Texture;
 class Image2DData;
 class SamplerState;
@@ -74,6 +75,9 @@ public:
 	\param indexSize Размер одного индекса - 2 или 4.
 	*/
 	virtual ptr<IndexBuffer> CreateIndexBuffer(ptr<File> file, int indexSize) = 0;
+
+	/// Создать геометрию.
+	virtual ptr<Geometry> CreateGeometry(ptr<VertexBuffer> vertexBuffer, ptr<IndexBuffer> indexBuffer) = 0;
 
 	/// Создать статическую текстуру из графического файла.
 	/** FIXME: Метод должен быть удалён. Для создания текстур нужно использовать

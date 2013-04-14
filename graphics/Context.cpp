@@ -8,14 +8,10 @@
 #include "PixelShader.hpp"
 #include "VertexBuffer.hpp"
 #include "IndexBuffer.hpp"
+#include "Geometry.hpp"
 #include "BlendState.hpp"
 
 Context::Context() : forceReset(true) {}
-
-const ContextState& Context::GetBoundState() const
-{
-	return boundState;
-}
 
 ContextState& Context::GetTargetState()
 {

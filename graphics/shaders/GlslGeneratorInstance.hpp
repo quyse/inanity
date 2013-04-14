@@ -2,7 +2,6 @@
 #define ___INANITY_GRAPHICS_SHADERS_GLSL_GENERATOR_INSTANCE_HPP___
 
 #include "ShaderType.hpp"
-#include "Semantic.hpp"
 #include "../DataType.hpp"
 #include <vector>
 #include <unordered_map>
@@ -19,26 +18,16 @@ BEGIN_INANITY_SHADERS
 class Node;
 class AttributeNode;
 class TempNode;
-class SpecialNode;
 class UniformGroup;
 class UniformNode;
 class SamplerNode;
-class TransitionalNode;
+class TransformedNode;
+class RasterizedNode;
 class OperationNode;
 
 /// Экземпляр генератора шейдеров на GLSL.
 class GlslGeneratorInstance
 {
-private:
-	/// Элемент структурированного буфера (атрибуты, промежуточные и выходные переменные).
-	struct Structured
-	{
-		DataType valueType;
-		Semantic semantic;
-
-		Structured(DataType valueType, Semantic semantic);
-	};
-
 private:
 	/// Исходный код шейдера.
 	ptr<Node> rootNode;
@@ -47,22 +36,25 @@ private:
 	/// Результирующий текст шейдера на GLSL.
 	std::ostringstream glsl;
 
+	/// Префикс имени uniform-буфера.
+	const char* uniformBufferPrefix;
+	/// Префикс имени семплера.
+	const char* samplerPrefix;
+
 	/// Атрибутные переменные.
 	std::vector<ptr<AttributeNode> > attributes;
 	/// Временные переменные.
 	/** Мап узел-индекс. */
 	std::unordered_map<ptr<TempNode>, int> temps;
 	int tempsCount;
-	/// Специальные переменные.
-	std::vector<std::pair<Semantic, ptr<SpecialNode> > > specials;
 	/// uniform-переменные по группам.
 	std::vector<std::pair<ptr<UniformGroup>, ptr<UniformNode> > > uniforms;
 	/// Семплеры.
 	std::vector<ptr<SamplerNode> > samplers;
 	/// transformed-переменные.
-	std::vector<ptr<TransitionalNode> > transformed;
+	std::vector<ptr<TransformedNode> > transformed;
 	/// rasterized-переменные.
-	std::vector<ptr<TransitionalNode> > rasterized;
+	std::vector<ptr<RasterizedNode> > rasterized;
 
 private:
 	/// Напечатать имя типа.
@@ -73,13 +65,8 @@ private:
 	void PrintNode(Node* node);
 	/// Напечатать узел операции.
 	void PrintOperationNode(OperationNode* node);
-	/// Вывести структуру.
-	void PrintStructure(const std::vector<Structured>& elements, const char* variableNamePrefix, const char* specifier);
 	/// Вывести uniform-буферы.
 	void PrintUniforms();
-
-	template <typename NodeType>
-	static void ProcessTransitionalNodes(std::vector<ptr<NodeType> >& nodes, std::vector<Structured>& structure);
 
 public:
 	GlslGeneratorInstance(ptr<Node> rootNode, ShaderType shaderType);

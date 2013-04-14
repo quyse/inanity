@@ -11,6 +11,7 @@
 #include "DxUniformBuffer.hpp"
 #include "DxVertexBuffer.hpp"
 #include "DxIndexBuffer.hpp"
+#include "DxGeometry.hpp"
 #include "Layout.hpp"
 #include "DxInternalInputLayout.hpp"
 #include "Image2DData.hpp"
@@ -324,6 +325,21 @@ ptr<IndexBuffer> DxDevice::CreateIndexBuffer(ptr<File> file, int indexSize)
 	catch(Exception* exception)
 	{
 		THROW_SECONDARY_EXCEPTION("Can't create index buffer", exception);
+	}
+}
+
+ptr<Geometry> DxDevice::CreateGeometry(ptr<VertexBuffer> abstractVertexBuffer, ptr<IndexBuffer> abstractIndexBuffer)
+{
+	try
+	{
+		ptr<DxVertexBuffer> vertexBuffer = abstractVertexBuffer.FastCast<DxVertexBuffer>();
+		ptr<DxIndexBuffer> indexBuffer = abstractIndexBuffer.FastCast<DxIndexBuffer>();
+
+		return NEW(DxGeometry(vertexBuffer, indexBuffer));
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create geometry", exception);
 	}
 }
 

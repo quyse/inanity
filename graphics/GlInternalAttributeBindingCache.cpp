@@ -1,30 +1,20 @@
 #include "GlInternalAttributeBindingCache.hpp"
 #include "GlInternalAttributeBinding.hpp"
-#include "GlInternalProgram.hpp"
-#include "GlContext.hpp"
+#include "GlDevice.hpp"
 #include "Layout.hpp"
 
-GlInternalAttributeBindingCache::Key::Key(Layout* vertexLayout, GlInternalProgram* program)
-: vertexLayout(vertexLayout), program(program) {}
+GlInternalAttributeBindingCache::GlInternalAttributeBindingCache(GlDevice* device)
+: device(device) {}
 
-GlInternalAttributeBindingCache::Key::operator size_t() const
+ptr<GlInternalAttributeBinding> GlInternalAttributeBindingCache::GetBinding(Layout* vertexLayout)
 {
-	return (size_t)vertexLayout | (size_t)program;
-}
-
-GlInternalAttributeBindingCache::GlInternalAttributeBindingCache(GlContext* context)
-: context(context) {}
-
-ptr<GlInternalAttributeBinding> GlInternalAttributeBindingCache::GetBinding(Layout* vertexLayout, GlInternalProgram* program)
-{
-	Key key(vertexLayout, program);
-	Bindings::const_iterator i = bindings.find(key);
+	Bindings::const_iterator i = bindings.find(vertexLayout);
 	if(i != bindings.end())
 		return i->second;
 
-	ptr<GlInternalAttributeBinding> binding = context->CreateInternalAttributeBinding(vertexLayout, program);
+	ptr<GlInternalAttributeBinding> binding = device->CreateInternalAttributeBinding(vertexLayout);
 
-	bindings[key] = binding;
+	bindings[vertexLayout] = binding;
 
 	return binding;
 }

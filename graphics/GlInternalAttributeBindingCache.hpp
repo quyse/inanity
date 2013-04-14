@@ -9,29 +9,21 @@ BEGIN_INANITY_GRAPHICS
 
 class GlInternalAttributeBinding;
 class Layout;
-class GlInternalProgram;
-class GlContext;
+class GlDevice;
 
 /// Кэш привязок OpenGL.
 class GlInternalAttributeBindingCache : public Object
 {
 private:
-	struct Key
-	{
-		Layout* vertexLayout;
-		GlInternalProgram* program;
-		Key(Layout* vertexLayout, GlInternalProgram* program);
-		operator size_t() const;
-	};
-	typedef std::unordered_map<Key, ptr<GlInternalAttributeBinding> > Bindings;
+	typedef std::unordered_map<Layout*, ptr<GlInternalAttributeBinding> > Bindings;
 	Bindings bindings;
 
-	GlContext* context;
+	GlDevice* device;
 
 public:
-	GlInternalAttributeBindingCache(GlContext* context);
+	GlInternalAttributeBindingCache(GlDevice* device);
 
-	ptr<GlInternalAttributeBinding> GetBinding(Layout* vertexLayout, GlInternalProgram* program);
+	ptr<GlInternalAttributeBinding> GetBinding(Layout* vertexLayout);
 };
 
 END_INANITY_GRAPHICS

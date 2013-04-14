@@ -7,7 +7,7 @@
 
 BEGIN_INANITY_GRAPHICS
 
-/// Класс привязки конкретного VertexLayout'а к конкретному вершинному шейдеру.
+/// Класс привязки VertexLayout'а.
 class GlInternalAttributeBinding : public Object
 {
 public:

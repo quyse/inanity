@@ -16,6 +16,7 @@
 #include "graphics/shaders/GlslGeneratorInstance.hpp"
 #include "graphics/shaders/HlslGenerator.hpp"
 #include "graphics/shaders/HlslGeneratorInstance.hpp"
+#include "graphics/shaders/IntConstNode.hpp"
 #include "graphics/shaders/Interpolant.ipp"
 #include "graphics/shaders/LValue.ipp"
 #include "graphics/shaders/Node.hpp"

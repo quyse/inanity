@@ -102,7 +102,7 @@ var libraries = {
 			'graphics.DxSystem', 'graphics.DxDevice', 'graphics.DxPresenter', 'graphics.DxContext',
 			'graphics.DxInternalInputLayout', 'graphics.DxInternalInputLayoutCache',
 			'graphics.DxRenderBuffer', 'graphics.DxDepthStencilBuffer', 'graphics.DxTexture', 'graphics.DxUniformBuffer',
-			'graphics.DxVertexBuffer', 'graphics.DxIndexBuffer',
+			'graphics.DxVertexBuffer', 'graphics.DxIndexBuffer', 'graphics.DxGeometry',
 			'graphics.DxVertexShader', 'graphics.DxPixelShader',
 			'graphics.DxSamplerState', 'graphics.DxBlendState',
 			'graphics.D3D10BlobFile', 'graphics.DxShaderCompiler', 'graphics.HlslSource'
@@ -115,10 +115,10 @@ var libraries = {
 			'graphics.GlInternalTexture', 'graphics.GlInternalProgram', 'graphics.GlInternalProgramCache',
 			'graphics.GlInternalAttributeBinding', 'graphics.GlInternalAttributeBindingCache',
 			'graphics.GlRenderBuffer', 'graphics.GlDepthStencilBuffer', 'graphics.GlTexture', 'graphics.GlUniformBuffer',
-			'graphics.GlVertexBuffer', 'graphics.GlIndexBuffer',
+			'graphics.GlVertexBuffer', 'graphics.GlIndexBuffer', 'graphics.GlGeometry',
 			'graphics.GlVertexShader', 'graphics.GlPixelShader',
 			'graphics.GlSamplerState', 'graphics.GlBlendState',
-			'graphics.GlShaderCompiler', 'graphics.GlslSource'
+			'graphics.GlShaderCompiler', 'graphics.GlslSource', 'graphics.GlShaderBindings'
 		]
 	},
 	// ******* подсистема шейдеров
@@ -127,7 +127,7 @@ var libraries = {
 			'graphics.shaders.AttributeNode', 'graphics.shaders.SamplerNode',
 			'graphics.shaders.UniformNode', 'graphics.shaders.UniformGroup',
 			'graphics.shaders.SwizzleNode', 'graphics.shaders.OperationNode',
-			'graphics.shaders.SampleNode', 'graphics.shaders.FloatConstNode',
+			'graphics.shaders.SampleNode', 'graphics.shaders.FloatConstNode', 'graphics.shaders.IntConstNode',
 			'graphics.shaders.SequenceNode',
 			'graphics.shaders.TransformedNode', 'graphics.shaders.RasterizedNode',
 			'graphics.shaders.TempNode', 'graphics.shaders.CastNode',

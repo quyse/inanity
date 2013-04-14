@@ -12,8 +12,7 @@ class SamplerState;
 class UniformBuffer;
 class VertexShader;
 class PixelShader;
-class VertexBuffer;
-class IndexBuffer;
+class Geometry;
 class BlendState;
 
 /// Структура с состоянием контекста рисования.
@@ -46,10 +45,8 @@ struct ContextState
 	/// Привязанный пиксельный шейдер.
 	ptr<PixelShader> pixelShader;
 
-	/// Привязанный вершинный буфер.
-	ptr<VertexBuffer> vertexBuffer;
-	/// Привязанный индексный буфер.
-	ptr<IndexBuffer> indexBuffer;
+	/// Привязанная геометрия.
+	ptr<Geometry> geometry;
 
 	//******* Параметры растеризации.
 	/// Режим заливки.

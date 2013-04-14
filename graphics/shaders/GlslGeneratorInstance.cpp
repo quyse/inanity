@@ -2,6 +2,7 @@
 #include "Node.hpp"
 #include "AttributeNode.hpp"
 #include "FloatConstNode.hpp"
+#include "IntConstNode.hpp"
 #include "OperationNode.hpp"
 #include "SampleNode.hpp"
 #include "SamplerNode.hpp"
@@ -10,10 +11,11 @@
 #include "UniformGroup.hpp"
 #include "UniformNode.hpp"
 #include "TempNode.hpp"
-#include "SpecialNode.hpp"
-#include "TransitionalNode.hpp"
+#include "TransformedNode.hpp"
+#include "RasterizedNode.hpp"
 #include "CastNode.hpp"
 #include "../GlslSource.hpp"
+#include "../GlShaderBindings.hpp"
 #include "../GlSystem.hpp"
 #include "../../File.hpp"
 #include "../../FileSystem.hpp"
@@ -24,12 +26,30 @@
 
 BEGIN_INANITY_SHADERS
 
-GlslGeneratorInstance::Structured::Structured(DataType valueType, Semantic semantic)
-: valueType(valueType), semantic(semantic) {}
-
 GlslGeneratorInstance::GlslGeneratorInstance(ptr<Node> rootNode, ShaderType shaderType)
 : rootNode(rootNode), shaderType(shaderType), tempsCount(0)
-{}
+{
+	try
+	{
+		switch(shaderType)
+		{
+		case ShaderTypes::vertex:
+			uniformBufferPrefix = "UBv";
+			samplerPrefix = "sv";
+			break;
+		case ShaderTypes::pixel:
+			uniformBufferPrefix = "UBp";
+			samplerPrefix = "sp";
+			break;
+		default:
+			THROW_PRIMARY_EXCEPTION("Wrong shader type");
+		}
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create GLSL generator instance", exception);
+	}
+}
 
 void GlslGeneratorInstance::PrintDataType(DataType dataType)
 {
@@ -61,6 +81,7 @@ void GlslGeneratorInstance::RegisterNode(Node* node)
 	switch(node->GetType())
 	{
 	case Node::typeFloatConst:
+	case Node::typeIntConst:
 		break;
 	case Node::typeAttribute:
 		{
@@ -91,20 +112,14 @@ void GlslGeneratorInstance::RegisterNode(Node* node)
 				temps[tempNode] = tempsCount++;
 		}
 		break;
-	case Node::typeSpecial:
-		{
-			SpecialNode* specialNode = fast_cast<SpecialNode*>(node);
-			specials.push_back(std::make_pair(specialNode->GetSemantic(), specialNode));
-		}
-		break;
 	case Node::typeTransformed:
-		transformed.push_back(fast_cast<TransitionalNode*>(node));
+		transformed.push_back(fast_cast<TransformedNode*>(node));
 		break;
 	case Node::typeRasterized:
 		// rasterized-переменые дапустимы только в пиксельном шейдере
 		if(shaderType != ShaderTypes::pixel)
-			THROW_PRIMARY_EXCEPTION("Only pixel shader can have attribute nodes");
-		rasterized.push_back(fast_cast<TransitionalNode*>(node));
+			THROW_PRIMARY_EXCEPTION("Only pixel shader can have rasterized nodes");
+		rasterized.push_back(fast_cast<RasterizedNode*>(node));
 		break;
 	case Node::typeSequence:
 		{
@@ -146,6 +161,9 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 	case Node::typeFloatConst:
 		glsl << std::fixed << std::setprecision(10) << fast_cast<FloatConstNode*>(node)->GetValue() << 'f';
 		break;
+	case Node::typeIntConst:
+		glsl << fast_cast<IntConstNode*>(node)->GetValue();
+		break;
 	case Node::typeAttribute:
 		glsl << "a" << fast_cast<AttributeNode*>(node)->GetSemantic();
 		break;
@@ -171,24 +189,11 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 			glsl << '_' << i->second;
 		}
 		break;
-	case Node::typeSpecial:
-		{
-			const char* str;
-			switch(fast_cast<SpecialNode*>(node)->GetSemantic())
-			{
-			case Semantics::VertexPosition: str = "gl_Position"; break;
-			case Semantics::Instance: str = "gl_InstanceID"; break;
-			default:
-				THROW_PRIMARY_EXCEPTION("Invalid special semantic");
-			}
-			glsl << str;
-		}
-		break;
 	case Node::typeTransformed:
-		glsl << "v" << (int)fast_cast<TransitionalNode*>(node)->GetSemantic();
+		glsl << "v" << fast_cast<TransformedNode*>(node)->GetSemantic();
 		break;
 	case Node::typeRasterized:
-		glsl << "r" << (int)fast_cast<TransitionalNode*>(node)->GetSemantic();
+		glsl << "r" << fast_cast<RasterizedNode*>(node)->GetTarget();
 		break;
 	case Node::typeSequence:
 		{
@@ -212,7 +217,7 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 	case Node::typeSample:
 		{
 			SampleNode* sampleNode = fast_cast<SampleNode*>(node);
-			glsl << "(texture(s" << sampleNode->GetSamplerNode()->GetSlot() << ", ";
+			glsl << "(texture(" << samplerPrefix << sampleNode->GetSamplerNode()->GetSlot() << ", ";
 			PrintNode(sampleNode->GetCoordsNode());
 			glsl << ')';
 			// в GLSL всегда возвращается 4-компонентный вектор, так что возможно, нужно получить компоненты
@@ -254,9 +259,8 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 	case Node::typeCast:
 		{
 			CastNode* castNode = fast_cast<CastNode*>(node);
-			glsl << '(';
 			PrintDataType(castNode->GetCastDataType());
-			glsl << ")(";
+			glsl << '(';
 			PrintNode(castNode->GetA());
 			glsl << ')';
 		}
@@ -303,6 +307,7 @@ void GlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 		glsl << ')';
 		break;
 	case OperationNode::operationMultiply:
+	case OperationNode::operationMul:
 		glsl << '(';
 		PrintNode(node->GetA());
 		glsl << ") * (";
@@ -344,6 +349,19 @@ void GlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 		PrintNode(node->GetB());
 		glsl << ')';
 		break;
+	case OperationNode::operationSetPosition:
+		glsl << "(gl_Position = ";
+		PrintNode(node->GetA());
+		glsl << ')';
+		break;
+	case OperationNode::operationGetInstanceID:
+		glsl << "uint(gl_InstanceID)";
+		break;
+	case OperationNode::operationSaturate:
+		glsl << "clamp(";
+		PrintNode(node->GetA());
+		glsl << ", 0, 1)";
+		break;
 	default:
 		{
 			// остались только функции, которые делаются простым преобразованием имени
@@ -370,7 +388,6 @@ void GlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 				OP(Exp, exp);
 				OP(Exp2, exp2);
 				OP(Log, log);
-				OP(Saturate, saturate);
 				OP(Ddx, ddx);
 				OP(Ddy, ddy);
 				OP(Clip, clip);
@@ -393,34 +410,6 @@ void GlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 			glsl << ')';
 		}
 	}
-}
-
-void GlslGeneratorInstance::PrintStructure(const std::vector<Structured>& variables, const char* variableNamePrefix, const char* specifier)
-{
-	for(size_t i = 0; i < variables.size(); ++i)
-		try
-		{
-			const Structured& variable = variables[i];
-
-			// печатаем определение переменной
-
-			//glsl << '\t';
-			// привязка
-			glsl << "layout(location = " << (int)variable.semantic << ") " << specifier << ' ';
-			// тип переменной
-			PrintDataType(variable.valueType);
-			// имя переменной
-			glsl << ' ' << variableNamePrefix << variable.semantic;
-
-			// конец переменной
-			glsl << ";\n";
-		}
-		catch(Exception* exception)
-		{
-			std::ostringstream s;
-			s << "Can't print variable " << i;
-			THROW_SECONDARY_EXCEPTION(s.str(), exception);
-		}
 }
 
 void GlslGeneratorInstance::PrintUniforms()
@@ -449,7 +438,10 @@ void GlslGeneratorInstance::PrintUniforms()
 
 		// вывести заголовок
 		int slot = uniforms[i].first->GetSlot();
-		glsl << "layout(binding = " << slot << ", std140) uniform UB" << slot << "\n{\n";
+		glsl << "layout(std140) uniform " << uniformBufferPrefix << slot << "\n{\n";
+
+		// текущее смещение от начала буфера
+		int currentOffset = 0;
 
 		// вывести переменные
 		for(size_t k = i; k < j; ++k)
@@ -458,10 +450,27 @@ void GlslGeneratorInstance::PrintUniforms()
 			DataType valueType = uniformNode->GetValueType();
 			int offset = uniformNode->GetOffset();
 			int count = uniformNode->GetCount();
+			int valueSize = GetDataTypeSize(valueType);
 
 			// переменная должна лежать на границе float'а, как минимум
 			if(offset % sizeof(float))
 				THROW_PRIMARY_EXCEPTION("Wrong variable offset: should be on 4-byte boundary");
+
+			// если по умолчанию переменная попадёт в неправильное место, делаем пустые переменные, чтобы занять место
+			// автоматический сдвиг
+			if(currentOffset % sizeof(float4) + valueSize > sizeof(float4))
+				currentOffset = (currentOffset + sizeof(float4) - 1) & ~(sizeof(float4) - 1);
+			// оставшийся сдвиг добиваем пустыми переменными
+			while(currentOffset < offset)
+			{
+				int newOffset = (currentOffset + sizeof(float4)) & ~(sizeof(float4) - 1);
+				if(newOffset > offset)
+					newOffset = offset;
+				int size = (newOffset - currentOffset) / sizeof(float);
+				static const char* dumpTypes[] = { "float", "vec2", "vec3", "vec4" };
+				glsl << '\t' << dumpTypes[size - 1] << " dump" << slot << '_' << currentOffset << '_' << size << ";\n";
+				currentOffset = newOffset;
+			}
 
 			// печатаем определение переменной
 
@@ -474,32 +483,14 @@ void GlslGeneratorInstance::PrintUniforms()
 			if(count > 1)
 				glsl << '[' << count << ']';
 			// если массив, размер элемента должен быть кратен размеру float4
-			if(count > 1 && GetDataTypeSize(valueType) % sizeof(float4))
+			if(count > 1 && valueSize % sizeof(float4))
 				THROW_PRIMARY_EXCEPTION("Size of element of array should be multiply of float4 size");
-
-			// регистр и положение в нём переменной
-			glsl << " : packoffset(c" << (offset / sizeof(float4));
-			// если переменная не начинается ровно на границе регистра, нужно дописать ещё компоненты регистра
-			int registerOffset = offset % sizeof(float4);
-			if(registerOffset)
-			{
-				// получить размер данных
-				int variableSize = GetDataTypeSize(valueType);
-				// переменная не должна пересекать границу регистра
-				if(registerOffset + variableSize > sizeof(float4))
-					THROW_PRIMARY_EXCEPTION("Variable should not intersect a register boundary");
-				// выложить столько буков, сколько нужно
-				registerOffset /= sizeof(float);
-				int endRegisterOffset = registerOffset + variableSize / sizeof(float);
-				glsl << '.';
-				for(int j = registerOffset; j < endRegisterOffset; ++j)
-					glsl << "xyzw"[j];
-			}
-			// конец упаковки
-			glsl << ")";
 
 			// конец переменной
 			glsl << ";\n";
+
+			// смещение для следующей переменной
+			currentOffset += valueSize * count;
 		}
 
 		// окончание
@@ -509,71 +500,59 @@ void GlslGeneratorInstance::PrintUniforms()
 	}
 }
 
-/// Вспомогательная функция: обработать вектор узлов и сделать из него вектор Structured.
-template <typename NodeType>
-void GlslGeneratorInstance::ProcessTransitionalNodes(std::vector<ptr<NodeType> >& nodes, std::vector<Structured>& structure)
-{
-	std::sort(nodes.begin(), nodes.end());
-	nodes.resize(std::unique(nodes.begin(), nodes.end()) - nodes.begin());
-	for(size_t i = 0; i < nodes.size(); ++i)
-	{
-		ptr<NodeType> node = nodes[i];
-		structure.push_back(Structured(node->GetValueType(), node->GetSemantic()));
-	}
-}
-
 ptr<ShaderSource> GlslGeneratorInstance::Generate()
 {
 	// первый проход: зарегистрировать все переменные
 	RegisterNode(rootNode);
 
-	// выборы в зависимости от типа шейдера
-	const char* inputTypeName;
-	const char* inputName;
-	const char* outputTypeName;
-	const char* outputName;
-	const char* profile;
-	std::vector<Structured> inputs;
-	std::vector<Structured> outputs;
-
-	switch(shaderType)
-	{
-	case ShaderTypes::vertex:
-		inputTypeName = "A";
-		inputName = "a";
-		outputTypeName = "V";
-		outputName = "v";
-		profile = "vs";
-
-		ProcessTransitionalNodes<AttributeNode>(attributes, inputs);
-		ProcessTransitionalNodes<TransitionalNode>(transformed, outputs);
-		break;
-	case ShaderTypes::pixel:
-		inputTypeName = "V";
-		inputName = "v";
-		outputTypeName = "R";
-		outputName = "r";
-		profile = "ps";
-
-		ProcessTransitionalNodes<TransitionalNode>(transformed, inputs);
-		ProcessTransitionalNodes<TransitionalNode>(rasterized, outputs);
-		break;
-	default:
-		THROW_PRIMARY_EXCEPTION("Unknown shader type");
-	}
-
 	// заголовок файла
-	glsl << "#version 150\n";
+	glsl << "#version 330\n";
 
-	// интерфейс входных данных
-	//glsl << "in " << inputTypeName << "\n{\n";
-	PrintStructure(inputs, inputName, "in");
-	//glsl << "} " << inputName << ";\n";
-
-	// структура выходных данных
-	//glsl << "out " << outputTypeName << "\n{\n";
-	PrintStructure(outputs, outputName, "out");
-	//glsl << "} " << outputName << ";\n";
+	// вывести атрибуты в качестве входных переменных, если это вершинный шейдер
+	if(shaderType == ShaderTypes::vertex)
+	{
+		std::sort(attributes.begin(), attributes.end());
+		attributes.resize(std::unique(attributes.begin(), attributes.end()) - attributes.begin());
+		for(size_t i = 0; i < attributes.size(); ++i)
+		{
+			ptr<AttributeNode> node = attributes[i];
+			glsl << "layout(location = " << node->GetSemantic() << ") in ";
+			PrintDataType(node->GetValueType());
+			glsl << " a" << node->GetSemantic() << ";\n";
+		}
+	}
+	// вывести промежуточные переменные в любом случае
+	std::sort(transformed.begin(), transformed.end());
+	transformed.resize(std::unique(transformed.begin(), transformed.end()) - transformed.begin());
+	for(size_t i = 0; i < transformed.size(); ++i)
+	{
+		ptr<TransformedNode> node = transformed[i];
+		switch(shaderType)
+		{
+		case ShaderTypes::vertex:
+			glsl << "out ";
+			break;
+		case ShaderTypes::pixel:
+			glsl << "in ";
+			break;
+		}
+		PrintDataType(node->GetValueType());
+		glsl << " v" << node->GetSemantic() << ";\n";
+	}
+	// вывести пиксельные переменные, если это пиксельный шейдер
+	if(shaderType == ShaderTypes::pixel)
+	{
+		std::sort(rasterized.begin(), rasterized.end());
+		rasterized.resize(std::unique(rasterized.begin(), rasterized.end()) - rasterized.begin());
+		for(size_t i = 0; i < rasterized.size(); ++i)
+		{
+			ptr<RasterizedNode> node = rasterized[i];
+			int target = node->GetTarget();
+			glsl << "layout(location = " << target << ") out ";
+			PrintDataType(node->GetValueType());
+			glsl << " r" << target << ";\n";
+		}
+	}
 
 	// вывести uniform-буферы
 	PrintUniforms();
@@ -629,7 +608,7 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 		}
 		// вывести семплер
 		int slot = samplerNode->GetSlot();
-		glsl << "layout(binding = " << slot << ") uniform " << valueTypeStr << "sampler" << dimensionStr << " s" << slot << ";\n";
+		glsl << "uniform " << valueTypeStr << "sampler" << dimensionStr << ' ' << samplerPrefix << slot << ";\n";
 	}
 
 	//** заголовок функции шейдера
@@ -661,7 +640,43 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 	// завершение шейдера
 	glsl << ";\n}\n";
 
-	return NEW(GlslSource(Strings::String2File(glsl.str())));
+	// сформировать список привязок uniform-блоков
+	GlShaderBindings::Bindings uniformBlockBindings(uniforms.size());
+	for(size_t i = 0; i < uniforms.size(); ++i)
+	{
+		int slot = uniforms[i].first->GetSlot();
+		char name[16];
+		sprintf(name, "%s%d", uniformBufferPrefix, slot);
+		uniformBlockBindings[i].first = name;
+		uniformBlockBindings[i].second = slot;
+	}
+
+	// сформировать список привязок семплеров
+	GlShaderBindings::Bindings samplerBindings(samplers.size());
+	for(size_t i = 0; i < samplers.size(); ++i)
+	{
+		int slot = samplers[i]->GetSlot();
+		char name[16];
+		sprintf(name, "%s%d", samplerPrefix, slot);
+		samplerBindings[i].first = name;
+		samplerBindings[i].second = slot;
+	}
+
+	// сформировать список привязок атрибутов
+	GlShaderBindings::Bindings attributeBindings(attributes.size());
+	for(size_t i = 0; i < attributes.size(); ++i)
+	{
+		int semantic = attributes[i]->GetSemantic();
+		char name[16];
+		sprintf(name, "a%d", semantic);
+		attributeBindings[i].first = name;
+		attributeBindings[i].second = semantic;
+	}
+
+	return NEW(GlslSource(
+		Strings::String2File(glsl.str()),
+		NEW(GlShaderBindings(uniformBlockBindings, samplerBindings, attributeBindings))
+	));
 }
 
 END_INANITY_SHADERS

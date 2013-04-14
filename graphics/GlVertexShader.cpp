@@ -1,6 +1,8 @@
 #include "GlVertexShader.hpp"
+#include "GlShaderBindings.hpp"
 
-GlVertexShader::GlVertexShader(GLuint shaderName) : shaderName(shaderName) {}
+GlVertexShader::GlVertexShader(GLuint shaderName, ptr<GlShaderBindings> shaderBindings)
+: shaderName(shaderName), shaderBindings(shaderBindings) {}
 
 GlVertexShader::~GlVertexShader()
 {
@@ -10,4 +12,9 @@ GlVertexShader::~GlVertexShader()
 GLuint GlVertexShader::GetShaderName() const
 {
 	return shaderName;
+}
+
+ptr<GlShaderBindings> GlVertexShader::GetShaderBindings() const
+{
+	return shaderBindings;
 }

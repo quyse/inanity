@@ -1,6 +1,7 @@
 #include "GlInternalProgram.hpp"
 
-GlInternalProgram::GlInternalProgram(GLuint name) : name(name) {}
+GlInternalProgram::GlInternalProgram(GLuint name)
+: name(name) {}
 
 GlInternalProgram::~GlInternalProgram()
 {
@@ -10,9 +11,4 @@ GlInternalProgram::~GlInternalProgram()
 GLuint GlInternalProgram::GetName() const
 {
 	return name;
-}
-
-const std::vector<String>& GlInternalProgram::GetAttributes()
-{
-	return attributes;
 }

@@ -1,6 +1,8 @@
 #include "GlPixelShader.hpp"
+#include "GlShaderBindings.hpp"
 
-GlPixelShader::GlPixelShader(GLuint shaderName) : shaderName(shaderName) {}
+GlPixelShader::GlPixelShader(GLuint shaderName, ptr<GlShaderBindings> shaderBindings)
+: shaderName(shaderName), shaderBindings(shaderBindings) {}
 
 GlPixelShader::~GlPixelShader()
 {
@@ -10,4 +12,9 @@ GlPixelShader::~GlPixelShader()
 GLuint GlPixelShader::GetShaderName() const
 {
 	return shaderName;
+}
+
+ptr<GlShaderBindings> GlPixelShader::GetShaderBindings() const
+{
+	return shaderBindings;
 }

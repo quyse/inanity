@@ -4,11 +4,11 @@
 #include "Expression.hpp"
 #include "AttributeNode.hpp"
 #include "TempNode.hpp"
-#include "SpecialNode.hpp"
 #include "UniformGroup.hpp"
 #include "UniformNode.hpp"
 #include "SamplerNode.hpp"
-#include "TransitionalNode.hpp"
+#include "TransformedNode.hpp"
+#include "RasterizedNode.hpp"
 #include "OperationNode.hpp"
 
 ptr<ShaderSource> GlslGenerator::Generate(Expression code, ShaderType shaderType)

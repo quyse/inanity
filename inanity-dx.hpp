@@ -16,6 +16,7 @@
 #include "graphics/DxContext.hpp"
 #include "graphics/DxDepthStencilBuffer.hpp"
 #include "graphics/DxDevice.hpp"
+#include "graphics/DxGeometry.hpp"
 #include "graphics/DxIndexBuffer.hpp"
 #include "graphics/DxInternalInputLayout.hpp"
 #include "graphics/DxInternalInputLayoutCache.hpp"
