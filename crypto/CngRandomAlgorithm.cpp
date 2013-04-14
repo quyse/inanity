@@ -1,6 +1,8 @@
 #include "CngRandomAlgorithm.hpp"
 #include "../Exception.hpp"
 
+BEGIN_INANITY_CRYPTO
+
 #define NT_SUCCESS(Status) \
 	(((NTSTATUS)(Status)) >= 0)
 
@@ -27,3 +29,5 @@ void CngRandomAlgorithm::GenerateRandom(void* data, size_t size)
 	if(!NT_SUCCESS(BCryptGenRandom(algorithm, (PUCHAR)data, size, 0)))
 		THROW_PRIMARY_EXCEPTION("Can't generate random data");
 }
+
+END_INANITY_CRYPTO

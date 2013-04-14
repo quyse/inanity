@@ -10,6 +10,8 @@
 #include "../FileInputStream.hpp"
 #include "../Exception.hpp"
 
+BEGIN_INANITY_CRYPTO
+
 StreamSigner::StreamSigner(ptr<HashAlgorithm> blockHashAlgorithm, ptr<HashAlgorithm> signatureHashAlgorithm, ptr<SignatureAlgorithm> signatureAlgorithm, size_t blockSize)
 : blockHashAlgorithm(blockHashAlgorithm), signatureHashAlgorithm(signatureHashAlgorithm), signatureAlgorithm(signatureAlgorithm), blockSize(blockSize)
 {
@@ -142,3 +144,5 @@ size_t StreamSigner::VerifyStream::Read(void* data, size_t size)
 		THROW_SECONDARY_EXCEPTION("Can't read from signed stream", exception);
 	}
 }
+
+END_INANITY_CRYPTO
