@@ -1,6 +1,8 @@
 #include "Image2DData.hpp"
 #include "../File.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 Image2DData::Image2DData(ptr<File> data, int width, int height, int pitch, PixelFormat pixelFormat)
 : data(data), width(width), height(height), pitch(pitch), pixelFormat(pixelFormat) {}
 
@@ -28,3 +30,5 @@ PixelFormat Image2DData::GetPixelFormat() const
 {
 	return pixelFormat;
 }
+
+END_INANITY_GRAPHICS

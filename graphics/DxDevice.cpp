@@ -21,6 +21,8 @@
 #include "../Exception.hpp"
 #include "d3dx.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 DxDevice::DxDevice(ptr<DxSystem> system, ComPointer<IDXGIAdapter> adapter, ComPointer<ID3D11Device> device, ptr<DxContext> context)
 : system(system), adapter(adapter), device(device), context(context)
 {
@@ -448,3 +450,5 @@ ID3D11Device* DxDevice::GetDeviceInterface() const
 {
 	return device;
 }
+
+END_INANITY_GRAPHICS

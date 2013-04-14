@@ -5,6 +5,8 @@
 #include "../StreamWriter.hpp"
 #include "../Exception.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 GeometryFormat::GeometryFormat(const std::vector<std::pair<String, GeometrySemantic> >& semantics) :
 	semantics(semantics)
 {
@@ -48,3 +50,5 @@ void GeometryFormat::Serialize(ptr<OutputStream> outputStream)
 	}
 	writer->WriteString(String());
 }
+
+END_INANITY_GRAPHICS

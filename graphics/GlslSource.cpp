@@ -4,6 +4,8 @@
 #include "../StreamWriter.hpp"
 #include "../StreamReader.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 GlslSource::GlslSource(ptr<File> code, ptr<GlShaderBindings> shaderBindings)
 : code(code), shaderBindings(shaderBindings) {}
 
@@ -41,3 +43,5 @@ ptr<GlShaderBindings> GlslSource::GetShaderBindings() const
 {
 	return shaderBindings;
 }
+
+END_INANITY_GRAPHICS

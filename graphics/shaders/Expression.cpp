@@ -1,6 +1,8 @@
 #include "Expression.hpp"
 #include "SequenceNode.hpp"
 
+BEGIN_INANITY_SHADERS
+
 Expression::Expression(ptr<Node> node) : node(node) {}
 
 ptr<Node> Expression::GetNode() const
@@ -17,8 +19,6 @@ void Expression::Append(Expression expression)
 {
 	Assign((*this, expression));
 }
-
-BEGIN_INANITY_SHADERS
 
 Expression operator,(Expression a, Expression b)
 {

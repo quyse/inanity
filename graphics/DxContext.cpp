@@ -18,6 +18,8 @@
 #include "../File.hpp"
 #include "../Exception.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 DxContext::DxContext(ComPointer<ID3D11Device> device, ComPointer<ID3D11DeviceContext> deviceContext)
 : device(device), deviceContext(deviceContext)
 {
@@ -514,3 +516,5 @@ void DxContext::DrawInstanced(int instancesCount)
 	else
 		deviceContext->DrawInstanced(geometry->GetVertexBuffer()->GetVerticesCount(), instancesCount, 0, 0);
 }
+
+END_INANITY_GRAPHICS

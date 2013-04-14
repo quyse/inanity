@@ -9,6 +9,8 @@
 #endif
 #include "../Exception.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 ptr<Window> GlSystem::CreateDefaultWindow()
 {
 #ifdef ___INANITY_WINDOWS
@@ -170,3 +172,5 @@ int GlSystem::AttributeNameToSemantic(const String& name)
 
 	return semantic;
 }
+
+END_INANITY_GRAPHICS

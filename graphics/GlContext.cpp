@@ -17,6 +17,8 @@
 #include "Layout.hpp"
 #include "../Exception.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 /*
 Примечание к реализации. GlContext использует boundState.renderBuffers и boundState.depthStencilBuffer
 для хранения только нестандартных таргетов. Соответственно, эта информация актуальна только в то время,
@@ -478,3 +480,5 @@ void GlContext::DrawInstanced(int instancesCount)
 	fast_cast<GlGeometry*>(&*boundState.geometry)->IssueDrawInstanced(instancesCount);
 	GlSystem::CheckErrors("Can't draw instanced");
 }
+
+END_INANITY_GRAPHICS

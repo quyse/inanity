@@ -1,5 +1,7 @@
 #include "BlendState.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 BlendState::BlendState() : enable(false),
 	sourceColor(colorSourceOne), destColor(colorSourceZero), colorOperation(operationAdd),
 	sourceAlpha(alphaSourceOne), destAlpha(alphaSourceZero), alphaOperation(operationAdd),
@@ -23,3 +25,5 @@ void BlendState::SetAlpha(AlphaSource sourceAlpha, AlphaSource destAlpha, Operat
 	this->destAlpha = destAlpha;
 	this->alphaOperation = alphaOperation;
 }
+
+END_INANITY_GRAPHICS

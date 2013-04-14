@@ -4,6 +4,8 @@
 #include "../File.hpp"
 #include "../Exception.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 ptr<File> GlShaderCompiler::Compile(ptr<ShaderSource> shaderSource)
 {
 	try
@@ -23,3 +25,5 @@ ptr<File> GlShaderCompiler::Compile(ptr<ShaderSource> shaderSource)
 		THROW_SECONDARY_EXCEPTION("Can't compile GLSL shader source", exception);
 	}
 }
+
+END_INANITY_GRAPHICS

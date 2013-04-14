@@ -1,6 +1,8 @@
 #include "DxRenderBuffer.hpp"
 #include "DxTexture.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 DxRenderBuffer::DxRenderBuffer(ComPointer<ID3D11RenderTargetView> renderTargetView, ptr<DxTexture> texture)
 : renderTargetView(renderTargetView), texture(texture)
 {
@@ -15,3 +17,5 @@ ID3D11RenderTargetView* DxRenderBuffer::GetRenderTargetViewInterface() const
 {
 	return renderTargetView;
 }
+
+END_INANITY_GRAPHICS

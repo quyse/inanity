@@ -3,6 +3,8 @@
 #include "GlDevice.hpp"
 #include "Layout.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 GlInternalAttributeBindingCache::GlInternalAttributeBindingCache(GlDevice* device)
 : device(device) {}
 
@@ -18,3 +20,5 @@ ptr<GlInternalAttributeBinding> GlInternalAttributeBindingCache::GetBinding(Layo
 
 	return binding;
 }
+
+END_INANITY_GRAPHICS

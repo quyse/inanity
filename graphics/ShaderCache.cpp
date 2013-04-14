@@ -13,6 +13,10 @@
 #include "../File.hpp"
 #include "../Exception.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
+using namespace Shaders;
+
 ShaderCache::ShaderCache(ptr<FileSystem> fileSystem, ptr<Device> device, ptr<ShaderCompiler> shaderCompiler, ptr<ShaderGenerator> shaderGenerator, ptr<HashStream> hashStream)
 : fileSystem(fileSystem), device(device), shaderCompiler(shaderCompiler), shaderGenerator(shaderGenerator), hashStream(hashStream)
 {}
@@ -98,3 +102,5 @@ ptr<PixelShader> ShaderCache::GetPixelShader(Expression shaderExpression)
 		THROW_SECONDARY_EXCEPTION("Can't get pixel shader from expression", exception);
 	}
 }
+
+END_INANITY_GRAPHICS

@@ -7,6 +7,8 @@
 #include "../Win32Window.hpp"
 #include "../Exception.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 DxPresenter::DxPresenter(ptr<DxDevice> device, ptr<Win32Output> output, ComPointer<IDXGISwapChain> swapChain)
 : device(device), output(output), swapChain(swapChain)
 {
@@ -132,3 +134,5 @@ void DxPresenter::Resize(int width, int height)
 	if(FAILED(swapChain->ResizeBuffers(2, width, height, DxSystem::GetDXGIFormat(currentMode.pixelFormat), DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH)))
 		THROW_PRIMARY_EXCEPTION("Can't resize buffers");
 }
+
+END_INANITY_GRAPHICS

@@ -28,6 +28,8 @@
 #include "../Strings.hpp"
 #endif
 
+BEGIN_INANITY_GRAPHICS
+
 #ifdef ___INANITY_WINDOWS
 GlDevice::GlDevice(ptr<GlSystem> system, const String& deviceName, ptr<GlContext> context)
 : system(system), deviceName(deviceName), context(context), hglrc(0)
@@ -578,3 +580,5 @@ ptr<BlendState> GlDevice::CreateBlendState()
 		THROW_SECONDARY_EXCEPTION("Can't create OpenGL blend state", exception);
 	}
 }
+
+END_INANITY_GRAPHICS

@@ -7,6 +7,8 @@
 #include "../Exception.hpp"
 #include "opengl.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 GlInternalProgramCache::ProgramKey::ProgramKey(GlVertexShader* vertexShader, GlPixelShader* pixelShader)
 : vertexShader(vertexShader), pixelShader(pixelShader) {}
 
@@ -122,3 +124,5 @@ ptr<GlInternalProgram> GlInternalProgramCache::GetProgram(GlVertexShader* vertex
 
 	return program;
 }
+
+END_INANITY_GRAPHICS

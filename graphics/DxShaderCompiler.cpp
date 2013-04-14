@@ -7,6 +7,8 @@
 #include "../Exception.hpp"
 #include "d3dx.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 /// Класс обработчика включаемых файлов.
 /** Предоставляет интерфейс ID3D10Include, необходимый для компиляции шейдеров,
 возвращая файлы из заданной файловой системы. */
@@ -120,3 +122,5 @@ ptr<File> DxShaderCompiler::Compile(ptr<ShaderSource> shaderSource)
 		THROW_SECONDARY_EXCEPTION("Can't compile shader", exception);
 	}
 }
+
+END_INANITY_GRAPHICS

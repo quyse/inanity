@@ -6,6 +6,8 @@
 #include "../Win32Window.hpp"
 #include "../Exception.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 IDXGIFactory* DxSystem::GetDXGIFactory()
 {
 	if(!dxgiFactory)
@@ -123,3 +125,5 @@ ptr<Shaders::ShaderGenerator> DxSystem::CreateShaderGenerator()
 {
 	return NEW(HlslGenerator());
 }
+
+END_INANITY_GRAPHICS

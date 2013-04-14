@@ -2,6 +2,8 @@
 #include "GlInternalTexture.hpp"
 #include "GlTexture.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 GlDepthStencilBuffer::GlDepthStencilBuffer(ptr<GlInternalTexture> internalTexture, ptr<GlTexture> texture, int width, int height)
 : internalTexture(internalTexture), texture(texture), width(width), height(height) {}
 
@@ -24,3 +26,5 @@ ptr<Texture> GlDepthStencilBuffer::GetTexture()
 {
 	return texture;
 }
+
+END_INANITY_GRAPHICS

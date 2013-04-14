@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <cstring>
 
+BEGIN_INANITY_GRAPHICS
+
 LayoutBinding::Element::Element(int sourceOffset, int destOffset, int size)
 : sourceOffset(sourceOffset), destOffset(destOffset), size(size) {}
 
@@ -88,3 +90,5 @@ ptr<LayoutBinding> LayoutBinding::Create(Layout* sourceLayout, Layout* destLayou
 		THROW_SECONDARY_EXCEPTION("Can't create layout binding", exception);
 	}
 }
+
+END_INANITY_GRAPHICS

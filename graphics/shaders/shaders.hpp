@@ -24,8 +24,5 @@
 BEGIN_INANITY_SHADERS
 using namespace Inanity::Math;
 END_INANITY_SHADERS
-#ifdef INANITY_LIB
-using namespace Shaders;
-#endif
 
 #endif

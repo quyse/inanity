@@ -7,6 +7,8 @@
 #include "../../MemoryFile.hpp"
 #include "../../Exception.hpp"
 
+BEGIN_INANITY_SHADERS
+
 UniformGroup::UniformGroup(int slot)
 : slot(slot), bufferSize(0), data(0) {}
 
@@ -45,3 +47,5 @@ void UniformGroup::Upload(Context* context)
 {
 	context->SetUniformBufferData(buffer, data, bufferSize);
 }
+
+END_INANITY_SHADERS

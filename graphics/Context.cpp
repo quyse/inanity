@@ -11,6 +11,8 @@
 #include "Geometry.hpp"
 #include "BlendState.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 Context::Context() : forceReset(true) {}
 
 ContextState& Context::GetTargetState()
@@ -22,3 +24,5 @@ void Context::Reset()
 {
 	forceReset = true;
 }
+
+END_INANITY_GRAPHICS

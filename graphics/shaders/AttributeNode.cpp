@@ -1,5 +1,7 @@
 #include "AttributeNode.hpp"
 
+BEGIN_INANITY_SHADERS
+
 AttributeNode::AttributeNode(DataType valueType, int semantic)
 : valueType(valueType), semantic(semantic) {}
 
@@ -17,3 +19,5 @@ int AttributeNode::GetSemantic() const
 {
 	return semantic;
 }
+
+END_INANITY_SHADERS

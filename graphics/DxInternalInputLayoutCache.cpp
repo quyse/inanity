@@ -4,6 +4,8 @@
 #include "DxInternalInputLayout.hpp"
 #include "DxContext.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 DxInternalInputLayoutCache::Key::Key(Layout* vertexLayout, DxVertexShader* vertexShader)
 : vertexLayout(vertexLayout), vertexShader(vertexShader) {}
 
@@ -28,3 +30,5 @@ ptr<DxInternalInputLayout> DxInternalInputLayoutCache::GetInputLayout(Layout* ve
 
 	return inputLayout;
 }
+
+END_INANITY_GRAPHICS

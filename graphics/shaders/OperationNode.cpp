@@ -1,6 +1,8 @@
 #include "OperationNode.hpp"
 #include "../../Exception.hpp"
 
+BEGIN_INANITY_SHADERS
+
 OperationNode::OperationNode(Operation operation)
 : operation(operation), argumentsCount(0) {}
 OperationNode::OperationNode(Operation operation, ptr<Node> a)
@@ -71,3 +73,5 @@ ptr<Node> OperationNode::GetArgument(int number) const
 		THROW_PRIMARY_EXCEPTION("Invalid argument number for operation node");
 	}
 }
+
+END_INANITY_SHADERS

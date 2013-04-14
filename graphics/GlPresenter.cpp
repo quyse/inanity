@@ -2,6 +2,8 @@
 #include "GlDevice.hpp"
 #include "GlRenderBuffer.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 #ifdef ___INANITY_WINDOWS
 GlPresenter::GlPresenter(ptr<GlDevice> device, HDC hdc, ptr<GlRenderBuffer> backBuffer)
 : device(device), hdc(hdc), backBuffer(backBuffer)
@@ -35,3 +37,5 @@ void GlPresenter::Resize(int width, int height)
 {
 	// TODO.
 }
+
+END_INANITY_GRAPHICS

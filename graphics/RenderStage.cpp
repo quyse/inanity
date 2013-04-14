@@ -1,6 +1,8 @@
 #include "RenderStage.hpp"
 #include <algorithm>
 
+BEGIN_INANITY_GRAPHICS
+
 RenderStage::RenderTarget::RenderTarget() : clear(false)
 {
 	std::fill(clearColor, clearColor + 4, 0.0f);
@@ -65,3 +67,5 @@ void RenderStage::Apply(Graphics::Context* context)
 
 	renderBuffers.clear();
 }
+
+END_INANITY_GRAPHICS

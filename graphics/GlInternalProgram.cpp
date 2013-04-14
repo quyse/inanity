@@ -1,5 +1,7 @@
 #include "GlInternalProgram.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 GlInternalProgram::GlInternalProgram(GLuint name)
 : name(name) {}
 
@@ -12,3 +14,5 @@ GLuint GlInternalProgram::GetName() const
 {
 	return name;
 }
+
+END_INANITY_GRAPHICS

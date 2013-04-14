@@ -2,6 +2,8 @@
 #include "DxDevice.hpp"
 #include "../Exception.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 DxBlendState::DxBlendState(ptr<DxDevice> device) : device(device) {}
 
 ID3D11BlendState* DxBlendState::GetBlendStateInterface()
@@ -125,3 +127,5 @@ void DxBlendState::Update()
 		THROW_SECONDARY_EXCEPTION("Can't update DirectX blend state", exception);
 	}
 }
+
+END_INANITY_GRAPHICS

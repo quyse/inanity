@@ -2,6 +2,8 @@
 #include "GlSystem.hpp"
 #include "../Exception.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 GlSamplerState::GlSamplerState(GLuint samplerName) : samplerName(samplerName)
 {
 }
@@ -128,3 +130,5 @@ void GlSamplerState::Update()
 		THROW_SECONDARY_EXCEPTION("Can't update OpenGL sampler", exception);
 	}
 }
+
+END_INANITY_GRAPHICS

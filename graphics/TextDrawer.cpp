@@ -22,6 +22,8 @@
 
 BEGIN_INANITY_GRAPHICS
 
+using namespace Shaders;
+
 /// Вспомогательная структура для рисователя.
 struct TextDrawerHelper : public Object
 {
@@ -131,8 +133,6 @@ struct TextDrawerHelper : public Object
 		}
 	}
 };
-
-END_INANITY_GRAPHICS
 
 TextDrawer::TextDrawer(ptr<TextDrawerHelper> helper)
 : helper(helper), queuedCharsCount(0) {}
@@ -301,3 +301,5 @@ ptr<TextDrawer> TextDrawer::Create(ptr<Device> device, ptr<ShaderCache> shaderCa
 {
 	return NEW(TextDrawer(NEW(TextDrawerHelper(device, shaderCache))));
 }
+
+END_INANITY_GRAPHICS

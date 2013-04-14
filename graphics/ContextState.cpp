@@ -9,6 +9,8 @@
 #include "Geometry.hpp"
 #include "BlendState.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 ContextState::ContextState() :
 	fillMode(fillModeSolid), cullMode(cullModeBack),
 	viewportWidth(1), viewportHeight(1),
@@ -40,3 +42,5 @@ void ContextState::ResetUniformBuffers()
 	for(int i = 0; i < uniformBufferSlotsCount; ++i)
 		uniformBuffers[i] = 0;
 }
+
+END_INANITY_GRAPHICS

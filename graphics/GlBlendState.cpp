@@ -1,6 +1,8 @@
 #include "GlBlendState.hpp"
 #include "../Exception.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 GlBlendState GlBlendState::defaultState;
 
 GLenum GlBlendState::ConvertColorSource(ColorSource colorSource)
@@ -72,3 +74,5 @@ void GlBlendState::ApplyDefault()
 {
 	defaultState.Apply();
 }
+
+END_INANITY_GRAPHICS

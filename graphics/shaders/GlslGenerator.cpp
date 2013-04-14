@@ -11,9 +11,13 @@
 #include "RasterizedNode.hpp"
 #include "OperationNode.hpp"
 
+BEGIN_INANITY_SHADERS
+
 ptr<ShaderSource> GlslGenerator::Generate(Expression code, ShaderType shaderType)
 {
 	GlslGeneratorInstance instance(code.GetNode(), shaderType);
 
 	return instance.Generate();
 }
+
+END_INANITY_SHADERS

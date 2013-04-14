@@ -4,6 +4,8 @@
 #include "../OutputStream.hpp"
 #include "../StreamWriter.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 HlslSource::HlslSource(ptr<File> code, const String& functionName, const String& profile, ptr<FileSystem> includes)
 : code(code), functionName(functionName), profile(profile), includes(includes) {}
 
@@ -35,3 +37,5 @@ void HlslSource::Serialize(ptr<OutputStream> outputStream)
 	writer.WriteString(profile);
 	outputStream->WriteFile(code);
 }
+
+END_INANITY_GRAPHICS

@@ -2,6 +2,8 @@
 #include "DxDevice.hpp"
 #include "../Exception.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 DxSamplerState::DxSamplerState(ptr<DxDevice> device) : device(device) {}
 
 ID3D11SamplerState* DxSamplerState::GetSamplerStateInterface()
@@ -89,3 +91,5 @@ void DxSamplerState::Update()
 		THROW_SECONDARY_EXCEPTION("Can't update DirectX sampler", exception);
 	}
 }
+
+END_INANITY_GRAPHICS

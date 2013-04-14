@@ -1,5 +1,7 @@
 #include "Layout.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 Layout::Element::Element(DataType dataType, int offset, int semantic)
 : dataType(dataType), offset(offset), semantic(semantic) {}
 
@@ -24,3 +26,5 @@ int Layout::GetStride() const
 {
 	return stride;
 }
+
+END_INANITY_GRAPHICS

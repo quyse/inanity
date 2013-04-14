@@ -8,6 +8,8 @@
 #include "../File.hpp"
 #include "../Exception.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 TextureManager::TextureManager(ptr<FileSystem> fileSystem, ptr<Device> device)
 : ResourceManager(fileSystem), device(device)
 {
@@ -42,3 +44,5 @@ ptr<Texture> TextureManager::Load(const String& textureName)
 		THROW_SECONDARY_EXCEPTION("Can't load texture", exception);
 	}
 }
+
+END_INANITY_GRAPHICS

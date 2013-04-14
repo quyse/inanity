@@ -1,5 +1,7 @@
 #include "GlInternalTexture.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 GlInternalTexture::GlInternalTexture(GLuint name) : name(name) {}
 
 GlInternalTexture::~GlInternalTexture()
@@ -11,3 +13,5 @@ GLuint GlInternalTexture::GetName() const
 {
 	return name;
 }
+
+END_INANITY_GRAPHICS
