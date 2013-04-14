@@ -2,20 +2,13 @@
 #ifdef ___INANITY_TRACE_HEAP
 #include "CriticalCode.hpp"
 #endif
-#include <cstdlib>
-#include <cstdio>
+#include <iostream>
 
 BEGIN_INANITY
 
 ManagedHeap managedHeap;
 
 END_INANITY
-
-#ifdef ___INANITY_WINDOWS
-#define DEBUG_PRINT(x) OutputDebugStringA(x)
-#else
-#define DEBUG_PRINT(x) printf("%s", (x))
-#endif
 
 #ifdef ___INANITY_TRACE_HEAP
 ManagedHeap::AllocationInfo::AllocationInfo(size_t number, size_t size) : number(number), size(size)
@@ -50,37 +43,30 @@ ManagedHeap::~ManagedHeap()
 
 #ifdef ___INANITY_TRACE_HEAP
 	//выдать отчет по памяти
-	DEBUG_PRINT("======= INANITY MANAGED HEAP REPORT =======\n");
-	static char s[100];
-	sprintf(s, "Allocations count: %p\nAllocations size: %p\n", (unsigned)allocationsCount, (unsigned)allAllocationsSize);
-	DEBUG_PRINT(s);
+	std::cout << "======= INANITY MANAGED HEAP REPORT =======\n";
+	std::cout << "Allocations count: " << allocationsCount <<  "\nAllocations size: " << allAllocationsSize << "\n";
 	if(allocations.size())
 	{
 #ifdef ___INANITY_WINDOWS
 		Beep(750, 300);
 #endif
-		DEBUG_PRINT("ATTENTION! SOME LEAKS DETECTED!\n");
+		std::cout << "ATTENTION! SOME LEAKS DETECTED!\n";
 		PrintAllocations();
 	}
 	else
-		DEBUG_PRINT("NO LEAKS DETECTED\n");
-	DEBUG_PRINT("======= END REPORT =======\n");
+		std::cout << "NO LEAKS DETECTED\n";
+	std::cout << "======= END REPORT =======\n";
 #endif
 }
 
 #ifdef ___INANITY_TRACE_HEAP
 void ManagedHeap::PrintAllocations()
 {
-	static char s[1024];
 	for(std::map<void*, AllocationInfo>::const_iterator i = allocations.begin(); i != allocations.end(); ++i)
 	{
-		sprintf(s, "%p : #%p, %p bytes\n", i->first, i->second.number, i->second.size);
-		DEBUG_PRINT(s);
+		std::cout << i->first << " : #" << i->second.number << ", " << i->second.size << " bytes\n";
 		if(i->second.info)
-		{
-			sprintf(s, "  %s\n", i->second.info);
-			DEBUG_PRINT(s);
-		}
+			std::cout << "  " << i->second.info << "\n";
 	}
 }
 #endif
