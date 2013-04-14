@@ -3,6 +3,8 @@
 #include "../Exception.hpp"
 #include <algorithm>
 
+BEGIN_INANITY_INPUT
+
 RawManager::RawManager(HWND hWnd) : Manager(hWnd)
 {
 	try
@@ -108,3 +110,5 @@ bool RawManager::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 	}
 	return false;
 }
+
+END_INANITY_INPUT

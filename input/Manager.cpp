@@ -4,6 +4,8 @@
 #include "../Exception.hpp"
 #include <algorithm>
 
+BEGIN_INANITY_INPUT
+
 Manager::Manager(HWND hWnd)
 : hWnd(hWnd)
 {
@@ -61,3 +63,5 @@ void Manager::AcquireDevices()
 void Manager::UnacquireDevices()
 {
 }
+
+END_INANITY_INPUT
