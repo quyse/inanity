@@ -2,6 +2,8 @@
 #include "BtWorld.hpp"
 #include "BtShape.hpp"
 
+BEGIN_INANITY_PHYSICS
+
 BtRigidBody::BtRigidBody(ptr<BtWorld> world, ptr<BtShape> shape, const btTransform& startTransform)
 : RigidBody(world, shape), rigidBody(0), transform(startTransform)
 {
@@ -55,3 +57,5 @@ void BtRigidBody::setWorldTransform(const btTransform& transform)
 {
 	this->transform = transform;
 }
+
+END_INANITY_PHYSICS

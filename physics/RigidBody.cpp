@@ -3,6 +3,8 @@
 #include "Shape.hpp"
 #include "../scripting_impl.hpp"
 
+BEGIN_INANITY_PHYSICS
+
 SCRIPTABLE_MAP_BEGIN(RigidBody, Inanity.Physics.RigidBody);
 SCRIPTABLE_MAP_END();
 
@@ -18,3 +20,5 @@ ptr<Shape> RigidBody::GetShape() const
 {
 	return shape;
 }
+
+END_INANITY_PHYSICS

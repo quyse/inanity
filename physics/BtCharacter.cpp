@@ -2,6 +2,8 @@
 #include "BtWorld.hpp"
 #include "BtShape.hpp"
 
+BEGIN_INANITY_PHYSICS
+
 BtCharacter::BtCharacter(ptr<BtWorld> world, ptr<BtShape> shape, btPairCachingGhostObject* ghost, btKinematicCharacterController* controller)
 : Character(world, shape), ghost(ghost), controller(controller) {}
 
@@ -31,3 +33,5 @@ float4x4 BtCharacter::GetTransform() const
 {
 	return fromBt(ghost->getWorldTransform());
 }
+
+END_INANITY_PHYSICS

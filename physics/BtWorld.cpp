@@ -4,6 +4,8 @@
 #include "BtCharacter.hpp"
 #include "../Exception.hpp"
 
+BEGIN_INANITY_PHYSICS
+
 BtWorld::BtWorld() :
 	collisionConfiguration(0), collisionDispatcher(0), broadphase(0),
 	solver(0), dynamicsWorld(0)
@@ -148,3 +150,5 @@ void BtWorld::Simulate(float time)
 {
 	dynamicsWorld->stepSimulation(time, 10);
 }
+
+END_INANITY_PHYSICS

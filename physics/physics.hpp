@@ -16,8 +16,5 @@
 BEGIN_INANITY_PHYSICS
 using namespace Inanity::Math;
 END_INANITY_PHYSICS
-#ifdef INANITY_LIB
-using namespace Physics;
-#endif
 
 #endif
