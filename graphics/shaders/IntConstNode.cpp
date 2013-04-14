@@ -1,5 +1,7 @@
 #include "IntConstNode.hpp"
 
+BEGIN_INANITY_SHADERS
+
 IntConstNode::IntConstNode(int value)
 : value(value) {}
 
@@ -12,3 +14,5 @@ int IntConstNode::GetValue() const
 {
 	return value;
 }
+
+END_INANITY_SHADERS

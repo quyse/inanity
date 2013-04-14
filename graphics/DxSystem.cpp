@@ -123,7 +123,7 @@ ptr<ShaderCompiler> DxSystem::CreateShaderCompiler()
 
 ptr<Shaders::ShaderGenerator> DxSystem::CreateShaderGenerator()
 {
-	return NEW(HlslGenerator());
+	return NEW(Shaders::HlslGenerator());
 }
 
 END_INANITY_GRAPHICS

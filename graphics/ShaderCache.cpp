@@ -17,7 +17,7 @@ BEGIN_INANITY_GRAPHICS
 
 using namespace Shaders;
 
-ShaderCache::ShaderCache(ptr<FileSystem> fileSystem, ptr<Device> device, ptr<ShaderCompiler> shaderCompiler, ptr<ShaderGenerator> shaderGenerator, ptr<HashStream> hashStream)
+ShaderCache::ShaderCache(ptr<FileSystem> fileSystem, ptr<Device> device, ptr<ShaderCompiler> shaderCompiler, ptr<ShaderGenerator> shaderGenerator, ptr<Crypto::HashStream> hashStream)
 : fileSystem(fileSystem), device(device), shaderCompiler(shaderCompiler), shaderGenerator(shaderGenerator), hashStream(hashStream)
 {}
 
