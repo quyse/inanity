@@ -2,6 +2,8 @@
 #include "../StreamWriter.hpp"
 #include "../StreamReader.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 GlShaderBindings::GlShaderBindings(
 	const Bindings& uniformBlockBindings,
 	const Bindings& samplerBindings,
@@ -67,3 +69,5 @@ ptr<GlShaderBindings> GlShaderBindings::Deserialize(StreamReader& reader)
 
 	return NEW(GlShaderBindings(uniformBlockBindings, samplerBindings, attributeBindings));
 }
+
+END_INANITY_GRAPHICS

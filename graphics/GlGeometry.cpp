@@ -2,6 +2,8 @@
 #include "GlVertexBuffer.hpp"
 #include "GlIndexBuffer.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 GlGeometry::GlGeometry(ptr<GlVertexBuffer> vertexBuffer, ptr<GlIndexBuffer> indexBuffer, GLuint vertexArrayName)
 : vertexBuffer(vertexBuffer), indexBuffer(indexBuffer), vertexArrayName(vertexArrayName) {}
 
@@ -45,3 +47,5 @@ void GlGeometry::IssueDrawInstanced(int instancesCount)
 	else
 		glDrawArraysInstanced(GL_TRIANGLES, 0, vertexBuffer->GetVerticesCount(), instancesCount);
 }
+
+END_INANITY_GRAPHICS

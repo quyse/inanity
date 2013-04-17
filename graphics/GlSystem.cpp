@@ -52,7 +52,7 @@ ptr<ShaderCompiler> GlSystem::CreateShaderCompiler()
 
 ptr<Shaders::ShaderGenerator> GlSystem::CreateShaderGenerator()
 {
-	return NEW(GlslGenerator());
+	return NEW(Shaders::GlslGenerator());
 }
 
 void GlSystem::InitGLEW()
