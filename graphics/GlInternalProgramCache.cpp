@@ -20,7 +20,16 @@ void GlInternalProgramCache::ApplyPreLinkBindings(GLuint programName, ptr<GlShad
 	{
 		// привязать атрибут к заданному generic vertex attribute index
 		glBindAttribLocation(programName, attributeBindings[i].second, attributeBindings[i].first.c_str());
-		GlSystem::CheckErrors("Can't bind attribute location to index");
+		GlSystem::CheckErrors("Can't bind attribute location");
+	}
+
+	// применить привязки выходных переменных пиксельного шейдера
+	const GlShaderBindings::Bindings& targetBindings = shaderBindings->GetTargetBindings();
+	for(size_t i = 0; i < targetBindings.size(); ++i)
+	{
+		// привязать переменную к заданному номеру цветового рендертаргета
+		glBindFragDataLocation(programName, targetBindings[i].second, targetBindings[i].first.c_str());
+		GlSystem::CheckErrors("Can't bind frag data location");
 	}
 }
 

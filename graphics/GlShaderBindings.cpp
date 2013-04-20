@@ -7,11 +7,13 @@ BEGIN_INANITY_GRAPHICS
 GlShaderBindings::GlShaderBindings(
 	const Bindings& uniformBlockBindings,
 	const Bindings& samplerBindings,
-	const Bindings& attributeBindings
+	const Bindings& attributeBindings,
+	const Bindings& targetBindings
 ) :
 	uniformBlockBindings(uniformBlockBindings),
 	samplerBindings(samplerBindings),
-	attributeBindings(attributeBindings)
+	attributeBindings(attributeBindings),
+	targetBindings(targetBindings)
 {
 }
 
@@ -50,24 +52,28 @@ const GlShaderBindings::Bindings& GlShaderBindings::GetAttributeBindings() const
 	return attributeBindings;
 }
 
+const GlShaderBindings::Bindings& GlShaderBindings::GetTargetBindings() const
+{
+	return targetBindings;
+}
+
 void GlShaderBindings::Serialize(StreamWriter& writer)
 {
-	// записать привязки uniform-блоков
 	WriteBindings(writer, uniformBlockBindings);
-	// записать привязки семплеров
 	WriteBindings(writer, samplerBindings);
-	// записать привязки
 	WriteBindings(writer, attributeBindings);
+	WriteBindings(writer, targetBindings);
 }
 
 ptr<GlShaderBindings> GlShaderBindings::Deserialize(StreamReader& reader)
 {
-	Bindings uniformBlockBindings, samplerBindings, attributeBindings;
+	Bindings uniformBlockBindings, samplerBindings, attributeBindings, targetBindings;
 	ReadBindings(reader, uniformBlockBindings);
 	ReadBindings(reader, samplerBindings);
 	ReadBindings(reader, attributeBindings);
+	ReadBindings(reader, targetBindings);
 
-	return NEW(GlShaderBindings(uniformBlockBindings, samplerBindings, attributeBindings));
+	return NEW(GlShaderBindings(uniformBlockBindings, samplerBindings, attributeBindings, targetBindings));
 }
 
 END_INANITY_GRAPHICS

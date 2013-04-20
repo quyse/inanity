@@ -516,7 +516,7 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 		for(size_t i = 0; i < attributes.size(); ++i)
 		{
 			ptr<AttributeNode> node = attributes[i];
-			glsl << "layout(location = " << node->GetSemantic() << ") in ";
+			glsl << "in ";
 			PrintDataType(node->GetValueType());
 			glsl << " a" << node->GetSemantic() << ";\n";
 		}
@@ -548,7 +548,7 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 		{
 			ptr<RasterizedNode> node = rasterized[i];
 			int target = node->GetTarget();
-			glsl << "layout(location = " << target << ") out ";
+			glsl << "out ";
 			PrintDataType(node->GetValueType());
 			glsl << " r" << target << ";\n";
 		}
@@ -673,9 +673,20 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 		attributeBindings[i].second = semantic;
 	}
 
+	// сформировать список привязок целевых переменных
+	GlShaderBindings::Bindings targetBindings(rasterized.size());
+	for(size_t i = 0; i < rasterized.size(); ++i)
+	{
+		int target = rasterized[i]->GetTarget();
+		char name[16];
+		sprintf(name, "r%d", target);
+		targetBindings[i].first = name;
+		targetBindings[i].second = target;
+	}
+
 	return NEW(GlslSource(
 		Strings::String2File(glsl.str()),
-		NEW(GlShaderBindings(uniformBlockBindings, samplerBindings, attributeBindings))
+		NEW(GlShaderBindings(uniformBlockBindings, samplerBindings, attributeBindings, targetBindings))
 	));
 }
 
