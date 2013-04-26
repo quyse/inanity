@@ -49,9 +49,7 @@ void ClassB::print3(ptr<ClassA> a)
 	std::cout << "ClassB::print3: " << (ClassA*)a << '\n';
 }
 
-END_INANITY_LUA
-
-int main()
+static void Run()
 {
 	try
 	{
@@ -77,6 +75,13 @@ int main()
 		MakePointer(exception)->PrintStack(s);
 		std::cout << s.str() << '\n';
 	}
+}
+
+END_INANITY_LUA
+
+int main()
+{
+	Inanity::Lua::Run();
 
 	return 0;
 }

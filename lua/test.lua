@@ -8,8 +8,7 @@ local fileSystem = Inanity.FolderFileSystem.GetNativeFileSystem();
 
 -- Inanity.Lua.ClassA.printFile(fileSystem:LoadFile("lua/test.lua"))
 
-local bfsStream = Inanity.CompressStream.CreateMax(fileSystem:SaveFileAsStream("lua/test.bfs"));
+local bfsStream = Inanity.CompressStream.CreateMax(fileSystem:SaveStream("lua/test.bfs"));
 local bfsBuilder = Inanity.BlobFileSystemBuilder(bfsStream);
 bfsBuilder:AddFile("gdfsgfd", fileSystem:LoadFile("lua/test.lua"), 4);
 bfsBuilder:Finalize();
-bfsStream:Flush();
