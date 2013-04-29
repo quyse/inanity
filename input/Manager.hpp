@@ -21,8 +21,6 @@ struct Event;
 class Manager : public Object
 {
 protected:
-	/// Окно, к которому привязан менеджер.
-	HWND hWnd;
 	/// Критическая секция.
 	/** Предназначена для синхронизации, в случае если подкласс будет получать
 	данные из другого потока. */
@@ -36,24 +34,17 @@ protected:
 	но пользователю он не доступен. */
 	ptr<Frame> internalFrame;
 
-	Manager(HWND hWnd);
+protected:
+	Manager();
 
 	/// Добавить событие.
 	void AddEvent(const Event& e);
 
 public:
-	//обработать оконное сообщение.
-	virtual bool ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam);
-
 	//перейти к следующему кадру
 	virtual void Update();
 	/// Получить текущий кадр.
 	ptr<Frame> GetCurrentFrame();
-
-	/// Выполнить обработку активации окна.
-	virtual void AcquireDevices();
-	/// Выполнить обработку деактивации окна.
-	virtual void UnacquireDevices();
 };
 
 END_INANITY_INPUT

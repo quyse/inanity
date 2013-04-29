@@ -6,26 +6,10 @@
 
 BEGIN_INANITY_INPUT
 
-Manager::Manager(HWND hWnd)
-: hWnd(hWnd)
+Manager::Manager()
 {
 	currentFrame = NEW(Frame);
 	internalFrame = NEW(Frame);
-}
-
-bool Manager::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	//по умолчанию выполняется обработка символов
-	if(msg == WM_CHAR)
-	{
-		Event e;
-		e.device = Event::deviceKeyboard;
-		e.keyboard.type = Event::Keyboard::typeKeyPress;
-		e.keyboard.key = (int)wParam;
-		AddEvent(e);
-		return true;
-	}
-	return false;
 }
 
 void Manager::AddEvent(const Event& e)
@@ -54,14 +38,6 @@ void Manager::Update()
 ptr<Frame> Manager::GetCurrentFrame()
 {
 	return currentFrame;
-}
-
-void Manager::AcquireDevices()
-{
-}
-
-void Manager::UnacquireDevices()
-{
 }
 
 END_INANITY_INPUT

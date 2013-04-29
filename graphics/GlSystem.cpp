@@ -7,6 +7,10 @@
 #include "../Win32Window.hpp"
 #include "../Strings.hpp"
 #endif
+#ifdef ___INANITY_LINUX
+#include "../X11Window.hpp"
+#include "../X11Display.hpp"
+#endif
 #include "../Exception.hpp"
 
 BEGIN_INANITY_GRAPHICS
@@ -17,7 +21,7 @@ ptr<Window> GlSystem::CreateDefaultWindow()
 	return Win32Window::CreateForOpenGL();
 #endif
 #ifdef ___INANITY_LINUX
-	return NEW(X11Window());
+	return X11Window::CreateForOpenGL(X11Display::CreateDefault());
 #endif
 }
 
@@ -25,6 +29,7 @@ ptr<Device> GlSystem::CreatePrimaryDevice()
 {
 	try
 	{
+
 #ifdef ___INANITY_WINDOWS
 		// получить всё устройства
 		DISPLAY_DEVICE deviceInfo;
@@ -38,6 +43,15 @@ ptr<Device> GlSystem::CreatePrimaryDevice()
 		// в MSDN написано, устройство всегда есть, так что этого быть не должно
 		THROW_PRIMARY_EXCEPTION("Can't find primary device");
 #endif
+
+#ifdef ___INANITY_LINUX
+
+
+
+		// создать устройство
+		return NEW(GlDevice(this, NEW(GlContext())));
+#endif
+
 	}
 	catch(Exception* exception)
 	{

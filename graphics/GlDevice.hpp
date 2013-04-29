@@ -5,6 +5,10 @@
 #include "opengl.hpp"
 #include "../String.hpp"
 
+#ifdef ___INANITY_LINUX
+#include "../x11.hpp"
+#endif
+
 BEGIN_INANITY_GRAPHICS
 
 class GlSystem;
@@ -31,6 +35,12 @@ private:
 	Является общим для всех Presenter'ов. */
 	HGLRC hglrc;
 #endif
+#ifdef ___INANITY_LINUX
+	/// Контекст рендеринга OpenGL.
+	/** Создаётся при первом создании Presenter'а.
+	Является общим для всех Presenter'ов. */
+	GLXContext glxContext;
+#endif
 	/// Основной графический контекст.
 	ptr<GlContext> context;
 
@@ -41,9 +51,14 @@ private:
 	static void CompileShader(GLuint shaderName, ptr<File> file, ptr<GlShaderBindings>& shaderBindings);
 
 public:
+
 #ifdef ___INANITY_WINDOWS
 	GlDevice(ptr<GlSystem> system, const String& deviceName, ptr<GlContext> context);
 	~GlDevice();
+#endif
+
+#ifdef ___INANITY_LINUX
+	GlDevice(ptr<GlSystem> system, ptr<GlContext> context);
 #endif
 
 	/// Создать привязку атрибутов.

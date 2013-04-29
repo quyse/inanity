@@ -16,6 +16,7 @@
 #include "GlInternalTexture.hpp"
 #include "Layout.hpp"
 #include "../Exception.hpp"
+#include <memory.h>
 
 BEGIN_INANITY_GRAPHICS
 

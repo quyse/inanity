@@ -12,18 +12,32 @@ class GlVertexShader;
 class GlPixelShader;
 class GlShaderBindings;
 
+struct GlInternalProgramKey
+{
+	GlVertexShader* vertexShader;
+	GlPixelShader* pixelShader;
+	GlInternalProgramKey(GlVertexShader* vertexShader, GlPixelShader* pixelShader);
+	friend bool operator==(const GlInternalProgramKey& a, const GlInternalProgramKey& b);
+};
+
+END_INANITY_GRAPHICS
+
+namespace std
+{
+	template <>
+	struct hash<Inanity::Graphics::GlInternalProgramKey>
+	{
+		size_t operator()(const Inanity::Graphics::GlInternalProgramKey& key) const;
+	};
+}
+
+BEGIN_INANITY_GRAPHICS
+
 /// Класс кэша программ OpenGL.
 class GlInternalProgramCache : public Object
 {
 private:
-	struct ProgramKey
-	{
-		GlVertexShader* vertexShader;
-		GlPixelShader* pixelShader;
-		ProgramKey(GlVertexShader* vertexShader, GlPixelShader* pixelShader);
-		operator size_t() const;
-	};
-	typedef std::unordered_map<ProgramKey, ptr<GlInternalProgram> > Programs;
+	typedef std::unordered_map<GlInternalProgramKey, ptr<GlInternalProgram> > Programs;
 	Programs programs;
 
 	static void ApplyPreLinkBindings(GLuint programName, ptr<GlShaderBindings> shaderBindings);

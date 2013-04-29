@@ -20,12 +20,17 @@
 #include "GlInternalAttributeBindingCache.hpp"
 #include "GlslSource.hpp"
 #include "GlShaderBindings.hpp"
-#include "Win32Output.hpp"
 #include "../File.hpp"
 #include "../FileInputStream.hpp"
 #include "../Exception.hpp"
-#ifdef ___INANITY_WINDOWS
 #include "../Strings.hpp"
+#ifdef ___INANITY_WINDOWS
+#include "Win32Output.hpp"
+#endif
+#ifdef ___INANITY_LINUX
+#include "X11Output.hpp"
+#include "../X11Window.hpp"
+#include "../X11Display.hpp"
 #endif
 
 BEGIN_INANITY_GRAPHICS
@@ -41,6 +46,14 @@ GlDevice::~GlDevice()
 {
 	if(hglrc)
 		wglDeleteContext(hglrc);
+}
+#endif
+
+#ifdef ___INANITY_LINUX
+GlDevice::GlDevice(ptr<GlSystem> system, ptr<GlContext> context)
+: system(system), context(context)
+{
+	attributeBindingCache = NEW(GlInternalAttributeBindingCache(this));
 }
 #endif
 
@@ -147,6 +160,7 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, const Prese
 {
 	try
 	{
+
 #ifdef ___INANITY_WINDOWS
 		// область вывода - только Win32
 		ptr<Win32Output> output = abstractOutput.DynamicCast<Win32Output>();
@@ -212,7 +226,7 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, const Prese
 		};
 		PFNWGLCREATECONTEXTATTRIBSARBPROC p = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
 		if(!p)
-			THROW_PRIMARY_EXCEPTION("ppp");
+			THROW_PRIMARY_EXCEPTION("Can't get wglCreateContextAttribsARB");
 		hglrc = p(hdc, 0, attribs);
 		if(!hglrc)
 			THROW_PRIMARY_EXCEPTION("Can't create OpenGL window context");
@@ -234,8 +248,42 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, const Prese
 
 		// создать и вернуть Presenter
 		return NEW(GlPresenter(this, hdc, NEW(GlRenderBuffer(0, 0))));
-
 #endif
+
+#ifdef ___INANITY_LINUX
+		// область вывода - только X11
+		ptr<X11Output> output = abstractOutput.DynamicCast<X11Output>();
+		if(!output)
+			THROW_PRIMARY_EXCEPTION("Only X11 output is allowed");
+
+		// получить окно
+		ptr<X11Window> window = output->GetWindow();
+
+		::Display* d = window->GetDisplay()->GetDisplay();
+
+		// создать контекст
+		glxContext = glXCreateContext(d, window->GetXVisualInfo(), NULL, True);
+		if(!glxContext)
+			THROW_PRIMARY_EXCEPTION("Can't create GLX context");
+
+		// сделать его текущим
+		glXMakeCurrent(d, window->GetHandle(), glxContext);
+
+		// инициализировать GLEW
+		GlSystem::InitGLEW();
+
+		GlSystem::ClearErrors();
+
+		// установить размер окна
+		XResizeWindow(d, window->GetHandle(), mode.width, mode.height);
+
+		// отобразить окно
+		XMapWindow(d, window->GetHandle());
+
+		// создать и вернуть Presenter
+		return NEW(GlPresenter(this, NEW(GlRenderBuffer(0, 0))));
+#endif
+
 	}
 	catch(Exception* exception)
 	{

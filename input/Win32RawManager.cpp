@@ -1,11 +1,11 @@
-#include "RawManager.hpp"
+#include "Win32RawManager.hpp"
 #include "Frame.hpp"
 #include "../Exception.hpp"
 #include <algorithm>
 
 BEGIN_INANITY_INPUT
 
-RawManager::RawManager(HWND hWnd) : Manager(hWnd)
+Win32RawManager::Win32RawManager(HWND hWnd) : Win32Manager(hWnd)
 {
 	try
 	{
@@ -30,9 +30,9 @@ RawManager::RawManager(HWND hWnd) : Manager(hWnd)
 	}
 }
 
-bool RawManager::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam)
+bool Win32RawManager::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	if(Manager::ProcessWindowMessage(msg, wParam, lParam))
+	if(Win32Manager::ProcessWindowMessage(msg, wParam, lParam))
 		return true;
 	if(msg == WM_INPUT)
 	{

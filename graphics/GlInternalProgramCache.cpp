@@ -7,9 +7,19 @@
 #include "../Exception.hpp"
 #include "opengl.hpp"
 
+size_t std::hash<Inanity::Graphics::GlInternalProgramKey>::operator()(const Inanity::Graphics::GlInternalProgramKey& key) const
+{
+	return size_t(key.vertexShader) ^ size_t(key.pixelShader);
+}
+
 BEGIN_INANITY_GRAPHICS
 
-GlInternalProgramCache::ProgramKey::ProgramKey(GlVertexShader* vertexShader, GlPixelShader* pixelShader)
+bool operator==(const GlInternalProgramKey& a, const GlInternalProgramKey& b)
+{
+	return a.vertexShader == b.vertexShader && a.pixelShader == b.pixelShader;
+}
+
+GlInternalProgramKey::GlInternalProgramKey(GlVertexShader* vertexShader, GlPixelShader* pixelShader)
 : vertexShader(vertexShader), pixelShader(pixelShader) {}
 
 void GlInternalProgramCache::ApplyPreLinkBindings(GLuint programName, ptr<GlShaderBindings> shaderBindings)
@@ -60,14 +70,9 @@ void GlInternalProgramCache::ApplyPostLinkBindings(GLuint programName, ptr<GlSha
 	}
 }
 
-GlInternalProgramCache::ProgramKey::operator size_t() const
-{
-	return size_t(vertexShader) ^ size_t(pixelShader);
-}
-
 ptr<GlInternalProgram> GlInternalProgramCache::GetProgram(GlVertexShader* vertexShader, GlPixelShader* pixelShader)
 {
-	ProgramKey key(vertexShader, pixelShader);
+	GlInternalProgramKey key(vertexShader, pixelShader);
 	Programs::const_iterator i = programs.find(key);
 	if(i != programs.end())
 		return i->second;

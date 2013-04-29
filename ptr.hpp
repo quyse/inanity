@@ -2,6 +2,7 @@
 #define ___INANITY_POINTER_HPP___
 
 #include "config.hpp"
+#include <functional>
 
 BEGIN_INANITY
 
@@ -148,5 +149,18 @@ inline ptr<T> MakePointer(T* p)
 #undef CHECK_OBJECT
 
 END_INANITY
+
+// Оператор для хеширования указателей.
+namespace std
+{
+	template <typename T>
+	struct hash<Inanity::ptr<T> >
+	{
+		size_t operator()(const Inanity::ptr<T>& p) const
+		{
+			return static_cast<size_t>(static_cast<T*>(p));
+		}
+	};
+}
 
 #endif

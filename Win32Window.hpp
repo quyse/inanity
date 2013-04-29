@@ -6,7 +6,9 @@
 #include "Handler.hpp"
 #include "input/input.hpp"
 
-#ifdef ___INANITY_WINDOWS
+#ifndef ___INANITY_WINDOWS
+#error Win32Window is implemented only on Windows.
+#endif
 
 #include "windows.hpp"
 
@@ -79,11 +81,5 @@ public:
 };
 
 END_INANITY
-
-#else
-
-#error Win32Window is implemented only on Windows.
-
-#endif
 
 #endif

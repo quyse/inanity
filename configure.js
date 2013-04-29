@@ -78,9 +78,13 @@ var libraries = {
 	'libinanity-input': {
 		objects: ['input.Frame', 'input.Manager', 'input.Mux', 'input.Processor', 'input.RawManager']
 	},
-	// ******* подсистема окон
+	// ******* подсистема окон Win32
 	'libinanity-win32window': {
 		objects: ['Win32Window', 'graphics.Win32Output']
+	},
+	// ******* подсистема окон X11
+	'libinanity-x11window' : {
+		objects: ['X11Window', 'X11Display', 'graphics.X11Output']
 	},
 	// ******* общая графика
 	'libinanity-graphics': {

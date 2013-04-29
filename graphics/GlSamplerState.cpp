@@ -57,6 +57,8 @@ void GlSamplerState::Update()
 					case filterLinear:
 						filterParam = GL_NEAREST_MIPMAP_LINEAR;
 						break;
+					default:
+						break;
 					}
 					break;
 				case filterLinear:
@@ -68,7 +70,11 @@ void GlSamplerState::Update()
 					case filterLinear:
 						filterParam = GL_LINEAR_MIPMAP_LINEAR;
 						break;
+					default:
+						break;
 					}
+					break;
+				default:
 					break;
 				}
 			else
@@ -79,6 +85,8 @@ void GlSamplerState::Update()
 					break;
 				case filterLinear:
 					filterParam = GL_LINEAR;
+					break;
+				default:
 					break;
 				}
 			if(filterParam == -1)
@@ -97,6 +105,8 @@ void GlSamplerState::Update()
 				break;
 			case filterLinear:
 				filterParam = GL_LINEAR;
+				break;
+			default:
 				break;
 			}
 			if(filterParam == -1)
