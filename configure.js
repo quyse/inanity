@@ -76,7 +76,7 @@ var libraries = {
 	},
 	// ******* подсистема ввода
 	'libinanity-input': {
-		objects: ['input.Frame', 'input.Manager', 'input.Mux', 'input.Processor', 'input.RawManager']
+		objects: ['input.Frame', 'input.Manager', 'input.Mux', 'input.Processor', 'input.Win32Manager', 'input.Win32RawManager']
 	},
 	// ******* подсистема окон Win32
 	'libinanity-win32window': {

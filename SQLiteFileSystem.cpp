@@ -150,7 +150,10 @@ ptr<File> SQLiteFileSystem::TryLoadFile(const String& fileName)
 		QueryHandle query(loadFileStmt);
 		// установить имя файла в запросе
 		if(sqlite3_bind_text(*loadFileStmt, 1, fileName.c_str(), -1, SQLITE_TRANSIENT) != SQLITE_OK)
+		{
 			Throw("Can't bind name parameter");
+			return 0;
+		}
 
 		// выполнить запрос
 		switch(sqlite3_step(*loadFileStmt))
@@ -172,6 +175,7 @@ ptr<File> SQLiteFileSystem::TryLoadFile(const String& fileName)
 			return nullptr;
 		default:
 			Throw("Error with statement step");
+			return 0;
 		}
 	}
 	catch(Exception* exception)

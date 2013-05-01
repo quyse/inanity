@@ -13,7 +13,7 @@ bigsize_t InputStream::Skip(bigsize_t size)
 	bigsize_t skipped = 0;
 	while(size)
 	{
-		size_t read = Read(buffer, std::min<bigsize_t>(size, sizeof(buffer)));
+		size_t read = Read(buffer, (size_t)std::min<bigsize_t>(size, sizeof(buffer)));
 		if(!read)
 			break;
 		size -= read;

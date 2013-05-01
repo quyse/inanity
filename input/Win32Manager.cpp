@@ -1,4 +1,5 @@
 #include "Win32Manager.hpp"
+#include "Frame.hpp"
 
 BEGIN_INANITY_INPUT
 

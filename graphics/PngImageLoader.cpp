@@ -149,6 +149,7 @@ ptr<Image2DData> PngImageLoader::Load(ptr<File> file)
 		}
 		catch(Exception* exception)
 		{
+			MakePointer(exception);
 			// бросаем "исключение" libpng
 			png_error(pngPtr, "Can't allocate image memory");
 		}

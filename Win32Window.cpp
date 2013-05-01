@@ -1,5 +1,5 @@
 #include "Win32Window.hpp"
-#include "input/Manager.hpp"
+#include "input/Win32Manager.hpp"
 #include "Strings.hpp"
 #include "Exception.hpp"
 #include "graphics/Presenter.hpp"
@@ -148,7 +148,7 @@ void Win32Window::SetGraphicsPresenter(Graphics::Presenter* presenter)
 	this->graphicsPresenter = graphicsPresenter;
 }
 
-void Win32Window::SetInputManager(ptr<Input::Manager> inputManager)
+void Win32Window::SetInputManager(ptr<Input::Win32Manager> inputManager)
 {
 	this->inputManager = inputManager;
 }

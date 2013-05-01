@@ -416,8 +416,8 @@ void DxContext::Update()
 		D3D11_VIEWPORT viewport;
 		viewport.TopLeftX = 0;
 		viewport.TopLeftY = 0;
-		viewport.Width = targetState.viewportWidth;
-		viewport.Height = targetState.viewportHeight;
+		viewport.Width = (float)targetState.viewportWidth;
+		viewport.Height = (float)targetState.viewportHeight;
 		viewport.MinDepth = 0;
 		viewport.MaxDepth = 1;
 		deviceContext->RSSetViewports(1, &viewport);

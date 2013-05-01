@@ -158,7 +158,7 @@ namespace std
 	{
 		size_t operator()(const Inanity::ptr<T>& p) const
 		{
-			return static_cast<size_t>(static_cast<T*>(p));
+			return reinterpret_cast<size_t>(static_cast<T*>(p));
 		}
 	};
 }
