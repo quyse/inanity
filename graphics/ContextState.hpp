@@ -12,7 +12,9 @@ class SamplerState;
 class UniformBuffer;
 class VertexShader;
 class PixelShader;
-class Geometry;
+class AttributeLayout;
+class VertexBuffer;
+class IndexBuffer;
 class BlendState;
 
 /// Структура с состоянием контекста рисования.
@@ -45,8 +47,14 @@ struct ContextState
 	/// Привязанный пиксельный шейдер.
 	ptr<PixelShader> pixelShader;
 
-	/// Привязанная геометрия.
-	ptr<Geometry> geometry;
+	/// Разметка атрибутов.
+	ptr<AttributeLayout> attributeLayout;
+	/// Количество слотов для вершинных буферов.
+	static const int vertexBufferSlotsCount = 2;
+	/// Привязанные вершинные буферы.
+	ptr<VertexBuffer> vertexBuffers[vertexBufferSlotsCount];
+	/// Привязанный индексный буфер.
+	ptr<IndexBuffer> indexBuffer;
 
 	//******* Параметры растеризации.
 	/// Режим заливки.
