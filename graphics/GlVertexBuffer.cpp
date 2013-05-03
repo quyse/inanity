@@ -1,9 +1,9 @@
 #include "GlVertexBuffer.hpp"
-#include "Layout.hpp"
+#include "VertexLayout.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
-GlVertexBuffer::GlVertexBuffer(GLuint name, int verticesCount, ptr<Layout> layout)
+GlVertexBuffer::GlVertexBuffer(GLuint name, int verticesCount, ptr<VertexLayout> layout)
 : VertexBuffer(verticesCount, layout), name(name) {}
 
 GlVertexBuffer::~GlVertexBuffer()

@@ -7,8 +7,6 @@
 
 BEGIN_INANITY_GRAPHICS
 
-class Layout;
-
 /// Класс вершинного буфера DirectX.
 class DxVertexBuffer : public VertexBuffer
 {
@@ -16,7 +14,7 @@ private:
 	ComPointer<ID3D11Buffer> buffer;
 
 public:
-	DxVertexBuffer(ComPointer<ID3D11Buffer> buffer, int verticesCount, ptr<Layout> layout);
+	DxVertexBuffer(ComPointer<ID3D11Buffer> buffer, int verticesCount, ptr<VertexLayout> layout);
 
 	ID3D11Buffer* GetBufferInterface() const;
 };

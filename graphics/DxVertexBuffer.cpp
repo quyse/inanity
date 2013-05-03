@@ -1,9 +1,9 @@
 #include "DxVertexBuffer.hpp"
-#include "Layout.hpp"
+#include "VertexLayout.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
-DxVertexBuffer::DxVertexBuffer(ComPointer<ID3D11Buffer> buffer, int verticesCount, ptr<Layout> layout)
+DxVertexBuffer::DxVertexBuffer(ComPointer<ID3D11Buffer> buffer, int verticesCount, ptr<VertexLayout> layout)
 : VertexBuffer(verticesCount, layout), buffer(buffer) {}
 
 ID3D11Buffer* DxVertexBuffer::GetBufferInterface() const
