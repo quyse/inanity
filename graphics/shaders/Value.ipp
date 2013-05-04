@@ -5,6 +5,8 @@
 #include "SwizzleNode.hpp"
 #include "CastNode.hpp"
 #include "OperationNode.hpp"
+#include "AttributeNode.hpp"
+#include "../AttributeLayoutElement.hpp"
 
 BEGIN_INANITY_SHADERS
 
@@ -89,6 +91,10 @@ inline Value<int>::Value(int constValue)
 template <>
 inline Value<uint>::Value(uint constValue)
 : Expression(NEW(IntConstNode(constValue))) {}
+
+template <typename ValueType>
+inline Value<ValueType>::Value(ptr<AttributeLayoutElement> element)
+: Expression(NEW(AttributeNode(element))) {}
 
 template <typename ValueType>
 inline void Value<ValueType>::operator=(Value<ValueType> a)

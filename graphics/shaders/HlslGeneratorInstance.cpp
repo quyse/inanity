@@ -146,7 +146,7 @@ void HlslGeneratorInstance::PrintNode(Node* node)
 		hlsl << fast_cast<IntConstNode*>(node)->GetValue();
 		break;
 	case Node::typeAttribute:
-		hlsl << "a.a" << fast_cast<AttributeNode*>(node)->GetSemantic();
+		hlsl << "a.a" << fast_cast<AttributeNode*>(node)->GetElementIndex();
 		break;
 	case Node::typeUniform:
 		{
@@ -487,8 +487,8 @@ ptr<ShaderSource> HlslGeneratorInstance::Generate()
 			ptr<AttributeNode> node = attributes[i];
 			hlsl << '\t';
 			PrintDataType(node->GetValueType());
-			int semantic = node->GetSemantic();
-			hlsl << " a" << semantic << " : " << DxSystem::GetSemanticString(semantic) << ";\n";
+			int index = node->GetElementIndex();
+			hlsl << " a" << index << " : " << DxSystem::GetSemanticString(index) << ";\n";
 		}
 		hlsl << "};\n";
 	}

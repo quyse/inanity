@@ -165,7 +165,7 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 		glsl << fast_cast<IntConstNode*>(node)->GetValue();
 		break;
 	case Node::typeAttribute:
-		glsl << "a" << fast_cast<AttributeNode*>(node)->GetSemantic();
+		glsl << "a" << fast_cast<AttributeNode*>(node)->GetElementIndex();
 		break;
 	case Node::typeUniform:
 		{
@@ -518,7 +518,7 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 			ptr<AttributeNode> node = attributes[i];
 			glsl << "in ";
 			PrintDataType(node->GetValueType());
-			glsl << " a" << node->GetSemantic() << ";\n";
+			glsl << " a" << node->GetElementIndex() << ";\n";
 		}
 	}
 	// вывести промежуточные переменные в любом случае
@@ -666,11 +666,11 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 	GlShaderBindings::Bindings attributeBindings(attributes.size());
 	for(size_t i = 0; i < attributes.size(); ++i)
 	{
-		int semantic = attributes[i]->GetSemantic();
+		int index = attributes[i]->GetElementIndex();
 		char name[16];
-		sprintf(name, "a%d", semantic);
+		sprintf(name, "a%d", index);
 		attributeBindings[i].first = name;
-		attributeBindings[i].second = semantic;
+		attributeBindings[i].second = index;
 	}
 
 	// сформировать список привязок целевых переменных
