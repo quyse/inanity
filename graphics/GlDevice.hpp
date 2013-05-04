@@ -13,10 +13,7 @@ BEGIN_INANITY_GRAPHICS
 
 class GlSystem;
 class GlContext;
-class GlInternalAttributeBinding;
-class GlInternalAttributeBindingCache;
 class GlShaderBindings;
-class Layout;
 
 /// Класс графического устройства OpenGL.
 /** Текущие ограничения:
@@ -44,9 +41,6 @@ private:
 	/// Основной графический контекст.
 	ptr<GlContext> context;
 
-	/// Кэш привязок аттрибутов.
-	ptr<GlInternalAttributeBindingCache> attributeBindingCache;
-
 	/// Скомпилировать шейдер.
 	static void CompileShader(GLuint shaderName, ptr<File> file, ptr<GlShaderBindings>& shaderBindings);
 
@@ -61,9 +55,6 @@ public:
 	GlDevice(ptr<GlSystem> system, ptr<GlContext> context);
 #endif
 
-	/// Создать привязку атрибутов.
-	ptr<GlInternalAttributeBinding> CreateInternalAttributeBinding(Layout* vertexLayout);
-
 	// методы Device
 	ptr<System> GetSystem() const;
 	ptr<Presenter> CreatePresenter(ptr<Output> output, const PresentMode& mode);
@@ -73,9 +64,9 @@ public:
 	ptr<VertexShader> CreateVertexShader(ptr<File> file);
 	ptr<PixelShader> CreatePixelShader(ptr<File> file);
 	ptr<UniformBuffer> CreateUniformBuffer(int size);
-	ptr<VertexBuffer> CreateVertexBuffer(ptr<File> file, ptr<Layout> layout);
-	ptr<IndexBuffer> CreateIndexBuffer(ptr<File> file, int indexSize);
-	ptr<Geometry> CreateGeometry(ptr<VertexBuffer> vertexBuffer, ptr<IndexBuffer> indexBuffer);
+	ptr<VertexBuffer> CreateStaticVertexBuffer(ptr<File> file, ptr<VertexLayout> layout);
+	ptr<IndexBuffer> CreateStaticIndexBuffer(ptr<File> file, int indexSize);
+	ptr<AttributeLayout> CreateAttributeLayout();
 	ptr<Texture> CreateStaticTexture(ptr<File> file);
 	ptr<Texture> CreateStatic2DTexture(ptr<Image2DData> imageData);
 	ptr<SamplerState> CreateSamplerState();

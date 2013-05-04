@@ -9,12 +9,12 @@
 #include "GlUniformBuffer.hpp"
 #include "GlVertexShader.hpp"
 #include "GlPixelShader.hpp"
+#include "GlAttributeLayout.hpp"
 #include "GlVertexBuffer.hpp"
 #include "GlIndexBuffer.hpp"
-#include "GlGeometry.hpp"
 #include "GlBlendState.hpp"
 #include "GlInternalTexture.hpp"
-#include "Layout.hpp"
+#include "VertexLayout.hpp"
 #include "../Exception.hpp"
 #include <memory.h>
 
@@ -171,13 +171,40 @@ void GlContext::Update()
 		boundState.pixelShader = targetState.pixelShader;
 	}
 
-	// геометрия
-	if(forceReset || targetState.geometry != boundState.geometry)
+	// разметка атрибутов
+	if(forceReset || targetState.attributeLayout != boundState.attributeLayout)
 	{
-		glBindVertexArray(fast_cast<GlGeometry*>(&*targetState.geometry)->GetVertexArrayName());
-		GlSystem::CheckErrors("Can't bind geometry");
+		glBindVertexArray(fast_cast<GlAttributeLayout*>(&*targetState.attributeLayout)->GetVertexArrayName());
+		GlSystem::CheckErrors("Can't bind attribute layout");
 
-		boundState.geometry = targetState.geometry;
+		boundState.attributeLayout = targetState.attributeLayout;
+	}
+
+	// вершинные буферы
+	for(int i = 0; i < ContextState::vertexBufferSlotsCount; ++i)
+		if(forceReset || targetState.vertexBuffers[i] != boundState.vertexBuffers[i])
+		{
+			VertexBuffer* abstractVertexBuffer = targetState.vertexBuffers[i];
+			if(abstractVertexBuffer)
+			{
+				GlVertexBuffer* vertexBuffer = fast_cast<GlVertexBuffer*>(abstractVertexBuffer);
+				glBindVertexBuffer((GLuint)i, vertexBuffer->GetName(), 0, vertexBuffer->GetLayout()->GetStride());
+			}
+			else
+				glBindVertexBuffer((GLuint)i, 0, 0, 0);
+			GlSystem::CheckErrors("Can't bind vertex buffer");
+
+			boundState.vertexBuffers[i] = targetState.vertexBuffers[i];
+		}
+
+	// индексный буфер
+	if(forceReset || targetState.indexBuffer != boundState.indexBuffer)
+	{
+		IndexBuffer* abstractIndexBuffer = targetState.indexBuffer;
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, abstractIndexBuffer ? fast_cast<GlIndexBuffer*>(abstractIndexBuffer)->GetName() : 0);
+		GlSystem::CheckErrors("Can't bind index buffer");
+
+		boundState.indexBuffer = targetState.indexBuffer;
 	}
 
 	if(forceReset || targetState.fillMode != boundState.fillMode)
@@ -470,7 +497,13 @@ void GlContext::Draw()
 {
 	Update();
 
-	fast_cast<GlGeometry*>(&*boundState.geometry)->IssueDraw();
+	if(boundState.indexBuffer)
+	{
+		GlIndexBuffer* indexBuffer = fast_cast<GlIndexBuffer*>(&*boundState.indexBuffer);
+		glDrawElements(GL_TRIANGLES, indexBuffer->GetIndicesCount(), indexBuffer->GetIndicesType(), (void*)0);
+	}
+	else
+		glDrawArrays(GL_TRIANGLES, 0, boundState.vertexBuffers[0]->GetVerticesCount());
 	GlSystem::CheckErrors("Can't draw");
 }
 
@@ -478,7 +511,13 @@ void GlContext::DrawInstanced(int instancesCount)
 {
 	Update();
 
-	fast_cast<GlGeometry*>(&*boundState.geometry)->IssueDrawInstanced(instancesCount);
+	if(boundState.indexBuffer)
+	{
+		GlIndexBuffer* indexBuffer = fast_cast<GlIndexBuffer*>(&*boundState.indexBuffer);
+		glDrawElementsInstanced(GL_TRIANGLES, indexBuffer->GetIndicesCount(), indexBuffer->GetIndicesType(), (void*)0, instancesCount);
+	}
+	else
+		glDrawArraysInstanced(GL_TRIANGLES, 0, boundState.vertexBuffers[0]->GetVerticesCount(), instancesCount);
 	GlSystem::CheckErrors("Can't draw instanced");
 }
 

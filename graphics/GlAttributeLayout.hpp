@@ -6,17 +6,23 @@
 
 BEGIN_INANITY_GRAPHICS
 
+class GlDevice;
+
+/// Класс разметки атрибутов для OpenGL.
 class GlAttributeLayout : public AttributeLayout
 {
 private:
+	ptr<GlDevice> device;
 	/// Vertex Array Object.
 	GLuint vertexArrayName;
 
 public:
-	GlAttributeLayout(GLuint vertexArrayName);
+	GlAttributeLayout(ptr<GlDevice> device);
 	~GlAttributeLayout();
 
 	GLuint GetVertexArrayName() const;
+
+	void Finalize();
 };
 
 END_INANITY_GRAPHICS

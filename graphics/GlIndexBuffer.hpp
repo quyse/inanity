@@ -17,6 +17,7 @@ public:
 	~GlIndexBuffer();
 
 	GLuint GetName() const;
+	GLenum GetIndicesType() const;
 };
 
 END_INANITY_GRAPHICS
