@@ -4,7 +4,6 @@
 #include "UniformBuffer.hpp"
 #include "VertexBuffer.hpp"
 #include "IndexBuffer.hpp"
-#include "Geometry.hpp"
 #include "VertexShader.hpp"
 #include "PixelShader.hpp"
 #include "BlendState.hpp"
@@ -12,7 +11,11 @@
 #include "Device.hpp"
 #include "Context.hpp"
 #include "ShaderCache.hpp"
-#include "Layout.hpp"
+#include "VertexLayout.hpp"
+#include "VertexLayoutElement.hpp"
+#include "AttributeLayout.hpp"
+#include "AttributeLayoutSlot.hpp"
+#include "AttributeLayoutElement.hpp"
 #include "RenderBuffer.hpp"
 #include "DepthStencilBuffer.hpp"
 #include "../MemoryFile.hpp"
@@ -30,7 +33,13 @@ struct TextDrawerHelper : public Object
 	/// Максимальное количество символов, рисуемое за раз.
 	static const int maxSymbolsCount = 64;
 
-	Attribute<float4> aCorner;
+	ptr<VertexLayout> vl;
+	ptr<VertexLayoutElement> vlePosition;
+	ptr<AttributeLayout> al;
+	ptr<AttributeLayoutSlot> als;
+	ptr<AttributeLayoutElement> alePosition;
+
+	Value<float4> aCorner;
 
 	Interpolant<float2> iTexcoord;
 	Interpolant<float4> iColor;
@@ -49,13 +58,19 @@ struct TextDrawerHelper : public Object
 	/** Задаёт альфу для шрифта. */
 	Sampler<float, float2> uFontSampler;
 
-	ptr<Geometry> geometry;
+	ptr<VertexBuffer> vb;
 	ptr<VertexShader> vs;
 	ptr<PixelShader> ps;
 	ptr<BlendState> bs;
 
 	TextDrawerHelper(ptr<Device> device, ptr<ShaderCache> shaderCache) :
-		aCorner(0),
+		vl(NEW(VertexLayout(sizeof(float4)))),
+		vlePosition(vl->AddElement(DataTypes::Float4, 0)),
+		al(device->CreateAttributeLayout()),
+		als(al->AddSlot(vl)),
+		alePosition(al->AddElement(als, vlePosition)),
+
+		aCorner(alePosition),
 
 		iTexcoord(1),
 		iColor(2),
@@ -71,6 +86,7 @@ struct TextDrawerHelper : public Object
 	{
 		try
 		{
+			al->Finalize();
 			ugSymbols->Finalize(device);
 
 			// создать геометрию
@@ -83,9 +99,8 @@ struct TextDrawerHelper : public Object
 				float4(1, 0, 0, 1),
 				float4(0, 0, 1, 1)
 			};
-			ptr<Layout> layout = NEW(Layout(std::vector<Layout::Element>(1, Layout::Element(DataTypes::Float4, 0, 0)), 16));
 
-			geometry = device->CreateGeometry(device->CreateVertexBuffer(MemoryFile::CreateViaCopy(vertices, sizeof(vertices)), layout), 0);
+			vb = device->CreateStaticVertexBuffer(MemoryFile::CreateViaCopy(vertices, sizeof(vertices)), vl);
 
 			// вершинный шейдер
 			Temp<uint> tmpInstance;
@@ -143,7 +158,10 @@ void TextDrawer::Prepare(ptr<Context> context)
 
 	// установить всё, что можно, в состояние контекста
 	ContextState& cs = context->GetTargetState();
-	cs.geometry = helper->geometry;
+	cs.ResetVertexBuffers();
+	cs.attributeLayout = helper->al;
+	cs.vertexBuffers[0] = helper->vb;
+	cs.indexBuffer = 0;
 	cs.vertexShader = helper->vs;
 	cs.pixelShader = helper->ps;
 	cs.blendState = helper->bs;
