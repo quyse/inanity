@@ -1,5 +1,4 @@
 #include "DxVertexShader.hpp"
-#include "Layout.hpp"
 #include "../File.hpp"
 
 BEGIN_INANITY_GRAPHICS

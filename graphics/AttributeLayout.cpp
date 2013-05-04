@@ -25,7 +25,7 @@ ptr<AttributeLayoutElement> AttributeLayout::AddElement(ptr<AttributeLayoutSlot>
 			THROW_PRIMARY_EXCEPTION("Slot is from another attribute layout");
 		// проверить, что разметка верная
 		int slotIndex = slot->GetIndex();
-		if(element->GetLayout() != slots[slotIndex].layout)
+		if(element->GetLayout() != slots[slotIndex].vertexLayout)
 			THROW_PRIMARY_EXCEPTION("Wrong vertex layout for this slot");
 
 		int elementIndex = (int)elements.size();

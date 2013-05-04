@@ -6,9 +6,9 @@
 #include "UniformBuffer.hpp"
 #include "VertexShader.hpp"
 #include "PixelShader.hpp"
+#include "AttributeLayout.hpp"
 #include "VertexBuffer.hpp"
 #include "IndexBuffer.hpp"
-#include "Geometry.hpp"
 #include "BlendState.hpp"
 
 BEGIN_INANITY_GRAPHICS

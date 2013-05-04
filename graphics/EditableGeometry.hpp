@@ -1,8 +1,7 @@
 #ifndef ___INANITY_GRAPHICS_EDITABLE_GEOMETRY_H___
 #define ___INANITY_GRAPHICS_EDITABLE_GEOMETRY_H___
 
-#include "Geometry.hpp"
-#include "GeometryFormat.hpp"
+#include "graphics.hpp"
 #include <vector>
 #include <map>
 #include <set>

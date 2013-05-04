@@ -98,6 +98,8 @@ struct ContextState
 
 	ContextState();
 
+	/// Очистить все слоты вершинных буферов.
+	void ResetVertexBuffers();
 	/// Очистить все слоты вывода.
 	void ResetTargets();
 	/// Очистить все текстурные слоты.

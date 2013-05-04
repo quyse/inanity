@@ -20,6 +20,12 @@ ContextState::ContextState() :
 {
 }
 
+void ContextState::ResetVertexBuffers()
+{
+	for(int i = 0; i < vertexBufferSlotsCount; ++i)
+		vertexBuffers[i] = 0;
+}
+
 void ContextState::ResetTargets()
 {
 	for(int i = 0; i < renderTargetSlotsCount; ++i)

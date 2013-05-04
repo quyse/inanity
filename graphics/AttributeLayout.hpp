@@ -53,6 +53,9 @@ public:
 	ptr<AttributeLayoutSlot> AddSlot(ptr<VertexLayout> vertexLayout, int divisor = 0);
 	ptr<AttributeLayoutElement> AddElement(ptr<AttributeLayoutSlot> slot, ptr<VertexLayoutElement> element);
 
+	/// Завершить создание разметки.
+	virtual void Finalize() = 0;
+
 	const Slots& GetSlots() const;
 	const Elements& GetElements() const;
 };

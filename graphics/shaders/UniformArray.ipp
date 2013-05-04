@@ -11,7 +11,7 @@ BEGIN_INANITY_SHADERS
 
 template <typename ValueType>
 UniformArray<ValueType>::UniformArray(ptr<UniformNode> node)
-: Value<ValueType>(node)
+: Value<ValueType>(node.StaticCast<Node>())
 {
 #ifdef _DEBUG
 	if(node->GetValueType() != GetDataType<ValueType>())

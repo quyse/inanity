@@ -22,10 +22,10 @@ class DepthStencilBuffer;
 class VertexShader;
 class PixelShader;
 class UniformBuffer;
-class Layout;
+class VertexLayout;
 class VertexBuffer;
 class IndexBuffer;
-class Geometry;
+class AttributeLayout;
 class Texture;
 class Image2DData;
 class SamplerState;
@@ -68,16 +68,16 @@ public:
 
 	/// Создать константный буфер.
 	virtual ptr<UniformBuffer> CreateUniformBuffer(int size) = 0;
-	/// Создать вершинный буфер.
-	virtual ptr<VertexBuffer> CreateVertexBuffer(ptr<File> file, ptr<Layout> layout) = 0;
-	/// Создать индексный буфер.
+	/// Создать статический вершинный буфер.
+	virtual ptr<VertexBuffer> CreateStaticVertexBuffer(ptr<File> file, ptr<VertexLayout> layout) = 0;
+	/// Создать статический индексный буфер.
 	/**
 	\param indexSize Размер одного индекса - 2 или 4.
 	*/
-	virtual ptr<IndexBuffer> CreateIndexBuffer(ptr<File> file, int indexSize) = 0;
+	virtual ptr<IndexBuffer> CreateStaticIndexBuffer(ptr<File> file, int indexSize) = 0;
 
-	/// Создать геометрию.
-	virtual ptr<Geometry> CreateGeometry(ptr<VertexBuffer> vertexBuffer, ptr<IndexBuffer> indexBuffer) = 0;
+	/// Создать разметку атрибутов.
+	virtual ptr<AttributeLayout> CreateAttributeLayout() = 0;
 
 	/// Создать статическую текстуру из графического файла.
 	/** FIXME: Метод должен быть удалён. Для создания текстур нужно использовать

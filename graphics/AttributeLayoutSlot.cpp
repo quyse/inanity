@@ -18,9 +18,9 @@ int AttributeLayoutSlot::GetIndex() const
 	return index;
 }
 
-void AttributeLayoutSlot::Apply(ContextState* contextState, ptr<VertexBuffer> vertexBuffer)
+void AttributeLayoutSlot::Apply(ContextState& contextState, ptr<VertexBuffer> vertexBuffer)
 {
-	contextState->vertexBuffers[index] = vertexBuffer;
+	contextState.vertexBuffers[index] = vertexBuffer;
 }
 
 END_INANITY_GRAPHICS

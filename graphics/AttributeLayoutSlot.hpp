@@ -6,7 +6,7 @@
 BEGIN_INANITY_GRAPHICS
 
 class AttributeLayout;
-class ContextState;
+struct ContextState;
 class VertexBuffer;
 
 /// Класс слота для разметки атрибутов.
@@ -22,7 +22,7 @@ public:
 	ptr<AttributeLayout> GetLayout() const;
 	int GetIndex() const;
 
-	void Apply(ContextState* contextState, ptr<VertexBuffer> vertexBuffer);
+	void Apply(ContextState& contextState, ptr<VertexBuffer> vertexBuffer);
 };
 
 END_INANITY_GRAPHICS
