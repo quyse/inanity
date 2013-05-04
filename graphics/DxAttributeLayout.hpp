@@ -7,16 +7,21 @@
 
 BEGIN_INANITY_GRAPHICS
 
+class DxDevice;
+
 /// Класс разметки атрибутов для DirectX.
 class DxAttributeLayout : public AttributeLayout
 {
 private:
+	ptr<DxDevice> device;
 	ComPointer<ID3D11InputLayout> inputLayout;
 
 public:
-	DxAttributeLayout(ComPointer<ID3D11InputLayout> inputLayout);
+	DxAttributeLayout(ptr<DxDevice> device);
 
 	ID3D11InputLayout* GetInputLayoutInterface() const;
+
+	void Finalize();
 };
 
 END_INANITY_GRAPHICS

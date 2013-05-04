@@ -8,13 +8,11 @@
 #include "DxUniformBuffer.hpp"
 #include "DxVertexShader.hpp"
 #include "DxPixelShader.hpp"
+#include "DxAttributeLayout.hpp"
 #include "DxVertexBuffer.hpp"
-#include "DxInternalInputLayout.hpp"
-#include "DxInternalInputLayoutCache.hpp"
 #include "DxIndexBuffer.hpp"
-#include "DxGeometry.hpp"
+#include "VertexLayout.hpp"
 #include "DxBlendState.hpp"
-#include "Layout.hpp"
 #include "../File.hpp"
 #include "../Exception.hpp"
 
@@ -23,118 +21,6 @@ BEGIN_INANITY_GRAPHICS
 DxContext::DxContext(ComPointer<ID3D11Device> device, ComPointer<ID3D11DeviceContext> deviceContext)
 : device(device), deviceContext(deviceContext)
 {
-	// создать кэш входных разметок
-	inputLayoutCache = NEW(DxInternalInputLayoutCache(this));
-}
-
-ptr<DxInternalInputLayout> DxContext::CreateInternalInputLayout(Layout* vertexLayout, DxVertexShader* vertexShader)
-{
-	try
-	{
-		// получить элементы разметки
-		const std::vector<Layout::Element>& elements = vertexLayout->GetElements();
-		if(elements.empty())
-			THROW_PRIMARY_EXCEPTION("Vertex layout is empty");
-
-		// структуры описания
-		// количество не указывается, так как матрицы требуют несколько элементов
-		std::vector<D3D11_INPUT_ELEMENT_DESC> descs;
-		// строки для имён семантик, их количество известно
-		std::vector<String> semanticNames(elements.size());
-
-		// и заполнить их
-		for(size_t i = 0; i < elements.size(); ++i)
-		{
-			const Layout::Element& element = elements[i];
-
-			// получить количество необходимых описаний для элемента
-			int needDescsCount;
-			switch(element.dataType)
-			{
-			case DataTypes::Float4x4:
-				needDescsCount = 4;
-				break;
-			default:
-				needDescsCount = 1;
-				break;
-			}
-
-			// выбрать формат элемента
-			DXGI_FORMAT format;
-			switch(element.dataType)
-			{
-			case DataTypes::Float:
-				format = DXGI_FORMAT_R32_FLOAT;
-				break;
-			case DataTypes::Float2:
-				format = DXGI_FORMAT_R32G32_FLOAT;
-				break;
-			case DataTypes::Float3:
-				format = DXGI_FORMAT_R32G32B32_FLOAT;
-				break;
-			case DataTypes::Float4:
-				format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-				break;
-			case DataTypes::Float4x4:
-				format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-				break;
-			case DataTypes::UInt:
-				format = DXGI_FORMAT_R32_UINT;
-				break;
-			case DataTypes::UInt2:
-				format = DXGI_FORMAT_R32G32_UINT;
-				break;
-			case DataTypes::UInt3:
-				format = DXGI_FORMAT_R32G32B32_UINT;
-				break;
-			case DataTypes::UInt4:
-				format = DXGI_FORMAT_R32G32B32A32_UINT;
-				break;
-			default:
-				THROW_PRIMARY_EXCEPTION("Unknown element type");
-			}
-
-			// размер элемента - пока всегда один вектор (float4 или uint4),
-			// так как он нужен только для матриц float4x4
-			const int elementSize = 16;
-
-			// имя семантики получается переводом кода семантики в 26-ричную систему (буквы)
-			String& semanticName = semanticNames[i];
-			semanticName = DxSystem::GetSemanticString(element.semantic);
-
-			// цикл по вот этим требуемым элементам
-			for(int descIndex = 0; descIndex < needDescsCount; ++descIndex)
-			{
-				descs.push_back(D3D11_INPUT_ELEMENT_DESC());
-				D3D11_INPUT_ELEMENT_DESC& desc = descs.back();
-
-				// SemanticName в структуре будет заполнено позже,
-				// потому что сейчас адреса в векторе ещё могут поменяться
-
-				desc.SemanticName = semanticName.c_str();
-				desc.SemanticIndex = descIndex;
-				desc.Format = format;
-				desc.InputSlot = 0;
-				desc.AlignedByteOffset = element.offset + descIndex * elementSize;
-				desc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-				desc.InstanceDataStepRate = 0;
-			}
-		}
-
-		// получить код шейдера
-		ptr<File> vertexShaderCode = vertexShader->GetCode();
-
-		// создать разметку
-		ID3D11InputLayout* inputLayoutInterface;
-		if(FAILED(device->CreateInputLayout(&*descs.begin(), (UINT)descs.size(), vertexShaderCode->GetData(), vertexShaderCode->GetSize(), &inputLayoutInterface)))
-			THROW_PRIMARY_EXCEPTION("Can't create input layout");
-
-		return NEW(DxInternalInputLayout(inputLayoutInterface));
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY_EXCEPTION("Can't create DX internal input layout", exception);
-	}
 }
 
 void DxContext::Update()
@@ -334,15 +220,82 @@ void DxContext::Update()
 		}
 	}
 
-	// входная разметка
-	if(forceReset || targetState.geometry != boundState.geometry)
+	// разметка атрибутов
+	if(forceReset || targetState.attributeLayout != boundState.attributeLayout)
 	{
-		ptr<DxInternalInputLayout> inputLayout = inputLayoutCache->GetInputLayout(fast_cast<DxGeometry*>(&*targetState.geometry)->GetVertexBuffer()->GetLayout(), fast_cast<DxVertexShader*>(&*targetState.vertexShader));
-		if(forceReset || inputLayout != boundInputLayout)
+		deviceContext->IASetInputLayout(fast_cast<DxAttributeLayout*>(&*targetState.attributeLayout)->GetInputLayoutInterface());
+
+		boundState.attributeLayout = targetState.attributeLayout;
+	}
+
+	// вершинные буферы
+	{
+		// сейчас единственная оптимизация - начало и конец в списке обновляемых вершинных буферов
+		int end;
+		if(forceReset)
+			end = ContextState::vertexBufferSlotsCount;
+		else
 		{
-			deviceContext->IASetInputLayout(inputLayout->GetInputLayoutInterface());
-			boundInputLayout = inputLayout;
+			for(end = ContextState::vertexBufferSlotsCount - 1; end >= 0; --end)
+				if(targetState.vertexBuffers[end] != boundState.vertexBuffers[end])
+					break;
+			++end;
 		}
+		int begin;
+		if(forceReset)
+			begin = 0;
+		else
+		{
+			for(begin = 0; begin < end; ++begin)
+				if(targetState.vertexBuffers[begin] != boundState.vertexBuffers[begin])
+					break;
+		}
+
+		if(begin < end)
+		{
+			ID3D11Buffer* buffers[ContextState::vertexBufferSlotsCount];
+			UINT strides[ContextState::vertexBufferSlotsCount];
+			UINT offsets[ContextState::vertexBufferSlotsCount];
+			for(int i = begin; i < end; ++i)
+			{
+				VertexBuffer* abstractVertexBuffer = targetState.vertexBuffers[i];
+				if(abstractVertexBuffer)
+				{
+					DxVertexBuffer* vertexBuffer = fast_cast<DxVertexBuffer*>(abstractVertexBuffer);
+					buffers[i] = vertexBuffer->GetBufferInterface();
+					strides[i] = vertexBuffer->GetLayout()->GetStride();
+					offsets[i] = 0;
+				}
+				else
+				{
+					buffers[i] = 0;
+					strides[i] = 0;
+					offsets[i] = 0;
+				}
+			}
+
+			// установить буферы
+			deviceContext->IASetVertexBuffers(begin, end - begin, buffers + begin, strides + begin, offsets + begin);
+
+			// обновить актуальное состояние
+			for(int i = begin; i < end; ++i)
+				boundState.vertexBuffers[i] = targetState.vertexBuffers[i];
+		}
+	}
+
+	// индексный буфер
+	if(forceReset || targetState.indexBuffer != boundState.indexBuffer)
+	{
+		IndexBuffer* abstractIndexBuffer = targetState.indexBuffer;
+		if(abstractIndexBuffer)
+		{
+			DxIndexBuffer* indexBuffer = fast_cast<DxIndexBuffer*>(abstractIndexBuffer);
+			deviceContext->IASetIndexBuffer(indexBuffer->GetBufferInterface(), indexBuffer->GetIndexFormat(), 0);
+		}
+		else
+			deviceContext->IASetIndexBuffer(NULL, DXGI_FORMAT_R16_UINT, 0);
+
+		boundState.indexBuffer = targetState.indexBuffer;
 	}
 
 	// вершинный шейдер
@@ -369,42 +322,6 @@ void DxContext::Update()
 		deviceContext->PSSetShader(shader, NULL, 0);
 
 		boundState.pixelShader = targetState.pixelShader;
-	}
-
-	// геометрия
-	if(forceReset || targetState.geometry != boundState.geometry)
-	{
-		DxGeometry* geometry = fast_cast<DxGeometry*>(&*targetState.geometry);
-
-		// вершинный буфер
-		{
-			DxVertexBuffer* vertexBuffer = geometry->GetVertexBuffer();
-			ID3D11Buffer* buffer = vertexBuffer->GetBufferInterface();
-			UINT stride = vertexBuffer->GetLayout()->GetStride();
-			UINT offset = 0;
-			deviceContext->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
-			deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		}
-
-		// индексный буфер
-		{
-			DxIndexBuffer* indexBuffer = geometry->GetIndexBuffer();
-			ID3D11Buffer* buffer;
-			DXGI_FORMAT format;
-			if(indexBuffer)
-			{
-				buffer = indexBuffer->GetBufferInterface();
-				format = indexBuffer->GetIndexSize() == 4 ? DXGI_FORMAT_R32_UINT : DXGI_FORMAT_R16_UINT;
-			}
-			else
-			{
-				buffer = 0;
-				format = DXGI_FORMAT_R16_UINT;
-			}
-			deviceContext->IASetIndexBuffer(buffer, format, 0);
-		}
-
-		boundState.geometry = targetState.geometry;
 	}
 
 	// TODO: fill mode
@@ -495,26 +412,20 @@ void DxContext::Draw()
 {
 	Update();
 
-	DxGeometry* geometry = fast_cast<DxGeometry*>(&*boundState.geometry);
-	DxIndexBuffer* indexBuffer = geometry->GetIndexBuffer();
-
-	if(indexBuffer)
-		deviceContext->DrawIndexed(indexBuffer->GetIndicesCount(), 0, 0);
+	if(boundState.indexBuffer)
+		deviceContext->DrawIndexed(fast_cast<DxIndexBuffer*>(&*boundState.indexBuffer)->GetIndicesCount(), 0, 0);
 	else
-		deviceContext->Draw(geometry->GetVertexBuffer()->GetVerticesCount(), 0);
+		deviceContext->Draw(fast_cast<DxVertexBuffer*>(&*boundState.vertexBuffers[0])->GetVerticesCount(), 0);
 }
 
 void DxContext::DrawInstanced(int instancesCount)
 {
 	Update();
 
-	DxGeometry* geometry = fast_cast<DxGeometry*>(&*boundState.geometry);
-	DxIndexBuffer* indexBuffer = geometry->GetIndexBuffer();
-
-	if(indexBuffer)
-		deviceContext->DrawIndexedInstanced(indexBuffer->GetIndicesCount(), instancesCount, 0, 0, 0);
+	if(boundState.indexBuffer)
+		deviceContext->DrawIndexedInstanced(fast_cast<DxIndexBuffer*>(&*boundState.indexBuffer)->GetIndicesCount(), instancesCount, 0, 0, 0);
 	else
-		deviceContext->DrawInstanced(geometry->GetVertexBuffer()->GetVerticesCount(), instancesCount, 0, 0);
+		deviceContext->DrawInstanced(fast_cast<DxVertexBuffer*>(&*boundState.vertexBuffers[0])->GetVerticesCount(), instancesCount, 0, 0);
 }
 
 END_INANITY_GRAPHICS

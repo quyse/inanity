@@ -12,14 +12,12 @@
 #endif
 
 #include "graphics/D3D10BlobFile.hpp"
+#include "graphics/DxAttributeLayout.hpp"
 #include "graphics/DxBlendState.hpp"
 #include "graphics/DxContext.hpp"
 #include "graphics/DxDepthStencilBuffer.hpp"
 #include "graphics/DxDevice.hpp"
-#include "graphics/DxGeometry.hpp"
 #include "graphics/DxIndexBuffer.hpp"
-#include "graphics/DxInternalInputLayout.hpp"
-#include "graphics/DxInternalInputLayoutCache.hpp"
 #include "graphics/DxPixelShader.hpp"
 #include "graphics/DxPresenter.hpp"
 #include "graphics/DxRenderBuffer.hpp"
