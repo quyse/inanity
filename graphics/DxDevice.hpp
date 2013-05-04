@@ -43,7 +43,7 @@ public:
 	ptr<UniformBuffer> CreateUniformBuffer(int size);
 	ptr<VertexBuffer> CreateStaticVertexBuffer(ptr<File> file, ptr<VertexLayout> layout);
 	ptr<IndexBuffer> CreateStaticIndexBuffer(ptr<File> file, int indexSize);
-	ptr<AttributeLayout> CreateAttributeLayout();
+	ptr<AttributeBinding> CreateAttributeBinding(ptr<AttributeLayout> layout);
 	ptr<Texture> CreateStaticTexture(ptr<File> file);
 	ptr<Texture> CreateStatic2DTexture(ptr<Image2DData> imageData);
 	ptr<SamplerState> CreateSamplerState();

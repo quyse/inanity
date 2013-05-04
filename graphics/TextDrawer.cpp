@@ -16,6 +16,7 @@
 #include "AttributeLayout.hpp"
 #include "AttributeLayoutSlot.hpp"
 #include "AttributeLayoutElement.hpp"
+#include "AttributeBinding.hpp"
 #include "RenderBuffer.hpp"
 #include "DepthStencilBuffer.hpp"
 #include "../MemoryFile.hpp"
@@ -38,6 +39,7 @@ struct TextDrawerHelper : public Object
 	ptr<AttributeLayout> al;
 	ptr<AttributeLayoutSlot> als;
 	ptr<AttributeLayoutElement> alePosition;
+	ptr<AttributeBinding> ab;
 
 	Value<float4> aCorner;
 
@@ -66,9 +68,10 @@ struct TextDrawerHelper : public Object
 	TextDrawerHelper(ptr<Device> device, ptr<ShaderCache> shaderCache) :
 		vl(NEW(VertexLayout(sizeof(float4)))),
 		vlePosition(vl->AddElement(DataTypes::Float4, 0)),
-		al(device->CreateAttributeLayout()),
+		al(NEW(AttributeLayout())),
 		als(al->AddSlot(vl)),
 		alePosition(al->AddElement(als, vlePosition)),
+		ab(device->CreateAttributeBinding(al)),
 
 		aCorner(alePosition),
 
@@ -86,7 +89,6 @@ struct TextDrawerHelper : public Object
 	{
 		try
 		{
-			al->Finalize();
 			ugSymbols->Finalize(device);
 
 			// создать геометрию
@@ -159,7 +161,7 @@ void TextDrawer::Prepare(ptr<Context> context)
 	// установить всё, что можно, в состояние контекста
 	ContextState& cs = context->GetTargetState();
 	cs.ResetVertexBuffers();
-	cs.attributeLayout = helper->al;
+	cs.attributeBinding = helper->ab;
 	cs.vertexBuffers[0] = helper->vb;
 	cs.indexBuffer = 0;
 	cs.vertexShader = helper->vs;

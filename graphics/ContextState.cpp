@@ -6,7 +6,7 @@
 #include "UniformBuffer.hpp"
 #include "VertexShader.hpp"
 #include "PixelShader.hpp"
-#include "AttributeLayout.hpp"
+#include "AttributeBinding.hpp"
 #include "VertexBuffer.hpp"
 #include "IndexBuffer.hpp"
 #include "BlendState.hpp"

@@ -9,7 +9,7 @@
 #include "GlUniformBuffer.hpp"
 #include "GlVertexShader.hpp"
 #include "GlPixelShader.hpp"
-#include "GlAttributeLayout.hpp"
+#include "GlAttributeBinding.hpp"
 #include "GlVertexBuffer.hpp"
 #include "GlIndexBuffer.hpp"
 #include "GlBlendState.hpp"
@@ -171,13 +171,13 @@ void GlContext::Update()
 		boundState.pixelShader = targetState.pixelShader;
 	}
 
-	// разметка атрибутов
-	if(forceReset || targetState.attributeLayout != boundState.attributeLayout)
+	// привязка атрибутов
+	if(forceReset || targetState.attributeBinding != boundState.attributeBinding)
 	{
-		glBindVertexArray(fast_cast<GlAttributeLayout*>(&*targetState.attributeLayout)->GetVertexArrayName());
-		GlSystem::CheckErrors("Can't bind attribute layout");
+		glBindVertexArray(fast_cast<GlAttributeBinding*>(&*targetState.attributeBinding)->GetVertexArrayName());
+		GlSystem::CheckErrors("Can't bind attribute binding");
 
-		boundState.attributeLayout = targetState.attributeLayout;
+		boundState.attributeBinding = targetState.attributeBinding;
 	}
 
 	// вершинные буферы

@@ -26,6 +26,7 @@ class VertexLayout;
 class VertexBuffer;
 class IndexBuffer;
 class AttributeLayout;
+class AttributeBinding;
 class Texture;
 class Image2DData;
 class SamplerState;
@@ -76,8 +77,8 @@ public:
 	*/
 	virtual ptr<IndexBuffer> CreateStaticIndexBuffer(ptr<File> file, int indexSize) = 0;
 
-	/// Создать разметку атрибутов.
-	virtual ptr<AttributeLayout> CreateAttributeLayout() = 0;
+	/// Создать привязку атрибутов.
+	virtual ptr<AttributeBinding> CreateAttributeBinding(ptr<AttributeLayout> layout) = 0;
 
 	/// Создать статическую текстуру из графического файла.
 	/** FIXME: Метод должен быть удалён. Для создания текстур нужно использовать

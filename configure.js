@@ -105,7 +105,7 @@ var libraries = {
 		objects: [
 			'graphics.DxSystem', 'graphics.DxDevice', 'graphics.DxPresenter', 'graphics.DxContext',
 			'graphics.DxRenderBuffer', 'graphics.DxDepthStencilBuffer', 'graphics.DxTexture', 'graphics.DxUniformBuffer',
-			'graphics.DxVertexBuffer', 'graphics.DxIndexBuffer', 'graphics.DxAttributeLayout',
+			'graphics.DxVertexBuffer', 'graphics.DxIndexBuffer', 'graphics.DxAttributeBinding',
 			'graphics.DxVertexShader', 'graphics.DxPixelShader',
 			'graphics.DxSamplerState', 'graphics.DxBlendState',
 			'graphics.D3D10BlobFile', 'graphics.DxShaderCompiler', 'graphics.HlslSource'
@@ -117,7 +117,7 @@ var libraries = {
 			'graphics.GlSystem', 'graphics.GlDevice', 'graphics.GlPresenter', 'graphics.GlContext',
 			'graphics.GlInternalTexture', 'graphics.GlInternalProgram', 'graphics.GlInternalProgramCache',
 			'graphics.GlRenderBuffer', 'graphics.GlDepthStencilBuffer', 'graphics.GlTexture', 'graphics.GlUniformBuffer',
-			'graphics.GlVertexBuffer', 'graphics.GlIndexBuffer', 'graphics.GlAttributeLayout',
+			'graphics.GlVertexBuffer', 'graphics.GlIndexBuffer', 'graphics.GlAttributeBinding',
 			'graphics.GlVertexShader', 'graphics.GlPixelShader',
 			'graphics.GlSamplerState', 'graphics.GlBlendState',
 			'graphics.GlShaderCompiler', 'graphics.GlslSource', 'graphics.GlShaderBindings'

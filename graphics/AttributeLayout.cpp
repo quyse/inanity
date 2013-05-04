@@ -7,8 +7,6 @@
 
 BEGIN_INANITY_GRAPHICS
 
-AttributeLayout::AttributeLayout() {}
-
 ptr<AttributeLayoutSlot> AttributeLayout::AddSlot(ptr<VertexLayout> vertexLayout, int divisor)
 {
 	int index = (size_t)slots.size();

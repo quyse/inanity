@@ -5,6 +5,7 @@
 
 #include "Object.hpp"
 
+#include "graphics/GlAttributeBinding.hpp"
 #include "graphics/GlBlendState.hpp"
 #include "graphics/GlContext.hpp"
 #include "graphics/GlDepthStencilBuffer.hpp"

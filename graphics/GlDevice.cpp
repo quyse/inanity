@@ -11,7 +11,8 @@
 #include "GlVertexBuffer.hpp"
 #include "GlIndexBuffer.hpp"
 #include "VertexLayout.hpp"
-#include "GlAttributeLayout.hpp"
+#include "GlAttributeBinding.hpp"
+#include "AttributeLayout.hpp"
 #include "GlInternalTexture.hpp"
 #include "Image2DData.hpp"
 #include "GlSamplerState.hpp"
@@ -393,9 +394,103 @@ ptr<IndexBuffer> GlDevice::CreateStaticIndexBuffer(ptr<File> file, int indexSize
 	}
 }
 
-ptr<AttributeLayout> GlDevice::CreateAttributeLayout()
+ptr<AttributeBinding> GlDevice::CreateAttributeBinding(ptr<AttributeLayout> layout)
 {
-	return NEW(GlAttributeLayout(this));
+	try
+	{
+		// создать Vertex Array Object
+		GLuint vertexArrayName;
+		glGenVertexArrays(1, &vertexArrayName);
+		GlSystem::CheckErrors("Can't gen vertex array");
+
+		// сразу создать привязку
+		ptr<AttributeBinding> binding = NEW(GlAttributeBinding(this, vertexArrayName));
+
+		// задать все настройки для VAO
+
+		// привязать VAO
+		glBindVertexArray(vertexArrayName);
+		GlSystem::CheckErrors("Can't bind vertex array");
+
+		const AttributeLayout::Elements& elements = layout->GetElements();
+		const AttributeLayout::Slots& slots = layout->GetSlots();
+
+		// задать элементы в VAO
+		for(size_t i = 0; i < elements.size(); ++i)
+		{
+			const AttributeLayout::Element& element = elements[i];
+			const AttributeLayout::Slot& slot = slots[i];
+
+			glEnableVertexAttribArray((GLuint)i);
+			GlSystem::CheckErrors("Can't enable vertex attribute array");
+
+			// выбрать формат и размер
+			GLint size;
+			GLenum type;
+			switch(element.dataType)
+			{
+			case DataTypes::Float:
+				size = 1;
+				type = GL_FLOAT;
+				break;
+			case DataTypes::Float2:
+				size = 2;
+				type = GL_FLOAT;
+				break;
+			case DataTypes::Float3:
+				size = 3;
+				type = GL_FLOAT;
+				break;
+			case DataTypes::Float4:
+				size = 4;
+				type = GL_FLOAT;
+				break;
+			case DataTypes::Float4x4:
+				THROW_PRIMARY_EXCEPTION("Matrices can't be used in attributes");
+			case DataTypes::UInt:
+				size = 1;
+				type = GL_UNSIGNED_INT;
+				break;
+			case DataTypes::UInt2:
+				size = 2;
+				type = GL_UNSIGNED_INT;
+				break;
+			case DataTypes::UInt3:
+				size = 3;
+				type = GL_UNSIGNED_INT;
+				break;
+			case DataTypes::UInt4:
+				size = 4;
+				type = GL_UNSIGNED_INT;
+				break;
+			default:
+				THROW_PRIMARY_EXCEPTION("Unknown attribute element type");
+			}
+			glVertexAttribFormat((GLuint)i, size, type, false, element.offset);
+			GlSystem::CheckErrors("Can't set vertex attribute format");
+
+			// указать слот для элемента
+			glVertexAttribBinding((GLuint)i, element.slot);
+		}
+
+		// задать разделители для слотов
+		for(size_t i = 0; i < slots.size(); ++i)
+		{
+			glVertexBindingDivisor((GLuint)i, slots[i].divisor);
+			GlSystem::CheckErrors("Can't set vertex binding divisor");
+		}
+
+		// отвязать VAO
+		glBindVertexArray(0);
+		GlSystem::CheckErrors("Can't unbind vertex array");
+
+		// вернуть привязку
+		return binding;
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create GL attribute binding", exception);
+	}
 }
 
 ptr<Texture> GlDevice::CreateStaticTexture(ptr<File> file)

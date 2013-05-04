@@ -8,7 +8,7 @@
 #include "DxUniformBuffer.hpp"
 #include "DxVertexShader.hpp"
 #include "DxPixelShader.hpp"
-#include "DxAttributeLayout.hpp"
+#include "DxAttributeBinding.hpp"
 #include "DxVertexBuffer.hpp"
 #include "DxIndexBuffer.hpp"
 #include "VertexLayout.hpp"
@@ -221,11 +221,11 @@ void DxContext::Update()
 	}
 
 	// разметка атрибутов
-	if(forceReset || targetState.attributeLayout != boundState.attributeLayout)
+	if(forceReset || targetState.attributeBinding != boundState.attributeBinding)
 	{
-		deviceContext->IASetInputLayout(fast_cast<DxAttributeLayout*>(&*targetState.attributeLayout)->GetInputLayoutInterface());
+		deviceContext->IASetInputLayout(fast_cast<DxAttributeBinding*>(&*targetState.attributeBinding)->GetInputLayoutInterface());
 
-		boundState.attributeLayout = targetState.attributeLayout;
+		boundState.attributeBinding = targetState.attributeBinding;
 	}
 
 	// вершинные буферы

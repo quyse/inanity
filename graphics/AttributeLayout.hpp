@@ -12,7 +12,6 @@ class AttributeLayoutSlot;
 class AttributeLayoutElement;
 
 /// Класс разметки атрибутов для привязки к шейдерному конвейеру.
-/** Унаследованные от него классы создаются device'ом. */
 class AttributeLayout : public Object
 {
 public:
@@ -43,18 +42,13 @@ public:
 	};
 	typedef std::vector<Element> Elements;
 
-protected:
+private:
 	Slots slots;
 	Elements elements;
-
-	AttributeLayout();
 
 public:
 	ptr<AttributeLayoutSlot> AddSlot(ptr<VertexLayout> vertexLayout, int divisor = 0);
 	ptr<AttributeLayoutElement> AddElement(ptr<AttributeLayoutSlot> slot, ptr<VertexLayoutElement> element);
-
-	/// Завершить создание разметки.
-	virtual void Finalize() = 0;
 
 	const Slots& GetSlots() const;
 	const Elements& GetElements() const;

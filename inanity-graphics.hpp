@@ -16,6 +16,7 @@
 #endif
 
 #include "graphics/graphics.hpp"
+#include "graphics/AttributeBinding.hpp"
 #include "graphics/AttributeLayout.hpp"
 #include "graphics/AttributeLayoutElement.hpp"
 #include "graphics/AttributeLayoutSlot.hpp"

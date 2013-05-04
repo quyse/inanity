@@ -12,7 +12,7 @@ class SamplerState;
 class UniformBuffer;
 class VertexShader;
 class PixelShader;
-class AttributeLayout;
+class AttributeBinding;
 class VertexBuffer;
 class IndexBuffer;
 class BlendState;
@@ -47,8 +47,8 @@ struct ContextState
 	/// Привязанный пиксельный шейдер.
 	ptr<PixelShader> pixelShader;
 
-	/// Разметка атрибутов.
-	ptr<AttributeLayout> attributeLayout;
+	/// Привязка атрибутов.
+	ptr<AttributeBinding> attributeBinding;
 	/// Количество слотов для вершинных буферов.
 	static const int vertexBufferSlotsCount = 2;
 	/// Привязанные вершинные буферы.
