@@ -143,7 +143,7 @@ LRESULT CALLBACK Win32Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
-void Win32Window::SetGraphicsPresenter(Graphics::Presenter* presenter)
+void Win32Window::SetGraphicsPresenter(Graphics::Presenter* graphicsPresenter)
 {
 	this->graphicsPresenter = graphicsPresenter;
 }
