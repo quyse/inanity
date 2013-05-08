@@ -34,7 +34,7 @@ public:
 	template <typename TT>
 	inline ptr(const ptr<TT>& p)
 	{
-		object = p;
+		object = &*p;
 		if(object) object->Reference();
 	}
 
