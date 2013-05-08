@@ -7,10 +7,16 @@
 
 BEGIN_INANITY_GRAPHICS
 
-ptr<AttributeLayoutSlot> AttributeLayout::AddSlot(ptr<VertexLayout> vertexLayout, int divisor)
+AttributeLayout::Slot::Slot(int divisor)
+: divisor(divisor) {}
+
+AttributeLayout::Element::Element(int slot, int offset, DataType dataType)
+: slot(slot), offset(offset), dataType(dataType) {}
+
+ptr<AttributeLayoutSlot> AttributeLayout::AddSlot(int divisor)
 {
 	int index = (size_t)slots.size();
-	slots.push_back(Slot(vertexLayout, divisor));
+	slots.push_back(Slot(divisor));
 	return NEW(AttributeLayoutSlot(this, index));
 }
 
@@ -23,8 +29,6 @@ ptr<AttributeLayoutElement> AttributeLayout::AddElement(ptr<AttributeLayoutSlot>
 			THROW_PRIMARY_EXCEPTION("Slot is from another attribute layout");
 		// проверить, что разметка верная
 		int slotIndex = slot->GetIndex();
-		if(element->GetLayout() != slots[slotIndex].vertexLayout)
-			THROW_PRIMARY_EXCEPTION("Wrong vertex layout for this slot");
 
 		int elementIndex = (int)elements.size();
 		elements.push_back(Element(slotIndex, element->GetOffset(), element->GetDataType()));

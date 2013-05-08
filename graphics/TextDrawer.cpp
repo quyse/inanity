@@ -69,7 +69,7 @@ struct TextDrawerHelper : public Object
 		vl(NEW(VertexLayout(sizeof(float4)))),
 		vlePosition(vl->AddElement(DataTypes::Float4, 0)),
 		al(NEW(AttributeLayout())),
-		als(al->AddSlot(vl)),
+		als(al->AddSlot()),
 		alePosition(al->AddElement(als, vlePosition)),
 		ab(device->CreateAttributeBinding(al)),
 

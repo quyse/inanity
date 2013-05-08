@@ -35,6 +35,12 @@ public:
 
 	/// Добавить элемент к разметке.
 	ptr<VertexLayoutElement> AddElement(DataType dataType, int offset);
+	/// Добавить член структуры как элемент.
+	template <typename Struct, typename ValueType>
+	ptr<VertexLayoutElement> AddElement(ValueType Struct::*field)
+	{
+		return AddElement(GetDataType<ValueType>(), (int)&(((Struct*)0)->*field));
+	}
 	/// Получить внутренние элементы.
 	const Elements& GetElements() const;
 

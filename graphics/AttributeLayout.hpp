@@ -6,7 +6,6 @@
 
 BEGIN_INANITY_GRAPHICS
 
-class VertexLayout;
 class VertexLayoutElement;
 class AttributeLayoutSlot;
 class AttributeLayoutElement;
@@ -18,13 +17,11 @@ public:
 	/// Структура, описывающая слот для вершинного буфера.
 	struct Slot
 	{
-		/// Разметка вершин, которая привязана к слоту.
-		ptr<VertexLayout> vertexLayout;
 		/// Шаг инстансов геометрии.
 		/** Для индексированного элемента - 0. Для per-instance-элемента - 1 и больше. */
 		int divisor;
 
-		Slot(ptr<VertexLayout> vertexLayout, int divisor);
+		Slot(int divisor);
 	};
 	typedef std::vector<Slot> Slots;
 
@@ -47,7 +44,7 @@ private:
 	Elements elements;
 
 public:
-	ptr<AttributeLayoutSlot> AddSlot(ptr<VertexLayout> vertexLayout, int divisor = 0);
+	ptr<AttributeLayoutSlot> AddSlot(int divisor = 0);
 	ptr<AttributeLayoutElement> AddElement(ptr<AttributeLayoutSlot> slot, ptr<VertexLayoutElement> element);
 
 	const Slots& GetSlots() const;
