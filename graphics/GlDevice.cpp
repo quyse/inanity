@@ -104,7 +104,13 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, const Prese
 		if(!SetPixelFormat(hdc, pixelFormat, &pfd))
 			THROW_PRIMARY_EXCEPTION("Can't set pixel format");
 
-		// создать контекст
+		// создать временный контекст
+		HGLRC hglrcTemp = wglCreateContext(hdc);
+		// сделать его текущим
+		if(!wglMakeCurrent(hdc, hglrcTemp))
+			THROW_SECONDARY_EXCEPTION("Can't make temp OpenGL context current", Exception::SystemError());
+
+		// создать настоящий контекст
 		int attribs[] =
 		{
 			WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
@@ -127,6 +133,9 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, const Prese
 		// сделать его текущим
 		if(!wglMakeCurrent(hdc, hglrc))
 			THROW_SECONDARY_EXCEPTION("Can't make OpenGL context current", Exception::SystemError());
+
+		// удалить временный контекст
+		wglDeleteContext(hglrcTemp);
 
 		// инициализировать GLEW
 		GlSystem::InitGLEW();
