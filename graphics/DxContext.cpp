@@ -16,11 +16,38 @@
 #include "../File.hpp"
 #include "../Exception.hpp"
 
+size_t std::hash<Inanity::Graphics::DxInputLayoutCacheKey>::operator()
+	(const Inanity::Graphics::DxInputLayoutCacheKey& key) const
+{
+	return (size_t)&*key.vertexShader ^ (size_t)&*key.attributeBinding;
+}
+
 BEGIN_INANITY_GRAPHICS
+
+DxInputLayoutCacheKey::DxInputLayoutCacheKey(ptr<DxAttributeBinding> attributeBinding, ptr<DxVertexShader> vertexShader)
+: attributeBinding(attributeBinding), vertexShader(vertexShader) {}
+
+bool operator==(const DxInputLayoutCacheKey& a, const DxInputLayoutCacheKey& b)
+{
+	return a.attributeBinding == b.attributeBinding && a.vertexShader == b.vertexShader;
+}
 
 DxContext::DxContext(ComPointer<ID3D11Device> device, ComPointer<ID3D11DeviceContext> deviceContext)
 : device(device), deviceContext(deviceContext)
 {
+}
+
+ID3D11InputLayout* DxContext::GetInputLayout(ptr<DxAttributeBinding> attributeBinding, ptr<DxVertexShader> vertexShader)
+{
+	DxInputLayoutCacheKey key(attributeBinding, vertexShader);
+	InputLayoutCache::const_iterator i = inputLayoutCache.find(key);
+	if(i != inputLayoutCache.end())
+		return i->second;
+
+	ComPointer<ID3D11InputLayout> inputLayout = attributeBinding->CreateInputLayout(device, vertexShader);
+	inputLayoutCache[key] = inputLayout;
+
+	return inputLayout;
 }
 
 void DxContext::Update()
@@ -221,9 +248,12 @@ void DxContext::Update()
 	}
 
 	// разметка атрибутов
-	if(forceReset || targetState.attributeBinding != boundState.attributeBinding)
+	if(forceReset || targetState.attributeBinding != boundState.attributeBinding || targetState.vertexShader != boundState.vertexShader)
 	{
-		deviceContext->IASetInputLayout(fast_cast<DxAttributeBinding*>(&*targetState.attributeBinding)->GetInputLayoutInterface());
+		deviceContext->IASetInputLayout(GetInputLayout(
+			targetState.attributeBinding.FastCast<DxAttributeBinding>(),
+			targetState.vertexShader.FastCast<DxVertexShader>()
+		));
 
 		boundState.attributeBinding = targetState.attributeBinding;
 	}
@@ -276,6 +306,8 @@ void DxContext::Update()
 
 			// установить буферы
 			deviceContext->IASetVertexBuffers(begin, end - begin, buffers + begin, strides + begin, offsets + begin);
+			// установить топологию геометрии
+			deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			// обновить актуальное состояние
 			for(int i = begin; i < end; ++i)
