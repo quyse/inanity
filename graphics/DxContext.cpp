@@ -33,9 +33,7 @@ bool operator==(const DxInputLayoutCacheKey& a, const DxInputLayoutCacheKey& b)
 }
 
 DxContext::DxContext(ComPointer<ID3D11Device> device, ComPointer<ID3D11DeviceContext> deviceContext)
-: device(device), deviceContext(deviceContext)
-{
-}
+: device(device), deviceContext(deviceContext) {}
 
 ID3D11InputLayout* DxContext::GetInputLayout(ptr<DxAttributeBinding> attributeBinding, ptr<DxVertexShader> vertexShader)
 {
@@ -48,6 +46,46 @@ ID3D11InputLayout* DxContext::GetInputLayout(ptr<DxAttributeBinding> attributeBi
 	inputLayoutCache[key] = inputLayout;
 
 	return inputLayout;
+}
+
+int DxContext::GetRasterizerStateKey(const ContextState& contextState)
+{
+	int key = ((int)contextState.fillMode) | (((int)contextState.cullMode) << 1);
+	// если состояние растеризатора отсутствует, создать его
+	if(!rasterizerStateCache[key])
+	{
+		D3D11_RASTERIZER_DESC desc = CD3D11_RASTERIZER_DESC(CD3D11_DEFAULT());
+
+		switch(contextState.fillMode)
+		{
+		case ContextState::fillModeWireframe:
+			desc.FillMode = D3D11_FILL_WIREFRAME;
+			break;
+		case ContextState::fillModeSolid:
+			desc.FillMode = D3D11_FILL_SOLID;
+			break;
+		}
+
+		switch(contextState.cullMode)
+		{
+		case ContextState::cullModeNone:
+			desc.CullMode = D3D11_CULL_NONE;
+			break;
+		case ContextState::cullModeBack:
+			desc.CullMode = D3D11_CULL_BACK;
+			break;
+		case ContextState::cullModeFront:
+			desc.CullMode = D3D11_CULL_FRONT;
+			break;
+		}
+
+		ID3D11RasterizerState* rasterizerStateInterface;
+		if(FAILED(device->CreateRasterizerState(&desc, &rasterizerStateInterface)))
+			THROW_PRIMARY_EXCEPTION("Can't create rasterizer state");
+		rasterizerStateCache[key] = rasterizerStateInterface;
+	}
+
+	return key;
 }
 
 void DxContext::Update()
@@ -356,8 +394,15 @@ void DxContext::Update()
 		boundState.pixelShader = targetState.pixelShader;
 	}
 
-	// TODO: fill mode
-	// TODO: cull mode
+	// состояние растеризатора (fill mode & cull mode)
+	if(forceReset || targetState.fillMode != boundState.fillMode || targetState.cullMode != boundState.cullMode)
+	{
+		int key = GetRasterizerStateKey(targetState);
+		deviceContext->RSSetState(rasterizerStateCache[key]);
+
+		boundState.fillMode = targetState.fillMode;
+		boundState.cullMode = targetState.cullMode;
+	}
 
 	// viewport
 	if(forceReset || targetState.viewportWidth != boundState.viewportWidth || targetState.viewportHeight != boundState.viewportHeight)

@@ -48,6 +48,13 @@ private:
 	/// Получить входную разметку.
 	ID3D11InputLayout* GetInputLayout(ptr<DxAttributeBinding> attributeBinding, ptr<DxVertexShader> vertexShader);
 
+	/// Закодировать состояние растеризатора, и добавить его в кэш, если ещё нет.
+	int GetRasterizerStateKey(const ContextState& contextState);
+	/// Максимальное количество состояний растеризатора.
+	static const int rasterizerStateCacheSize = 8;
+	/// Кэш состояний растеризатора.
+	ComPointer<ID3D11RasterizerState> rasterizerStateCache[rasterizerStateCacheSize];
+
 	/// Выполнить обновление в API всех "грязных" состояний.
 	void Update();
 
