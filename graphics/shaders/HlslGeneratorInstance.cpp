@@ -480,7 +480,16 @@ ptr<ShaderSource> HlslGeneratorInstance::Generate()
 	if(shaderType == ShaderTypes::vertex)
 	{
 		hlsl << "struct A\n{\n";
-		std::sort(attributes.begin(), attributes.end());
+
+		struct IndexSorter
+		{
+			bool operator()(AttributeNode* a, AttributeNode* b) const
+			{
+				return a->GetElementIndex() < b->GetElementIndex();
+			}
+		};
+
+		std::sort(attributes.begin(), attributes.end(), IndexSorter());
 		attributes.resize(std::unique(attributes.begin(), attributes.end()) - attributes.begin());
 		for(size_t i = 0; i < attributes.size(); ++i)
 		{
@@ -500,7 +509,15 @@ ptr<ShaderSource> HlslGeneratorInstance::Generate()
 		// вывести SV_Position
 		hlsl << "\tfloat4 vTP : SV_Position;\n";
 
-		std::sort(transformed.begin(), transformed.end());
+		struct SemanticSorter
+		{
+			bool operator()(TransformedNode* a, TransformedNode* b) const
+			{
+				return a->GetSemantic() < b->GetSemantic();
+			}
+		};
+
+		std::sort(transformed.begin(), transformed.end(), SemanticSorter());
 		transformed.resize(std::unique(transformed.begin(), transformed.end()) - transformed.begin());
 		for(size_t i = 0; i < transformed.size(); ++i)
 		{
@@ -517,7 +534,16 @@ ptr<ShaderSource> HlslGeneratorInstance::Generate()
 	if(shaderType == ShaderTypes::pixel)
 	{
 		hlsl << "struct R\n{\n";
-		std::sort(rasterized.begin(), rasterized.end());
+
+		struct TargetSorter
+		{
+			bool operator()(RasterizedNode* a, RasterizedNode* b) const
+			{
+				return a->GetTarget() < b->GetTarget();
+			}
+		};
+
+		std::sort(rasterized.begin(), rasterized.end(), TargetSorter());
 		rasterized.resize(std::unique(rasterized.begin(), rasterized.end()) - rasterized.begin());
 		for(size_t i = 0; i < rasterized.size(); ++i)
 		{
@@ -534,7 +560,14 @@ ptr<ShaderSource> HlslGeneratorInstance::Generate()
 	PrintUniforms();
 
 	// семплеры
-	std::sort(samplers.begin(), samplers.end());
+	struct SamplerSlotSorter
+	{
+		bool operator()(SamplerNode* a, SamplerNode* b) const
+		{
+			return a->GetSlot() < b->GetSlot();
+		}
+	};
+	std::sort(samplers.begin(), samplers.end(), SamplerSlotSorter());
 	samplers.resize(std::unique(samplers.begin(), samplers.end()) - samplers.begin());
 	for(size_t i = 0; i < samplers.size(); ++i)
 	{
