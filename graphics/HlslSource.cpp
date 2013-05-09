@@ -1,13 +1,12 @@
 #include "HlslSource.hpp"
 #include "../File.hpp"
-#include "../FileSystem.hpp"
 #include "../OutputStream.hpp"
 #include "../StreamWriter.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
-HlslSource::HlslSource(ptr<File> code, const String& functionName, const String& profile, ptr<FileSystem> includes)
-: code(code), functionName(functionName), profile(profile), includes(includes) {}
+HlslSource::HlslSource(ptr<File> code, const String& functionName, const String& profile)
+: code(code), functionName(functionName), profile(profile) {}
 
 ptr<File> HlslSource::GetCode() const
 {
@@ -22,11 +21,6 @@ const String& HlslSource::GetFunctionName() const
 const String& HlslSource::GetProfile() const
 {
 	return profile;
-}
-
-ptr<FileSystem> HlslSource::GetIncludes() const
-{
-	return includes;
 }
 
 void HlslSource::Serialize(ptr<OutputStream> outputStream)

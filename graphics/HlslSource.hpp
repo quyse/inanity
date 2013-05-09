@@ -7,7 +7,6 @@
 BEGIN_INANITY
 
 class File;
-class FileSystem;
 
 END_INANITY
 
@@ -23,19 +22,15 @@ private:
 	String functionName;
 	/// Профиль компиляции.
 	String profile;
-	/// Файловая система для включаемых файлов.
-	/** Может быть 0. */
-	ptr<FileSystem> includes;
 
 public:
-	HlslSource(ptr<File> code, const String& functionName, const String& profile, ptr<FileSystem> includes);
+	HlslSource(ptr<File> code, const String& functionName, const String& profile);
 
 	void Serialize(ptr<OutputStream> outputStream);
 
 	ptr<File> GetCode() const;
 	const String& GetFunctionName() const;
 	const String& GetProfile() const;
-	ptr<FileSystem> GetIncludes() const;
 };
 
 END_INANITY_GRAPHICS

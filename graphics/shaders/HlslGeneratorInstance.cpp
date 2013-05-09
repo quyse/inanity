@@ -632,7 +632,7 @@ ptr<ShaderSource> HlslGeneratorInstance::Generate()
 	// завершение шейдера
 	hlsl << ";\n\treturn " << outputName << ";\n}\n";
 
-	return NEW(HlslSource(Strings::String2File(hlsl.str()), mainFunctionName, profile, 0));
+	return NEW(HlslSource(Strings::String2File(hlsl.str()), mainFunctionName, profile));
 }
 
 END_INANITY_SHADERS

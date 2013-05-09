@@ -12,7 +12,7 @@ BEGIN_INANITY_GRAPHICS
 /// Класс обработчика включаемых файлов.
 /** Предоставляет интерфейс ID3D10Include, необходимый для компиляции шейдеров,
 возвращая файлы из заданной файловой системы. */
-class IncludeProcessor : public Object, public ID3D10Include
+class DxShaderCompiler::IncludeProcessor : public ID3D10Include
 {
 private:
 	/// Файловая система.
@@ -72,8 +72,13 @@ DxShaderCompiler::DxShaderCompiler()
 {
 }
 
-DxShaderCompiler::DxShaderCompiler(bool debug, bool optimize, bool columnMajorMatrices)
-	: debug(debug), optimize(optimize), columnMajorMatrices(columnMajorMatrices)
+DxShaderCompiler::DxShaderCompiler(
+	bool debug,
+	bool optimize,
+	bool columnMajorMatrices,
+	ptr<FileSystem> includesFileSystem) :
+	debug(debug), optimize(optimize), columnMajorMatrices(columnMajorMatrices),
+	includesFileSystem(includesFileSystem)
 {
 }
 
@@ -89,17 +94,14 @@ ptr<File> DxShaderCompiler::Compile(ptr<ShaderSource> shaderSource)
 		// получить код шейдера
 		ptr<File> code = hlslSource->GetCode();
 
-		// создать обработчик включаемых файлов, если нужно
-		ptr<FileSystem> includesFileSystem = hlslSource->GetIncludes();
-		ptr<IncludeProcessor> includeProcessor;
-		if(includesFileSystem)
-			includeProcessor = NEW(IncludeProcessor(includesFileSystem));
+		// обработчик включаемых файлов
+		IncludeProcessor includeProcessor(includesFileSystem);
 
 		// скомпилировать шейдер
 		ID3D10Blob* shaderBlob;
 		ID3D10Blob* errorsBlob;
 		HRESULT result = D3DX11CompileFromMemory((char*)code->GetData(), code->GetSize(), NULL, NULL,
-			includeProcessor ? includeProcessor : 0, hlslSource->GetFunctionName().c_str(),
+			includesFileSystem ? &includeProcessor : 0, hlslSource->GetFunctionName().c_str(),
 			hlslSource->GetProfile().c_str(), D3D10_SHADER_ENABLE_STRICTNESS
 			| (debug ? D3D10_SHADER_DEBUG : 0)
 			| (optimize ? D3D10_SHADER_OPTIMIZATION_LEVEL3 : (D3D10_SHADER_OPTIMIZATION_LEVEL0 | D3D10_SHADER_SKIP_OPTIMIZATION))
