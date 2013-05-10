@@ -6,6 +6,7 @@
 #include "DxPresenter.hpp"
 #include "DxRenderBuffer.hpp"
 #include "DxDepthStencilBuffer.hpp"
+#include "DxCompiledShader.hpp"
 #include "DxVertexShader.hpp"
 #include "DxPixelShader.hpp"
 #include "DxUniformBuffer.hpp"
@@ -18,6 +19,7 @@
 #include "DxSamplerState.hpp"
 #include "DxBlendState.hpp"
 #include "../File.hpp"
+#include "../FileInputStream.hpp"
 #include "../Exception.hpp"
 #include "d3dx.hpp"
 
@@ -222,10 +224,14 @@ ptr<VertexShader> DxDevice::CreateVertexShader(ptr<File> file)
 {
 	try
 	{
+		ptr<DxCompiledShader> compiledShader = DxCompiledShader::Deserialize(NEW(FileInputStream(file)));
+		ptr<File> code = compiledShader->GetCode();
+
 		ID3D11VertexShader* shader;
-		if(FAILED(device->CreateVertexShader(file->GetData(), file->GetSize(), NULL, &shader)))
+		if(FAILED(device->CreateVertexShader(code->GetData(), code->GetSize(), NULL, &shader)))
 			THROW_PRIMARY_EXCEPTION("Can't create DirectX 11 vertex shader");
-		return NEW(DxVertexShader(file, shader));
+
+		return NEW(DxVertexShader(code, shader, compiledShader->GetResources()));
 	}
 	catch(Exception* exception)
 	{
@@ -237,10 +243,14 @@ ptr<PixelShader> DxDevice::CreatePixelShader(ptr<File> file)
 {
 	try
 	{
+		ptr<DxCompiledShader> compiledShader = DxCompiledShader::Deserialize(NEW(FileInputStream(file)));
+		ptr<File> code = compiledShader->GetCode();
+
 		ID3D11PixelShader* shader;
-		if(FAILED(device->CreatePixelShader(file->GetData(), file->GetSize(), NULL, &shader)))
+		if(FAILED(device->CreatePixelShader(code->GetData(), code->GetSize(), NULL, &shader)))
 			THROW_PRIMARY_EXCEPTION("Can't create DirectX 11 pixel shader");
-		return NEW(DxPixelShader(shader));
+
+		return NEW(DxPixelShader(shader, compiledShader->GetResources()));
 	}
 	catch(Exception* exception)
 	{

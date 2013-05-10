@@ -107,6 +107,7 @@ var libraries = {
 			'graphics.DxRenderBuffer', 'graphics.DxDepthStencilBuffer', 'graphics.DxTexture', 'graphics.DxUniformBuffer',
 			'graphics.DxVertexBuffer', 'graphics.DxIndexBuffer', 'graphics.DxAttributeBinding',
 			'graphics.DxVertexShader', 'graphics.DxPixelShader',
+			'graphics.DxCompiledShader', 'graphics.DxShaderResources',
 			'graphics.DxSamplerState', 'graphics.DxBlendState',
 			'graphics.D3D10BlobFile', 'graphics.DxShaderCompiler', 'graphics.HlslSource'
 		]

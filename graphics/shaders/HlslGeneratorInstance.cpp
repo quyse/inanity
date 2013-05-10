@@ -632,7 +632,16 @@ ptr<ShaderSource> HlslGeneratorInstance::Generate()
 	// завершение шейдера
 	hlsl << ";\n\treturn " << outputName << ";\n}\n";
 
-	return NEW(HlslSource(Strings::String2File(hlsl.str()), mainFunctionName, profile));
+	// получить маски ресурсов
+	int uniformBuffersMask = 0;
+	for(size_t i = 0; i < uniforms.size(); ++i)
+		uniformBuffersMask |= 1 << uniforms[i].first->GetSlot();
+	int samplersMask = 0;
+	for(size_t i = 0; i < samplers.size(); ++i)
+		samplersMask |= 1 << samplers[i]->GetSlot();
+	DxShaderResources resources(uniformBuffersMask, samplersMask);
+
+	return NEW(HlslSource(Strings::String2File(hlsl.str()), mainFunctionName, profile, resources));
 }
 
 END_INANITY_SHADERS

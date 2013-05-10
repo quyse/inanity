@@ -3,8 +3,8 @@
 
 BEGIN_INANITY_GRAPHICS
 
-DxVertexShader::DxVertexShader(ptr<File> code, ComPointer<ID3D11VertexShader> vertexShader)
-: code(code), vertexShader(vertexShader) {}
+DxVertexShader::DxVertexShader(ptr<File> code, ComPointer<ID3D11VertexShader> vertexShader, const DxShaderResources& resources)
+: code(code), vertexShader(vertexShader), resources(resources) {}
 
 ID3D11VertexShader* DxVertexShader::GetVertexShaderInterface() const
 {
@@ -14,6 +14,11 @@ ID3D11VertexShader* DxVertexShader::GetVertexShaderInterface() const
 ptr<File> DxVertexShader::GetCode() const
 {
 	return code;
+}
+
+const DxShaderResources& DxVertexShader::GetResources() const
+{
+	return resources;
 }
 
 END_INANITY_GRAPHICS

@@ -1,8 +1,10 @@
 #include "DxShaderCompiler.hpp"
 #include "HlslSource.hpp"
+#include "DxCompiledShader.hpp"
 #include "D3D10BlobFile.hpp"
 #include "../FileSystem.hpp"
 #include "../File.hpp"
+#include "../MemoryStream.hpp"
 #include "../Strings.hpp"
 #include "../Exception.hpp"
 #include "d3dx.hpp"
@@ -116,8 +118,12 @@ ptr<File> DxShaderCompiler::Compile(ptr<ShaderSource> shaderSource)
 		if(FAILED(result))
 			THROW_PRIMARY_EXCEPTION("Compile error(s): " + Strings::File2String(errorsFile) + "\n" + Strings::File2String(code));
 
-		// вернуть файл с шейдером
-		return shaderFile;
+		// создать скомпилированный шейдер
+		ptr<DxCompiledShader> compiledShader = NEW(DxCompiledShader(shaderFile, hlslSource->GetResources()));
+		// сериализовать его в файл и вернуть
+		ptr<MemoryStream> memoryStream = NEW(MemoryStream());
+		compiledShader->Serialize(memoryStream);
+		return memoryStream->ToFile();
 	}
 	catch(Exception* exception)
 	{

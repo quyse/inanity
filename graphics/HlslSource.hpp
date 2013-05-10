@@ -2,6 +2,7 @@
 #define ___INANITY_GRAPHICS_HLSL_SOURCE_HPP___
 
 #include "ShaderSource.hpp"
+#include "DxShaderResources.hpp"
 #include "../String.hpp"
 
 BEGIN_INANITY
@@ -22,15 +23,18 @@ private:
 	String functionName;
 	/// Профиль компиляции.
 	String profile;
+	/// Ресурсы шейдера.
+	DxShaderResources resources;
 
 public:
-	HlslSource(ptr<File> code, const String& functionName, const String& profile);
+	HlslSource(ptr<File> code, const String& functionName, const String& profile, const DxShaderResources& resources);
 
 	void Serialize(ptr<OutputStream> outputStream);
 
 	ptr<File> GetCode() const;
 	const String& GetFunctionName() const;
 	const String& GetProfile() const;
+	const DxShaderResources& GetResources() const;
 };
 
 END_INANITY_GRAPHICS
