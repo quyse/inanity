@@ -41,4 +41,15 @@ ToType fast_cast(FromType object)
 
 END_INANITY
 
+//*** Отладочные проверки
+#ifdef _DEBUG
+
+/// Включить трассировку кучи.
+#define ___INANITY_TRACE_HEAP
+/// Включить трассировку указателей.
+/** Требует включенного ___INANITY_TRACE_HEAP. */
+#define ___INANITY_TRACE_PTR
+
+#endif
+
 #endif
