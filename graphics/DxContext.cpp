@@ -221,7 +221,7 @@ void DxContext::Update()
 				if(abstractSamplerState)
 				{
 					DxSamplerState* samplerState = fast_cast<DxSamplerState*>(abstractSamplerState);
-					states[i] = samplerState->GetSamplerStateInterface();
+					states[i] = samplerState->GetSamplerStateInterface(device);
 				}
 				else
 					states[i] = 0;
@@ -425,7 +425,7 @@ void DxContext::Update()
 	{
 		ID3D11BlendState* blendState;
 		if(targetState.blendState)
-			blendState = fast_cast<DxBlendState*>(&*targetState.blendState)->GetBlendStateInterface();
+			blendState = fast_cast<DxBlendState*>(&*targetState.blendState)->GetBlendStateInterface(device);
 		else
 			blendState = 0;
 		deviceContext->OMSetBlendState(blendState, 0, 0xffffffff);

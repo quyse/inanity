@@ -447,12 +447,12 @@ ptr<Texture> DxDevice::CreateStatic2DTexture(ptr<Image2DData> imageData)
 
 ptr<SamplerState> DxDevice::CreateSamplerState()
 {
-	return NEW(DxSamplerState(this));
+	return NEW(DxSamplerState());
 }
 
 ptr<BlendState> DxDevice::CreateBlendState()
 {
-	return NEW(DxBlendState(this));
+	return NEW(DxBlendState());
 }
 
 ID3D11Device* DxDevice::GetDeviceInterface() const

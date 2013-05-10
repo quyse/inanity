@@ -7,13 +7,10 @@
 
 BEGIN_INANITY_GRAPHICS
 
-class DxDevice;
-
 /// Класс настроек смешивания DirectX.
 class DxBlendState : public BlendState
 {
 private:
-	ptr<DxDevice> device;
 	ComPointer<ID3D11BlendState> blendState;
 
 	static D3D11_BLEND ConvertColorSource(ColorSource colorSource);
@@ -21,12 +18,10 @@ private:
 	static D3D11_BLEND_OP ConvertOperation(Operation operation);
 
 	/// Обновить настройки состояния, если они менялись.
-	void Update();
+	void Update(ID3D11Device* deviceInterface);
 
 public:
-	DxBlendState(ptr<DxDevice> device);
-
-	ID3D11BlendState* GetBlendStateInterface();
+	ID3D11BlendState* GetBlendStateInterface(ID3D11Device* deviceInterface);
 };
 
 END_INANITY_GRAPHICS

@@ -1,14 +1,11 @@
 #include "DxBlendState.hpp"
-#include "DxDevice.hpp"
 #include "../Exception.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
-DxBlendState::DxBlendState(ptr<DxDevice> device) : device(device) {}
-
-ID3D11BlendState* DxBlendState::GetBlendStateInterface()
+ID3D11BlendState* DxBlendState::GetBlendStateInterface(ID3D11Device* deviceInterface)
 {
-	Update();
+	Update(deviceInterface);
 	return blendState;
 }
 
@@ -87,7 +84,7 @@ D3D11_BLEND_OP DxBlendState::ConvertOperation(Operation operation)
 	return r;
 }
 
-void DxBlendState::Update()
+void DxBlendState::Update(ID3D11Device* deviceInterface)
 {
 	if(!dirty)
 		return;
@@ -115,7 +112,7 @@ void DxBlendState::Update()
 		d.BlendOpAlpha = ConvertOperation(alphaOperation);
 
 		ID3D11BlendState* blendStateInterface;
-		if(FAILED(device->GetDeviceInterface()->CreateBlendState(&desc, &blendStateInterface)))
+		if(FAILED(deviceInterface->CreateBlendState(&desc, &blendStateInterface)))
 			THROW_PRIMARY_EXCEPTION("Can't create blend state");
 
 		blendState = blendStateInterface;

@@ -1,14 +1,11 @@
 #include "DxSamplerState.hpp"
-#include "DxDevice.hpp"
 #include "../Exception.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
-DxSamplerState::DxSamplerState(ptr<DxDevice> device) : device(device) {}
-
-ID3D11SamplerState* DxSamplerState::GetSamplerStateInterface()
+ID3D11SamplerState* DxSamplerState::GetSamplerStateInterface(ID3D11Device* deviceInterface)
 {
-	Update();
+	Update(deviceInterface);
 	return samplerState;
 }
 
@@ -28,7 +25,7 @@ D3D11_TEXTURE_ADDRESS_MODE DxSamplerState::ConvertWrap(Wrap wrap)
 	THROW_PRIMARY_EXCEPTION("Invalid wrap mode");
 }
 
-void DxSamplerState::Update()
+void DxSamplerState::Update(ID3D11Device* deviceInterface)
 {
 	if(!dirty)
 		return;
@@ -79,7 +76,7 @@ void DxSamplerState::Update()
 
 		// создать sampler state
 		ID3D11SamplerState* samplerStateInterface;
-		if(FAILED(device->GetDeviceInterface()->CreateSamplerState(&desc, &samplerStateInterface)))
+		if(FAILED(deviceInterface->CreateSamplerState(&desc, &samplerStateInterface)))
 			THROW_PRIMARY_EXCEPTION("Can't create sampler state");
 
 		samplerState = samplerStateInterface;
