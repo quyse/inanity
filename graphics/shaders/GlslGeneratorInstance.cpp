@@ -56,20 +56,20 @@ void GlslGeneratorInstance::PrintDataType(DataType dataType)
 	const char* name;
 	switch(dataType)
 	{
-	case DataTypes::Float:			name = "float";			break;
-	case DataTypes::Float2:			name = "vec2";		break;
-	case DataTypes::Float3:			name = "vec3";		break;
-	case DataTypes::Float4:			name = "vec4";		break;
-	case DataTypes::Float3x3:		name = "mat3x3";	break;
-	case DataTypes::Float4x4:		name = "mat4x4";	break;
-	case DataTypes::UInt:				name = "uint";			break;
-	case DataTypes::UInt2:			name = "uvec2";			break;
-	case DataTypes::UInt3:			name = "uvec3";			break;
-	case DataTypes::UInt4:			name = "uvec4";			break;
-	case DataTypes::Int:				name = "int";				break;
-	case DataTypes::Int2:				name = "ivec2";			break;
-	case DataTypes::Int3:				name = "ivec3";			break;
-	case DataTypes::Int4:				name = "ivec4";			break;
+	case DataTypes::_float:			name = "float";			break;
+	case DataTypes::_vec2:			name = "vec2";			break;
+	case DataTypes::_vec3:			name = "vec3";			break;
+	case DataTypes::_vec4:			name = "vec4";			break;
+	case DataTypes::_mat3x3:		name = "mat3x3";		break;
+	case DataTypes::_mat4x4:		name = "mat4x4";		break;
+	case DataTypes::_uint:			name = "uint";			break;
+	case DataTypes::_uvec2:			name = "uvec2";			break;
+	case DataTypes::_uvec3:			name = "uvec3";			break;
+	case DataTypes::_uvec4:			name = "uvec4";			break;
+	case DataTypes::_int:				name = "int";				break;
+	case DataTypes::_ivec2:			name = "ivec2";			break;
+	case DataTypes::_ivec3:			name = "ivec3";			break;
+	case DataTypes::_ivec4:			name = "ivec4";			break;
 	default:
 		THROW_PRIMARY_EXCEPTION("Unknown data type");
 	}
@@ -224,24 +224,24 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 			int valueSize;
 			switch(sampleNode->GetSamplerNode()->GetValueType())
 			{
-			case DataTypes::Float:
-			case DataTypes::UInt:
-			case DataTypes::Int:
+			case DataTypes::_float:
+			case DataTypes::_uint:
+			case DataTypes::_int:
 				valueSize = 1;
 				break;
-			case DataTypes::Float2:
-			case DataTypes::UInt2:
-			case DataTypes::Int2:
+			case DataTypes::_vec2:
+			case DataTypes::_uvec2:
+			case DataTypes::_ivec2:
 				valueSize = 2;
 				break;
-			case DataTypes::Float3:
-			case DataTypes::UInt3:
-			case DataTypes::Int3:
+			case DataTypes::_vec3:
+			case DataTypes::_uvec3:
+			case DataTypes::_ivec3:
 				valueSize = 3;
 				break;
-			case DataTypes::Float4:
-			case DataTypes::UInt4:
-			case DataTypes::Int4:
+			case DataTypes::_vec4:
+			case DataTypes::_uvec4:
+			case DataTypes::_ivec4:
 				valueSize = 4;
 				break;
 			default:
@@ -458,12 +458,12 @@ void GlslGeneratorInstance::PrintUniforms()
 
 			// если по умолчанию переменная попадёт в неправильное место, делаем пустые переменные, чтобы занять место
 			// автоматический сдвиг
-			if(currentOffset % sizeof(float4) + valueSize > sizeof(float4))
-				currentOffset = (currentOffset + sizeof(float4) - 1) & ~(sizeof(float4) - 1);
+			if(currentOffset % sizeof(vec4) + valueSize > sizeof(vec4))
+				currentOffset = (currentOffset + sizeof(vec4) - 1) & ~(sizeof(vec4) - 1);
 			// оставшийся сдвиг добиваем пустыми переменными
 			while(currentOffset < offset)
 			{
-				int newOffset = (currentOffset + sizeof(float4)) & ~(sizeof(float4) - 1);
+				int newOffset = (currentOffset + sizeof(vec4)) & ~(sizeof(vec4) - 1);
 				if(newOffset > offset)
 					newOffset = offset;
 				int size = (newOffset - currentOffset) / sizeof(float);
@@ -482,9 +482,9 @@ void GlslGeneratorInstance::PrintUniforms()
 			// размер массива
 			if(count > 1)
 				glsl << '[' << count << ']';
-			// если массив, размер элемента должен быть кратен размеру float4
-			if(count > 1 && valueSize % sizeof(float4))
-				THROW_PRIMARY_EXCEPTION("Size of element of array should be multiply of float4 size");
+			// если массив, размер элемента должен быть кратен размеру vec4
+			if(count > 1 && valueSize % sizeof(vec4))
+				THROW_PRIMARY_EXCEPTION("Size of element of array should be multiply of vec4 size");
 
 			// конец переменной
 			glsl << ";\n";
@@ -567,22 +567,22 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 		const char* valueTypeStr;
 		switch(samplerNode->GetValueType())
 		{
-		case DataTypes::Float:
-		case DataTypes::Float2:
-		case DataTypes::Float3:
-		case DataTypes::Float4:
+		case DataTypes::_float:
+		case DataTypes::_vec2:
+		case DataTypes::_vec3:
+		case DataTypes::_vec4:
 			valueTypeStr = "";
 			break;
-		case DataTypes::UInt:
-		case DataTypes::UInt2:
-		case DataTypes::UInt3:
-		case DataTypes::UInt4:
+		case DataTypes::_uint:
+		case DataTypes::_uvec2:
+		case DataTypes::_uvec3:
+		case DataTypes::_uvec4:
 			valueTypeStr = "u";
 			break;
-		case DataTypes::Int:
-		case DataTypes::Int2:
-		case DataTypes::Int3:
-		case DataTypes::Int4:
+		case DataTypes::_int:
+		case DataTypes::_ivec2:
+		case DataTypes::_ivec3:
+		case DataTypes::_ivec4:
 			valueTypeStr = "i";
 			break;
 		default:
@@ -592,15 +592,13 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 		const char* dimensionStr;
 		switch(samplerNode->GetCoordType())
 		{
-		case DataTypes::Float:
-		case DataTypes::UInt:
-		case DataTypes::Int:
+		case DataTypes::_float:
 			dimensionStr = "1D";
 			break;
-		case DataTypes::Float2:
+		case DataTypes::_vec2:
 			dimensionStr = "2D";
 			break;
-		case DataTypes::Float3:
+		case DataTypes::_vec3:
 			dimensionStr = "3D";
 			break;
 		default:

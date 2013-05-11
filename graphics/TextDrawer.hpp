@@ -35,7 +35,7 @@ private:
 	ptr<Texture> currentFontTexture;
 
 	/// Вывести символ.
-	void DrawSymbol(const float4& position, const float4& texcoord, const float4& color);
+	void DrawSymbol(const vec4& position, const vec4& texcoord, const vec4& color);
 
 public:
 	TextDrawer(ptr<TextDrawerHelper> helper);
@@ -48,7 +48,7 @@ public:
 
 	/// Нарисовать строку текста.
 	/** Не рисует сразу, а только задаёт текст в очередь на рисование. */
-	void DrawTextLine(const String& text, float x, float y, const float4& color, int alignment);
+	void DrawTextLine(const String& text, float x, float y, const vec4& color, int alignment);
 
 	/// Очистить очередь на рисование - нарисовать всё, что осталось.
 	void Flush();

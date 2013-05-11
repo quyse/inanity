@@ -25,7 +25,7 @@ class UniformNode;
 
 /// Группа uniform-переменных.
 /** Хранит переменные, и управляет их памятью.
-Распределяет переменные, выравнивая их по float4-регистрам. */
+Распределяет переменные, выравнивая их по vec4-регистрам. */
 class UniformGroup : public Object
 {
 private:
@@ -49,14 +49,14 @@ public:
 	template <typename ValueType>
 	Uniform<ValueType> AddUniform()
 	{
-		DataType valueType = GetDataType<ValueType>();
+		DataType valueType = DataTypeOf<ValueType>();
 		// получить размер данных переменной
 		int valueSize = GetDataTypeSize(valueType);
 		// получить смещение до переменной с соответствующим выравниванием
-		// на границу float4-регистра
+		// на границу vec4-регистра
 		int offset = bufferSize;
-		if(offset % sizeof(float4) + valueSize > sizeof(float4))
-			offset = (offset + sizeof(float4) - 1) & ~(sizeof(float4) - 1);
+		if(offset % sizeof(vec4) + valueSize > sizeof(vec4))
+			offset = (offset + sizeof(vec4) - 1) & ~(sizeof(vec4) - 1);
 		// увеличить размер буфера
 		bufferSize = offset + valueSize;
 
@@ -67,14 +67,14 @@ public:
 	template <typename ValueType>
 	UniformArray<ValueType> AddUniformArray(int count)
 	{
-		DataType valueType = GetDataType<ValueType>();
+		DataType valueType = DataTypeOf<ValueType>();
 		// получить размер данных переменной
 		int valueSize = GetDataTypeSize(valueType) * count;
 		// получить смещение до переменной с соответствующим выравниванием
-		// на границу float4-регистра
+		// на границу vec4-регистра
 		int offset = bufferSize;
-		if(offset % sizeof(float4) + valueSize > sizeof(float4))
-			offset = (offset + sizeof(float4) - 1) & ~(sizeof(float4) - 1);
+		if(offset % sizeof(vec4) + valueSize > sizeof(vec4))
+			offset = (offset + sizeof(vec4) - 1) & ~(sizeof(vec4) - 1);
 		// увеличить размер буфера
 		bufferSize = offset + valueSize;
 

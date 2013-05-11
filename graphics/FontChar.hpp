@@ -16,14 +16,14 @@ BEGIN_INANITY_GRAPHICS
 struct FontChar
 {
 	/// Текстурные координаты левого нижнего угла
-	float2 firstUV;
+	vec2 firstUV;
 	/// Текстурные координаты правого верхнего угла
-	float2 secondUV;
+	vec2 secondUV;
 
 	/// Смещение на экране левого нижнего угла (в пикселах)
-	float2 screenFirstUV;
+	vec2 screenFirstUV;
 	/// Смещение на экране правого верхнего угла (в пикселах)
-	float2 screenSecondUV;
+	vec2 screenSecondUV;
 
 	/// Логическая ширина символа
 	float width;

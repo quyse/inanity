@@ -7,94 +7,144 @@
 
 BEGIN_INANITY_MATH
 
-typedef float scalar;
-
-inline scalar sqr(scalar s)
-{
-	return s * s;
-}
-
 template <typename T>
 inline T clamp(T t, T a, T b)
 {
 	return t < a ? a : t > b ? b : t;
 }
 
-template <int n>
-struct vector
+template <typename T, int n>
+struct xvec
 {
-	scalar t[n];
+	T t[n];
+
+	T& operator()(int i)
+	{
+		return t[i];
+	}
+
+	T operator()(int i) const
+	{
+		return t[i];
+	}
 };
 
-template <>
-struct vector<2>
+template <typename T>
+struct xvec<T, 2>
 {
 	union
 	{
 		struct
 		{
-			scalar x, y;
+			T x, y;
 		};
-		scalar t[2];
+		T t[2];
 	};
 
-	vector(scalar x = 0, scalar y = 0) : x(x), y(y) {}
+	xvec(T x = 0, T y = 0) : x(x), y(y) {}
+
+	T& operator()(int i)
+	{
+		return t[i];
+	}
+
+	T operator()(int i) const
+	{
+		return t[i];
+	}
 };
 
-template <>
-struct vector<3>
+template <typename T>
+struct xvec<T, 3>
 {
 	union
 	{
 		struct
 		{
-			scalar x, y, z;
+			T x, y, z;
 		};
-		scalar t[3];
+		T t[3];
 	};
 
-	vector(scalar x = 0, scalar y = 0, scalar z = 0) : x(x), y(y), z(z) {}
+	xvec(T x = 0, T y = 0, T z = 0) : x(x), y(y), z(z) {}
+
+	T& operator()(int i)
+	{
+		return t[i];
+	}
+
+	T operator()(int i) const
+	{
+		return t[i];
+	}
 };
 
-template <>
-struct vector<4>
+template <typename T>
+struct xvec<T, 4>
 {
 	union
 	{
 		struct
 		{
-			scalar x, y, z, w;
+			T x, y, z, w;
 		};
-		scalar t[4];
+		T t[4];
 	};
 
-	vector(scalar x = 0, scalar y = 0, scalar z = 0, scalar w = 0) : x(x), y(y), z(z), w(w) {}
+	xvec(T x = 0, T y = 0, T z = 0, T w = 0) : x(x), y(y), z(z), w(w) {}
+
+	T& operator()(int i)
+	{
+		return t[i];
+	}
+
+	T operator()(int i) const
+	{
+		return t[i];
+	}
 };
 
-template <int n, int m>
-struct matrix
+template <typename T, int n, int m>
+class xmat
 {
-	scalar t[n][m];
+private:
+	// Порядок column-major.
+	T t[m][n];
+
+public:
+	inline T& operator()(int i, int j)
+	{
+		return t[j][i];
+	}
+
+	inline T operator()(int i, int j) const
+	{
+		return t[j][i];
+	}
 };
 
-template <int n>
-inline void SetMatrixIdentity(matrix<n, n>& a)
+template <typename T, int n>
+inline xmat<typename T, n, n> identity_mat()
 {
-	for(int i = 0; i < n; ++i)
-		for(int j = 0; j < n; ++j)
-			a.t[i][j] = i == j;
+	xmat<T, n, n> a;
+	for(int j = 0; j < n; ++j)
+		for(int i = 0; i < n; ++i)
+			a(i, j) = i == j;
+	return a;
 }
 
-template <int n, int m>
-inline void SetMatrixZero(matrix<n, m>& a)
+template <typename T, int n, int m>
+inline xmat<T, n, m> zero_mat()
 {
-	for(int i = 0; i < n; ++i)
-		for(int j = 0; j < m; ++j)
-			a.t[i][j] = scalar();
+	xmat<T, n, m> a;
+	for(int j = 0; j < m; ++j)
+		for(int i = 0; i < n; ++i)
+			a(i, j) = T();
+	return a;
 }
 
-template <int n>
-inline bool operator<(const vector<n>& a, const vector<n>& b)
+template <typename T, int n>
+inline bool operator<(const xvec<T, n>& a, const xvec<T, n>& b)
 {
 	for(int i = 0; i < n; ++i)
 	{
@@ -104,182 +154,184 @@ inline bool operator<(const vector<n>& a, const vector<n>& b)
 	return false;
 }
 
-template <int n>
-inline bool operator==(const vector<n>& a, const vector<n>& b)
+template <typename T, int n>
+inline bool operator==(const xvec<T, n>& a, const xvec<T, n>& b)
 {
 	for(int i = 0; i < n; ++i)
 		if(a.t[i] != b.t[i]) return false;
 	return true;
 }
 
-template <int n>
-inline vector<n> operator-(const vector<n>& a)
+template <typename T, int n>
+inline xvec<T, n> operator-(const xvec<T, n>& a)
 {
-	vector<n> r;
+	xvec<T, n> r;
 	for(int i = 0; i < n; ++i)
 		r.t[i] = -a.t[i];
 	return r;
 }
 
-template <int n>
-inline vector<n> operator+(const vector<n>& a, const vector<n>& b)
+template <typename T, int n>
+inline xvec<T, n> operator+(const xvec<T, n>& a, const xvec<T, n>& b)
 {
-	vector<n> r;
+	xvec<T, n> r;
 	for(int i = 0; i < n; ++i)
 		r.t[i] = a.t[i] + b.t[i];
 	return r;
 }
 
-template <int n>
-inline vector<n>& operator+=(vector<n>& a, const vector<n>& b)
+template <typename T, int n>
+inline xvec<T, n>& operator+=(xvec<T, n>& a, const xvec<T, n>& b)
 {
 	for(int i = 0; i < n; ++i)
 		a.t[i] += b.t[i];
 	return a;
 }
 
-template <int n>
-inline vector<n> operator-(const vector<n>& a, const vector<n>& b)
+template <typename T, int n>
+inline xvec<T, n> operator-(const xvec<T, n>& a, const xvec<T, n>& b)
 {
-	vector<n> r;
+	xvec<T, n> r;
 	for(int i = 0; i < n; ++i)
 		r.t[i] = a.t[i] - b.t[i];
 	return r;
 }
 
-template <int n>
-inline vector<n>& operator-=(vector<n>& a, const vector<n>& b)
+template <typename T, int n>
+inline xvec<T, n>& operator-=(xvec<T, n>& a, const xvec<T, n>& b)
 {
 	for(int i = 0; i < n; ++i)
 		a.t[i] -= b.t[i];
 	return a;
 }
 
-template <int n>
-inline vector<n> operator*(const vector<n>& a, const vector<n>& b)
+template <typename T, int n>
+inline xvec<T, n> operator*(const xvec<T, n>& a, const xvec<T, n>& b)
 {
-	vector<n> r;
+	xvec<T, n> r;
 	for(int i = 0; i < n; ++i)
 		r.t[i] = a.t[i] * b.t[i];
 	return r;
 }
 
-template <int n>
-inline vector<n>& operator*=(vector<n>& a, const vector<n>& b)
+template <typename T, int n>
+inline xvec<T, n>& operator*=(xvec<T, n>& a, const xvec<T, n>& b)
 {
 	for(int i = 0; i < n; ++i)
 		a.t[i] *= b.t[i];
 	return a;
 }
 
-template <int n>
-inline vector<n> operator*(const vector<n>& a, scalar b)
+template <typename T, int n>
+inline xvec<T, n> operator*(const xvec<T, n>& a, T b)
 {
-	vector<n> r;
+	xvec<T, n> r;
 	for(int i = 0; i < n; ++i)
 		r.t[i] = a.t[i] * b;
 	return r;
 }
 
-template <int n>
-inline vector<n>& operator*=(vector<n>& a, scalar b)
+template <typename T, int n>
+inline xvec<T, n>& operator*=(xvec<T, n>& a, T b)
 {
 	for(int i = 0; i < n; ++i)
 		a.t[i] *= b;
 	return a;
 }
 
-template <int n>
-inline vector<n> operator/(const vector<n>& a, const vector<n>& b)
+template <typename T, int n>
+inline xvec<T, n> operator/(const xvec<T, n>& a, const xvec<T, n>& b)
 {
-	vector<n> r;
+	xvec<T, n> r;
 	for(int i = 0; i < n; ++i)
 		r.t[i] = a.t[i] / b.t[i];
 	return r;
 }
 
-template <int n>
-inline vector<n>& operator/=(vector<n>& a, const vector<n>& b)
+template <typename T, int n>
+inline xvec<T, n>& operator/=(xvec<T, n>& a, const xvec<T, n>& b)
 {
 	for(int i = 0; i < n; ++i)
 		a.t[i] /= b.t[i];
 	return a;
 }
 
-template <int n>
-inline vector<n> operator/(const vector<n>& a, scalar b)
+template <typename T, int n>
+inline xvec<T, n> operator/(const xvec<T, n>& a, T b)
 {
-	vector<n> r;
+	xvec<T, n> r;
 	for(int i = 0; i < n; ++i)
 		r.t[i] = a.t[i] / b;
 	return r;
 }
 
-template <int n>
-inline vector<n>& operator/=(vector<n>& a, scalar b)
+template <typename T, int n>
+inline xvec<T, n>& operator/=(xvec<T, n>& a, T b)
 {
 	for(int i = 0; i < n; ++i)
 		a.t[i] /= b;
 	return a;
 }
 
-template <int n>
-inline scalar dot(const vector<n>& a, const vector<n>& b)
+template <typename T, int n>
+inline T dot(const xvec<T, n>& a, const xvec<T, n>& b)
 {
-	scalar s = scalar();
+	T s = T();
 	for(int i = 0; i < n; ++i)
 		s += a.t[i] * b.t[i];
 	return s;
 }
 
-inline vector<3> cross(const vector<3>& a, const vector<3>& b)
+template <typename T>
+inline xvec<T, 3> cross(const xvec<T, 3>& a, const xvec<T, 3>& b)
 {
-	return vector<3>(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
+	return xvec<T, 3>(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
 }
 
-template <int n>
-inline scalar length2(const vector<n>& a)
+template <typename T, int n>
+inline T length2(const xvec<T, n>& a)
 {
 	return dot(a, a);
 }
 
-template <int n>
-inline scalar length(const vector<n>& a)
+template <typename T, int n>
+inline T length(const xvec<T, n>& a)
 {
 	return std::sqrt(length2(a));
 }
 
-template <int n>
-inline vector<n> normalize(const vector<n>& a)
+template <typename T, int n>
+inline xvec<T, n> normalize(const xvec<T, n>& a)
 {
 	return a / length(a);
 }
 
-inline vector<3> normal(const vector<3>& a, const vector<3>& b, const vector<3>& c)
+template <typename T>
+inline xvec<T, 3> normal(const xvec<T, 3>& a, const xvec<T, 3>& b, const xvec<T, 3>& c)
 {
 	return cross(b - a, c - a);
 }
 
-template <typename T>
-inline T lerp(const T& a, const T& b, scalar t)
+template <typename V, typename T>
+inline V lerp(const V& a, const V& b, T t)
 {
 	return a * (1 - t) + b * t;
 }
 
-template <int n>
-inline std::ostream& operator<<(std::ostream& a, const vector<n>& b)
+template <typename T, int n>
+inline std::ostream& operator<<(std::ostream& a, const xvec<T, n>& b)
 {
 	for(int i = 0; i < n; ++i)
 	{
 		if(i)
 			a << ' ';
-		a << b.t[i];
+		a << b(i);
 	}
 	return a;
 }
 
-template <int n, int m>
-inline std::ostream& operator<<(std::ostream& a, const matrix<n, m>& b)
+template <typename T, int n, int m>
+inline std::ostream& operator<<(std::ostream& a, const xmat<T, n, m>& b)
 {
 	for(int i = 0; i < n; ++i)
 	{
@@ -287,197 +339,170 @@ inline std::ostream& operator<<(std::ostream& a, const matrix<n, m>& b)
 		{
 			if(j)
 				a << ' ';
-			a << b.t[i][j];
+			a << b(i, j);
 		}
 		a << '\n';
 	}
 	return a;
 }
 
-template <int n, int m>
-inline matrix<n, m> operator+(const matrix<n, m>& a, const matrix<n, m>& b)
+template <typename T, int n, int m>
+inline xmat<T, n, m> operator+(const xmat<T, n, m>& a, const xmat<T, n, m>& b)
 {
-	matrix<n, m> r;
-	for(int i = 0; i < n; ++i)
-		for(int j = 0; j < m; ++j)
-			r.t[i][j] = a.t[i][j] + b.t[i][j];
+	xmat<T, n, m> r;
+	for(int j = 0; j < m; ++j)
+		for(int i = 0; i < n; ++i)
+			r(i, j) = a(i, j) + b(i, j);
 	return r;
 }
 
-template <int n, int m>
-inline matrix<n, m> operator-(const matrix<n, m>& a, const matrix<n, m>& b)
+template <typename T, int n, int m>
+inline xmat<T, n, m> operator-(const xmat<T, n, m>& a, const xmat<T, n, m>& b)
 {
-	matrix<n, m> r;
-	for(int i = 0; i < n; ++i)
-		for(int j = 0; j < m; ++j)
-			r.t[i][j] = a.t[i][j] - b.t[i][j];
+	xmat<T, n, m> r;
+	for(int j = 0; j < m; ++j)
+		for(int i = 0; i < n; ++i)
+			r(i, j) = a(i, j) - b(i, j);
 	return r;
 }
 
-template <int n, int m>
-inline matrix<n, m> operator*(const matrix<n, m>& a, const scalar b)
+template <typename T, int n, int m>
+inline xmat<T, n, m> operator*(const xmat<T, n, m>& a, const T b)
 {
-	matrix<n, m> r;
-	for(int i = 0; i < n; ++i)
-		for(int j = 0; j < m; ++j)
-			r.t[i][j] = a.t[i][j] * b;
+	xmat<T, n, m> r;
+	for(int j = 0; j < m; ++j)
+		for(int i = 0; i < n; ++i)
+			r(i, j) = a(i, j) * b;
 	return r;
 }
 
-template <int n1, int n2, int n3>
-inline matrix<n1, n3> operator*(const matrix<n1, n2>& a, const matrix<n2, n3>& b)
+template <typename T, int n1, int n2, int n3>
+inline xmat<T, n1, n3> operator*(const xmat<T, n1, n2>& a, const xmat<T, n2, n3>& b)
 {
-	matrix<n1, n3> r;
-	for(int i = 0; i < n1; ++i)
-		for(int j = 0; j < n3; ++j)
+	xmat<T, n1, n3> r;
+	for(int j = 0; j < n3; ++j)
+		for(int i = 0; i < n1; ++i)
 		{
-			scalar s = scalar();
+			T s = T();
 			for(int k = 0; k < n2; ++k)
-				s += a.t[i][k] * b.t[k][j];
-			r.t[i][j] = s;
+				s += a(i, k) * b(k, j);
+			r(i, j) = s;
 		}
 	return r;
 }
 
-template <int n, int m>
-inline vector<m> operator*(const vector<n>& a, const matrix<n, m>& b)
+template <typename T, int n, int m>
+inline xvec<T, m> operator*(const xvec<T, n>& a, const xmat<T, n, m>& b)
 {
-	vector<m> r;
-	for(int i = 0; i < m; ++i)
+	xvec<T, m> r;
+	for(int j = 0; j < m; ++j)
 	{
-		scalar s = scalar();
-		for(int j = 0; j < n; ++j)
-			s += a.t[j] * b.t[j][i];
-		r.t[i] = s;
+		T s = T();
+		for(int i = 0; i < n; ++i)
+			s += a(i) * b(i, j);
+		r(j) = s;
 	}
 	return r;
 }
 
-inline vector<4> operator*(const vector<3>& a, const matrix<4, 4>& b)
+template <typename T>
+inline xvec<T, 4> operator*(const xvec<T, 3>& a, const xmat<T, 4, 4>& b)
 {
-	return vector<4>(a.x, a.y, a.z, 1) * b;
+	return xvec<T, 4>(a.x, a.y, a.z, 1) * b;
 }
 
-template <int sn, int sm, int n, int m>
-inline matrix<sn, sm> submatrix(const matrix<n, m>& a, int si = 0, int sj = 0)
+template <typename T, int sn, int sm, int n, int m>
+inline xmat<T, sn, sm> submat(const xmat<T, n, m>& a, int si = 0, int sj = 0)
 {
-	matrix<sn, sm> r;
-	for(int i = 0; i < sn; ++i)
-		for(int j = 0; j < sm; ++j)
-			r.t[i][j] = a.t[i + si][j + sj];
+	xmat<T, sn, sm> r;
+	for(int j = 0; j < sm; ++j)
+		for(int i = 0; i < sn; ++i)
+			r(i, j) = a(i + si, j + sj);
 	return r;
 }
 
-inline matrix<4, 4> CreateTranslationMatrix(scalar x, scalar y, scalar z)
-{
-	matrix<4, 4> r;
-	SetMatrixIdentity(r);
-	r.t[3][0] = x;
-	r.t[3][1] = y;
-	r.t[3][2] = z;
-	return r;
-}
-inline matrix<4, 4> CreateTranslationMatrix(const vector<3>& translation)
-{
-	return CreateTranslationMatrix(translation.x, translation.y, translation.z);
-}
+//******* Typedef'ы для удобства.
 
-inline matrix<4, 4> CreateScalingMatrix(scalar x, scalar y, scalar z)
-{
-	matrix<4, 4> r;
-	SetMatrixZero(r);
-	r.t[0][0] = x;
-	r.t[1][1] = y;
-	r.t[2][2] = z;
-	r.t[3][3] = 1;
-	return r;
-}
-inline matrix<4, 4> CreateScalingMatrix(const vector<3>& scale)
-{
-	return CreateScalingMatrix(scale.x, scale.y, scale.z);
-}
+//*** float
+typedef xvec<float, 2> vec2;
+typedef xvec<float, 3> vec3;
+typedef xvec<float, 4> vec4;
+typedef xmat<float, 1, 2> mat1x2;
+typedef xmat<float, 1, 3> mat1x3;
+typedef xmat<float, 1, 4> mat1x4;
+typedef xmat<float, 2, 1> mat2x1;
+typedef xmat<float, 2, 2> mat2x2;
+typedef xmat<float, 2, 3> mat2x3;
+typedef xmat<float, 2, 4> mat2x4;
+typedef xmat<float, 3, 1> mat3x1;
+typedef xmat<float, 3, 2> mat3x2;
+typedef xmat<float, 3, 3> mat3x3;
+typedef xmat<float, 3, 4> mat3x4;
+typedef xmat<float, 4, 1> mat4x1;
+typedef xmat<float, 4, 2> mat4x2;
+typedef xmat<float, 4, 3> mat4x3;
+typedef xmat<float, 4, 4> mat4x4;
 
-inline matrix<4, 4> CreateRotationXMatrix(scalar alpha)
-{
-	scalar cosAlpha = std::cos(alpha);
-	scalar sinAlpha = std::sin(alpha);
-	matrix<4, 4> r;
-	SetMatrixZero(r);
-	r.t[0][0] = 1;
-	r.t[1][1] = cosAlpha;
-	r.t[1][2] = sinAlpha;
-	r.t[2][1] = -sinAlpha;
-	r.t[2][2] = cosAlpha;
-	r.t[3][3] = 1;
-	return r;
-}
+//*** double
+typedef xvec<double, 2> dvec2;
+typedef xvec<double, 3> dvec3;
+typedef xvec<double, 4> dvec4;
+typedef xmat<double, 1, 2> dmat1x2;
+typedef xmat<double, 1, 3> dmat1x3;
+typedef xmat<double, 1, 4> dmat1x4;
+typedef xmat<double, 2, 1> dmat2x1;
+typedef xmat<double, 2, 2> dmat2x2;
+typedef xmat<double, 2, 3> dmat2x3;
+typedef xmat<double, 2, 4> dmat2x4;
+typedef xmat<double, 3, 1> dmat3x1;
+typedef xmat<double, 3, 2> dmat3x2;
+typedef xmat<double, 3, 3> dmat3x3;
+typedef xmat<double, 3, 4> dmat3x4;
+typedef xmat<double, 4, 1> dmat4x1;
+typedef xmat<double, 4, 2> dmat4x2;
+typedef xmat<double, 4, 3> dmat4x3;
+typedef xmat<double, 4, 4> dmat4x4;
 
-inline matrix<4, 4> CreateRotationZMatrix(scalar alpha)
-{
-	scalar cosAlpha = std::cos(alpha);
-	scalar sinAlpha = std::sin(alpha);
-	matrix<4, 4> r;
-	SetMatrixZero(r);
-	r.t[0][0] = cosAlpha;
-	r.t[0][1] = sinAlpha;
-	r.t[1][0] = -sinAlpha;
-	r.t[1][1] = cosAlpha;
-	r.t[2][2] = 1;
-	r.t[3][3] = 1;
-	return r;
-}
+//*** int
+typedef xvec<int, 2> ivec2;
+typedef xvec<int, 3> ivec3;
+typedef xvec<int, 4> ivec4;
+typedef xmat<int, 1, 2> imat1x2;
+typedef xmat<int, 1, 3> imat1x3;
+typedef xmat<int, 1, 4> imat1x4;
+typedef xmat<int, 2, 1> imat2x1;
+typedef xmat<int, 2, 2> imat2x2;
+typedef xmat<int, 2, 3> imat2x3;
+typedef xmat<int, 2, 4> imat2x4;
+typedef xmat<int, 3, 1> imat3x1;
+typedef xmat<int, 3, 2> imat3x2;
+typedef xmat<int, 3, 3> imat3x3;
+typedef xmat<int, 3, 4> imat3x4;
+typedef xmat<int, 4, 1> imat4x1;
+typedef xmat<int, 4, 2> imat4x2;
+typedef xmat<int, 4, 3> imat4x3;
+typedef xmat<int, 4, 4> imat4x4;
 
-inline matrix<4, 4> CreateLookAtMatrix(const vector<3>& eye, const vector<3>& target, const vector<3>& up)
-{
-	matrix<4, 4> r;
-	SetMatrixIdentity(r);
-	vector<3> z = normalize(eye - target);
-	vector<3> x = normalize(cross(up, z));
-	vector<3> y = cross(z, x);
-	r.t[0][0] = x.x;
-	r.t[0][1] = y.x;
-	r.t[0][2] = z.x;
-	r.t[1][0] = x.y;
-	r.t[1][1] = y.y;
-	r.t[1][2] = z.y;
-	r.t[2][0] = x.z;
-	r.t[2][1] = y.z;
-	r.t[2][2] = z.z;
-	r.t[3][0] = -dot(x, eye);
-	r.t[3][1] = -dot(y, eye);
-	r.t[3][2] = -dot(z, eye);
-	return r;
-}
-
-inline matrix<4, 4> CreateProjectionPerspectiveFovMatrix(scalar fovY, scalar aspect, scalar zn, scalar zf)
-{
-	matrix<4, 4> r;
-	SetMatrixZero(r);
-	scalar yScale = 1 / tan(fovY / 2);
-	scalar xScale = yScale / aspect;
-	r.t[0][0] = xScale;
-	r.t[1][1] = yScale;
-	r.t[2][2] = zf / (zn - zf);
-	r.t[3][2] = zn * zf / (zn - zf);
-	r.t[2][3] = -1;
-	return r;
-}
-
-typedef vector<2> float2;
-typedef vector<3> float3;
-typedef vector<4> float4;
-typedef matrix<3, 3> float3x3;
-typedef matrix<4, 4> float4x4;
-
-//*** Целочисленные вектора (заглушка для шейдеров).
-
-template <int n>
-struct uintvector {};
-
+//*** uint
 typedef unsigned int uint;
-typedef uintvector<2> uint2;
-typedef uintvector<3> uint3;
-typedef uintvector<4> uint4;
+typedef xvec<unsigned int, 2> uvec2;
+typedef xvec<unsigned int, 3> uvec3;
+typedef xvec<unsigned int, 4> uvec4;
+typedef xmat<unsigned int, 1, 2> umat1x2;
+typedef xmat<unsigned int, 1, 3> umat1x3;
+typedef xmat<unsigned int, 1, 4> umat1x4;
+typedef xmat<unsigned int, 2, 1> umat2x1;
+typedef xmat<unsigned int, 2, 2> umat2x2;
+typedef xmat<unsigned int, 2, 3> umat2x3;
+typedef xmat<unsigned int, 2, 4> umat2x4;
+typedef xmat<unsigned int, 3, 1> umat3x1;
+typedef xmat<unsigned int, 3, 2> umat3x2;
+typedef xmat<unsigned int, 3, 3> umat3x3;
+typedef xmat<unsigned int, 3, 4> umat3x4;
+typedef xmat<unsigned int, 4, 1> umat4x1;
+typedef xmat<unsigned int, 4, 2> umat4x2;
+typedef xmat<unsigned int, 4, 3> umat4x3;
+typedef xmat<unsigned int, 4, 4> umat4x4;
 
 END_INANITY_MATH
 

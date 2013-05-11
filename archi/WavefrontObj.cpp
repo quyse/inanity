@@ -56,7 +56,7 @@ bool operator == (const SkinnedVertex& a, const SkinnedVertex& b)
 	return a.position == b.position && a.normal == b.normal && a.texcoord == b.texcoord;
 }
 
-std::ostream& operator<<(std::ostream& s, const float3& p)
+std::ostream& operator<<(std::ostream& s, const vec3& p)
 {
 	return s << p.x << ' ' << p.y << ' ' << p.z;
 }
@@ -102,7 +102,7 @@ void WavefrontObj::Run(const std::vector<String>& arguments)
 		{
 			uint boneNumbers[4];
 			float boneWeights[4];
-			float3 position;
+			vec3 position;
 		};
 		std::vector<SkinCoef> skinCoefs(skinVerticesCount);
 
@@ -134,7 +134,7 @@ void WavefrontObj::Run(const std::vector<String>& arguments)
 				bones[j].first *= weightCoef;
 
 			// считать позицию для проверки
-			float3 position;
+			vec3 position;
 			std::cin >> position.x >> position.y >> position.z;
 
 			// записать
@@ -202,9 +202,9 @@ void WavefrontObj::Run(const std::vector<String>& arguments)
 
 ptr<EditableGeometry<Vertex, unsigned> > WavefrontObj::Convert(std::vector<int>& positionNumbers)
 {
-	std::vector<float3> points;
-	std::vector<float3> normals;
-	std::vector<float2> texPoints;
+	std::vector<vec3> points;
+	std::vector<vec3> normals;
+	std::vector<vec2> texPoints;
 	std::string geometryName;
 	std::vector<Vertex> vertices;
 
@@ -225,25 +225,25 @@ ptr<EditableGeometry<Vertex, unsigned> > WavefrontObj::Convert(std::vector<int>&
 		//вершина
 		if(command == "v")
 		{
-			float3 v;
+			vec3 v;
 			s >> v.x >> v.y >> v.z;
 			points.push_back(v);
 		}
 		//нормаль к вершине
 		else if(command == "vn")
 		{
-			float3 v;
+			vec3 v;
 			s >> v.x >> v.y >> v.z;
 			normals.push_back(v);
 		}
 		//текстурные координаты вершины
 		else if(command == "vt")
 		{
-			float3 v;
+			vec3 v;
 			s >> v.x >> v.y >> v.z;
 			//развернуть ось Y, так как в максе начало координат текстуры внизу
 			v.y = 1.0f - v.y;
-			texPoints.push_back(float2(v.x, v.y));
+			texPoints.push_back(vec2(v.x, v.y));
 		}
 		//название геометрии (хз зачем)
 		else if(command == "g")

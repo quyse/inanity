@@ -13,7 +13,7 @@ Sampler<ValueType, CoordType>::Sampler(ptr<SamplerNode> node)
 
 template <typename ValueType, typename CoordType>
 Sampler<ValueType, CoordType>::Sampler(int slot)
-: SamplerBase(NEW(SamplerNode(slot, GetDataType<ValueType>(), GetDataType<CoordType>()))) {}
+: SamplerBase(NEW(SamplerNode(slot, DataTypeOf<ValueType>(), DataTypeOf<CoordType>()))) {}
 
 template <typename ValueType, typename CoordType>
 void Sampler<ValueType, CoordType>::operator=(Sampler<ValueType, CoordType> a)

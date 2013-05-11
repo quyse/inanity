@@ -34,20 +34,20 @@ void HlslGeneratorInstance::PrintDataType(DataType dataType)
 	const char* name;
 	switch(dataType)
 	{
-	case DataTypes::Float:			name = "float";			break;
-	case DataTypes::Float2:			name = "float2";		break;
-	case DataTypes::Float3:			name = "float3";		break;
-	case DataTypes::Float4:			name = "float4";		break;
-	case DataTypes::Float3x3:		name = "float3x3";	break;
-	case DataTypes::Float4x4:		name = "float4x4";	break;
-	case DataTypes::UInt:				name = "uint";			break;
-	case DataTypes::UInt2:			name = "uint2";			break;
-	case DataTypes::UInt3:			name = "uint3";			break;
-	case DataTypes::UInt4:			name = "uint4";			break;
-	case DataTypes::Int:				name = "int";				break;
-	case DataTypes::Int2:				name = "int2";			break;
-	case DataTypes::Int3:				name = "int3";			break;
-	case DataTypes::Int4:				name = "int4";			break;
+	case DataTypes::_float:		name = "float";			break;
+	case DataTypes::_vec2:		name = "float2";		break;
+	case DataTypes::_vec3:		name = "float3";		break;
+	case DataTypes::_vec4:		name = "float4";		break;
+	case DataTypes::_mat3x3:	name = "float3x3";	break;
+	case DataTypes::_mat4x4:	name = "float4x4";	break;
+	case DataTypes::_uint:		name = "uint";			break;
+	case DataTypes::_uvec2:		name = "uint2";			break;
+	case DataTypes::_uvec3:		name = "uint3";			break;
+	case DataTypes::_uvec4:		name = "uint4";			break;
+	case DataTypes::_int:			name = "int";				break;
+	case DataTypes::_ivec2:		name = "int2";			break;
+	case DataTypes::_ivec3:		name = "int3";			break;
+	case DataTypes::_ivec4:		name = "int4";			break;
 	default:
 		THROW_PRIMARY_EXCEPTION("Unknown data type");
 	}
@@ -406,20 +406,20 @@ void HlslGeneratorInstance::PrintUniforms()
 			// размер массива
 			if(count > 1)
 				hlsl << '[' << count << ']';
-			// если массив, размер элемента должен быть кратен размеру float4
-			if(count > 1 && GetDataTypeSize(valueType) % sizeof(float4))
-				THROW_PRIMARY_EXCEPTION("Size of element of array should be multiply of float4 size");
+			// если массив, размер элемента должен быть кратен размеру vec4
+			if(count > 1 && GetDataTypeSize(valueType) % sizeof(vec4))
+				THROW_PRIMARY_EXCEPTION("Size of element of array should be multiply of vec4 size");
 
 			// регистр и положение в нём переменной
-			hlsl << " : packoffset(c" << (offset / sizeof(float4));
+			hlsl << " : packoffset(c" << (offset / sizeof(vec4));
 			// если переменная не начинается ровно на границе регистра, нужно дописать ещё компоненты регистра
-			int registerOffset = offset % sizeof(float4);
+			int registerOffset = offset % sizeof(vec4);
 			if(registerOffset)
 			{
 				// получить размер данных
 				int variableSize = GetDataTypeSize(valueType);
 				// переменная не должна пересекать границу регистра
-				if(registerOffset + variableSize > sizeof(float4))
+				if(registerOffset + variableSize > sizeof(vec4))
 					THROW_PRIMARY_EXCEPTION("Variable should not intersect a register boundary");
 				// выложить столько буков, сколько нужно
 				registerOffset /= sizeof(float);
@@ -575,13 +575,13 @@ ptr<ShaderSource> HlslGeneratorInstance::Generate()
 		const char* textureStr;
 		switch(samplerNode->GetCoordType())
 		{
-		case DataTypes::Float:
+		case DataTypes::_float:
 			textureStr = "Texture1D";
 			break;
-		case DataTypes::Float2:
+		case DataTypes::_vec2:
 			textureStr = "Texture2D";
 			break;
-		case DataTypes::Float3:
+		case DataTypes::_vec3:
 			textureStr = "Texture3D";
 			break;
 		default:

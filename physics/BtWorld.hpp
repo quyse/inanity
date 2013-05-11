@@ -22,11 +22,11 @@ public:
 
 	btDynamicsWorld* GetInternalDynamicsWorld() const;
 
-	ptr<Shape> CreateBoxShape(const float3& halfSize);
+	ptr<Shape> CreateBoxShape(const vec3& halfSize);
 	ptr<Shape> CreateSphereShape(float radius);
 	ptr<Shape> CreateCapsuleShape(float radius, float height);
-	ptr<RigidBody> CreateRigidBody(ptr<Shape> shape, float mass, const float4x4& startTransform);
-	ptr<Character> CreateCharacter(ptr<Shape> shape, const float4x4& startTransform);
+	ptr<RigidBody> CreateRigidBody(ptr<Shape> shape, float mass, const mat4x4& startTransform);
+	ptr<Character> CreateCharacter(ptr<Shape> shape, const mat4x4& startTransform);
 	void Simulate(float time);
 };
 

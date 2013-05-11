@@ -24,30 +24,30 @@ void DxAttributeBinding::Initialize(ptr<AttributeLayout> layout)
 		DXGI_FORMAT format;
 		switch(element.dataType)
 		{
-		case DataTypes::Float:
+		case DataTypes::_float:
 			format = DXGI_FORMAT_R32_FLOAT;
 			break;
-		case DataTypes::Float2:
+		case DataTypes::_vec2:
 			format = DXGI_FORMAT_R32G32_FLOAT;
 			break;
-		case DataTypes::Float3:
+		case DataTypes::_vec3:
 			format = DXGI_FORMAT_R32G32B32_FLOAT;
 			break;
-		case DataTypes::Float4:
+		case DataTypes::_vec4:
 			format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 			break;
-		case DataTypes::Float4x4:
+		case DataTypes::_mat4x4:
 			THROW_PRIMARY_EXCEPTION("Matrices can't be used in attributes");
-		case DataTypes::UInt:
+		case DataTypes::_uint:
 			format = DXGI_FORMAT_R32_UINT;
 			break;
-		case DataTypes::UInt2:
+		case DataTypes::_uvec2:
 			format = DXGI_FORMAT_R32G32_UINT;
 			break;
-		case DataTypes::UInt3:
+		case DataTypes::_uvec3:
 			format = DXGI_FORMAT_R32G32B32_UINT;
 			break;
-		case DataTypes::UInt4:
+		case DataTypes::_uvec4:
 			format = DXGI_FORMAT_R32G32B32A32_UINT;
 			break;
 		default:

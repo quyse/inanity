@@ -10,74 +10,71 @@ struct DataTypes
 {
 	enum _
 	{
-		Float,
-		Float2,
-		Float3,
-		Float4,
-		Float3x3,
-		Float4x4,
-		UInt,
-		UInt2,
-		UInt3,
-		UInt4,
-		Int,
-		Int2,
-		Int3,
-		Int4,
-		_Count
+		_float,
+		_vec2,
+		_vec3,
+		_vec4,
+		_mat3x3,
+		_mat4x4,
+		_uint,
+		_uvec2,
+		_uvec3,
+		_uvec4,
+		_int,
+		_ivec2,
+		_ivec3,
+		_ivec4,
+		Count
 	};
 };
+
 typedef DataTypes::_ DataType;
+
+/// Получить константу типа на этапе компиляции.
+template <typename T>
+inline DataType DataTypeOf();
+#define DTO(t) template <> inline DataType DataTypeOf<t>() { return DataTypes::_##t; }
+DTO(float)
+DTO(vec2)
+DTO(vec3)
+DTO(vec4)
+DTO(mat3x3)
+DTO(mat4x4)
+DTO(uint)
+DTO(uvec2)
+DTO(uvec3)
+DTO(uvec4)
+DTO(int)
+DTO(ivec2)
+DTO(ivec3)
+DTO(ivec4)
+#undef DTO
 
 /// Размеры данных.
 inline int GetDataTypeSize(DataType dataType)
 {
 	switch(dataType)
 	{
-#define DT(name, size) case DataTypes::name: return size
-		DT(Float, 4);
-		DT(Float2, 8);
-		DT(Float3, 12);
-		DT(Float4, 16);
-		DT(Float3x3, 36);
-		DT(Float4x4, 64);
-		DT(UInt, 4);
-		DT(UInt2, 8);
-		DT(UInt3, 12);
-		DT(UInt4, 16);
-		DT(Int, 4);
-		DT(Int2, 8);
-		DT(Int3, 12);
-		DT(Int4, 16);
-#undef DT
+#define DTS(t) case DataTypes::_##t: return sizeof(t);
+	DTS(float)
+	DTS(vec2)
+	DTS(vec3)
+	DTS(vec4)
+	DTS(mat3x3)
+	DTS(mat4x4)
+	DTS(uint)
+	DTS(uvec2)
+	DTS(uvec3)
+	DTS(uvec4)
+	DTS(int)
+	DTS(ivec2)
+	DTS(ivec3)
+	DTS(ivec4)
+#undef DTS
 	default:
 		return 0x7fffffff;
 	}
 }
-
-/// Перевести тип на этапе компиляции в константу типа.
-template <typename T>
-DataType GetDataType();
-template <>
-inline DataType GetDataType<float>() { return DataTypes::Float; }
-template <>
-inline DataType GetDataType<float2>() { return DataTypes::Float2; }
-template <>
-inline DataType GetDataType<float3>() { return DataTypes::Float3; }
-template <>
-inline DataType GetDataType<float4>() { return DataTypes::Float4; }
-template <>
-inline DataType GetDataType<float3x3>() { return DataTypes::Float3x3; }
-template <>
-inline DataType GetDataType<float4x4>() { return DataTypes::Float4x4; }
-template <>
-inline DataType GetDataType<unsigned int>() { return DataTypes::UInt; }
-template <>
-inline DataType GetDataType<uint2>() { return DataTypes::UInt2; }
-template <>
-inline DataType GetDataType<uint3>() { return DataTypes::UInt3; }
-template <>
-inline DataType GetDataType<uint4>() { return DataTypes::UInt4; }
 
 END_INANITY_GRAPHICS
 

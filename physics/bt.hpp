@@ -12,49 +12,49 @@ BEGIN_INANITY_PHYSICS
 
 //******* функции преобразования для типов bullet
 
-inline btVector3 toBt(const float3& a)
+inline btVector3 toBt(const vec3& a)
 {
 	return btVector3(a.x, a.y, a.z);
 }
-inline btMatrix3x3 toBt(const float3x3& a)
+inline btMatrix3x3 toBt(const mat3x3& a)
 {
 	return btMatrix3x3(
-		a.t[0][0], a.t[0][1], a.t[0][2],
-		a.t[1][0], a.t[1][1], a.t[1][2],
-		a.t[2][0], a.t[2][1], a.t[2][2]);
+		a(0, 0), a(0, 1), a(0, 2),
+		a(1, 0), a(1, 1), a(1, 2),
+		a(2, 0), a(2, 1), a(2, 2));
 }
-inline btTransform toBt(const float4x4& a)
+inline btTransform toBt(const mat4x4& a)
 {
-	return btTransform(toBt(submatrix<3, 3>(a)), btVector3(a.t[3][0], a.t[3][1], a.t[3][2]));
+	return btTransform(toBt(submat<float, 3, 3>(a)), btVector3(a(3, 0), a(3, 1), a(3, 2)));
 }
 
-inline float3 fromBt(const btVector3& a)
+inline vec3 fromBt(const btVector3& a)
 {
-	return float3(a.x(), a.y(), a.z());
+	return vec3(a.x(), a.y(), a.z());
 }
-inline float3x3 fromBt(const btMatrix3x3& a)
+inline mat3x3 fromBt(const btMatrix3x3& a)
 {
-	float3x3 r;
+	mat3x3 r;
 	for(int i = 0; i < 3; ++i)
 		for(int j = 0; j < 3; ++j)
-			r.t[i][j] = a[i][j];
+			r(i, j) = a[i][j];
 	return r;
 }
-inline float4x4 fromBt(const btTransform& a)
+inline mat4x4 fromBt(const btTransform& a)
 {
-	float4x4 r;
+	mat4x4 r;
 	const btMatrix3x3& basis = a.getBasis();
 	for(int i = 0; i < 3; ++i)
 	{
 		for(int j = 0; j < 3; ++j)
-			r.t[i][j] = basis[i][j];
-		r.t[i][3] = 0;
+			r(i, j) = basis[i][j];
+		r(i, 3) = 0;
 	}
 	const btVector3& origin = a.getOrigin();
-	r.t[3][0] = origin.x();
-	r.t[3][1] = origin.y();
-	r.t[3][2] = origin.z();
-	r.t[3][3] = 1;
+	r(3, 0) = origin.x();
+	r(3, 1) = origin.y();
+	r(3, 2) = origin.z();
+	r(3, 3) = 1;
 	return r;
 }
 

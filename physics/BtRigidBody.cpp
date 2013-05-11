@@ -28,22 +28,22 @@ btRigidBody* BtRigidBody::GetInternalObject() const
 	return rigidBody;
 }
 
-float3 BtRigidBody::GetPosition() const
+vec3 BtRigidBody::GetPosition() const
 {
 	return fromBt(transform.getOrigin());
 }
 
-float3x3 BtRigidBody::GetOrientation() const
+mat3x3 BtRigidBody::GetOrientation() const
 {
 	return fromBt(transform.getBasis());
 }
 
-float4x4 BtRigidBody::GetTransform() const
+mat4x4 BtRigidBody::GetTransform() const
 {
 	return fromBt(transform);
 }
 
-void BtRigidBody::ApplyImpulse(const float3& impulse)
+void BtRigidBody::ApplyImpulse(const vec3& impulse)
 {
 	rigidBody->applyCentralImpulse(toBt(impulse));
 }

@@ -23,8 +23,8 @@ public:
 	btPairCachingGhostObject* GetInternalGhost() const;
 	btKinematicCharacterController* GetInternalController() const;
 
-	void Walk(const float3& movement);
-	float4x4 GetTransform() const;
+	void Walk(const vec3& movement);
+	mat4x4 GetTransform() const;
 };
 
 END_INANITY_PHYSICS

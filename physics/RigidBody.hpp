@@ -26,14 +26,14 @@ public:
 	ptr<Shape> GetShape() const;
 
 	/// Получить текущее положение твёрдого тела.
-	virtual float3 GetPosition() const = 0;
+	virtual vec3 GetPosition() const = 0;
 	/// Получить текущую ориентацию твёрдого тела.
-	virtual float3x3 GetOrientation() const = 0;
+	virtual mat3x3 GetOrientation() const = 0;
 	/// Получить текущую трансформацию твёрдого тела.
-	virtual float4x4 GetTransform() const = 0;
+	virtual mat4x4 GetTransform() const = 0;
 
 	/// Применить импульс к телу.
-	virtual void ApplyImpulse(const float3& impulse) = 0;
+	virtual void ApplyImpulse(const vec3& impulse) = 0;
 
 	SCRIPTABLE_CLASS(RigidBody);
 };

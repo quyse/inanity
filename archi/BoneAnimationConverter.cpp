@@ -26,7 +26,7 @@ void BoneAnimationConverter::Run(const std::vector<String>& arguments)
 	struct Bone
 	{
 		quaternion originalWorldOrientation;
-		float3 originalWorldPosition;
+		vec3 originalWorldPosition;
 		int parent;
 		std::vector<int> children;
 
@@ -37,7 +37,7 @@ void BoneAnimationConverter::Run(const std::vector<String>& arguments)
 	{
 		int& parent = bones[i].parent;
 		quaternion& o = bones[i].originalWorldOrientation;
-		float3& p = bones[i].originalWorldPosition;
+		vec3& p = bones[i].originalWorldPosition;
 		std::cin >> parent
 			>> o.x >> o.y >> o.z >> o.w
 			>> p.x >> p.y >> p.z;
@@ -89,7 +89,7 @@ void BoneAnimationConverter::Run(const std::vector<String>& arguments)
 		float time;
 		int boneNumber;
 		quaternion orientation;
-		float3 rootOffset;
+		vec3 rootOffset;
 	};
 	std::vector<Key> keys;
 
@@ -118,7 +118,7 @@ void BoneAnimationConverter::Run(const std::vector<String>& arguments)
 			std::cin >> hasKeyBones[i];
 
 		// считать все кости
-		float3 rootOffset;
+		vec3 rootOffset;
 		for(int i = 0; i < bonesCount; ++i)
 		{
 			// считать мировую ориентацию кости

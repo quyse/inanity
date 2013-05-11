@@ -8,7 +8,7 @@ BEGIN_INANITY_SHADERS
 
 template <typename ValueType>
 Interpolant<ValueType>::Interpolant(int semantic)
-: LValue<ValueType>(NEW(TransformedNode(GetDataType<ValueType>(), semantic)))
+: LValue<ValueType>(NEW(TransformedNode(DataTypeOf<ValueType>(), semantic)))
 {}
 
 template <typename ValueType>

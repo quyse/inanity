@@ -438,37 +438,37 @@ ptr<AttributeBinding> GlDevice::CreateAttributeBinding(ptr<AttributeLayout> layo
 			GLenum type;
 			switch(element.dataType)
 			{
-			case DataTypes::Float:
+			case DataTypes::_float:
 				size = 1;
 				type = GL_FLOAT;
 				break;
-			case DataTypes::Float2:
+			case DataTypes::_vec2:
 				size = 2;
 				type = GL_FLOAT;
 				break;
-			case DataTypes::Float3:
+			case DataTypes::_vec3:
 				size = 3;
 				type = GL_FLOAT;
 				break;
-			case DataTypes::Float4:
+			case DataTypes::_vec4:
 				size = 4;
 				type = GL_FLOAT;
 				break;
-			case DataTypes::Float4x4:
+			case DataTypes::_mat4x4:
 				THROW_PRIMARY_EXCEPTION("Matrices can't be used in attributes");
-			case DataTypes::UInt:
+			case DataTypes::_uint:
 				size = 1;
 				type = GL_UNSIGNED_INT;
 				break;
-			case DataTypes::UInt2:
+			case DataTypes::_uvec2:
 				size = 2;
 				type = GL_UNSIGNED_INT;
 				break;
-			case DataTypes::UInt3:
+			case DataTypes::_uvec3:
 				size = 3;
 				type = GL_UNSIGNED_INT;
 				break;
-			case DataTypes::UInt4:
+			case DataTypes::_uvec4:
 				size = 4;
 				type = GL_UNSIGNED_INT;
 				break;

@@ -24,10 +24,10 @@ public:
 	/// Указать, куда персонаж идёт.
 	/** Требуется указывать это каждый кадр симуляции.
 	Персонаж идёт туда, взаимодействуя с физическим миром. */
-	virtual void Walk(const float3& movement) = 0;
+	virtual void Walk(const vec3& movement) = 0;
 
 	/// Получить трансформацию персонажа.
-	virtual float4x4 GetTransform() const = 0;
+	virtual mat4x4 GetTransform() const = 0;
 };
 
 END_INANITY_PHYSICS

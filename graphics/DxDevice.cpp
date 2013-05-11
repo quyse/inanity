@@ -262,11 +262,11 @@ ptr<UniformBuffer> DxDevice::CreateUniformBuffer(int size)
 {
 	try
 	{
-		// округлить размер вверх, чтобы он был кратен sizeof(float4)
+		// округлить размер вверх, чтобы он был кратен sizeof(vec4)
 		// кроме того, если размер 0, то сделать не 0
 		int ceiledSize = size;
 		if(!ceiledSize) ceiledSize = 1;
-		ceiledSize = (ceiledSize + sizeof(float4) - 1) & ~(sizeof(float4) - 1);
+		ceiledSize = (ceiledSize + sizeof(vec4) - 1) & ~(sizeof(vec4) - 1);
 
 		D3D11_BUFFER_DESC desc;
 		desc.ByteWidth = ceiledSize;
