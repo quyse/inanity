@@ -19,13 +19,13 @@ inline btVector3 toBt(const vec3& a)
 inline btMatrix3x3 toBt(const mat3x3& a)
 {
 	return btMatrix3x3(
-		a(0, 0), a(0, 1), a(0, 2),
-		a(1, 0), a(1, 1), a(1, 2),
-		a(2, 0), a(2, 1), a(2, 2));
+		a(0, 0), a(1, 0), a(2, 0),
+		a(0, 1), a(1, 1), a(2, 1),
+		a(0, 2), a(1, 2), a(2, 2));
 }
 inline btTransform toBt(const mat4x4& a)
 {
-	return btTransform(toBt(submat<float, 3, 3>(a)), btVector3(a(3, 0), a(3, 1), a(3, 2)));
+	return btTransform(toBt(submat<float, 3, 3>(a)), btVector3(a(0, 3), a(1, 3), a(2, 3)));
 }
 
 inline vec3 fromBt(const btVector3& a)
@@ -37,7 +37,7 @@ inline mat3x3 fromBt(const btMatrix3x3& a)
 	mat3x3 r;
 	for(int i = 0; i < 3; ++i)
 		for(int j = 0; j < 3; ++j)
-			r(i, j) = a[i][j];
+			r(j, i) = a[i][j];
 	return r;
 }
 inline mat4x4 fromBt(const btTransform& a)
@@ -47,13 +47,13 @@ inline mat4x4 fromBt(const btTransform& a)
 	for(int i = 0; i < 3; ++i)
 	{
 		for(int j = 0; j < 3; ++j)
-			r(i, j) = basis[i][j];
-		r(i, 3) = 0;
+			r(j, i) = basis[i][j];
+		r(3, i) = 0;
 	}
 	const btVector3& origin = a.getOrigin();
-	r(3, 0) = origin.x();
-	r(3, 1) = origin.y();
-	r(3, 2) = origin.z();
+	r(0, 3) = origin.x();
+	r(1, 3) = origin.y();
+	r(2, 3) = origin.z();
 	r(3, 3) = 1;
 	return r;
 }

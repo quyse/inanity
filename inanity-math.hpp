@@ -3,7 +3,6 @@
 
 #include "math/basic.hpp"
 #include "math/geometry.hpp"
-#include "math/quaternion.hpp"
 #include "math/eigen.hpp"
 
 #endif

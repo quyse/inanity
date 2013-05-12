@@ -504,6 +504,10 @@ typedef xmat<unsigned int, 4, 2> umat4x2;
 typedef xmat<unsigned int, 4, 3> umat4x3;
 typedef xmat<unsigned int, 4, 4> umat4x4;
 
+//*** quaternion
+typedef vec4 quat;
+typedef dvec4 dquat;
+
 END_INANITY_MATH
 
 #endif
