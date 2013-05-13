@@ -101,15 +101,15 @@ var libraries = {
 		]
 	},
 	// ******* подсистема DirectX 11
-	'libinanity-dx': {
+	'libinanity-dx11': {
 		objects: [
-			'graphics.DxSystem', 'graphics.DxDevice', 'graphics.DxPresenter', 'graphics.DxContext',
-			'graphics.DxRenderBuffer', 'graphics.DxDepthStencilBuffer', 'graphics.DxTexture', 'graphics.DxUniformBuffer',
-			'graphics.DxVertexBuffer', 'graphics.DxIndexBuffer', 'graphics.DxAttributeBinding',
-			'graphics.DxVertexShader', 'graphics.DxPixelShader',
-			'graphics.DxCompiledShader', 'graphics.DxShaderResources',
-			'graphics.DxSamplerState', 'graphics.DxBlendState',
-			'graphics.D3D10BlobFile', 'graphics.DxShaderCompiler', 'graphics.HlslSource'
+			'graphics.Dx11System', 'graphics.Dx11Device', 'graphics.Dx11Presenter', 'graphics.Dx11Context',
+			'graphics.Dx11RenderBuffer', 'graphics.Dx11DepthStencilBuffer', 'graphics.Dx11Texture', 'graphics.Dx11UniformBuffer',
+			'graphics.Dx11VertexBuffer', 'graphics.Dx11IndexBuffer', 'graphics.Dx11AttributeBinding',
+			'graphics.Dx11VertexShader', 'graphics.Dx11PixelShader',
+			'graphics.Dx11CompiledShader', 'graphics.Dx11ShaderResources',
+			'graphics.Dx11SamplerState', 'graphics.Dx11BlendState',
+			'graphics.D3D10BlobFile', 'graphics.Dx11ShaderCompiler', 'graphics.Hlsl11Source'
 		]
 	},
 	// ******* подсистема OpenGl
@@ -135,7 +135,7 @@ var libraries = {
 			'graphics.shaders.TransformedNode', 'graphics.shaders.RasterizedNode',
 			'graphics.shaders.TempNode', 'graphics.shaders.CastNode',
 			'graphics.shaders.Expression', 'graphics.shaders.Sampler',
-			'graphics.shaders.HlslGenerator', 'graphics.shaders.HlslGeneratorInstance',
+			'graphics.shaders.Hlsl11Generator', 'graphics.shaders.Hlsl11GeneratorInstance',
 			'graphics.shaders.GlslGenerator', 'graphics.shaders.GlslGeneratorInstance'
 		]
 	},
