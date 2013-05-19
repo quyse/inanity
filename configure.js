@@ -109,7 +109,8 @@ var libraries = {
 			'graphics.Dx11VertexShader', 'graphics.Dx11PixelShader',
 			'graphics.Dx11CompiledShader', 'graphics.Dx11ShaderResources',
 			'graphics.Dx11SamplerState', 'graphics.Dx11BlendState',
-			'graphics.D3D10BlobFile', 'graphics.Dx11ShaderCompiler', 'graphics.Hlsl11Source'
+			'graphics.D3D10BlobFile', 'graphics.Dx11ShaderCompiler', 'graphics.Hlsl11Source',
+			'graphics.DxgiAdapter', 'graphics.DxgiMonitor', 'graphics.DxgiMonitorMode'
 		]
 	},
 	// ******* подсистема OpenGl

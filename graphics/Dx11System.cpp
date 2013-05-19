@@ -3,6 +3,7 @@
 #include "Dx11Context.hpp"
 #include "Dx11ShaderCompiler.hpp"
 #include "shaders/Hlsl11Generator.hpp"
+#include "DxgiAdapter.hpp"
 #include "../Win32Window.hpp"
 #include "../Exception.hpp"
 
@@ -68,6 +69,37 @@ String Dx11System::GetSemanticString(int semantic)
 		semantic /= 26;
 	}
 	return name;
+}
+
+Dx11System::Dx11System() : adaptersInitialized(false) {}
+
+const std::vector<ptr<Adapter> >& Dx11System::GetAdapters()
+{
+	if(!adaptersInitialized)
+		try
+		{
+			IDXGIFactory* factory = GetDXGIFactory();
+
+			for(UINT i = 0; ; ++i)
+			{
+				IDXGIAdapter* adapterInterface;
+				HRESULT hr = factory->EnumAdapters(i, &adapterInterface);
+				if(SUCCEEDED(hr))
+					adapters.push_back(NEW(DxgiAdapter(adapterInterface)));
+				else if(hr == DXGI_ERROR_NOT_FOUND)
+					break;
+				else
+					THROW_PRIMARY_EXCEPTION("Error enumerating adapters");
+			}
+
+			adaptersInitialized = true;
+		}
+		catch(Exception* exception)
+		{
+			THROW_SECONDARY_EXCEPTION("Can't get adapters of DirectX 11 system", exception);
+		}
+
+	return adapters;
 }
 
 ptr<Window> Dx11System::CreateDefaultWindow()

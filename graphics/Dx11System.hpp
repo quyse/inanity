@@ -16,6 +16,9 @@ class Dx11System : public System
 private:
 	/// Фабрика объектов DXGI.
 	ComPointer<IDXGIFactory> dxgiFactory;
+	/// Адаптеры DXGI.
+	std::vector<ptr<Adapter> > adapters;
+	bool adaptersInitialized;
 
 public:
 	/// Преобразовать формат пикселей из общего перечисления в DXGI.
@@ -25,7 +28,10 @@ public:
 	/// Преобразовать номер сематники атрибута в строку.
 	static String GetSemanticString(int semantic);
 
+	Dx11System();
+
 	// методы System
+	const std::vector<ptr<Adapter> >& GetAdapters();
 	ptr<Window> CreateDefaultWindow();
 	ptr<Device> CreatePrimaryDevice();
 	ptr<ShaderCompiler> CreateShaderCompiler();
