@@ -11,6 +11,11 @@ int VertexBuffer::GetVerticesCount() const
 	return verticesCount;
 }
 
+int VertexBuffer::GetSize() const
+{
+	return verticesCount * layout->GetStride();
+}
+
 ptr<VertexLayout> VertexBuffer::GetLayout() const
 {
 	return layout;

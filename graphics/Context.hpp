@@ -51,7 +51,9 @@ public:
 	/* Непосредственные методы. */
 	/// Указать данные для uniform-буфера.
 	/** Размер передаваемых данных должен совпадать с размером буфера. */
-	virtual void SetUniformBufferData(UniformBuffer* buffer, const void* data, size_t size) = 0;
+	virtual void SetUniformBufferData(UniformBuffer* buffer, const void* data, int size) = 0;
+	/// Указать данные для динамического вершинного буфера.
+	virtual void SetVertexBufferData(VertexBuffer* buffer, const void* data, int size) = 0;
 
 	//******* Методы рисования.
 	/* Непосредственные методы. Кроме того, могут выполнять ранее отложенные действия по привязке данных. */

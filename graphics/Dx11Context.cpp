@@ -464,25 +464,36 @@ void Dx11Context::ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer
 		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, stencil);
 }
 
-void Dx11Context::SetUniformBufferData(UniformBuffer* abstractUniformBuffer, const void* data, size_t size)
+void Dx11Context::SetBufferData(ID3D11Resource* resource, const void* data, int size, int bufferSize)
 {
 	// проверить, что размер не больше, чем нужно
-	if(size > abstractUniformBuffer->GetSize())
-		THROW_PRIMARY_EXCEPTION("Data size to set into uniform buffer is too big");
-
-	Dx11UniformBuffer* uniformBuffer = fast_cast<Dx11UniformBuffer*>(abstractUniformBuffer);
+	if(size > bufferSize)
+		THROW_PRIMARY_EXCEPTION("Size of data to set into DX11 buffer is too big");
 
 	//спроецировать буфер
 	D3D11_MAPPED_SUBRESOURCE bufferData;
-	ID3D11Resource* resource = uniformBuffer->GetBufferInterface();
 	if(FAILED(deviceContext->Map(resource, 0, D3D11_MAP_WRITE_DISCARD, 0, &bufferData)))
-		THROW_PRIMARY_EXCEPTION("Can't map graphics buffer");
+		THROW_PRIMARY_EXCEPTION("Can't map DX11 buffer");
 
 	//скопировать данные
 	memcpy(bufferData.pData, data, size);
 
 	//отключить проекцию буфера
 	deviceContext->Unmap(resource, 0);
+}
+
+void Dx11Context::SetUniformBufferData(UniformBuffer* abstractUniformBuffer, const void* data, int size)
+{
+	Dx11UniformBuffer* uniformBuffer = fast_cast<Dx11UniformBuffer*>(abstractUniformBuffer);
+
+	SetBufferData(uniformBuffer->GetBufferInterface(), data, size, uniformBuffer->GetSize());
+}
+
+void Dx11Context::SetVertexBufferData(VertexBuffer* abstractVertexBuffer, const void* data, int size)
+{
+	Dx11VertexBuffer* vertexBuffer = fast_cast<Dx11VertexBuffer*>(abstractVertexBuffer);
+
+	SetBufferData(vertexBuffer->GetBufferInterface(), data, size, vertexBuffer->GetSize());
 }
 
 void Dx11Context::Draw()

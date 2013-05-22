@@ -531,25 +531,37 @@ void GlContext::ClearDepthStencilBuffer(DepthStencilBuffer* abstractDepthStencil
 	GlSystem::CheckErrors("Can't clear depth and stencil");
 }
 
-void GlContext::SetUniformBufferData(UniformBuffer* abstractUniformBuffer, const void* data, size_t size)
+void GlContext::SetBufferData(GLenum target, GLuint bufferName, const void* data, int size, int bufferSize)
 {
-	GlUniformBuffer* uniformBuffer = fast_cast<GlUniformBuffer*>(&*abstractUniformBuffer);
-
 	// проверить, что размер правильный
-	if(size > uniformBuffer->GetSize())
-		THROW_PRIMARY_EXCEPTION("Uniform buffer data size too big");
+	if(size > bufferSize)
+		THROW_PRIMARY_EXCEPTION("Size of data to set into OpenGL buffer is too big");
 
 	// http://www.opengl.org/wiki/GLAPI/glBindBuffer
 	// Сказано, что такая привязка не снимает буферы, привязанные
 	// через glBindBufferBase. Верим, но надо проверить.
-	glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer->GetName());
-	void* bufferData = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-	GlSystem::CheckErrors("Can't map uniform buffer");
+	glBindBuffer(target, bufferName);
+	void* bufferData = glMapBuffer(target, GL_WRITE_ONLY);
+	GlSystem::CheckErrors("Can't map OpenGL buffer");
 
 	memcpy(bufferData, data, size);
 
-	glUnmapBuffer(GL_UNIFORM_BUFFER);
-	GlSystem::CheckErrors("Can't unmap uniform buffer");
+	glUnmapBuffer(target);
+	GlSystem::CheckErrors("Can't unmap OpenGL buffer");
+}
+
+void GlContext::SetUniformBufferData(UniformBuffer* abstractUniformBuffer, const void* data, int size)
+{
+	GlUniformBuffer* uniformBuffer = fast_cast<GlUniformBuffer*>(&*abstractUniformBuffer);
+
+	SetBufferData(GL_UNIFORM_BUFFER, uniformBuffer->GetName(), data, size, uniformBuffer->GetSize());
+}
+
+void GlContext::SetVertexBufferData(VertexBuffer* abstractVertexBuffer, const void* data, int size)
+{
+	GlVertexBuffer* vertexBuffer = fast_cast<GlVertexBuffer*>(&*abstractVertexBuffer);
+
+	SetBufferData(GL_ARRAY_BUFFER, vertexBuffer->GetName(), data, size, vertexBuffer->GetSize());
 }
 
 void GlContext::Draw()

@@ -67,6 +67,7 @@ public:
 	ptr<PixelShader> CreatePixelShader(ptr<File> file);
 	ptr<UniformBuffer> CreateUniformBuffer(int size);
 	ptr<VertexBuffer> CreateStaticVertexBuffer(ptr<File> file, ptr<VertexLayout> layout);
+	ptr<VertexBuffer> CreateDynamicVertexBuffer(int size, ptr<VertexLayout> layout);
 	ptr<IndexBuffer> CreateStaticIndexBuffer(ptr<File> file, int indexSize);
 	ptr<AttributeBinding> CreateAttributeBinding(ptr<AttributeLayout> layout);
 	ptr<Texture> CreateStaticTexture(ptr<File> file);

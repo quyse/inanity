@@ -19,6 +19,7 @@ protected:
 
 public:
 	int GetVerticesCount() const;
+	int GetSize() const;
 
 	ptr<VertexLayout> GetLayout() const;
 };

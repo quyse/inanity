@@ -395,7 +395,30 @@ ptr<VertexBuffer> GlDevice::CreateStaticVertexBuffer(ptr<File> file, ptr<VertexL
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create vertex buffer", exception);
+		THROW_SECONDARY_EXCEPTION("Can't create OpenGL static vertex buffer", exception);
+	}
+}
+
+ptr<VertexBuffer> GlDevice::CreateDynamicVertexBuffer(int size, ptr<VertexLayout> layout)
+{
+	try
+	{
+		GLuint bufferName;
+		glGenBuffers(1, &bufferName);
+		GlSystem::CheckErrors("Can't gen buffer");
+		ptr<GlVertexBuffer> vertexBuffer = NEW(GlVertexBuffer(bufferName, size / layout->GetStride(), layout));
+
+		glBindBuffer(GL_ARRAY_BUFFER, bufferName);
+		GlSystem::CheckErrors("Can't bind buffer");
+
+		glBufferData(GL_ARRAY_BUFFER, size, 0, GL_DYNAMIC_DRAW);
+		GlSystem::CheckErrors("Can't setup buffer data");
+
+		return vertexBuffer;
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create OpenGL dynamic vertex buffer", exception);
 	}
 }
 
