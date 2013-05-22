@@ -2,6 +2,7 @@
 #define ___INANITY_GRAPHICS_GL_DEVICE_HPP___
 
 #include "Device.hpp"
+#include "DataType.hpp"
 #include "opengl.hpp"
 #include "../String.hpp"
 
@@ -43,6 +44,7 @@ private:
 
 	/// Скомпилировать шейдер.
 	static void CompileShader(GLuint shaderName, ptr<File> file, ptr<GlShaderBindings>& shaderBindings);
+	static void GetAttributeSizeAndType(DataType dataType, GLint& size, GLenum& type);
 
 public:
 

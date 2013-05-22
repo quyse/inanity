@@ -20,6 +20,9 @@ private:
 	/// Текущий фреймбуфер.
 	GLuint boundFramebuffer;
 
+	/// Количество используемых атрибутов.
+	int boundAttributesCount;
+
 	/// Кэш программ.
 	ptr<GlInternalProgramCache> programCache;
 	/// Текущая программа.
