@@ -44,7 +44,7 @@ private:
 
 	/// Скомпилировать шейдер.
 	static void CompileShader(GLuint shaderName, ptr<File> file, ptr<GlShaderBindings>& shaderBindings);
-	static void GetAttributeSizeAndType(DataType dataType, GLint& size, GLenum& type);
+	static void GetAttributeSizeAndType(DataType dataType, GLint& size, GLenum& type, bool& integer);
 
 public:
 

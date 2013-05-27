@@ -445,43 +445,51 @@ ptr<IndexBuffer> GlDevice::CreateStaticIndexBuffer(ptr<File> file, int indexSize
 	}
 }
 
-void GlDevice::GetAttributeSizeAndType(DataType dataType, GLint& size, GLenum& type)
+void GlDevice::GetAttributeSizeAndType(DataType dataType, GLint& size, GLenum& type, bool& integer)
 {
 	switch(dataType)
 	{
 	case DataTypes::_float:
 		size = 1;
 		type = GL_FLOAT;
+		integer = false;
 		break;
 	case DataTypes::_vec2:
 		size = 2;
 		type = GL_FLOAT;
+		integer = false;
 		break;
 	case DataTypes::_vec3:
 		size = 3;
 		type = GL_FLOAT;
+		integer = false;
 		break;
 	case DataTypes::_vec4:
 		size = 4;
 		type = GL_FLOAT;
+		integer = false;
 		break;
 	case DataTypes::_mat4x4:
 		THROW_PRIMARY_EXCEPTION("Matrices can't be used in attributes");
 	case DataTypes::_uint:
 		size = 1;
 		type = GL_UNSIGNED_INT;
+		integer = true;
 		break;
 	case DataTypes::_uvec2:
 		size = 2;
 		type = GL_UNSIGNED_INT;
+		integer = true;
 		break;
 	case DataTypes::_uvec3:
 		size = 3;
 		type = GL_UNSIGNED_INT;
+		integer = true;
 		break;
 	case DataTypes::_uvec4:
 		size = 4;
 		type = GL_UNSIGNED_INT;
+		integer = true;
 		break;
 	default:
 		THROW_PRIMARY_EXCEPTION("Unknown attribute element type");
@@ -523,9 +531,13 @@ ptr<AttributeBinding> GlDevice::CreateAttributeBinding(ptr<AttributeLayout> layo
 				// выбрать формат и размер
 				GLint size;
 				GLenum type;
-				GetAttributeSizeAndType(element.dataType, size, type);
+				bool integer;
+				GetAttributeSizeAndType(element.dataType, size, type, integer);
 
-				glVertexAttribFormat((GLuint)i, size, type, false, element.offset);
+				if(integer)
+					glVertexAttribIFormat((GLuint)i, size, type, element.offset);
+				else
+					glVertexAttribFormat((GLuint)i, size, type, false, element.offset);
 				GlSystem::CheckErrors("Can't set vertex attribute format");
 
 				// указать слот для элемента
@@ -571,7 +583,7 @@ ptr<AttributeBinding> GlDevice::CreateAttributeBinding(ptr<AttributeLayout> layo
 
 				GlAttributeBinding::Element bindingElement;
 				bindingElement.index = (GLuint)i;
-				GetAttributeSizeAndType(element.dataType, bindingElement.size, bindingElement.type);
+				GetAttributeSizeAndType(element.dataType, bindingElement.size, bindingElement.type, bindingElement.integer);
 				bindingElement.normalized = false;
 				bindingElement.pointer = (GLvoid*)element.offset;
 

@@ -22,6 +22,7 @@ public:
 		GLenum type;
 		GLboolean normalized;
 		const GLvoid* pointer;
+		bool integer;
 	};
 	typedef std::vector<Element> Elements;
 	/// Слот ручной разметки.

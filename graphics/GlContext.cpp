@@ -231,7 +231,10 @@ void GlContext::Update()
 						{
 							const GlAttributeBinding::Element& element = elements[j];
 							glEnableVertexAttribArray(element.index);
-							glVertexAttribPointer(element.index, element.size, element.type, element.normalized, stride, element.pointer);
+							if(element.integer)
+								glVertexAttribIPointer(element.index, element.size, element.type, stride, element.pointer);
+							else
+								glVertexAttribPointer(element.index, element.size, element.type, element.normalized, stride, element.pointer);
 							glVertexAttribDivisor(element.index, slots[i].divisor);
 							if((int)element.index > maxUsedElement)
 								maxUsedElement = element.index;
