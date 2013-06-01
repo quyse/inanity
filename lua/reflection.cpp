@@ -1,4 +1,4 @@
-#include "reflection.hpp"
+#include "reflection.ipp"
 
 BEGIN_INANITY_LUA
 

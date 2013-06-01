@@ -1,10 +1,10 @@
 #ifndef ___INANITY_LUA_SCRIPTING_IMPL_HPP___
 #define ___INANITY_LUA_SCRIPTING_IMPL_HPP___
 
-#include "reflection.hpp"
-#include "callable.hpp"
-#include "thunks.hpp"
-#include "values.hpp"
+#include "reflection.ipp"
+#include "callable.ipp"
+#include "thunks.ipp"
+#include "values.ipp"
 
 // Добавить в файл реализации.
 // Начало карты методов.

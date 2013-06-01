@@ -1,4 +1,4 @@
-#include "Script.hpp"
+#include "Script.ipp"
 
 BEGIN_INANITY_LUA
 

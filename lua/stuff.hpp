@@ -3,7 +3,7 @@
 
 #include "lua.hpp"
 #include "lualib.hpp"
-#include "reflection_decl.hpp"
+#include "reflection.hpp"
 
 BEGIN_INANITY
 
