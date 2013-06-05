@@ -16,6 +16,7 @@
 #endif
 
 #include "graphics/graphics.hpp"
+#include "graphics/Adapter.hpp"
 #include "graphics/AttributeBinding.hpp"
 #include "graphics/AttributeLayout.hpp"
 #include "graphics/AttributeLayoutElement.hpp"
@@ -36,6 +37,8 @@
 #include "graphics/Image2DData.hpp"
 #include "graphics/ImageLoader.hpp"
 #include "graphics/IndexBuffer.hpp"
+#include "graphics/Monitor.hpp"
+#include "graphics/MonitorMode.hpp"
 #include "graphics/Output.hpp"
 #include "graphics/PixelFormat.hpp"
 #include "graphics/PixelShader.hpp"

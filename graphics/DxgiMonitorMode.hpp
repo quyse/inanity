@@ -11,6 +11,7 @@ class DxgiMonitorMode : public MonitorMode
 {
 private:
 	DXGI_MODE_DESC desc;
+	String name;
 
 public:
 	DxgiMonitorMode(const DXGI_MODE_DESC& desc);
@@ -19,6 +20,7 @@ public:
 	int GetWidth() const;
 	int GetHeight() const;
 	float GetRefreshRate() const;
+	String GetName() const;
 
 	const DXGI_MODE_DESC& GetDesc() const;
 };

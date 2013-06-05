@@ -2,6 +2,7 @@
 #define ___INANITY_GRAPHICS_MONITOR_MODE_HPP___
 
 #include "graphics.hpp"
+#include "../String.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
@@ -12,6 +13,7 @@ public:
 	virtual int GetWidth() const = 0;
 	virtual int GetHeight() const = 0;
 	virtual float GetRefreshRate() const = 0;
+	virtual String GetName() const = 0;
 };
 
 END_INANITY_GRAPHICS
