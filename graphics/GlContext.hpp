@@ -20,6 +20,9 @@ private:
 	/// Текущий фреймбуфер.
 	GLuint boundFramebuffer;
 
+	/// Количество используемых атрибутов.
+	int boundAttributesCount;
+
 	/// Кэш программ.
 	ptr<GlInternalProgramCache> programCache;
 	/// Текущая программа.
@@ -38,6 +41,8 @@ private:
 	/// Получить пустой рендербуфер нужных размеров.
 	ptr<GlRenderBuffer> GetDummyRenderBuffer(int width, int height);
 
+	void SetBufferData(GLenum target, GLuint bufferName, const void* data, int size, int bufferSize);
+
 public:
 	GlContext();
 	~GlContext();
@@ -49,7 +54,8 @@ public:
 	void ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, unsigned stencil);
 	void ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, float depth, unsigned stencil);
 
-	void SetUniformBufferData(UniformBuffer* buffer, const void* data, size_t size);
+	void SetUniformBufferData(UniformBuffer* buffer, const void* data, int size);
+	void SetVertexBufferData(VertexBuffer* buffer, const void* data, int size);
 
 	void Draw();
 	void DrawInstanced(int instancesCount);

@@ -309,7 +309,31 @@ ptr<VertexBuffer> Dx11Device::CreateStaticVertexBuffer(ptr<File> file, ptr<Verte
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create vertex buffer", exception);
+		THROW_SECONDARY_EXCEPTION("Can't create DirectX 11 static vertex buffer", exception);
+	}
+}
+
+ptr<VertexBuffer> Dx11Device::CreateDynamicVertexBuffer(int size, ptr<VertexLayout> layout)
+{
+	try
+	{
+		D3D11_BUFFER_DESC desc;
+		desc.ByteWidth = (UINT)size;
+		desc.Usage = D3D11_USAGE_DYNAMIC;
+		desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		desc.MiscFlags = 0;
+		desc.StructureByteStride = 0;
+
+		ID3D11Buffer* vertexBufferInterface;
+		if(FAILED(device->CreateBuffer(&desc, NULL, &vertexBufferInterface)))
+			THROW_PRIMARY_EXCEPTION("Can't create vertex buffer");
+
+		return NEW(Dx11VertexBuffer(vertexBufferInterface, size / layout->GetStride(), layout));
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create DirectX 11 dynamic vertex buffer", exception);
 	}
 }
 

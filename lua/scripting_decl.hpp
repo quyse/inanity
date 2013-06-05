@@ -1,7 +1,7 @@
 #ifndef ___INANITY_LUA_SCRIPTING_DECL_HPP___
 #define ___INANITY_LUA_SCRIPTING_DECL_HPP___
 
-#include "reflection_decl.hpp"
+#include "reflection.hpp"
 
 // Добавить в определение класса, который может быть представлен в скрипте.
 #define SCRIPTABLE_CLASS(className) \

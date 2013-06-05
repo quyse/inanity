@@ -71,6 +71,8 @@ public:
 	virtual ptr<UniformBuffer> CreateUniformBuffer(int size) = 0;
 	/// Создать статический вершинный буфер.
 	virtual ptr<VertexBuffer> CreateStaticVertexBuffer(ptr<File> file, ptr<VertexLayout> layout) = 0;
+	/// Создать динамический вершинный буфер.
+	virtual ptr<VertexBuffer> CreateDynamicVertexBuffer(int size, ptr<VertexLayout> layout) = 0;
 	/// Создать статический индексный буфер.
 	/**
 	\param indexSize Размер одного индекса - 2 или 4.

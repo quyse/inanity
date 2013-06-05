@@ -27,7 +27,7 @@ BEGIN_INANITY_GRAPHICS
 всё равно всё ясно, что привязано.
 */
 
-GlContext::GlContext() : targetFramebuffer(0), boundFramebuffer(0)
+GlContext::GlContext() : targetFramebuffer(0), boundFramebuffer(0), boundAttributesCount(0)
 {
 	programCache = NEW(GlInternalProgramCache());
 }
@@ -171,31 +171,93 @@ void GlContext::Update()
 		boundState.pixelShader = targetState.pixelShader;
 	}
 
-	// привязка атрибутов
-	if(forceReset || targetState.attributeBinding != boundState.attributeBinding)
+	// если вершинные буферы поддерживаются, используем их
+	if(GLEW_ARB_vertex_attrib_binding)
 	{
-		glBindVertexArray(fast_cast<GlAttributeBinding*>(&*targetState.attributeBinding)->GetVertexArrayName());
-		GlSystem::CheckErrors("Can't bind attribute binding");
-
-		boundState.attributeBinding = targetState.attributeBinding;
-	}
-
-	// вершинные буферы
-	for(int i = 0; i < ContextState::vertexBufferSlotsCount; ++i)
-		if(forceReset || targetState.vertexBuffers[i] != boundState.vertexBuffers[i])
+		// привязка атрибутов
+		if(forceReset || targetState.attributeBinding != boundState.attributeBinding)
 		{
-			VertexBuffer* abstractVertexBuffer = targetState.vertexBuffers[i];
-			if(abstractVertexBuffer)
-			{
-				GlVertexBuffer* vertexBuffer = fast_cast<GlVertexBuffer*>(abstractVertexBuffer);
-				glBindVertexBuffer((GLuint)i, vertexBuffer->GetName(), 0, vertexBuffer->GetLayout()->GetStride());
-			}
-			else
-				glBindVertexBuffer((GLuint)i, 0, 0, 0);
-			GlSystem::CheckErrors("Can't bind vertex buffer");
+			glBindVertexArray(fast_cast<GlAttributeBinding*>(&*targetState.attributeBinding)->GetVertexArrayName());
+			GlSystem::CheckErrors("Can't bind attribute binding");
 
-			boundState.vertexBuffers[i] = targetState.vertexBuffers[i];
+			boundState.attributeBinding = targetState.attributeBinding;
 		}
+
+		// вершинные буферы
+		for(int i = 0; i < ContextState::vertexBufferSlotsCount; ++i)
+			if(forceReset || targetState.vertexBuffers[i] != boundState.vertexBuffers[i])
+			{
+				VertexBuffer* abstractVertexBuffer = targetState.vertexBuffers[i];
+				if(abstractVertexBuffer)
+				{
+					GlVertexBuffer* vertexBuffer = fast_cast<GlVertexBuffer*>(abstractVertexBuffer);
+					glBindVertexBuffer((GLuint)i, vertexBuffer->GetName(), 0, vertexBuffer->GetLayout()->GetStride());
+				}
+				else
+					glBindVertexBuffer((GLuint)i, 0, 0, 0);
+				GlSystem::CheckErrors("Can't bind vertex buffer");
+
+				boundState.vertexBuffers[i] = targetState.vertexBuffers[i];
+			}
+	}
+	// иначе выполняем привязку "вручную"
+	else
+	{
+		GlAttributeBinding* attributeBinding = fast_cast<GlAttributeBinding*>(&*targetState.attributeBinding);
+		// если привязка атрибутов изменилась, перепривязываем все слоты
+		// а если только вершинные буферы изменились, можно перепривязать
+		// только изменившиеся слоты
+		bool rebindAllSlots = forceReset || targetState.attributeBinding != boundState.attributeBinding;
+
+		const GlAttributeBinding::Slots& slots = attributeBinding->GetSlots();
+
+		int maxUsedElement = 0;
+
+		for(int i = 0; i < ContextState::vertexBufferSlotsCount; ++i)
+			if(rebindAllSlots || targetState.vertexBuffers[i] != boundState.vertexBuffers[i])
+			{
+				if(i < (int)slots.size())
+				{
+					VertexBuffer* abstractVertexBuffer = targetState.vertexBuffers[i];
+					if(abstractVertexBuffer)
+					{
+						GlVertexBuffer* vertexBuffer = fast_cast<GlVertexBuffer*>(abstractVertexBuffer);
+						glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->GetName());
+
+						int stride = vertexBuffer->GetLayout()->GetStride();
+
+						const GlAttributeBinding::Elements& elements = slots[i].elements;
+						for(int j = 0; j < (int)elements.size(); ++j)
+						{
+							const GlAttributeBinding::Element& element = elements[j];
+							glEnableVertexAttribArray(element.index);
+							if(element.integer)
+								glVertexAttribIPointer(element.index, element.size, element.type, stride, element.pointer);
+							else
+								glVertexAttribPointer(element.index, element.size, element.type, element.normalized, stride, element.pointer);
+							glVertexAttribDivisor(element.index, slots[i].divisor);
+							if((int)element.index > maxUsedElement)
+								maxUsedElement = element.index;
+						}
+
+						GlSystem::CheckErrors("Can't bind vertex buffer");
+					}
+				}
+
+				boundState.vertexBuffers[i] = targetState.vertexBuffers[i];
+			}
+
+		// если привязка менялась, отключить неиспользуемые атрибуты
+		if(rebindAllSlots)
+		{
+			for(int i = maxUsedElement + 1; i < boundAttributesCount; ++i)
+				glDisableVertexAttribArray(i);
+			boundAttributesCount = maxUsedElement + 1;
+			GlSystem::CheckErrors("Can't disable unused attributes");
+
+			boundState.attributeBinding = targetState.attributeBinding;
+		}
+	}
 
 	// индексный буфер
 	if(forceReset || targetState.indexBuffer != boundState.indexBuffer)
@@ -472,25 +534,37 @@ void GlContext::ClearDepthStencilBuffer(DepthStencilBuffer* abstractDepthStencil
 	GlSystem::CheckErrors("Can't clear depth and stencil");
 }
 
-void GlContext::SetUniformBufferData(UniformBuffer* abstractUniformBuffer, const void* data, size_t size)
+void GlContext::SetBufferData(GLenum target, GLuint bufferName, const void* data, int size, int bufferSize)
 {
-	GlUniformBuffer* uniformBuffer = fast_cast<GlUniformBuffer*>(&*abstractUniformBuffer);
-
 	// проверить, что размер правильный
-	if(size > uniformBuffer->GetSize())
-		THROW_PRIMARY_EXCEPTION("Uniform buffer data size too big");
+	if(size > bufferSize)
+		THROW_PRIMARY_EXCEPTION("Size of data to set into OpenGL buffer is too big");
 
 	// http://www.opengl.org/wiki/GLAPI/glBindBuffer
 	// Сказано, что такая привязка не снимает буферы, привязанные
 	// через glBindBufferBase. Верим, но надо проверить.
-	glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer->GetName());
-	void* bufferData = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-	GlSystem::CheckErrors("Can't map uniform buffer");
+	glBindBuffer(target, bufferName);
+	void* bufferData = glMapBuffer(target, GL_WRITE_ONLY);
+	GlSystem::CheckErrors("Can't map OpenGL buffer");
 
 	memcpy(bufferData, data, size);
 
-	glUnmapBuffer(GL_UNIFORM_BUFFER);
-	GlSystem::CheckErrors("Can't unmap uniform buffer");
+	glUnmapBuffer(target);
+	GlSystem::CheckErrors("Can't unmap OpenGL buffer");
+}
+
+void GlContext::SetUniformBufferData(UniformBuffer* abstractUniformBuffer, const void* data, int size)
+{
+	GlUniformBuffer* uniformBuffer = fast_cast<GlUniformBuffer*>(&*abstractUniformBuffer);
+
+	SetBufferData(GL_UNIFORM_BUFFER, uniformBuffer->GetName(), data, size, uniformBuffer->GetSize());
+}
+
+void GlContext::SetVertexBufferData(VertexBuffer* abstractVertexBuffer, const void* data, int size)
+{
+	GlVertexBuffer* vertexBuffer = fast_cast<GlVertexBuffer*>(&*abstractVertexBuffer);
+
+	SetBufferData(GL_ARRAY_BUFFER, vertexBuffer->GetName(), data, size, vertexBuffer->GetSize());
 }
 
 void GlContext::Draw()

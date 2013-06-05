@@ -58,6 +58,9 @@ private:
 	/// Выполнить обновление в API всех "грязных" состояний.
 	void Update();
 
+	/// Указать данные буфера.
+	void SetBufferData(ID3D11Resource* resource, const void* data, int size, int bufferSize);
+
 public:
 	Dx11Context(ComPointer<ID3D11Device> device, ComPointer<ID3D11DeviceContext> deviceContext);
 
@@ -68,7 +71,8 @@ public:
 	void ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, unsigned stencil);
 	void ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, float depth, unsigned stencil);
 
-	void SetUniformBufferData(UniformBuffer* buffer, const void* data, size_t size);
+	void SetUniformBufferData(UniformBuffer* buffer, const void* data, int size);
+	void SetVertexBufferData(VertexBuffer* buffer, const void* data, int size);
 
 	void Draw();
 	void DrawInstanced(int instancesCount);

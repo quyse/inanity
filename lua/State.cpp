@@ -1,5 +1,5 @@
 #include "State.hpp"
-#include "Script.hpp"
+#include "Script.ipp"
 #include "../File.hpp"
 #include "../Exception.hpp"
 #include <cstdlib>

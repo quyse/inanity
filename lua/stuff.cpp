@@ -1,6 +1,6 @@
 #include "stuff.hpp"
-#include "reflection.hpp"
-#include "values.hpp"
+#include "reflection.ipp"
+#include "values.ipp"
 #include "../Exception.hpp"
 #include <sstream>
 

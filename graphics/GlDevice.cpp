@@ -113,8 +113,8 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, const Prese
 		// создать настоящий контекст
 		int attribs[] =
 		{
-			WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
-			WGL_CONTEXT_MINOR_VERSION_ARB, 3,
+			WGL_CONTEXT_MAJOR_VERSION_ARB, 0,
+			WGL_CONTEXT_MINOR_VERSION_ARB, 0,
 			WGL_CONTEXT_FLAGS_ARB, 0
 #ifdef _DEBUG
 				| WGL_CONTEXT_DEBUG_BIT_ARB
@@ -123,14 +123,33 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, const Prese
 			WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
 			0, 0
 		};
+		// версии для попыток создания
+		static const int versions[][2] =
+		{
+			{ 4, 3 },
+			{ 4, 2 },
+			{ 4, 1 },
+			{ 4, 0 },
+			{ 3, 3 },
+			{ 3, 2 }
+		};
 		PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
 		if(!wglCreateContextAttribsARB)
 			THROW_PRIMARY_EXCEPTION("Can't get wglCreateContextAttribsARB");
-		hglrc = wglCreateContextAttribsARB(hdc, 0, attribs);
+		// цикл по попыткам создать контекст для какой-нибудь версии
+		for(int i = 0; i < sizeof(versions) / sizeof(versions[0]); ++i)
+		{
+			attribs[1] = versions[i][0];
+			attribs[3] = versions[i][1];
+			hglrc = wglCreateContextAttribsARB(hdc, 0, attribs);
+			if(hglrc)
+				break;
+		}
+		// если никакая версия OpenGL не поддерживается, то жопа
 		if(!hglrc)
 			THROW_PRIMARY_EXCEPTION("Can't create OpenGL window context");
 
-		// сделать его текущим
+		// сделать новый контекст текущим
 		if(!wglMakeCurrent(hdc, hglrc))
 			THROW_SECONDARY_EXCEPTION("Can't make OpenGL context current", Exception::SystemError());
 
@@ -376,7 +395,30 @@ ptr<VertexBuffer> GlDevice::CreateStaticVertexBuffer(ptr<File> file, ptr<VertexL
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create vertex buffer", exception);
+		THROW_SECONDARY_EXCEPTION("Can't create OpenGL static vertex buffer", exception);
+	}
+}
+
+ptr<VertexBuffer> GlDevice::CreateDynamicVertexBuffer(int size, ptr<VertexLayout> layout)
+{
+	try
+	{
+		GLuint bufferName;
+		glGenBuffers(1, &bufferName);
+		GlSystem::CheckErrors("Can't gen buffer");
+		ptr<GlVertexBuffer> vertexBuffer = NEW(GlVertexBuffer(bufferName, size / layout->GetStride(), layout));
+
+		glBindBuffer(GL_ARRAY_BUFFER, bufferName);
+		GlSystem::CheckErrors("Can't bind buffer");
+
+		glBufferData(GL_ARRAY_BUFFER, size, 0, GL_DYNAMIC_DRAW);
+		GlSystem::CheckErrors("Can't setup buffer data");
+
+		return vertexBuffer;
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create OpenGL dynamic vertex buffer", exception);
 	}
 }
 
@@ -403,98 +445,154 @@ ptr<IndexBuffer> GlDevice::CreateStaticIndexBuffer(ptr<File> file, int indexSize
 	}
 }
 
+void GlDevice::GetAttributeSizeAndType(DataType dataType, GLint& size, GLenum& type, bool& integer)
+{
+	switch(dataType)
+	{
+	case DataTypes::_float:
+		size = 1;
+		type = GL_FLOAT;
+		integer = false;
+		break;
+	case DataTypes::_vec2:
+		size = 2;
+		type = GL_FLOAT;
+		integer = false;
+		break;
+	case DataTypes::_vec3:
+		size = 3;
+		type = GL_FLOAT;
+		integer = false;
+		break;
+	case DataTypes::_vec4:
+		size = 4;
+		type = GL_FLOAT;
+		integer = false;
+		break;
+	case DataTypes::_mat4x4:
+		THROW_PRIMARY_EXCEPTION("Matrices can't be used in attributes");
+	case DataTypes::_uint:
+		size = 1;
+		type = GL_UNSIGNED_INT;
+		integer = true;
+		break;
+	case DataTypes::_uvec2:
+		size = 2;
+		type = GL_UNSIGNED_INT;
+		integer = true;
+		break;
+	case DataTypes::_uvec3:
+		size = 3;
+		type = GL_UNSIGNED_INT;
+		integer = true;
+		break;
+	case DataTypes::_uvec4:
+		size = 4;
+		type = GL_UNSIGNED_INT;
+		integer = true;
+		break;
+	default:
+		THROW_PRIMARY_EXCEPTION("Unknown attribute element type");
+	}
+}
+
 ptr<AttributeBinding> GlDevice::CreateAttributeBinding(ptr<AttributeLayout> layout)
 {
 	try
 	{
-		// создать Vertex Array Object
-		GLuint vertexArrayName;
-		glGenVertexArrays(1, &vertexArrayName);
-		GlSystem::CheckErrors("Can't gen vertex array");
-
-		// сразу создать привязку
-		ptr<AttributeBinding> binding = NEW(GlAttributeBinding(this, vertexArrayName));
-
-		// задать все настройки для VAO
-
-		// привязать VAO
-		glBindVertexArray(vertexArrayName);
-		GlSystem::CheckErrors("Can't bind vertex array");
-
-		const AttributeLayout::Elements& elements = layout->GetElements();
-		const AttributeLayout::Slots& slots = layout->GetSlots();
-
-		// задать элементы в VAO
-		for(size_t i = 0; i < elements.size(); ++i)
+		// если поддерживается vertex bindings, используем их как более оптимальный метод
+		if(GLEW_ARB_vertex_attrib_binding)
 		{
-			const AttributeLayout::Element& element = elements[i];
-			const AttributeLayout::Slot& slot = slots[i];
+			// создать Vertex Array Object
+			GLuint vertexArrayName;
+			glGenVertexArrays(1, &vertexArrayName);
+			GlSystem::CheckErrors("Can't gen vertex array");
 
-			glEnableVertexAttribArray((GLuint)i);
-			GlSystem::CheckErrors("Can't enable vertex attribute array");
+			// сразу создать привязку
+			ptr<AttributeBinding> binding = NEW(GlAttributeBinding(vertexArrayName));
 
-			// выбрать формат и размер
-			GLint size;
-			GLenum type;
-			switch(element.dataType)
+			// задать все настройки для VAO
+
+			// привязать VAO
+			glBindVertexArray(vertexArrayName);
+			GlSystem::CheckErrors("Can't bind vertex array");
+
+			const AttributeLayout::Elements& elements = layout->GetElements();
+			const AttributeLayout::Slots& slots = layout->GetSlots();
+
+			// задать элементы в VAO
+			for(size_t i = 0; i < elements.size(); ++i)
 			{
-			case DataTypes::_float:
-				size = 1;
-				type = GL_FLOAT;
-				break;
-			case DataTypes::_vec2:
-				size = 2;
-				type = GL_FLOAT;
-				break;
-			case DataTypes::_vec3:
-				size = 3;
-				type = GL_FLOAT;
-				break;
-			case DataTypes::_vec4:
-				size = 4;
-				type = GL_FLOAT;
-				break;
-			case DataTypes::_mat4x4:
-				THROW_PRIMARY_EXCEPTION("Matrices can't be used in attributes");
-			case DataTypes::_uint:
-				size = 1;
-				type = GL_UNSIGNED_INT;
-				break;
-			case DataTypes::_uvec2:
-				size = 2;
-				type = GL_UNSIGNED_INT;
-				break;
-			case DataTypes::_uvec3:
-				size = 3;
-				type = GL_UNSIGNED_INT;
-				break;
-			case DataTypes::_uvec4:
-				size = 4;
-				type = GL_UNSIGNED_INT;
-				break;
-			default:
-				THROW_PRIMARY_EXCEPTION("Unknown attribute element type");
+				const AttributeLayout::Element& element = elements[i];
+
+				glEnableVertexAttribArray((GLuint)i);
+				GlSystem::CheckErrors("Can't enable vertex attribute array");
+
+				// выбрать формат и размер
+				GLint size;
+				GLenum type;
+				bool integer;
+				GetAttributeSizeAndType(element.dataType, size, type, integer);
+
+				if(integer)
+					glVertexAttribIFormat((GLuint)i, size, type, element.offset);
+				else
+					glVertexAttribFormat((GLuint)i, size, type, false, element.offset);
+				GlSystem::CheckErrors("Can't set vertex attribute format");
+
+				// указать слот для элемента
+				glVertexAttribBinding((GLuint)i, element.slot);
 			}
-			glVertexAttribFormat((GLuint)i, size, type, false, element.offset);
-			GlSystem::CheckErrors("Can't set vertex attribute format");
 
-			// указать слот для элемента
-			glVertexAttribBinding((GLuint)i, element.slot);
+			// задать разделители для слотов
+			for(size_t i = 0; i < slots.size(); ++i)
+			{
+				glVertexBindingDivisor((GLuint)i, slots[i].divisor);
+				GlSystem::CheckErrors("Can't set vertex binding divisor");
+			}
+
+			// отвязать VAO
+			glBindVertexArray(0);
+			GlSystem::CheckErrors("Can't unbind vertex array");
+
+			// вернуть привязку
+			return binding;
 		}
-
-		// задать разделители для слотов
-		for(size_t i = 0; i < slots.size(); ++i)
+		// иначе использовать "ручную" привязку
+		else
 		{
-			glVertexBindingDivisor((GLuint)i, slots[i].divisor);
-			GlSystem::CheckErrors("Can't set vertex binding divisor");
+			// создать привязку
+			ptr<GlAttributeBinding> binding = NEW(GlAttributeBinding(0));
+
+			const AttributeLayout::Elements& elements = layout->GetElements();
+			const AttributeLayout::Slots& slots = layout->GetSlots();
+
+			GlAttributeBinding::Slots& bindingSlots = binding->GetSlots();
+
+			// задать слоты
+			bindingSlots.resize(slots.size());
+			for(size_t i = 0; i < slots.size(); ++i)
+				bindingSlots[i].divisor = slots[i].divisor;
+
+			// задать элементы
+			for(size_t i = 0; i < elements.size(); ++i)
+			{
+				const AttributeLayout::Element& element = elements[i];
+
+				GlAttributeBinding::Slot& bindingSlot = bindingSlots[element.slot];
+
+				GlAttributeBinding::Element bindingElement;
+				bindingElement.index = (GLuint)i;
+				GetAttributeSizeAndType(element.dataType, bindingElement.size, bindingElement.type, bindingElement.integer);
+				bindingElement.normalized = false;
+				bindingElement.pointer = (GLvoid*)element.offset;
+
+				bindingSlot.elements.push_back(bindingElement);
+			}
+
+			// вернуть привязку
+			return binding;
 		}
-
-		// отвязать VAO
-		glBindVertexArray(0);
-		GlSystem::CheckErrors("Can't unbind vertex array");
-
-		// вернуть привязку
-		return binding;
 	}
 	catch(Exception* exception)
 	{
