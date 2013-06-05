@@ -1,5 +1,5 @@
-#ifndef ___INANITY_LUA_THUNKS_IPP___
-#define ___INANITY_LUA_THUNKS_IPP___
+#ifndef ___INANITY_SCRIPT_LUA_THUNKS_IPP___
+#define ___INANITY_SCRIPT_LUA_THUNKS_IPP___
 
 #include "thunks.hpp"
 #include "callable.hpp"

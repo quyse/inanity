@@ -1,5 +1,5 @@
-#ifndef ___INANITY_LUA_SCRIPTING_DECL_HPP___
-#define ___INANITY_LUA_SCRIPTING_DECL_HPP___
+#ifndef ___INANITY_SCRIPT_LUA_SCRIPTING_DECL_HPP___
+#define ___INANITY_SCRIPT_LUA_SCRIPTING_DECL_HPP___
 
 #include "reflection.hpp"
 

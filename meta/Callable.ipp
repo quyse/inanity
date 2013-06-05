@@ -1,9 +1,10 @@
-#ifndef ___INANITY_CALLABLE_IPP___
-#define ___INANITY_CALLABLE_IPP___
+#ifndef ___INANITY_META_CALLABLE_IPP___
+#define ___INANITY_META_CALLABLE_IPP___
 
-#include "callable.hpp"
+#include "Callable.hpp"
+#include "Tuple.hpp"
 
-BEGIN_INANITY_LUA
+BEGIN_INANITY_META
 
 //******* Callable для функций
 
@@ -23,17 +24,17 @@ struct Callable<R (*)()>
 {
 	enum { isMethod = 0 };
 	typedef R (*CalleeType)();
-	typedef void Args;
+	typedef VoidTuple Args;
 	typedef R ReturnType;
 	template <CalleeType callee>
-	static inline R Call(TypesVoid& args) { return callee(); }
+	static inline R Call(VoidTuple& args) { return callee(); }
 };
 template <typename R, typename A1>
 struct Callable<R (*)(A1)>
 {
 	enum { isMethod = 0 };
 	typedef R (*CalleeType)(A1);
-	typedef Types<A1, void> Args;
+	typedef Tuple<A1, VoidTuple> Args;
 	typedef R ReturnType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return callee(a1); }
@@ -43,7 +44,7 @@ struct Callable<R (*)(A1, A2)>
 {
 	enum { isMethod = 0 };
 	typedef R (*CalleeType)(A1, A2);
-	typedef Types<A1, Types<A2, void> > Args;
+	typedef Tuple<A1, Tuple<A2, VoidTuple> > Args;
 	typedef R ReturnType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return callee(a1, a2); }
@@ -53,7 +54,7 @@ struct Callable<R (*)(A1, A2, A3)>
 {
 	enum { isMethod = 0 };
 	typedef R (*CalleeType)(A1, A2, A3);
-	typedef Types<A1, Types<A2, Types<A3, void> > > Args;
+	typedef Tuple<A1, Tuple<A2, Tuple<A3, VoidTuple> > > Args;
 	typedef R ReturnType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return callee(a1, a2, a3); }
@@ -63,7 +64,7 @@ struct Callable<R (*)(A1, A2, A3, A4)>
 {
 	enum { isMethod = 0 };
 	typedef R (*CalleeType)(A1, A2, A3, A4);
-	typedef Types<A1, Types<A2, Types<A3, Types<A4, void> > > > Args;
+	typedef Tuple<A1, Tuple<A2, Tuple<A3, Tuple<A4, VoidTuple> > > > Args;
 	typedef R ReturnType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return callee(a1, a2, a3, a4); }
@@ -73,7 +74,7 @@ struct Callable<R (*)(A1, A2, A3, A4, A5)>
 {
 	enum { isMethod = 0 };
 	typedef R (*CalleeType)(A1, A2, A3, A4, A5);
-	typedef Types<A1, Types<A2, Types<A3, Types<A4, Types<A5, void> > > > > Args;
+	typedef Tuple<A1, Tuple<A2, Tuple<A3, Tuple<A4, Tuple<A5, VoidTuple> > > > > Args;
 	typedef R ReturnType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return callee(a1, a2, a3, a4, a5); }
@@ -83,7 +84,7 @@ struct Callable<R (*)(A1, A2, A3, A4, A5, A6)>
 {
 	enum { isMethod = 0 };
 	typedef R (*CalleeType)(A1, A2, A3, A4, A5, A6);
-	typedef Types<A1, Types<A2, Types<A3, Types<A4, Types<A5, Types<A6, void> > > > > > Args;
+	typedef Tuple<A1, Tuple<A2, Tuple<A3, Tuple<A4, Tuple<A5, Tuple<A6, VoidTuple> > > > > > Args;
 	typedef R ReturnType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return callee(a1, a2, a3, a4, a5, a6); }
@@ -93,7 +94,7 @@ struct Callable<R (*)(A1, A2, A3, A4, A5, A6, A7)>
 {
 	enum { isMethod = 0 };
 	typedef R (*CalleeType)(A1, A2, A3, A4, A5, A6, A7);
-	typedef Types<A1, Types<A2, Types<A3, Types<A4, Types<A5, Types<A6, Types<A7, void> > > > > > > Args;
+	typedef Tuple<A1, Tuple<A2, Tuple<A3, Tuple<A4, Tuple<A5, Tuple<A6, Tuple<A7, VoidTuple> > > > > > > Args;
 	typedef R ReturnType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return callee(a1, a2, a3, a4, a5, a6, a7); }
@@ -103,7 +104,7 @@ struct Callable<R (*)(A1, A2, A3, A4, A5, A6, A7, A8)>
 {
 	enum { isMethod = 0 };
 	typedef R (*CalleeType)(A1, A2, A3, A4, A5, A6, A7, A8);
-	typedef Types<A1, Types<A2, Types<A3, Types<A4, Types<A5, Types<A6, Types<A7, Types<A8, void> > > > > > > > Args;
+	typedef Tuple<A1, Tuple<A2, Tuple<A3, Tuple<A4, Tuple<A5, Tuple<A6, Tuple<A7, Tuple<A8, VoidTuple> > > > > > > > Args;
 	typedef R ReturnType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return callee(a1, a2, a3, a4, a5, a6, a7, a8); }
@@ -116,8 +117,9 @@ struct Callable<R (C::*)()>
 {
 	enum { isMethod = 1 };
 	typedef R (C::*CalleeType)();
-	typedef Types<ptr<C>, void> Args;
+	typedef Tuple<ptr<C>, VoidTuple> Args;
 	typedef R ReturnType;
+	typedef C ClassType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return b1(); }
 };
@@ -126,8 +128,9 @@ struct Callable<R (C::*)(A1)>
 {
 	enum { isMethod = 1 };
 	typedef R (C::*CalleeType)(A1);
-	typedef Types<ptr<C>, Types<A1, void> > Args;
+	typedef Tuple<ptr<C>, Tuple<A1, VoidTuple> > Args;
 	typedef R ReturnType;
+	typedef C ClassType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return b1(a2); }
 };
@@ -136,8 +139,9 @@ struct Callable<R (C::*)(A1, A2)>
 {
 	enum { isMethod = 1 };
 	typedef R (C::*CalleeType)(A1, A2);
-	typedef Types<ptr<C>, Types<A1, Types<A2, void> > > Args;
+	typedef Tuple<ptr<C>, Tuple<A1, Tuple<A2, VoidTuple> > > Args;
 	typedef R ReturnType;
+	typedef C ClassType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return b1(a2, a3); }
 };
@@ -146,8 +150,9 @@ struct Callable<R (C::*)(A1, A2, A3)>
 {
 	enum { isMethod = 1 };
 	typedef R (C::*CalleeType)(A1, A2, A3);
-	typedef Types<ptr<C>, Types<A1, Types<A2, Types<A3, void> > > > Args;
+	typedef Tuple<ptr<C>, Tuple<A1, Tuple<A2, Tuple<A3, VoidTuple> > > > Args;
 	typedef R ReturnType;
+	typedef C ClassType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return b1(a2, a3, a4); }
 };
@@ -156,8 +161,9 @@ struct Callable<R (C::*)(A1, A2, A3, A4)>
 {
 	enum { isMethod = 1 };
 	typedef R (C::*CalleeType)(A1, A2, A3, A4);
-	typedef Types<ptr<C>, Types<A1, Types<A2, Types<A3, Types<A4, void> > > > > Args;
+	typedef Tuple<ptr<C>, Tuple<A1, Tuple<A2, Tuple<A3, Tuple<A4, VoidTuple> > > > > Args;
 	typedef R ReturnType;
+	typedef C ClassType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return b1(a2, a3, a4, a5); }
 };
@@ -166,8 +172,9 @@ struct Callable<R (C::*)(A1, A2, A3, A4, A5)>
 {
 	enum { isMethod = 1 };
 	typedef R (C::*CalleeType)(A1, A2, A3, A4, A5);
-	typedef Types<ptr<C>, Types<A1, Types<A2, Types<A3, Types<A4, Types<A5, void> > > > > > Args;
+	typedef Tuple<ptr<C>, Tuple<A1, Tuple<A2, Tuple<A3, Tuple<A4, Tuple<A5, VoidTuple> > > > > > Args;
 	typedef R ReturnType;
+	typedef C ClassType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return b1(a2, a3, a4, a5, a6); }
 };
@@ -176,8 +183,9 @@ struct Callable<R (C::*)(A1, A2, A3, A4, A5, A6)>
 {
 	enum { isMethod = 1 };
 	typedef R (C::*CalleeType)(A1, A2, A3, A4, A5, A6);
-	typedef Types<ptr<C>, Types<A1, Types<A2, Types<A3, Types<A4, Types<A5, Types<A6, void> > > > > > > Args;
+	typedef Tuple<ptr<C>, Tuple<A1, Tuple<A2, Tuple<A3, Tuple<A4, Tuple<A5, Tuple<A6, VoidTuple> > > > > > > Args;
 	typedef R ReturnType;
+	typedef C ClassType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return b1(a2, a3, a4, a5, a6, a7); }
 };
@@ -186,8 +194,9 @@ struct Callable<R (C::*)(A1, A2, A3, A4, A5, A6, A7)>
 {
 	enum { isMethod = 1 };
 	typedef R (C::*CalleeType)(A1, A2, A3, A4, A5, A6, A7);
-	typedef Types<ptr<C>, Types<A1, Types<A2, Types<A3, Types<A4, Types<A5, Types<A6, Types<A7, void> > > > > > > > Args;
+	typedef Tuple<ptr<C>, Tuple<A1, Tuple<A2, Tuple<A3, Tuple<A4, Tuple<A5, Tuple<A6, Tuple<A7, VoidTuple> > > > > > > > Args;
 	typedef R ReturnType;
+	typedef C ClassType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return b1(a2, a3, a4, a5, a6, a7, a8); }
 };
@@ -196,8 +205,9 @@ struct Callable<R (C::*)(A1, A2, A3, A4, A5, A6, A7, A8)>
 {
 	enum { isMethod = 1 };
 	typedef R (C::*CalleeType)(A1, A2, A3, A4, A5, A6, A7, A8);
-	typedef Types<ptr<C>, Types<A1, Types<A2, Types<A3, Types<A4, Types<A5, Types<A6, Types<A7, Types<A8, void> > > > > > > > > Args;
+	typedef Tuple<ptr<C>, Tuple<A1, Tuple<A2, Tuple<A3, Tuple<A4, Tuple<A5, Tuple<A6, Tuple<A7, Tuple<A8, VoidTuple> > > > > > > > > Args;
 	typedef R ReturnType;
+	typedef C ClassType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return b1(a2, a3, a4, a5, a6, a7, a8, a9); }
 };
@@ -209,8 +219,9 @@ struct Callable<R (C::*)() const>
 {
 	enum { isMethod = 1 };
 	typedef R (C::* CalleeType)() const;
-	typedef Types<ptr<C>, void> Args;
+	typedef Tuple<ptr<C>, VoidTuple> Args;
 	typedef R ReturnType;
+	typedef C ClassType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return b1(); }
 };
@@ -219,8 +230,9 @@ struct Callable<R (C::*)(A1) const>
 {
 	enum { isMethod = 1 };
 	typedef R (C::* CalleeType)(A1) const;
-	typedef Types<ptr<C>, Types<A1, void> > Args;
+	typedef Tuple<ptr<C>, Tuple<A1, VoidTuple> > Args;
 	typedef R ReturnType;
+	typedef C ClassType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return b1(a2); }
 };
@@ -229,8 +241,9 @@ struct Callable<R (C::*)(A1, A2) const>
 {
 	enum { isMethod = 1 };
 	typedef R (C::* CalleeType)(A1, A2) const;
-	typedef Types<ptr<C>, Types<A1, Types<A2, void> > > Args;
+	typedef Tuple<ptr<C>, Tuple<A1, Tuple<A2, VoidTuple> > > Args;
 	typedef R ReturnType;
+	typedef C ClassType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return b1(a2, a3); }
 };
@@ -239,8 +252,9 @@ struct Callable<R (C::*)(A1, A2, A3) const>
 {
 	enum { isMethod = 1 };
 	typedef R (C::* CalleeType)(A1, A2, A3) const;
-	typedef Types<ptr<C>, Types<A1, Types<A2, Types<A3, void> > > > Args;
+	typedef Tuple<ptr<C>, Tuple<A1, Tuple<A2, Tuple<A3, VoidTuple> > > > Args;
 	typedef R ReturnType;
+	typedef C ClassType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return b1(a2, a3, a4); }
 };
@@ -249,8 +263,9 @@ struct Callable<R (C::*)(A1, A2, A3, A4) const>
 {
 	enum { isMethod = 1 };
 	typedef R (C::* CalleeType)(A1, A2, A3, A4) const;
-	typedef Types<ptr<C>, Types<A1, Types<A2, Types<A3, Types<A4, void> > > > > Args;
+	typedef Tuple<ptr<C>, Tuple<A1, Tuple<A2, Tuple<A3, Tuple<A4, VoidTuple> > > > > Args;
 	typedef R ReturnType;
+	typedef C ClassType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return b1(a2, a3, a4, a5); }
 };
@@ -259,8 +274,9 @@ struct Callable<R (C::*)(A1, A2, A3, A4, A5) const>
 {
 	enum { isMethod = 1 };
 	typedef R (C::* CalleeType)(A1, A2, A3, A4, A5) const;
-	typedef Types<ptr<C>, Types<A1, Types<A2, Types<A3, Types<A4, Types<A5, void> > > > > > Args;
+	typedef Tuple<ptr<C>, Tuple<A1, Tuple<A2, Tuple<A3, Tuple<A4, Tuple<A5, VoidTuple> > > > > > Args;
 	typedef R ReturnType;
+	typedef C ClassType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return b1(a2, a3, a4, a5, a6); }
 };
@@ -269,8 +285,9 @@ struct Callable<R (C::*)(A1, A2, A3, A4, A5, A6) const>
 {
 	enum { isMethod = 1 };
 	typedef R (C::* CalleeType)(A1, A2, A3, A4, A5, A6) const;
-	typedef Types<ptr<C>, Types<A1, Types<A2, Types<A3, Types<A4, Types<A5, Types<A6, void> > > > > > > Args;
+	typedef Tuple<ptr<C>, Tuple<A1, Tuple<A2, Tuple<A3, Tuple<A4, Tuple<A5, Tuple<A6, VoidTuple> > > > > > > Args;
 	typedef R ReturnType;
+	typedef C ClassType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return b1(a2, a3, a4, a5, a6, a7); }
 };
@@ -279,8 +296,9 @@ struct Callable<R (C::*)(A1, A2, A3, A4, A5, A6, A7) const>
 {
 	enum { isMethod = 1 };
 	typedef R (C::* CalleeType)(A1, A2, A3, A4, A5, A6, A7) const;
-	typedef Types<ptr<C>, Types<A1, Types<A2, Types<A3, Types<A4, Types<A5, Types<A6, Types<A7, void> > > > > > > > Args;
+	typedef Tuple<ptr<C>, Tuple<A1, Tuple<A2, Tuple<A3, Tuple<A4, Tuple<A5, Tuple<A6, Tuple<A7, VoidTuple> > > > > > > > Args;
 	typedef R ReturnType;
+	typedef C ClassType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return b1(a2, a3, a4, a5, a6, a7, a8); }
 };
@@ -289,8 +307,9 @@ struct Callable<R (C::*)(A1, A2, A3, A4, A5, A6, A7, A8) const>
 {
 	enum { isMethod = 1 };
 	typedef R (C::* CalleeType)(A1, A2, A3, A4, A5, A6, A7, A8) const;
-	typedef Types<ptr<C>, Types<A1, Types<A2, Types<A3, Types<A4, Types<A5, Types<A6, Types<A7, Types<A8, void> > > > > > > > > Args;
+	typedef Tuple<ptr<C>, Tuple<A1, Tuple<A2, Tuple<A3, Tuple<A4, Tuple<A5, Tuple<A6, Tuple<A7, Tuple<A8, VoidTuple> > > > > > > > > Args;
 	typedef R ReturnType;
+	typedef C ClassType;
 	template <CalleeType callee>
 	static inline R Call(Args& args) { return b1(a2, a3, a4, a5, a6, a7, a8, a9); }
 };
@@ -302,17 +321,19 @@ struct CallableConstructor<void (C::*)()>
 {
 	enum { isMethod = 0 };
 	typedef void (C::*CalleeType)();
-	typedef void Args;
+	typedef VoidTuple Args;
 	typedef ptr<C> ReturnType;
-	static inline ptr<C> Call(TypesVoid& args) { return NEW(C()); }
+	typedef C ClassType;
+	static inline ptr<C> Call(VoidTuple& args) { return NEW(C()); }
 };
 template <typename C, typename A1>
 struct CallableConstructor<void (C::*)(A1)>
 {
 	enum { isMethod = 0 };
 	typedef void (C::*CalleeType)(A1);
-	typedef Types<A1, void> Args;
+	typedef Tuple<A1, VoidTuple> Args;
 	typedef ptr<C> ReturnType;
+	typedef C ClassType;
 	static inline ptr<C> Call(Args& args) { return NEW(C(a1)); }
 };
 template <typename C, typename A1, typename A2>
@@ -320,8 +341,9 @@ struct CallableConstructor<void (C::*)(A1, A2)>
 {
 	enum { isMethod = 0 };
 	typedef void (C::*CalleeType)(A1, A2);
-	typedef Types<A1, Types<A2, void> > Args;
+	typedef Tuple<A1, Tuple<A2, VoidTuple> > Args;
 	typedef ptr<C> ReturnType;
+	typedef C ClassType;
 	static inline ptr<C> Call(Args& args) { return NEW(C(a1, a2)); }
 };
 template <typename C, typename A1, typename A2, typename A3>
@@ -329,8 +351,9 @@ struct CallableConstructor<void (C::*)(A1, A2, A3)>
 {
 	enum { isMethod = 0 };
 	typedef void (C::*CalleeType)(A1, A2, A3);
-	typedef Types<A1, Types<A2, Types<A3, void> > > Args;
+	typedef Tuple<A1, Tuple<A2, Tuple<A3, VoidTuple> > > Args;
 	typedef ptr<C> ReturnType;
+	typedef C ClassType;
 	static inline ptr<C> Call(Args& args) { return NEW(C(a1, a2, a3)); }
 };
 template <typename C, typename A1, typename A2, typename A3, typename A4>
@@ -338,8 +361,9 @@ struct CallableConstructor<void (C::*)(A1, A2, A3, A4)>
 {
 	enum { isMethod = 0 };
 	typedef void (C::*CalleeType)(A1, A2, A3, A4);
-	typedef Types<A1, Types<A2, Types<A3, Types<A4, void> > > > Args;
+	typedef Tuple<A1, Tuple<A2, Tuple<A3, Tuple<A4, VoidTuple> > > > Args;
 	typedef ptr<C> ReturnType;
+	typedef C ClassType;
 	static inline ptr<C> Call(Args& args) { return NEW(C(a1, a2, a3, a4)); }
 };
 template <typename C, typename A1, typename A2, typename A3, typename A4, typename A5>
@@ -347,8 +371,9 @@ struct CallableConstructor<void (C::*)(A1, A2, A3, A4, A5)>
 {
 	enum { isMethod = 0 };
 	typedef void (C::*CalleeType)(A1, A2, A3, A4, A5);
-	typedef Types<A1, Types<A2, Types<A3, Types<A4, Types<A5, void> > > > > Args;
+	typedef Tuple<A1, Tuple<A2, Tuple<A3, Tuple<A4, Tuple<A5, VoidTuple> > > > > Args;
 	typedef ptr<C> ReturnType;
+	typedef C ClassType;
 	static inline ptr<C> Call(Args& args) { return NEW(C(a1, a2, a3, a4, a5)); }
 };
 template <typename C, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
@@ -356,8 +381,9 @@ struct CallableConstructor<void (C::*)(A1, A2, A3, A4, A5, A6)>
 {
 	enum { isMethod = 0 };
 	typedef void (C::*CalleeType)(A1, A2, A3, A4, A5, A6);
-	typedef Types<A1, Types<A2, Types<A3, Types<A4, Types<A5, Types<A6, void> > > > > > Args;
+	typedef Tuple<A1, Tuple<A2, Tuple<A3, Tuple<A4, Tuple<A5, Tuple<A6, VoidTuple> > > > > > Args;
 	typedef ptr<C> ReturnType;
+	typedef C ClassType;
 	static inline ptr<C> Call(Args& args) { return NEW(C(a1, a2, a3, a4, a5, a6)); }
 };
 template <typename C, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7>
@@ -365,8 +391,9 @@ struct CallableConstructor<void (C::*)(A1, A2, A3, A4, A5, A6, A7)>
 {
 	enum { isMethod = 0 };
 	typedef void (C::*CalleeType)(A1, A2, A3, A4, A5, A6, A7);
-	typedef Types<A1, Types<A2, Types<A3, Types<A4, Types<A5, Types<A6, Types<A7, void> > > > > > > Args;
+	typedef Tuple<A1, Tuple<A2, Tuple<A3, Tuple<A4, Tuple<A5, Tuple<A6, Tuple<A7, VoidTuple> > > > > > > Args;
 	typedef ptr<C> ReturnType;
+	typedef C ClassType;
 	static inline ptr<C> Call(Args& args) { return NEW(C(a1, a2, a3, a4, a5, a6, a7)); }
 };
 template <typename C, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8>
@@ -374,8 +401,9 @@ struct CallableConstructor<void (C::*)(A1, A2, A3, A4, A5, A6, A7, A8)>
 {
 	enum { isMethod = 0 };
 	typedef void (C::*CalleeType)(A1, A2, A3, A4, A5, A6, A7, A8);
-	typedef Types<A1, Types<A2, Types<A3, Types<A4, Types<A5, Types<A6, Types<A7, Types<A8, void> > > > > > > > Args;
+	typedef Tuple<A1, Tuple<A2, Tuple<A3, Tuple<A4, Tuple<A5, Tuple<A6, Tuple<A7, Tuple<A8, VoidTuple> > > > > > > > Args;
 	typedef ptr<C> ReturnType;
+	typedef C ClassType;
 	static inline ptr<C> Call(Args& args) { return NEW(C(a1, a2, a3, a4, a5, a6, a7, a8)); }
 };
 
@@ -390,6 +418,6 @@ struct CallableConstructor<void (C::*)(A1, A2, A3, A4, A5, A6, A7, A8)>
 #undef a9
 #undef b1
 
-END_INANITY_LUA
+END_INANITY_META
 
 #endif

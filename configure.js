@@ -66,6 +66,10 @@ var libraries = {
 	'libinanity-sqlitefs': {
 		objects: ['SQLiteFileSystem', 'deps.sqlite.sqlite3.c']
 	},
+	// ******* метаинформация
+	'libinanity-meta': {
+		objects: ['meta.Class', 'meta.Constructor', 'meta.Function', 'meta.Method']
+	},
 	// ******* скрипты на lua
 	'libinanity-lua': {
 		objects: ['lua.stuff', 'lua.reflection', 'lua.State', 'lua.Script']

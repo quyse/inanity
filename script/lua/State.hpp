@@ -1,5 +1,5 @@
-#ifndef ___INANITY_LUA_STATE_HPP___
-#define ___INANITY_LUA_STATE_HPP___
+#ifndef ___INANITY_SCRIPT_LUA_STATE_HPP___
+#define ___INANITY_SCRIPT_LUA_STATE_HPP___
 
 /* Файл содержит общие определения, используемые для поддержки Lua.
  */

@@ -1,5 +1,5 @@
-#ifndef ___INANITY_LUA_VALUES_IPP___
-#define ___INANITY_LUA_VALUES_IPP___
+#ifndef ___INANITY_SCRIPT_LUA_VALUES_IPP___
+#define ___INANITY_SCRIPT_LUA_VALUES_IPP___
 
 #include "values.hpp"
 #include "reflection.hpp"
