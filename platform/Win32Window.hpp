@@ -1,16 +1,16 @@
-#ifndef ___INANITY_WIN32_WINDOW_HPP___
-#define ___INANITY_WIN32_WINDOW_HPP___
+#ifndef ___INANITY_PLATFORM_WIN32_WINDOW_HPP___
+#define ___INANITY_PLATFORM_WIN32_WINDOW_HPP___
 
 #include "Window.hpp"
-#include "String.hpp"
-#include "Handler.hpp"
-#include "input/input.hpp"
+#include "../String.hpp"
+#include "../Handler.hpp"
+#include "../input/input.hpp"
 
 #ifndef ___INANITY_WINDOWS
 #error Win32Window is implemented only on Windows.
 #endif
 
-#include "windows.hpp"
+#include "../windows.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
@@ -24,7 +24,7 @@ class Win32Manager;
 
 END_INANITY_INPUT
 
-BEGIN_INANITY
+BEGIN_INANITY_PLATFORM
 
 class Win32Window : public Window
 {
@@ -37,6 +37,8 @@ private:
 	HWND hWnd;
 	/// Активность окна.
 	bool active;
+	/// Клиентские размеры окна.
+	int clientWidth, clientHeight;
 
 	/// Presenter для графики.
 	Graphics::Presenter* graphicsPresenter;
@@ -53,23 +55,29 @@ private:
 	bool Do(ActiveHandler* activeHandler);
 
 public:
-	Win32Window(ATOM windowClass, const String& title = String());
+	Win32Window(ATOM windowClass, const String& title,
+		int left = 0, int top = 0, int width = 1, int height = 1);
 	~Win32Window();
 
-	// методы Window
+	//*** методы Window
 	void SetTitle(const String& title);
 	void Close();
 	ptr<Graphics::Output> CreateOutput();
 
 	/// Создать окно для DirectX.
-	static ptr<Win32Window> CreateForDirectX();
+	static ptr<Win32Window> CreateForDirectX(const String& title,
+		int left, int top, int width, int height);
 	/// Создать окно для OpenGL.
-	static ptr<Win32Window> CreateForOpenGL();
+	static ptr<Win32Window> CreateForOpenGL(const String& title);
 
-	//получить окно
+	/// Получить хендл окна.
 	HWND GetHWND() const;
-	//получить активность окна
+	/// Получить активность окна.
 	bool IsActive() const;
+	/// Получить клиентскую ширину окна.
+	int GetClientWidth() const;
+	/// Получить клиентскую высоту окна.
+	int GetClientHeight() const;
 
 	/// Установить presenter для оповещений.
 	void SetGraphicsPresenter(Graphics::Presenter* graphicsPresenter);
@@ -80,6 +88,6 @@ public:
 	void Run(ptr<ActiveHandler> activeHandler);
 };
 
-END_INANITY
+END_INANITY_PLATFORM
 
 #endif

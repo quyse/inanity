@@ -1,5 +1,5 @@
-#ifndef ___INANITY_X11_WINDOW_HPP___
-#define ___INANITY_X11_WINDOW_HPP___
+#ifndef ___INANITY_PLATFORM_X11_WINDOW_HPP___
+#define ___INANITY_PLATFORM_X11_WINDOW_HPP___
 
 #include "Window.hpp"
 #include "x11.hpp"
@@ -8,7 +8,7 @@
 #error X11Window implemented only on Linux.
 #endif
 
-BEGIN_INANITY
+BEGIN_INANITY_PLATFORM
 
 class X11Display;
 
@@ -41,6 +41,6 @@ public:
 	static ptr<X11Window> CreateForOpenGL(ptr<X11Display> display);
 };
 
-END_INANITY
+END_INANITY_PLATFORM
 
 #endif

@@ -1,3 +1,7 @@
+//var config = require('config.js');
+
+//console.log(config);
+
 exports.configureCompiler = function(objectFile, compiler) {
 	// объектные файлы: <conf>/object
 	var a = /^([^\/]+)\/([^\/]+)$/.exec(objectFile);
@@ -79,8 +83,8 @@ var libraries = {
 		objects: ['input.Frame', 'input.Manager', 'input.Mux', 'input.Processor', 'input.Win32Manager', 'input.Win32RawManager']
 	},
 	// ******* подсистема окон Win32
-	'libinanity-win32window': {
-		objects: ['Win32Window', 'graphics.Win32Output']
+	'libinanity-platform': {
+		objects: ['platform.Desktop', 'platform.Win32Window', 'graphics.Win32Output']
 	},
 	// ******* подсистема окон X11
 	'libinanity-x11window' : {

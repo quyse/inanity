@@ -1,7 +1,7 @@
 #include "X11Display.hpp"
-#include "Exception.hpp"
+#include "../Exception.hpp"
 
-BEGIN_INANITY
+BEGIN_INANITY_PLATFORM
 
 X11Display::X11Display(Display* display) : display(display) {}
 
@@ -25,4 +25,4 @@ ptr<X11Display> X11Display::CreateDefault()
 	return NEW(X11Display(display));
 }
 
-END_INANITY
+END_INANITY_PLATFORM

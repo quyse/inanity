@@ -52,8 +52,4 @@
 #include "graphics/VertexLayoutElement.hpp"
 #include "graphics/VertexShader.hpp"
 
-#ifdef ___INANITY_WINDOWS
-#include "Win32Window.hpp"
-#endif
-
 #endif
