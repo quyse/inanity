@@ -2,12 +2,12 @@
 #define ___INANITY_GRAPHICS_PRESENTER_HPP___
 
 #include "graphics.hpp"
-#include "PresentMode.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
 class Device;
 class RenderBuffer;
+class MonitorMode;
 
 /// Абстрактный класс "представлятеля" графики на экран.
 class Presenter : public Object
@@ -20,7 +20,7 @@ public:
 	virtual ptr<RenderBuffer> GetBackBuffer() = 0;
 
 	/// Сменить режим экрана.
-	virtual void SetMode(const PresentMode& mode) = 0;
+	virtual void SetMode(ptr<MonitorMode> mode) = 0;
 
 	/// Отобразить очередной кадр.
 	/** Обычно, это переворот двойного буфера. */

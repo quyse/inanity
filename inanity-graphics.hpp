@@ -35,7 +35,6 @@
 #include "graphics/PixelShader.hpp"
 #include "graphics/PngImageLoader.hpp"
 #include "graphics/Presenter.hpp"
-#include "graphics/PresentMode.hpp"
 #include "graphics/RenderBuffer.hpp"
 #include "graphics/RenderStage.hpp"
 #include "graphics/SamplerState.hpp"

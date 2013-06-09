@@ -56,4 +56,32 @@ const std::vector<ptr<MonitorMode> >& DxgiMonitor::GetModes()
 	return modes;
 }
 
+ptr<MonitorMode> DxgiMonitor::TryCreateMode(int width, int height)
+{
+	try
+	{
+		DXGI_MODE_DESC desc;
+		desc.Width = width;
+		desc.Height = height;
+		desc.RefreshRate.Numerator = 0;
+		desc.RefreshRate.Denominator = 0;
+		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		desc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+		desc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+		DXGI_MODE_DESC closestDesc;
+		if(FAILED(output->FindClosestMatchingMode(&desc, &closestDesc, 0)))
+			return 0;
+		return NEW(DxgiMonitorMode(closestDesc));
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create DXGI mode", exception);
+	}
+}
+
+const DXGI_OUTPUT_DESC& DxgiMonitor::GetDesc() const
+{
+	return desc;
+}
+
 END_INANITY_GRAPHICS

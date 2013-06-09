@@ -2,7 +2,7 @@
 #define ___INANITY_GRAPHICS_DX11_PRESENTER_HPP___
 
 #include "Presenter.hpp"
-#include "PresentMode.hpp"
+#include "DxgiMonitorMode.hpp"
 #include "d3d11.hpp"
 #include "../ComPointer.hpp"
 
@@ -27,10 +27,8 @@ private:
 	ptr<Dx11RenderBuffer> backBuffer;
 
 	/// Текущий режим экрана.
-	PresentMode currentMode;
-
-	/// Привести указанный режим экрана к самому похожему, но поддерживаемому.
-	DXGI_MODE_DESC GetClosestSupportedMode(const DXGI_MODE_DESC& mode) const;
+	/** 0, если оконный. */
+	ptr<DxgiMonitorMode> currentMode;
 
 public:
 	/// Создать presenter.
@@ -41,7 +39,7 @@ public:
 	// методы Presenter
 	ptr<Device> GetDevice();
 	ptr<RenderBuffer> GetBackBuffer();
-	void SetMode(const PresentMode& mode);
+	void SetMode(ptr<MonitorMode> mode);
 	void Present();
 	void Resize(int width, int height);
 };

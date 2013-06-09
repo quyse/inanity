@@ -23,6 +23,8 @@ public:
 	String GetId() const;
 	String GetName() const;
 	const std::vector<ptr<Monitor> >& GetMonitors();
+
+	IDXGIAdapter* GetInterface() const;
 };
 
 END_INANITY_GRAPHICS

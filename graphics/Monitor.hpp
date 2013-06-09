@@ -19,6 +19,10 @@ public:
 	virtual String GetName() const = 0;
 	/// Получить режимы, поддерживаемые монитором.
 	virtual const std::vector<ptr<MonitorMode> >& GetModes() = 0;
+	/// Создать свой режим.
+	/** Монитор может подкорректировать его, чтобы он был поддерживаемым.
+	Может быть возвращён 0, если никак нельзя создать поддерживаемый режим. */
+	virtual ptr<MonitorMode> TryCreateMode(int width, int height) = 0;
 };
 
 END_INANITY_GRAPHICS

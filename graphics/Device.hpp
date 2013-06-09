@@ -15,6 +15,7 @@ BEGIN_INANITY_GRAPHICS
 class System;
 class Presenter;
 class Output;
+class MonitorMode;
 struct PresentMode;
 class Context;
 class RenderBuffer;
@@ -43,13 +44,8 @@ public:
 	virtual ptr<System> GetSystem() const = 0;
 
 	/// Создать выходное устройство.
-	/**
-	\param output Область вывода для рисования графики.
-	\param fullscreen Полноэкранный режим?
-	\param width Ширина окна или горизонтальное разрешение экрана.
-	\param height Высота окна или вертикальное разрешение экрана.
-	*/
-	virtual ptr<Presenter> CreatePresenter(ptr<Output> output, const PresentMode& mode) = 0;
+	/** \param mode Режим экрана, в случае, если режим должен быть полноэкранным. */
+	virtual ptr<Presenter> CreatePresenter(ptr<Output> output, ptr<MonitorMode> mode) = 0;
 
 	/// Получить графический контекст.
 	virtual ptr<Context> GetContext() = 0;

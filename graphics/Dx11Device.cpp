@@ -25,8 +25,8 @@
 
 BEGIN_INANITY_GRAPHICS
 
-Dx11Device::Dx11Device(ptr<Dx11System> system, ComPointer<IDXGIAdapter> adapter, ComPointer<ID3D11Device> device, ptr<Dx11Context> context)
-: system(system), adapter(adapter), device(device), context(context)
+Dx11Device::Dx11Device(ptr<Dx11System> system, ComPointer<ID3D11Device> device, ptr<Dx11Context> context)
+: system(system), device(device), context(context)
 {
 }
 
@@ -35,30 +35,7 @@ ptr<System> Dx11Device::GetSystem() const
 	return system;
 }
 
-DXGI_MODE_DESC Dx11Device::GetClosestSupportedMode(const DXGI_MODE_DESC& mode) const
-{
-	try
-	{
-		// получить output по умолчанию
-		IDXGIOutput* dxgiOutputInterface;
-		if(FAILED(adapter->EnumOutputs(0, &dxgiOutputInterface)))
-			THROW_PRIMARY_EXCEPTION("Can't get containing output for swap chain");
-
-		ComPointer<IDXGIOutput> dxgiOutput = dxgiOutputInterface;
-
-		DXGI_MODE_DESC closestMode;
-		if(FAILED(dxgiOutput->FindClosestMatchingMode(&mode, &closestMode, device)))
-			THROW_PRIMARY_EXCEPTION("Can't get closest matching mode");
-
-		return closestMode;
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY_EXCEPTION("Can't get closest supported mode", exception);
-	}
-}
-
-ptr<Presenter> Dx11Device::CreatePresenter(ptr<Output> abstractOutput, const PresentMode& mode)
+ptr<Presenter> Dx11Device::CreatePresenter(ptr<Output> abstractOutput, ptr<MonitorMode> abstractMode)
 {
 	try
 	{
@@ -66,18 +43,16 @@ ptr<Presenter> Dx11Device::CreatePresenter(ptr<Output> abstractOutput, const Pre
 		ptr<Win32Output> output = abstractOutput.DynamicCast<Win32Output>();
 		if(!output)
 			THROW_PRIMARY_EXCEPTION("Only Win32 output allowed");
+		// режим, если есть - только DXGI
+		ptr<DxgiMonitorMode> mode = abstractMode.DynamicCast<DxgiMonitorMode>();
+		if(!mode && abstractMode)
+			THROW_PRIMARY_EXCEPTION("Only DXGI monitor mode allowed");
 
 		// сформировать структуру настроек swap chain
 		DXGI_SWAP_CHAIN_DESC desc;
 		ZeroMemory(&desc, sizeof(desc));
 
-		// подзадача - сформировать структуру режима экрана
-		DXGI_MODE_DESC& modeDesc = desc.BufferDesc;
-		modeDesc = Dx11System::GetModeDesc(mode);
-		// если режим - полноэкранный, необходимо его скорректировать,
-		// то есть привести к поддерживаемому
-		if(mode.fullscreen)
-			modeDesc = GetClosestSupportedMode(modeDesc);
+		desc.BufferDesc = Dx11System::GetModeDesc(mode, output);
 
 		// мультисемплинга пока нет
 		desc.SampleDesc.Count = 1;

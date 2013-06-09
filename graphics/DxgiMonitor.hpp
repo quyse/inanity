@@ -23,6 +23,9 @@ public:
 	String GetId() const;
 	String GetName() const;
 	const std::vector<ptr<MonitorMode> >& GetModes();
+	ptr<MonitorMode> TryCreateMode(int width, int height);
+
+	const DXGI_OUTPUT_DESC& GetDesc() const;
 };
 
 END_INANITY_GRAPHICS

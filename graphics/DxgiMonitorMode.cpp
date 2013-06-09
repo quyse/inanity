@@ -8,8 +8,9 @@ DxgiMonitorMode::DxgiMonitorMode(const DXGI_MODE_DESC& desc)
 {
 	// generate a name of monitor mode
 	std::ostringstream stream;
+
 	// width, height
-	stream << GetWidth() << "x" << GetHeight();
+	stream << GetWidth() << 'x' << GetHeight();
 	// format
 	switch(desc.Format)
 	{
@@ -20,8 +21,10 @@ DxgiMonitorMode::DxgiMonitorMode(const DXGI_MODE_DESC& desc)
 		stream << ", 16 bit";
 		break;
 	}
+
 	// refresh rate
 	stream << ", " << GetRefreshRate() << " Hz";
+
 	// scanline ordering
 	switch(desc.ScanlineOrdering)
 	{
@@ -35,6 +38,7 @@ DxgiMonitorMode::DxgiMonitorMode(const DXGI_MODE_DESC& desc)
 		stream << ", interlaced lower-first";
 		break;
 	}
+
 	// scaling
 	switch(desc.Scaling)
 	{
@@ -45,6 +49,7 @@ DxgiMonitorMode::DxgiMonitorMode(const DXGI_MODE_DESC& desc)
 		stream << ", stretched";
 		break;
 	}
+
 	name = stream.str();
 }
 

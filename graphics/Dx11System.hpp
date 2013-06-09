@@ -3,12 +3,14 @@
 
 #include "System.hpp"
 #include "PixelFormat.hpp"
-#include "PresentMode.hpp"
 #include "d3d11.hpp"
 #include "../ComPointer.hpp"
 #include "../String.hpp"
 
 BEGIN_INANITY_GRAPHICS
+
+class DxgiMonitorMode;
+class Output;
 
 /// Графическая система, основанная на DirectX 11.
 class Dx11System : public System
@@ -23,8 +25,8 @@ private:
 public:
 	/// Преобразовать формат пикселей из общего перечисления в DXGI.
 	static DXGI_FORMAT GetDXGIFormat(PixelFormat format);
-	/// Преобразовать режим экрана в структуру для DXGI.
-	static DXGI_MODE_DESC GetModeDesc(const PresentMode& mode);
+	/// Создать структуру режима экрана DXGI.
+	static DXGI_MODE_DESC GetModeDesc(ptr<DxgiMonitorMode> mode, ptr<Output> output);
 	/// Преобразовать номер сематники атрибута в строку.
 	static String GetSemanticString(int semantic);
 
@@ -32,8 +34,7 @@ public:
 
 	// методы System
 	const std::vector<ptr<Adapter> >& GetAdapters();
-	ptr<Window> CreateDefaultWindow();
-	ptr<Device> CreatePrimaryDevice();
+	ptr<Device> CreateDevice(ptr<Adapter> adapter);
 	ptr<ShaderCompiler> CreateShaderCompiler();
 	ptr<Shaders::ShaderGenerator> CreateShaderGenerator();
 

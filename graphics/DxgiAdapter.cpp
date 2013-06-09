@@ -59,4 +59,9 @@ const std::vector<ptr<Monitor> >& DxgiAdapter::GetMonitors()
 	return monitors;
 }
 
+IDXGIAdapter* DxgiAdapter::GetInterface() const
+{
+	return adapter;
+}
+
 END_INANITY_GRAPHICS

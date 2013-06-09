@@ -4,7 +4,8 @@
 #include "Dx11ShaderCompiler.hpp"
 #include "shaders/Hlsl11Generator.hpp"
 #include "DxgiAdapter.hpp"
-#include "../Win32Window.hpp"
+#include "DxgiMonitorMode.hpp"
+#include "Output.hpp"
 #include "../Exception.hpp"
 
 BEGIN_INANITY_GRAPHICS
@@ -44,15 +45,17 @@ DXGI_FORMAT Dx11System::GetDXGIFormat(PixelFormat format)
 	}
 }
 
-DXGI_MODE_DESC Dx11System::GetModeDesc(const PresentMode& mode)
+DXGI_MODE_DESC Dx11System::GetModeDesc(ptr<DxgiMonitorMode> mode, ptr<Output> output)
 {
+	if(mode)
+		return mode->GetDesc();
 	DXGI_MODE_DESC modeDesc;
 	ZeroMemory(&modeDesc, sizeof(modeDesc));
-	modeDesc.Width = (UINT)mode.width;
-	modeDesc.Height = (UINT)mode.height;
+	modeDesc.Width = (UINT)output->GetWidth();
+	modeDesc.Height = (UINT)output->GetHeight();
 	modeDesc.RefreshRate.Numerator = 0;
 	modeDesc.RefreshRate.Denominator = 0;
-	modeDesc.Format = GetDXGIFormat(mode.pixelFormat);
+	modeDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	modeDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 	modeDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	return modeDesc;
@@ -102,20 +105,14 @@ const std::vector<ptr<Adapter> >& Dx11System::GetAdapters()
 	return adapters;
 }
 
-ptr<Window> Dx11System::CreateDefaultWindow()
-{
-	return Win32Window::CreateForDirectX();
-}
-
-ptr<Device> Dx11System::CreatePrimaryDevice()
+ptr<Device> Dx11System::CreateDevice(ptr<Adapter> abstractAdapter)
 {
 	try
 	{
-		// получить адаптер
-		IDXGIAdapter* adapterInterface;
-		if(FAILED(GetDXGIFactory()->EnumAdapters(0, &adapterInterface)))
-			THROW_PRIMARY_EXCEPTION("Can't get primary adapter");
-		ComPointer<IDXGIAdapter> adapter = adapterInterface;
+		ptr<DxgiAdapter> adapter = abstractAdapter.DynamicCast<DxgiAdapter>();
+		if(!adapter)
+			THROW_PRIMARY_EXCEPTION("Wrong adapter type");
+		IDXGIAdapter* adapterInterface = adapter->GetInterface();
 
 		// флаги устройства
 		UINT flags = D3D11_CREATE_DEVICE_SINGLETHREADED
@@ -131,7 +128,7 @@ ptr<Device> Dx11System::CreatePrimaryDevice()
 		D3D_FEATURE_LEVEL featureLevelSupported;
 		// здесь необходимо указывать D3D_DRIVER_TYPE_UNKNOWN, если мы указываем adapter.
 		// http://msdn.microsoft.com/en-us/library/ff476082 (remarks)
-		if(FAILED(D3D11CreateDevice(adapter, D3D_DRIVER_TYPE_UNKNOWN, NULL, flags, &featureLevel, 1, D3D11_SDK_VERSION, &deviceInterface, &featureLevelSupported, &deviceContextInterface)))
+		if(FAILED(D3D11CreateDevice(adapterInterface, D3D_DRIVER_TYPE_UNKNOWN, NULL, flags, &featureLevel, 1, D3D11_SDK_VERSION, &deviceInterface, &featureLevelSupported, &deviceContextInterface)))
 			THROW_PRIMARY_EXCEPTION("Can't create device and context");
 
 		ComPointer<ID3D11Device> device = deviceInterface;
@@ -140,7 +137,7 @@ ptr<Device> Dx11System::CreatePrimaryDevice()
 		ptr<Dx11Context> context = NEW(Dx11Context(device, deviceContext));
 
 		// вернуть объект
-		return NEW(Dx11Device(this, adapter, device, context));
+		return NEW(Dx11Device(this, device, context));
 	}
 	catch(Exception* exception)
 	{
