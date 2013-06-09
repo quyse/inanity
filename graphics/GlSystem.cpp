@@ -4,7 +4,8 @@
 #include "GlShaderCompiler.hpp"
 #include "shaders/GlslGenerator.hpp"
 #ifdef ___INANITY_WINDOWS
-#include "../Win32Window.hpp"
+#include "Win32Adapter.hpp"
+#include "../platform/Win32Window.hpp"
 #include "../Strings.hpp"
 #endif
 #ifdef ___INANITY_LINUX
@@ -15,48 +16,26 @@
 
 BEGIN_INANITY_GRAPHICS
 
-ptr<Window> GlSystem::CreateDefaultWindow()
+GlSystem::GlSystem() : adaptersInitialized(false) {}
+
+const std::vector<ptr<Adapter> >& GlSystem::GetAdapters()
 {
+	if(!adaptersInitialized)
+	{
 #ifdef ___INANITY_WINDOWS
-	return Win32Window::CreateForOpenGL();
+		Win32Adapter::GetAdapters(adapters);
 #endif
-#ifdef ___INANITY_LINUX
-	return X11Window::CreateForOpenGL(X11Display::CreateDefault());
-#endif
+
+		adaptersInitialized = true;
+	}
+
+	return adapters;
 }
 
-ptr<Device> GlSystem::CreatePrimaryDevice()
+ptr<Device> GlSystem::CreateDevice(ptr<Adapter> abstractAdapter)
 {
-	try
-	{
-
-#ifdef ___INANITY_WINDOWS
-		// получить всё устройства
-		DISPLAY_DEVICE deviceInfo;
-		deviceInfo.cb = sizeof(deviceInfo);
-		for(DWORD i = 0; EnumDisplayDevices(NULL, i, &deviceInfo, 0); ++i)
-			// если устройство primary
-			if(deviceInfo.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE)
-				// вернуть его
-				return NEW(GlDevice(this, Strings::Unicode2UTF8(deviceInfo.DeviceName), NEW(GlContext())));
-
-		// в MSDN написано, устройство всегда есть, так что этого быть не должно
-		THROW_PRIMARY_EXCEPTION("Can't find primary device");
-#endif
-
-#ifdef ___INANITY_LINUX
-
-
-
-		// создать устройство
-		return NEW(GlDevice(this, NEW(GlContext())));
-#endif
-
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY_EXCEPTION("Can't create primary device", exception);
-	}
+	// TODO
+	THROW_PRIMARY_EXCEPTION("Not implemented");
 }
 
 ptr<ShaderCompiler> GlSystem::CreateShaderCompiler()

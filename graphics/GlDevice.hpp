@@ -59,7 +59,7 @@ public:
 
 	// методы Device
 	ptr<System> GetSystem() const;
-	ptr<Presenter> CreatePresenter(ptr<Output> output, const PresentMode& mode);
+	ptr<Presenter> CreatePresenter(ptr<Output> output, ptr<MonitorMode> mode);
 	ptr<Context> GetContext();
 	ptr<RenderBuffer> CreateRenderBuffer(int width, int height, PixelFormat pixelFormat);
 	ptr<DepthStencilBuffer> CreateDepthStencilBuffer(int width, int height, bool canBeResource);

@@ -25,6 +25,7 @@
 #include "../Strings.hpp"
 #ifdef ___INANITY_WINDOWS
 #include "Win32Output.hpp"
+#include "Win32MonitorMode.hpp"
 #endif
 #ifdef ___INANITY_LINUX
 #include "X11Output.hpp"
@@ -55,7 +56,7 @@ ptr<System> GlDevice::GetSystem() const
 	return system;
 }
 
-ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, const PresentMode& mode)
+ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<MonitorMode> abstractMode)
 {
 	try
 	{
@@ -65,20 +66,24 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, const Prese
 		ptr<Win32Output> output = abstractOutput.DynamicCast<Win32Output>();
 		if(!output)
 			THROW_PRIMARY_EXCEPTION("Only Win32 output allowed");
+		// режим экрана - только Win32
+		ptr<Win32MonitorMode> mode = abstractMode.DynamicCast<Win32MonitorMode>();
+		if(!mode && abstractMode)
+			THROW_PRIMARY_EXCEPTION("Only Win32 monitor mode allowed");
 
 		// если режим полноэкранный, переключить его
-		if(mode.fullscreen)
+		if(mode)
 		{
-			// заполнить структуру режима экрана
-			DEVMODE devMode;
-			ZeroMemory(&devMode, sizeof(devMode));
-			devMode.dmSize = sizeof(devMode);
-			devMode.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
-			devMode.dmBitsPerPel = 32;
-			devMode.dmPelsWidth = mode.width;
-			devMode.dmPelsHeight = mode.height;
-			// сменить режим экрана
-			if(ChangeDisplaySettingsEx(Strings::UTF82Unicode(deviceName).c_str(), &devMode, NULL, CDS_FULLSCREEN, NULL) != DISP_CHANGE_SUCCESSFUL)
+			// получить монитор окна
+			HMONITOR monitor = MonitorFromWindow(output->GetHWND(), MONITOR_DEFAULTTOPRIMARY);
+			if(!monitor)
+				THROW_PRIMARY_EXCEPTION("Can't get window monitor");
+			MONITORINFOEX monitorInfo;
+			monitorInfo.cbSize = sizeof(monitorInfo);
+			if(!GetMonitorInfo(monitor, &monitorInfo))
+				THROW_PRIMARY_EXCEPTION("Can't get monitor info");
+			DEVMODE modeInfo = mode->GetInfo();
+			if(ChangeDisplaySettingsEx(monitorInfo.szDevice, &modeInfo, NULL, CDS_FULLSCREEN, NULL) != DISP_CHANGE_SUCCESSFUL)
 				THROW_PRIMARY_EXCEPTION("Can't change display settings");
 		}
 
@@ -164,7 +169,7 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, const Prese
 		GlSystem::ClearErrors();
 
 		// установить размер окна
-		SetWindowPos(output->GetHWND(), NULL, 0, 0, mode.width, mode.height, SWP_NOMOVE | SWP_NOZORDER);
+		SetWindowPos(output->GetHWND(), NULL, 0, 0, mode->GetWidth(), mode->GetHeight(), SWP_NOMOVE | SWP_NOZORDER);
 
 		// создать и вернуть Presenter
 		return NEW(GlPresenter(this, hdc, NEW(GlRenderBuffer(0, 0))));

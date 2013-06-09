@@ -38,7 +38,7 @@ public:
 	// методы Presenter
 	ptr<Device> GetDevice();
 	ptr<RenderBuffer> GetBackBuffer();
-	void SetMode(const PresentMode& mode);
+	void SetMode(ptr<MonitorMode> mode);
 	void Present();
 	void Resize(int width, int height);
 };
