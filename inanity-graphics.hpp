@@ -6,15 +6,6 @@
 
 #include "Object.hpp"
 
-// В Windows используется подсистема DX, использующая DirectX 11
-#ifdef ___INANITY_WINDOWS
-#define ___INANITY_GRAPHICS_DX
-#endif
-// В Linux используется подсистема GL, использующая OpenGL
-#ifdef ___INANITY_LINUX
-#define ___INANITY_GRAPHICS_GL
-#endif
-
 #include "graphics/graphics.hpp"
 #include "graphics/Adapter.hpp"
 #include "graphics/AttributeBinding.hpp"
