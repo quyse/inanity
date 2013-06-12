@@ -1,7 +1,7 @@
 #include "Strings.hpp"
 #include "MemoryFile.hpp"
 #include "scripting_impl.hpp"
-#include "utf8.h"
+#include "deps/utf8.h"
 #include <cstring>
 
 BEGIN_INANITY
