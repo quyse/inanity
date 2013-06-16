@@ -2,7 +2,7 @@
 #define ___INANITY_DECOMPRESS_STREAM_HPP___
 
 #include "InputStream.hpp"
-#include "scripting_decl.hpp"
+#include "meta/decl.hpp"
 #include "zlib.hpp"
 
 /*
@@ -41,7 +41,7 @@ public:
 
 	size_t Read(void* data, size_t size);
 
-	SCRIPTABLE_CLASS(DecompressStream);
+	META_DECLARE_CLASS(DecompressStream);
 };
 
 END_INANITY

@@ -3,7 +3,7 @@
 
 #include "Object.hpp"
 #include "String.hpp"
-#include "scripting_decl.hpp"
+#include "meta/decl.hpp"
 #include <ostream>
 
 BEGIN_INANITY
@@ -74,7 +74,7 @@ public:
 	static ptr<Exception> SystemError();
 	static ptr<Exception> SystemError(int errorCode);
 
-	SCRIPTABLE_CLASS(Exception);
+	META_DECLARE_CLASS(Exception);
 };
 
 #ifdef _DEBUG

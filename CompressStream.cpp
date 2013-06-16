@@ -2,15 +2,15 @@
 #include "MemoryFile.hpp"
 #include "MemoryStream.hpp"
 #include "Exception.hpp"
-#include "scripting_impl.hpp"
+#include "meta/impl.hpp"
 #include <memory.h>
 
 BEGIN_INANITY
 
-SCRIPTABLE_MAP_BEGIN(CompressStream, Inanity.CompressStream);
-	SCRIPTABLE_PARENT(OutputStream);
-	SCRIPTABLE_METHOD(CompressStream, CreateMax);
-SCRIPTABLE_MAP_END();
+META_CLASS(CompressStream, Inanity.CompressStream);
+	META_CLASS_PARENT(OutputStream);
+	META_STATIC_METHOD(CreateMax);
+META_CLASS_END();
 
 CompressStream::CompressStream(ptr<OutputStream> outputStream, CompressionLevel compressionLevel)
 : inputFile(NEW(MemoryFile(inputBufferSize))), outputStream(outputStream), finalized(false)

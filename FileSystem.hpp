@@ -3,7 +3,7 @@
 
 #include "Object.hpp"
 #include "String.hpp"
-#include "scripting_decl.hpp"
+#include "meta/decl.hpp"
 #include <vector>
 
 BEGIN_INANITY
@@ -100,7 +100,7 @@ public:
 	*/
 	virtual void GetAllDirectoryEntries(const String& directoryName, std::vector<String>& entries) const;
 
-	SCRIPTABLE_CLASS(FileSystem);
+	META_DECLARE_CLASS(FileSystem);
 };
 
 END_INANITY

@@ -3,16 +3,16 @@
 #include "FileInputStream.hpp"
 #include "MemoryStream.hpp"
 #include "Exception.hpp"
-#include "scripting_impl.hpp"
+#include "meta/impl.hpp"
 #include <memory.h>
 
 BEGIN_INANITY
 
-SCRIPTABLE_MAP_BEGIN(DecompressStream, Inanity.DecompressStream);
-	SCRIPTABLE_PARENT(InputStream);
-	SCRIPTABLE_CONSTRUCTOR(DecompressStream, ptr<InputStream>);
-	SCRIPTABLE_METHOD(DecompressStream, DecompressFile);
-SCRIPTABLE_MAP_END();
+META_CLASS(DecompressStream, Inanity.DecompressStream);
+	META_CLASS_PARENT(InputStream);
+	META_CONSTRUCTOR(ptr<InputStream>);
+	META_STATIC_METHOD(DecompressFile);
+META_CLASS_END();
 
 DecompressStream::DecompressStream(ptr<InputStream> inputStream)
 : inputFile(NEW(MemoryFile(inputBufferSize))), inputStream(inputStream), finished(false)

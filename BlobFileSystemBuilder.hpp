@@ -2,7 +2,7 @@
 #define ___INANITY_BLOB_FILE_SYSTEM_BUILDER_HPP___
 
 #include "String.hpp"
-#include "scripting_decl.hpp"
+#include "meta/decl.hpp"
 
 BEGIN_INANITY
 
@@ -42,7 +42,7 @@ public:
 	/// Завершить создание файловой системы.
 	void Finalize();
 
-	SCRIPTABLE_CLASS(BlobFileSystemBuilder);
+	META_DECLARE_CLASS(BlobFileSystemBuilder);
 };
 
 END_INANITY
