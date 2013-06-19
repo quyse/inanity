@@ -3,7 +3,8 @@
 
 #include "lua.hpp"
 #include "lualib.hpp"
-#include "reflection.hpp"
+#include "../../meta/Class.hpp"
+#include "../../String.hpp"
 
 BEGIN_INANITY
 
@@ -13,36 +14,32 @@ END_INANITY
 
 BEGIN_INANITY_LUA
 
-/// Универсальная функция для индексирования метатаблиц (классов и объектов).
-/** Предполагает, что в замыкании лежит таблица методов. */
+/// General routine which indexes metatables (of classes and objects).
+/** Assumes that closure contains methods table. */
 int MetaTable_index(lua_State* state);
 
-/// Запихать в стек метатаблицу для классов.
-/** Метатаблица классов нигде не хранится, и создаётся каждый раз заново.
-Потому что предполагается, что она один раз будет нужна (для одного глобального объекта).
-Вообще говоря, можно было бы обойтись вообще без метатаблицы, а сделать просто таблицу,
-а не объект. Но пофиг, пусть будет более круто. */
-void PushClassMetaTable(lua_State* state, Class& cls);
+/// Push class metatable in stack.
+void PushClassMetaTable(lua_State* state, Meta::ClassBase* cls);
 
-/// Зарегистрировать класс в состоянии.
-void RegisterCls(lua_State* state, Class& cls);
+/// Register a class in Lua state.
+void RegisterClassMeta(lua_State* state, Meta::ClassBase* cls);
 
 /// Структура с методами метатаблицы объектов.
 int ObjectMetaTable_gc(lua_State* state);
 
-/// Запихать в стек метатаблицу для объектов.
-void PushObjectMetaTable(lua_State* state, Class& cls);
+/// Push object metatable in stack.
+void PushObjectMetaTable(lua_State* state, Meta::ClassBase* cls);
 
-/// Перевести ошибку в исключение.
-/** Вытаскивает ошибку из стека. */
+/// Converts Lua error to exception.
+/** Pops an error out from stack. */
 ptr<Exception> ErrorToException(lua_State* state);
-/// Обработать ошибку в Lua.
-/** То есть достать её из стека и бросить как исключение. */
+/// Process an error in Lua.
+/** Pops an error from stack and throws it as an exception. */
 void ProcessError(lua_State* state);
-/// Обработать ошибку при вызове скрипта, и вернуть в Lua расширенную информацию об ошибке.
+/// Processes a script call error, and return extended information about it in Lua.
 int ScriptErrorHook(lua_State* state);
 
-/// Описать строкой значение в стеке Lua.
+/// Convert Lua value to string.
 String DescribeValue(lua_State* state, int index);
 
 END_INANITY_LUA

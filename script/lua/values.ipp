@@ -2,17 +2,18 @@
 #define ___INANITY_SCRIPT_LUA_VALUES_IPP___
 
 #include "values.hpp"
-#include "reflection.hpp"
 #include "stuff.hpp"
 #include "userdata.hpp"
 #include "lualib.hpp"
-#include "../Exception.hpp"
+#include "../../Exception.hpp"
 
 BEGIN_INANITY_LUA
 
 template <>
 struct Value<bool>
 {
+	typedef bool ValueType;
+
 	static inline bool Get(lua_State* state, int index)
 	{
 		return !!lua_toboolean(state, index);
@@ -27,6 +28,8 @@ struct Value<bool>
 template <>
 struct Value<int>
 {
+	typedef int ValueType;
+
 	static inline int Get(lua_State* state, int index)
 	{
 		int isnum;
@@ -45,6 +48,8 @@ struct Value<int>
 template <>
 struct Value<double>
 {
+	typedef double ValueType;
+
 	static inline double Get(lua_State* state, int index)
 	{
 		int isnum;
@@ -63,6 +68,8 @@ struct Value<double>
 template <>
 struct Value<float>
 {
+	typedef float ValueType;
+
 	static inline float Get(lua_State* state, int index)
 	{
 		int isnum;
@@ -81,6 +88,8 @@ struct Value<float>
 template <>
 struct Value<unsigned int>
 {
+	typedef unsigned int ValueType;
+
 	static inline unsigned int Get(lua_State* state, int index)
 	{
 		int isnum;
@@ -99,6 +108,8 @@ struct Value<unsigned int>
 template <>
 struct Value<long long>
 {
+	typedef long long ValueType;
+
 	static inline long long Get(lua_State* state, int index)
 	{
 		int isnum;
@@ -117,6 +128,8 @@ struct Value<long long>
 template <>
 struct Value<unsigned long long>
 {
+	typedef unsigned long long ValueType;
+
 	static inline unsigned long long Get(lua_State* state, int index)
 	{
 		int isnum;
@@ -135,6 +148,8 @@ struct Value<unsigned long long>
 template <>
 struct Value<const char*>
 {
+	typedef const char* ValueType;
+
 	static inline const char* Get(lua_State* state, int index)
 	{
 		const char* res = lua_tostring(state, index);
@@ -152,6 +167,8 @@ struct Value<const char*>
 template <>
 struct Value<String>
 {
+	typedef String ValueType;
+
 	static inline String Get(lua_State* state, int index)
 	{
 		return Value<const char*>::Get(state, index);
@@ -166,6 +183,8 @@ struct Value<String>
 template <>
 struct Value<const String&>
 {
+	typedef String ValueType;
+
 	static inline String Get(lua_State* state, int index)
 	{
 		return Value<const char*>::Get(state, index);
@@ -175,6 +194,8 @@ struct Value<const String&>
 template <typename ObjectType>
 struct Value<ptr<ObjectType> >
 {
+	typedef ptr<ObjectType> ValueType;
+
 	static inline ptr<ObjectType> Get(lua_State* state, int index)
 	{
 		// проверить, если это nil (это допустимо)
@@ -184,15 +205,15 @@ struct Value<ptr<ObjectType> >
 		// получить userdata для объекта, и проверить, что это объект
 		ObjectUserData* userData = (ObjectUserData*)lua_touserdata(state, index);
 		if(!userData || lua_islightuserdata(state, index) || userData->type != UserData::typeObject)
-			THROW_PRIMARY_EXCEPTION("Expected an object of type '" + ObjectType::scriptClass.GetFullName() + "' for argument, but got " + DescribeValue(state, index));
+			THROW_PRIMARY_EXCEPTION(String("Expected an object of type '") + ObjectType::meta.GetFullName() + "' for argument, but got " + DescribeValue(state, index));
 
 		// проверить тип объекта, в случае необходимости привести к вышестоящему типу
-		for(Class* cls = userData->cls; cls; cls = cls->GetParent())
-			if(cls == &ObjectType::scriptClass)
+		for(Meta::ClassBase* cls = userData->cls; cls; cls = cls->GetParent())
+			if(cls == &ObjectType::meta)
 				// вернуть объект
 				return (ObjectType*)userData->object;
 		// если здесь, значит, мы проверили всю цепочку наследования, а тип не нашли
-		THROW_PRIMARY_EXCEPTION("Can't cast object of type '" + userData->cls->GetFullName() + "' to expected type '" + ObjectType::scriptClass.GetFullName() + "'");
+		THROW_PRIMARY_EXCEPTION(String("Can't cast object of type '") + userData->cls->GetFullName() + "' to expected type '" + ObjectType::meta.GetFullName() + "'");
 	}
 
 	static inline void Push(lua_State* state, ptr<ObjectType> value)
@@ -207,9 +228,9 @@ struct Value<ptr<ObjectType> >
 		ObjectUserData* userData = (ObjectUserData*)lua_newuserdata(state, sizeof(ObjectUserData));
 		userData->type = UserData::typeObject;
 		userData->object = (Object*)(ObjectType*)value;
-		userData->cls = &ObjectType::scriptClass;
+		userData->cls = &ObjectType::meta;
 		// указать метатаблицу
-		PushObjectMetaTable(state, ObjectType::scriptClass);
+		PushObjectMetaTable(state, &ObjectType::meta);
 		lua_setmetatable(state, -2);
 		// задать дополнительную ссылку объекту
 		userData->object->Reference();

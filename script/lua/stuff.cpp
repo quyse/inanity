@@ -1,7 +1,10 @@
 #include "stuff.hpp"
-#include "reflection.ipp"
 #include "values.ipp"
-#include "../Exception.hpp"
+#include "../../meta/Class.ipp"
+#include "../../meta/Constructor.ipp"
+#include "../../meta/Method.ipp"
+#include "../../meta/Function.ipp"
+#include "../../Exception.hpp"
 #include <sstream>
 
 BEGIN_INANITY_LUA
@@ -43,21 +46,21 @@ int NonConstructableClass_call(lua_State* state)
 	return 0;
 }
 
-void PushClassMetaTable(lua_State* state, Class& cls)
+void PushClassMetaTable(lua_State* state, Meta::ClassBase* cls)
 {
 	// создать табличку
 	lua_createtable(state, 0, 2);     // metatable
 	
 	// сделать call
 	lua_pushliteral(state, "__call");                    // metatable "__call"
-	Constructor* constructor = cls.GetConstructor();
+	Meta::ConstructorBase* constructor = cls->GetConstructor();
 	// если конструктор есть, то добавить его
 	if(constructor)
-		constructor->PushThunk(state);                     // metatable "__call" thunk
+		constructor->GetLuaExtension()->PushThunk(state);  // metatable "__call" thunk
 	else
 	{
 		// а если конструктора нет, добавить заглушку
-		lua_pushstring(state, cls.GetFullName().c_str());  // metatable "__call" classFullName
+		lua_pushstring(state, cls->GetFullName());         // metatable "__call" classFullName
 		lua_pushcclosure(state, NonConstructableClass_call, 1); // metatable "__call" thunk
 	}
 	lua_settable(state, -3);                             // metatable
@@ -65,14 +68,14 @@ void PushClassMetaTable(lua_State* state, Class& cls)
 	// сделать index для статических методов
 	lua_pushliteral(state, "__index");                   // metatable "__index"
 	// создать таблицу методов
-	const std::vector<Function*>& staticMethods = cls.GetStaticMethods();
+	const Meta::ClassBase::StaticMethods& staticMethods = cls->GetStaticMethods();
 	lua_createtable(state, 0, (int)staticMethods.size()); // metatable "__index" staticMethods
 	for(size_t i = 0; i < staticMethods.size(); ++i)
 	{
-		Function* function = staticMethods[i];
+		Meta::FunctionBase* function = staticMethods[i];
 
 		lua_pushstring(state, function->GetName());        // metatable "__index" staticMethods functionName
-		function->PushThunk(state);                        // metatable "__index" staticMethods functionName thunk
+		function->GetLuaExtension()->PushThunk(state);     // metatable "__index" staticMethods functionName thunk
 		lua_settable(state, -3);                           // metatable "__index" staticMethods
 	}
 	// таблица методов попадает в замыкание
@@ -83,26 +86,26 @@ void PushClassMetaTable(lua_State* state, Class& cls)
 	// всё.
 }
 
-void RegisterCls(lua_State* state, Class& cls)
+void RegisterClassMeta(lua_State* state, Meta::ClassBase* cls)
 {
 	// разобрать полное имя класса (вида Inanity.Namespace1.Namespace2.ClassName),
 	// пройтись по этому пути, и создать глобальный объект
-	String fullName = cls.GetFullName();
+	const char* fullName = cls->GetFullName();
 	// поддерживаем инвариант - в стеке лежит последний объект пройденного пути
 	// сначала тут, конечно, глобальное пространство
 	lua_pushinteger(state, LUA_RIDX_GLOBALS);
 	lua_gettable(state, LUA_REGISTRYINDEX);
 	// цикл по кускам пути
-	for(size_t i = 0; i < fullName.length(); )
+	for(size_t i = 0; fullName[i]; )
 	{
 		size_t j;
-		for(j = i + 1; j < fullName.length() && fullName[j] != '.'; ++j);
+		for(j = i + 1; fullName[j] && fullName[j] != '.'; ++j);
 		// тут [i, j) задают строку пути
 		// положить строку в стек
-		lua_pushlstring(state, fullName.c_str() + i, j - i);   // prevPath name
+		lua_pushlstring(state, fullName + i, j - i);             // prevPath name
 
 		// если это последняя строка
-		if(j >= fullName.length())
+		if(!fullName[j])
 		{
 			// создать объект
 			ClassUserData* userData = (ClassUserData*)lua_newuserdata(state, sizeof(ClassUserData)); // prevPath name userData
@@ -112,6 +115,9 @@ void RegisterCls(lua_State* state, Class& cls)
 			lua_setmetatable(state, -2);                           // prevPath name userData
 			// и добавить его в таблицу
 			lua_settable(state, -3);                               // prevPath
+
+			// завершить цикл
+			break;
 		}
 		// иначе это промежуточная строка
 		else
@@ -163,10 +169,10 @@ int ObjectMetaTable_gc(lua_State* state)
 	return 0;
 }
 
-void PushObjectMetaTable(lua_State* state, Class& cls)
+void PushObjectMetaTable(lua_State* state, Meta::ClassBase* cls)
 {
 	// получить метатаблицу объектов
-	lua_pushlightuserdata(state, &cls);                  // cls
+	lua_pushlightuserdata(state, cls);                   // cls
 	lua_gettable(state, LUA_REGISTRYINDEX);              // metatable
 	// если её нет, сделать
 	if(!lua_istable(state, -1))
@@ -180,7 +186,7 @@ void PushObjectMetaTable(lua_State* state, Class& cls)
 
 		// создать метатаблицу
 		// использовать адрес структуры класса как индекс в реестре
-		lua_pushlightuserdata(state, &cls);                // cls
+		lua_pushlightuserdata(state, cls);                 // cls
 		lua_createtable(state, 0, 2);                      // cls metatable
 		// задать индексатор
 		lua_pushliteral(state, "__index");                 // cls metatable "__index"
@@ -188,19 +194,19 @@ void PushObjectMetaTable(lua_State* state, Class& cls)
 		// вот в этом месте создать таблицу методов
 		// посчитать количество методов
 		size_t methodsCount = 0;
-		for(Class* c = &cls; c; c = c->GetParent())
+		for(Meta::ClassBase* c = cls; c; c = c->GetParent())
 			methodsCount += c->GetMethods().size();
 		// создать таблицу
 		lua_createtable(state, 0, (int)methodsCount);      // cls metatable "__index" methods
 		// и наполнить методами
-		for(Class* c = &cls; c; c = c->GetParent())
+		for(Meta::ClassBase* c = cls; c; c = c->GetParent())
 		{
-			const std::vector<Method*>& methods = c->GetMethods();
+			const Meta::ClassBase::Methods& methods = c->GetMethods();
 			for(size_t i = 0; i < methods.size(); ++i)
 			{
-				Method* method = methods[i];
+				Meta::MethodBase* method = methods[i];
 				lua_pushstring(state, method->GetName());      // cls metatable "__index" methods methodName
-				method->PushThunk(state);                      // cls metatable "__index" methods methodName thunk
+				method->GetLuaExtension()->PushThunk(state);   // cls metatable "__index" methods methodName thunk
 				lua_settable(state, -3);                       // cls metatable "__index" methods
 			}
 		}
@@ -229,7 +235,7 @@ ptr<Exception> ErrorToException(lua_State* state)
 	{
 		// full userdata, возможно, что Exception
 		ObjectUserData* userData = (ObjectUserData*)lua_touserdata(state, -1);
-		if(userData->type == UserData::typeObject && userData->cls == &Exception::scriptClass)
+		if(userData->type == UserData::typeObject && userData->cls == &Exception::meta)
 			// да, Exception!
 			exception = (Exception*)userData->object;
 	}
@@ -405,7 +411,7 @@ String DescribeValue(lua_State* state, int index)
 			case UserData::typeObject:
 				{
 					ObjectUserData* objectUserData = (ObjectUserData*)userData;
-					return "ptr<" + objectUserData->cls->GetFullName() + ">";
+					return String("ptr<") + objectUserData->cls->GetFullName() + ">";
 				}
 			}
 			return "<unknown full userdata>";

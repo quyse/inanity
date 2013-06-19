@@ -6,7 +6,7 @@
 
 #include "lua.hpp"
 #include "lualib.hpp"
-#include "stuff.hpp"
+#include "../State.hpp"
 
 BEGIN_INANITY
 
@@ -14,38 +14,36 @@ class File;
 
 END_INANITY
 
+BEGIN_INANITY_META
+
+class ClassBase;
+
+END_INANITY_META
+
 BEGIN_INANITY_LUA
 
-class Script;
-
-/// Класс, инкапсулирующий состояние Lua.
-class State : public Object
+/// The state for Lua interpreter.
+class State : public Inanity::Script::State
 {
 private:
 	lua_State* state;
 
 private:
-	/// Обработчик выделения памяти Lua.
+	/// Lua allocation callback.
 	static void* Alloc(void* self, void* ptr, size_t osize, size_t nsize);
-	/// Обработчик фатальной ошибки Lua.
+	/// Lua fatal error callback.
 	static int Panic(lua_State* state);
 
 public:
 	State();
 	~State();
 
-	/// Получить состояние Lua.
+	/// Get internal Lua state.
 	lua_State* GetState();
 
-	/// Зарегистрировать класс.
-	template <typename ClassType>
-	void RegisterClass()
-	{
-		Lua::RegisterCls(state, ClassType::scriptClass);
-	}
-
-	/// Загрузить скрипт из файла.
-	ptr<Script> LoadScript(ptr<File> file);
+	//*** Script::State methods.
+	void Register(Meta::ClassBase* classMeta);
+	ptr<Script::Function> LoadScript(ptr<File> file);
 };
 
 END_INANITY_LUA

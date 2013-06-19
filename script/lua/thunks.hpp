@@ -6,17 +6,6 @@
 
 BEGIN_INANITY_LUA
 
-/// Структура, сохраняющая состояние для получения аргументов.
-struct ArgGettingState
-{
-	/// Состояние Lua.
-	lua_State* state;
-	/// Общее количество аргументов.
-	int argsCount;
-	/// Количество уже вытащенных аргументов.
-	int gotArgsCount;
-};
-
 /// Переходник для функций.
 /** Предназначен для содержания следующего метода:
 static int Thunk(lua_State* luaState);

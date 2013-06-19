@@ -7,9 +7,11 @@
 (userdata), которые хранят в Lua различные вещи.
 */
 
-BEGIN_INANITY_LUA
+BEGIN_INANITY_META
 
-class Class;
+END_INANITY_META
+
+BEGIN_INANITY_LUA
 
 /// Каждая открытая userdata является этой структурой.
 struct UserData
@@ -31,7 +33,7 @@ struct ClassUserData : public UserData
 struct ObjectUserData : public UserData
 {
 	Object* object;
-	Class* cls;
+	Meta::ClassBase* cls;
 };
 
 END_INANITY_LUA

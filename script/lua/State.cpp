@@ -1,7 +1,13 @@
 #include "State.hpp"
-#include "Script.ipp"
-#include "../File.hpp"
-#include "../Exception.hpp"
+#include "Function.hpp"
+#include "stuff.hpp"
+#include "userdata.hpp"
+#include "../../meta/Class.hpp"
+#include "../../meta/Constructor.hpp"
+#include "../../meta/Method.hpp"
+#include "../../meta/Function.hpp"
+#include "../../File.hpp"
+#include "../../Exception.hpp"
 #include <cstdlib>
 #include <sstream>
 
@@ -49,7 +55,7 @@ lua_State* State::GetState()
 	return state;
 }
 
-ptr<Script> State::LoadScript(ptr<File> file)
+ptr<Script::Function> State::LoadScript(ptr<File> file)
 {
 	/// Класс читателя.
 	/** Чтение выполняется в один приём. */
@@ -79,11 +85,16 @@ ptr<Script> State::LoadScript(ptr<File> file)
 	Reader reader(file);
 	if(lua_load(state, Reader::Callback, &reader, "=noname", 0) == LUA_OK)
 		// конструктор Script заберёт функцию из стека, и сохранит её себе
-		return NEW(Script(this));
+		return NEW(Function(this));
 	// обработать ошибку
 	ProcessError(state);
 	// ProcessError никогда не возвращает управления
 	return 0;
+}
+
+void State::Register(Meta::ClassBase* classMeta)
+{
+	RegisterClassMeta(state, classMeta);
 }
 
 END_INANITY_LUA

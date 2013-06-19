@@ -1,8 +1,9 @@
 /* Тестовый файл Lua.
 */
 
-#include "../inanity-base.hpp"
-#include "../scripting_decl.hpp"
+#include "lua.hpp"
+#include "../../inanity-base.hpp"
+#include "../../meta/decl.hpp"
 
 BEGIN_INANITY_LUA
 
@@ -16,7 +17,7 @@ public:
 
 	static void printFile(ptr<File> a);
 
-	SCRIPTABLE_CLASS(ClassA);
+	META_DECLARE_CLASS(ClassA);
 };
 
 class ClassB : public ClassA
@@ -30,7 +31,7 @@ public:
 	void print(const String& a);
 	void print3(ptr<ClassA> a);
 
-	SCRIPTABLE_CLASS(ClassB);
+	META_DECLARE_CLASS(ClassB);
 };
 
 END_INANITY_LUA

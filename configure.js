@@ -72,7 +72,7 @@ var libraries = {
 	},
 	// ******* скрипты на lua
 	'libinanity-lua': {
-		objects: ['lua.stuff', 'lua.reflection', 'lua.State', 'lua.Script']
+		objects: ['script.lua.Function', 'script.lua.State', 'script.lua.stuff']
 	},
 	// ******* криптография
 	'libinanity-crypto': {
@@ -184,8 +184,8 @@ var executables = {
 	}
 	// TEST
 	, luatest: {
-		objects: ['lua.test'],
-		staticLibraries: ['libinanity-base', 'libinanity-compress', 'libinanity-lua', 'deps/lua//liblua'],
+		objects: ['script.lua.test'],
+		staticLibraries: ['libinanity-base', 'libinanity-compress', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
 		dynamicLibraries: []
 	}
 };
