@@ -2,8 +2,8 @@
 
 BEGIN_INANITY_META
 
-ClassBase::ClassBase(const char* name, const char* fullName, ClassBase* parent)
-: name(name), fullName(fullName), parent(parent) {}
+ClassBase::ClassBase(const char* name, const char* fullName)
+: name(name), fullName(fullName) {}
 
 const char* ClassBase::GetName() const
 {
@@ -15,14 +15,19 @@ const char* ClassBase::GetFullName() const
 	return fullName;
 }
 
+void ClassBase::SetParent(ClassBase* parent)
+{
+	this->parent = parent;
+}
+
 ClassBase* ClassBase::GetParent() const
 {
 	return parent;
 }
 
-void ClassBase::AddConstructor(ConstructorBase* constructor)
+void ClassBase::SetConstructor(ConstructorBase* constructor)
 {
-	constructors.push_back(constructor);
+	this->constructor = constructor;
 }
 
 void ClassBase::AddMethod(MethodBase* method)
@@ -35,9 +40,9 @@ void ClassBase::AddStaticMethod(FunctionBase* staticMethod)
 	staticMethods.push_back(staticMethod);
 }
 
-const ClassBase::Constructors& ClassBase::GetConstructors() const
+ConstructorBase* ClassBase::GetConstructor() const
 {
-	return constructors;
+	return constructor;
 }
 
 const ClassBase::Methods& ClassBase::GetMethods() const

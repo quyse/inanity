@@ -3,6 +3,10 @@
 
 #include "Extension.hpp"
 
+#ifdef ___INANITY_META_LUA___
+#include "../script/lua/extension.hpp"
+#endif
+
 BEGIN_INANITY_META
 
 class FunctionBase
@@ -14,21 +18,24 @@ protected:
 
 public:
 	const char* GetName() const;
+
+#ifdef ___INANITY_META_LUA___
+	virtual Script::Lua::FunctionExtensionBase* GetLuaExtension() = 0;
+#endif
 };
 
 template <typename FunctionType, FunctionType function>
 class Function : public FunctionBase
 {
-public:
-	typedef Extension<Function<FunctionType, function> > ExtensionType;
-
+#ifdef ___INANITY_META_LUA___
 private:
-	ExtensionType extension;
+	Script::Lua::Extension<Function<FunctionType, function> > luaExtension;
+public:
+	Script::Lua::FunctionExtensionBase* GetLuaExtension();
+#endif
 
 public:
 	Function(const char* name);
-
-	const ExtensionType& GetExtension() const;
 };
 
 END_INANITY_META

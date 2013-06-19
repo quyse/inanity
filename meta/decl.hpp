@@ -3,15 +3,17 @@
 
 // This file includes files necessary for declaring metadata.
 
-#include "of.hpp"
+#include "Class.hpp"
 
 #define META_DECLARE_CLASS(className) \
-	template <> \
-	class Inanity::Meta::OfClass<className> : public Inanity::Meta::Class<className> \
-	{ \
 	public: \
-		OfClass(); \
-		static OfClass meta;
-	}
+		class ClassMeta : public Inanity::Meta::Class<className> \
+		{ \
+		private: \
+			typedef className ClassType; \
+		public: \
+			ClassMeta(); \
+		}; \
+		static ClassMeta meta
 
 #endif

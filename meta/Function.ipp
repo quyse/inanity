@@ -5,14 +5,16 @@
 
 BEGIN_INANITY_META
 
+#ifdef ___INANITY_META_LUA___
 template <typename FunctionType, FunctionType function>
-Function<FunctionType, function>::Function(const char* name) : FunctionBase(name) {}
+Script::Lua::FunctionExtensionBase* Function<FunctionType, function>::GetLuaExtension()
+{
+	return &luaExtension;
+}
+#endif
 
 template <typename FunctionType, FunctionType function>
-const typename Function<FunctionType, function>::ExtensionType& Function<FunctionType, function>::GetExtension() const
-{
-	return extension;
-}
+Function<FunctionType, function>::Function(const char* name) : FunctionBase(name) {}
 
 END_INANITY_META
 

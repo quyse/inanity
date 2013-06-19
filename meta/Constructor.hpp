@@ -3,23 +3,29 @@
 
 #include "Extension.hpp"
 
+#ifdef ___INANITY_META_LUA___
+#include "../script/lua/extension.hpp"
+#endif
+
 BEGIN_INANITY_META
 
 class ConstructorBase
 {
+public:
+#ifdef ___INANITY_META_LUA___
+	virtual Script::Lua::ConstructorExtensionBase* GetLuaExtension() = 0;
+#endif
 };
 
 template <typename ConstructorType>
 class Constructor : public ConstructorBase
 {
-public:
-	typedef Extension<Constructor<ConstructorType> > ExtensionType;
-
+#ifdef ___INANITY_META_LUA___
 private:
-	ExtensionType extension;
-
+	Script::Lua::Extension<Constructor<ConstructorType> > luaExtension;
 public:
-	const ExtensionType& GetExtension() const;
+	Script::Lua::ConstructorExtensionBase* GetLuaExtension();
+#endif
 };
 
 END_INANITY_META

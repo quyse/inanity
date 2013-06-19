@@ -3,21 +3,17 @@
 
 #include "meta.hpp"
 
+#define ___INANITY_META_LUA___
+
 #ifdef ___INANITY_META_LUA___
-#include "../script/extension.hpp"
+#include "../script/lua/extension.hpp"
 #endif
 
 BEGIN_INANITY_META
 
-struct ExtensionBase
-{
-#ifdef ___INANITY_META_LUA___
-	virtual GetExtension()
-};
-
 /// Struct contains enabled compile-time extension substructs.
 template <typename MetaType>
-struct Extension : public ExtensionBase
+struct Extension
 {
 #ifdef ___INANITY_META_LUA___
 	Script::Lua::Extension<MetaType> lua;

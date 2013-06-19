@@ -5,18 +5,17 @@
 
 BEGIN_INANITY_META
 
+#ifdef ___INANITY_META_LUA___
 template <typename ClassType>
-Class<ClassType>::Class(const char* name, const char* fullName, ClassBase* parent)
-: ClassBase(name, fullName, parent)
+Script::Lua::ClassExtensionBase* Class<ClassType>::GetLuaExtension()
 {
-	ClassInitialize<ClassType>(*this);
+	return &luaExtension;
 }
+#endif
 
 template <typename ClassType>
-const typename Class<ClassType>::ExtensionType& Class<ClassType>::GetExtension() const
-{
-	return extension;
-}
+Class<ClassType>::Class(const char* name, const char* fullName)
+: ClassBase(name, fullName) {}
 
 END_INANITY_META
 

@@ -2,18 +2,22 @@
 #define ___INANITY_META_CLASS_HPP___
 
 #include "Extension.hpp"
-#include "Constructor.hpp"
-#include "Function.hpp"
-#include "Method.hpp"
 #include <vector>
 
+#ifdef ___INANITY_META_LUA___
+#include "../script/lua/extension.hpp"
+#endif
+
 BEGIN_INANITY_META
+
+class ConstructorBase;
+class MethodBase;
+class FunctionBase;
 
 /// Base non-templated class.
 class ClassBase
 {
 public:
-	typedef std::vector<ConstructorBase*> Constructors;
 	typedef std::vector<MethodBase*> Methods;
 	typedef std::vector<FunctionBase*> StaticMethods;
 
@@ -25,26 +29,30 @@ protected:
 
 	ClassBase* parent;
 
-	Constructors constructors;
+	ConstructorBase* constructor;
 	Methods methods;
 	StaticMethods staticMethods;
 
-	ClassBase(const char* name, const char* fullName, ClassBase* parent);
+	ClassBase(const char* name, const char* fullName);
 
 public:
 	const char* GetName() const;
 	const char* GetFullName() const;
 
-	void SetParent(ClassBase* parent) const;
+	void SetParent(ClassBase* parent);
 	ClassBase* GetParent() const;
 
-	void AddConstructor(ConstructorBase* constructor);
+	void SetConstructor(ConstructorBase* constructor);
 	void AddMethod(MethodBase* method);
 	void AddStaticMethod(FunctionBase* staticMethod);
 
-	const Constructors& GetConstructors() const;
+	ConstructorBase* GetConstructor() const;
 	const Methods& GetMethods() const;
 	const StaticMethods& GetStaticMethods() const;
+
+#ifdef ___INANITY_META_LUA___
+	virtual Script::Lua::ClassExtensionBase* GetLuaExtension() = 0;
+#endif
 };
 
 /// Stores metainformation about C++ class.
@@ -53,23 +61,16 @@ If there is no parent class, it should be void. */
 template <typename ClassType>
 class Class : public ClassBase
 {
-public:
-	typedef Extension<Class<ClassType> > ExtensionType;
-
+#ifdef ___INANITY_META_LUA___
 private:
-	ExtensionType extension;
+	Script::Lua::Extension<Class<ClassType> > luaExtension;
+public:
+	Script::Lua::ClassExtensionBase* GetLuaExtension();
+#endif
 
 public:
 	Class(const char* name, const char* fullName);
-
-	const ExtensionType& GetExtension() const;
 };
-
-/// Initializes a class metainformation.
-/** Doesn't have generic implementation. Concrete specializations
-initialize concrete classes. */
-template <typename ClassType>
-void ClassInitialize(Class<ClassType>& meta);
 
 END_INANITY_META
 

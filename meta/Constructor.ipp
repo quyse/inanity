@@ -3,15 +3,16 @@
 
 #include "Constructor.hpp"
 #include "Callable.hpp"
-#include "of.hpp"
 
 BEGIN_INANITY_META
 
+#ifdef ___INANITY_META_LUA___
 template <typename ConstructorType>
-const typename Constructor<ConstructorType>::ExtensionType& Constructor<ConstructorType>::GetExtension() const
+Script::Lua::ConstructorExtensionBase* Constructor<ConstructorType>::GetLuaExtension()
 {
-	return extension;
+	return &luaExtension;
 }
+#endif
 
 END_INANITY_META
 

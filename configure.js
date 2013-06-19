@@ -68,7 +68,7 @@ var libraries = {
 	},
 	// ******* метаинформация
 	'libinanity-meta': {
-		objects: ['meta.Class', 'meta.Constructor', 'meta.Function', 'meta.Method']
+		objects: ['meta.Class', 'meta.Function', 'meta.Method']
 	},
 	// ******* скрипты на lua
 	'libinanity-lua': {
