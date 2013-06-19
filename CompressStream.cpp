@@ -9,6 +9,7 @@ BEGIN_INANITY
 
 META_CLASS(CompressStream, Inanity.CompressStream);
 	META_CLASS_PARENT(OutputStream);
+	META_METHOD(Flush);
 	META_STATIC_METHOD(CreateMax);
 META_CLASS_END();
 
