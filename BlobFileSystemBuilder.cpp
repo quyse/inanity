@@ -7,17 +7,17 @@
 #include "FileInputStream.hpp"
 #include "File.hpp"
 #include "Exception.hpp"
-#include "scripting_impl.hpp"
+#include "meta/impl.hpp"
 #include <cstring>
 
 BEGIN_INANITY
 
-SCRIPTABLE_MAP_BEGIN(BlobFileSystemBuilder, Inanity.BlobFileSystemBuilder);
-	SCRIPTABLE_CONSTRUCTOR(BlobFileSystemBuilder, ptr<OutputStream>);
-	SCRIPTABLE_METHOD(BlobFileSystemBuilder, AddFile);
-	SCRIPTABLE_METHOD(BlobFileSystemBuilder, AddFileStream);
-	SCRIPTABLE_METHOD(BlobFileSystemBuilder, Finalize);
-SCRIPTABLE_MAP_END();
+META_CLASS(BlobFileSystemBuilder, Inanity.BlobFileSystemBuilder);
+	META_CONSTRUCTOR(ptr<OutputStream>);
+	META_METHOD(AddFile);
+	META_METHOD(AddFileStream);
+	META_METHOD(Finalize);
+META_CLASS_END();
 
 BlobFileSystemBuilder::BlobFileSystemBuilder(ptr<OutputStream> outputStream)
 {

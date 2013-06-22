@@ -1,11 +1,11 @@
 #include "InputStream.hpp"
-#include "scripting_impl.hpp"
+#include "meta/impl.hpp"
 #include <algorithm>
 
 BEGIN_INANITY
 
-SCRIPTABLE_MAP_BEGIN(InputStream, Inanity.InputStream);
-SCRIPTABLE_MAP_END();
+META_CLASS(InputStream, Inanity.InputStream);
+META_CLASS_END();
 
 bigsize_t InputStream::Skip(bigsize_t size)
 {

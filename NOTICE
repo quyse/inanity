@@ -1,0 +1,16 @@
+Licenses of third party libraries.
+
+All the libraries have permissive open source licenses allowing use of the code in closed-source software.
+
+All third-party libraries are placed in /deps directory.
+
+zlib (http://zlib.net/) - zlib license (http://zlib.net/zlib_license.html)
+lua (http://www.lua.org/) - MIT license
+libpng (http://www.libpng.org/pub/png/libpng.html) - libpng license (/deps/libpng/LICENSE)
+GLEW (http://glew.sourceforge.net/) - modified MIT license (http://glew.sourceforge.net/glew.txt)
+eigen (http://eigen.tuxfamily.org/) - Mozilla Public License 2.0 (LGPL parts of eigen are explicitly excluded by having "#define EIGEN_MPL2_ONLY" in /math/eigen.hpp)
+sqlite (http://www.sqlite.org/) - in public domain
+bullet (http://bulletphysics.org) - zlib license (http://zlib.net/zlib_license.html)
+libuv [via git submodule] (https://github.com/joyent/libuv) - node.js license (https://github.com/joyent/libuv/blob/master/LICENSE)
+http-parser [via git submodule] (https://github.com/joyent/http-parser) - MIT license
+utf8 (http://utfcpp.sourceforge.net/) - own license (in /deps/utf8.h heading comment)

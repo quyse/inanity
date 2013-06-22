@@ -3,17 +3,17 @@
 #include "FileInputStream.hpp"
 #include "OutputStream.hpp"
 #include "Exception.hpp"
-#include "scripting_impl.hpp"
+#include "meta/impl.hpp"
 
 BEGIN_INANITY
 
-SCRIPTABLE_MAP_BEGIN(FileSystem, Inanity.FileSystem);
-	SCRIPTABLE_METHOD(FileSystem, LoadFile);
-	SCRIPTABLE_METHOD(FileSystem, TryLoadFile);
-	SCRIPTABLE_METHOD(FileSystem, LoadStream);
-	SCRIPTABLE_METHOD(FileSystem, SaveFile);
-	SCRIPTABLE_METHOD(FileSystem, SaveStream);
-SCRIPTABLE_MAP_END();
+META_CLASS(FileSystem, Inanity.FileSystem);
+	META_METHOD(LoadFile);
+	META_METHOD(TryLoadFile);
+	META_METHOD(LoadStream);
+	META_METHOD(SaveFile);
+	META_METHOD(SaveStream);
+META_CLASS_END();
 
 ptr<File> FileSystem::LoadFile(const String& fileName)
 {

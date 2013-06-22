@@ -2,7 +2,7 @@
 #define ___INANITY_FOLDER_FILE_SYSTEM_HPP___
 
 #include "FileSystem.hpp"
-#include "scripting_decl.hpp"
+#include "meta/decl.hpp"
 
 BEGIN_INANITY
 
@@ -71,7 +71,7 @@ public:
 	*/
 	ptr<File> LoadPartOfFile(const String& fileName, long long mappingStart, size_t mappingSize);
 
-	SCRIPTABLE_CLASS(FolderFileSystem);
+	META_DECLARE_CLASS(FolderFileSystem);
 };
 
 END_INANITY

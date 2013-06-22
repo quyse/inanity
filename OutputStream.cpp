@@ -1,13 +1,13 @@
 #include "OutputStream.hpp"
 #include "InputStream.hpp"
 #include "MemoryFile.hpp"
-#include "scripting_impl.hpp"
+#include "meta/impl.hpp"
 #include <string.h>
 
 BEGIN_INANITY
 
-SCRIPTABLE_MAP_BEGIN(OutputStream, Inanity.OutputStream);
-SCRIPTABLE_MAP_END();
+META_CLASS(OutputStream, Inanity.OutputStream);
+META_CLASS_END();
 
 void OutputStream::Write(const void* data, size_t size)
 {

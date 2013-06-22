@@ -6,17 +6,17 @@
 #include "DiskInputStream.hpp"
 #include "DiskOutputStream.hpp"
 #include "Exception.hpp"
-#include "scripting_impl.hpp"
+#include "meta/impl.hpp"
 
 BEGIN_INANITY
 
-SCRIPTABLE_MAP_BEGIN(FolderFileSystem, Inanity.FolderFileSystem);
-	SCRIPTABLE_PARENT(FileSystem);
-	SCRIPTABLE_CONSTRUCTOR(FolderFileSystem, const String&);
-	SCRIPTABLE_METHOD(FolderFileSystem, GetNativeFileSystem);
-	SCRIPTABLE_METHOD(FolderFileSystem, GetFileSize);
-	SCRIPTABLE_METHOD(FolderFileSystem, LoadPartOfFile);
-SCRIPTABLE_MAP_END();
+META_CLASS(FolderFileSystem, Inanity.FolderFileSystem);
+	META_CLASS_PARENT(FileSystem);
+	META_CONSTRUCTOR(const String&);
+	META_STATIC_METHOD(GetNativeFileSystem);
+	META_METHOD(GetFileSize);
+	META_METHOD(LoadPartOfFile);
+META_CLASS_END();
 
 END_INANITY
 

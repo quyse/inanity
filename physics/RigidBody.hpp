@@ -2,7 +2,7 @@
 #define ___INANITY_PHYSICS_RIGID_BODY_HPP___
 
 #include "physics.hpp"
-#include "../scripting_decl.hpp"
+#include "../meta/decl.hpp"
 
 BEGIN_INANITY_PHYSICS
 
@@ -35,7 +35,7 @@ public:
 	/// Применить импульс к телу.
 	virtual void ApplyImpulse(const vec3& impulse) = 0;
 
-	SCRIPTABLE_CLASS(RigidBody);
+	META_DECLARE_CLASS(RigidBody);
 };
 
 END_INANITY_PHYSICS

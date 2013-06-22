@@ -2,7 +2,7 @@
 #define ___INANITY_OUTPUT_STREAM_HPP___
 
 #include "Object.hpp"
-#include "scripting_decl.hpp"
+#include "meta/decl.hpp"
 
 BEGIN_INANITY
 
@@ -43,7 +43,7 @@ public:
 	/** Так как такая задача часто встречается. */
 	bigsize_t ReadAllFromStream(ptr<InputStream> inputStream);
 
-	SCRIPTABLE_CLASS(OutputStream);
+	META_DECLARE_CLASS(OutputStream);
 };
 
 END_INANITY

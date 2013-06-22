@@ -1,5 +1,5 @@
 #include "StringTraveler.hpp"
-#include "utf8.h"
+#include "deps/utf8.h"
 
 BEGIN_INANITY
 
