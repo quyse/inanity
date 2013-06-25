@@ -4,6 +4,9 @@
 #include "graphics.hpp"
 #include "../String.hpp"
 #include <vector>
+#ifdef ___INANITY_WINDOWS
+#include "../windows.hpp"
+#endif
 
 BEGIN_INANITY_GRAPHICS
 
@@ -23,6 +26,11 @@ public:
 	/** Монитор может подкорректировать его, чтобы он был поддерживаемым.
 	Может быть возвращён 0, если никак нельзя создать поддерживаемый режим. */
 	virtual ptr<MonitorMode> TryCreateMode(int width, int height) = 0;
+
+#ifdef ___INANITY_WINDOWS
+	/// Получить координаты монитора на рабочем столе.
+	virtual RECT GetRect() const = 0;
+#endif
 };
 
 END_INANITY_GRAPHICS

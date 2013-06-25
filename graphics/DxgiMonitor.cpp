@@ -79,6 +79,22 @@ ptr<MonitorMode> DxgiMonitor::TryCreateMode(int width, int height)
 	}
 }
 
+RECT DxgiMonitor::GetRect() const
+{
+	try
+	{
+		MONITORINFO info;
+		info.cbSize = sizeof(info);
+		if(!GetMonitorInfo(desc.Monitor, &info))
+			THROW_PRIMARY_EXCEPTION("Can't get monitor info");
+		return info.rcMonitor;
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't get DXGI monitor rect", exception);
+	}
+}
+
 const DXGI_OUTPUT_DESC& DxgiMonitor::GetDesc() const
 {
 	return desc;

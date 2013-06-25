@@ -34,8 +34,21 @@ const std::vector<ptr<Adapter> >& GlSystem::GetAdapters()
 
 ptr<Device> GlSystem::CreateDevice(ptr<Adapter> abstractAdapter)
 {
-	// TODO
-	THROW_PRIMARY_EXCEPTION("Not implemented");
+	try
+	{
+#ifdef ___INANITY_WINDOWS
+		ptr<Win32Adapter> adapter = abstractAdapter.DynamicCast<Win32Adapter>();
+		if(!adapter)
+			THROW_PRIMARY_EXCEPTION("Wrong adapter type");
+		return NEW(GlDevice(this, adapter->GetId(), NEW(GlContext())));
+#endif
+		// TODO
+		THROW_PRIMARY_EXCEPTION("Not implemented");
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create OpenGL device", exception);
+	}
 }
 
 ptr<ShaderCompiler> GlSystem::CreateShaderCompiler()

@@ -1,5 +1,7 @@
 #include "Win32Monitor.hpp"
+#include "Win32MonitorMode.hpp"
 #include "../Strings.hpp"
+#include "../Exception.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
@@ -44,6 +46,30 @@ ptr<MonitorMode> Win32Monitor::TryCreateMode(int width, int height)
 {
 	// TODO
 	return 0;
+}
+
+RECT Win32Monitor::GetRect() const
+{
+	try
+	{
+		DEVMODE modeInfo;
+		modeInfo.dmSize = sizeof(modeInfo);
+		modeInfo.dmDriverExtra = 0;
+		std::cout << deviceName << "\n";
+		if(!EnumDisplaySettingsEx(info.DeviceName, ENUM_CURRENT_SETTINGS, &modeInfo, 0))
+			THROW_PRIMARY_EXCEPTION("Can't get current mode");
+
+		RECT rect;
+		rect.left = (modeInfo.dmFields & DM_POSITION) ? modeInfo.dmPosition.x : 0;
+		rect.top = (modeInfo.dmFields & DM_POSITION) ? modeInfo.dmPosition.y : 0;
+		rect.right = rect.left + ((modeInfo.dmFields & DM_PELSWIDTH) ? modeInfo.dmPelsWidth : 0);
+		rect.bottom = rect.top + ((modeInfo.dmFields & DM_PELSHEIGHT) ? modeInfo.dmPelsHeight : 0);
+		return rect;
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't get Win32 monitor rect", exception);
+	}
 }
 
 END_INANITY_GRAPHICS

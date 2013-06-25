@@ -1,7 +1,3 @@
-//var config = require('config.js');
-
-//console.log(config);
-
 exports.configureCompiler = function(objectFile, compiler) {
 	// объектные файлы: <conf>/object
 	var a = /^([^\/]+)\/([^\/]+)$/.exec(objectFile);
@@ -130,7 +126,8 @@ var libraries = {
 			'graphics.GlVertexBuffer', 'graphics.GlIndexBuffer', 'graphics.GlAttributeBinding',
 			'graphics.GlVertexShader', 'graphics.GlPixelShader',
 			'graphics.GlSamplerState', 'graphics.GlBlendState',
-			'graphics.GlShaderCompiler', 'graphics.GlslSource', 'graphics.GlShaderBindings'
+			'graphics.GlShaderCompiler', 'graphics.GlslSource', 'graphics.GlShaderBindings',
+			'graphics.Win32Adapter', 'graphics.Win32Monitor', 'graphics.Win32MonitorMode'
 		]
 	},
 	// ******* подсистема шейдеров
