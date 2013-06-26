@@ -68,7 +68,8 @@ public:
 	static ptr<Win32Window> CreateForDirectX(const String& title,
 		int left, int top, int width, int height);
 	/// Создать окно для OpenGL.
-	static ptr<Win32Window> CreateForOpenGL(const String& title);
+	static ptr<Win32Window> CreateForOpenGL(const String& title,
+		int left, int top, int width, int height);
 
 	/// Получить хендл окна.
 	HWND GetHWND() const;

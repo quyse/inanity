@@ -1,5 +1,6 @@
 #include "Win32Monitor.hpp"
 #include "Win32MonitorMode.hpp"
+#include "../platform/Win32Window.hpp"
 #include "../Strings.hpp"
 #include "../Exception.hpp"
 
@@ -46,6 +47,24 @@ ptr<MonitorMode> Win32Monitor::TryCreateMode(int width, int height)
 {
 	// TODO
 	return 0;
+}
+
+ptr<Platform::Window> Win32Monitor::CreateWindowCentered(const String& title, int width, int height)
+{
+	try
+	{
+		RECT rect = GetRect();
+		return Platform::Win32Window::CreateForOpenGL(
+			title,
+			rect.left + (rect.right - rect.left - width) / 2,
+			rect.top + (rect.bottom - rect.top - height) / 2,
+			width, height
+			);
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create window centered in Win32 monitor", exception);
+	}
 }
 
 RECT Win32Monitor::GetRect() const

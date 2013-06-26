@@ -24,6 +24,7 @@ public:
 	String GetName() const;
 	const std::vector<ptr<MonitorMode> >& GetModes();
 	ptr<MonitorMode> TryCreateMode(int width, int height);
+	ptr<Platform::Window> CreateWindowCentered(const String& title, int width, int height);
 	RECT GetRect() const;
 };
 

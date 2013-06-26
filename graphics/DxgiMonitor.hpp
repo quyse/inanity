@@ -25,6 +25,7 @@ public:
 	const std::vector<ptr<MonitorMode> >& GetModes();
 	ptr<MonitorMode> TryCreateMode(int width, int height);
 	RECT GetRect() const;
+	ptr<Platform::Window> CreateWindowCentered(const String& title, int width, int height);
 
 	const DXGI_OUTPUT_DESC& GetDesc() const;
 };

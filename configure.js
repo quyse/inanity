@@ -84,7 +84,7 @@ var libraries = {
 	},
 	// ******* подсистема окон Win32
 	'libinanity-platform': {
-		objects: ['platform.Desktop', 'platform.Win32Window', 'graphics.Win32Output']
+		objects: ['platform.Win32Window', 'graphics.Win32Output']
 	},
 	// ******* подсистема окон X11
 	'libinanity-x11window' : {

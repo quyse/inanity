@@ -79,7 +79,7 @@ ptr<Win32Window> Win32Window::CreateForDirectX(const String& title, int left, in
 	return NEW(Win32Window(windowClass, title, left, top, width, height));
 }
 
-ptr<Win32Window> Win32Window::CreateForOpenGL(const String& title)
+ptr<Win32Window> Win32Window::CreateForOpenGL(const String& title, int left, int top, int width, int height)
 {
 	static ATOM windowClass = NULL;
 	//зарегистрировать класс окна, если еще не сделано
@@ -97,7 +97,7 @@ ptr<Win32Window> Win32Window::CreateForOpenGL(const String& title)
 			THROW_PRIMARY_EXCEPTION("Can't register window class for OpenGL");
 	}
 
-	return NEW(Win32Window(windowClass, title));
+	return NEW(Win32Window(windowClass, title, left, top, width, height));
 }
 
 HWND Win32Window::GetHWND() const
