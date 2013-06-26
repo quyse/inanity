@@ -575,14 +575,17 @@ ptr<ShaderSource> Hlsl11GeneratorInstance::Generate()
 		const char* textureStr;
 		switch(samplerNode->GetCoordType())
 		{
-		case DataTypes::_float:
+		case SamplerNode::_1D:
 			textureStr = "Texture1D";
 			break;
-		case DataTypes::_vec2:
+		case SamplerNode::_2D:
 			textureStr = "Texture2D";
 			break;
-		case DataTypes::_vec3:
+		case SamplerNode::_3D:
 			textureStr = "Texture3D";
+			break;
+		case SamplerNode::_Cube:
+			textureStr = "TextureCube";
 			break;
 		default:
 			THROW_PRIMARY_EXCEPTION("Invalid sampler coord type");

@@ -7,22 +7,34 @@
 
 BEGIN_INANITY_SHADERS
 
-template <typename ValueType, typename CoordType>
-Sampler<ValueType, CoordType>::Sampler(ptr<SamplerNode> node)
+//*** class Sampler
+
+template <typename ValueType, int dimensions>
+Sampler<ValueType, dimensions>::Sampler(ptr<SamplerNode> node)
 : SamplerBase(node) {}
 
-template <typename ValueType, typename CoordType>
-Sampler<ValueType, CoordType>::Sampler(int slot)
-: SamplerBase(NEW(SamplerNode(slot, DataTypeOf<ValueType>(), DataTypeOf<CoordType>()))) {}
+template <typename ValueType, int dimensions>
+Sampler<ValueType, dimensions>::Sampler(int slot)
+: SamplerBase(NEW(SamplerNode(slot, DataTypeOf<ValueType>(), SamplerNode::CoordTypeFromDimensions(dimensions)))) {}
 
-template <typename ValueType, typename CoordType>
-void Sampler<ValueType, CoordType>::operator=(Sampler<ValueType, CoordType> a)
+template <typename ValueType, int dimensions>
+Value<ValueType> Sampler<ValueType, dimensions>::Sample(Value<CoordType> coords)
 {
-	// реализации не требуется
+	return Value<ValueType>(NEW(SampleNode(node.FastCast<SamplerNode>(), coords.GetNode())));
 }
 
-template <typename ValueType, typename CoordType>
-Value<ValueType> Sampler<ValueType, CoordType>::Sample(Value<CoordType> coords)
+//*** class SamplerCube
+
+template <typename ValueType>
+SamplerCube<ValueType>::SamplerCube(ptr<SamplerNode> node)
+: SamplerBase(node) {}
+
+template <typename ValueType>
+SamplerCube<ValueType>::SamplerCube(int slot)
+: SamplerBase(NEW(SamplerNode(slot, DataTypeOf<ValueType>(), SamplerNode::_Cube))) {}
+
+template <typename ValueType>
+Value<ValueType> SamplerCube<ValueType>::Sample(Value<vec3> coords)
 {
 	return Value<ValueType>(NEW(SampleNode(node.FastCast<SamplerNode>(), coords.GetNode())));
 }
