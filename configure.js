@@ -99,9 +99,9 @@ var libraries = {
 			'graphics.VertexLayout', 'graphics.VertexLayoutElement',
 			'graphics.AttributeLayout', 'graphics.AttributeLayoutElement', 'graphics.AttributeLayoutSlot',
 			'graphics.ShaderCache',
-			'graphics.Texture', 'graphics.TextureManager',
+			'graphics.PixelFormat', 'graphics.RawTextureData', 'graphics.Texture', 'graphics.TextureManager',
 			'graphics.EditableFont', 'graphics.Font', 'graphics.FontManager', 'graphics.TextDrawer',
-			'graphics.Image2DData', 'graphics.BmpImageLoader', 'graphics.PngImageLoader'
+			'graphics.BmpImageLoader', 'graphics.PngImageLoader'
 		]
 	},
 	// ******* подсистема DirectX 11
