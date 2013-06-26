@@ -13,7 +13,7 @@ private:
 	class Helper;
 
 public:
-	ptr<Image2DData> Load(ptr<File> file);
+	ptr<RawTextureData> Load(ptr<File> file);
 };
 
 END_INANITY_GRAPHICS

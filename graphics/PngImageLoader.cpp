@@ -1,7 +1,7 @@
 #include "PngImageLoader.hpp"
-#include "Image2DData.hpp"
+#include "RawTextureData.hpp"
 #include "../deps/libpng/png.h"
-#include "../MemoryFile.hpp"
+#include "../File.hpp"
 #include "../Exception.hpp"
 #include <sstream>
 
@@ -49,7 +49,7 @@ void PngImageLoader::Helper::Read(png_structp png, png_bytep data, png_size_t le
 	io.position += length;
 }
 
-ptr<Image2DData> PngImageLoader::Load(ptr<File> file)
+ptr<RawTextureData> PngImageLoader::Load(ptr<File> file)
 {
 	try
 	{
@@ -77,8 +77,8 @@ ptr<Image2DData> PngImageLoader::Load(ptr<File> file)
 		io.size = fileSize;
 		io.position = 8;
 
-		// память для изображения
-		ptr<MemoryFile> imageFile;
+		// данные изображения
+		ptr<RawTextureData> textureData;
 		png_bytep* imageRows = 0;
 
 		// создать объекты libpng
@@ -145,7 +145,7 @@ ptr<Image2DData> PngImageLoader::Load(ptr<File> file)
 		// в отдельном try-catch, чтобы исключение не выпало
 		try
 		{
-			imageFile = NEW(MemoryFile(height * pitch));
+			textureData = NEW(RawTextureData(0, PixelFormats::uintRGBA32, width, height, 0, 1, 0));
 		}
 		catch(Exception* exception)
 		{
@@ -154,7 +154,7 @@ ptr<Image2DData> PngImageLoader::Load(ptr<File> file)
 			png_error(pngPtr, "Can't allocate image memory");
 		}
 		imageRows = (png_bytep*)malloc(height * sizeof(void*));
-		png_bytep imageFileData = (png_bytep)imageFile->GetData();
+		png_bytep imageFileData = (png_bytep)textureData->GetMipData(0, 0);
 		for(int i = 0; i < height; ++i)
 			imageRows[i] = imageFileData + i * pitch;
 
@@ -172,7 +172,7 @@ ptr<Image2DData> PngImageLoader::Load(ptr<File> file)
 
 		// всё очищено, режим тревоги отменяется, теперь можно писать на C++ снова ^_^
 		// создать и вернуть объект данных изображения
-		return NEW(Image2DData(imageFile, width, height, pitch, PixelFormats::intR8G8B8A8));
+		return textureData;
 	}
 	catch(Exception* exception)
 	{

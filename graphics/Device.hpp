@@ -29,7 +29,7 @@ class IndexBuffer;
 class AttributeLayout;
 class AttributeBinding;
 class Texture;
-class Image2DData;
+class RawTextureData;
 class SamplerState;
 class BlendState;
 
@@ -78,12 +78,8 @@ public:
 	/// Создать привязку атрибутов.
 	virtual ptr<AttributeBinding> CreateAttributeBinding(ptr<AttributeLayout> layout) = 0;
 
-	/// Создать статическую текстуру из графического файла.
-	/** FIXME: Метод должен быть удалён. Для создания текстур нужно использовать
-	общий метод, принимающий ImageData. */
-	virtual ptr<Texture> CreateStaticTexture(ptr<File> file) = 0;
-	/// Создать статическую 2D-текстуру из графических данных.
-	virtual ptr<Texture> CreateStatic2DTexture(ptr<Image2DData> imageData) = 0;
+	/// Создать статическую текстуру из файла с сырыми данными.
+	virtual ptr<Texture> CreateStaticTexture(ptr<RawTextureData> data) = 0;
 
 	/// Создать объект настроек семплирования.
 	virtual ptr<SamplerState> CreateSamplerState() = 0;
