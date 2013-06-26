@@ -1,11 +1,28 @@
 #include "../inanity-graphics.hpp"
 #include "../inanity-dx11.hpp"
+#include "../inanity-gl.hpp"
 using namespace Inanity;
 using namespace Inanity::Graphics;
 
-int main()
+int main(int argc, char** argv)
 {
-	ptr<System> system = NEW(Dx11System());
+	ptr<System> system;
+	String systemStr;
+	if(argc >= 2)
+		systemStr = argv[1];
+	if(systemStr == "dx11")
+	{
+		system = NEW(Dx11System());
+	}
+	else if(systemStr == "gl")
+	{
+		system = NEW(GlSystem());
+	}
+	if(!system)
+	{
+		std::cout << "Usage: adapterstest <system>\nSupported systems: dx11, gl.\n";
+		return 0;
+	}
 
 	const std::vector<ptr<Adapter> >& adapters = system->GetAdapters();
 	for(size_t i = 0; i < adapters.size(); ++i)

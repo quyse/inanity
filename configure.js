@@ -174,8 +174,8 @@ var executables = {
 	}
 	, adapterstest: {
 		objects: ['graphics.adapters_test'],
-		staticLibraries: ['libinanity-base', 'libinanity-graphics', 'libinanity-shaders', 'libinanity-dx11', 'libinanity-win32window', 'libinanity-lua', 'deps/lua//liblua'],
-		dynamicLibraries: ['user32.lib', 'gdi32.lib', 'dxgi.lib', 'd3d11.lib', 'd3dx11.lib', 'd3dx10.lib']
+		staticLibraries: ['libinanity-base', 'libinanity-graphics', 'libinanity-shaders', 'libinanity-dx11', 'libinanity-gl', 'deps/glew//libglew', 'libinanity-platform', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
+		dynamicLibraries: ['user32.lib', 'gdi32.lib', 'dxgi.lib', 'd3d11.lib', 'd3dx11.lib', 'd3dx10.lib', 'opengl32.lib']
 	}
 	// TEST
 	, shaderstest: {
