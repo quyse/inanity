@@ -184,13 +184,13 @@ var executables = {
 	// TEST
 	, nettesttcp: {
 		objects: ['net.test-chat-tcp'],
-		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-lua', 'deps/lua//liblua'],
+		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
 		dynamicLibraries: []
 	}
 	// TEST
 	, nettestudp: {
 		objects: ['net.test-chat-udp'],
-		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-lua', 'deps/lua//liblua'],
+		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
 		dynamicLibraries: []
 	}
 };
