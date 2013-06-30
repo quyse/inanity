@@ -120,29 +120,7 @@ private:
 	/// Класс делегата.
 	/** Для упрощения привязки методов. */
 	template <typename Class>
-	class Delegate : public DataHandler
-	{
-	public:
-		typedef void (Class::*Method)(const Result& result);
-
-	private:
-		ptr<Class> object;
-		Method method;
-
-	public:
-		Delegate(ptr<Class> object, Method method)
-		: object(object), method(method) {}
-
-		void OnError(ptr<Exception> exception)
-		{
-			(object->*method)(ErrorResult(exception));
-		}
-
-		void OnData(T data)
-		{
-			(object->*method)(DataResult(data));
-		}
-	};
+	class Delegate;
 
 protected:
 	/// Обработать данные.
@@ -160,6 +138,32 @@ public:
 	static ptr<DataHandler> Bind(ptr<Class> object, typename Delegate<Class>::Method method)
 	{
 		return NEW(Delegate<Class>(object, method));
+	}
+};
+
+template <typename T>
+template <typename Class>
+class DataHandler<T>::Delegate : public DataHandler
+{
+public:
+	typedef void (Class::*Method)(const Result& result);
+
+private:
+	ptr<Class> object;
+	Method method;
+
+public:
+	Delegate(ptr<Class> object, Method method)
+	: object(object), method(method) {}
+
+	void OnError(ptr<Exception> exception)
+	{
+		(object->*method)(ErrorResult(exception));
+	}
+
+	void OnData(T data)
+	{
+		(object->*method)(DataResult(data));
 	}
 };
 
