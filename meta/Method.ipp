@@ -18,7 +18,8 @@ template <typename MethodType, MethodType method>
 Method<MethodType, method>::Method(const char* name) : MethodBase(name)
 {
 	// register the method in the class
-	typename Callable<MethodType>::ClassType::meta.AddMethod(this);
+	typedef typename Callable<MethodType>::ClassType ClassType;
+	ClassType::meta.AddMethod(this);
 }
 
 END_INANITY_META
