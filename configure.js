@@ -50,16 +50,6 @@ var libraries = {
 		// потоки для сжатия
 		'CompressStream', 'DecompressStream']
 	},
-	// ******* сетевая библиотека
-	'libinanity-net': {
-		objects: [
-		// базовая часть
-		'net.EventLoop',
-		// сокеты
-		'net.Socket', 'net.ClientSocket', 'net.ServerSocket',
-		// HTTP
-		'net.HttpClient', 'net.HttpResponseStream', 'net.http_parser']
-	},
 	// ******* сетевая библиотека ASIO
 	'libinanity-asio': {
 		objects: [
