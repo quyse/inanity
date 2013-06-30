@@ -4,6 +4,8 @@
 #include "../File.hpp"
 #include "../CriticalCode.hpp"
 
+BEGIN_INANITY_NET
+
 /// Вспомогательный класс буфера.
 /** Представляет собой один буфер с данными.
 Удовлетворяет требованиям Asio к ConstBufferSequence. */
@@ -194,3 +196,5 @@ void AsioUdpSocket::Close()
 		internalSocket = 0;
 	}
 }
+
+END_INANITY_NET

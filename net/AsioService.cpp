@@ -7,6 +7,8 @@
 #include <vector>
 #include <sstream>
 
+BEGIN_INANITY_NET
+
 /// Вспомогательный класс запроса на TCP-соединение.
 class AsioService::ConnectTcpRequest : public Object
 {
@@ -286,3 +288,5 @@ void AsioService::ConnectUdp(const String& host, int port, ptr<UdpSocketHandler>
 {
 	MakePointer(NEW(ConnectUdpRequest(this, host, port, socketHandler)));
 }
+
+END_INANITY_NET

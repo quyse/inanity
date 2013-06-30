@@ -2,6 +2,7 @@
 #include "TcpListener.hpp"
 #include "TcpSocket.hpp"
 #include "../inanity-base.hpp"
+using namespace Inanity;
 using namespace Inanity::Net;
 #include <iostream>
 #include <vector>

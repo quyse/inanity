@@ -7,10 +7,5 @@
 
 #define BEGIN_INANITY_NET BEGIN_INANITY namespace Net {
 #define END_INANITY_NET } END_INANITY
-#ifdef INANITY_LIB
-BEGIN_INANITY_NET
-END_INANITY_NET
-using namespace Inanity::Net;
-#endif
 
 #endif

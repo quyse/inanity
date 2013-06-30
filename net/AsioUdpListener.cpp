@@ -7,6 +7,8 @@
 #include "../PartFile.hpp"
 #include "../CriticalCode.hpp"
 
+BEGIN_INANITY_NET
+
 class AsioUdpListener::Packet : public UdpPacket
 {
 private:
@@ -81,3 +83,5 @@ void AsioUdpListener::Close()
 		internalSocket = 0;
 	}
 }
+
+END_INANITY_NET

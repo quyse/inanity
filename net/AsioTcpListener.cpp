@@ -3,6 +3,8 @@
 #include "AsioTcpSocket.hpp"
 #include <boost/bind.hpp>
 
+BEGIN_INANITY_NET
+
 /// Вспомогательный класс для обработки входящего сообщения.
 class AsioTcpListener::AcceptedBinder
 {
@@ -71,3 +73,5 @@ void AsioTcpListener::Accepted(const boost::system::error_code& error)
 		StartAccept();
 	}
 }
+
+END_INANITY_NET

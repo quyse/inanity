@@ -4,6 +4,8 @@
 #include "../PartFile.hpp"
 #include <boost/bind.hpp>
 
+BEGIN_INANITY_NET
+
 const size_t AsioTcpSocket::receiveFileSize = 0x1000;
 
 AsioTcpSocket::SendItem::SendItem(ptr<File> data, ptr<SendHandler> handler)
@@ -302,3 +304,5 @@ void AsioTcpSocket::Close()
 	{
 	}
 }
+
+END_INANITY_NET

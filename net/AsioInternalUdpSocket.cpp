@@ -7,6 +7,8 @@
 #include "../CriticalCode.hpp"
 #include <vector>
 
+BEGIN_INANITY_NET
+
 /* Policy для многопоточности.
 private-функции не делают синхронизации, и её нужно делать самим при вызове.
 public-функции делают синхронизацию.
@@ -181,3 +183,5 @@ void AsioInternalUdpSocket::Received(const boost::system::error_code& error, siz
 			clientListener->Accept(receiveEndpoint, NEW(PartFile(packetFile, packetFile->GetData(), transferred)));
 	}
 }
+
+END_INANITY_NET
