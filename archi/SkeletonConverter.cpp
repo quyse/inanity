@@ -43,7 +43,7 @@ void SkeletonConverter::Run(const std::vector<String>& arguments)
 	{
 		int parent;
 		quaternion worldOrientation;
-		float3 worldOffset;
+		vec3 worldOffset;
 		std::cin >> parent
 			>> worldOrientation.x >> worldOrientation.y >> worldOrientation.z >> worldOrientation.w
 			>> worldOffset.x >> worldOffset.y >> worldOffset.z;

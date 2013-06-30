@@ -1,5 +1,8 @@
 #include "Frame.hpp"
 #include "../Exception.hpp"
+#include <cstring>
+
+BEGIN_INANITY_INPUT
 
 Frame::Frame()
 {
@@ -85,3 +88,5 @@ void Frame::CopyTo(ptr<Frame> frame)
 	frame->currentEvent = currentEvent;
 	frame->state = state;
 }
+
+END_INANITY_INPUT

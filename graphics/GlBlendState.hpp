@@ -13,9 +13,14 @@ private:
 	static GLenum ConvertColorSource(ColorSource colorSource);
 	static GLenum ConvertAlphaSource(AlphaSource alphaSource);
 	static GLenum ConvertOperation(Operation operation);
+
+	static GlBlendState defaultState;
+
 public:
 	/// Применить настройки.
 	void Apply();
+	/// Применить настройки по умолчанию.
+	static void ApplyDefault();
 };
 
 END_INANITY_GRAPHICS

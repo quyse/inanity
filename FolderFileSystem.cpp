@@ -6,20 +6,26 @@
 #include "DiskInputStream.hpp"
 #include "DiskOutputStream.hpp"
 #include "Exception.hpp"
-#include "scripting_impl.hpp"
+#include "meta/impl.hpp"
 
-SCRIPTABLE_MAP_BEGIN(FolderFileSystem, Inanity.FolderFileSystem);
-	SCRIPTABLE_PARENT(FileSystem);
-	SCRIPTABLE_CONSTRUCTOR(FolderFileSystem, const String&);
-	SCRIPTABLE_METHOD(FolderFileSystem, GetNativeFileSystem);
-	SCRIPTABLE_METHOD(FolderFileSystem, GetFileSize);
-	SCRIPTABLE_METHOD(FolderFileSystem, LoadPartOfFile);
-SCRIPTABLE_MAP_END();
+BEGIN_INANITY
+
+META_CLASS(FolderFileSystem, Inanity.FolderFileSystem);
+	META_CLASS_PARENT(FileSystem);
+	META_CONSTRUCTOR(const String&);
+	META_STATIC_METHOD(GetNativeFileSystem);
+	META_METHOD(GetFileSize);
+	META_METHOD(LoadPartOfFile);
+META_CLASS_END();
+
+END_INANITY
 
 #ifdef ___INANITY_WINDOWS
 
 #include "windows.hpp"
 #include "Strings.hpp"
+
+BEGIN_INANITY
 
 FolderFileSystem::FolderFileSystem(const String& userFolderName)
 {
@@ -215,6 +221,8 @@ void FolderFileSystem::GetDirectoryEntries(const String& directoryName, std::vec
 	FindClose(hFind);
 }
 
+END_INANITY
+
 #endif // ___INANITY_WINDOWS
 
 #ifdef ___INANITY_LINUX
@@ -227,6 +235,8 @@ void FolderFileSystem::GetDirectoryEntries(const String& directoryName, std::vec
 #include <dirent.h>
 #include <errno.h>
 #include <stdlib.h>
+
+BEGIN_INANITY
 
 FolderFileSystem::FolderFileSystem(const String& userFolderName)
 {
@@ -426,7 +436,11 @@ void FolderFileSystem::GetDirectoryEntries(const String& directoryName, std::vec
 	closedir(dir);
 }
 
+END_INANITY
+
 #endif // ___INANITY_LINUX
+
+BEGIN_INANITY
 
 ptr<File> FolderFileSystem::LoadFile(const String& fileName)
 {
@@ -445,3 +459,5 @@ void FolderFileSystem::GetFileNames(std::vector<String>& fileNames) const
 	if(folderName.length())
 		GetAllDirectoryEntries("/", fileNames);
 }
+
+END_INANITY

@@ -7,6 +7,9 @@
 #include "input/Mux.hpp"
 #include "input/Manager.hpp"
 #include "input/Processor.hpp"
-#include "input/RawManager.hpp"
+
+#ifdef ___INANITY_WINDOWS
+#include "input/Win32RawManager.hpp"
+#endif
 
 #endif

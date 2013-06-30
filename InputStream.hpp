@@ -2,7 +2,7 @@
 #define ___INANITY_INPUT_STREAM_HPP___
 
 #include "Object.hpp"
-#include "scripting_decl.hpp"
+#include "meta/decl.hpp"
 
 BEGIN_INANITY
 
@@ -29,7 +29,7 @@ public:
 	Реализация по умолчанию просто читает данные в никуда. */
 	virtual bigsize_t Skip(bigsize_t size);
 
-	SCRIPTABLE_CLASS(InputStream);
+	META_DECLARE_CLASS(InputStream);
 };
 
 END_INANITY

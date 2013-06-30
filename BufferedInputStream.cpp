@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <cstring>
 
+BEGIN_INANITY
+
 BufferedInputStream::BufferedInputStream(ptr<InputStream> stream, size_t bufferSize)
 	: stream(stream), bufferSize(bufferSize), dataBegin(0), dataEnd(0)
 {
@@ -46,3 +48,5 @@ size_t BufferedInputStream::Read(void* data, size_t size)
 	}
 	return read;
 }
+
+END_INANITY

@@ -1,0 +1,11 @@
+Используемые расширения OpenGL:
+
+OpenGL 4.3
+==========
+* vertex_attrib_binding
+	VertexAttribBinding
+	BindVertexBuffer
+	VertexAttribFormat
+	VertexBindingDivisor
+
+Если vertex_attrib_binding поддерживается, для привязок используется Vertex Array Object. Если не поддерживается, привязки каждый раз выставляются вручную.

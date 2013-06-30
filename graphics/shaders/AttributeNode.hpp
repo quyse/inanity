@@ -3,23 +3,27 @@
 
 #include "Node.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
+class AttributeLayoutElement;
+
+END_INANITY_GRAPHICS
+
 BEGIN_INANITY_SHADERS
 
 /// Класс узла атрибута.
 class AttributeNode : public Node
 {
-protected:
-	DataType valueType;
-	/// Семантика атрибута.
-	int semantic;
+private:
+	ptr<AttributeLayoutElement> element;
 
 public:
-	AttributeNode(DataType valueType, int semantic);
+	AttributeNode(ptr<AttributeLayoutElement> element);
 
 	Type GetType() const;
 
 	DataType GetValueType() const;
-	int GetSemantic() const;
+	int GetElementIndex() const;
 };
 
 END_INANITY_SHADERS

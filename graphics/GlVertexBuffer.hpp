@@ -13,7 +13,7 @@ private:
 	GLuint name;
 
 public:
-	GlVertexBuffer(GLuint name, int verticesCount, ptr<Layout> layout);
+	GlVertexBuffer(GLuint name, int verticesCount, ptr<VertexLayout> layout);
 	~GlVertexBuffer();
 
 	GLuint GetName() const;

@@ -10,29 +10,44 @@
 #include "GlUniformBuffer.hpp"
 #include "GlVertexBuffer.hpp"
 #include "GlIndexBuffer.hpp"
-#include "Layout.hpp"
+#include "VertexLayout.hpp"
+#include "GlAttributeBinding.hpp"
+#include "AttributeLayout.hpp"
 #include "GlInternalTexture.hpp"
 #include "Image2DData.hpp"
 #include "GlSamplerState.hpp"
 #include "GlBlendState.hpp"
-#include "Win32Output.hpp"
+#include "GlslSource.hpp"
+#include "GlShaderBindings.hpp"
 #include "../File.hpp"
+#include "../FileInputStream.hpp"
 #include "../Exception.hpp"
-#ifdef ___INANITY_WINDOWS
 #include "../Strings.hpp"
+#ifdef ___INANITY_WINDOWS
+#include "Win32Output.hpp"
 #endif
+#ifdef ___INANITY_LINUX
+#include "X11Output.hpp"
+#include "../X11Window.hpp"
+#include "../X11Display.hpp"
+#endif
+
+BEGIN_INANITY_GRAPHICS
 
 #ifdef ___INANITY_WINDOWS
 GlDevice::GlDevice(ptr<GlSystem> system, const String& deviceName, ptr<GlContext> context)
-: system(system), deviceName(deviceName), context(context), hglrc(0)
-{
-}
+: system(system), deviceName(deviceName), context(context), hglrc(0) {}
 
 GlDevice::~GlDevice()
 {
 	if(hglrc)
 		wglDeleteContext(hglrc);
 }
+#endif
+
+#ifdef ___INANITY_LINUX
+GlDevice::GlDevice(ptr<GlSystem> system, ptr<GlContext> context)
+: system(system), context(context) {}
 #endif
 
 ptr<System> GlDevice::GetSystem() const
@@ -44,6 +59,7 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, const Prese
 {
 	try
 	{
+
 #ifdef ___INANITY_WINDOWS
 		// область вывода - только Win32
 		ptr<Win32Output> output = abstractOutput.DynamicCast<Win32Output>();
@@ -94,36 +110,100 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, const Prese
 		if(!wglMakeCurrent(hdc, hglrcTemp))
 			THROW_SECONDARY_EXCEPTION("Can't make temp OpenGL context current", Exception::SystemError());
 
-		// время для инициализации GLEW
-		GlSystem::InitGLEW();
-
 		// создать настоящий контекст
 		int attribs[] =
 		{
-			WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-			WGL_CONTEXT_MINOR_VERSION_ARB, 2,
-			WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+			WGL_CONTEXT_MAJOR_VERSION_ARB, 0,
+			WGL_CONTEXT_MINOR_VERSION_ARB, 0,
+			WGL_CONTEXT_FLAGS_ARB, 0
+#ifdef _DEBUG
+				| WGL_CONTEXT_DEBUG_BIT_ARB
+#endif
+			,
 			WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
 			0, 0
 		};
-		hglrc = wglCreateContextAttribsARB(hdc, 0, attribs);
-		PFNWGLCREATECONTEXTATTRIBSARBPROC p = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
-		if(!p)
-			THROW_PRIMARY_EXCEPTION("ppp");
+		// версии для попыток создания
+		static const int versions[][2] =
+		{
+			{ 4, 3 },
+			{ 4, 2 },
+			{ 4, 1 },
+			{ 4, 0 },
+			{ 3, 3 },
+			{ 3, 2 }
+		};
+		PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
+		if(!wglCreateContextAttribsARB)
+			THROW_PRIMARY_EXCEPTION("Can't get wglCreateContextAttribsARB");
+		// цикл по попыткам создать контекст для какой-нибудь версии
+		for(int i = 0; i < sizeof(versions) / sizeof(versions[0]); ++i)
+		{
+			attribs[1] = versions[i][0];
+			attribs[3] = versions[i][1];
+			hglrc = wglCreateContextAttribsARB(hdc, 0, attribs);
+			if(hglrc)
+				break;
+		}
+		// если никакая версия OpenGL не поддерживается, то жопа
 		if(!hglrc)
 			THROW_PRIMARY_EXCEPTION("Can't create OpenGL window context");
 
-		// сделать его текущим
+		// сделать новый контекст текущим
 		if(!wglMakeCurrent(hdc, hglrc))
 			THROW_SECONDARY_EXCEPTION("Can't make OpenGL context current", Exception::SystemError());
 
 		// удалить временный контекст
 		wglDeleteContext(hglrcTemp);
 
+		// инициализировать GLEW
+		GlSystem::InitGLEW();
+
+		// очистка ошибок - обход бага GLEW, который может оставлять ошибки
+		// (тем не менее, GLEW инициализируется нормально)
+		GlSystem::ClearErrors();
+
+		// установить размер окна
+		SetWindowPos(output->GetHWND(), NULL, 0, 0, mode.width, mode.height, SWP_NOMOVE | SWP_NOZORDER);
+
 		// создать и вернуть Presenter
 		return NEW(GlPresenter(this, hdc, NEW(GlRenderBuffer(0, 0))));
-
 #endif
+
+#ifdef ___INANITY_LINUX
+		// область вывода - только X11
+		ptr<X11Output> output = abstractOutput.DynamicCast<X11Output>();
+		if(!output)
+			THROW_PRIMARY_EXCEPTION("Only X11 output is allowed");
+
+		// получить окно
+		ptr<X11Window> window = output->GetWindow();
+
+		::Display* d = window->GetDisplay()->GetDisplay();
+
+		// создать контекст
+		glxContext = glXCreateContext(d, window->GetXVisualInfo(), NULL, True);
+		if(!glxContext)
+			THROW_PRIMARY_EXCEPTION("Can't create GLX context");
+
+		// сделать его текущим
+		glXMakeCurrent(d, window->GetHandle(), glxContext);
+
+		// инициализировать GLEW
+		GlSystem::InitGLEW();
+
+		GlSystem::ClearErrors();
+
+		// установить размер окна
+		XResizeWindow(d, window->GetHandle(), mode.width, mode.height);
+
+		// отобразить окно
+		XMapWindow(d, window->GetHandle());
+
+		// создать и вернуть Presenter
+		return NEW(GlPresenter(this, NEW(GlRenderBuffer(0, 0))));
+#endif
+
 	}
 	catch(Exception* exception)
 	{
@@ -191,7 +271,7 @@ ptr<DepthStencilBuffer> GlDevice::CreateDepthStencilBuffer(int width, int height
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 		GlSystem::CheckErrors("Can't set texture parameters");
 
-		return NEW(GlDepthStencilBuffer(internalTexture, NEW(GlTexture(internalTexture))));
+		return NEW(GlDepthStencilBuffer(internalTexture, NEW(GlTexture(internalTexture)), width, height));
 	}
 	catch(Exception* exception)
 	{
@@ -199,11 +279,18 @@ ptr<DepthStencilBuffer> GlDevice::CreateDepthStencilBuffer(int width, int height
 	}
 }
 
-void GlDevice::CompileShader(GLuint shaderName, ptr<File> file)
+void GlDevice::CompileShader(GLuint shaderName, ptr<File> file, ptr<GlShaderBindings>& shaderBindings)
 {
+	// десериализовать исходник
+	ptr<GlslSource> source = GlslSource::Deserialize(NEW(FileInputStream(file)));
+
+	// вернуть привязки
+	shaderBindings = source->GetShaderBindings();
+
 	// указать текст шейдера
-	const GLchar* string = (const GLchar*)file->GetData();
-	const GLint length = (GLint)file->GetSize();
+	ptr<File> code = source->GetCode();
+	const GLchar* string = (const GLchar*)code->GetData();
+	const GLint length = (GLint)code->GetSize();
 	glShaderSource(shaderName, 1, &string, &length);
 	GlSystem::CheckErrors("Can't set shader source");
 
@@ -225,7 +312,7 @@ void GlDevice::CompileShader(GLuint shaderName, ptr<File> file)
 			GlSystem::ClearErrors();
 
 			// выбросить ошибку
-			THROW_PRIMARY_EXCEPTION("Can't compile shader:\n" + Strings::File2String(file) + "\n" + log);
+			THROW_PRIMARY_EXCEPTION("Can't compile shader:\n" + Strings::File2String(code) + "\n" + log);
 		}
 	}
 }
@@ -237,9 +324,10 @@ ptr<VertexShader> GlDevice::CreateVertexShader(ptr<File> file)
 		GLuint shaderName = glCreateShader(GL_VERTEX_SHADER);
 		GlSystem::CheckErrors("Can't create shader");
 
-		CompileShader(shaderName, file);
+		ptr<GlShaderBindings> shaderBindings;
+		CompileShader(shaderName, file, shaderBindings);
 
-		return NEW(GlVertexShader(shaderName));
+		return NEW(GlVertexShader(shaderName, shaderBindings));
 	}
 	catch(Exception* exception)
 	{
@@ -254,9 +342,10 @@ ptr<PixelShader> GlDevice::CreatePixelShader(ptr<File> file)
 		GLuint shaderName = glCreateShader(GL_FRAGMENT_SHADER);
 		GlSystem::CheckErrors("Can't create shader");
 
-		CompileShader(shaderName, file);
+		ptr<GlShaderBindings> shaderBindings;
+		CompileShader(shaderName, file, shaderBindings);
 
-		return NEW(GlPixelShader(shaderName));
+		return NEW(GlPixelShader(shaderName, shaderBindings));
 	}
 	catch(Exception* exception)
 	{
@@ -287,7 +376,7 @@ ptr<UniformBuffer> GlDevice::CreateUniformBuffer(int size)
 	}
 }
 
-ptr<VertexBuffer> GlDevice::CreateVertexBuffer(ptr<File> file, ptr<Layout> layout)
+ptr<VertexBuffer> GlDevice::CreateStaticVertexBuffer(ptr<File> file, ptr<VertexLayout> layout)
 {
 	try
 	{
@@ -306,11 +395,34 @@ ptr<VertexBuffer> GlDevice::CreateVertexBuffer(ptr<File> file, ptr<Layout> layou
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create vertex buffer", exception);
+		THROW_SECONDARY_EXCEPTION("Can't create OpenGL static vertex buffer", exception);
 	}
 }
 
-ptr<IndexBuffer> GlDevice::CreateIndexBuffer(ptr<File> file, int indexSize)
+ptr<VertexBuffer> GlDevice::CreateDynamicVertexBuffer(int size, ptr<VertexLayout> layout)
+{
+	try
+	{
+		GLuint bufferName;
+		glGenBuffers(1, &bufferName);
+		GlSystem::CheckErrors("Can't gen buffer");
+		ptr<GlVertexBuffer> vertexBuffer = NEW(GlVertexBuffer(bufferName, size / layout->GetStride(), layout));
+
+		glBindBuffer(GL_ARRAY_BUFFER, bufferName);
+		GlSystem::CheckErrors("Can't bind buffer");
+
+		glBufferData(GL_ARRAY_BUFFER, size, 0, GL_DYNAMIC_DRAW);
+		GlSystem::CheckErrors("Can't setup buffer data");
+
+		return vertexBuffer;
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create OpenGL dynamic vertex buffer", exception);
+	}
+}
+
+ptr<IndexBuffer> GlDevice::CreateStaticIndexBuffer(ptr<File> file, int indexSize)
 {
 	try
 	{
@@ -330,6 +442,161 @@ ptr<IndexBuffer> GlDevice::CreateIndexBuffer(ptr<File> file, int indexSize)
 	catch(Exception* exception)
 	{
 		THROW_SECONDARY_EXCEPTION("Can't create index buffer", exception);
+	}
+}
+
+void GlDevice::GetAttributeSizeAndType(DataType dataType, GLint& size, GLenum& type, bool& integer)
+{
+	switch(dataType)
+	{
+	case DataTypes::_float:
+		size = 1;
+		type = GL_FLOAT;
+		integer = false;
+		break;
+	case DataTypes::_vec2:
+		size = 2;
+		type = GL_FLOAT;
+		integer = false;
+		break;
+	case DataTypes::_vec3:
+		size = 3;
+		type = GL_FLOAT;
+		integer = false;
+		break;
+	case DataTypes::_vec4:
+		size = 4;
+		type = GL_FLOAT;
+		integer = false;
+		break;
+	case DataTypes::_mat4x4:
+		THROW_PRIMARY_EXCEPTION("Matrices can't be used in attributes");
+	case DataTypes::_uint:
+		size = 1;
+		type = GL_UNSIGNED_INT;
+		integer = true;
+		break;
+	case DataTypes::_uvec2:
+		size = 2;
+		type = GL_UNSIGNED_INT;
+		integer = true;
+		break;
+	case DataTypes::_uvec3:
+		size = 3;
+		type = GL_UNSIGNED_INT;
+		integer = true;
+		break;
+	case DataTypes::_uvec4:
+		size = 4;
+		type = GL_UNSIGNED_INT;
+		integer = true;
+		break;
+	default:
+		THROW_PRIMARY_EXCEPTION("Unknown attribute element type");
+	}
+}
+
+ptr<AttributeBinding> GlDevice::CreateAttributeBinding(ptr<AttributeLayout> layout)
+{
+	try
+	{
+		// если поддерживается vertex bindings, используем их как более оптимальный метод
+		if(GLEW_ARB_vertex_attrib_binding)
+		{
+			// создать Vertex Array Object
+			GLuint vertexArrayName;
+			glGenVertexArrays(1, &vertexArrayName);
+			GlSystem::CheckErrors("Can't gen vertex array");
+
+			// сразу создать привязку
+			ptr<AttributeBinding> binding = NEW(GlAttributeBinding(vertexArrayName));
+
+			// задать все настройки для VAO
+
+			// привязать VAO
+			glBindVertexArray(vertexArrayName);
+			GlSystem::CheckErrors("Can't bind vertex array");
+
+			const AttributeLayout::Elements& elements = layout->GetElements();
+			const AttributeLayout::Slots& slots = layout->GetSlots();
+
+			// задать элементы в VAO
+			for(size_t i = 0; i < elements.size(); ++i)
+			{
+				const AttributeLayout::Element& element = elements[i];
+
+				glEnableVertexAttribArray((GLuint)i);
+				GlSystem::CheckErrors("Can't enable vertex attribute array");
+
+				// выбрать формат и размер
+				GLint size;
+				GLenum type;
+				bool integer;
+				GetAttributeSizeAndType(element.dataType, size, type, integer);
+
+				if(integer)
+					glVertexAttribIFormat((GLuint)i, size, type, element.offset);
+				else
+					glVertexAttribFormat((GLuint)i, size, type, false, element.offset);
+				GlSystem::CheckErrors("Can't set vertex attribute format");
+
+				// указать слот для элемента
+				glVertexAttribBinding((GLuint)i, element.slot);
+			}
+
+			// задать разделители для слотов
+			for(size_t i = 0; i < slots.size(); ++i)
+			{
+				glVertexBindingDivisor((GLuint)i, slots[i].divisor);
+				GlSystem::CheckErrors("Can't set vertex binding divisor");
+			}
+
+			// отвязать VAO
+			glBindVertexArray(0);
+			GlSystem::CheckErrors("Can't unbind vertex array");
+
+			// вернуть привязку
+			return binding;
+		}
+		// иначе использовать "ручную" привязку
+		else
+		{
+			// создать привязку
+			ptr<GlAttributeBinding> binding = NEW(GlAttributeBinding(0));
+
+			const AttributeLayout::Elements& elements = layout->GetElements();
+			const AttributeLayout::Slots& slots = layout->GetSlots();
+
+			GlAttributeBinding::Slots& bindingSlots = binding->GetSlots();
+
+			// задать слоты
+			bindingSlots.resize(slots.size());
+			for(size_t i = 0; i < slots.size(); ++i)
+				bindingSlots[i].divisor = slots[i].divisor;
+
+			// задать элементы
+			for(size_t i = 0; i < elements.size(); ++i)
+			{
+				const AttributeLayout::Element& element = elements[i];
+
+				GlAttributeBinding::Slot& bindingSlot = bindingSlots[element.slot];
+
+				GlAttributeBinding::Element bindingElement;
+				bindingElement.index = (GLuint)i;
+				GetAttributeSizeAndType(element.dataType, bindingElement.size, bindingElement.type, bindingElement.integer);
+				bindingElement.normalized = false;
+				bindingElement.pointer = (GLvoid*)element.offset;
+
+				bindingSlot.elements.push_back(bindingElement);
+			}
+
+			// вернуть привязку
+			return binding;
+		}
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY_EXCEPTION("Can't create GL attribute binding", exception);
 	}
 }
 
@@ -354,7 +621,7 @@ ptr<Texture> GlDevice::CreateStatic2DTexture(ptr<Image2DData> imageData)
 		GLenum type;
 		if(!GlSystem::GetTextureFormat(imageData->GetPixelFormat(), internalFormat, format, type))
 			THROW_PRIMARY_EXCEPTION("Invalid pixel format");
-		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, (GLsizei)imageData->GetWidth(), (GLsizei)imageData->GetHeight(), 0, format, type, imageData->GetData());
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, (GLsizei)imageData->GetWidth(), (GLsizei)imageData->GetHeight(), 0, format, type, imageData->GetData()->GetData());
 		GlSystem::CheckErrors("Can't initialize texture");
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -399,3 +666,5 @@ ptr<BlendState> GlDevice::CreateBlendState()
 		THROW_SECONDARY_EXCEPTION("Can't create OpenGL blend state", exception);
 	}
 }
+
+END_INANITY_GRAPHICS

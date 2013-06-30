@@ -6,17 +6,21 @@
 
 BEGIN_INANITY_GRAPHICS
 
+class GlShaderBindings;
+
 /// Класс пиксельного (фрагментного) шейдера OpenGL.
 class GlPixelShader : public PixelShader
 {
 private:
 	GLuint shaderName;
+	ptr<GlShaderBindings> shaderBindings;
 
 public:
-	GlPixelShader(GLuint shaderName);
+	GlPixelShader(GLuint shaderName, ptr<GlShaderBindings> shaderBindings);
 	~GlPixelShader();
 
 	GLuint GetShaderName() const;
+	ptr<GlShaderBindings> GetShaderBindings() const;
 };
 
 END_INANITY_GRAPHICS

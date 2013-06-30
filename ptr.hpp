@@ -2,6 +2,7 @@
 #define ___INANITY_POINTER_HPP___
 
 #include "config.hpp"
+#include <functional>
 
 BEGIN_INANITY
 
@@ -11,6 +12,11 @@ BEGIN_INANITY
 		__asm int 3;
 #else
 #define CHECK_OBJECT()
+#endif
+
+#ifdef ___INANITY_TRACE_PTR
+// функция определена в ManagedHeap.cpp
+void ManagedHeapTracePtr(void* ptr, void* object);
 #endif
 
 /// Класс указателя на управляемый объект.
@@ -27,14 +33,20 @@ public:
 	{
 		object = p.object;
 		if(object) object->Reference();
+#ifdef ___INANITY_TRACE_PTR
+		ManagedHeapTracePtr(this, object);
+#endif
 	}
 
 	/// Конструктор, создающий указатель из другого указателя.
 	template <typename TT>
 	inline ptr(const ptr<TT>& p)
 	{
-		object = p;
+		object = static_cast<TT*>(p);
 		if(object) object->Reference();
+#ifdef ___INANITY_TRACE_PTR
+		ManagedHeapTracePtr(this, object);
+#endif
 	}
 
 	/// Конструктор, создающий указатель из неуправляемого указателя.
@@ -43,12 +55,18 @@ public:
 	{
 		object = p;
 		if(object) object->Reference();
+#ifdef ___INANITY_TRACE_PTR
+		ManagedHeapTracePtr(this, object);
+#endif
 	}
 
 	/// Деструктор.
 	inline ~ptr()
 	{
 		if(object) object->Dereference();
+#ifdef ___INANITY_TRACE_PTR
+		ManagedHeapTracePtr(this, 0);
+#endif
 	}
 
 	/// Оператор присваивания указателя.
@@ -57,14 +75,20 @@ public:
 		if(object) object->Dereference();
 		object = p.object;
 		if(object) object->Reference();
+#ifdef ___INANITY_TRACE_PTR
+		ManagedHeapTracePtr(this, object);
+#endif
 	}
 	/// Оператор присваивания указателя совместимого типа.
 	template <typename TT>
 	inline void operator = (const ptr<TT>& p)
 	{
 		if(object) object->Dereference();
-		object = p;
+		object = static_cast<TT*>(p);
 		if(object) object->Reference();
+#ifdef ___INANITY_TRACE_PTR
+		ManagedHeapTracePtr(this, object);
+#endif
 	}
 
 	/// Оператор разыменования указателя.
@@ -148,5 +172,18 @@ inline ptr<T> MakePointer(T* p)
 #undef CHECK_OBJECT
 
 END_INANITY
+
+// Оператор для хеширования указателей.
+namespace std
+{
+	template <typename T>
+	struct hash<Inanity::ptr<T> >
+	{
+		size_t operator()(const Inanity::ptr<T>& p) const
+		{
+			return reinterpret_cast<size_t>(static_cast<T*>(p));
+		}
+	};
+}
 
 #endif

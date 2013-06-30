@@ -2,6 +2,8 @@
 #include "GlInternalTexture.hpp"
 #include "GlTexture.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 GlRenderBuffer::GlRenderBuffer(ptr<GlInternalTexture> internalTexture, ptr<GlTexture> texture)
 : internalTexture(internalTexture), texture(texture)
 {
@@ -9,10 +11,12 @@ GlRenderBuffer::GlRenderBuffer(ptr<GlInternalTexture> internalTexture, ptr<GlTex
 
 GLuint GlRenderBuffer::GetName() const
 {
-	return internalTexture->GetName();
+	return internalTexture ? internalTexture->GetName() : 0;
 }
 
 ptr<Texture> GlRenderBuffer::GetTexture()
 {
 	return texture;
 }
+
+END_INANITY_GRAPHICS

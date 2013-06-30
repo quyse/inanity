@@ -3,54 +3,49 @@
 
 #include "Context.hpp"
 #include "opengl.hpp"
+#include <map>
 
 BEGIN_INANITY_GRAPHICS
 
 class GlInternalProgramCache;
-class GlInternalAttributeBinding;
-class GlInternalAttributeBindingCache;
-class GlVertexLayout;
 class GlInternalProgram;
-class Layout;
+class GlRenderBuffer;
 
 /// Класс контекста OpenGL.
 class GlContext : public Context
 {
 private:
-	/// Фреймбуфер для установки нестандартных рендертаргетов.
-	GLuint targetsFramebuffer;
-	/// Фреймбуфер для вспомогательных операций.
-	GLuint serviceFramebuffer;
+	/// Фреймбуфер для установки нестандартных рендертаргетов (целевой фреймбуфер).
+	GLuint targetFramebuffer;
 	/// Текущий фреймбуфер.
-	/** То есть тот, который должен быть. Если флажок грязности фреймбуфера
-	установлен, то он может быть неправильным.
-	В сущности, может быть равен только targetsFramebuffer или 0 (нет фреймбуфера).
-	*/
-	GLuint currentFramebuffer;
-	/// Флажок "грязности" текущего фреймбуфера.
-	/** Если он стоит, то буфер следует установить в currentFramebuffer. */
-	bool dirtyCurrentFramebuffer;
+	GLuint boundFramebuffer;
+
+	/// Количество используемых атрибутов.
+	int boundAttributesCount;
 
 	/// Кэш программ.
 	ptr<GlInternalProgramCache> programCache;
 	/// Текущая программа.
 	ptr<GlInternalProgram> boundProgram;
 
-	/// Кэш привязок аттрибутов.
-	ptr<GlInternalAttributeBindingCache> attributeBindingCache;
-	/// Текущая привязка атрибутов.
-	ptr<GlInternalAttributeBinding> boundAttributeBinding;
-
-	void BindServiceFramebuffer();
+	void BindTargetsFramebuffer();
+	void BindDefaultFramebuffer();
 	/// Выполнить обновление в API всех "грязных" состояний.
 	void Update();
+
+	/* Используется странное решение для очистки буферов глубины.
+	Так как для очистки требуется полнота фреймбуфера, то есть
+	хотя бы один цветовой буфер, мы привязываем бесполезный буфер. */
+	/// Кэш пустых рендербуферов для очистки буфера глубины.
+	std::map<std::pair<int, int>, ptr<GlRenderBuffer> > dummyRenderBuffers;
+	/// Получить пустой рендербуфер нужных размеров.
+	ptr<GlRenderBuffer> GetDummyRenderBuffer(int width, int height);
+
+	void SetBufferData(GLenum target, GLuint bufferName, const void* data, int size, int bufferSize);
 
 public:
 	GlContext();
 	~GlContext();
-
-	/// Создать привязку атрибутов.
-	ptr<GlInternalAttributeBinding> CreateInternalAttributeBinding(Layout* vertexLayout, GlInternalProgram* program);
 
 	// методы Context
 
@@ -59,7 +54,8 @@ public:
 	void ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, unsigned stencil);
 	void ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, float depth, unsigned stencil);
 
-	void SetUniformBufferData(UniformBuffer* buffer, const void* data, size_t size);
+	void SetUniformBufferData(UniformBuffer* buffer, const void* data, int size);
+	void SetVertexBufferData(VertexBuffer* buffer, const void* data, int size);
 
 	void Draw();
 	void DrawInstanced(int instancesCount);

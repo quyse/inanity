@@ -1,8 +1,12 @@
 #include "Shape.hpp"
 #include "World.hpp"
-#include "../scripting_impl.hpp"
+#include "../meta/impl.hpp"
 
-SCRIPTABLE_MAP_BEGIN(Shape, Inanity.Physics.Shape);
-SCRIPTABLE_MAP_END();
+BEGIN_INANITY_PHYSICS
+
+META_CLASS(Shape, Inanity.Physics.Shape);
+META_CLASS_END();
 
 Shape::Shape(ptr<World> world) : world(world) {}
+
+END_INANITY_PHYSICS

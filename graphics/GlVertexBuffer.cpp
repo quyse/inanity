@@ -1,7 +1,9 @@
 #include "GlVertexBuffer.hpp"
-#include "Layout.hpp"
+#include "VertexLayout.hpp"
 
-GlVertexBuffer::GlVertexBuffer(GLuint name, int verticesCount, ptr<Layout> layout)
+BEGIN_INANITY_GRAPHICS
+
+GlVertexBuffer::GlVertexBuffer(GLuint name, int verticesCount, ptr<VertexLayout> layout)
 : VertexBuffer(verticesCount, layout), name(name) {}
 
 GlVertexBuffer::~GlVertexBuffer()
@@ -13,3 +15,5 @@ GLuint GlVertexBuffer::GetName() const
 {
 	return name;
 }
+
+END_INANITY_GRAPHICS

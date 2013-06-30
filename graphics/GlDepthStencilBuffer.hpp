@@ -15,11 +15,14 @@ class GlDepthStencilBuffer : public DepthStencilBuffer
 private:
 	ptr<GlInternalTexture> internalTexture;
 	ptr<GlTexture> texture;
+	int width, height;
 
 public:
-	GlDepthStencilBuffer(ptr<GlInternalTexture> internalTexture, ptr<GlTexture> texture);
+	GlDepthStencilBuffer(ptr<GlInternalTexture> internalTexture, ptr<GlTexture> texture, int width, int height);
 
 	GLuint GetName() const;
+	int GetWidth() const;
+	int GetHeight() const;
 
 	// методы DepthStencilBuffer
 	ptr<Texture> GetTexture();

@@ -220,12 +220,12 @@ void SystemFontCreator::CreateImage(const String& alphabatFileName, const String
 		int charWidth = gm.gmBlackBoxX;
 		int charHeight = gm.gmBlackBoxY;
 		FontChar& fontChar = charset[str[i]];
-		fontChar.firstUV = float2(solver.coords[i].x * pixelWidth, (solver.coords[i].y + charHeight + 2) * pixelHeight);
-		fontChar.secondUV = float2((solver.coords[i].x + charWidth + 2) * pixelWidth, solver.coords[i].y * pixelHeight);
+		fontChar.firstUV = vec2(solver.coords[i].x * pixelWidth, (solver.coords[i].y + charHeight + 2) * pixelHeight);
+		fontChar.secondUV = vec2((solver.coords[i].x + charWidth + 2) * pixelWidth, solver.coords[i].y * pixelHeight);
 		//заметим, что тут хитро - Glyph Origin указывает на положение точки отсчета для символа
 		//в системе координат с Y, направленной вверх, причем в MSDN этого не написано
-		fontChar.screenFirstUV = float2(float(gm.gmptGlyphOrigin.x - 1), float(-charHeight + gm.gmptGlyphOrigin.y - 1));
-		fontChar.screenSecondUV = float2(float(gm.gmptGlyphOrigin.x + charWidth + 1), float(gm.gmptGlyphOrigin.y + 1));
+		fontChar.screenFirstUV = vec2(float(gm.gmptGlyphOrigin.x - 1), float(-charHeight + gm.gmptGlyphOrigin.y - 1));
+		fontChar.screenSecondUV = vec2(float(gm.gmptGlyphOrigin.x + charWidth + 1), float(gm.gmptGlyphOrigin.y + 1));
 		fontChar.width = gm.gmCellIncX;
 	}
 	//вычислим высоту символов (как максимум из их высот)

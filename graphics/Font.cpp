@@ -6,6 +6,8 @@
 #include "../ResourceManager.ipp"
 #include "../Exception.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 FontChar Font::defaultFontChar;
 
 Font::Font(ptr<Texture> texture, const Charset& charset, const KerningPairs& kerningPairs, float charHeight)
@@ -91,3 +93,5 @@ ptr<Font> Font::Deserialize(ptr<InputStream> inputStream, ptr<TextureManager> te
 		THROW_SECONDARY_EXCEPTION("Can't deserialize font", exception);
 	}
 }
+
+END_INANITY_GRAPHICS

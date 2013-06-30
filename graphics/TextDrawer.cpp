@@ -11,7 +11,12 @@
 #include "Device.hpp"
 #include "Context.hpp"
 #include "ShaderCache.hpp"
-#include "Layout.hpp"
+#include "VertexLayout.hpp"
+#include "VertexLayoutElement.hpp"
+#include "AttributeLayout.hpp"
+#include "AttributeLayoutSlot.hpp"
+#include "AttributeLayoutElement.hpp"
+#include "AttributeBinding.hpp"
 #include "RenderBuffer.hpp"
 #include "DepthStencilBuffer.hpp"
 #include "../MemoryFile.hpp"
@@ -21,30 +26,39 @@
 
 BEGIN_INANITY_GRAPHICS
 
+using namespace Shaders;
+
 /// Вспомогательная структура для рисователя.
 struct TextDrawerHelper : public Object
 {
 	/// Максимальное количество символов, рисуемое за раз.
 	static const int maxSymbolsCount = 64;
 
-	Attribute<float4> aCorner;
+	ptr<VertexLayout> vl;
+	ptr<VertexLayoutElement> vlePosition;
+	ptr<AttributeLayout> al;
+	ptr<AttributeLayoutSlot> als;
+	ptr<AttributeLayoutElement> alePosition;
+	ptr<AttributeBinding> ab;
 
-	Interpolant<float2> iTexcoord;
-	Interpolant<float4> iColor;
+	Value<vec4> aCorner;
 
-	Fragment<float4> fTarget;
+	Interpolant<vec2> iTexcoord;
+	Interpolant<vec4> iColor;
+
+	Fragment<vec4> fTarget;
 
 	ptr<UniformGroup> ugSymbols;
 	/// Координаты символов на экране.
-	UniformArray<float4> uPositions;
+	UniformArray<vec4> uPositions;
 	/// Текстурные координаты символов.
-	UniformArray<float4> uTexcoords;
+	UniformArray<vec4> uTexcoords;
 	/// Цвета символов.
-	UniformArray<float4> uColors;
+	UniformArray<vec4> uColors;
 
 	/// Текстура шрифта.
 	/** Задаёт альфу для шрифта. */
-	Sampler<float, float2> uFontSampler;
+	Sampler<float, vec2> uFontSampler;
 
 	ptr<VertexBuffer> vb;
 	ptr<VertexShader> vs;
@@ -52,7 +66,14 @@ struct TextDrawerHelper : public Object
 	ptr<BlendState> bs;
 
 	TextDrawerHelper(ptr<Device> device, ptr<ShaderCache> shaderCache) :
-		aCorner(0),
+		vl(NEW(VertexLayout(sizeof(vec4)))),
+		vlePosition(vl->AddElement(DataTypes::_vec4, 0)),
+		al(NEW(AttributeLayout())),
+		als(al->AddSlot()),
+		alePosition(al->AddElement(als, vlePosition)),
+		ab(device->CreateAttributeBinding(al)),
+
+		aCorner(alePosition),
 
 		iTexcoord(1),
 		iColor(2),
@@ -60,9 +81,9 @@ struct TextDrawerHelper : public Object
 		fTarget(0),
 
 		ugSymbols(NEW(UniformGroup(0))),
-		uPositions(ugSymbols->AddUniformArray<float4>(maxSymbolsCount)),
-		uTexcoords(ugSymbols->AddUniformArray<float4>(maxSymbolsCount)),
-		uColors(ugSymbols->AddUniformArray<float4>(maxSymbolsCount)),
+		uPositions(ugSymbols->AddUniformArray<vec4>(maxSymbolsCount)),
+		uTexcoords(ugSymbols->AddUniformArray<vec4>(maxSymbolsCount)),
+		uColors(ugSymbols->AddUniformArray<vec4>(maxSymbolsCount)),
 
 		uFontSampler(0)
 	{
@@ -71,22 +92,21 @@ struct TextDrawerHelper : public Object
 			ugSymbols->Finalize(device);
 
 			// создать геометрию
-			static const float4 vertices[6] =
+			static const vec4 vertices[6] =
 			{
-				float4(0, 1, 1, 0),
-				float4(1, 1, 0, 0),
-				float4(1, 0, 0, 1),
-				float4(0, 1, 1, 0),
-				float4(1, 0, 0, 1),
-				float4(0, 0, 1, 1)
+				vec4(0, 1, 1, 0),
+				vec4(1, 1, 0, 0),
+				vec4(1, 0, 0, 1),
+				vec4(0, 1, 1, 0),
+				vec4(1, 0, 0, 1),
+				vec4(0, 0, 1, 1)
 			};
-			ptr<Layout> layout = NEW(Layout(std::vector<Layout::Element>(1, Layout::Element(DataTypes::Float4, 0, 0)), 16));
 
-			vb = device->CreateVertexBuffer(MemoryFile::CreateViaCopy(vertices, sizeof(vertices)), layout);
+			vb = device->CreateStaticVertexBuffer(MemoryFile::CreateViaCopy(vertices, sizeof(vertices)), vl);
 
 			// вершинный шейдер
 			Temp<uint> tmpInstance;
-			Temp<float4> tmpPosition, tmpTexcoord, tmpColor;
+			Temp<vec4> tmpPosition, tmpTexcoord, tmpColor;
 			vs = shaderCache->GetVertexShader((
 				tmpInstance = getInstanceID(),
 
@@ -94,11 +114,11 @@ struct TextDrawerHelper : public Object
 				tmpTexcoord = uTexcoords[tmpInstance],
 				tmpColor = uColors[tmpInstance],
 
-				setPosition(newfloat4(
+				setPosition(newvec4(
 					dot(aCorner["xz"], tmpPosition["xz"]),
 					dot(aCorner["yw"], tmpPosition["yw"]),
 					0, 1)),
-				iTexcoord = newfloat2(
+				iTexcoord = newvec2(
 					dot(aCorner["xz"], tmpTexcoord["xz"]),
 					dot(aCorner["yw"], tmpTexcoord["yw"])),
 				iColor = tmpColor
@@ -109,7 +129,7 @@ struct TextDrawerHelper : public Object
 				iTexcoord,
 				iColor,
 
-				fTarget = newfloat4(iColor["xyz"], iColor["w"] * uFontSampler.Sample(iTexcoord))
+				fTarget = newvec4(iColor["xyz"], iColor["w"] * uFontSampler.Sample(iTexcoord))
 			));
 
 			// настройки смешивания
@@ -131,8 +151,6 @@ struct TextDrawerHelper : public Object
 	}
 };
 
-END_INANITY_GRAPHICS
-
 TextDrawer::TextDrawer(ptr<TextDrawerHelper> helper)
 : helper(helper), queuedCharsCount(0) {}
 
@@ -142,11 +160,16 @@ void TextDrawer::Prepare(ptr<Context> context)
 
 	// установить всё, что можно, в состояние контекста
 	ContextState& cs = context->GetTargetState();
-	cs.vertexBuffer = helper->vb;
+	cs.ResetVertexBuffers();
+	cs.attributeBinding = helper->ab;
+	cs.vertexBuffers[0] = helper->vb;
 	cs.indexBuffer = 0;
 	cs.vertexShader = helper->vs;
 	cs.pixelShader = helper->ps;
 	cs.blendState = helper->bs;
+	cs.cullMode = ContextState::cullModeNone;
+	cs.depthTestFunc = ContextState::depthTestFuncAlways;
+	cs.depthWrite = false;
 	helper->ugSymbols->Apply(cs);
 
 	// сбросить текущий шрифт и текстуру
@@ -173,7 +196,7 @@ void TextDrawer::SetFont(ptr<Font> font)
 	}
 }
 
-void TextDrawer::DrawSymbol(const float4& position, const float4& texcoord, const float4& color)
+void TextDrawer::DrawSymbol(const vec4& position, const vec4& texcoord, const vec4& color)
 {
 	// если очередь переполнена
 	if(queuedCharsCount >= TextDrawerHelper::maxSymbolsCount)
@@ -187,7 +210,7 @@ void TextDrawer::DrawSymbol(const float4& position, const float4& texcoord, cons
 	++queuedCharsCount;
 }
 
-void TextDrawer::DrawTextLine(const String& text, float x, float y, const float4& color, int alignment)
+void TextDrawer::DrawTextLine(const String& text, float x, float y, const vec4& color, int alignment)
 {
 	Font* font = currentFont;
 
@@ -258,11 +281,11 @@ void TextDrawer::DrawTextLine(const String& text, float x, float y, const float4
 
 		// вывести символ
 		DrawSymbol(
-			float4(
+			vec4(
 				left + fontChar.screenFirstUV.x * scaleX, y + fontChar.screenFirstUV.y * scaleY,
 				left + fontChar.screenSecondUV.x * scaleX, y + fontChar.screenSecondUV.y * scaleY
 			),
-			float4(fontChar.firstUV.x, fontChar.firstUV.y, fontChar.secondUV.x, fontChar.secondUV.y),
+			vec4(fontChar.firstUV.x, fontChar.firstUV.y, fontChar.secondUV.x, fontChar.secondUV.y),
 			color
 		);
 
@@ -298,3 +321,5 @@ ptr<TextDrawer> TextDrawer::Create(ptr<Device> device, ptr<ShaderCache> shaderCa
 {
 	return NEW(TextDrawer(NEW(TextDrawerHelper(device, shaderCache))));
 }
+
+END_INANITY_GRAPHICS

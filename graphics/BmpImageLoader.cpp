@@ -4,6 +4,8 @@
 #include "../Exception.hpp"
 #include "../windows.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 ptr<Image2DData> BmpImageLoader::Load(ptr<File> file)
 {
 	try
@@ -102,3 +104,5 @@ ptr<Image2DData> BmpImageLoader::Load(ptr<File> file)
 		THROW_SECONDARY_EXCEPTION("Can't load BMP image", exception);
 	}
 }
+
+END_INANITY_GRAPHICS

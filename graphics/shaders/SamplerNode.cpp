@@ -3,6 +3,8 @@
 #include "../Texture.hpp"
 #include "../SamplerState.hpp"
 
+BEGIN_INANITY_SHADERS
+
 SamplerNode::SamplerNode(int slot, DataType valueType, DataType coordType)
 : slot(slot), valueType(valueType), coordType(coordType) {}
 
@@ -31,3 +33,5 @@ void SamplerNode::Apply(ContextState& contextState, ptr<Texture> texture, ptr<Sa
 	contextState.textures[slot] = texture;
 	contextState.samplerStates[slot] = samplerState;
 }
+
+END_INANITY_SHADERS

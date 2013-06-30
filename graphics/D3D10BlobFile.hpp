@@ -2,7 +2,7 @@
 #define ___INANITY_GRAPHICS_D3D10_BLOB_FILE_HPP___
 
 #include "graphics.hpp"
-#include "d3d.hpp"
+#include "d3d11.hpp"
 #include "../File.hpp"
 #include "../ComPointer.hpp"
 

@@ -6,6 +6,8 @@
 #include <string.h>
 #include <limits.h>
 
+BEGIN_INANITY_CRYPTO
+
 /* Definition of minimum-width integer types
  * 
  * u8   -> unsigned integer type, at least 8 bits, equivalent to unsigned char
@@ -1212,3 +1214,5 @@ void WhirlpoolStream::Reset()
 		this->hash[i] = 0L; /* initial value */
 	}
 }
+
+END_INANITY_CRYPTO

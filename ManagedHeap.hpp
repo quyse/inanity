@@ -10,15 +10,11 @@
 #include "windows.hpp"
 #endif
 #include <vector>
-
-#ifdef _DEBUG
-//макрос для трассировки памяти
-#define ___INANITY_TRACE_HEAP
-#endif
+#include <iostream>
 
 #ifdef ___INANITY_TRACE_HEAP
 #include "CriticalSection.hpp"
-#include <map>
+#include <unordered_map>
 #endif
 
 BEGIN_INANITY
@@ -27,12 +23,14 @@ BEGIN_INANITY
 class ManagedHeap
 {
 private:
-	//информация для трассировки
+	/// Информация для трассировки кучи.
 #ifdef ___INANITY_TRACE_HEAP
 
 	CriticalSection criticalSection;
-	size_t allocationsCount;
-	size_t allAllocationsSize;
+	/// Общее количество создаваний объектов (не уменьшается).
+	size_t totalAllocationsCount;
+	/// Общее количество выделенной памяти на объекты (не уменьшается).
+	size_t totalAllocationsSize;
 	struct AllocationInfo
 	{
 		size_t number;
@@ -40,30 +38,25 @@ private:
 		const char* info;
 		AllocationInfo(size_t number, size_t size);
 	};
-	std::map<void*, AllocationInfo> allocations;
+	typedef std::unordered_map<void*, AllocationInfo> Allocations;
+	Allocations allocations;
+
+#ifdef ___INANITY_TRACE_PTR
+
+	/// Карта ссылок указателей на объекты.
+	typedef std::unordered_map<void*, void*> Ptrs;
+	Ptrs ptrs;
+
+	class PtrTracer;
 
 #endif
 
-	//максимальный размер кусочка, выделяемый быстрым способом
-	static const size_t maxChunkSize = 1 << 10;
-	//шаг между размерами кусочков
-	static const size_t chunkSizeStep = 8;
-	//количество аллокаторов для разных размеров
-	static const size_t allocatorsCount = maxChunkSize / chunkSizeStep;
+#endif
 
 private:
 #ifdef ___INANITY_WINDOWS
 	//куча для медленного выделения памяти
 	HANDLE heap;
-#endif
-
-#ifdef ___INANITY_TRACE_HEAP
-public:
-	//значение указателя на выделяемую память, при котором будет выдаваться breakpoint
-	size_t tracedBlock;
-
-	//функция для указания дополнительной информации о кусочке памяти
-	void SetAllocationInfo(void* data, const char* info);
 #endif
 
 public:
@@ -72,8 +65,24 @@ public:
 
 	void* Allocate(size_t size);
 	void Free(void* data);
+
+//*** Открытые методы для трассировки.
 #ifdef ___INANITY_TRACE_HEAP
-	void PrintAllocations();
+
+	/// Распечатать список всей выделенной памяти.
+	void PrintAllocations(std::ostream& stream);
+	/// Указать дополнительную информацию о кусочке памяти.
+	void SetAllocationInfo(void* data, const char* info);
+
+#ifdef ___INANITY_TRACE_PTR
+
+	/// Распечатать список всех указателей.
+	void PrintPtrs(std::ostream& stream);
+	/// Сообщить, что данный указатель теперь указывает на данный объект.
+	void TracePtr(void* ptr, void* object);
+
+#endif
+
 #endif
 };
 //глобальная управляемая куча

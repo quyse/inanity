@@ -2,7 +2,7 @@
 #define ___INANITY_BLOB_FILE_SYSTEM_HPP___
 
 #include "FileSystem.hpp"
-#include "scripting_decl.hpp"
+#include "meta/decl.hpp"
 #include <unordered_map>
 
 BEGIN_INANITY
@@ -43,7 +43,7 @@ public:
 	void GetFileNames(std::vector<String>& fileNames) const;
 	bool IsFileExists(const String& fileName) const;
 
-	SCRIPTABLE_CLASS(BlobFileSystem);
+	META_DECLARE_CLASS(BlobFileSystem);
 };
 
 END_INANITY

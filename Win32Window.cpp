@@ -1,10 +1,12 @@
 #include "Win32Window.hpp"
-#include "input/Manager.hpp"
+#include "input/Win32Manager.hpp"
 #include "Strings.hpp"
 #include "Exception.hpp"
 #include "graphics/Presenter.hpp"
 #include "graphics/Win32Output.hpp"
 #include <windowsx.h>
+
+BEGIN_INANITY
 
 Win32Window* Win32Window::singleWindow = 0;
 
@@ -141,12 +143,12 @@ LRESULT CALLBACK Win32Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
-void Win32Window::SetGraphicsPresenter(Graphics::Presenter* presenter)
+void Win32Window::SetGraphicsPresenter(Graphics::Presenter* graphicsPresenter)
 {
 	this->graphicsPresenter = graphicsPresenter;
 }
 
-void Win32Window::SetInputManager(ptr<Input::Manager> inputManager)
+void Win32Window::SetInputManager(ptr<Input::Win32Manager> inputManager)
 {
 	this->inputManager = inputManager;
 }
@@ -200,3 +202,5 @@ void Win32Window::Run(ptr<ActiveHandler> activeHandler)
 {
 	while(Do(activeHandler));
 }
+
+END_INANITY

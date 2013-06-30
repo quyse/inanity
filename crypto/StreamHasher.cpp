@@ -3,6 +3,9 @@
 #include "HashStream.hpp"
 #include "../MemoryFile.hpp"
 #include "../Exception.hpp"
+#include <cstring>
+
+BEGIN_INANITY_CRYPTO
 
 StreamHasher::StreamHasher(ptr<HashAlgorithm> hashAlgorithm, size_t blockSize)
 : hashAlgorithm(hashAlgorithm), blockSize(blockSize)
@@ -135,3 +138,5 @@ size_t StreamHasher::VerifyStream::Read(void* data, size_t size)
 	}
 	return dataPtr - (char*)data;
 }
+
+END_INANITY_CRYPTO

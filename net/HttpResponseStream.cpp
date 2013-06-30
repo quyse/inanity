@@ -1,5 +1,7 @@
 #include "HttpResponseStream.hpp"
 
+BEGIN_INANITY
+
 http_parser_settings HttpResponseStream::settings = {
 	HttpResponseStream::OnMessageBegin,
 	HttpResponseStream::OnUrl,
@@ -85,3 +87,5 @@ int HttpResponseStream::OnMessageComplete(http_parser* parser)
 
 	return 0;
 }
+
+END_INANITY

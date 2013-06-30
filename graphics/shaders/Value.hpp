@@ -3,6 +3,12 @@
 
 #include "Expression.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
+class AttributeLayoutElement;
+
+END_INANITY_GRAPHICS
+
 BEGIN_INANITY_SHADERS
 
 class Node;
@@ -24,6 +30,7 @@ private:
 public:
 	Value(ptr<Node> node);
 	Value(ValueType constValue);
+	Value(ptr<AttributeLayoutElement> element);
 
 	/// Преобразовать тип.
 	template <typename CastValueType>

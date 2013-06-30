@@ -4,12 +4,14 @@
 #include "Expression.hpp"
 #include "AttributeNode.hpp"
 #include "TempNode.hpp"
-#include "SpecialNode.hpp"
 #include "UniformGroup.hpp"
 #include "UniformNode.hpp"
 #include "SamplerNode.hpp"
-#include "TransitionalNode.hpp"
+#include "TransformedNode.hpp"
+#include "RasterizedNode.hpp"
 #include "OperationNode.hpp"
+
+BEGIN_INANITY_SHADERS
 
 ptr<ShaderSource> GlslGenerator::Generate(Expression code, ShaderType shaderType)
 {
@@ -17,3 +19,5 @@ ptr<ShaderSource> GlslGenerator::Generate(Expression code, ShaderType shaderType
 
 	return instance.Generate();
 }
+
+END_INANITY_SHADERS

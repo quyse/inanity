@@ -1,6 +1,8 @@
 #include "Semaphore.hpp"
 #include "Exception.hpp"
 
+BEGIN_INANITY
+
 Semaphore::Semaphore(int initialCount)
 {
 	try
@@ -72,3 +74,5 @@ void Semaphore::Release(int count)
 #endif
 		THROW_SECONDARY_EXCEPTION("Can't release semaphore", Exception::SystemError());
 }
+
+END_INANITY

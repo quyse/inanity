@@ -21,6 +21,7 @@ my @sections = (
     "Name Strings?",
     "New Procedures and Functions",
     "New Tokens",
+    "Additions to Chapter.*",
 );
 
 my %typemap = (
@@ -60,6 +61,8 @@ my %typemap = (
     charARB => "GLcharARB",
     handleARB => "GLhandleARB",
 
+    char => "GLchar",
+
     # OpenGL 3.2 and GL_ARB_sync
 
     int64  => "GLint64",
@@ -73,6 +76,10 @@ my %typemap = (
     # ARB_debug_output
 
     DEBUGPROCARB => "GLDEBUGPROCARB",
+
+    # KHR_debug
+
+    DEBUGPROC => "GLDEBUGPROC",
 
     vdpauSurfaceNV => "GLvdpauSurfaceNV",
     

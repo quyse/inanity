@@ -3,6 +3,8 @@
 #include "Visuals.hpp"
 #include "Notifications.hpp"
 
+BEGIN_INANITY_GUI
+
 Label::Label(ptr<Visualizer> visualizer) : Element(visualizer)
 {
 }
@@ -22,3 +24,5 @@ void Label::Draw(Visualizer* visualizer, Position offset)
 	offset += position;
 	visualizer->DrawRectText(VisualFonts::Label, text, offset.x, offset.y, offset.x + size.x, offset.y + size.y);
 }
+
+END_INANITY_GUI

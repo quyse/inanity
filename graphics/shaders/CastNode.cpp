@@ -1,5 +1,7 @@
 #include "CastNode.hpp"
 
+BEGIN_INANITY_SHADERS
+
 CastNode::CastNode(DataType castDataType, ptr<Node> a)
 : castDataType(castDataType), a(a) {}
 
@@ -17,3 +19,5 @@ ptr<Node> CastNode::GetA() const
 {
 	return a;
 }
+
+END_INANITY_SHADERS

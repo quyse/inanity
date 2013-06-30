@@ -8,7 +8,7 @@ BEGIN_INANITY_SHADERS
 
 template <typename ValueType>
 Fragment<ValueType>::Fragment(int semantic)
-: LValue<ValueType>(NEW(RasterizedNode(GetDataType<ValueType>(), semantic)))
+: LValue<ValueType>(NEW(RasterizedNode(DataTypeOf<ValueType>(), semantic)))
 {}
 
 template <typename ValueType>

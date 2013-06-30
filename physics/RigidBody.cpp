@@ -1,10 +1,12 @@
 #include "RigidBody.hpp"
 #include "World.hpp"
 #include "Shape.hpp"
-#include "../scripting_impl.hpp"
+#include "../meta/impl.hpp"
 
-SCRIPTABLE_MAP_BEGIN(RigidBody, Inanity.Physics.RigidBody);
-SCRIPTABLE_MAP_END();
+BEGIN_INANITY_PHYSICS
+
+META_CLASS(RigidBody, Inanity.Physics.RigidBody);
+META_CLASS_END();
 
 RigidBody::RigidBody(ptr<World> world, ptr<Shape> shape)
 : world(world), shape(shape) {}
@@ -18,3 +20,5 @@ ptr<Shape> RigidBody::GetShape() const
 {
 	return shape;
 }
+
+END_INANITY_PHYSICS

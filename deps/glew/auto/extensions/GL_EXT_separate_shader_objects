@@ -3,5 +3,5 @@ http://www.opengl.org/registry/specs/EXT/separate_shader_objects.txt
 GL_EXT_separate_shader_objects
 	GL_ACTIVE_PROGRAM_EXT 0x8B8D
 	void glActiveProgramEXT (GLuint program)
-	GLuint glCreateShaderProgramEXT (GLenum type, const char* string)
+	GLuint glCreateShaderProgramEXT (GLenum type, const GLchar* string)
 	void glUseShaderProgramEXT (GLenum type, GLuint program)

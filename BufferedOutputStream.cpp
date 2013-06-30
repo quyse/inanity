@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <cstring>
 
+BEGIN_INANITY
+
 BufferedOutputStream::BufferedOutputStream(ptr<OutputStream> stream, size_t bufferSize)
 	: stream(stream), bufferSize(bufferSize), dataSize(0)
 {
@@ -59,3 +61,5 @@ void BufferedOutputStream::Flush()
 {
 	FlushBuffer();
 }
+
+END_INANITY

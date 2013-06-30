@@ -3,6 +3,8 @@
 #include "Notificator.hpp"
 #include <algorithm>
 
+BEGIN_INANITY_GUI
+
 FreeContainer::FreeContainer(ptr<Visualizer> visualizer) : ContainerElement(visualizer)
 {
 }
@@ -42,3 +44,5 @@ ptr<Element> FreeContainer::GetElementByPosition(Position position) const
 			return elements[i];
 	return nullptr;
 }
+
+END_INANITY_GUI

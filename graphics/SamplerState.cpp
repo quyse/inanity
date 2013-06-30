@@ -1,5 +1,7 @@
 #include "SamplerState.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 SamplerState::SamplerState() :
 	minFilter(filterPoint), mipFilter(filterPoint), magFilter(filterPoint),
 	mipMapping(false),
@@ -46,3 +48,5 @@ void SamplerState::SetBorderColor(const float* borderColor)
 		this->borderColor[i] = borderColor[i];
 	dirty = true;
 }
+
+END_INANITY_GRAPHICS

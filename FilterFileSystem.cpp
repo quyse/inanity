@@ -3,6 +3,8 @@
 #include "InputStream.hpp"
 #include "OutputStream.hpp"
 
+BEGIN_INANITY
+
 FilterFileSystem::FilterFileSystem(ptr<FileSystem> fileSystem)
 : fileSystem(fileSystem) {}
 
@@ -45,3 +47,5 @@ void FilterFileSystem::GetAllDirectoryEntries(const String& directoryName, std::
 {
 	fileSystem->GetAllDirectoryEntries(directoryName, entries);
 }
+
+END_INANITY

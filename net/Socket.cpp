@@ -1,6 +1,8 @@
 #include "Socket.hpp"
 #include "EventLoop.hpp"
 
+BEGIN_INANITY
+
 Socket::Socket(ptr<EventLoop> eventLoop) :
 	eventLoop(eventLoop), socket(eventLoop->GetIoService())
 {
@@ -26,3 +28,5 @@ void Socket::Close()
 {
 	uv_close((uv_handle_t*)stream, CloseCallback);
 }
+
+END_INANITY

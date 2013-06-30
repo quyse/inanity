@@ -4,6 +4,8 @@
 #include <pthread.h>
 #endif
 
+BEGIN_INANITY
+
 Thread::Thread(ptr<ThreadHandler> handler) : handler(handler)
 {
 	try
@@ -56,3 +58,5 @@ void Thread::WaitEnd()
 #endif
 		THROW_SECONDARY_EXCEPTION("Can't wait for thread end", Exception::SystemError());
 }
+
+END_INANITY

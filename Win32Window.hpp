@@ -6,7 +6,9 @@
 #include "Handler.hpp"
 #include "input/input.hpp"
 
-#ifdef ___INANITY_WINDOWS
+#ifndef ___INANITY_WINDOWS
+#error Win32Window is implemented only on Windows.
+#endif
 
 #include "windows.hpp"
 
@@ -18,7 +20,7 @@ END_INANITY_GRAPHICS
 
 BEGIN_INANITY_INPUT
 
-class Manager;
+class Win32Manager;
 
 END_INANITY_INPUT
 
@@ -39,7 +41,7 @@ private:
 	/// Presenter для графики.
 	Graphics::Presenter* graphicsPresenter;
 	/// Менеждер ввода.
-	ptr<Input::Manager> inputManager;
+	ptr<Input::Win32Manager> inputManager;
 
 	/// Единственный экземпляр главного окна.
 	/** больше одного не разрешается, для ускорения обработки сообщений */
@@ -72,18 +74,12 @@ public:
 	/// Установить presenter для оповещений.
 	void SetGraphicsPresenter(Graphics::Presenter* graphicsPresenter);
 	/// Установить менеджер ввода.
-	void SetInputManager(ptr<Input::Manager> inputManager);
+	void SetInputManager(ptr<Input::Win32Manager> inputManager);
 
 	/// Запустить оконный цикл.
 	void Run(ptr<ActiveHandler> activeHandler);
 };
 
 END_INANITY
-
-#else
-
-#error Win32Window is implemented only on Windows.
-
-#endif
 
 #endif

@@ -11,10 +11,12 @@
 #include <cstring>
 #endif // ___INANITY_LINUX
 
-#include "scripting_impl.hpp"
+#include "meta/impl.hpp"
 
-SCRIPTABLE_MAP_BEGIN(Exception, Inanity.Exception);
-SCRIPTABLE_MAP_END();
+BEGIN_INANITY
+
+META_CLASS(Exception, Inanity.Exception);
+META_CLASS_END();
 
 Exception::Exception(const String& message) : message(message)
 {
@@ -81,3 +83,5 @@ ptr<Exception> Exception::SystemError(int errorCode)
 
 #endif // ___INANITY_LINUX
 }
+
+END_INANITY

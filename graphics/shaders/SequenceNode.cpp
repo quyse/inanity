@@ -1,5 +1,7 @@
 #include "SequenceNode.hpp"
 
+BEGIN_INANITY_SHADERS
+
 SequenceNode::SequenceNode(ptr<Node> a, ptr<Node> b)
 : a(a), b(b) {}
 
@@ -17,3 +19,5 @@ ptr<Node> SequenceNode::GetB() const
 {
 	return b;
 }
+
+END_INANITY_SHADERS

@@ -5,6 +5,8 @@
 #include <alloca.h>
 #endif
 
+BEGIN_INANITY
+
 StreamReader::StreamReader(ptr<InputStream> stream) : stream(stream), read(0)
 {
 }
@@ -127,3 +129,5 @@ bigsize_t StreamReader::Skip(bigsize_t size)
 		THROW_PRIMARY_EXCEPTION("Not enough data to skip");
 	return skipped;
 }
+
+END_INANITY

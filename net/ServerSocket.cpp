@@ -4,6 +4,8 @@
 #include "../Exception.hpp"
 #include <string.h>
 
+BEGIN_INANITY
+
 ServerSocket::ServerSocket(ptr<EventLoop> eventLoop, uv_tcp_t* stream, ptr<SocketHandler> handler) :
 	Socket(eventLoop, stream), handler(handler)
 {
@@ -31,3 +33,5 @@ void ServerSocket::ConnectionCallback(uv_stream_t* stream, int status)
 		}
 	}
 }
+
+END_INANITY

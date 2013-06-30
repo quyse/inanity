@@ -2,7 +2,7 @@
 #define ___INANITY_COMPRESS_STREAM_HPP___
 
 #include "OutputStream.hpp"
-#include "scripting_decl.hpp"
+#include "meta/decl.hpp"
 #include "zlib.hpp"
 
 /*
@@ -55,7 +55,7 @@ public:
 
 	static ptr<CompressStream> CreateMax(ptr<OutputStream> outputStream);
 
-	SCRIPTABLE_CLASS(CompressStream);
+	META_DECLARE_CLASS(CompressStream);
 };
 
 END_INANITY

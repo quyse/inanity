@@ -4,6 +4,8 @@
 #endif
 #include <ctime>
 
+BEGIN_INANITY
+
 long long Time::GetUnixTime()
 {
 	// используем стандартную функцию C++
@@ -35,3 +37,5 @@ long long Time::GetTicksPerSecond()
 	return 1000000000LL;
 #endif
 }
+
+END_INANITY

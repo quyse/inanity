@@ -16,6 +16,10 @@
 #endif
 
 #include "graphics/graphics.hpp"
+#include "graphics/AttributeBinding.hpp"
+#include "graphics/AttributeLayout.hpp"
+#include "graphics/AttributeLayoutElement.hpp"
+#include "graphics/AttributeLayoutSlot.hpp"
 #include "graphics/BlendState.hpp"
 #include "graphics/BmpImageLoader.hpp"
 #include "graphics/Context.hpp"
@@ -29,14 +33,9 @@
 #include "graphics/FontAlignment.hpp"
 #include "graphics/FontChar.hpp"
 #include "graphics/FontManager.hpp"
-#include "graphics/Geometry.hpp"
-#include "graphics/GeometryFormat.hpp"
-#include "graphics/GeometrySemantic.hpp"
 #include "graphics/Image2DData.hpp"
 #include "graphics/ImageLoader.hpp"
 #include "graphics/IndexBuffer.hpp"
-#include "graphics/Layout.hpp"
-#include "graphics/LayoutBinding.hpp"
 #include "graphics/Output.hpp"
 #include "graphics/PixelFormat.hpp"
 #include "graphics/PixelShader.hpp"
@@ -55,6 +54,8 @@
 #include "graphics/TextureManager.hpp"
 #include "graphics/UniformBuffer.hpp"
 #include "graphics/VertexBuffer.hpp"
+#include "graphics/VertexLayout.hpp"
+#include "graphics/VertexLayoutElement.hpp"
 #include "graphics/VertexShader.hpp"
 
 #ifdef ___INANITY_WINDOWS

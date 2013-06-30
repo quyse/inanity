@@ -1,5 +1,7 @@
 #include "TransformedNode.hpp"
 
+BEGIN_INANITY_SHADERS
+
 TransformedNode::TransformedNode(DataType valueType, int semantic)
 : valueType(valueType), semantic(semantic) {}
 
@@ -17,3 +19,5 @@ int TransformedNode::GetSemantic() const
 {
 	return semantic;
 }
+
+END_INANITY_SHADERS

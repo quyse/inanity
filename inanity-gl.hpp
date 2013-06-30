@@ -5,13 +5,12 @@
 
 #include "Object.hpp"
 
+#include "graphics/GlAttributeBinding.hpp"
 #include "graphics/GlBlendState.hpp"
 #include "graphics/GlContext.hpp"
 #include "graphics/GlDepthStencilBuffer.hpp"
 #include "graphics/GlDevice.hpp"
 #include "graphics/GlIndexBuffer.hpp"
-#include "graphics/GlInternalAttributeBinding.hpp"
-#include "graphics/GlInternalAttributeBindingCache.hpp"
 #include "graphics/GlInternalProgram.hpp"
 #include "graphics/GlInternalProgramCache.hpp"
 #include "graphics/GlInternalTexture.hpp"
@@ -19,6 +18,7 @@
 #include "graphics/GlPresenter.hpp"
 #include "graphics/GlRenderBuffer.hpp"
 #include "graphics/GlSamplerState.hpp"
+#include "graphics/GlShaderBindings.hpp"
 #include "graphics/GlShaderCompiler.hpp"
 #include "graphics/GlslSource.hpp"
 #include "graphics/GlSystem.hpp"

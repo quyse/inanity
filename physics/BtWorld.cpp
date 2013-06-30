@@ -4,6 +4,8 @@
 #include "BtCharacter.hpp"
 #include "../Exception.hpp"
 
+BEGIN_INANITY_PHYSICS
+
 BtWorld::BtWorld() :
 	collisionConfiguration(0), collisionDispatcher(0), broadphase(0),
 	solver(0), dynamicsWorld(0)
@@ -45,7 +47,7 @@ btDynamicsWorld* BtWorld::GetInternalDynamicsWorld() const
 	return dynamicsWorld;
 }
 
-ptr<Shape> BtWorld::CreateBoxShape(const float3& halfSize)
+ptr<Shape> BtWorld::CreateBoxShape(const vec3& halfSize)
 {
 	try
 	{
@@ -87,7 +89,7 @@ ptr<Shape> BtWorld::CreateCapsuleShape(float radius, float height)
 	}
 }
 
-ptr<RigidBody> BtWorld::CreateRigidBody(ptr<Shape> abstractShape, float mass, const float4x4& startTransform)
+ptr<RigidBody> BtWorld::CreateRigidBody(ptr<Shape> abstractShape, float mass, const mat4x4& startTransform)
 {
 	try
 	{
@@ -115,7 +117,7 @@ ptr<RigidBody> BtWorld::CreateRigidBody(ptr<Shape> abstractShape, float mass, co
 	}
 }
 
-ptr<Character> BtWorld::CreateCharacter(ptr<Shape> abstractShape, const float4x4& startTransform)
+ptr<Character> BtWorld::CreateCharacter(ptr<Shape> abstractShape, const mat4x4& startTransform)
 {
 	try
 	{
@@ -148,3 +150,5 @@ void BtWorld::Simulate(float time)
 {
 	dynamicsWorld->stepSimulation(time, 10);
 }
+
+END_INANITY_PHYSICS

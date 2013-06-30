@@ -5,64 +5,40 @@
 #include "SwizzleNode.hpp"
 #include "CastNode.hpp"
 #include "OperationNode.hpp"
+#include "AttributeNode.hpp"
+#include "../AttributeLayoutElement.hpp"
 
 BEGIN_INANITY_SHADERS
 
 /// Класс для получения базового типа из типа-вектора.
 template <typename MaybeVectorType>
-class BaseTypeHelper;
-template <int n>
-class BaseTypeHelper<vector<n> >
+class BaseTypeHelper
 {
 public:
-	typedef scalar Type;
+	typedef MaybeVectorType Type;
 };
-template <>
-class BaseTypeHelper<scalar>
+template <typename T, int n>
+class BaseTypeHelper<xvec<T, n> >
 {
 public:
-	typedef scalar Type;
-};
-template <int n>
-class BaseTypeHelper<uintvector<n> >
-{
-public:
-	typedef uint Type;
-};
-template <>
-class BaseTypeHelper<uint>
-{
-public:
-	typedef uint Type;
+	typedef T Type;
 };
 
 /// Класс для получения типа по длине строки.
 /** Принимает базовый тип. */
 template <typename BaseType, int n>
 class SwizzleTypedHelper;
-template <int n>
-class SwizzleTypedHelper<float, n>
+template <typename T, int n>
+class SwizzleTypedHelper<T, n>
 {
 public:
-	typedef vector<n - 1> Type;
+	typedef xvec<T, n - 1> Type;
 };
-template <>
-class SwizzleTypedHelper<float, 2>
+template <typename T>
+class SwizzleTypedHelper<T, 2>
 {
 public:
-	typedef scalar Type;
-};
-template <int n>
-class SwizzleTypedHelper<uint, n>
-{
-public:
-	typedef uintvector<n - 1> Type;
-};
-template <>
-class SwizzleTypedHelper<uint, 2>
-{
-public:
-	typedef uint Type;
+	typedef T Type;
 };
 
 /// Класс для получения типа вектора по длине строки.
@@ -82,6 +58,18 @@ template <>
 inline Value<float>::Value(float constValue)
 : Expression(NEW(FloatConstNode(constValue))) {}
 
+template <>
+inline Value<int>::Value(int constValue)
+: Expression(NEW(IntConstNode(constValue))) {}
+
+template <>
+inline Value<uint>::Value(uint constValue)
+: Expression(NEW(IntConstNode(constValue))) {}
+
+template <typename ValueType>
+inline Value<ValueType>::Value(ptr<AttributeLayoutElement> element)
+: Expression(NEW(AttributeNode(element))) {}
+
 template <typename ValueType>
 inline void Value<ValueType>::operator=(Value<ValueType> a)
 {
@@ -99,7 +87,7 @@ template <typename ValueType>
 template <typename CastValueType>
 inline Value<CastValueType> Value<ValueType>::Cast() const
 {
-	return Value<CastValueType>(NEW(CastNode(GetDataType<CastValueType>(), GetNode())));
+	return Value<CastValueType>(NEW(CastNode(DataTypeOf<CastValueType>(), GetNode())));
 }
 
 template <typename ValueType>
@@ -112,20 +100,20 @@ inline Value<ValueType> operator+(Value<ValueType> a, Value<ValueType> b)
 {
 	return Value<ValueType>(NEW(OperationNode(OperationNode::operationAdd, a.GetNode(), b.GetNode())));
 }
-template <int n>
-inline Value<vector<n> > operator+(Value<vector<n> > a, Value<float> b)
+template <typename T, int n>
+inline Value<xvec<T, n> > operator+(Value<xvec<T, n> > a, Value<T> b)
 {
-	return Value<vector<n> >(NEW(OperationNode(OperationNode::operationAdd, a.GetNode(), b.GetNode())));
+	return Value<xvec<T, n> >(NEW(OperationNode(OperationNode::operationAdd, a.GetNode(), b.GetNode())));
 }
 template <typename ValueType>
 inline Value<ValueType> operator-(Value<ValueType> a, Value<ValueType> b)
 {
 	return Value<ValueType>(NEW(OperationNode(OperationNode::operationSubtract, a.GetNode(), b.GetNode())));
 }
-template <int n>
-inline Value<vector<n> > operator-(Value<vector<n> > a, Value<float> b)
+template <typename T, int n>
+inline Value<xvec<T, n> > operator-(Value<xvec<T, n> > a, Value<T> b)
 {
-	return Value<vector<n> >(NEW(OperationNode(OperationNode::operationSubtract, a.GetNode(), b.GetNode())));
+	return Value<xvec<T, n> >(NEW(OperationNode(OperationNode::operationSubtract, a.GetNode(), b.GetNode())));
 }
 
 template <typename ValueType>
@@ -133,15 +121,15 @@ inline Value<ValueType> operator*(Value<ValueType> a, Value<ValueType> b)
 {
 	return Value<ValueType>(NEW(OperationNode(OperationNode::operationMultiply, a.GetNode(), b.GetNode())));
 }
-template <int n>
-inline Value<vector<n> > operator*(Value<vector<n> > a, Value<float> b)
+template <typename T, int n>
+inline Value<xvec<T, n> > operator*(Value<xvec<T, n> > a, Value<T> b)
 {
-	return Value<vector<n> >(NEW(OperationNode(OperationNode::operationMultiply, a.GetNode(), b.GetNode())));
+	return Value<xvec<T, n> >(NEW(OperationNode(OperationNode::operationMultiply, a.GetNode(), b.GetNode())));
 }
-template <int n>
-inline Value<vector<n> > operator*(Value<float> a, Value<vector<n> > b)
+template <typename T, int n>
+inline Value<xvec<T, n> > operator*(Value<T> a, Value<xvec<T, n> > b)
 {
-	return Value<vector<n> >(NEW(OperationNode(OperationNode::operationMultiply, a.GetNode(), b.GetNode())));
+	return Value<xvec<T, n> >(NEW(OperationNode(OperationNode::operationMultiply, a.GetNode(), b.GetNode())));
 }
 
 template <typename ValueType>
@@ -149,15 +137,15 @@ inline Value<ValueType> operator/(Value<ValueType> a, Value<ValueType> b)
 {
 	return Value<ValueType>(NEW(OperationNode(OperationNode::operationDivide, a.GetNode(), b.GetNode())));
 }
-template <int n>
-inline Value<vector<n> > operator/(Value<vector<n> > a, Value<float> b)
+template <typename T, int n>
+inline Value<xvec<T, n> > operator/(Value<xvec<T, n> > a, Value<T> b)
 {
-	return Value<vector<n> >(NEW(OperationNode(OperationNode::operationDivide, a.GetNode(), b.GetNode())));
+	return Value<xvec<T, n> >(NEW(OperationNode(OperationNode::operationDivide, a.GetNode(), b.GetNode())));
 }
-template <int n>
-inline Value<vector<n> > operator/(Value<float> a, Value<vector<n> > b)
+template <typename T, int n>
+inline Value<xvec<T, n> > operator/(Value<T> a, Value<xvec<T, n> > b)
 {
-	return Value<vector<n> >(NEW(OperationNode(OperationNode::operationDivide, a.GetNode(), b.GetNode())));
+	return Value<xvec<T, n> >(NEW(OperationNode(OperationNode::operationDivide, a.GetNode(), b.GetNode())));
 }
 
 template <typename ValueType>

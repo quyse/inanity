@@ -1,9 +1,11 @@
 #include "InputStream.hpp"
-#include "scripting_impl.hpp"
+#include "meta/impl.hpp"
 #include <algorithm>
 
-SCRIPTABLE_MAP_BEGIN(InputStream, Inanity.InputStream);
-SCRIPTABLE_MAP_END();
+BEGIN_INANITY
+
+META_CLASS(InputStream, Inanity.InputStream);
+META_CLASS_END();
 
 bigsize_t InputStream::Skip(bigsize_t size)
 {
@@ -11,7 +13,7 @@ bigsize_t InputStream::Skip(bigsize_t size)
 	bigsize_t skipped = 0;
 	while(size)
 	{
-		size_t read = Read(buffer, std::min<bigsize_t>(size, sizeof(buffer)));
+		size_t read = Read(buffer, (size_t)std::min<bigsize_t>(size, sizeof(buffer)));
 		if(!read)
 			break;
 		size -= read;
@@ -19,3 +21,5 @@ bigsize_t InputStream::Skip(bigsize_t size)
 	}
 	return skipped;
 }
+
+END_INANITY

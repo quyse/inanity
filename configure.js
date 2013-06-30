@@ -15,7 +15,6 @@ exports.configureCompiler = function(objectFile, compiler) {
 		// .cpp-файл
 		source = source.replace(/\./g, '/') + '.cpp';
 	compiler.setSourceFile(source);
-	compiler.addMacro('INANITY_LIB');
 };
 
 /**
@@ -70,9 +69,13 @@ var libraries = {
 	'libinanity-sqlitefs': {
 		objects: ['SQLiteFileSystem', 'deps.sqlite.sqlite3.c']
 	},
+	// ******* метаинформация
+	'libinanity-meta': {
+		objects: ['meta.Class', 'meta.Function', 'meta.Method']
+	},
 	// ******* скрипты на lua
 	'libinanity-lua': {
-		objects: ['lua.stuff', 'lua.reflection', 'lua.State', 'lua.Script']
+		objects: ['script.lua.Function', 'script.lua.State', 'script.lua.stuff']
 	},
 	// ******* криптография
 	'libinanity-crypto': {
@@ -80,19 +83,24 @@ var libraries = {
 	},
 	// ******* подсистема ввода
 	'libinanity-input': {
-		objects: ['input.Frame', 'input.Manager', 'input.Mux', 'input.Processor', 'input.RawManager']
+		objects: ['input.Frame', 'input.Manager', 'input.Mux', 'input.Processor', 'input.Win32Manager', 'input.Win32RawManager']
 	},
-	// ******* подсистема окон
+	// ******* подсистема окон Win32
 	'libinanity-win32window': {
 		objects: ['Win32Window', 'graphics.Win32Output']
+	},
+	// ******* подсистема окон X11
+	'libinanity-x11window' : {
+		objects: ['X11Window', 'X11Display', 'graphics.X11Output']
 	},
 	// ******* общая графика
 	'libinanity-graphics': {
 		objects: [
 			'graphics.Context', 'graphics.ContextState',
-			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.Layout', 'graphics.LayoutBinding', 'graphics.IndexBuffer',
+			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.IndexBuffer',
 			'graphics.SamplerState', 'graphics.BlendState',
-			'graphics.Geometry',
+			'graphics.VertexLayout', 'graphics.VertexLayoutElement',
+			'graphics.AttributeLayout', 'graphics.AttributeLayoutElement', 'graphics.AttributeLayoutSlot',
 			'graphics.ShaderCache',
 			'graphics.Texture', 'graphics.TextureManager',
 			'graphics.EditableFont', 'graphics.Font', 'graphics.FontManager', 'graphics.TextDrawer',
@@ -100,15 +108,15 @@ var libraries = {
 		]
 	},
 	// ******* подсистема DirectX 11
-	'libinanity-dx': {
+	'libinanity-dx11': {
 		objects: [
-			'graphics.DxSystem', 'graphics.DxDevice', 'graphics.DxPresenter', 'graphics.DxContext',
-			'graphics.DxInternalInputLayout', 'graphics.DxInternalInputLayoutCache',
-			'graphics.DxRenderBuffer', 'graphics.DxDepthStencilBuffer', 'graphics.DxTexture', 'graphics.DxUniformBuffer',
-			'graphics.DxVertexBuffer', 'graphics.DxIndexBuffer',
-			'graphics.DxVertexShader', 'graphics.DxPixelShader',
-			'graphics.DxSamplerState', 'graphics.DxBlendState',
-			'graphics.D3D10BlobFile', 'graphics.DxShaderCompiler', 'graphics.HlslSource'
+			'graphics.Dx11System', 'graphics.Dx11Device', 'graphics.Dx11Presenter', 'graphics.Dx11Context',
+			'graphics.Dx11RenderBuffer', 'graphics.Dx11DepthStencilBuffer', 'graphics.Dx11Texture', 'graphics.Dx11UniformBuffer',
+			'graphics.Dx11VertexBuffer', 'graphics.Dx11IndexBuffer', 'graphics.Dx11AttributeBinding',
+			'graphics.Dx11VertexShader', 'graphics.Dx11PixelShader',
+			'graphics.Dx11CompiledShader', 'graphics.Dx11ShaderResources',
+			'graphics.Dx11SamplerState', 'graphics.Dx11BlendState',
+			'graphics.D3D10BlobFile', 'graphics.Dx11ShaderCompiler', 'graphics.Hlsl11Source'
 		]
 	},
 	// ******* подсистема OpenGl
@@ -116,12 +124,11 @@ var libraries = {
 		objects: [
 			'graphics.GlSystem', 'graphics.GlDevice', 'graphics.GlPresenter', 'graphics.GlContext',
 			'graphics.GlInternalTexture', 'graphics.GlInternalProgram', 'graphics.GlInternalProgramCache',
-			'graphics.GlInternalAttributeBinding', 'graphics.GlInternalAttributeBindingCache',
 			'graphics.GlRenderBuffer', 'graphics.GlDepthStencilBuffer', 'graphics.GlTexture', 'graphics.GlUniformBuffer',
-			'graphics.GlVertexBuffer', 'graphics.GlIndexBuffer',
+			'graphics.GlVertexBuffer', 'graphics.GlIndexBuffer', 'graphics.GlAttributeBinding',
 			'graphics.GlVertexShader', 'graphics.GlPixelShader',
 			'graphics.GlSamplerState', 'graphics.GlBlendState',
-			'graphics.GlShaderCompiler', 'graphics.GlslSource'
+			'graphics.GlShaderCompiler', 'graphics.GlslSource', 'graphics.GlShaderBindings'
 		]
 	},
 	// ******* подсистема шейдеров
@@ -130,12 +137,12 @@ var libraries = {
 			'graphics.shaders.AttributeNode', 'graphics.shaders.SamplerNode',
 			'graphics.shaders.UniformNode', 'graphics.shaders.UniformGroup',
 			'graphics.shaders.SwizzleNode', 'graphics.shaders.OperationNode',
-			'graphics.shaders.SampleNode', 'graphics.shaders.FloatConstNode',
+			'graphics.shaders.SampleNode', 'graphics.shaders.FloatConstNode', 'graphics.shaders.IntConstNode',
 			'graphics.shaders.SequenceNode',
 			'graphics.shaders.TransformedNode', 'graphics.shaders.RasterizedNode',
 			'graphics.shaders.TempNode', 'graphics.shaders.CastNode',
 			'graphics.shaders.Expression', 'graphics.shaders.Sampler',
-			'graphics.shaders.HlslGenerator', 'graphics.shaders.HlslGeneratorInstance',
+			'graphics.shaders.Hlsl11Generator', 'graphics.shaders.Hlsl11GeneratorInstance',
 			'graphics.shaders.GlslGenerator', 'graphics.shaders.GlslGeneratorInstance'
 		]
 	},
@@ -180,8 +187,8 @@ var executables = {
 	}
 	// TEST
 	, luatest: {
-		objects: ['lua.test'],
-		staticLibraries: ['libinanity-base', 'libinanity-compress', 'libinanity-lua', 'deps/lua//liblua'],
+		objects: ['script.lua.test'],
+		staticLibraries: ['libinanity-base', 'libinanity-compress', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
 		dynamicLibraries: []
 	}
 	// TEST

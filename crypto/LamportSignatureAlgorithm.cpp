@@ -2,6 +2,9 @@
 #include "HashAlgorithm.hpp"
 #include "HashStream.hpp"
 #include "RandomAlgorithm.hpp"
+#include <cstring>
+
+BEGIN_INANITY_CRYPTO
 
 /*
 пусть n - размер хеша в битах
@@ -77,3 +80,5 @@ bool LamportSignatureAlgorithm::Verify(const void* data, const void* publicKey, 
 	}
 	return true;
 }
+
+END_INANITY_CRYPTO

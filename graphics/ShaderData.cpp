@@ -1,5 +1,7 @@
 #include "ShaderData.h"
 
+BEGIN_INANITY_GRAPHICS
+
 ShaderData::Constant::Constant(unsigned offset, const MultiShaderType& type)
 	: offset(offset), type(type)
 {
@@ -15,3 +17,5 @@ ptr<MultiShaderConstantNode> ShaderData::AddConstant(size_t offset, const MultiS
 	constants.push_back(Constant((unsigned)offset, type));
 	return NEW(MultiShaderConstantNode(this, constants.size() - 1, type));
 }
+
+END_INANITY_GRAPHICS

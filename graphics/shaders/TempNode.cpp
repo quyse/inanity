@@ -1,5 +1,7 @@
 #include "TempNode.hpp"
 
+BEGIN_INANITY_SHADERS
+
 TempNode::TempNode(DataType valueType) : valueType(valueType) {}
 
 Node::Type TempNode::GetType() const
@@ -11,3 +13,5 @@ DataType TempNode::GetValueType() const
 {
 	return valueType;
 }
+
+END_INANITY_SHADERS

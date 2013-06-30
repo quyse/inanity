@@ -5,6 +5,8 @@
 #include "../Exception.hpp"
 #include <sstream>
 
+BEGIN_INANITY_GRAPHICS
+
 class PngImageLoader::Helper
 {
 public:
@@ -147,6 +149,7 @@ ptr<Image2DData> PngImageLoader::Load(ptr<File> file)
 		}
 		catch(Exception* exception)
 		{
+			MakePointer(exception);
 			// бросаем "исключение" libpng
 			png_error(pngPtr, "Can't allocate image memory");
 		}
@@ -176,3 +179,5 @@ ptr<Image2DData> PngImageLoader::Load(ptr<File> file)
 		THROW_SECONDARY_EXCEPTION("Can't load PNG image", exception);
 	}
 }
+
+END_INANITY_GRAPHICS

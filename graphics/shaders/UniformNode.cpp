@@ -1,6 +1,8 @@
 #include "UniformNode.hpp"
 #include "UniformGroup.hpp"
 
+BEGIN_INANITY_SHADERS
+
 UniformNode::UniformNode(ptr<UniformGroup> group, DataType valueType, int offset, int count)
 : group(group), valueType(valueType), offset(offset), count(count) {}
 
@@ -28,3 +30,5 @@ int UniformNode::GetCount() const
 {
 	return count;
 }
+
+END_INANITY_SHADERS

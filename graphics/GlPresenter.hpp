@@ -22,7 +22,6 @@ private:
 #ifdef ___INANITY_WINDOWS
 	/// Контекст окна.
 	HDC hdc;
-	/// 
 #endif
 
 	/// Вторичный буфер.
@@ -31,6 +30,9 @@ private:
 public:
 #ifdef ___INANITY_WINDOWS
 	GlPresenter(ptr<GlDevice> device, HDC hdc, ptr<GlRenderBuffer> backBuffer);
+#endif
+#ifdef ___INANITY_LINUX
+	GlPresenter(ptr<GlDevice> device, ptr<GlRenderBuffer> backBuffer);
 #endif
 
 	// методы Presenter

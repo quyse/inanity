@@ -1,7 +1,10 @@
 #include "GlShaderCompiler.hpp"
 #include "GlslSource.hpp"
+#include "../MemoryStream.hpp"
 #include "../File.hpp"
 #include "../Exception.hpp"
+
+BEGIN_INANITY_GRAPHICS
 
 ptr<File> GlShaderCompiler::Compile(ptr<ShaderSource> shaderSource)
 {
@@ -12,12 +15,15 @@ ptr<File> GlShaderCompiler::Compile(ptr<ShaderSource> shaderSource)
 		if(!glslSource)
 			THROW_PRIMARY_EXCEPTION("Shader source is not GLSL");
 
-		// бинарные шейдеры OpenGL привязаны к архитектуре
-		// пока ничего не компилируем, просто возвращаем код
-		return glslSource->GetCode();
+		// сериализуем исходник шейдера в файл
+		ptr<MemoryStream> stream = NEW(MemoryStream());
+		glslSource->Serialize(stream);
+		return stream->ToFile();
 	}
 	catch(Exception* exception)
 	{
 		THROW_SECONDARY_EXCEPTION("Can't compile GLSL shader source", exception);
 	}
 }
+
+END_INANITY_GRAPHICS

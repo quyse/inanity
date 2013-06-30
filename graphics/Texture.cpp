@@ -1,5 +1,9 @@
 #include "Texture.hpp"
-#include "../scripting_impl.hpp"
+#include "../meta/impl.hpp"
 
-SCRIPTABLE_MAP_BEGIN(Texture, Inanity.Graphics.Texture);
-SCRIPTABLE_MAP_END();
+BEGIN_INANITY_GRAPHICS
+
+META_CLASS(Texture, Inanity.Graphics.Texture);
+META_CLASS_END();
+
+END_INANITY_GRAPHICS
