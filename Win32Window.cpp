@@ -153,7 +153,7 @@ void Win32Window::SetInputManager(ptr<Input::Win32Manager> inputManager)
 	this->inputManager = inputManager;
 }
 
-bool Win32Window::Do(ActiveHandler* activeHandler)
+bool Win32Window::Do(Handler* activeHandler)
 {
 	/* По-видимому, PeekMessage может обрабатывать некоторые сообщения (в том числе WM_ACTIVATE)
 	синхронно, не возвращая их в msg. Поэтому потом, определяя выход из GetMessage по WM_QUIT,
@@ -183,7 +183,7 @@ bool Win32Window::Do(ActiveHandler* activeHandler)
 	{
 		if(inputManager)
 			inputManager->Update();
-		activeHandler->Fire(0);
+		activeHandler->Fire();
 	}
 	// иначе если окно неактивно, и вышли мы из цикла по GetMessage(), то это сообщение WM_QUIT
 	else if(!lastActive)
@@ -198,7 +198,7 @@ void Win32Window::Close()
 		DestroyWindow(hWnd);
 }
 
-void Win32Window::Run(ptr<ActiveHandler> activeHandler)
+void Win32Window::Run(ptr<Handler> activeHandler)
 {
 	while(Do(activeHandler));
 }

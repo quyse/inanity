@@ -9,6 +9,47 @@ BEGIN_INANITY
 template <typename T, typename Class>
 class Delegate;
 
+/// Класс обработчика, который просто принимает сообщение.
+class Handler : public Object
+{
+public:
+	virtual void Fire() = 0;
+
+private:
+	/// Класс делегата.
+	/** Для упрощения привязки методов. */
+	template <typename Class>
+	class Delegate;
+
+public:
+	/// Привязать класс с методом.
+	template <typename Class>
+	static ptr<Handler> Bind(ptr<Class> object, typename Delegate<Class>::Method method)
+	{
+		return NEW(Delegate<Class>(object, method));
+	}
+};
+
+template <typename Class>
+class Handler::Delegate : public Handler
+{
+public:
+	typedef void (Class::*Method)();
+
+private:
+	ptr<Class> object;
+	Method method;
+
+public:
+	Delegate(ptr<Class> object, Method method)
+	: object(object), method(method) {}
+
+	void Fire()
+	{
+		(object->*method)();
+	}
+};
+
 /// Класс обработчика, который может обрабатывать ошибки.
 class ErrorHandler : public Object
 {
