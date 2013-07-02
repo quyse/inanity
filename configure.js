@@ -198,6 +198,12 @@ var executables = {
 		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
 		dynamicLibraries: []
 	}
+	// TEST
+	, nettesthttpclient: {
+		objects: ['net.test-http-client'],
+		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-http', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
+		dynamicLibraries: []
+	}
 };
 
 exports.configureComposer = function(libraryFile, composer) {
