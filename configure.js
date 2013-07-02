@@ -55,6 +55,11 @@ var libraries = {
 		objects: [
 		'net.asio', 'net.AsioService', 'net.AsioTcpListener', 'net.AsioTcpSocket', 'net.AsioInternalUdpSocket', 'net.AsioUdpListener', 'net.AsioUdpSocket']
 	},
+	// ******* библиотека HTTP
+	'libinanity-http': {
+		objects: [
+		'net.HttpResponseStream', 'net.HttpClient', 'deps.http-parser.http_parser.c']
+	},
 	// ******* файловая система на SQLite
 	'libinanity-sqlitefs': {
 		objects: ['SQLiteFileSystem', 'deps.sqlite.sqlite3.c']

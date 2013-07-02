@@ -2,25 +2,25 @@
 #define ___INANITY_NET_HTTP_CLIENT_HPP___
 
 #include "net.hpp"
-#include "EventLoop.hpp"
-#include "../OutputStream.hpp"
+#include "../Handler.hpp"
 #include "../String.hpp"
+
+BEGIN_INANITY
+
+class OutputStream;
+
+END_INANITY
 
 BEGIN_INANITY_NET
 
-/// Класс HTTP-клиента.
+class Service;
+
+/// HTTP client utility class.
 class HttpClient : public Object
 {
-private:
-	String request;
-	ptr<OutputStream> outputStream;
-
-	HttpClient(const String& request, ptr<OutputStream> outputStream);
-	void OnConnect(ptr<ClientSocket> socket);
-
 public:
-	/// Скачать данные по HTTP.
-	static void Fetch(ptr<EventLoop> eventLoop, const String& url, ptr<OutputStream> outputStream);
+	/// Download data via HTTP.
+	static void Fetch(ptr<Service> service, const String& url, ptr<SuccessHandler> handler, ptr<OutputStream> outputStream);
 };
 
 END_INANITY_NET
