@@ -190,6 +190,8 @@ void AsioUdpSocket::Close()
 {
 	CriticalCode cc(cs);
 
+	receiveHandler = 0;
+
 	if(internalSocket)
 	{
 		internalSocket->UnregisterClientSocket(remoteEndpoint);

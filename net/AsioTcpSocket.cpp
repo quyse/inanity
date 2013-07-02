@@ -296,6 +296,8 @@ void AsioTcpSocket::SetReceiveHandler(ptr<ReceiveHandler> receiveHandler)
 
 void AsioTcpSocket::Close()
 {
+	receiveHandler = 0;
+
 	try
 	{
 		socket.close();
