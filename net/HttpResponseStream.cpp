@@ -1,10 +1,11 @@
 #include "HttpResponseStream.hpp"
 
-BEGIN_INANITY
+BEGIN_INANITY_NET
 
 http_parser_settings HttpResponseStream::settings = {
 	HttpResponseStream::OnMessageBegin,
 	HttpResponseStream::OnUrl,
+	HttpResponseStream::OnStatusComplete,
 	HttpResponseStream::OnHeaderField,
 	HttpResponseStream::OnHeaderValue,
 	HttpResponseStream::OnHeadersComplete,
@@ -24,7 +25,7 @@ void HttpResponseStream::Write(const void* data, size_t size)
 	http_parser_execute(&parser, &settings, (const char*)data, size);
 }
 
-void HttpResponseStream::Flush()
+void HttpResponseStream::End()
 {
 	http_parser_execute(&parser, &settings, 0, 0);
 }
@@ -40,6 +41,11 @@ int HttpResponseStream::OnMessageBegin(http_parser* parser)
 }
 
 int HttpResponseStream::OnUrl(http_parser* parser, const char* data, size_t size)
+{
+	return 0;
+}
+
+int HttpResponseStream::OnStatusComplete(http_parser* parser)
 {
 	return 0;
 }
@@ -81,11 +87,7 @@ int HttpResponseStream::OnBody(http_parser* parser, const char* data, size_t siz
 
 int HttpResponseStream::OnMessageComplete(http_parser* parser)
 {
-	HttpResponseStream* stream = (HttpResponseStream*)parser->data;
-
-	stream->outputStream->Flush();
-
 	return 0;
 }
 
-END_INANITY
+END_INANITY_NET
