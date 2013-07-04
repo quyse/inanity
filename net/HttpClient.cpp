@@ -22,9 +22,18 @@ public:
 	: handler(handler), outputStream(NEW(HttpResponseStream(outputStream)))
 	{
 		// разобрать URL
-		String host, path;
-		int port;
-		ParseUrl(url, host, port, path);
+		http_parser_url parsedUrl;
+		if(http_parser_parse_url(url.c_str(), url.length(), 0, &parsedUrl))
+			THROW_PRIMARY_EXCEPTION("Can't parse url");
+		String host;
+		if(parsedUrl.field_set & (1 << UF_HOST))
+			host = url.substr(parsedUrl.field_data[UF_HOST].off, parsedUrl.field_data[UF_HOST].len);
+		String path = "/";
+		if(parsedUrl.field_set & (1 << UF_PATH))
+			path = url.substr(parsedUrl.field_data[UF_PATH].off, parsedUrl.field_data[UF_PATH].len);
+		int port = 80;
+		if(parsedUrl.field_set & (1 << UF_PORT))
+			port = parsedUrl.port;
 
 		// сформировать запрос
 		std::ostringstream request;
@@ -92,44 +101,6 @@ private:
 		{
 			// ошибка получения
 			handler->FireError(exception);
-		}
-	}
-
-	// простой URL-парсер, выделяющий хост, порт и путь
-	static void ParseUrl(const String& url, String& host, int& port, String& path)
-	{
-		try
-		{
-			// проверить, что URL начинается с http://
-			static const char* protocol = "http://";
-			static const size_t protocolLength = 7;
-			if(url.length() < protocolLength || url.compare(0, protocolLength, protocol) != 0)
-				THROW_PRIMARY_EXCEPTION("http:// not found");
-
-			// найти слеш, отделяющий хост и порт от пути
-			size_t pathSlashPos = url.find('/', protocolLength);
-			if(pathSlashPos == url.npos)
-				THROW_PRIMARY_EXCEPTION("Path begin slash not found");
-			path = url.substr(pathSlashPos);
-
-			// найти двоеточие, обозначающее порт
-			size_t portColonPos = url.find(':', protocolLength);
-			if(portColonPos == url.npos || portColonPos >= pathSlashPos)
-			{
-				// если порт не указан
-				host = url.substr(protocolLength, pathSlashPos - protocolLength);
-				port = 80;
-			}
-			else
-			{
-				// если порт указан
-				host = url.substr(protocolLength, portColonPos - protocolLength);
-				port = atoi(url.substr(portColonPos + 1, pathSlashPos - portColonPos - 1).c_str());
-			}
-		}
-		catch(Exception* exception)
-		{
-			THROW_SECONDARY_EXCEPTION("URL must be of form http://<host>[:<port>]/[<query>]", exception);
 		}
 	}
 };
