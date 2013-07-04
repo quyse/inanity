@@ -2,6 +2,7 @@
 #include "AsioService.hpp"
 #include "../MemoryFile.hpp"
 #include "../PartFile.hpp"
+#include "../CriticalCode.hpp"
 #include <boost/bind.hpp>
 
 BEGIN_INANITY_NET
@@ -158,7 +159,7 @@ boost::asio::ip::tcp::socket& AsioTcpSocket::GetSocket()
 
 void AsioTcpSocket::StartSending()
 {
-	// если в очереди ничего нет, проверить, не закрыт ли сокет
+	// если в очереди ничего нет, проверить, не нужно ли закрыть сокет
 	if(sendQueue.empty())
 	{
 		if(sendClosed)
@@ -180,49 +181,73 @@ void AsioTcpSocket::StartSending()
 
 void AsioTcpSocket::Sent(const boost::system::error_code& error, size_t transferred)
 {
-	std::deque<SendItem>::iterator i;
-
 	// если произошла ошибка
 	if(error)
 	{
 		ptr<Exception> exception = AsioService::ConvertError(error);
+
 		// отправить её всем элементам в очереди, и очистить очередь
-		for(i = sendQueue.begin(); i != sendQueue.end(); ++i)
+
+		// скопируем обработчики в вектор, чтобы вызывать их
+		// вне блокировки, и обеспечить реентрантность
+		std::vector<ptr<SendHandler> > handlers;
 		{
-			const SendItem& item = *i;
-			if(item.handler)
-				item.handler->FireError(exception);
+			CriticalCode cc(cs);
+			handlers.resize(sendQueue.size());
+			std::deque<SendItem>::iterator i;
+			size_t j = 0;
+			for(i = sendQueue.begin(); i != sendQueue.end(); ++i)
+				handlers[j++] = i->handler;
+			sendQueue.clear();
 		}
-		sendQueue.clear();
+
+		for(size_t j = 0; j < handlers.size(); ++j)
+			if(handlers[j])
+				handlers[j]->FireError(exception);
+
 		return;
 	}
-
-	// уведомить все завершившиеся файлы, и удалить их из очереди
-	for(i = sendQueue.begin(); i != sendQueue.end(); ++i)
+	// ошибки нет
+	else
 	{
-		const SendItem& item = *i;
-		// если элемент не передался полностью, закончить
-		size_t itemDataSkip = i == sendQueue.begin() ? firstItemSent : 0;
-		size_t itemSize = item.data->GetSize() - itemDataSkip;
-		if(itemSize > transferred)
+		// уведомить все завершившиеся файлы, и удалить их из очереди
+
+		// скопируем обработчики в вектор, чтобы вызывать их
+		// вне блокировки, и обеспечить реентрантность
+		std::vector<ptr<SendHandler> > handlers;
 		{
-			// этот элемент теперь будет первым, выставить новое смещение
-			firstItemSent = itemDataSkip + transferred;
-			break;
+			CriticalCode cc(cs);
+			std::deque<SendItem>::iterator i;
+			size_t j = 0;
+			for(i = sendQueue.begin(); i != sendQueue.end(); ++i)
+			{
+				const SendItem& item = *i;
+				// если элемент не передался полностью, закончить
+				size_t itemDataSkip = i == sendQueue.begin() ? firstItemSent : 0;
+				size_t itemSize = item.data->GetSize() - itemDataSkip;
+				if(itemSize > transferred)
+				{
+					// этот элемент теперь будет первым, выставить новое смещение
+					firstItemSent = itemDataSkip + transferred;
+					break;
+				}
+				// иначе передался полностью
+				transferred -= itemSize;
+				// добавить обработчик в массив
+				if(item.handler)
+					handlers.push_back(item.handler);
+			}
+			// теперь i указывает на первый элемент, который ещё не передался
+			// удалить всё, что до него
+			sendQueue.erase(sendQueue.begin(), i);
+
+			// если в очереди что-то есть, запустить отправку снова
+			StartSending();
 		}
-		// иначе передался полностью
-		transferred -= itemSize;
-		// уведомить обработчик
-		if(item.handler)
-			item.handler->FireSuccess();
+
+		for(size_t j = 0; j < handlers.size(); ++j)
+			handlers[j]->FireSuccess();
 	}
-
-	// теперь i указывает на первый элемент, который ещё не передался
-	// удалить всё, что до него
-	sendQueue.erase(sendQueue.begin(), i);
-
-	// если в очереди что-то есть, запустить отправку снова
-	StartSending();
 }
 
 void AsioTcpSocket::StartReceiving()
@@ -233,21 +258,48 @@ void AsioTcpSocket::StartReceiving()
 
 void AsioTcpSocket::Received(const boost::system::error_code& error, size_t transferred)
 {
-	if(error)
-	{
-		// если корректный конец файла, это не ошибка
-		if(error == boost::asio::error::eof)
-			receiveHandler->FireData(0);
-		else
-			receiveHandler->FireError(AsioService::ConvertError(error));
+	ptr<ReceiveHandler> receiveHandler;
+	ptr<File> receiveFile;
 
-		// в любом случае больше данные мы не получаем
-		Close();
-	}
-	else
 	{
-		receiveHandler->FireData(NEW(PartFile(receiveFile, receiveFile->GetData(), transferred)));
-		StartReceiving();
+		CriticalCode cc(cs);
+
+		receiveHandler = this->receiveHandler;
+		receiveFile = this->receiveFile;
+
+		if(error)
+		{
+			CloseNonSynced();
+			this->receiveHandler = 0;
+			this->receiveFile = 0;
+		}
+		else
+			StartReceiving();
+	}
+
+	if(receiveHandler)
+	{
+		if(error)
+		{
+			// если корректный конец файла, это не ошибка
+			if(error == boost::asio::error::eof)
+				receiveHandler->FireData(0);
+			else
+				receiveHandler->FireError(AsioService::ConvertError(error));
+		}
+		else
+			receiveHandler->FireData(NEW(PartFile(receiveFile, receiveFile->GetData(), transferred)));
+	}
+}
+
+void AsioTcpSocket::CloseNonSynced()
+{
+	try
+	{
+		socket.close();
+	}
+	catch(boost::system::system_error error)
+	{
 	}
 }
 
@@ -255,20 +307,26 @@ void AsioTcpSocket::Send(ptr<File> file, ptr<SendHandler> sendHandler)
 {
 	try
 	{
+		CriticalCode cc(cs);
+
 		// если запланировано закрытие передачи, то больше в очередь добавлять ничего нельзя
 		if(sendClosed)
 			THROW_PRIMARY_EXCEPTION("Sending closed");
 
-		// производится ли сейчас отправка
-		bool nowSending = !sendQueue.empty();
-		if(!nowSending)
-			firstItemSent = 0;
+		bool queueWasEmpty = sendQueue.empty();
+
 		// добавить элемент в очередь
 		sendQueue.push_back(SendItem(file, sendHandler));
 
-		// начать отправку, если она не начата
-		if(!nowSending)
+		// сбросить количество переданных данных в первом элементе,
+		// если очередь была пуста (то есть первый элемент как раз
+		// был добавлен)
+		// также, если очередь была пуста, начать отправку
+		if(queueWasEmpty)
+		{
+			firstItemSent = 0;
 			StartSending();
+		}
 	}
 	catch(Exception* exception)
 	{
@@ -278,14 +336,21 @@ void AsioTcpSocket::Send(ptr<File> file, ptr<SendHandler> sendHandler)
 
 void AsioTcpSocket::End()
 {
-	sendClosed = true;
+	CriticalCode cc(cs);
 
-	if(sendQueue.empty())
-		StartSending();
+	if(!sendClosed)
+	{
+		sendClosed = true;
+
+		if(sendQueue.empty())
+			StartSending();
+	}
 }
 
 void AsioTcpSocket::SetReceiveHandler(ptr<ReceiveHandler> receiveHandler)
 {
+	CriticalCode cc(cs);
+
 	bool firstTime = !this->receiveHandler;
 	this->receiveHandler = receiveHandler;
 
@@ -296,15 +361,9 @@ void AsioTcpSocket::SetReceiveHandler(ptr<ReceiveHandler> receiveHandler)
 
 void AsioTcpSocket::Close()
 {
-	receiveHandler = 0;
+	CriticalCode cc(cs);
 
-	try
-	{
-		socket.close();
-	}
-	catch(boost::system::system_error error)
-	{
-	}
+	CloseNonSynced();
 }
 
 END_INANITY_NET

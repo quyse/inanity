@@ -3,6 +3,7 @@
 
 #include "TcpSocket.hpp"
 #include "asio.hpp"
+#include "../CriticalSection.hpp"
 #include <deque>
 
 BEGIN_INANITY_NET
@@ -20,6 +21,8 @@ private:
 	ptr<AsioService> service;
 	boost::asio::ip::tcp::socket socket;
 	ptr<ReceiveHandler> receiveHandler;
+
+	CriticalSection cs;
 
 	class Buffers;
 
@@ -48,6 +51,7 @@ private:
 	void Sent(const boost::system::error_code& error, size_t transferred);
 	void StartReceiving();
 	void Received(const boost::system::error_code& error, size_t transferred);
+	void CloseNonSynced();
 
 public:
 	AsioTcpSocket(ptr<AsioService> service);
