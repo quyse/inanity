@@ -21,6 +21,7 @@ private:
 	ptr<OutputStream> outputStream;
 	Headers headers;
 	bool lastWasHeaderField;
+	bool completed;
 
 	// обработчики событий парсера
 
@@ -42,6 +43,9 @@ public:
 
 	void Write(const void* data, size_t size);
 	void End();
+
+	/// Завершено ли корректно получение HTTP-ответа.
+	bool IsCompleted() const;
 
 	const Headers& GetHeaders() const;
 };

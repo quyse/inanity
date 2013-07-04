@@ -14,7 +14,7 @@ http_parser_settings HttpResponseStream::settings = {
 };
 
 HttpResponseStream::HttpResponseStream(ptr<OutputStream> outputStream) :
-	outputStream(outputStream), lastWasHeaderField(false)
+	outputStream(outputStream), lastWasHeaderField(false), completed(false)
 {
 	parser.data = this;
 	http_parser_init(&parser, HTTP_RESPONSE);
@@ -28,6 +28,11 @@ void HttpResponseStream::Write(const void* data, size_t size)
 void HttpResponseStream::End()
 {
 	http_parser_execute(&parser, &settings, 0, 0);
+}
+
+bool HttpResponseStream::IsCompleted() const
+{
+	return completed;
 }
 
 const HttpResponseStream::Headers& HttpResponseStream::GetHeaders() const
@@ -87,6 +92,10 @@ int HttpResponseStream::OnBody(http_parser* parser, const char* data, size_t siz
 
 int HttpResponseStream::OnMessageComplete(http_parser* parser)
 {
+	HttpResponseStream* stream = (HttpResponseStream*)parser->data;
+
+	stream->completed = true;
+
 	return 0;
 }
 

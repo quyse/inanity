@@ -15,7 +15,7 @@ class HttpClientRequest : public Object
 private:
 	ptr<File> requestFile;
 	ptr<SuccessHandler> handler;
-	ptr<OutputStream> outputStream;
+	ptr<HttpResponseStream> outputStream;
 
 public:
 	HttpClientRequest(ptr<Service> service, const String& url, ptr<SuccessHandler> handler, ptr<OutputStream> outputStream)
@@ -34,7 +34,7 @@ public:
 		if(port != 80)
 			request << ":" << port;
 		request << "\r\n";
-		request << "User-Agent: Inanity/2.0\r\n";
+		request << "User-Agent: Inanity HttpClient/2.0\r\n";
 		request << "\r\n";
 
 		requestFile = Strings::String2File(request.str());
@@ -79,8 +79,14 @@ private:
 				// пришли данные
 				outputStream->WriteFile(data);
 			else
+			{
 				// корректный конец данных
-				handler->FireSuccess();
+				outputStream->End();
+				if(outputStream->IsCompleted())
+					handler->FireSuccess();
+				else
+					THROW_PRIMARY_EXCEPTION("HTTP response is not completed");
+			}
 		}
 		catch(Exception* exception)
 		{
