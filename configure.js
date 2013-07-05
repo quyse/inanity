@@ -32,8 +32,6 @@ var libraries = {
 		'Profiling',
 		// синхронизация и потоки выполнения
 		'Thread', 'CriticalSection', 'CriticalCode', 'Semaphore',
-		// очереди и обработчики
-		'HandlerQueue',
 		// общее: файлы и потоки
 		'File', 'EmptyFile', 'PartFile', 'MemoryFile', 'InputStream', 'OutputStream', 'FileInputStream', 'StreamReader', 'StreamWriter', 'BufferedInputStream', 'BufferedOutputStream', 'MemoryStream',
 		// преобразующие потоки
@@ -52,15 +50,15 @@ var libraries = {
 		// потоки для сжатия
 		'CompressStream', 'DecompressStream']
 	},
-	// ******* сетевая библиотека
-	'libinanity-net': {
+	// ******* сетевая библиотека ASIO
+	'libinanity-asio': {
 		objects: [
-		// базовая часть
-		'EventLoop',
-		// сокеты
-		'Socket', 'ClientSocket', 'ServerSocket',
-		// HTTP
-		'HttpClient', 'HttpResponseStream', 'http_parser']
+		'net.asio', 'net.AsioService', 'net.AsioTcpListener', 'net.AsioTcpSocket', 'net.AsioInternalUdpSocket', 'net.AsioUdpListener', 'net.AsioUdpSocket']
+	},
+	// ******* библиотека HTTP
+	'libinanity-http': {
+		objects: [
+		'net.HttpStream', 'net.HttpClient', 'deps.http-parser.http_parser.c']
 	},
 	// ******* файловая система на SQLite
 	'libinanity-sqlitefs': {
@@ -193,6 +191,24 @@ var executables = {
 	, luatest: {
 		objects: ['script.lua.test'],
 		staticLibraries: ['libinanity-base', 'libinanity-compress', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
+		dynamicLibraries: []
+	}
+	// TEST
+	, nettesttcp: {
+		objects: ['net.test-chat-tcp'],
+		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
+		dynamicLibraries: []
+	}
+	// TEST
+	, nettestudp: {
+		objects: ['net.test-chat-udp'],
+		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
+		dynamicLibraries: []
+	}
+	// TEST
+	, nettesthttpclient: {
+		objects: ['net.test-http-client'],
+		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-http', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
 		dynamicLibraries: []
 	}
 };

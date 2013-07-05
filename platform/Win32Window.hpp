@@ -28,10 +28,6 @@ BEGIN_INANITY_PLATFORM
 
 class Win32Window : public Window
 {
-public:
-	/// Тип обработчика активного окна.
-	typedef Handler<int> ActiveHandler;
-
 private:
 	/// Дескриптор окна.
 	HWND hWnd;
@@ -52,7 +48,7 @@ private:
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 	/// Выполнить одну итерацию оконного цикла.
-	bool Do(ActiveHandler* activeHandler);
+	bool Do(Handler* activeHandler);
 
 public:
 	Win32Window(ATOM windowClass, const String& title,
@@ -86,7 +82,7 @@ public:
 	void SetInputManager(ptr<Input::Win32Manager> inputManager);
 
 	/// Запустить оконный цикл.
-	void Run(ptr<ActiveHandler> activeHandler);
+	void Run(ptr<Handler> activeHandler);
 };
 
 END_INANITY_PLATFORM
