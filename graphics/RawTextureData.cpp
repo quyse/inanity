@@ -95,6 +95,11 @@ int RawTextureData::GetImageDepth() const
 	return depth;
 }
 
+int RawTextureData::GetImageSize() const
+{
+	return arrayPitch;
+}
+
 int RawTextureData::GetImageMips() const
 {
 	return mips;

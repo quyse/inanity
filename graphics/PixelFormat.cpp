@@ -55,6 +55,21 @@ PixelFormat PixelFormat::Deserialize(StreamReader& reader)
 	}
 }
 
+int PixelFormat::GetPixelSize(Size size)
+{
+	switch(size)
+	{
+	case size8bit: return 1;
+	case size16bit: return 2;
+	case size24bit: return 3;
+	case size32bit: return 4;
+	case size64bit: return 8;
+	case size96bit: return 12;
+	case size128bit: return 16;
+	default: return 0;
+	}
+}
+
 PixelFormat PixelFormats::uintRGBA32(
 	PixelFormat::pixelRGBA,
 	PixelFormat::formatUint,

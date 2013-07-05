@@ -77,6 +77,8 @@ struct PixelFormat
 
 	void Serialize(StreamWriter& writer);
 	static PixelFormat Deserialize(StreamReader& reader);
+
+	static int GetPixelSize(Size size);
 };
 
 struct PixelFormats
