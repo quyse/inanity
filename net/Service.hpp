@@ -13,7 +13,7 @@ class UdpListener;
 class UdpSocket;
 class UdpPacket;
 
-/// Абстрактный класс сетевой службы.
+/// Network service abstract class.
 class Service : public Object
 {
 public:
@@ -22,22 +22,24 @@ public:
 	typedef DataHandler<ptr<UdpSocket> > UdpSocketHandler;
 
 public:
-	/// Выполнять работу.
+	/// Do network job.
+	/** Doesn't return control until be stopped. */
 	virtual void Run() = 0;
-	/// Остановить работу.
+	/// Stop network job.
+	/** Could be called from any thread. Causes Run() to return control in threads
+	which called Run(). */
 	virtual void Stop() = 0;
 
-	/// Открыть порт и начать ожидать входящие TCP соединения.
-	/** Один раз будет вызван listenerHandler, и затем вызывается socketHandler
-	по разу на каждое входящее соединение, пока существует объект TcpListener. */
+	/// Open a TCP port and begin listening incoming TCP connections.
 	virtual ptr<TcpListener> ListenTcp(int port, ptr<TcpSocketHandler> socketHandler) = 0;
-	/// Создать исходящее TCP-подключение.
-	/** socketHandler будет вызван один раз. */
+	/// Create outcoming TCP connection.
+	/** socketHandler will be called once. */
 	virtual void ConnectTcp(const String& host, int port, ptr<TcpSocketHandler> socketHandler) = 0;
 
-	/// Открыть порт и начать ожидать UDP-пакеты.
+	/// Open an UDP port and begin listening incoming UDP packets.
 	virtual ptr<UdpListener> ListenUdp(int port, ptr<UdpPacketHandler> receiveHandler) = 0;
-	/// Создать исходящее UDP-подключение.
+	/// Create outcoming UDP connection.
+	/** Of course this is not actually connection, but only an abstraction. */
 	virtual void ConnectUdp(const String& host, int port, ptr<UdpSocketHandler> socketHandler) = 0;
 };
 

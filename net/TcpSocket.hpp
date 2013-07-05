@@ -12,35 +12,35 @@ END_INANITY
 
 BEGIN_INANITY_NET
 
-/// Абстрактный класс TCP-сокета.
-/** TCP-сокет не предоставляет интерфейса потоков данных, потому что
-передача выполняется асинхронно.
-Сокет существует сам по себе, пока принимающая сторона сокета активна,
-то есть удаление всех ссылок на него не убивает его. Нужно специально
-закрывать принимающую сторону вызовом Close.
-Передающая же сторона не удерживает такой неявной ссылки, потому что
-для передачи всё равно необходимо иметь ссылку на сокет.
+/// TCP socket abstract class.
+/** Retains a reference to itself until receiving side is closed.
+Sending side is not retains a reference (because anyway you need
+a reference if you want to send something).
+If you got a correct receiving data end, or receiving error,
+you don't need to explicitly close socket: in this case it releases
+automatically. You need to close socket if you want to stop
+receiving intentionally (for example, if you got sending error).
 */
 class TcpSocket : public Object
 {
 public:
 	typedef SuccessHandler SendHandler;
-	/// Тип обработчика входящих данных.
-	/** Конец потока данных (т.е. при корректно закрытом сокете)
-	обозначается нулевым указателем! После него обработчик вызываться больше
-	не будет. */
+	/// Receive data handler.
+	/** If the socket is closed correctly, handler will called last and once
+	with zero file pointer. */
 	typedef DataHandler<ptr<File> > ReceiveHandler;
 
 public:
-	/// Записать данные в сокет.
-	/** Данные ставятся в очередь на передачу, если ещё прошлые данные не отправились. */
+	/// Write data to the socket.
+	/** Data goes into queue, and will be sent in order. */
 	virtual void Send(ptr<File> file, ptr<SendHandler> sendHandler = 0) = 0;
-	/// Закрыть передающую сторону сокета.
-	/** Если в очереди на передачу есть данные, сначала они передаются, а потом сокет закрывается. */
+	/// Close sending side of the socket.
+	/** Socket will be closed only when all enqueued data will be sent. */
 	virtual void End() = 0;
-	/// Установить обработчик приходящих данных.
+	/// Set receive data handler.
 	virtual void SetReceiveHandler(ptr<ReceiveHandler> receiveHandler) = 0;
-	/// Закрыть принимающую сторону сокета.
+	/// Close receiving data side.
+	/** Releases references to itself and all handlers. */
 	virtual void Close() = 0;
 };
 

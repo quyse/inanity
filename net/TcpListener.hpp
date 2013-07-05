@@ -5,11 +5,12 @@
 
 BEGIN_INANITY_NET
 
-/// Абстрактный класс серверного TCP-сокета.
+/// Server TCP listener abstract class.
+/** Retains a reference to itself until closed. */
 class TcpListener : public Object
 {
 public:
-	/// Закрыть сокет.
+	/// Closes a listener.
 	virtual void Close() = 0;
 };
 
