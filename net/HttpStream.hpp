@@ -3,14 +3,18 @@
 
 #include "net.hpp"
 #include "../deps/http-parser/http_parser.h"
+#include "../Handler.hpp"
 #include "../OutputStream.hpp"
 #include "../String.hpp"
 #include <vector>
 
 BEGIN_INANITY_NET
 
-/// Класс фильтрующего потока, выполняющего разбор HTTP-ответа, и выводящего только тело ответа.
-class HttpResponseStream : public OutputStream
+class TcpSocket;
+
+/// Класс фильтрующего потока, выполняющего разбор HTTP-запроса/ответа, и выводящего только тело ответа.
+/** Умеет также привязываться к TCP-сокету, и разбирать приходящие данные. */
+class HttpStream : public OutputStream
 {
 public:
 	typedef std::vector<std::pair<String, String> > Headers;
@@ -34,12 +38,15 @@ private:
 	static int OnBody(http_parser* parser, const char* data, size_t size);
 	static int OnMessageComplete(http_parser* parser);
 
-public:
+	// обработчики сокета
+	void OnReceive(const DataHandler<ptr<File> >::Result& result);
+
 	/// Создать поток.
-	/**
-	 * \param outputStream поток, в который нужно записывать тело ответа.
-	 */
-	HttpResponseStream(ptr<OutputStream> outputStream);
+	HttpStream(ptr<OutputStream> outputStream, enum http_parser_type type);
+
+public:
+	static ptr<HttpStream> CreateRequestStream(ptr<OutputStream> outputStream);
+	static ptr<HttpStream> CreateResponseStream(ptr<OutputStream> outputStream);
 
 	void Write(const void* data, size_t size);
 	void End();
@@ -48,6 +55,8 @@ public:
 	bool IsCompleted() const;
 
 	const Headers& GetHeaders() const;
+
+	void ReceiveFromSocket(ptr<TcpSocket> socket);
 };
 
 END_INANITY_NET

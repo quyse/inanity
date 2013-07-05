@@ -1,7 +1,7 @@
 #include "HttpClient.hpp"
 #include "Service.hpp"
 #include "TcpSocket.hpp"
-#include "HttpResponseStream.hpp"
+#include "HttpStream.hpp"
 #include "../File.hpp"
 #include "../OutputStream.hpp"
 #include "../Strings.hpp"
@@ -15,11 +15,11 @@ class HttpClientRequest : public Object
 private:
 	ptr<File> requestFile;
 	ptr<SuccessHandler> handler;
-	ptr<HttpResponseStream> outputStream;
+	ptr<HttpStream> outputStream;
 
 public:
 	HttpClientRequest(ptr<Service> service, const String& url, ptr<SuccessHandler> handler, ptr<OutputStream> outputStream)
-	: handler(handler), outputStream(NEW(HttpResponseStream(outputStream)))
+	: handler(handler), outputStream(HttpStream::CreateResponseStream(outputStream))
 	{
 		// разобрать URL
 		http_parser_url parsedUrl;

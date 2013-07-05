@@ -58,7 +58,7 @@ var libraries = {
 	// ******* библиотека HTTP
 	'libinanity-http': {
 		objects: [
-		'net.HttpResponseStream', 'net.HttpClient', 'deps.http-parser.http_parser.c']
+		'net.HttpStream', 'net.HttpClient', 'deps.http-parser.http_parser.c']
 	},
 	// ******* файловая система на SQLite
 	'libinanity-sqlitefs': {
