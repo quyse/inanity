@@ -71,6 +71,9 @@ RECT Win32Monitor::GetRect() const
 {
 	try
 	{
+		// code below is not working for some reason
+		// EnumDisplaySettingsEx always return false
+#if 0
 		DEVMODE modeInfo;
 		modeInfo.dmSize = sizeof(modeInfo);
 		modeInfo.dmDriverExtra = 0;
@@ -84,6 +87,20 @@ RECT Win32Monitor::GetRect() const
 		rect.right = rect.left + ((modeInfo.dmFields & DM_PELSWIDTH) ? modeInfo.dmPelsWidth : 0);
 		rect.bottom = rect.top + ((modeInfo.dmFields & DM_PELSHEIGHT) ? modeInfo.dmPelsHeight : 0);
 		return rect;
+
+#else
+
+		// temporary "fix"
+
+		RECT rect;
+		rect.left = 0;
+		rect.top = 0;
+		rect.right = GetSystemMetrics(SM_CXSCREEN);
+		rect.bottom = GetSystemMetrics(SM_CYSCREEN);
+
+		return rect;
+
+#endif
 	}
 	catch(Exception* exception)
 	{
