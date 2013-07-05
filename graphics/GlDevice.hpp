@@ -59,7 +59,7 @@ public:
 
 	// методы Device
 	ptr<System> GetSystem() const;
-	ptr<Presenter> CreatePresenter(ptr<Output> output, const PresentMode& mode);
+	ptr<Presenter> CreatePresenter(ptr<Output> output, ptr<MonitorMode> mode);
 	ptr<Context> GetContext();
 	ptr<RenderBuffer> CreateRenderBuffer(int width, int height, PixelFormat pixelFormat);
 	ptr<DepthStencilBuffer> CreateDepthStencilBuffer(int width, int height, bool canBeResource);
@@ -70,8 +70,7 @@ public:
 	ptr<VertexBuffer> CreateDynamicVertexBuffer(int size, ptr<VertexLayout> layout);
 	ptr<IndexBuffer> CreateStaticIndexBuffer(ptr<File> file, int indexSize);
 	ptr<AttributeBinding> CreateAttributeBinding(ptr<AttributeLayout> layout);
-	ptr<Texture> CreateStaticTexture(ptr<File> file);
-	ptr<Texture> CreateStatic2DTexture(ptr<Image2DData> imageData);
+	ptr<Texture> CreateStaticTexture(ptr<RawTextureData> data);
 	ptr<SamplerState> CreateSamplerState();
 	ptr<BlendState> CreateBlendState();
 };

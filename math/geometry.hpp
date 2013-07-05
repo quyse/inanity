@@ -6,6 +6,16 @@
 BEGIN_INANITY_MATH
 
 template <typename T>
+xmat<T, 4, 4> CreateTranslationMatrix(const xvec<T, 3>& translation)
+{
+	xmat<T, 4, 4> r = identity_mat<T, 4>();
+	r(0, 3) = translation(0);
+	r(1, 3) = translation(1);
+	r(2, 3) = translation(2);
+	return r;
+}
+
+template <typename T>
 xmat<T, 4, 4> CreateLookAtMatrix(const xvec<T, 3>& eye, const xvec<T, 3>& target, const xvec<T, 3>& up)
 {
 	xmat<T, 4, 4> r;

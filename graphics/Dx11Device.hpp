@@ -18,8 +18,6 @@ class Dx11Device : public Device
 private:
 	/// Графическая система.
 	ptr<Dx11System> system;
-	/// 3D-адаптер.
-	ComPointer<IDXGIAdapter> adapter;
 	/// 3D-устройство.
 	ComPointer<ID3D11Device> device;
 	/// Основной графический контекст.
@@ -30,11 +28,11 @@ private:
 	DXGI_MODE_DESC GetClosestSupportedMode(const DXGI_MODE_DESC& desc) const;
 
 public:
-	Dx11Device(ptr<Dx11System> system, ComPointer<IDXGIAdapter> adapter, ComPointer<ID3D11Device> device, ptr<Dx11Context> context);
+	Dx11Device(ptr<Dx11System> system, ComPointer<ID3D11Device> device, ptr<Dx11Context> context);
 
 	// методы Device
 	ptr<System> GetSystem() const;
-	ptr<Presenter> CreatePresenter(ptr<Output> output, const PresentMode& mode);
+	ptr<Presenter> CreatePresenter(ptr<Output> output, ptr<MonitorMode> mode);
 	ptr<Context> GetContext();
 	ptr<RenderBuffer> CreateRenderBuffer(int width, int height, PixelFormat pixelFormat);
 	ptr<DepthStencilBuffer> CreateDepthStencilBuffer(int width, int height, bool canBeResource);
@@ -45,8 +43,7 @@ public:
 	ptr<VertexBuffer> CreateDynamicVertexBuffer(int size, ptr<VertexLayout> layout);
 	ptr<IndexBuffer> CreateStaticIndexBuffer(ptr<File> file, int indexSize);
 	ptr<AttributeBinding> CreateAttributeBinding(ptr<AttributeLayout> layout);
-	ptr<Texture> CreateStaticTexture(ptr<File> file);
-	ptr<Texture> CreateStatic2DTexture(ptr<Image2DData> imageData);
+	ptr<Texture> CreateStaticTexture(ptr<RawTextureData> data);
 	ptr<SamplerState> CreateSamplerState();
 	ptr<BlendState> CreateBlendState();
 

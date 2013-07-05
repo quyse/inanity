@@ -1,16 +1,15 @@
 #include "BmpImageLoader.hpp"
-#include "Image2DData.hpp"
-#include "../MemoryFile.hpp"
+#include "RawTextureData.hpp"
+#include "../File.hpp"
 #include "../Exception.hpp"
 #include "../windows.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
-ptr<Image2DData> BmpImageLoader::Load(ptr<File> file)
+ptr<RawTextureData> BmpImageLoader::Load(ptr<File> file)
 {
 	try
 	{
-		// получить данные
 		const unsigned char* fileData = (const unsigned char*)file->GetData();
 		size_t fileSize = file->GetSize();
 
@@ -47,14 +46,14 @@ ptr<Image2DData> BmpImageLoader::Load(ptr<File> file)
 			lineData = pixelData + pitch * (height - 1);
 		}
 
-		int resultPitch = width * 4;
-		ptr<MemoryFile> resultFile = NEW(MemoryFile(resultPitch * height));
-		unsigned char* resultDataLine = (unsigned char*)resultFile->GetData();
+		ptr<RawTextureData> textureData = NEW(RawTextureData(0, PixelFormats::uintRGBA32, width, height, 0, 1, 0));
+
+		int resultPitch = textureData->GetMipLinePitch(0);
+		unsigned char* resultDataLine = (unsigned char*)textureData->GetMipData(0, 0);
 
 		switch(bih->biBitCount)
 		{
 		case 8:
-			// прочитать палитру
 			{
 				const RGBQUAD* palette = (const RGBQUAD*)(bih + 1);
 				for(int i = 0; i < height; ++i)
@@ -97,7 +96,7 @@ ptr<Image2DData> BmpImageLoader::Load(ptr<File> file)
 			THROW_PRIMARY_EXCEPTION("Unsupported bit count");
 		}
 
-		return NEW(Image2DData(resultFile, width, height, resultPitch, PixelFormats::intR8G8B8A8));
+		return textureData;
 	}
 	catch(Exception* exception)
 	{

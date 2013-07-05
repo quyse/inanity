@@ -1,8 +1,9 @@
-#ifndef ___INANITY_WINDOW_HPP___
-#define ___INANITY_WINDOW_HPP___
+#ifndef ___INANITY_PLATFORM_WINDOW_HPP___
+#define ___INANITY_PLATFORM_WINDOW_HPP___
 
-#include "String.hpp"
-#include "graphics/graphics.hpp"
+#include "platform.hpp"
+#include "../String.hpp"
+#include "../graphics/graphics.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
@@ -10,7 +11,7 @@ class Output;
 
 END_INANITY_GRAPHICS
 
-BEGIN_INANITY
+BEGIN_INANITY_PLATFORM
 
 /// Абстрактный класс окна.
 class Window : public Object
@@ -21,10 +22,10 @@ public:
 	/// Закрыть окно.
 	virtual void Close() = 0;
 
-	/// Создать область вывода.
+	/// Создать область вывода, покрывающую всё окно.
 	virtual ptr<Graphics::Output> CreateOutput() = 0;
 };
 
-END_INANITY
+END_INANITY_PLATFORM
 
 #endif

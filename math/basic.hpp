@@ -104,6 +104,17 @@ struct xvec<T, 4>
 	}
 };
 
+template <typename T, int n>
+struct generalxvec
+{
+	typedef xvec<T, n> Type;
+};
+template <typename T>
+struct generalxvec<T, 1>
+{
+	typedef T Type;
+};
+
 template <typename T, int n, int m>
 class xmat
 {

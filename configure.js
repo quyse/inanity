@@ -83,8 +83,8 @@ var libraries = {
 		objects: ['input.Frame', 'input.Manager', 'input.Mux', 'input.Processor', 'input.Win32Manager', 'input.Win32RawManager']
 	},
 	// ******* подсистема окон Win32
-	'libinanity-win32window': {
-		objects: ['Win32Window', 'graphics.Win32Output']
+	'libinanity-platform': {
+		objects: ['platform.Win32Window', 'graphics.Win32Output']
 	},
 	// ******* подсистема окон X11
 	'libinanity-x11window' : {
@@ -99,9 +99,9 @@ var libraries = {
 			'graphics.VertexLayout', 'graphics.VertexLayoutElement',
 			'graphics.AttributeLayout', 'graphics.AttributeLayoutElement', 'graphics.AttributeLayoutSlot',
 			'graphics.ShaderCache',
-			'graphics.Texture', 'graphics.TextureManager',
+			'graphics.PixelFormat', 'graphics.RawTextureData', 'graphics.Texture', 'graphics.TextureManager',
 			'graphics.EditableFont', 'graphics.Font', 'graphics.FontManager', 'graphics.TextDrawer',
-			'graphics.Image2DData', 'graphics.BmpImageLoader', 'graphics.PngImageLoader'
+			'graphics.BmpImageLoader', 'graphics.PngImageLoader'
 		]
 	},
 	// ******* подсистема DirectX 11
@@ -113,7 +113,8 @@ var libraries = {
 			'graphics.Dx11VertexShader', 'graphics.Dx11PixelShader',
 			'graphics.Dx11CompiledShader', 'graphics.Dx11ShaderResources',
 			'graphics.Dx11SamplerState', 'graphics.Dx11BlendState',
-			'graphics.D3D10BlobFile', 'graphics.Dx11ShaderCompiler', 'graphics.Hlsl11Source'
+			'graphics.D3D10BlobFile', 'graphics.Dx11ShaderCompiler', 'graphics.Hlsl11Source',
+			'graphics.DxgiAdapter', 'graphics.DxgiMonitor', 'graphics.DxgiMonitorMode'
 		]
 	},
 	// ******* подсистема OpenGl
@@ -125,7 +126,8 @@ var libraries = {
 			'graphics.GlVertexBuffer', 'graphics.GlIndexBuffer', 'graphics.GlAttributeBinding',
 			'graphics.GlVertexShader', 'graphics.GlPixelShader',
 			'graphics.GlSamplerState', 'graphics.GlBlendState',
-			'graphics.GlShaderCompiler', 'graphics.GlslSource', 'graphics.GlShaderBindings'
+			'graphics.GlShaderCompiler', 'graphics.GlslSource', 'graphics.GlShaderBindings',
+			'graphics.Win32Adapter', 'graphics.Win32Monitor', 'graphics.Win32MonitorMode'
 		]
 	},
 	// ******* подсистема шейдеров
@@ -169,6 +171,11 @@ var executables = {
 			'archi.BoneAnimationConverter'],
 		staticLibraries: ['libinanity-base', 'libinanity-graphics', 'libinanity-lua', 'deps/lua//liblua'],
 		dynamicLibraries: ['user32.lib', 'gdi32.lib', 'comdlg32.lib']
+	}
+	, adapterstest: {
+		objects: ['graphics.adapters_test'],
+		staticLibraries: ['libinanity-base', 'libinanity-graphics', 'libinanity-shaders', 'libinanity-dx11', 'libinanity-gl', 'deps/glew//libglew', 'libinanity-platform', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
+		dynamicLibraries: ['user32.lib', 'gdi32.lib', 'dxgi.lib', 'd3d11.lib', 'd3dx11.lib', 'd3dx10.lib', 'opengl32.lib']
 	}
 	// TEST
 	, shaderstest: {

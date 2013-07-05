@@ -11,13 +11,13 @@ END_INANITY
 
 BEGIN_INANITY_GRAPHICS
 
-class Image2DData;
+class RawTextureData;
 
 /// Абстрактный класс загрузчика изображений.
 class ImageLoader : public Object
 {
 public:
-	virtual ptr<Image2DData> Load(ptr<File> file) = 0;
+	virtual ptr<RawTextureData> Load(ptr<File> file) = 0;
 };
 
 END_INANITY_GRAPHICS

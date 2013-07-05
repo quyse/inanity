@@ -15,7 +15,7 @@
 #include "VertexLayout.hpp"
 #include "Dx11AttributeBinding.hpp"
 #include "AttributeLayout.hpp"
-#include "Image2DData.hpp"
+#include "RawTextureData.hpp"
 #include "Dx11SamplerState.hpp"
 #include "Dx11BlendState.hpp"
 #include "../File.hpp"
@@ -25,8 +25,8 @@
 
 BEGIN_INANITY_GRAPHICS
 
-Dx11Device::Dx11Device(ptr<Dx11System> system, ComPointer<IDXGIAdapter> adapter, ComPointer<ID3D11Device> device, ptr<Dx11Context> context)
-: system(system), adapter(adapter), device(device), context(context)
+Dx11Device::Dx11Device(ptr<Dx11System> system, ComPointer<ID3D11Device> device, ptr<Dx11Context> context)
+: system(system), device(device), context(context)
 {
 }
 
@@ -35,30 +35,7 @@ ptr<System> Dx11Device::GetSystem() const
 	return system;
 }
 
-DXGI_MODE_DESC Dx11Device::GetClosestSupportedMode(const DXGI_MODE_DESC& mode) const
-{
-	try
-	{
-		// получить output по умолчанию
-		IDXGIOutput* dxgiOutputInterface;
-		if(FAILED(adapter->EnumOutputs(0, &dxgiOutputInterface)))
-			THROW_PRIMARY_EXCEPTION("Can't get containing output for swap chain");
-
-		ComPointer<IDXGIOutput> dxgiOutput = dxgiOutputInterface;
-
-		DXGI_MODE_DESC closestMode;
-		if(FAILED(dxgiOutput->FindClosestMatchingMode(&mode, &closestMode, device)))
-			THROW_PRIMARY_EXCEPTION("Can't get closest matching mode");
-
-		return closestMode;
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY_EXCEPTION("Can't get closest supported mode", exception);
-	}
-}
-
-ptr<Presenter> Dx11Device::CreatePresenter(ptr<Output> abstractOutput, const PresentMode& mode)
+ptr<Presenter> Dx11Device::CreatePresenter(ptr<Output> abstractOutput, ptr<MonitorMode> abstractMode)
 {
 	try
 	{
@@ -66,18 +43,16 @@ ptr<Presenter> Dx11Device::CreatePresenter(ptr<Output> abstractOutput, const Pre
 		ptr<Win32Output> output = abstractOutput.DynamicCast<Win32Output>();
 		if(!output)
 			THROW_PRIMARY_EXCEPTION("Only Win32 output allowed");
+		// режим, если есть - только DXGI
+		ptr<DxgiMonitorMode> mode = abstractMode.DynamicCast<DxgiMonitorMode>();
+		if(!mode && abstractMode)
+			THROW_PRIMARY_EXCEPTION("Only DXGI monitor mode allowed");
 
 		// сформировать структуру настроек swap chain
 		DXGI_SWAP_CHAIN_DESC desc;
 		ZeroMemory(&desc, sizeof(desc));
 
-		// подзадача - сформировать структуру режима экрана
-		DXGI_MODE_DESC& modeDesc = desc.BufferDesc;
-		modeDesc = Dx11System::GetModeDesc(mode);
-		// если режим - полноэкранный, необходимо его скорректировать,
-		// то есть привести к поддерживаемому
-		if(mode.fullscreen)
-			modeDesc = GetClosestSupportedMode(modeDesc);
+		desc.BufferDesc = Dx11System::GetModeDesc(mode, output);
 
 		// мультисемплинга пока нет
 		desc.SampleDesc.Count = 1;
@@ -378,94 +353,169 @@ ptr<AttributeBinding> Dx11Device::CreateAttributeBinding(ptr<AttributeLayout> la
 	}
 }
 
-ptr<Texture> Dx11Device::CreateStaticTexture(ptr<File> file)
+ptr<Texture> Dx11Device::CreateStaticTexture(ptr<RawTextureData> data)
 {
 	try
 	{
-		D3DX11_IMAGE_INFO info;
-		if(FAILED(D3DX11GetImageInfoFromMemory(file->GetData(), file->GetSize(), 0, &info, NULL)))
-			THROW_PRIMARY_EXCEPTION("Can't get image info");
+		int mips = data->GetImageMips();
+		int realCount = data->GetCount();
+		if(realCount == 0)
+			realCount = 1;
+		DXGI_FORMAT format = Dx11System::GetDXGIFormat(data->GetFormat());
 
-		D3DX11_IMAGE_LOAD_INFO loadInfo;
-		loadInfo.Width = info.Width;
-		loadInfo.Height = info.Height;
-		loadInfo.Depth = info.Depth;
-		loadInfo.FirstMipLevel = 0;
-		loadInfo.MipLevels = info.MipLevels;
-		loadInfo.Usage = D3D11_USAGE_IMMUTABLE;
-		loadInfo.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-		loadInfo.CpuAccessFlags = 0;
-		loadInfo.MiscFlags = info.MiscFlags;
-		loadInfo.Format = info.Format;
-		loadInfo.Filter = D3DX11_FILTER_LINEAR;
-		loadInfo.MipFilter = D3DX11_FILTER_LINEAR;
-		loadInfo.pSrcInfo = &info;
+		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+		ComPointer<ID3D11Resource> resource;
 
-		ID3D11ShaderResourceView* shaderResourceView;
-		if(FAILED(D3DX11CreateShaderResourceViewFromMemory(device, file->GetData(), file->GetSize(), &loadInfo, 0, &shaderResourceView, NULL)))
+		// if it is a 3D texture
+		if(data->GetImageDepth())
+		{
+			// 3D arrays are not supported
+			if(data->GetCount())
+				THROW_PRIMARY_EXCEPTION("Arrays of 3D textures are not supported");
+
+			{
+				// create texture and upload data
+				D3D11_TEXTURE3D_DESC desc;
+				desc.Width = data->GetImageWidth();
+				desc.Height = data->GetImageHeight();
+				desc.Depth = data->GetImageDepth();
+				desc.MipLevels = mips;
+				desc.Format = format;
+				desc.Usage = D3D11_USAGE_IMMUTABLE;
+				desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+				desc.CPUAccessFlags = 0;
+				desc.MiscFlags = 0;
+
+				std::vector<D3D11_SUBRESOURCE_DATA> dataDescs(mips);
+				for(int mip = 0; mip < mips; ++mip)
+				{
+					D3D11_SUBRESOURCE_DATA& dataDesc = dataDescs[mip];
+					dataDesc.pSysMem = data->GetMipData(0, mip);
+					dataDesc.SysMemPitch = data->GetMipLinePitch(mip);
+					dataDesc.SysMemSlicePitch = data->GetMipSlicePitch(mip);
+				}
+
+				ID3D11Texture3D* textureInterface;
+				if(FAILED(device->CreateTexture3D(&desc, &*dataDescs.begin(), &textureInterface)))
+					THROW_PRIMARY_EXCEPTION("Can't create texture 3D");
+				resource = textureInterface;
+			}
+
+			// fill SRV desc
+			srvDesc.Format = format;
+			srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE3D;
+			srvDesc.Texture3D.MostDetailedMip = 0;
+			srvDesc.Texture3D.MipLevels = -1;
+		}
+		// if it is a 2D texture
+		else if(data->GetImageHeight())
+		{
+			{
+				// create texture and upload data
+				D3D11_TEXTURE2D_DESC desc;
+				desc.Width = data->GetImageWidth();
+				desc.Height = data->GetImageHeight();
+				desc.MipLevels = mips;
+				desc.ArraySize = realCount;
+				desc.Format = format;
+				desc.SampleDesc.Count = 1;
+				desc.SampleDesc.Quality = 0;
+				desc.Usage = D3D11_USAGE_IMMUTABLE;
+				desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+				desc.CPUAccessFlags = 0;
+				desc.MiscFlags = 0;
+
+				std::vector<D3D11_SUBRESOURCE_DATA> dataDescs(realCount * mips);
+				for(int image = 0; image < realCount; ++image)
+					for(int mip = 0; mip < mips; ++mip)
+					{
+						D3D11_SUBRESOURCE_DATA& dataDesc = dataDescs[image * mips + mip];
+						dataDesc.pSysMem = data->GetMipData(image, mip);
+						dataDesc.SysMemPitch = data->GetMipLinePitch(mip);
+						dataDesc.SysMemSlicePitch = 0;
+					}
+
+				ID3D11Texture2D* textureInterface;
+				if(FAILED(device->CreateTexture2D(&desc, &*dataDescs.begin(), &textureInterface)))
+					THROW_PRIMARY_EXCEPTION("Can't create texture 2D");
+				resource = textureInterface;
+			}
+
+			// fill SRV desc
+			srvDesc.Format = format;
+			if(data->GetCount())
+			{
+				srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+				srvDesc.Texture2DArray.MostDetailedMip = 0;
+				srvDesc.Texture2DArray.MipLevels = -1;
+				srvDesc.Texture2DArray.FirstArraySlice = 0;
+				srvDesc.Texture2DArray.ArraySize = realCount;
+			}
+			else
+			{
+				srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+				srvDesc.Texture2D.MostDetailedMip = 0;
+				srvDesc.Texture2D.MipLevels = -1;
+			}
+		}
+		// else it is 1D texture
+		else
+		{
+			{
+				// create texture and upload data
+				D3D11_TEXTURE1D_DESC desc;
+				desc.Width = data->GetImageWidth();
+				desc.MipLevels = mips;
+				desc.ArraySize = realCount;
+				desc.Format = format;
+				desc.Usage = D3D11_USAGE_IMMUTABLE;
+				desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+				desc.CPUAccessFlags = 0;
+				desc.MiscFlags = 0;
+
+				std::vector<D3D11_SUBRESOURCE_DATA> dataDescs(realCount * mips);
+				for(int image = 0; image < realCount; ++image)
+					for(int mip = 0; mip < mips; ++mip)
+					{
+						D3D11_SUBRESOURCE_DATA& dataDesc = dataDescs[image * mips + mip];
+						dataDesc.pSysMem = data->GetMipData(image, mip);
+						dataDesc.SysMemPitch = 0;
+						dataDesc.SysMemSlicePitch = 0;
+					}
+
+				ID3D11Texture1D* textureInterface;
+				if(FAILED(device->CreateTexture1D(&desc, &*dataDescs.begin(), &textureInterface)))
+					THROW_PRIMARY_EXCEPTION("Can't create texture 1D");
+				resource = textureInterface;
+			}
+
+			// fill SRV desc
+			srvDesc.Format = format;
+			if(data->GetCount())
+			{
+				srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+				srvDesc.Texture1DArray.MostDetailedMip = 0;
+				srvDesc.Texture1DArray.MipLevels = -1;
+				srvDesc.Texture1DArray.FirstArraySlice = 0;
+				srvDesc.Texture1DArray.ArraySize = realCount;
+			}
+			else
+			{
+				srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+				srvDesc.Texture1D.MostDetailedMip = 0;
+				srvDesc.Texture1D.MipLevels = -1;
+			}
+		}
+
+		ID3D11ShaderResourceView* shaderResourceViewInterface;
+		if(FAILED(device->CreateShaderResourceView(resource, &srvDesc, &shaderResourceViewInterface)))
 			THROW_PRIMARY_EXCEPTION("Can't create shader resource view");
 
-		return NEW(Dx11Texture(shaderResourceView));
+		return NEW(Dx11Texture(shaderResourceViewInterface));
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create static texture", exception);
-	}
-}
-
-ptr<Texture> Dx11Device::CreateStatic2DTexture(ptr<Image2DData> imageData)
-{
-	try
-	{
-		// получить формат пикселов текстуры
-		DXGI_FORMAT pixelFormat = Dx11System::GetDXGIFormat(imageData->GetPixelFormat());
-
-		// создать текстуру
-		ComPointer<ID3D11Texture2D> texture;
-		{
-			D3D11_TEXTURE2D_DESC desc;
-			desc.Width = imageData->GetWidth();
-			desc.Height = imageData->GetHeight();
-			desc.MipLevels = 1;
-			desc.ArraySize = 1;
-			desc.Format = pixelFormat;
-			desc.SampleDesc.Count = 1;
-			desc.SampleDesc.Quality = 0;
-			desc.Usage = D3D11_USAGE_IMMUTABLE;
-			desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-			desc.CPUAccessFlags = 0;
-			desc.MiscFlags = 0;
-			D3D11_SUBRESOURCE_DATA dataDesc;
-			dataDesc.pSysMem = imageData->GetData()->GetData();
-			dataDesc.SysMemPitch = imageData->GetPitch();
-
-			ID3D11Texture2D* textureInterface;
-			if(FAILED(device->CreateTexture2D(&desc, &dataDesc, &textureInterface)))
-				THROW_PRIMARY_EXCEPTION("Can't create texture 2D");
-			texture = textureInterface;
-		}
-
-		// создать shader resource
-		ComPointer<ID3D11ShaderResourceView> shaderResourceView;
-		{
-			D3D11_SHADER_RESOURCE_VIEW_DESC desc;
-			desc.Format = pixelFormat;
-			desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-			desc.Texture2D.MostDetailedMip = 0;
-			desc.Texture2D.MipLevels = -1;
-
-			ID3D11ShaderResourceView* shaderResourceViewInterface;
-			if(FAILED(device->CreateShaderResourceView(texture, &desc, &shaderResourceViewInterface)))
-				THROW_PRIMARY_EXCEPTION("Can't create shader resource");
-			shaderResourceView = shaderResourceViewInterface;
-		}
-
-		// вернуть текстуру
-		return NEW(Dx11Texture(shaderResourceView));
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY_EXCEPTION("Can't create static 2D texture", exception);
+		THROW_SECONDARY_EXCEPTION("Can't create static DirectX 11 texture", exception);
 	}
 }
 

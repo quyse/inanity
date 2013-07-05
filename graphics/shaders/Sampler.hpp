@@ -35,10 +35,13 @@ public:
 	void Apply(ContextState& contextState) const;
 };
 
-/// Класс выражения-семплера.
-template <typename ValueType, typename CoordType>
+/// Класс выражения-семплера (обыкновенного, 1D, 2D или 3D).
+template <typename ValueType, int dimensions>
 class Sampler : public SamplerBase
 {
+public:
+	typedef typename generalxvec<float, dimensions>::Type CoordType;
+
 private:
 	/// Оператор присваивания запрещён (приватный).
 	void operator=(Sampler a);
@@ -49,6 +52,22 @@ public:
 
 	/// Получить семпл.
 	Value<ValueType> Sample(Value<CoordType> coords);
+};
+
+/// Класс выражения-семплера для кубического семплера.
+template <typename ValueType>
+class SamplerCube : public SamplerBase
+{
+private:
+	/// Оператор присваивания запрещён (приватный).
+	void operator=(SamplerCube a);
+
+public:
+	SamplerCube(ptr<SamplerNode> node);
+	SamplerCube(int slot);
+
+	/// Получить семпл.
+	Value<ValueType> Sample(Value<vec3> coords);
 };
 
 END_INANITY_SHADERS

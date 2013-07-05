@@ -1,10 +1,10 @@
-#ifndef ___INANITY_X11_DISPLAY_HPP___
-#define ___INANITY_X11_DISPLAY_HPP___
+#ifndef ___INANITY_PLATFORM_X11_DISPLAY_HPP___
+#define ___INANITY_PLATFORM_X11_DISPLAY_HPP___
 
-#include "Object.hpp"
+#include "platform.hpp"
 #include "x11.hpp"
 
-BEGIN_INANITY
+BEGIN_INANITY_PLATFORM
 
 /// Класс, инкапсулирующий дисплей X11.
 class X11Display : public Object
@@ -21,6 +21,6 @@ public:
 	static ptr<X11Display> CreateDefault();
 };
 
-END_INANITY
+END_INANITY_PLATFORM
 
 #endif

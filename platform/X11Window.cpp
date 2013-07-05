@@ -1,10 +1,10 @@
 #include "X11Window.hpp"
 #include "X11Display.hpp"
-#include "graphics/X11Output.hpp"
-#include "graphics/opengl.hpp"
-#include "Exception.hpp"
+#include "../graphics/X11Output.hpp"
+#include "../graphics/opengl.hpp"
+#include "../Exception.hpp"
 
-BEGIN_INANITY
+BEGIN_INANITY_PLATFORM
 
 X11Window::X11Window(ptr<X11Display> display, Handle handle) : handle(handle) {}
 
@@ -104,4 +104,4 @@ ptr<X11Window> X11Window::CreateForOpenGL(ptr<X11Display> display)
 	}
 }
 
-END_INANITY
+END_INANITY_PLATFORM

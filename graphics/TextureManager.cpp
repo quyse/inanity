@@ -3,7 +3,7 @@
 #include "Texture.hpp"
 #include "BmpImageLoader.hpp"
 #include "PngImageLoader.hpp"
-#include "Image2DData.hpp"
+#include "RawTextureData.hpp"
 #include "../ResourceManager.ipp"
 #include "../File.hpp"
 #include "../Exception.hpp"
@@ -34,10 +34,10 @@ ptr<Texture> TextureManager::Load(const String& textureName)
 		ptr<ImageLoader> imageLoader = i->second;
 
 		// загрузить изображение
-		ptr<Image2DData> imageData = imageLoader->Load(fileSystem->LoadFile(textureName));
+		ptr<RawTextureData> textureData = imageLoader->Load(fileSystem->LoadFile(textureName));
 
 		// создать текстуру
-		return device->CreateStatic2DTexture(imageData);
+		return device->CreateStaticTexture(textureData);
 	}
 	catch(Exception* exception)
 	{

@@ -15,6 +15,7 @@ BEGIN_INANITY_GRAPHICS
 class System;
 class Presenter;
 class Output;
+class MonitorMode;
 struct PresentMode;
 class Context;
 class RenderBuffer;
@@ -28,7 +29,7 @@ class IndexBuffer;
 class AttributeLayout;
 class AttributeBinding;
 class Texture;
-class Image2DData;
+class RawTextureData;
 class SamplerState;
 class BlendState;
 
@@ -43,13 +44,8 @@ public:
 	virtual ptr<System> GetSystem() const = 0;
 
 	/// Создать выходное устройство.
-	/**
-	\param output Область вывода для рисования графики.
-	\param fullscreen Полноэкранный режим?
-	\param width Ширина окна или горизонтальное разрешение экрана.
-	\param height Высота окна или вертикальное разрешение экрана.
-	*/
-	virtual ptr<Presenter> CreatePresenter(ptr<Output> output, const PresentMode& mode) = 0;
+	/** \param mode Режим экрана, в случае, если режим должен быть полноэкранным. */
+	virtual ptr<Presenter> CreatePresenter(ptr<Output> output, ptr<MonitorMode> mode) = 0;
 
 	/// Получить графический контекст.
 	virtual ptr<Context> GetContext() = 0;
@@ -82,12 +78,8 @@ public:
 	/// Создать привязку атрибутов.
 	virtual ptr<AttributeBinding> CreateAttributeBinding(ptr<AttributeLayout> layout) = 0;
 
-	/// Создать статическую текстуру из графического файла.
-	/** FIXME: Метод должен быть удалён. Для создания текстур нужно использовать
-	общий метод, принимающий ImageData. */
-	virtual ptr<Texture> CreateStaticTexture(ptr<File> file) = 0;
-	/// Создать статическую 2D-текстуру из графических данных.
-	virtual ptr<Texture> CreateStatic2DTexture(ptr<Image2DData> imageData) = 0;
+	/// Создать статическую текстуру из файла с сырыми данными.
+	virtual ptr<Texture> CreateStaticTexture(ptr<RawTextureData> data) = 0;
 
 	/// Создать объект настроек семплирования.
 	virtual ptr<SamplerState> CreateSamplerState() = 0;

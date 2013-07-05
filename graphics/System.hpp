@@ -3,12 +3,7 @@
 
 #include "graphics.hpp"
 #include "shaders/shaders.hpp"
-
-BEGIN_INANITY
-
-class Window;
-
-END_INANITY
+#include <vector>
 
 BEGIN_INANITY_SHADERS
 
@@ -18,6 +13,7 @@ END_INANITY_SHADERS
 
 BEGIN_INANITY_GRAPHICS
 
+class Adapter;
 class Device;
 class ShaderCompiler;
 
@@ -27,16 +23,11 @@ class ShaderCompiler;
 class System : public Object
 {
 public:
-	/// Информация о графическом устройстве.
-	class DeviceInfo
-	{
-	};
+	/// Получить графические адаптеры.
+	virtual const std::vector<ptr<Adapter> >& GetAdapters() = 0;
 
-public:
-	/// Создать окно, пригодное для использования с данной графической подсистемой.
-	virtual ptr<Window> CreateDefaultWindow() = 0;
 	/// Создать главное графическое устройство.
-	virtual ptr<Device> CreatePrimaryDevice() = 0;
+	virtual ptr<Device> CreateDevice(ptr<Adapter> adapter) = 0;
 
 	/// Создать компилятор шейдеров.
 	virtual ptr<ShaderCompiler> CreateShaderCompiler() = 0;

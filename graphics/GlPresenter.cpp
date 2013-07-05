@@ -1,6 +1,7 @@
 #include "GlPresenter.hpp"
 #include "GlDevice.hpp"
 #include "GlRenderBuffer.hpp"
+#include "Win32MonitorMode.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
@@ -24,7 +25,7 @@ ptr<RenderBuffer> GlPresenter::GetBackBuffer()
 	return backBuffer;
 }
 
-void GlPresenter::SetMode(const PresentMode& mode)
+void GlPresenter::SetMode(ptr<MonitorMode> abstractMode)
 {
 	// TODO.
 }

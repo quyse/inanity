@@ -58,7 +58,7 @@ struct TextDrawerHelper : public Object
 
 	/// Текстура шрифта.
 	/** Задаёт альфу для шрифта. */
-	Sampler<float, vec2> uFontSampler;
+	Sampler<float, 2> uFontSampler;
 
 	ptr<VertexBuffer> vb;
 	ptr<VertexShader> vs;
