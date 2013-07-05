@@ -14,7 +14,7 @@
 #include "GlAttributeBinding.hpp"
 #include "AttributeLayout.hpp"
 #include "GlInternalTexture.hpp"
-#include "Image2DData.hpp"
+#include "RawTextureData.hpp"
 #include "GlSamplerState.hpp"
 #include "GlBlendState.hpp"
 #include "GlslSource.hpp"
@@ -167,9 +167,6 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 		// очистка ошибок - обход бага GLEW, который может оставлять ошибки
 		// (тем не менее, GLEW инициализируется нормально)
 		GlSystem::ClearErrors();
-
-		// установить размер окна
-		SetWindowPos(output->GetHWND(), NULL, 0, 0, mode->GetWidth(), mode->GetHeight(), SWP_NOMOVE | SWP_NOZORDER);
 
 		// создать и вернуть Presenter
 		return NEW(GlPresenter(this, hdc, NEW(GlRenderBuffer(0, 0))));
@@ -605,12 +602,7 @@ ptr<AttributeBinding> GlDevice::CreateAttributeBinding(ptr<AttributeLayout> layo
 	}
 }
 
-ptr<Texture> GlDevice::CreateStaticTexture(ptr<File> file)
-{
-	THROW_PRIMARY_EXCEPTION("This method is unsupported on GlDevice");
-}
-
-ptr<Texture> GlDevice::CreateStatic2DTexture(ptr<Image2DData> imageData)
+ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data)
 {
 	try
 	{
@@ -618,22 +610,144 @@ ptr<Texture> GlDevice::CreateStatic2DTexture(ptr<Image2DData> imageData)
 		glGenTextures(1, &textureName);
 		GlSystem::CheckErrors("Can't gen texture");
 		ptr<GlInternalTexture> internalTexture = NEW(GlInternalTexture(textureName));
-		glBindTexture(GL_TEXTURE_2D, textureName);
-		GlSystem::CheckErrors("Can't bind texture");
+
+		int mips = data->GetImageMips();
+		int realCount = data->GetCount();
+		if(realCount == 0)
+			realCount = 1;
 
 		GLint internalFormat;
 		GLenum format;
 		GLenum type;
-		if(!GlSystem::GetTextureFormat(imageData->GetPixelFormat(), internalFormat, format, type))
+		if(!GlSystem::GetTextureFormat(data->GetFormat(), internalFormat, format, type))
 			THROW_PRIMARY_EXCEPTION("Invalid pixel format");
-		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, (GLsizei)imageData->GetWidth(), (GLsizei)imageData->GetHeight(), 0, format, type, imageData->GetData()->GetData());
-		GlSystem::CheckErrors("Can't initialize texture");
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		int pixelSize = PixelFormat::GetPixelSize(data->GetFormat().size);
+
+		glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
+		GLenum target;
+
+		// 3D texture
+		if(data->GetImageDepth())
+		{
+			// if array
+			if(data->GetCount())
+				THROW_PRIMARY_EXCEPTION("Arrays of 3D textures are not supported");
+
+			target = GL_TEXTURE_3D;
+
+			glBindTexture(target, textureName);
+			GlSystem::CheckErrors("Can't bind 3D texture");
+
+			for(int mip = 0; mip < mips; ++mip)
+			{
+				int linePitch = data->GetMipLinePitch(mip);
+				int slicePitch = data->GetMipSlicePitch(mip);
+				if((linePitch % pixelSize) || (slicePitch % pixelSize))
+					THROW_PRIMARY_EXCEPTION("Wrong line or slice pitch");
+				glPixelStorei(GL_PACK_ROW_LENGTH, linePitch / pixelSize);
+				glPixelStorei(GL_PACK_IMAGE_HEIGHT, slicePitch / pixelSize);
+				glTexImage3D(target, mip, internalFormat,
+					data->GetMipWidth(mip), data->GetMipHeight(mip), data->GetMipDepth(mip),
+					0, format, type, data->GetMipData(0, mip));
+				GlSystem::CheckErrors("Can't set 3D texture data");
+			}
+		}
+		// 2D texture
+		else if(data->GetImageHeight())
+		{
+			// if array
+			if(data->GetCount())
+			{
+				target = GL_TEXTURE_2D_ARRAY;
+
+				glBindTexture(target, textureName);
+				GlSystem::CheckErrors("Can't bind 2D array texture");
+
+				int imagePitch = data->GetImageSize();
+				if(imagePitch % pixelSize)
+					THROW_PRIMARY_EXCEPTION("Wrong image pitch");
+				glPixelStorei(GL_PACK_IMAGE_HEIGHT, imagePitch / pixelSize);
+				for(int mip = 0; mip < mips; ++mip)
+				{
+					int linePitch = data->GetMipLinePitch(mip);
+					if(linePitch % pixelSize)
+						THROW_PRIMARY_EXCEPTION("Wrong line pitch");
+					glPixelStorei(GL_PACK_ROW_LENGTH, linePitch / pixelSize);
+					glTexImage3D(target, mip, internalFormat,
+						data->GetMipWidth(mip), data->GetMipHeight(mip), data->GetCount(),
+						0, format, type, data->GetMipData(0, mip));
+					GlSystem::CheckErrors("Can't set 2D array texture data");
+				}
+			}
+			// single 2D texture
+			else
+			{
+				target = GL_TEXTURE_2D;
+
+				glBindTexture(target, textureName);
+				GlSystem::CheckErrors("Can't bind 2D texture");
+
+				for(int mip = 0; mip < mips; ++mip)
+				{
+					int linePitch = data->GetMipLinePitch(mip);
+					if(linePitch % pixelSize)
+						THROW_PRIMARY_EXCEPTION("Wrong line pitch");
+					glPixelStorei(GL_PACK_ROW_LENGTH, linePitch / pixelSize);
+					glTexImage2D(target, mip, internalFormat,
+						data->GetMipWidth(mip), data->GetMipHeight(mip),
+						0, format, type, data->GetMipData(0, mip));
+					GlSystem::CheckErrors("Can't set 2D texture data");
+				}
+			}
+		}
+		// 1D texture
+		else
+		{
+			// if array
+			if(data->GetCount())
+			{
+				target = GL_TEXTURE_1D_ARRAY;
+
+				glBindTexture(target, textureName);
+				GlSystem::CheckErrors("Can't bind 1D array texture");
+
+				int imagePitch = data->GetImageSize();
+				if(imagePitch % pixelSize)
+					THROW_PRIMARY_EXCEPTION("Wrong image pitch");
+				glPixelStorei(GL_PACK_ROW_LENGTH, imagePitch / pixelSize);
+				for(int mip = 0; mip < mips; ++mip)
+				{
+					glTexImage2D(target, mip, internalFormat,
+						data->GetMipWidth(mip), data->GetCount(),
+						0, format, type, data->GetMipData(0, mip));
+					GlSystem::CheckErrors("Can't set 1D array texture data");
+				}
+			}
+			// single 1D texture
+			else
+			{
+				target = GL_TEXTURE_1D;
+
+				glBindTexture(target, textureName);
+				GlSystem::CheckErrors("Can't bind 1D texture");
+
+				for(int mip = 0; mip < mips; ++mip)
+				{
+					glTexImage1D(target, mip, internalFormat,
+						data->GetMipWidth(mip),
+						0, format, type, data->GetMipData(0, mip));
+					GlSystem::CheckErrors("Can't set 1D texture data");
+				}
+			}
+		}
+
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 		GlSystem::CheckErrors("Can't set texture parameters");
 
 		return NEW(GlTexture(internalTexture));
