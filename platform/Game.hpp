@@ -3,14 +3,25 @@
 
 #include "platform.hpp"
 #include "../graphics/graphics.hpp"
+#include "../input/input.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
+class System;
 class Device;
+class Presenter;
 
 END_INANITY_GRAPHICS
 
+BEGIN_INANITY_INPUT
+
+class Manager;
+
+END_INANITY_INPUT
+
 BEGIN_INANITY_PLATFORM
+
+class Window;
 
 /// Класс стандартной игры.
 class Game : public Object
@@ -37,6 +48,14 @@ public:
 private:
 	ptr<Graphics::Device> device;
 	ptr<Graphics::Presenter> presenter;
+
+public:
+#ifdef ___INANITY_WINDOWS
+	static ptr<Graphics::System> CreateDx11System();
+#endif
+	static ptr<Graphics::System> CreateGlSystem();
+
+	static ptr<Input::Manager> CreateInputManager(ptr<Window> window);
 };
 
 END_INANITY_PLATFORM
