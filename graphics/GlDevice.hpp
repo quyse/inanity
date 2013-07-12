@@ -7,7 +7,7 @@
 #include "../String.hpp"
 
 #ifdef ___INANITY_LINUX
-#include "../x11.hpp"
+#include "../platform/x11.hpp"
 #endif
 
 BEGIN_INANITY_GRAPHICS

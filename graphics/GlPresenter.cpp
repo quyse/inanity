@@ -1,7 +1,12 @@
 #include "GlPresenter.hpp"
 #include "GlDevice.hpp"
 #include "GlRenderBuffer.hpp"
+#ifdef ___INANITY_WINDOWS
 #include "Win32MonitorMode.hpp"
+#endif
+#ifdef ___INANITY_LINUX
+#include "X11MonitorMode.hpp"
+#endif
 
 BEGIN_INANITY_GRAPHICS
 

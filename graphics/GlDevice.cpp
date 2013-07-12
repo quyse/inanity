@@ -29,8 +29,8 @@
 #endif
 #ifdef ___INANITY_LINUX
 #include "X11Output.hpp"
-#include "../X11Window.hpp"
-#include "../X11Display.hpp"
+#include "../platform/X11Window.hpp"
+#include "../platform/X11Display.hpp"
 #endif
 
 BEGIN_INANITY_GRAPHICS
@@ -179,12 +179,12 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 			THROW_PRIMARY_EXCEPTION("Only X11 output is allowed");
 
 		// получить окно
-		ptr<X11Window> window = output->GetWindow();
+		ptr<Platform::X11Window> window = output->GetWindow();
 
 		::Display* d = window->GetDisplay()->GetDisplay();
 
 		// создать контекст
-		glxContext = glXCreateContext(d, window->GetXVisualInfo(), NULL, True);
+		glxContext = glXCreateContext(d, window->GetVisualInfo(), NULL, True);
 		if(!glxContext)
 			THROW_PRIMARY_EXCEPTION("Can't create GLX context");
 
@@ -195,9 +195,6 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 		GlSystem::InitGLEW();
 
 		GlSystem::ClearErrors();
-
-		// установить размер окна
-		XResizeWindow(d, window->GetHandle(), mode.width, mode.height);
 
 		// отобразить окно
 		XMapWindow(d, window->GetHandle());

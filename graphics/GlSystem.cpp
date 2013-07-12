@@ -9,8 +9,9 @@
 #include "../Strings.hpp"
 #endif
 #ifdef ___INANITY_LINUX
-#include "../X11Window.hpp"
-#include "../X11Display.hpp"
+#include "X11Adapter.hpp"
+#include "../platform/X11Window.hpp"
+#include "../platform/X11Display.hpp"
 #endif
 #include "../Exception.hpp"
 
@@ -25,6 +26,9 @@ const std::vector<ptr<Adapter> >& GlSystem::GetAdapters()
 #ifdef ___INANITY_WINDOWS
 		Win32Adapter::GetAdapters(adapters);
 #endif
+#ifdef ___INANITY_LINUX
+		X11Adapter::GetAdapters(adapters);
+#endif
 
 		adaptersInitialized = true;
 	}
@@ -34,21 +38,23 @@ const std::vector<ptr<Adapter> >& GlSystem::GetAdapters()
 
 ptr<Device> GlSystem::CreateDevice(ptr<Adapter> abstractAdapter)
 {
-	try
-	{
+	BEGIN_TRY();
+
 #ifdef ___INANITY_WINDOWS
-		ptr<Win32Adapter> adapter = abstractAdapter.DynamicCast<Win32Adapter>();
-		if(!adapter)
-			THROW_PRIMARY_EXCEPTION("Wrong adapter type");
-		return NEW(GlDevice(this, adapter->GetId(), NEW(GlContext())));
+	ptr<Win32Adapter> adapter = abstractAdapter.DynamicCast<Win32Adapter>();
+	if(!adapter)
+		THROW_PRIMARY_EXCEPTION("Wrong adapter type");
+	return NEW(GlDevice(this, adapter->GetId(), NEW(GlContext())));
 #endif
-		// TODO
-		THROW_PRIMARY_EXCEPTION("Not implemented");
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY_EXCEPTION("Can't create OpenGL device", exception);
-	}
+
+#ifdef ___INANITY_LINUX
+	return NEW(GlDevice(this, NEW(GlContext())));
+#endif
+
+	// TODO
+	THROW_PRIMARY_EXCEPTION("Not implemented");
+
+	END_TRY("Can't create OpenGL device");
 }
 
 ptr<ShaderCompiler> GlSystem::CreateShaderCompiler()
