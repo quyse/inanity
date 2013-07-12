@@ -34,8 +34,8 @@ public:
 	Может быть возвращён 0, если никак нельзя создать поддерживаемый режим. */
 	virtual ptr<MonitorMode> TryCreateMode(int width, int height) = 0;
 
-	/// Создать окно по центру монитора.
-	virtual ptr<Platform::Window> CreateWindowCentered(const String& title, int width, int height) = 0;
+	/// Create window in the default position on the monitor.
+	virtual ptr<Platform::Window> CreateDefaultWindow(const String& title, int width, int height) = 0;
 
 #ifdef ___INANITY_WINDOWS
 	/// Получить координаты монитора на рабочем столе.
