@@ -80,7 +80,7 @@ ptr<MonitorMode> DxgiMonitor::TryCreateMode(int width, int height)
 	}
 }
 
-ptr<Platform::Window> DxgiMonitor::CreateWindowCentered(const String& title, int width, int height)
+ptr<Platform::Window> DxgiMonitor::CreateDefaultWindow(const String& title, int width, int height)
 {
 	try
 	{

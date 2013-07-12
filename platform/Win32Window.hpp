@@ -14,7 +14,7 @@
 
 BEGIN_INANITY_GRAPHICS
 
-class Presenter;
+class Win32Output;
 
 END_INANITY_GRAPHICS
 
@@ -36,8 +36,8 @@ private:
 	/// Клиентские размеры окна.
 	int clientWidth, clientHeight;
 
-	/// Presenter для графики.
-	Graphics::Presenter* graphicsPresenter;
+	/// Graphics output for window.
+	Graphics::Win32Output* output;
 	/// Менеждер ввода.
 	ptr<Input::Win32Manager> inputManager;
 
@@ -76,8 +76,8 @@ public:
 	/// Получить клиентскую высоту окна.
 	int GetClientHeight() const;
 
-	/// Установить presenter для оповещений.
-	void SetGraphicsPresenter(Graphics::Presenter* graphicsPresenter);
+	/// Set output for notifications.
+	void SetOutput(Graphics::Win32Output* output);
 	/// Установить менеджер ввода.
 	void SetInputManager(ptr<Input::Win32Manager> inputManager);
 

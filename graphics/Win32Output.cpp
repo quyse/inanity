@@ -5,6 +5,12 @@ BEGIN_INANITY_GRAPHICS
 
 Win32Output::Win32Output(ptr<Platform::Win32Window> window) : window(window)
 {
+	window->SetOutput(this);
+}
+
+Win32Output::~Win32Output()
+{
+	window->SetOutput(0);
 }
 
 int Win32Output::GetWidth() const
@@ -25,6 +31,12 @@ ptr<Platform::Win32Window> Win32Output::GetWindow() const
 HWND Win32Output::GetHWND() const
 {
 	return window->GetHWND();
+}
+
+void Win32Output::Resize(int width, int height)
+{
+	if(presenter)
+		presenter->Resize(width, height);
 }
 
 END_INANITY_GRAPHICS

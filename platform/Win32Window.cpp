@@ -2,7 +2,6 @@
 #include "../input/Win32Manager.hpp"
 #include "../Strings.hpp"
 #include "../Exception.hpp"
-#include "../graphics/Presenter.hpp"
 #include "../graphics/Win32Output.hpp"
 #include <windowsx.h>
 
@@ -12,7 +11,7 @@ Win32Window* Win32Window::singleWindow = 0;
 
 Win32Window::Win32Window(ATOM windowClass, const String& title,
 	int left, int top, int width, int height)
-: active(true), graphicsPresenter(0), clientWidth(0), clientHeight(0)
+: active(true), output(0), clientWidth(0), clientHeight(0)
 {
 	try
 	{
@@ -152,8 +151,8 @@ LRESULT CALLBACK Win32Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 		{
 			singleWindow->clientWidth = LOWORD(lParam);
 			singleWindow->clientHeight = HIWORD(lParam);
-			if(singleWindow->graphicsPresenter)
-				singleWindow->graphicsPresenter->Resize(singleWindow->clientWidth, singleWindow->clientHeight);
+			if(singleWindow->output)
+				singleWindow->output->Resize(singleWindow->clientWidth, singleWindow->clientHeight);
 		}
 		return 0;
 	case WM_CLOSE:
@@ -167,9 +166,9 @@ LRESULT CALLBACK Win32Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
-void Win32Window::SetGraphicsPresenter(Graphics::Presenter* graphicsPresenter)
+void Win32Window::SetOutput(Graphics::Win32Output* output)
 {
-	this->graphicsPresenter = graphicsPresenter;
+	this->output = output;
 }
 
 void Win32Window::SetInputManager(ptr<Input::Win32Manager> inputManager)

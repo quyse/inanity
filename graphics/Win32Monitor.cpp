@@ -49,7 +49,7 @@ ptr<MonitorMode> Win32Monitor::TryCreateMode(int width, int height)
 	return 0;
 }
 
-ptr<Platform::Window> Win32Monitor::CreateWindowCentered(const String& title, int width, int height)
+ptr<Platform::Window> Win32Monitor::CreateDefaultWindow(const String& title, int width, int height)
 {
 	try
 	{
