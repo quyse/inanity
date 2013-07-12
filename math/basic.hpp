@@ -135,7 +135,7 @@ public:
 };
 
 template <typename T, int n>
-inline xmat<typename T, n, n> identity_mat()
+inline xmat<T, n, n> identity_mat()
 {
 	xmat<T, n, n> a;
 	for(int j = 0; j < n; ++j)

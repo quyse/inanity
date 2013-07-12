@@ -22,7 +22,7 @@ void Expression::Append(Expression expression)
 
 Expression operator,(Expression a, Expression b)
 {
-	return NEW(SequenceNode(a.GetNode(), b.GetNode()));
+	return Expression(NEW(SequenceNode(a.GetNode(), b.GetNode())));
 }
 
 END_INANITY_SHADERS

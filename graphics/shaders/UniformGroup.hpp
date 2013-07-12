@@ -3,6 +3,8 @@
 
 #include "Uniform.hpp"
 #include "UniformArray.hpp"
+#include "UniformNode.hpp"
+#include "../DataType.hpp"
 
 BEGIN_INANITY
 

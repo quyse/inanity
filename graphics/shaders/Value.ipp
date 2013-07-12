@@ -26,10 +26,8 @@ public:
 
 /// Класс для получения типа по длине строки.
 /** Принимает базовый тип. */
-template <typename BaseType, int n>
-class SwizzleTypedHelper;
 template <typename T, int n>
-class SwizzleTypedHelper<T, n>
+class SwizzleTypedHelper
 {
 public:
 	typedef xvec<T, n - 1> Type;
