@@ -62,7 +62,7 @@ var libraries = {
 	},
 	// ******* файловая система на SQLite
 	'libinanity-sqlitefs': {
-		objects: ['SQLiteFileSystem', 'deps.sqlite.sqlite3.c']
+		objects: ['SQLiteFileSystem']
 	},
 	// ******* метаинформация
 	'libinanity-meta': {
