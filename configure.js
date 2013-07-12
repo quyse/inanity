@@ -15,6 +15,7 @@ exports.configureCompiler = function(objectFile, compiler) {
 		// .cpp-файл
 		source = source.replace(/\./g, '/') + '.cpp';
 	compiler.setSourceFile(source);
+	compiler.addIncludeDir('deps/bullet/src');
 };
 
 /**
@@ -74,24 +75,25 @@ var libraries = {
 	},
 	// ******* криптография
 	'libinanity-crypto': {
-		objects: ['crypto.CngRandomAlgorithm', 'crypto.HashStream', 'crypto.LamportSignatureAlgorithm', 'crypto.WhirlpoolStream', 'crypto.StreamHasher', 'crypto.StreamSigner']
+		objects: ['crypto.HashStream', 'crypto.LamportSignatureAlgorithm', 'crypto.WhirlpoolStream', 'crypto.StreamHasher', 'crypto.StreamSigner'],
+		'objects-win32': ['crypto.CngRandomAlgorithm']
 	},
 	// ******* подсистема ввода
 	'libinanity-input': {
-		objects: ['input.Frame', 'input.Manager', 'input.Mux', 'input.Processor', 'input.Win32Manager', 'input.Win32RawManager']
+		objects: ['input.Frame', 'input.Manager', 'input.Mux', 'input.Processor'],
+		'objects-win32': ['input.Win32Manager', 'input.Win32RawManager'],
+		'objects-linux': ['input.X11Manager']
 	},
-	// ******* подсистема окон Win32
+	// ******* general platform subsystem
 	'libinanity-platform': {
-		objects: ['platform.Win32Window', 'graphics.Win32Output']
-	},
-	// ******* подсистема окон X11
-	'libinanity-x11window' : {
-		objects: ['X11Window', 'X11Display', 'graphics.X11Output']
+		objects: ['platform.Game'],
+		'objects-win32': ['platform.Win32Window', 'graphics.Win32Output', 'graphics.Win32Adapter', 'graphics.Win32Monitor', 'graphics.Win32MonitorMode'],
+		'objects-linux': ['platform.X11Window', 'platform.X11Display', 'graphics.X11Output', 'graphics.X11Adapter', 'graphics.X11Monitor', 'graphics.X11MonitorMode']
 	},
 	// ******* общая графика
 	'libinanity-graphics': {
 		objects: [
-			'graphics.Context', 'graphics.ContextState',
+			'graphics.Context', 'graphics.ContextState', 'graphics.Output',
 			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.IndexBuffer',
 			'graphics.SamplerState', 'graphics.BlendState',
 			'graphics.VertexLayout', 'graphics.VertexLayoutElement',
@@ -124,8 +126,7 @@ var libraries = {
 			'graphics.GlVertexBuffer', 'graphics.GlIndexBuffer', 'graphics.GlAttributeBinding',
 			'graphics.GlVertexShader', 'graphics.GlPixelShader',
 			'graphics.GlSamplerState', 'graphics.GlBlendState',
-			'graphics.GlShaderCompiler', 'graphics.GlslSource', 'graphics.GlShaderBindings',
-			'graphics.Win32Adapter', 'graphics.Win32Monitor', 'graphics.Win32MonitorMode'
+			'graphics.GlShaderCompiler', 'graphics.GlslSource', 'graphics.GlShaderBindings'
 		]
 	},
 	// ******* подсистема шейдеров
@@ -139,9 +140,9 @@ var libraries = {
 			'graphics.shaders.TransformedNode', 'graphics.shaders.RasterizedNode',
 			'graphics.shaders.TempNode', 'graphics.shaders.CastNode',
 			'graphics.shaders.Expression', 'graphics.shaders.Sampler',
-			'graphics.shaders.Hlsl11Generator', 'graphics.shaders.Hlsl11GeneratorInstance',
 			'graphics.shaders.GlslGenerator', 'graphics.shaders.GlslGeneratorInstance'
-		]
+		],
+		'objects-win32': ['graphics.shaders.Hlsl11Generator', 'graphics.shaders.Hlsl11GeneratorInstance']
 	},
 	// ******* общая физика
 	'libinanity-physics': {
@@ -221,6 +222,9 @@ exports.configureComposer = function(libraryFile, composer) {
 	var library = libraries[a[3]];
 	for ( var i = 0; i < library.objects.length; ++i)
 		composer.addObjectFile(confDir + library.objects[i]);
+	var platformObjects = library['objects-' + composer.platform] || [];
+	for(var i = 0; i < platformObjects.length; ++i)
+		composer.addObjectFile(confDir + platformObjects[i]);
 };
 
 exports.configureLinker = function(executableFile, linker) {
