@@ -2,26 +2,32 @@
 #define ___INANITY_GRAPHICS_X11_OUTPUT_HPP___
 
 #include "Output.hpp"
+#include "../platform/platform.hpp"
 
-BEGIN_INANITY
+BEGIN_INANITY_PLATFORM
 
 class X11Window;
 
-END_INANITY
+END_INANITY_PLATFORM
 
 BEGIN_INANITY_GRAPHICS
 
-/// Класс области вывода в X11.
-/** Пока всегда целое окно. */
+/// X11 graphics output class.
 class X11Output : public Output
 {
 private:
-	ptr<X11Window> window;
+	ptr<Platform::X11Window> window;
+	int width, height;
 
 public:
-	X11Output(ptr<X11Window> window);
+	X11Output(ptr<Platform::X11Window> window);
 
-	ptr<X11Window> GetWindow() const;
+	// Output's methods.
+	int GetWidth() const;
+	int GetHeight() const;
+
+	ptr<Platform::X11Window> GetWindow() const;
+	void Resize(int width, int height);
 };
 
 END_INANITY_GRAPHICS

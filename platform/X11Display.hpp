@@ -18,6 +18,7 @@ public:
 
 	Display* GetDisplay() const;
 
+	static ptr<X11Display> Open(const char* displayName);
 	static ptr<X11Display> CreateDefault();
 };
 
