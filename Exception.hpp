@@ -92,6 +92,9 @@ public:
 #define THROW_SECONDARY_EXCEPTION(message, exception) throw NEW(Exception((message), (exception)))
 #endif
 
+#define BEGIN_TRY() try {
+#define END_TRY(message) } catch(Exception* exception) { THROW_SECONDARY_EXCEPTION(message, exception); }
+
 END_INANITY
 
 #endif
