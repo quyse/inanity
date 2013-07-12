@@ -2,12 +2,16 @@
 #include "RawTextureData.hpp"
 #include "../File.hpp"
 #include "../Exception.hpp"
+
+#ifdef ___INANITY_WINDOWS
 #include "../windows.hpp"
+#endif
 
 BEGIN_INANITY_GRAPHICS
 
 ptr<RawTextureData> BmpImageLoader::Load(ptr<File> file)
 {
+#ifdef ___INANITY_WINDOWS
 	try
 	{
 		const unsigned char* fileData = (const unsigned char*)file->GetData();
@@ -102,6 +106,9 @@ ptr<RawTextureData> BmpImageLoader::Load(ptr<File> file)
 	{
 		THROW_SECONDARY_EXCEPTION("Can't load BMP image", exception);
 	}
+#else // ___INANITY_WINDOWS
+	THROW_PRIMARY_EXCEPTION("BmpImageLoader implemented only on Windows");
+#endif
 }
 
 END_INANITY_GRAPHICS
