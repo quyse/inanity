@@ -4,7 +4,8 @@ exports.configureCompiler = function(objectFile, compiler) {
 	compiler.configuration = a[1];
 	compiler.cppMode = false;
 	compiler.setSourceFile(a[2] + '.c');
-	compiler.addMacro('SQLITE_HAVE_ISNAN');
+	if(compiler.platform != 'win32')
+		compiler.addMacro('SQLITE_HAVE_ISNAN');
 };
 
 var libraries = {
