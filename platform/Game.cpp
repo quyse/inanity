@@ -4,7 +4,6 @@
 #ifdef ___INANITY_WINDOWS
 #include "Win32Window.hpp"
 #include "../graphics/Dx11System.hpp"
-#include "../graphics/GlSystem.hpp"
 #include "../input/Win32RawManager.hpp"
 #endif
 
@@ -25,10 +24,14 @@ ptr<Graphics::System> Game::CreateDx11System()
 
 #endif
 
+#ifdef ___INANITY_LINUX
+
 ptr<Graphics::System> Game::CreateGlSystem()
 {
 	return NEW(Graphics::GlSystem());
 }
+
+#endif
 
 ptr<Input::Manager> Game::CreateInputManager(ptr<Window> window)
 {

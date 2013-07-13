@@ -37,6 +37,11 @@ void X11Window::Close()
 	}
 }
 
+void X11Window::Run(ptr<Handler> activeHandler)
+{
+	while(Do(activeHandler));
+}
+
 ptr<Graphics::Output> X11Window::CreateOutput()
 {
 	return NEW(Graphics::X11Output(this));
@@ -152,11 +157,6 @@ bool X11Window::Do(Handler* activeHandler)
 	// if there are no events now, do the work
 	if(active)
 		activeHandler->Fire();
-}
-
-void X11Window::Run(ptr<Handler> activeHandler)
-{
-	while(Do(activeHandler));
 }
 
 END_INANITY_PLATFORM

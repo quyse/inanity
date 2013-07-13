@@ -50,6 +50,7 @@ public:
 	// методы Window
 	void SetTitle(const String& title);
 	void Close();
+	void Run(ptr<Handler> activeHandler);
 	ptr<Graphics::Output> CreateOutput();
 
 	ptr<X11Display> GetDisplay() const;
@@ -57,9 +58,6 @@ public:
 	XVisualInfo* GetVisualInfo() const;
 	void SetOutput(Graphics::X11Output* output);
 	void SetInputManager(ptr<Input::X11Manager> inputManager);
-
-	/// Запустить оконный цикл.
-	void Run(ptr<Handler> activeHandler);
 
 	/// Создать окно для OpenGL.
 	static ptr<X11Window> CreateForOpenGL(ptr<X11Display> display, int screenNumber, int left, int top, int width, int height);

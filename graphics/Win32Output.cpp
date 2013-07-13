@@ -1,4 +1,5 @@
 #include "Win32Output.hpp"
+#include "Presenter.hpp"
 #include "../platform/Win32Window.hpp"
 
 BEGIN_INANITY_GRAPHICS

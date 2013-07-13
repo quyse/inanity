@@ -2,6 +2,7 @@
 #define ___INANITY_PLATFORM_WINDOW_HPP___
 
 #include "platform.hpp"
+#include "../Handler.hpp"
 #include "../String.hpp"
 #include "../graphics/graphics.hpp"
 
@@ -21,6 +22,10 @@ public:
 	virtual void SetTitle(const String& title) = 0;
 	/// Закрыть окно.
 	virtual void Close() = 0;
+
+	/// Запустить оконный цикл.
+	/** Цикл завершается, когда окно закрывается. */
+	virtual void Run(ptr<Handler> activeHandler) = 0;
 
 	/// Создать область вывода, покрывающую всё окно.
 	virtual ptr<Graphics::Output> CreateOutput() = 0;

@@ -13,21 +13,12 @@ BEGIN_INANITY_GRAPHICS
 Dx11Presenter::Dx11Presenter(ptr<Dx11Device> device, ptr<Win32Output> output, ComPointer<IDXGISwapChain> swapChain)
 : device(device), output(output), swapChain(swapChain), currentMode(0)
 {
-	try
-	{
-		// указать себя окну
-		output->GetWindow()->SetGraphicsPresenter(this);
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY_EXCEPTION("Can't create DXGI Presenter", exception);
-	}
+	output->SetPresenter(this);
 }
 
 Dx11Presenter::~Dx11Presenter()
 {
-	// отменить указание себя окну
-	output->GetWindow()->SetGraphicsPresenter(0);
+	output->SetPresenter(0);
 
 	// перед уничтожением swap chain, необходимо выключить полноэкранность
 	if(currentMode)

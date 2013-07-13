@@ -58,6 +58,7 @@ public:
 	//*** методы Window
 	void SetTitle(const String& title);
 	void Close();
+	void Run(ptr<Handler> activeHandler);
 	ptr<Graphics::Output> CreateOutput();
 
 	/// Создать окно для DirectX.
@@ -80,9 +81,6 @@ public:
 	void SetOutput(Graphics::Win32Output* output);
 	/// Установить менеджер ввода.
 	void SetInputManager(ptr<Input::Win32Manager> inputManager);
-
-	/// Запустить оконный цикл.
-	void Run(ptr<Handler> activeHandler);
 };
 
 END_INANITY_PLATFORM
