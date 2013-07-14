@@ -54,7 +54,7 @@ void EditableFont::Serialize(ptr<OutputStream> outputStream)
 		writer->WriteShortly(charset.size());
 		for(Charset::const_iterator i = charset.begin(); i != charset.end(); ++i)
 		{
-			writer->Write(i->first);
+			writer->WriteShortly(i->first);
 			writer->Write(i->second);
 		}
 
@@ -62,8 +62,8 @@ void EditableFont::Serialize(ptr<OutputStream> outputStream)
 		writer->WriteShortly(kerningPairs.size());
 		for(KerningPairs::const_iterator i = kerningPairs.begin(); i != kerningPairs.end(); ++i)
 		{
-			writer->Write(i->first.first);
-			writer->Write(i->first.second);
+			writer->WriteShortly(i->first.first);
+			writer->WriteShortly(i->first.second);
 			writer->Write(i->second);
 		}
 	}

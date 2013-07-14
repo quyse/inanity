@@ -45,7 +45,7 @@ const FontChar& Font::GetChar(wchar_t symbol)
 
 float Font::GetKerning(wchar_t first, wchar_t second)
 {
-	KerningPairs::const_iterator i = kerningPairs.find(first | (second << 16));
+	KerningPairs::const_iterator i = kerningPairs.find(std::pair<wchar_t, wchar_t>(first, second));
 	return (i == kerningPairs.end()) ? 0 : i->second;
 }
 
@@ -68,7 +68,7 @@ ptr<Font> Font::Deserialize(ptr<InputStream> inputStream, ptr<TextureManager> te
 		for(size_t i = 0; i < charsetSize; ++i)
 		{
 			std::pair<wchar_t, FontChar> symbol;
-			symbol.first = reader->Read<wchar_t>();
+			symbol.first = reader->ReadShortly();
 			symbol.second = reader->Read<FontChar>();
 			charset.insert(symbol);
 		}
@@ -78,9 +78,9 @@ ptr<Font> Font::Deserialize(ptr<InputStream> inputStream, ptr<TextureManager> te
 		KerningPairs kerningPairs;
 		for(size_t i = 0; i < kerningPairsCount; ++i)
 		{
-			std::pair<unsigned, float> kerningPair;
-			kerningPair.first = reader->Read<wchar_t>();
-			kerningPair.first |= reader->Read<wchar_t>() << 16;
+			std::pair<std::pair<wchar_t, wchar_t>, float> kerningPair;
+			kerningPair.first.first = (wchar_t)reader->ReadShortly();
+			kerningPair.first.second = (wchar_t)reader->ReadShortly();
 			kerningPair.second = reader->Read<float>();
 			kerningPairs.insert(kerningPair);
 		}

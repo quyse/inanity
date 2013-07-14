@@ -5,6 +5,7 @@
 #include "FontChar.hpp"
 #include "../String.hpp"
 #include <unordered_map>
+#include <map>
 
 BEGIN_INANITY
 
@@ -17,15 +18,13 @@ BEGIN_INANITY_GRAPHICS
 class Texture;
 class TextureManager;
 
-/// Шрифт.
+/// Raster font.
 class Font : public Object
 {
 public:
 	typedef std::unordered_map<wchar_t, FontChar> Charset;
-	/// Тип для кернинг-пар.
-	/** Для лучшей производительности пара wchar_t объединена в один unsigned int.
-	Младшее слово - первый символ, старшее - второй. */
-	typedef std::unordered_map<unsigned, float> KerningPairs;
+	/// Kerning pairs.
+	typedef std::map<std::pair<wchar_t, wchar_t>, float> KerningPairs;
 
 private:
 	/// Текстура.
