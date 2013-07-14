@@ -2,7 +2,7 @@
 
 BEGIN_INANITY_GRAPHICS
 
-Output::Output() : presenter(presenter) {}
+Output::Output() : presenter(0) {}
 
 void Output::SetPresenter(Presenter* presenter)
 {

@@ -6,6 +6,9 @@
 #endif
 #ifdef ___INANITY_LINUX
 #include "X11MonitorMode.hpp"
+#include "X11Output.hpp"
+#include "../platform/X11Window.hpp"
+#include "../platform/X11Display.hpp"
 #endif
 
 BEGIN_INANITY_GRAPHICS
@@ -16,8 +19,16 @@ GlPresenter::GlPresenter(ptr<GlDevice> device, HDC hdc, ptr<GlRenderBuffer> back
 #endif
 
 #ifdef ___INANITY_LINUX
-GlPresenter::GlPresenter(ptr<GlDevice> device, ptr<GlRenderBuffer> backBuffer)
-: device(device), backBuffer(backBuffer) {}
+GlPresenter::GlPresenter(ptr<GlDevice> device, ptr<X11Output> output, ptr<GlRenderBuffer> backBuffer)
+: device(device), output(output), backBuffer(backBuffer)
+{
+	output->SetPresenter(this);
+}
+
+GlPresenter::~GlPresenter()
+{
+	output->SetPresenter(0);
+}
 #endif
 
 ptr<Device> GlPresenter::GetDevice()
@@ -39,6 +50,11 @@ void GlPresenter::Present()
 {
 #ifdef ___INANITY_WINDOWS
 	SwapBuffers(hdc);
+#endif
+
+#ifdef ___INANITY_LINUX
+	Platform::X11Window* window = output->GetWindow();
+	glXSwapBuffers(window->GetDisplay()->GetDisplay(), window->GetHandle());
 #endif
 }
 

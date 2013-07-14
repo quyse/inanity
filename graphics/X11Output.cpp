@@ -5,7 +5,15 @@
 BEGIN_INANITY_GRAPHICS
 
 X11Output::X11Output(ptr<Platform::X11Window> window)
-: window(window), width(width), height(height) {}
+: window(window), width(width), height(height)
+{
+	window->SetOutput(this);
+}
+
+X11Output::~X11Output()
+{
+	window->SetOutput(0);
+}
 
 int X11Output::GetWidth() const
 {

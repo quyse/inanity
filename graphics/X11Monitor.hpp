@@ -4,15 +4,19 @@
 #include "Monitor.hpp"
 #include "../platform/x11.hpp"
 
-BEGIN_INANITY_GRAPHICS
+BEGIN_INANITY_PLATFORM
 
-class X11Adapter;
+class X11Display;
+
+END_INANITY_PLATFORM
+
+BEGIN_INANITY_GRAPHICS
 
 /// X11 screen as a Monitor.
 class X11Monitor : public Monitor
 {
 private:
-	ptr<X11Adapter> adapter;
+	ptr<Platform::X11Display> display;
 	int screenNumber;
 	::Screen* screen;
 	String id, name;
@@ -20,7 +24,7 @@ private:
 	bool modesInitialized;
 
 public:
-	X11Monitor(ptr<X11Adapter> adapter, int screenNumber);
+	X11Monitor(ptr<Platform::X11Display> display, const String& displayName, int screenNumber);
 	~X11Monitor();
 
 	// Monitor's methods.

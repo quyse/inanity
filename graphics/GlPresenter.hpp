@@ -11,6 +11,7 @@ BEGIN_INANITY_GRAPHICS
 
 class GlDevice;
 class GlRenderBuffer;
+class X11Output;
 
 /// Класс Presenter для OpenGL.
 class GlPresenter : public Presenter
@@ -24,6 +25,10 @@ private:
 	HDC hdc;
 #endif
 
+#ifdef ___INANITY_LINUX
+	ptr<X11Output> output;
+#endif
+
 	/// Вторичный буфер.
 	ptr<GlRenderBuffer> backBuffer;
 
@@ -32,7 +37,8 @@ public:
 	GlPresenter(ptr<GlDevice> device, HDC hdc, ptr<GlRenderBuffer> backBuffer);
 #endif
 #ifdef ___INANITY_LINUX
-	GlPresenter(ptr<GlDevice> device, ptr<GlRenderBuffer> backBuffer);
+	GlPresenter(ptr<GlDevice> device, ptr<X11Output> output, ptr<GlRenderBuffer> backBuffer);
+	~GlPresenter();
 #endif
 
 	// методы Presenter

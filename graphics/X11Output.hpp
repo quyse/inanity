@@ -21,6 +21,7 @@ private:
 
 public:
 	X11Output(ptr<Platform::X11Window> window);
+	~X11Output();
 
 	// Output's methods.
 	int GetWidth() const;

@@ -26,7 +26,7 @@ const std::vector<ptr<Monitor> >& X11Adapter::GetMonitors()
 	{
 		int monitorsCount = XScreenCount(display->GetDisplay());
 		for(int i = 0; i < monitorsCount; ++i)
-			monitors.push_back(NEW(X11Monitor(this, i)));
+			monitors.push_back(NEW(X11Monitor(display, displayName, i)));
 		monitorsInitialized = true;
 	}
 

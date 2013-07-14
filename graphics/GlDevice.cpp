@@ -200,7 +200,7 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 		XMapWindow(d, window->GetHandle());
 
 		// создать и вернуть Presenter
-		return NEW(GlPresenter(this, NEW(GlRenderBuffer(0, 0))));
+		return NEW(GlPresenter(this, output, NEW(GlRenderBuffer(0, 0))));
 #endif
 
 	}

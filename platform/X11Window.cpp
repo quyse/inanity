@@ -8,7 +8,7 @@
 BEGIN_INANITY_PLATFORM
 
 X11Window::X11Window(ptr<X11Display> display, Handle handle, XVisualInfo* visualInfo)
-: display(display), handle(handle), visualInfo(visualInfo), output(output) {}
+: display(display), handle(handle), visualInfo(visualInfo), output(0) {}
 
 X11Window::~X11Window()
 {
@@ -32,7 +32,6 @@ void X11Window::Close()
 	if(display && handle)
 	{
 		XDestroyWindow(display->GetDisplay(), handle);
-		display = 0;
 		handle = 0;
 	}
 }
@@ -107,9 +106,9 @@ ptr<X11Window> X11Window::CreateForOpenGL(ptr<X11Display> display, int screenNum
 		left, top, // x, y
 		width, height, // width and height
 		0, // border width
-		visualInfo->depth, // depth
+		CopyFromParent,//visualInfo->depth, // depth
 		InputOutput, // window type
-		visualInfo->visual, // visual
+		CopyFromParent,//visualInfo->visual, // visual
 		CWBorderPixel | CWEventMask, // mask of attributes set
 		&windowAttrs // attributes
 	);
@@ -130,7 +129,7 @@ bool X11Window::Do(Handler* activeHandler)
 	// cycle for message-consume cycles
 	// message-consume cycles are there to reduce number of useless XPending calls
 	bool active = true;
-	for(;;)
+	do
 	{
 		XEvent event;
 		// get a number of events in queue (with flushing as nesessary)
@@ -140,6 +139,11 @@ bool X11Window::Do(Handler* activeHandler)
 		{
 			// if there are no events, this call will wait for the next
 			XNextEvent(d, &event);
+
+			// if input manager processes the event, skip it
+			if(inputManager && inputManager->Process(event))
+				continue;
+
 			switch(event.type)
 			{
 			case ConfigureNotify:
@@ -153,10 +157,17 @@ bool X11Window::Do(Handler* activeHandler)
 			}
 		}
 	}
+	while(!active);
 
 	// if there are no events now, do the work
 	if(active)
+	{
+		if(inputManager)
+			inputManager->Update();
 		activeHandler->Fire();
+	}
+
+	return true;
 }
 
 END_INANITY_PLATFORM
