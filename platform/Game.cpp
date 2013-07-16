@@ -9,6 +9,7 @@
 
 #ifdef ___INANITY_LINUX
 #include "X11Window.hpp"
+#include "X11Display.hpp"
 #include "../graphics/GlSystem.hpp"
 #include "../input/X11Manager.hpp"
 #endif
@@ -46,7 +47,7 @@ ptr<Input::Manager> Game::CreateInputManager(ptr<Window> window)
 
 #ifdef ___INANITY_LINUX
 	ptr<Platform::X11Window> x11Window = window.DynamicCast<Platform::X11Window>();
-	ptr<Input::X11Manager> inputManager = NEW(Input::X11Manager());
+	ptr<Input::X11Manager> inputManager = NEW(Input::X11Manager(x11Window->GetDisplay()));
 	x11Window->SetInputManager(inputManager);
 	return inputManager;
 #endif

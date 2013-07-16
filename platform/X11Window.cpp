@@ -31,8 +31,10 @@ void X11Window::Close()
 {
 	if(display && handle)
 	{
-		XDestroyWindow(display->GetDisplay(), handle);
+		Handle h = handle;
 		handle = 0;
+		inputManager = 0;
+		XDestroyWindow(display->GetDisplay(), h);
 	}
 }
 
@@ -95,6 +97,7 @@ ptr<X11Window> X11Window::CreateForOpenGL(ptr<X11Display> display, int screenNum
 	windowAttrs.event_mask =
 		StructureNotifyMask | // ConfigureNotify, DestroyNotify
 		ExposureMask |
+		EnterWindowMask | LeaveWindowMask |
 		KeyPressMask |
 		KeyReleaseMask |
 		ButtonPressMask |
@@ -140,9 +143,9 @@ bool X11Window::Do(Handler* activeHandler)
 			// if there are no events, this call will wait for the next
 			XNextEvent(d, &event);
 
-			// if input manager processes the event, skip it
-			if(inputManager && inputManager->Process(event))
-				continue;
+			// give input manager a chance to process the event
+			if(inputManager)
+				inputManager->Process(event);
 
 			switch(event.type)
 			{
