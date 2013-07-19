@@ -120,14 +120,16 @@ var libraries = {
 	// ******* подсистема OpenGl
 	'libinanity-gl': {
 		objects: [
-			'graphics.GlSystem', 'graphics.GlDevice', 'graphics.GlPresenter', 'graphics.GlContext',
+			'graphics.GlSystem', 'graphics.GlDevice', 'graphics.GlContext',
 			'graphics.GlInternalTexture', 'graphics.GlInternalProgram', 'graphics.GlInternalProgramCache',
 			'graphics.GlRenderBuffer', 'graphics.GlDepthStencilBuffer', 'graphics.GlTexture', 'graphics.GlUniformBuffer',
 			'graphics.GlVertexBuffer', 'graphics.GlIndexBuffer', 'graphics.GlAttributeBinding',
 			'graphics.GlVertexShader', 'graphics.GlPixelShader',
 			'graphics.GlSamplerState', 'graphics.GlBlendState',
 			'graphics.GlShaderCompiler', 'graphics.GlslSource', 'graphics.GlShaderBindings'
-		]
+		],
+		'objects-win32': ['graphics.WglPresenter'],
+		'objects-linux': ['graphics.GlxPresenter']
 	},
 	// ******* подсистема шейдеров
 	'libinanity-shaders': {

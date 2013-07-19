@@ -1,6 +1,5 @@
 #include "GlDevice.hpp"
 #include "GlSystem.hpp"
-#include "GlPresenter.hpp"
 #include "GlRenderBuffer.hpp"
 #include "GlDepthStencilBuffer.hpp"
 #include "GlContext.hpp"
@@ -24,10 +23,12 @@
 #include "../Exception.hpp"
 #include "../Strings.hpp"
 #ifdef ___INANITY_WINDOWS
+#include "WglPresenter.hpp"
 #include "Win32Output.hpp"
 #include "Win32MonitorMode.hpp"
 #endif
 #ifdef ___INANITY_LINUX
+#include "GlxPresenter.hpp"
 #include "X11Output.hpp"
 #include "../platform/X11Window.hpp"
 #include "../platform/X11Display.hpp"
@@ -169,7 +170,7 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 		GlSystem::ClearErrors();
 
 		// создать и вернуть Presenter
-		return NEW(GlPresenter(this, hdc, NEW(GlRenderBuffer(0, 0))));
+		return NEW(WglPresenter(this, NEW(GlRenderBuffer(0, 0)), hdc));
 #endif
 
 #ifdef ___INANITY_LINUX
@@ -200,7 +201,7 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 		XMapWindow(d, window->GetHandle());
 
 		// создать и вернуть Presenter
-		return NEW(GlPresenter(this, output, NEW(GlRenderBuffer(0, 0))));
+		return NEW(GlxPresenter(this, NEW(GlRenderBuffer(0, 0)), output));
 #endif
 
 	}

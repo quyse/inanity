@@ -15,7 +15,6 @@
 #include "graphics/GlInternalProgramCache.hpp"
 #include "graphics/GlInternalTexture.hpp"
 #include "graphics/GlPixelShader.hpp"
-#include "graphics/GlPresenter.hpp"
 #include "graphics/GlRenderBuffer.hpp"
 #include "graphics/GlSamplerState.hpp"
 #include "graphics/GlShaderBindings.hpp"
@@ -26,5 +25,11 @@
 #include "graphics/GlUniformBuffer.hpp"
 #include "graphics/GlVertexBuffer.hpp"
 #include "graphics/GlVertexShader.hpp"
+#ifdef ___INANITY_WINDOWS
+#include "graphics/WglPresenter.hpp"
+#endif
+#ifdef ___INANITY_LINUX
+#include "graphics/GlxPresenter.hpp"
+#endif
 
 #endif
