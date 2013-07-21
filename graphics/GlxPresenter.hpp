@@ -2,6 +2,7 @@
 #define ___INANITY_GRAPHICS_GLX_PRESENTER_HPP___
 
 #include "Presenter.hpp"
+#include "opengl.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
@@ -16,9 +17,10 @@ private:
 	ptr<GlDevice> device;
 	ptr<GlRenderBuffer> backBuffer;
 	ptr<X11Output> output;
+	GLXWindow glxWindow;
 
 public:
-	GlxPresenter(ptr<GlDevice> device, ptr<GlRenderBuffer> backBuffer, ptr<X11Output> output);
+	GlxPresenter(ptr<GlDevice> device, ptr<GlRenderBuffer> backBuffer, ptr<X11Output> output, GLXWindow glxWindow);
 	~GlxPresenter();
 
 	// Presenter's methods.

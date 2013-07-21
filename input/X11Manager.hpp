@@ -19,9 +19,9 @@ class X11Manager : public Manager
 private:
 	ptr<Platform::X11Display> display;
 	int mouseX, mouseY;
-	int keyboardMapping[256];
+	Key keyboardMapping[256][2];
 
-	Key ConvertKey(unsigned key);
+	Key ConvertKey(xcb_keysym_t key);
 	void UpdateKeyboardMapping(int first, int count);
 
 public:

@@ -6,17 +6,21 @@
 
 BEGIN_INANITY_PLATFORM
 
-/// Класс, инкапсулирующий дисплей X11.
+/// Class incapsulating X11 display.
 class X11Display : public Object
 {
 private:
-	Display* display;
+	::Display* display;
+	xcb_connection_t* connection;
 
 public:
-	X11Display(Display* display);
+	X11Display(::Display* display);
 	~X11Display();
 
-	Display* GetDisplay() const;
+	::Display* GetDisplay() const;
+	xcb_connection_t* GetConnection() const;
+
+	void ThrowError(xcb_generic_error_t* error);
 
 	static ptr<X11Display> Open(const char* displayName);
 	static ptr<X11Display> CreateDefault();

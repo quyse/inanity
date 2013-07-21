@@ -29,11 +29,8 @@ class X11Display;
 class X11Window : public Window
 {
 private:
-	typedef ::Window Handle;
-
 	ptr<X11Display> display;
-	Handle handle;
-	XVisualInfo* visualInfo;
+	xcb_window_t handle;
 
 	/// Graphics output to receive notifications about resize.
 	Graphics::X11Output* output;
@@ -41,7 +38,7 @@ private:
 	ptr<Input::X11Manager> inputManager;
 
 private:
-	X11Window(ptr<X11Display> display, Handle handle, XVisualInfo* visualInfo);
+	X11Window(ptr<X11Display> display, xcb_window_t handle);
 	~X11Window();
 
 	bool Do(Handler* activeHandler);
@@ -54,8 +51,7 @@ public:
 	ptr<Graphics::Output> CreateOutput();
 
 	ptr<X11Display> GetDisplay() const;
-	Handle GetHandle() const;
-	XVisualInfo* GetVisualInfo() const;
+	xcb_window_t GetHandle() const;
 	void SetOutput(Graphics::X11Output* output);
 	void SetInputManager(ptr<Input::X11Manager> inputManager);
 

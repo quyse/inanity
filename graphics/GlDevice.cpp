@@ -37,6 +37,7 @@
 BEGIN_INANITY_GRAPHICS
 
 #ifdef ___INANITY_WINDOWS
+
 GlDevice::GlDevice(ptr<GlSystem> system, const String& deviceName, ptr<GlContext> context)
 : system(system), deviceName(deviceName), context(context), hglrc(0) {}
 
@@ -45,11 +46,20 @@ GlDevice::~GlDevice()
 	if(hglrc)
 		wglDeleteContext(hglrc);
 }
+
 #endif
 
 #ifdef ___INANITY_LINUX
+
 GlDevice::GlDevice(ptr<GlSystem> system, ptr<GlContext> context)
-: system(system), context(context) {}
+: system(system), context(context), glxContext(0) {}
+
+GlDevice::~GlDevice()
+{
+	if(display && glxContext)
+		glXDestroyContext(display->GetDisplay(), glxContext);
+}
+
 #endif
 
 ptr<System> GlDevice::GetSystem() const
@@ -174,34 +184,135 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 #endif
 
 #ifdef ___INANITY_LINUX
-		// область вывода - только X11
+		// only X11Output allowed
 		ptr<X11Output> output = abstractOutput.DynamicCast<X11Output>();
 		if(!output)
 			THROW_PRIMARY_EXCEPTION("Only X11 output is allowed");
 
-		// получить окно
 		ptr<Platform::X11Window> window = output->GetWindow();
 
-		::Display* d = window->GetDisplay()->GetDisplay();
+		display = window->GetDisplay();
 
-		// создать контекст
-		glxContext = glXCreateContext(d, window->GetVisualInfo(), NULL, True);
+		::Display* xDisplay = display->GetDisplay();
+
+		static const int fbAttribs[] =
+		{
+			GLX_X_RENDERABLE, True,
+			GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
+			GLX_RENDER_TYPE, GLX_RGBA_BIT,
+			GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR,
+			GLX_RED_SIZE, 8,
+			GLX_GREEN_SIZE, 8,
+			GLX_BLUE_SIZE, 8,
+			GLX_ALPHA_SIZE, 8,
+			GLX_DEPTH_SIZE, 24,
+			GLX_STENCIL_SIZE, 8,
+			GLX_DOUBLEBUFFER, True,
+			GLX_SAMPLE_BUFFERS, 1,
+			GLX_SAMPLES, 4,
+			0, 0
+		};
+
+#define GETPROC(fnType, fn) \
+		fnType fn = (fnType)glXGetProcAddress((const GLubyte*)#fn); \
+		if(!fn) THROW_PRIMARY_EXCEPTION("Can't get " #fn)
+
+		GETPROC(PFNGLXCHOOSEFBCONFIGPROC, glXChooseFBConfig);
+		GETPROC(PFNGLXGETFBCONFIGATTRIBPROC, glXGetFBConfigAttrib);
+		GETPROC(PFNGLXGETVISUALFROMFBCONFIGPROC, glXGetVisualFromFBConfig);
+
+		// get FB configs
+		int fbConfigsCount;
+		GLXFBConfig* fbConfigs = glXChooseFBConfig(
+			xDisplay,
+			DefaultScreen(xDisplay),
+			fbAttribs,
+			&fbConfigsCount
+		);
+		if(!fbConfigs || !fbConfigsCount)
+			THROW_PRIMARY_EXCEPTION("Can't get FB configs");
+
+		// select first config
+		GLXFBConfig fbConfig = fbConfigs[0];
+		XFree(fbConfigs);
+		int visualId;
+		glXGetFBConfigAttrib(xDisplay, fbConfig, GLX_VISUAL_ID, &visualId);
+		XVisualInfo* xVisualInfo = glXGetVisualFromFBConfig(xDisplay, fbConfig);
+
+		// create temp old-style context
+		GLXContext tempGlxContext = glXCreateContext(xDisplay, xVisualInfo, 0, True);
+		if(!tempGlxContext)
+			THROW_PRIMARY_EXCEPTION("Can't create temp context");
+		// make it current
+		glXMakeCurrent(xDisplay, window->GetHandle(), tempGlxContext);
+
+		GETPROC(PFNGLXCREATECONTEXTATTRIBSARBPROC, glXCreateContextAttribsARB);
+
+		// reset and delete temp context
+		glXMakeCurrent(xDisplay, None, 0);
+		glXDestroyContext(xDisplay, tempGlxContext);
+
+		// now create real context
+
+		// attributes for context
+		int attribs[] =
+		{
+			GLX_CONTEXT_MAJOR_VERSION_ARB, 0,
+			GLX_CONTEXT_MINOR_VERSION_ARB, 0,
+			GLX_CONTEXT_FLAGS_ARB, 0
+#ifdef _DEBUG
+				| GLX_CONTEXT_DEBUG_BIT_ARB
+#endif
+			,
+			GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
+			0, 0
+		};
+		// versions for tryings
+		static const int versions[][2] =
+		{
+			{ 4, 3 },
+			{ 4, 2 },
+			{ 4, 1 },
+			{ 4, 0 },
+			{ 3, 3 },
+			{ 3, 2 }
+		};
+		// loop trying to create some version
+		for(int i = 0; i < sizeof(versions) / sizeof(versions[0]); ++i)
+		{
+			attribs[1] = versions[i][0];
+			attribs[3] = versions[i][1];
+			glxContext = glXCreateContextAttribsARB(xDisplay, fbConfig, 0, True, attribs);
+			if(glxContext)
+				break;
+		}
+
+		// if no version of OpenGL supported, this is end
 		if(!glxContext)
-			THROW_PRIMARY_EXCEPTION("Can't create GLX context");
+			THROW_PRIMARY_EXCEPTION("Can't create OpenGL context");
 
-		// сделать его текущим
-		glXMakeCurrent(d, window->GetHandle(), glxContext);
+		GETPROC(PFNGLXCREATEWINDOWPROC, glXCreateWindow);
+		GETPROC(PFNGLXMAKECONTEXTCURRENTPROC, glXMakeContextCurrent);
 
-		// инициализировать GLEW
+		// create glx window
+		GLXWindow glxWindow = glXCreateWindow(xDisplay, fbConfig, window->GetHandle(), 0);
+		if(!glxWindow)
+		{
+			glXDestroyContext(xDisplay, glxContext);
+			THROW_PRIMARY_EXCEPTION("Can't create GLX window");
+		}
+
+		// make OpenGL context current
+		if(!glXMakeContextCurrent(xDisplay, glxWindow, glxWindow, glxContext))
+		{
+			glXDestroyContext(xDisplay, glxContext);
+			THROW_PRIMARY_EXCEPTION("Can't make context current");
+		}
+
 		GlSystem::InitGLEW();
-
 		GlSystem::ClearErrors();
 
-		// отобразить окно
-		XMapWindow(d, window->GetHandle());
-
-		// создать и вернуть Presenter
-		return NEW(GlxPresenter(this, NEW(GlRenderBuffer(0, 0)), output));
+		return NEW(GlxPresenter(this, NEW(GlRenderBuffer(0, 0)), output, glxWindow));
 #endif
 
 	}

@@ -1,6 +1,6 @@
 #include "X11Manager.hpp"
-#include "../platform/X11Display.hpp"
 #include "Frame.hpp"
+#include "../platform/X11Display.hpp"
 
 BEGIN_INANITY_INPUT
 
@@ -12,7 +12,7 @@ X11Manager::X11Manager(ptr<Platform::X11Display> display)
 	UpdateKeyboardMapping(minKeycodes, maxKeycodes - minKeycodes + 1);
 }
 
-Key X11Manager::ConvertKey(unsigned key)
+Key X11Manager::ConvertKey(xcb_keysym_t key)
 {
 #define M(xkey, key) case XK_##xkey: return Keys::key
 #define M2(xkey1, xkey2, key) case XK_##xkey1: case XK_##xkey2: return Keys::key
@@ -96,19 +96,25 @@ static bool ConvertButton(unsigned button, Event::Mouse::Button& outButton)
 void X11Manager::UpdateKeyboardMapping(int first, int count)
 {
 	int keySymsPerKeycode;
-	::KeySym* mapping = XGetKeyboardMapping(display->GetDisplay(), first, count, &keySymsPerKeycode);
 
-	// TODO
-#if 0
-	for(int i = 0; i < count; ++i)
-	{
-		for(int j = 0; j < 4; ++j)
-			mapping[i * keySymsPerKeycode + j]
-		this->keyboardMapping[i]
-	}
-#endif
+	xcb_get_keyboard_mapping_cookie_t cookie = xcb_get_keyboard_mapping(display->GetConnection(), first, count);
+	xcb_generic_error_t* error;
+	xcb_get_keyboard_mapping_reply_t* reply = xcb_get_keyboard_mapping_reply(display->GetConnection(), cookie, &error);
+	if(error)
+		display->ThrowError(error);
 
-	XFree(mapping);
+	xcb_keysym_t* replyKeysyms = xcb_get_keyboard_mapping_keysyms(reply);
+	int replyKeysymsLength = xcb_get_keyboard_mapping_keysyms_length(reply);
+
+	int replyKeysymsPerKeycode = reply->keysyms_per_keycode;
+	int keycodesLength = replyKeysymsLength / replyKeysymsPerKeycode;
+	int usefulKeysyms = replyKeysymsPerKeycode < 2 ? replyKeysymsPerKeycode : 2;
+
+	for(int i = 0; i < keycodesLength; ++i)
+		for(int j = 0; j < usefulKeysyms; ++j)
+			keyboardMapping[first + i][j] = ConvertKey(replyKeysyms[i * replyKeysymsPerKeycode + j]);
+
+	XFree(reply);
 }
 
 void X11Manager::Process(const XEvent& event)
@@ -124,7 +130,7 @@ void X11Manager::Process(const XEvent& event)
 			Event e;
 			e.device = Event::deviceKeyboard;
 			e.keyboard.type = Event::Keyboard::typeKeyDown;
-			e.keyboard.key = ConvertKey(XLookupKeysym(const_cast<XKeyEvent*>(&event.xkey), 0));
+			e.keyboard.key = keyboardMapping[event.xkey.keycode][(event.xkey.state & ShiftMask) ? 1 : 0];
 			AddEvent(e);
 		}
 		break;
@@ -133,7 +139,7 @@ void X11Manager::Process(const XEvent& event)
 			Event e;
 			e.device = Event::deviceKeyboard;
 			e.keyboard.type = Event::Keyboard::typeKeyUp;
-			e.keyboard.key = ConvertKey(XLookupKeysym(const_cast<XKeyEvent*>(&event.xkey), 0));
+			e.keyboard.key = keyboardMapping[event.xkey.keycode][(event.xkey.state & ShiftMask) ? 1 : 0];
 			AddEvent(e);
 		}
 		break;
@@ -162,6 +168,7 @@ void X11Manager::Process(const XEvent& event)
 			Event e;
 			e.device = Event::deviceMouse;
 			e.mouse.type = Event::Mouse::typeMove;
+
 			{
 				const State& state = internalFrame->GetCurrentState();
 				e.mouse.offsetX = event.xmotion.x - mouseX;
@@ -176,7 +183,7 @@ void X11Manager::Process(const XEvent& event)
 	case LeaveNotify:
 		mouseX = 100;
 		mouseY = 100;
-		XWarpPointer(event.xcrossing.display, 0, event.xcrossing.window, 0, 0, 0, 0, 100, 100);
+		XWarpPointer(event.xcrossing.display, 0, event.xcrossing.window, 0, 0, 0, 0, mouseX, mouseY);
 		break;
 	}
 }

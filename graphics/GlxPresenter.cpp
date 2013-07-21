@@ -8,8 +8,8 @@
 
 BEGIN_INANITY_GRAPHICS
 
-GlxPresenter::GlxPresenter(ptr<GlDevice> device, ptr<GlRenderBuffer> backBuffer, ptr<X11Output> output)
-: device(device), backBuffer(backBuffer), output(output)
+GlxPresenter::GlxPresenter(ptr<GlDevice> device, ptr<GlRenderBuffer> backBuffer, ptr<X11Output> output, GLXWindow glxWindow)
+: device(device), backBuffer(backBuffer), output(output), glxWindow(glxWindow)
 {
 	output->SetPresenter(this);
 }
@@ -37,7 +37,7 @@ void GlxPresenter::SetMode(ptr<MonitorMode> abstractMode)
 void GlxPresenter::Present()
 {
 	Platform::X11Window* window = output->GetWindow();
-	glXSwapBuffers(window->GetDisplay()->GetDisplay(), window->GetHandle());
+	glXSwapBuffers(window->GetDisplay()->GetDisplay(), glxWindow);
 }
 
 void GlxPresenter::Resize(int width, int height)

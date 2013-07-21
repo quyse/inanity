@@ -7,7 +7,18 @@
 #include "../String.hpp"
 
 #ifdef ___INANITY_LINUX
+#include "../platform/platform.hpp"
 #include "../platform/x11.hpp"
+#endif
+
+#ifdef ___INANITY_LINUX
+
+BEGIN_INANITY_PLATFORM
+
+class X11Display;
+
+END_INANITY_PLATFORM
+
 #endif
 
 BEGIN_INANITY_GRAPHICS
@@ -25,6 +36,9 @@ class GlDevice : public Device
 private:
 	/// Графическая система.
 	ptr<GlSystem> system;
+	/// Основной графический контекст.
+	ptr<GlContext> context;
+
 #ifdef ___INANITY_WINDOWS
 	/// Имя графического устройства.
 	String deviceName;
@@ -34,13 +48,12 @@ private:
 	HGLRC hglrc;
 #endif
 #ifdef ___INANITY_LINUX
+	ptr<Platform::X11Display> display;
 	/// Контекст рендеринга OpenGL.
 	/** Создаётся при первом создании Presenter'а.
 	Является общим для всех Presenter'ов. */
 	GLXContext glxContext;
 #endif
-	/// Основной графический контекст.
-	ptr<GlContext> context;
 
 	/// Скомпилировать шейдер.
 	static void CompileShader(GLuint shaderName, ptr<File> file, ptr<GlShaderBindings>& shaderBindings);
@@ -50,12 +63,13 @@ public:
 
 #ifdef ___INANITY_WINDOWS
 	GlDevice(ptr<GlSystem> system, const String& deviceName, ptr<GlContext> context);
-	~GlDevice();
 #endif
 
 #ifdef ___INANITY_LINUX
 	GlDevice(ptr<GlSystem> system, ptr<GlContext> context);
 #endif
+
+	~GlDevice();
 
 	// методы Device
 	ptr<System> GetSystem() const;
