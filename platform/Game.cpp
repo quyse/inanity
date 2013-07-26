@@ -10,9 +10,10 @@
 #ifdef ___INANITY_LINUX
 #include "X11Window.hpp"
 #include "X11Display.hpp"
-#include "../graphics/GlSystem.hpp"
 #include "../input/X11Manager.hpp"
 #endif
+
+#include "../graphics/GlSystem.hpp"
 
 BEGIN_INANITY_PLATFORM
 
@@ -25,14 +26,10 @@ ptr<Graphics::System> Game::CreateDx11System()
 
 #endif
 
-#ifdef ___INANITY_LINUX
-
 ptr<Graphics::System> Game::CreateGlSystem()
 {
 	return NEW(Graphics::GlSystem());
 }
-
-#endif
 
 ptr<Input::Manager> Game::CreateInputManager(ptr<Window> window)
 {
