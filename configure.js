@@ -87,7 +87,11 @@ var libraries = {
 	// ******* general platform subsystem
 	'libinanity-platform': {
 		objects: ['platform.Game'],
-		'objects-win32': ['platform.Win32Window', 'graphics.Win32Output', 'graphics.Win32Adapter', 'graphics.Win32Monitor', 'graphics.Win32MonitorMode'],
+		'objects-win32': [
+			'platform.Win32Window', 'graphics.Win32Output',
+			'graphics.Win32Adapter', 'graphics.Win32Monitor', 'graphics.Win32MonitorMode',
+			'platform.DllCache'
+		],
 		'objects-linux': ['platform.X11Window', 'platform.X11Display', 'graphics.X11Output', 'graphics.X11Adapter', 'graphics.X11Monitor', 'graphics.X11MonitorMode']
 	},
 	// ******* общая графика
