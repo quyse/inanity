@@ -2,12 +2,9 @@
 #define ___INANITY_GRAPHICS_DX11_SHADER_COMPILER_HPP___
 
 #include "ShaderCompiler.hpp"
-
-BEGIN_INANITY
-
-class FileSystem;
-
-END_INANITY
+#include "../FileSystem.hpp"
+#include "../platform/DllFunction.hpp"
+#include "d3d11.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
@@ -27,13 +24,22 @@ private:
 	/// Файловая система для включаемых файлов (опционально).
 	ptr<FileSystem> includesFileSystem;
 
+	Platform::DllFunction<pD3DCompile> functionD3DCompile;
+
 	class IncludeProcessor;
 
 public:
-	/// Создать компилятор с параметрами по умолчанию.
-	Dx11ShaderCompiler();
-	/// Создать компилятор с указанными параметрами.
-	Dx11ShaderCompiler(bool debug, bool optimize, bool columnMajorMatrices, ptr<FileSystem> includesFileSystem);
+	Dx11ShaderCompiler(
+#ifdef _DEBUG
+		bool debug = true,
+		bool optimize = false,
+#else
+		bool debug = false,
+		bool optimize = true,
+#endif
+		bool columnMajorMatrices = true,
+		ptr<FileSystem> includesFileSystem = 0
+	);
 
 	ptr<File> Compile(ptr<ShaderSource> shaderSource);
 };

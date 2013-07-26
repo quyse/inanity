@@ -1,20 +1,20 @@
 #include "Dx11ShaderCompiler.hpp"
 #include "Hlsl11Source.hpp"
 #include "Dx11CompiledShader.hpp"
-#include "D3D10BlobFile.hpp"
+#include "D3DBlobFile.hpp"
 #include "../FileSystem.hpp"
 #include "../File.hpp"
 #include "../MemoryStream.hpp"
 #include "../Strings.hpp"
+#include "../platform/DllFunction.ipp"
 #include "../Exception.hpp"
-#include "d3dx11.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
 /// Класс обработчика включаемых файлов.
-/** Предоставляет интерфейс ID3D10Include, необходимый для компиляции шейдеров,
+/** Предоставляет интерфейс ID3DInclude, необходимый для компиляции шейдеров,
 возвращая файлы из заданной файловой системы. */
-class Dx11ShaderCompiler::IncludeProcessor : public ID3D10Include
+class Dx11ShaderCompiler::IncludeProcessor : public ID3DInclude
 {
 private:
 	/// Файловая система.
@@ -28,10 +28,10 @@ public:
 	IncludeProcessor(ptr<FileSystem> fileSystem) : fileSystem(fileSystem) {}
 
 	/// Открыть файл.
-	HRESULT STDMETHODCALLTYPE Open(D3D10_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID* ppData, UINT* pBytes)
+	HRESULT STDMETHODCALLTYPE Open(D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID* ppData, UINT* pBytes)
 	{
 		// если файл не локальный, закончить (потому что системных файлов пока не обрабатываем)
-		if(IncludeType != D3D10_INCLUDE_LOCAL)
+		if(IncludeType != D3D_INCLUDE_LOCAL)
 			return E_FAIL;
 
 		// получить файл из файловой системы
@@ -64,23 +64,14 @@ public:
 	}
 };
 
-Dx11ShaderCompiler::Dx11ShaderCompiler()
-	:
-#ifdef _DEBUG
-	debug(true), optimize(false), columnMajorMatrices(true)
-#else
-	debug(false), optimize(true), columnMajorMatrices(true)
-#endif
-{
-}
-
 Dx11ShaderCompiler::Dx11ShaderCompiler(
 	bool debug,
 	bool optimize,
 	bool columnMajorMatrices,
 	ptr<FileSystem> includesFileSystem) :
 	debug(debug), optimize(optimize), columnMajorMatrices(columnMajorMatrices),
-	includesFileSystem(includesFileSystem)
+	includesFileSystem(includesFileSystem),
+	functionD3DCompile(D3DCOMPILER_DLL_A, "D3DCompile")
 {
 }
 
@@ -100,19 +91,29 @@ ptr<File> Dx11ShaderCompiler::Compile(ptr<ShaderSource> shaderSource)
 		IncludeProcessor includeProcessor(includesFileSystem);
 
 		// скомпилировать шейдер
-		ID3D10Blob* shaderBlob;
-		ID3D10Blob* errorsBlob;
-		HRESULT result = D3DX11CompileFromMemory((char*)code->GetData(), code->GetSize(), NULL, NULL,
-			includesFileSystem ? &includeProcessor : 0, hlslSource->GetFunctionName().c_str(),
-			hlslSource->GetProfile().c_str(), D3D10_SHADER_ENABLE_STRICTNESS
-			| (debug ? D3D10_SHADER_DEBUG : 0)
-			| (optimize ? D3D10_SHADER_OPTIMIZATION_LEVEL3 : (D3D10_SHADER_OPTIMIZATION_LEVEL0 | D3D10_SHADER_SKIP_OPTIMIZATION))
-			| (columnMajorMatrices ? D3D10_SHADER_PACK_MATRIX_COLUMN_MAJOR : D3D10_SHADER_PACK_MATRIX_ROW_MAJOR)
-			, 0, NULL, &shaderBlob, &errorsBlob, NULL);
+		ID3DBlob* shaderBlob;
+		ID3DBlob* errorsBlob;
+		HRESULT result = functionD3DCompile(
+			(char*)code->GetData(),
+			code->GetSize(),
+			NULL, // source name
+			NULL, // defines
+			includesFileSystem ? &includeProcessor : 0, // includes
+			hlslSource->GetFunctionName().c_str(), // entrypoint
+			hlslSource->GetProfile().c_str(), // target
+			D3DCOMPILE_ENABLE_STRICTNESS
+			| (debug ? D3DCOMPILE_DEBUG : 0)
+			| (optimize ? D3DCOMPILE_OPTIMIZATION_LEVEL3 : (D3DCOMPILE_OPTIMIZATION_LEVEL0 | D3DCOMPILE_SKIP_OPTIMIZATION))
+			| (columnMajorMatrices ? D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR : D3DCOMPILE_PACK_MATRIX_ROW_MAJOR)
+			, // flags
+			0, // flags 2
+			&shaderBlob,
+			&errorsBlob
+		);
 
 		// завернуть blob'ы в классы для корректного удаления
-		ptr<D3D10BlobFile> shaderFile = NEW(D3D10BlobFile(shaderBlob));
-		ptr<D3D10BlobFile> errorsFile = NEW(D3D10BlobFile(errorsBlob));
+		ptr<D3DBlobFile> shaderFile = NEW(D3DBlobFile(shaderBlob));
+		ptr<D3DBlobFile> errorsFile = NEW(D3DBlobFile(errorsBlob));
 
 		// если ошибка
 		if(FAILED(result))
