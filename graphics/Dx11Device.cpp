@@ -21,7 +21,6 @@
 #include "../File.hpp"
 #include "../FileInputStream.hpp"
 #include "../Exception.hpp"
-#include "d3dx11.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
