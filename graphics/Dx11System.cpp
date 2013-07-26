@@ -6,6 +6,7 @@
 #include "DxgiAdapter.hpp"
 #include "DxgiMonitorMode.hpp"
 #include "Output.hpp"
+#include "../platform/DllFunction.ipp"
 #include "../Exception.hpp"
 
 BEGIN_INANITY_GRAPHICS
@@ -14,8 +15,10 @@ IDXGIFactory* Dx11System::GetDXGIFactory()
 {
 	if(!dxgiFactory)
 	{
+		Platform::DllFunction<decltype(&CreateDXGIFactory)> functionCreateDXGIFactory("dxgi.dll", "CreateDXGIFactory");
+
 		IDXGIFactory* dxgiFactoryInterface;
-		if(FAILED(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&dxgiFactoryInterface)))
+		if(FAILED(functionCreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&dxgiFactoryInterface)))
 			THROW_PRIMARY_EXCEPTION("Can't create DXGI Factory");
 		dxgiFactory = dxgiFactoryInterface;
 	}
@@ -219,6 +222,9 @@ ptr<Device> Dx11System::CreateDevice(ptr<Adapter> abstractAdapter)
 {
 	try
 	{
+		// получить функцию создания в первую очередь
+		Platform::DllFunction<PFN_D3D11_CREATE_DEVICE> functionD3D11CreateDevice("d3d11.dll", "D3D11CreateDevice");
+
 		ptr<DxgiAdapter> adapter = abstractAdapter.DynamicCast<DxgiAdapter>();
 		if(!adapter)
 			THROW_PRIMARY_EXCEPTION("Wrong adapter type");
@@ -238,7 +244,7 @@ ptr<Device> Dx11System::CreateDevice(ptr<Adapter> abstractAdapter)
 		D3D_FEATURE_LEVEL featureLevelSupported;
 		// здесь необходимо указывать D3D_DRIVER_TYPE_UNKNOWN, если мы указываем adapter.
 		// http://msdn.microsoft.com/en-us/library/ff476082 (remarks)
-		if(FAILED(D3D11CreateDevice(adapterInterface, D3D_DRIVER_TYPE_UNKNOWN, NULL, flags, &featureLevel, 1, D3D11_SDK_VERSION, &deviceInterface, &featureLevelSupported, &deviceContextInterface)))
+		if(FAILED(functionD3D11CreateDevice(adapterInterface, D3D_DRIVER_TYPE_UNKNOWN, NULL, flags, &featureLevel, 1, D3D11_SDK_VERSION, &deviceInterface, &featureLevelSupported, &deviceContextInterface)))
 			THROW_PRIMARY_EXCEPTION("Can't create device and context");
 
 		ComPointer<ID3D11Device> device = deviceInterface;
