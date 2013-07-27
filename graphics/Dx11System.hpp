@@ -38,6 +38,9 @@ public:
 	ptr<ShaderCompiler> CreateShaderCompiler();
 	ptr<Shaders::ShaderGenerator> CreateShaderGenerator();
 
+	/// Checks if DirectX 11 is supported.
+	static bool IsSupported();
+
 	/// Получить фабрику DXGI.
 	/** Создаёт её, если ещё не создана. */
 	IDXGIFactory* GetDXGIFactory();

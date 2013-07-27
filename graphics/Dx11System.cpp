@@ -11,6 +11,19 @@
 
 BEGIN_INANITY_GRAPHICS
 
+bool Dx11System::IsSupported()
+{
+	try
+	{
+		return DllCache::Load("dxgi.dll") && DllCache::Load("d3d11.dll");
+	}
+	catch(Exception* exception)
+	{
+		MakePointer(exception);
+		return false;
+	}
+}
+
 IDXGIFactory* Dx11System::GetDXGIFactory()
 {
 	if(!dxgiFactory)

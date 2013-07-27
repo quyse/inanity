@@ -17,17 +17,12 @@
 
 BEGIN_INANITY_PLATFORM
 
+ptr<Graphics::System> Game::CreateDefaultGraphicsSystem()
+{
 #ifdef ___INANITY_WINDOWS
-
-ptr<Graphics::System> Game::CreateDx11System()
-{
-	return NEW(Graphics::Dx11System());
-}
-
+	if(Graphics::Dx11System::IsSupported())
+		return NEW(Graphics::Dx11System());
 #endif
-
-ptr<Graphics::System> Game::CreateGlSystem()
-{
 	return NEW(Graphics::GlSystem());
 }
 

@@ -50,10 +50,7 @@ private:
 	ptr<Graphics::Presenter> presenter;
 
 public:
-#ifdef ___INANITY_WINDOWS
-	static ptr<Graphics::System> CreateDx11System();
-#endif
-	static ptr<Graphics::System> CreateGlSystem();
+	static ptr<Graphics::System> CreateDefaultGraphicsSystem();
 
 	static ptr<Input::Manager> CreateInputManager(ptr<Window> window);
 };
