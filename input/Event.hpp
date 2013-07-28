@@ -20,9 +20,16 @@ struct Event
 		{
 			typeKeyDown,
 			typeKeyUp,
-			typeKeyPress
+			typeCharacter
 		} type;
-		Key key;
+
+		union
+		{
+			// in case type == typeKey{Down,Up}
+			Key key;
+			// in case type == typeCharacter
+			wchar_t character;
+		};
 	};
 
 	struct Mouse

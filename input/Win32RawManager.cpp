@@ -46,7 +46,7 @@ bool Win32RawManager::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lPara
 					Event e;
 					e.device = Event::deviceKeyboard;
 					e.keyboard.type = !(block.data.keyboard.Flags & RI_KEY_BREAK) ? Event::Keyboard::typeKeyDown : Event::Keyboard::typeKeyUp;
-					e.keyboard.key = block.data.keyboard.VKey;
+					e.keyboard.key = ConvertKey(block.data.keyboard.VKey);
 					AddEvent(e);
 				}
 				break;
