@@ -82,18 +82,18 @@ public:
 #define __SLINE3__(x) __SLINE2__(x)
 #define __SLINE__ __SLINE3__(__LINE__)
 /// Макрос для вызова первичного исключения
-#define THROW_PRIMARY_EXCEPTION(message) throw NEW(Exception(String("[ " __FILE__ ", " __SLINE__ " ] ") + (message)))
+#define THROW_PRIMARY_EXCEPTION(message) throw NEW(Inanity::Exception(Inanity::String("[ " __FILE__ ", " __SLINE__ " ] ") + (message)))
 /// Макрос для вызова вторичного исключения
-#define THROW_SECONDARY_EXCEPTION(message, exception) throw NEW(Exception(String("[ " __FILE__ ", " __SLINE__ " ] ") + (message), (exception)))
+#define THROW_SECONDARY_EXCEPTION(message, exception) throw NEW(Inanity::Exception(Inanity::String("[ " __FILE__ ", " __SLINE__ " ] ") + (message), (exception)))
 #else
 /// Макрос для вызова первичного исключения
-#define THROW_PRIMARY_EXCEPTION(message) throw NEW(Exception((message)))
+#define THROW_PRIMARY_EXCEPTION(message) throw NEW(Inanity::Exception((message)))
 /// Макрос для вызова вторичного исключения
-#define THROW_SECONDARY_EXCEPTION(message, exception) throw NEW(Exception((message), (exception)))
+#define THROW_SECONDARY_EXCEPTION(message, exception) throw NEW(Inanity::Exception((message), (exception)))
 #endif
 
 #define BEGIN_TRY() try {
-#define END_TRY(message) } catch(Exception* exception) { THROW_SECONDARY_EXCEPTION(message, exception); }
+#define END_TRY(message) } catch(Inanity::Exception* exception) { THROW_SECONDARY_EXCEPTION(message, exception); }
 
 END_INANITY
 
