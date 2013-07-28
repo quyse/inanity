@@ -76,10 +76,10 @@ void WavefrontObj::PrintHelp() const
 void WavefrontObj::Run(const std::vector<String>& arguments)
 {
 	if(arguments.size() < 2)
-		THROW_PRIMARY_EXCEPTION("Must be at least 2 arguments for command");
+		THROW("Must be at least 2 arguments for command");
 
 	if(!_wfreopen(Strings::UTF82Unicode(arguments[0]).c_str(), L"r", stdin))
-		THROW_PRIMARY_EXCEPTION("Can't open source file");
+		THROW("Can't open source file");
 
 	std::vector<int> positionNumbers;
 	ptr<Graphics::EditableGeometry<Vertex, unsigned> > geometry = WavefrontObj::Convert(positionNumbers);
@@ -92,7 +92,7 @@ void WavefrontObj::Run(const std::vector<String>& arguments)
 		std::vector<SkinnedVertex> skinnedVertices(vertices.size());
 
 		if(!_wfreopen(Strings::UTF82Unicode(arguments[2]).c_str(), L"r", stdin))
-			THROW_PRIMARY_EXCEPTION("Can't open skin file");
+			THROW("Can't open skin file");
 
 		// считать коэффициенты для кожи
 		size_t skinVerticesCount;
@@ -128,7 +128,7 @@ void WavefrontObj::Run(const std::vector<String>& arguments)
 			for(int j = 0; j < 4; ++j)
 				weightsSum += bones[j].first;
 			if(weightsSum <= 1e-8f)
-				THROW_PRIMARY_EXCEPTION("Bone with zero sum weight");
+				THROW("Bone with zero sum weight");
 			float weightCoef = 1.0f / weightsSum;
 			for(int j = 0; j < 4; ++j)
 				bones[j].first *= weightCoef;

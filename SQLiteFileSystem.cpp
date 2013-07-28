@@ -58,7 +58,7 @@ SQLiteFileSystem::SQLiteFileSystem(const String& fileName)
 			{
 				if(dbPtr)
 					sqlite3_close(dbPtr);
-				THROW_PRIMARY_EXCEPTION("Can't open db");
+				THROW("Can't open db");
 			}
 			db = NEW(Db(dbPtr));
 		}
@@ -73,13 +73,13 @@ SQLiteFileSystem::SQLiteFileSystem(const String& fileName)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't open SQLite file system in " + fileName, exception);
+		THROW_SECONDARY("Can't open SQLite file system in " + fileName, exception);
 	}
 }
 
 void SQLiteFileSystem::Throw(const char* message) const
 {
-	THROW_SECONDARY_EXCEPTION(message, NEW(Exception(sqlite3_errmsg(*db))));
+	THROW_SECONDARY(message, NEW(Exception(sqlite3_errmsg(*db))));
 }
 
 void SQLiteFileSystem::ensureLoadFileStmt() const
@@ -137,7 +137,7 @@ void SQLiteFileSystem::FreeFile(void* data)
 	CriticalCode code(filesCriticalSection);
 	std::unordered_multimap<void*, ptr<File> >::iterator i = files.find(data);
 	if(i == files.end())
-		THROW_PRIMARY_EXCEPTION("Invalid call of SQLiteFileSystem::FreeFile");
+		THROW("Invalid call of SQLiteFileSystem::FreeFile");
 	files.erase(i);
 }
 
@@ -180,7 +180,7 @@ ptr<File> SQLiteFileSystem::TryLoadFile(const String& fileName)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't try to load file from SQLite file system", exception);
+		THROW_SECONDARY("Can't try to load file from SQLite file system", exception);
 	}
 }
 
@@ -207,7 +207,7 @@ void SQLiteFileSystem::SaveFile(ptr<File> file, const String& fileName)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't save file to SQLite file system", exception);
+		THROW_SECONDARY("Can't save file to SQLite file system", exception);
 	}
 }
 
@@ -239,7 +239,7 @@ void SQLiteFileSystem::GetEntries(const String& directoryName, std::vector<Strin
 #ifdef _DEBUG
 				// проверить, что оно начинается с имени каталога
 				if(fileName.length() < directoryName.length() || memcmp(fileName.c_str(), directoryName.c_str(), directoryName.length()) != 0)
-					THROW_PRIMARY_EXCEPTION("File name is not begins with directory name");
+					THROW("File name is not begins with directory name");
 #endif
 				// отрезать от него имя каталога
 				fileName = fileName.substr(directoryName.length());
@@ -264,7 +264,7 @@ void SQLiteFileSystem::GetEntries(const String& directoryName, std::vector<Strin
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't get SQLite file system directory entries for " + directoryName, exception);
+		THROW_SECONDARY("Can't get SQLite file system directory entries for " + directoryName, exception);
 	}
 }
 
@@ -291,7 +291,7 @@ void SQLiteFileSystem::GetFileNames(std::vector<String>& fileNames) const
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't get SQLite file system file names", exception);
+		THROW_SECONDARY("Can't get SQLite file system file names", exception);
 	}
 }
 

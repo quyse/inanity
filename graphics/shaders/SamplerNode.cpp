@@ -46,7 +46,7 @@ SamplerNode::CoordType SamplerNode::CoordTypeFromDimensions(int dimensions)
 	case 3:
 		return _3D;
 	default:
-		THROW_PRIMARY_EXCEPTION("Wrong sampler node dimensions");
+		THROW("Wrong sampler node dimensions");
 	}
 }
 

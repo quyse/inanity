@@ -172,7 +172,7 @@ void AsioUdpSocket::Send(ptr<File> file)
 	}
 	catch(boost::system::system_error error)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't send file", AsioService::ConvertError(error));
+		THROW_SECONDARY("Can't send file", AsioService::ConvertError(error));
 	}
 }
 
@@ -181,7 +181,7 @@ void AsioUdpSocket::SetReceiveHandler(ptr<ReceiveHandler> receiveHandler)
 	CriticalCode cc(cs);
 
 	if(this->receiveHandler)
-		THROW_PRIMARY_EXCEPTION("Receive handler already set");
+		THROW("Receive handler already set");
 
 	this->receiveHandler = receiveHandler;
 }

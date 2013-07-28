@@ -32,7 +32,7 @@ IDXGIFactory* Dx11System::GetDXGIFactory()
 
 		IDXGIFactory* dxgiFactoryInterface;
 		if(FAILED(functionCreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&dxgiFactoryInterface)))
-			THROW_PRIMARY_EXCEPTION("Can't create DXGI Factory");
+			THROW("Can't create DXGI Factory");
 		dxgiFactory = dxgiFactoryInterface;
 	}
 	return dxgiFactory;
@@ -162,7 +162,7 @@ DXGI_FORMAT Dx11System::GetDXGIFormat(PixelFormat format)
 		}
 		break;
 	}
-	THROW_PRIMARY_EXCEPTION("Pixel format is unsupported in DX11");
+	THROW("Pixel format is unsupported in DX11");
 #undef T
 #undef P
 #undef F
@@ -218,14 +218,14 @@ const std::vector<ptr<Adapter> >& Dx11System::GetAdapters()
 				else if(hr == DXGI_ERROR_NOT_FOUND)
 					break;
 				else
-					THROW_PRIMARY_EXCEPTION("Error enumerating adapters");
+					THROW("Error enumerating adapters");
 			}
 
 			adaptersInitialized = true;
 		}
 		catch(Exception* exception)
 		{
-			THROW_SECONDARY_EXCEPTION("Can't get adapters of DirectX 11 system", exception);
+			THROW_SECONDARY("Can't get adapters of DirectX 11 system", exception);
 		}
 
 	return adapters;
@@ -240,7 +240,7 @@ ptr<Device> Dx11System::CreateDevice(ptr<Adapter> abstractAdapter)
 
 		ptr<DxgiAdapter> adapter = abstractAdapter.DynamicCast<DxgiAdapter>();
 		if(!adapter)
-			THROW_PRIMARY_EXCEPTION("Wrong adapter type");
+			THROW("Wrong adapter type");
 		IDXGIAdapter* adapterInterface = adapter->GetInterface();
 
 		// флаги устройства
@@ -258,7 +258,7 @@ ptr<Device> Dx11System::CreateDevice(ptr<Adapter> abstractAdapter)
 		// здесь необходимо указывать D3D_DRIVER_TYPE_UNKNOWN, если мы указываем adapter.
 		// http://msdn.microsoft.com/en-us/library/ff476082 (remarks)
 		if(FAILED(functionD3D11CreateDevice(adapterInterface, D3D_DRIVER_TYPE_UNKNOWN, NULL, flags, &featureLevel, 1, D3D11_SDK_VERSION, &deviceInterface, &featureLevelSupported, &deviceContextInterface)))
-			THROW_PRIMARY_EXCEPTION("Can't create device and context");
+			THROW("Can't create device and context");
 
 		ComPointer<ID3D11Device> device = deviceInterface;
 		ComPointer<ID3D11DeviceContext> deviceContext = deviceContextInterface;
@@ -268,7 +268,7 @@ ptr<Device> Dx11System::CreateDevice(ptr<Adapter> abstractAdapter)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create DirectX 11 device", exception);
+		THROW_SECONDARY("Can't create DirectX 11 device", exception);
 	}
 }
 
@@ -278,7 +278,7 @@ ptr<Context> Dx11System::CreateContext(ptr<Device> abstractDevice)
 
 	ptr<Dx11Device> device = abstractDevice.DynamicCast<Dx11Device>();
 	if(!device)
-		THROW_PRIMARY_EXCEPTION("Wrong device type");
+		THROW("Wrong device type");
 
 	return NEW(Dx11Context(device));
 

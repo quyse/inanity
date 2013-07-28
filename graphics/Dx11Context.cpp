@@ -84,7 +84,7 @@ int Dx11Context::GetRasterizerStateKey(const ContextState& contextState)
 
 		ID3D11RasterizerState* rasterizerStateInterface;
 		if(FAILED(device->CreateRasterizerState(&desc, &rasterizerStateInterface)))
-			THROW_PRIMARY_EXCEPTION("Can't create rasterizer state");
+			THROW("Can't create rasterizer state");
 		rasterizerStateCache[key] = rasterizerStateInterface;
 	}
 
@@ -471,12 +471,12 @@ void Dx11Context::SetBufferData(ID3D11Resource* resource, const void* data, int 
 {
 	// проверить, что размер не больше, чем нужно
 	if(size > bufferSize)
-		THROW_PRIMARY_EXCEPTION("Size of data to set into DX11 buffer is too big");
+		THROW("Size of data to set into DX11 buffer is too big");
 
 	//спроецировать буфер
 	D3D11_MAPPED_SUBRESOURCE bufferData;
 	if(FAILED(deviceContext->Map(resource, 0, D3D11_MAP_WRITE_DISCARD, 0, &bufferData)))
-		THROW_PRIMARY_EXCEPTION("Can't map DX11 buffer");
+		THROW("Can't map DX11 buffer");
 
 	//скопировать данные
 	memcpy(bufferData.pData, data, size);

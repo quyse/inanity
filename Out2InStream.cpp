@@ -82,7 +82,7 @@ void Out2InStream::WriteFile(ptr<File> file)
 	// просто передать файл всем читателям
 	CriticalCode code(criticalSection);
 	if(flushed)
-		THROW_PRIMARY_EXCEPTION("Out2InStream already flushed");
+		THROW("Out2InStream already flushed");
 	for(std::list<Reader*>::const_iterator i = readers.begin(); i != readers.end(); ++i)
 		(*i)->Push(file);
 }
@@ -92,7 +92,7 @@ void Out2InStream::End()
 	// просто передать всем
 	CriticalCode code(criticalSection);
 	if(flushed)
-		THROW_PRIMARY_EXCEPTION("Out2InStream already flushed");
+		THROW("Out2InStream already flushed");
 	flushed = true;
 	for(std::list<Reader*>::const_iterator i = readers.begin(); i != readers.end(); ++i)
 		(*i)->Push(0);

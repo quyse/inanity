@@ -30,7 +30,7 @@ BlobFileSystemBuilder::BlobFileSystemBuilder(ptr<OutputStream> outputStream)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create blob file system builder", exception);
+		THROW_SECONDARY("Can't create blob file system builder", exception);
 	}
 }
 
@@ -60,7 +60,7 @@ void BlobFileSystemBuilder::AddFileStream(const String& fileName, ptr<InputStrea
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't add file stream", exception);
+		THROW_SECONDARY("Can't add file stream", exception);
 	}
 }
 
@@ -85,7 +85,7 @@ void BlobFileSystemBuilder::Finalize()
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't finalize blob file system", exception);
+		THROW_SECONDARY("Can't finalize blob file system", exception);
 	}
 }
 

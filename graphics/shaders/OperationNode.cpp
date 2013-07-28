@@ -32,28 +32,28 @@ int OperationNode::GetArgumentsCount() const
 ptr<Node> OperationNode::GetA() const
 {
 	if(!a)
-		THROW_PRIMARY_EXCEPTION("Argument A is unavailable");
+		THROW("Argument A is unavailable");
 	return a;
 }
 
 ptr<Node> OperationNode::GetB() const
 {
 	if(!b)
-		THROW_PRIMARY_EXCEPTION("Argument B is unavailable");
+		THROW("Argument B is unavailable");
 	return b;
 }
 
 ptr<Node> OperationNode::GetC() const
 {
 	if(!c)
-		THROW_PRIMARY_EXCEPTION("Argument C is unavailable");
+		THROW("Argument C is unavailable");
 	return c;
 }
 
 ptr<Node> OperationNode::GetD() const
 {
 	if(!d)
-		THROW_PRIMARY_EXCEPTION("Argument D is unavailable");
+		THROW("Argument D is unavailable");
 	return d;
 }
 
@@ -70,7 +70,7 @@ ptr<Node> OperationNode::GetArgument(int number) const
 	case 3:
 		return GetD();
 	default:
-		THROW_PRIMARY_EXCEPTION("Invalid argument number for operation node");
+		THROW("Invalid argument number for operation node");
 	}
 }
 

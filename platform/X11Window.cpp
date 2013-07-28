@@ -87,7 +87,7 @@ ptr<X11Window> X11Window::CreateForOpenGL(ptr<X11Display> display, int screenNum
 
 	// получить, поддерживает ли дисплей расширение GLX
 	if(!glXQueryExtension(d, NULL, NULL))
-		THROW_PRIMARY_EXCEPTION("Display doesn't support GLX extension");
+		THROW("Display doesn't support GLX extension");
 
 	// создать окно
 	xcb_window_t window = xcb_generate_id(connection);

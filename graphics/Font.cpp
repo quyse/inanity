@@ -90,7 +90,7 @@ ptr<Font> Font::Deserialize(ptr<InputStream> inputStream, ptr<TextureManager> te
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't deserialize font", exception);
+		THROW_SECONDARY("Can't deserialize font", exception);
 	}
 }
 

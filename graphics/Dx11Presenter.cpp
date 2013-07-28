@@ -36,7 +36,7 @@ ptr<RenderBuffer> Dx11Presenter::GetBackBuffer()
 	{
 		ID3D11Texture2D* backBufferTextureInterface;
 		if(FAILED(swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backBufferTextureInterface)))
-			THROW_PRIMARY_EXCEPTION("Can't get back buffer texture");
+			THROW("Can't get back buffer texture");
 
 		ID3D11Device* deviceInterface = device->GetDeviceInterface();
 
@@ -44,7 +44,7 @@ ptr<RenderBuffer> Dx11Presenter::GetBackBuffer()
 		HRESULT hr = deviceInterface->CreateRenderTargetView(backBufferTextureInterface, 0, &renderTargetInterface);
 		backBufferTextureInterface->Release();
 		if(FAILED(hr))
-			THROW_PRIMARY_EXCEPTION("Can't create back buffer render target view");
+			THROW("Can't create back buffer render target view");
 		backBuffer = NEW(Dx11RenderBuffer(renderTargetInterface));
 	}
 	return backBuffer;
@@ -56,18 +56,18 @@ void Dx11Presenter::SetMode(ptr<MonitorMode> abstractMode)
 	{
 		ptr<DxgiMonitorMode> mode = abstractMode.DynamicCast<DxgiMonitorMode>();
 		if(!mode && abstractMode)
-			THROW_PRIMARY_EXCEPTION("Only DXGI monitor mode allowed");
+			THROW("Only DXGI monitor mode allowed");
 
 		// В MSDN рекомендуется сначала изменять размер, а потом переключать полноэкранность.
 
 		// изменить режим
 		if(FAILED(swapChain->ResizeTarget(&Dx11System::GetModeDesc(mode, output))))
-			THROW_PRIMARY_EXCEPTION("Can't resize target");
+			THROW("Can't resize target");
 		//если полноэкранность изменилась, изменить её
 		if(!currentMode != !mode)
 		{
 			if(FAILED(swapChain->SetFullscreenState(!!mode, NULL)))
-				THROW_PRIMARY_EXCEPTION("Can't set fullscreen state");
+				THROW("Can't set fullscreen state");
 
 			// и при этом нужно изменить размеры буфера
 			Resize(mode->GetWidth(), mode->GetHeight());
@@ -78,14 +78,14 @@ void Dx11Presenter::SetMode(ptr<MonitorMode> abstractMode)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't set mode", exception);
+		THROW_SECONDARY("Can't set mode", exception);
 	}
 }
 
 void Dx11Presenter::Present()
 {
 	if(FAILED(swapChain->Present(0, 0)))
-		THROW_PRIMARY_EXCEPTION("Can't present");
+		THROW("Can't present");
 }
 
 void Dx11Presenter::Resize(int width, int height)
@@ -94,7 +94,7 @@ void Dx11Presenter::Resize(int width, int height)
 	backBuffer = 0;
 	// изменить размеры буфера
 	if(FAILED(swapChain->ResizeBuffers(2, width, height, Dx11System::GetModeDesc(currentMode, output).Format, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH)))
-		THROW_PRIMARY_EXCEPTION("Can't resize buffers");
+		THROW("Can't resize buffers");
 }
 
 END_INANITY_GRAPHICS

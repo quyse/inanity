@@ -16,7 +16,7 @@ Win32Window::Win32Window(ATOM windowClass, const String& title,
 	try
 	{
 		if(singleWindow)
-			THROW_PRIMARY_EXCEPTION("Can't create second game window");
+			THROW("Can't create second game window");
 
 		//создать окно
 		hWnd = CreateWindow(
@@ -25,7 +25,7 @@ Win32Window::Win32Window(ATOM windowClass, const String& title,
 			left, top, width, height,
 			NULL, NULL, GetModuleHandle(NULL), NULL);
 		if(!hWnd)
-			THROW_PRIMARY_EXCEPTION("Can't create window");
+			THROW("Can't create window");
 		ShowCursor(FALSE);
 
 		RECT rect;
@@ -37,7 +37,7 @@ Win32Window::Win32Window(ATOM windowClass, const String& title,
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create game window", exception);
+		THROW_SECONDARY("Can't create game window", exception);
 	}
 }
 
@@ -72,7 +72,7 @@ ptr<Win32Window> Win32Window::CreateForDirectX(const String& title, int left, in
 		wndClass.lpfnWndProc = WndProc;
 		windowClass = RegisterClass(&wndClass);
 		if(!windowClass)
-			THROW_PRIMARY_EXCEPTION("Can't register window class for DirectX");
+			THROW("Can't register window class for DirectX");
 	}
 
 	return NEW(Win32Window(windowClass, title, left, top, width, height));
@@ -93,7 +93,7 @@ ptr<Win32Window> Win32Window::CreateForOpenGL(const String& title, int left, int
 		wndClass.lpfnWndProc = WndProc;
 		windowClass = RegisterClass(&wndClass);
 		if(!windowClass)
-			THROW_PRIMARY_EXCEPTION("Can't register window class for OpenGL");
+			THROW("Can't register window class for OpenGL");
 	}
 
 	return NEW(Win32Window(windowClass, title, left, top, width, height));

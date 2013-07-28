@@ -169,7 +169,7 @@ void AsioTcpSocket::StartSending()
 			}
 			catch(boost::system::system_error error)
 			{
-				THROW_SECONDARY_EXCEPTION("Can't close Asio TCP socket", AsioService::ConvertError(error));
+				THROW_SECONDARY("Can't close Asio TCP socket", AsioService::ConvertError(error));
 			}
 	}
 	else
@@ -311,7 +311,7 @@ void AsioTcpSocket::Send(ptr<File> file, ptr<SendHandler> sendHandler)
 
 		// если запланировано закрытие передачи, то больше в очередь добавлять ничего нельзя
 		if(sendClosed)
-			THROW_PRIMARY_EXCEPTION("Sending closed");
+			THROW("Sending closed");
 
 		bool queueWasEmpty = sendQueue.empty();
 
@@ -330,7 +330,7 @@ void AsioTcpSocket::Send(ptr<File> file, ptr<SendHandler> sendHandler)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't send data to Asio TCP socket", exception);
+		THROW_SECONDARY("Can't send data to Asio TCP socket", exception);
 	}
 }
 

@@ -24,7 +24,7 @@ public:
 		// разобрать URL
 		http_parser_url parsedUrl;
 		if(http_parser_parse_url(url.c_str(), url.length(), 0, &parsedUrl))
-			THROW_PRIMARY_EXCEPTION("Can't parse url");
+			THROW("Can't parse url");
 		String host;
 		if(parsedUrl.field_set & (1 << UF_HOST))
 			host = url.substr(parsedUrl.field_data[UF_HOST].off, parsedUrl.field_data[UF_HOST].len);
@@ -94,7 +94,7 @@ private:
 				if(outputStream->IsCompleted())
 					handler->FireSuccess();
 				else
-					THROW_PRIMARY_EXCEPTION("HTTP response is not completed");
+					THROW("HTTP response is not completed");
 			}
 		}
 		catch(Exception* exception)
@@ -113,7 +113,7 @@ void HttpClient::Fetch(ptr<Service> service, const String& url, ptr<SuccessHandl
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't fetch http", exception);
+		THROW_SECONDARY("Can't fetch http", exception);
 	}
 }
 

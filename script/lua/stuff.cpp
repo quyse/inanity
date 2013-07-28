@@ -250,7 +250,7 @@ ptr<Exception> ErrorToException(lua_State* state)
 
 void ProcessError(lua_State* state)
 {
-	THROW_SECONDARY_EXCEPTION("Error while running Lua function", ErrorToException(state));
+	THROW_SECONDARY("Error while running Lua function", ErrorToException(state));
 }
 
 int ScriptErrorHook(lua_State* state)

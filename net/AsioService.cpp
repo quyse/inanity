@@ -272,7 +272,7 @@ ptr<UdpListener> AsioService::ListenUdp(int port, ptr<UdpPacketHandler> receiveH
 		}
 		catch(boost::system::system_error error)
 		{
-			THROW_SECONDARY_EXCEPTION("Asio error", ConvertError(error));
+			THROW_SECONDARY("Asio error", ConvertError(error));
 		}
 		ptr<AsioUdpListener> listener = NEW(AsioUdpListener(internalSocket, receiveHandler));
 		internalSocket->Start();
@@ -280,7 +280,7 @@ ptr<UdpListener> AsioService::ListenUdp(int port, ptr<UdpPacketHandler> receiveH
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't listen UDP", exception);
+		THROW_SECONDARY("Can't listen UDP", exception);
 	}
 }
 

@@ -74,10 +74,10 @@ void GlContext::Update()
 	if(targetState.renderBuffers[0] && fast_cast<GlRenderBuffer*>(&*targetState.renderBuffers[0])->GetName() == 0)
 	{
 		if(targetState.depthStencilBuffer)
-			THROW_PRIMARY_EXCEPTION("Default renderbuffer can be bound only without depth-stencil buffer");
+			THROW("Default renderbuffer can be bound only without depth-stencil buffer");
 		for(int i = 1; i < ContextState::renderTargetSlotsCount; ++i)
 			if(targetState.renderBuffers[i])
-				THROW_PRIMARY_EXCEPTION("Default renderbuffer can be bound only without other buffers");
+				THROW("Default renderbuffer can be bound only without other buffers");
 
 		// привязать фреймбуфер по умолчанию
 		BindDefaultFramebuffer();
@@ -100,11 +100,11 @@ void GlContext::Update()
 				{
 					GLuint name = fast_cast<GlRenderBuffer*>(abstractRenderBuffer)->GetName();
 					if(name == 0)
-						THROW_PRIMARY_EXCEPTION("Default renderbuffer can't be bound with other buffers");
+						THROW("Default renderbuffer can't be bound with other buffers");
 					glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, name, 0);
 				}
 				else if(i == 0)
-					THROW_PRIMARY_EXCEPTION("Zero color attachment can't be not set");
+					THROW("Zero color attachment can't be not set");
 				else
 					glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, 0, 0);
 
@@ -283,7 +283,7 @@ void GlContext::Update()
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			break;
 		default:
-			THROW_PRIMARY_EXCEPTION("Unknown fill mode");
+			THROW("Unknown fill mode");
 		}
 		GlSystem::CheckErrors("Can't bind fill mode");
 
@@ -306,7 +306,7 @@ void GlContext::Update()
 			glCullFace(GL_FRONT);
 			break;
 		default:
-			THROW_PRIMARY_EXCEPTION("Unknown cull mode");
+			THROW("Unknown cull mode");
 		}
 		GlSystem::CheckErrors("Can't bind cull mode");
 
@@ -357,7 +357,7 @@ void GlContext::Update()
 			func = GL_ALWAYS;
 			break;
 		default:
-			THROW_PRIMARY_EXCEPTION("Unknown depth test func");
+			THROW("Unknown depth test func");
 		}
 
 		glDepthFunc(func);
@@ -418,7 +418,7 @@ ptr<GlRenderBuffer> GlContext::GetDummyRenderBuffer(int width, int height)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't get dummy render buffer", exception);
+		THROW_SECONDARY("Can't get dummy render buffer", exception);
 	}
 }
 
@@ -541,7 +541,7 @@ void GlContext::SetBufferData(GLenum target, GLuint bufferName, const void* data
 {
 	// проверить, что размер правильный
 	if(size > bufferSize)
-		THROW_PRIMARY_EXCEPTION("Size of data to set into OpenGL buffer is too big");
+		THROW("Size of data to set into OpenGL buffer is too big");
 
 	// http://www.opengl.org/wiki/GLAPI/glBindBuffer
 	// Сказано, что такая привязка не снимает буферы, привязанные

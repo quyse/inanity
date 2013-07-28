@@ -41,7 +41,7 @@ void Function::Run()
 		~StackBalanceCheck()
 		{
 			if(top != lua_gettop(state))
-				THROW_PRIMARY_EXCEPTION("Script::Run - unbalanced Lua stack");
+				THROW("Script::Run - unbalanced Lua stack");
 		}
 	};
 	StackBalanceCheck check(luaState);
@@ -70,7 +70,7 @@ void Function::Run()
 	if(code == LUA_OK)
 	{
 		if(argsCount != 0)
-			THROW_PRIMARY_EXCEPTION("Lua function expected to return no results");
+			THROW("Lua function expected to return no results");
 		return;
 	}
 

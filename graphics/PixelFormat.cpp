@@ -27,7 +27,7 @@ void PixelFormat::Serialize(StreamWriter& writer)
 		writer.WriteShortly(compression);
 		break;
 	default:
-		THROW_PRIMARY_EXCEPTION("Unsupported type");
+		THROW("Unsupported type");
 	}
 }
 
@@ -51,7 +51,7 @@ PixelFormat PixelFormat::Deserialize(StreamReader& reader)
 			return PixelFormat(compression);
 		}
 	default:
-		THROW_PRIMARY_EXCEPTION("Unsupported type");
+		THROW("Unsupported type");
 	}
 }
 

@@ -51,7 +51,7 @@ ptr<File> ShaderCache::GetShader(ptr<ShaderSource> shaderSource)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't get shader from shader cache", exception);
+		THROW_SECONDARY("Can't get shader from shader cache", exception);
 	}
 }
 
@@ -63,7 +63,7 @@ ptr<VertexShader> ShaderCache::GetVertexShader(ptr<ShaderSource> shaderSource)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't get vertex shader", exception);
+		THROW_SECONDARY("Can't get vertex shader", exception);
 	}
 }
 
@@ -75,7 +75,7 @@ ptr<VertexShader> ShaderCache::GetVertexShader(Expression shaderExpression)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't get vertex shader from expression", exception);
+		THROW_SECONDARY("Can't get vertex shader from expression", exception);
 	}
 }
 
@@ -87,7 +87,7 @@ ptr<PixelShader> ShaderCache::GetPixelShader(ptr<ShaderSource> shaderSource)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't get pixel shader", exception);
+		THROW_SECONDARY("Can't get pixel shader", exception);
 	}
 }
 
@@ -99,7 +99,7 @@ ptr<PixelShader> ShaderCache::GetPixelShader(Expression shaderExpression)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't get pixel shader from expression", exception);
+		THROW_SECONDARY("Can't get pixel shader from expression", exception);
 	}
 }
 

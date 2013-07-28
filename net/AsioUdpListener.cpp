@@ -35,7 +35,7 @@ public:
 		}
 		catch(Exception* exception)
 		{
-			THROW_SECONDARY_EXCEPTION("Can't create Asio UDP socket for packet", exception);
+			THROW_SECONDARY("Can't create Asio UDP socket for packet", exception);
 		}
 	}
 };

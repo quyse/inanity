@@ -20,7 +20,7 @@ ptr<File> FileSystem::LoadFile(const String& fileName)
 	ptr<File> file = TryLoadFile(fileName);
 	if(file)
 		return file;
-	THROW_PRIMARY_EXCEPTION("Can't load file " + fileName);
+	THROW("Can't load file " + fileName);
 }
 
 ptr<File> FileSystem::TryLoadFile(const String& fileName)
@@ -44,28 +44,28 @@ ptr<InputStream> FileSystem::LoadStream(const String& fileName)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't load file " + fileName + " as stream", exception);
+		THROW_SECONDARY("Can't load file " + fileName + " as stream", exception);
 	}
 }
 
 void FileSystem::SaveFile(ptr<File> file, const String& fileName)
 {
-	THROW_PRIMARY_EXCEPTION("Saving files in this filesystem is not supported");
+	THROW("Saving files in this filesystem is not supported");
 }
 
 ptr<OutputStream> FileSystem::SaveStream(const String& fileName)
 {
-	THROW_PRIMARY_EXCEPTION("Saving files as stream in this filesystem is not supported");
+	THROW("Saving files as stream in this filesystem is not supported");
 }
 
 void FileSystem::GetFileNames(std::vector<String>& fileNames) const
 {
-	THROW_PRIMARY_EXCEPTION("Getting file names in this filesystem is not supported");
+	THROW("Getting file names in this filesystem is not supported");
 }
 
 void FileSystem::GetDirectoryEntries(const String& directoryName, std::vector<String>& entries) const
 {
-	THROW_PRIMARY_EXCEPTION("Getting directory entries in this filesystem is not supported");
+	THROW("Getting directory entries in this filesystem is not supported");
 }
 
 void FileSystem::GetAllDirectoryEntries(const String& directoryName, std::vector<String>& entries) const

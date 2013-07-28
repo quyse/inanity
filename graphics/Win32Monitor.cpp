@@ -63,7 +63,7 @@ ptr<Platform::Window> Win32Monitor::CreateDefaultWindow(const String& title, int
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create window centered in Win32 monitor", exception);
+		THROW_SECONDARY("Can't create window centered in Win32 monitor", exception);
 	}
 }
 
@@ -79,7 +79,7 @@ RECT Win32Monitor::GetRect() const
 		modeInfo.dmDriverExtra = 0;
 		std::cout << deviceName << "\n";
 		if(!EnumDisplaySettingsEx(info.DeviceName, ENUM_CURRENT_SETTINGS, &modeInfo, 0))
-			THROW_PRIMARY_EXCEPTION("Can't get current mode");
+			THROW("Can't get current mode");
 
 		RECT rect;
 		rect.left = (modeInfo.dmFields & DM_POSITION) ? modeInfo.dmPosition.x : 0;
@@ -104,7 +104,7 @@ RECT Win32Monitor::GetRect() const
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't get Win32 monitor rect", exception);
+		THROW_SECONDARY("Can't get Win32 monitor rect", exception);
 	}
 }
 

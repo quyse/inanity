@@ -17,7 +17,7 @@ X11Monitor::X11Monitor(ptr<Platform::X11Display> display, const String& displayN
 
 	screen = XScreenOfDisplay(display->GetDisplay(), screenNumber);
 	if(!screen)
-		THROW_PRIMARY_EXCEPTION("Can't get screen");
+		THROW("Can't get screen");
 
 	END_TRY("Can't create X11 monitor");
 }

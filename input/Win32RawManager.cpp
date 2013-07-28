@@ -22,11 +22,11 @@ Win32RawManager::Win32RawManager(HWND hWnd) : Win32Manager(hWnd)
 		devices[1].dwFlags = 0;//RIDEV_NOLEGACY;
 		devices[1].hwndTarget = hWnd;
 		if(!RegisterRawInputDevices(devices, 2, sizeof(devices[0])))
-			THROW_PRIMARY_EXCEPTION("Can't register window to receiving raw input");
+			THROW("Can't register window to receiving raw input");
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create raw input manager", exception);
+		THROW_SECONDARY("Can't create raw input manager", exception);
 	}
 }
 

@@ -16,11 +16,11 @@ void BoneAnimationConverter::PrintHelp() const
 void BoneAnimationConverter::Run(const std::vector<String>& arguments)
 {
 	if(arguments.size() < 3)
-		THROW_PRIMARY_EXCEPTION("Must be at least 3 arguments");
+		THROW("Must be at least 3 arguments");
 
 	// считать скелет
 	if(!_wfreopen(Strings::UTF82Unicode(arguments[1]).c_str(), L"r", stdin))
-		THROW_PRIMARY_EXCEPTION("Can't open source .tskeleton file");
+		THROW("Can't open source .tskeleton file");
 	int bonesCount;
 	std::cin >> bonesCount;
 	struct Bone
@@ -71,14 +71,14 @@ void BoneAnimationConverter::Run(const std::vector<String>& arguments)
 
 	// открыть файл с текстовой анимацией
 	if(!_wfreopen(Strings::UTF82Unicode(arguments[0]).c_str(), L"r", stdin))
-		THROW_PRIMARY_EXCEPTION("Can't open source .tba file");
+		THROW("Can't open source .tba file");
 
 	StreamWriter writer(FolderFileSystem::GetNativeFileSystem()->SaveStream(arguments[2]));
 
 	int bonesCountInAnimation;
 	std::cin >> bonesCountInAnimation;
 	if(bonesCount != bonesCountInAnimation)
-		THROW_PRIMARY_EXCEPTION("Number of bones is different in animation and skeleton");
+		THROW("Number of bones is different in animation and skeleton");
 	writer.WriteShortly(bonesCount);
 
 	const float timeScale = 1.0f / 30;

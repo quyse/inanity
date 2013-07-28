@@ -44,7 +44,7 @@ height <высота текстуры>
 void SimpleGeometryCreator::Run(const std::vector<String>& arguments)
 {
 	if(arguments.size() < 3)
-		THROW_PRIMARY_EXCEPTION("Must be 3 auguments for command");
+		THROW("Must be 3 auguments for command");
 
 	ptr<FileSystem> fileSystem = FolderFileSystem::GetNativeFileSystem();
 	//открыть исходный файл
@@ -101,7 +101,7 @@ void SimpleGeometryCreator::Run(const std::vector<String>& arguments)
 			continue;
 		}
 		else
-			THROW_PRIMARY_EXCEPTION(String("Unknown field type: ") + typeStr);
+			THROW(String("Unknown field type: ") + typeStr);
 
 		vertexStride += fieldSize * field.size1 * field.size2;
 
@@ -134,7 +134,7 @@ void SimpleGeometryCreator::Run(const std::vector<String>& arguments)
 			if(!ReadField(fields[i]))
 				//если оно не первое в вершине, то это плохо
 				if(i)
-					THROW_PRIMARY_EXCEPTION("Can't read field");
+					THROW("Can't read field");
 				//иначе это нормально, просто завершить цикл
 				else
 				{
@@ -159,7 +159,7 @@ void SimpleGeometryCreator::Run(const std::vector<String>& arguments)
 				//считать три индекса
 				int a, b, c;
 				if(scanf("%d%d%d", &a, &b, &c) != 3)
-					THROW_PRIMARY_EXCEPTION("Unexpected end of file: can't read triangle");
+					THROW("Unexpected end of file: can't read triangle");
 				indices.push_back(a);
 				indices.push_back(b);
 				indices.push_back(c);
@@ -170,7 +170,7 @@ void SimpleGeometryCreator::Run(const std::vector<String>& arguments)
 				//считать 4 индекса в порядке по часовой стрелке (как и треугольник)
 				int a, b, c, d;
 				if(scanf("%d%d%d%d", &a, &b, &c, &d) != 4)
-					THROW_PRIMARY_EXCEPTION("Unexpected end of file: can't read rectangle");
+					THROW("Unexpected end of file: can't read rectangle");
 				indices.push_back(a);
 				indices.push_back(b);
 				indices.push_back(c);
@@ -188,10 +188,10 @@ void SimpleGeometryCreator::Run(const std::vector<String>& arguments)
 				gets_s(str);
 			//иначе это что-то непонятное
 			else
-				THROW_PRIMARY_EXCEPTION(String("Unknown type of index: ") + str);
+				THROW(String("Unknown type of index: ") + str);
 		}
 		if(indices.size() % 3)
-			THROW_PRIMARY_EXCEPTION("Number of indices must be divisible by 3");
+			THROW("Number of indices must be divisible by 3");
 	}
 
 	ptr<File> indicesFile;
@@ -222,7 +222,7 @@ bool SimpleGeometryCreator::ReadField(const Field& field)
 				//если он не первый в данном подполе
 				if(i)
 					//выбросить исключение
-					THROW_PRIMARY_EXCEPTION("Unexpected end of file: can't read subfield");
+					THROW("Unexpected end of file: can't read subfield");
 				//иначе он первый, то есть поле еще не началось
 				//возможно, все в порядке (если это поле - первое в вершине,
 				//но с этим разберется вызывающая функция)
@@ -248,7 +248,7 @@ bool SimpleGeometryCreator::ReadField(const Field& field)
 					{
 						float data;
 						if(sscanf(str, "%f", &data) != 1)
-							THROW_PRIMARY_EXCEPTION(String("Can't read float from ") + str);
+							THROW(String("Can't read float from ") + str);
 						switch(field.divider)
 						{
 						case 'w':
@@ -265,7 +265,7 @@ bool SimpleGeometryCreator::ReadField(const Field& field)
 					{
 						int data;
 						if(sscanf(str, "%d", &data) != 1)
-							THROW_PRIMARY_EXCEPTION(String("Can't read int from ") + str);
+							THROW(String("Can't read int from ") + str);
 						switch(field.divider)
 						{
 						case 'w':
@@ -282,7 +282,7 @@ bool SimpleGeometryCreator::ReadField(const Field& field)
 					{
 						unsigned data;
 						if(sscanf(str, "%u", &data) != 1)
-							THROW_PRIMARY_EXCEPTION(String("Can't read uint from ") + str);
+							THROW(String("Can't read uint from ") + str);
 						switch(field.divider)
 						{
 						case 'w':
@@ -296,7 +296,7 @@ bool SimpleGeometryCreator::ReadField(const Field& field)
 					}
 					break;
 				default:
-					THROW_PRIMARY_EXCEPTION("Unknown type of data");
+					THROW("Unknown type of data");
 				}
 				//считали, так что цикл надо закончить
 				break;

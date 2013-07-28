@@ -18,13 +18,13 @@ ptr<RawTextureData> BmpImageLoader::Load(ptr<File> file)
 		size_t fileSize = file->GetSize();
 
 		if(fileSize < sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER))
-			THROW_PRIMARY_EXCEPTION("Can't read headers");
+			THROW("Can't read headers");
 
 		const BITMAPFILEHEADER* bfh = (const BITMAPFILEHEADER*)fileData;
 		if(bfh->bfType != 'MB')
-			THROW_PRIMARY_EXCEPTION("Wrong signature");
+			THROW("Wrong signature");
 		if(fileSize != bfh->bfSize)
-			THROW_PRIMARY_EXCEPTION("Wrong file size");
+			THROW("Wrong file size");
 		const BITMAPINFOHEADER* bih = (const BITMAPINFOHEADER*)(bfh + 1);
 
 		int width = bih->biWidth;
@@ -33,7 +33,7 @@ ptr<RawTextureData> BmpImageLoader::Load(ptr<File> file)
 			height = -height;
 		int pitch = (width * (bih->biBitCount / 8) + 3) & ~3;
 		if(bfh->bfOffBits >= fileSize || bfh->bfOffBits + height * pitch > fileSize)
-			THROW_PRIMARY_EXCEPTION("Can't read pixel data");
+			THROW("Can't read pixel data");
 		const unsigned char* pixelData = fileData + bfh->bfOffBits;
 		int lineStep;
 		const unsigned char* lineData;
@@ -97,17 +97,17 @@ ptr<RawTextureData> BmpImageLoader::Load(ptr<File> file)
 			}
 			break;
 		default:
-			THROW_PRIMARY_EXCEPTION("Unsupported bit count");
+			THROW("Unsupported bit count");
 		}
 
 		return textureData;
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't load BMP image", exception);
+		THROW_SECONDARY("Can't load BMP image", exception);
 	}
 #else // ___INANITY_WINDOWS
-	THROW_PRIMARY_EXCEPTION("BmpImageLoader implemented only on Windows");
+	THROW("BmpImageLoader implemented only on Windows");
 #endif
 }
 

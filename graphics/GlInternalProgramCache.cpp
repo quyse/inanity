@@ -120,7 +120,7 @@ ptr<GlInternalProgram> GlInternalProgramCache::GetProgram(GlVertexShader* vertex
 			GlSystem::ClearErrors();
 
 			// выбросить ошибку
-			THROW_PRIMARY_EXCEPTION("Can't link program:\n" + log);
+			THROW("Can't link program:\n" + log);
 		}
 	}
 

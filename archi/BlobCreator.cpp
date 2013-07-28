@@ -15,7 +15,7 @@ void BlobCreator::PrintHelp() const
 void BlobCreator::Run(const std::vector<String>& arguments)
 {
 	if(arguments.size() < 2)
-		THROW_PRIMARY_EXCEPTION("Must be at least 2 arguments for command");
+		THROW("Must be at least 2 arguments for command");
 
 	fileSystem = FolderFileSystem::GetNativeFileSystem();
 	builder = NEW(BlobFileSystemBuilder(fileSystem->SaveStream(arguments[0])));

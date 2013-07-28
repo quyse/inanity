@@ -259,7 +259,7 @@ int main()
 			chat = NEW(ChatClient(service, host));
 		}
 		else
-			THROW_PRIMARY_EXCEPTION("Wrong answer");
+			THROW("Wrong answer");
 
 		ptr<Thread> thread = NEW(Thread(Thread::ThreadHandler::Bind<Processor>(NEW(Processor(service)), &Processor::Process)));
 

@@ -30,14 +30,14 @@ void X11Display::ThrowError(xcb_generic_error_t* error)
 	std::ostringstream s;
 	s << "XCB error #" << error->error_code << ' ' << error->major_code << '.' << error->minor_code;
 	XFree(error);
-	THROW_PRIMARY_EXCEPTION(s.str());
+	THROW(s.str());
 }
 
 ptr<X11Display> X11Display::Open(const char* displayName)
 {
 	::Display* display = XOpenDisplay(displayName);
 	if(!display)
-		THROW_PRIMARY_EXCEPTION("Can't open X11 display");
+		THROW("Can't open X11 display");
 
 	return NEW(X11Display(display));
 }

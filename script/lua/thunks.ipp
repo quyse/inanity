@@ -60,7 +60,7 @@ struct Caller<CalleeType, callee, void>
 	{
 		// в стеке не должно остаться аргументов
 		if(state.gotArgsCount != state.argsCount)
-			THROW_PRIMARY_EXCEPTION("Extra arguments for function call");
+			THROW("Extra arguments for function call");
 
 		// выполнить вызов
 		return Meta::Callable<CalleeType>::template Call<callee>(args);
@@ -88,7 +88,7 @@ struct ConstructorCaller<CalleeType, void>
 	{
 		// в стеке не должно остаться аргументов
 		if(state.gotArgsCount != state.argsCount)
-			THROW_PRIMARY_EXCEPTION("Extra arguments for function call");
+			THROW("Extra arguments for function call");
 
 		// выполнить вызов
 		return Meta::CallableConstructor<CalleeType>::Call(args);

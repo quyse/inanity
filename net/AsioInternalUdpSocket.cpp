@@ -62,7 +62,7 @@ void AsioInternalUdpSocket::RegisterClientSocket(const boost::asio::ip::udp::end
 	CriticalCode cc(cs);
 
 	if(clientSockets.find(endpoint) != clientSockets.end())
-		THROW_PRIMARY_EXCEPTION("This endpoint already registered");
+		THROW("This endpoint already registered");
 
 	clientSockets[endpoint] = clientSocket;
 }
@@ -75,7 +75,7 @@ void AsioInternalUdpSocket::UnregisterClientSocket(const boost::asio::ip::udp::e
 
 		ClientSockets::iterator i = clientSockets.find(endpoint);
 		if(i == clientSockets.end())
-			THROW_PRIMARY_EXCEPTION("This endpoint is not registered");
+			THROW("This endpoint is not registered");
 
 		clientSockets.erase(i);
 
@@ -104,7 +104,7 @@ void AsioInternalUdpSocket::StartReceive()
 	try
 	{
 		if(receiveFile)
-			THROW_PRIMARY_EXCEPTION("Receive already started");
+			THROW("Receive already started");
 
 		receiveFile = NEW(MemoryFile(receiveFileSize));
 
@@ -118,12 +118,12 @@ void AsioInternalUdpSocket::StartReceive()
 		}
 		catch(boost::system::system_error error)
 		{
-			THROW_SECONDARY_EXCEPTION("Asio error", AsioService::ConvertError(error));
+			THROW_SECONDARY("Asio error", AsioService::ConvertError(error));
 		}
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't start receiving Asio UDP socket", exception);
+		THROW_SECONDARY("Can't start receiving Asio UDP socket", exception);
 	}
 }
 

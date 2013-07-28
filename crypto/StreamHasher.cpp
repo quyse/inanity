@@ -90,12 +90,12 @@ void StreamHasher::VerifyStream::ReadBlock()
 		if(blockDataSize)
 		{
 			if(originalHashSize != hashSize)
-				THROW_PRIMARY_EXCEPTION("Can't read hash");
+				THROW("Can't read hash");
 		}
 		else
 		{
 			if(originalHashSize)
-				THROW_PRIMARY_EXCEPTION("Extra hash after data end");
+				THROW("Extra hash after data end");
 			// данных нет, и больше делать нечего
 			return;
 		}
@@ -109,13 +109,13 @@ void StreamHasher::VerifyStream::ReadBlock()
 
 		// сравнить его с оригинальным
 		if(memcmp(originalHash, dataHash, hashSize) != 0)
-			THROW_PRIMARY_EXCEPTION("Wrong data hash");
+			THROW("Wrong data hash");
 
 		// всё хорошо, данные можно использовать
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't read block in verify stream of stream hasher", exception);
+		THROW_SECONDARY("Can't read block in verify stream of stream hasher", exception);
 	}
 }
 

@@ -1197,7 +1197,7 @@ size_t WhirlpoolStream::GetHashSize() const
 void WhirlpoolStream::GetHash(void* data) const
 {
 	if(!ended)
-		THROW_PRIMARY_EXCEPTION("Whirlpool stream is not ended");
+		THROW("Whirlpool stream is not ended");
 	memcpy(data, digest, sizeof(digest));
 }
 

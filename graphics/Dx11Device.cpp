@@ -39,11 +39,11 @@ ptr<Presenter> Dx11Device::CreatePresenter(ptr<Output> abstractOutput, ptr<Monit
 		// область вывода - только Win32
 		ptr<Win32Output> output = abstractOutput.DynamicCast<Win32Output>();
 		if(!output)
-			THROW_PRIMARY_EXCEPTION("Only Win32 output allowed");
+			THROW("Only Win32 output allowed");
 		// режим, если есть - только DXGI
 		ptr<DxgiMonitorMode> mode = abstractMode.DynamicCast<DxgiMonitorMode>();
 		if(!mode && abstractMode)
-			THROW_PRIMARY_EXCEPTION("Only DXGI monitor mode allowed");
+			THROW("Only DXGI monitor mode allowed");
 
 		// сформировать структуру настроек swap chain
 		DXGI_SWAP_CHAIN_DESC desc;
@@ -66,7 +66,7 @@ ptr<Presenter> Dx11Device::CreatePresenter(ptr<Output> abstractOutput, ptr<Monit
 		// создать swap chain
 		IDXGISwapChain* swapChainInterface;
 		if(FAILED(system->GetDXGIFactory()->CreateSwapChain(device, &desc, &swapChainInterface)))
-			THROW_PRIMARY_EXCEPTION("Can't create swap chain");
+			THROW("Can't create swap chain");
 
 		ComPointer<IDXGISwapChain> swapChain = swapChainInterface;
 
@@ -81,7 +81,7 @@ ptr<Presenter> Dx11Device::CreatePresenter(ptr<Output> abstractOutput, ptr<Monit
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create presenter for DX device", exception);
+		THROW_SECONDARY("Can't create presenter for DX device", exception);
 	}
 }
 
@@ -105,25 +105,25 @@ ptr<RenderBuffer> Dx11Device::CreateRenderBuffer(int width, int height, PixelFor
 			desc.MiscFlags = 0;
 			HRESULT hr;
 			if(FAILED(hr = device->CreateTexture2D(&desc, 0, &bufferInterface)))
-				THROW_PRIMARY_EXCEPTION("Can't create buffer");
+				THROW("Can't create buffer");
 		}
 		ComPointer<ID3D11Texture2D> buffer = bufferInterface;
 
 		ID3D11RenderTargetView* renderTargetViewInterface;
 		if(FAILED(device->CreateRenderTargetView(buffer, 0, &renderTargetViewInterface)))
-			THROW_PRIMARY_EXCEPTION("Can't create render target view");
+			THROW("Can't create render target view");
 		ComPointer<ID3D11RenderTargetView> renderTargetView = renderTargetViewInterface;
 
 		ID3D11ShaderResourceView* shaderResourceViewInterface;
 		if(FAILED(device->CreateShaderResourceView(buffer, 0, &shaderResourceViewInterface)))
-			THROW_PRIMARY_EXCEPTION("Can't create shader resource view");
+			THROW("Can't create shader resource view");
 		ComPointer<ID3D11ShaderResourceView> shaderResourceView = shaderResourceViewInterface;
 
 		return NEW(Dx11RenderBuffer(renderTargetView, NEW(Dx11Texture(shaderResourceView))));
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create render buffer", exception);
+		THROW_SECONDARY("Can't create render buffer", exception);
 	}
 }
 
@@ -147,7 +147,7 @@ ptr<DepthStencilBuffer> Dx11Device::CreateDepthStencilBuffer(int width, int heig
 			desc.CPUAccessFlags = 0;
 			desc.MiscFlags = 0;
 			if(FAILED(device->CreateTexture2D(&desc, 0, &bufferInterface)))
-				THROW_PRIMARY_EXCEPTION("Can't create buffer");
+				THROW("Can't create buffer");
 			buffer = bufferInterface;
 		}
 
@@ -160,7 +160,7 @@ ptr<DepthStencilBuffer> Dx11Device::CreateDepthStencilBuffer(int width, int heig
 			desc.Flags = 0;
 			desc.Texture2D.MipSlice = 0;
 			if(FAILED(device->CreateDepthStencilView(buffer, &desc, &depthStencilViewInterface)))
-				THROW_PRIMARY_EXCEPTION("Can't create depth stencil view");
+				THROW("Can't create depth stencil view");
 			depthStencilView = depthStencilViewInterface;
 		}
 
@@ -174,7 +174,7 @@ ptr<DepthStencilBuffer> Dx11Device::CreateDepthStencilBuffer(int width, int heig
 			desc.Texture2D.MostDetailedMip = 0;
 			desc.Texture2D.MipLevels = 1;
 			if(FAILED(device->CreateShaderResourceView(buffer, &desc, &shaderResourceViewInterface)))
-				THROW_PRIMARY_EXCEPTION("Can't create shader resource view");
+				THROW("Can't create shader resource view");
 			shaderResourceView = shaderResourceViewInterface;
 			return NEW(Dx11DepthStencilBuffer(depthStencilView, NEW(Dx11Texture(shaderResourceView))));
 		}
@@ -183,7 +183,7 @@ ptr<DepthStencilBuffer> Dx11Device::CreateDepthStencilBuffer(int width, int heig
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create depth stencil buffer", exception);
+		THROW_SECONDARY("Can't create depth stencil buffer", exception);
 	}
 }
 
@@ -196,13 +196,13 @@ ptr<VertexShader> Dx11Device::CreateVertexShader(ptr<File> file)
 
 		ID3D11VertexShader* shader;
 		if(FAILED(device->CreateVertexShader(code->GetData(), code->GetSize(), NULL, &shader)))
-			THROW_PRIMARY_EXCEPTION("Can't create DirectX 11 vertex shader");
+			THROW("Can't create DirectX 11 vertex shader");
 
 		return NEW(Dx11VertexShader(code, shader, compiledShader->GetResources()));
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create vertex shader", exception);
+		THROW_SECONDARY("Can't create vertex shader", exception);
 	}
 }
 
@@ -215,13 +215,13 @@ ptr<PixelShader> Dx11Device::CreatePixelShader(ptr<File> file)
 
 		ID3D11PixelShader* shader;
 		if(FAILED(device->CreatePixelShader(code->GetData(), code->GetSize(), NULL, &shader)))
-			THROW_PRIMARY_EXCEPTION("Can't create DirectX 11 pixel shader");
+			THROW("Can't create DirectX 11 pixel shader");
 
 		return NEW(Dx11PixelShader(shader, compiledShader->GetResources()));
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create pixel shader", exception);
+		THROW_SECONDARY("Can't create pixel shader", exception);
 	}
 }
 
@@ -244,12 +244,12 @@ ptr<UniformBuffer> Dx11Device::CreateUniformBuffer(int size)
 		desc.StructureByteStride = 0;
 		ID3D11Buffer* buffer;
 		if(FAILED(device->CreateBuffer(&desc, NULL, &buffer)))
-			THROW_PRIMARY_EXCEPTION("Can't create buffer");
+			THROW("Can't create buffer");
 		return NEW(Dx11UniformBuffer(buffer, size));
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create uniform buffer", exception);
+		THROW_SECONDARY("Can't create uniform buffer", exception);
 	}
 }
 
@@ -270,13 +270,13 @@ ptr<VertexBuffer> Dx11Device::CreateStaticVertexBuffer(ptr<File> file, ptr<Verte
 
 		ID3D11Buffer* vertexBufferInterface;
 		if(FAILED(device->CreateBuffer(&desc, &data, &vertexBufferInterface)))
-			THROW_PRIMARY_EXCEPTION("Can't create vertex buffer");
+			THROW("Can't create vertex buffer");
 
 		return NEW(Dx11VertexBuffer(vertexBufferInterface, file->GetSize() / layout->GetStride(), layout));
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create DirectX 11 static vertex buffer", exception);
+		THROW_SECONDARY("Can't create DirectX 11 static vertex buffer", exception);
 	}
 }
 
@@ -294,13 +294,13 @@ ptr<VertexBuffer> Dx11Device::CreateDynamicVertexBuffer(int size, ptr<VertexLayo
 
 		ID3D11Buffer* vertexBufferInterface;
 		if(FAILED(device->CreateBuffer(&desc, NULL, &vertexBufferInterface)))
-			THROW_PRIMARY_EXCEPTION("Can't create vertex buffer");
+			THROW("Can't create vertex buffer");
 
 		return NEW(Dx11VertexBuffer(vertexBufferInterface, size / layout->GetStride(), layout));
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create DirectX 11 dynamic vertex buffer", exception);
+		THROW_SECONDARY("Can't create DirectX 11 dynamic vertex buffer", exception);
 	}
 }
 
@@ -321,13 +321,13 @@ ptr<IndexBuffer> Dx11Device::CreateStaticIndexBuffer(ptr<File> file, int indexSi
 
 		ID3D11Buffer* indexBufferInterface;
 		if(FAILED(device->CreateBuffer(&desc, &data, &indexBufferInterface)))
-			THROW_PRIMARY_EXCEPTION("Can't create index buffer");
+			THROW("Can't create index buffer");
 
 		return NEW(Dx11IndexBuffer(indexBufferInterface, file->GetSize() / indexSize, indexSize));
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create index buffer", exception);
+		THROW_SECONDARY("Can't create index buffer", exception);
 	}
 }
 
@@ -341,7 +341,7 @@ ptr<AttributeBinding> Dx11Device::CreateAttributeBinding(ptr<AttributeLayout> la
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create DX attribute binding", exception);
+		THROW_SECONDARY("Can't create DX attribute binding", exception);
 	}
 }
 
@@ -363,7 +363,7 @@ ptr<Texture> Dx11Device::CreateStaticTexture(ptr<RawTextureData> data)
 		{
 			// 3D arrays are not supported
 			if(data->GetCount())
-				THROW_PRIMARY_EXCEPTION("Arrays of 3D textures are not supported");
+				THROW("Arrays of 3D textures are not supported");
 
 			{
 				// create texture and upload data
@@ -389,7 +389,7 @@ ptr<Texture> Dx11Device::CreateStaticTexture(ptr<RawTextureData> data)
 
 				ID3D11Texture3D* textureInterface;
 				if(FAILED(device->CreateTexture3D(&desc, &*dataDescs.begin(), &textureInterface)))
-					THROW_PRIMARY_EXCEPTION("Can't create texture 3D");
+					THROW("Can't create texture 3D");
 				resource = textureInterface;
 			}
 
@@ -429,7 +429,7 @@ ptr<Texture> Dx11Device::CreateStaticTexture(ptr<RawTextureData> data)
 
 				ID3D11Texture2D* textureInterface;
 				if(FAILED(device->CreateTexture2D(&desc, &*dataDescs.begin(), &textureInterface)))
-					THROW_PRIMARY_EXCEPTION("Can't create texture 2D");
+					THROW("Can't create texture 2D");
 				resource = textureInterface;
 			}
 
@@ -477,7 +477,7 @@ ptr<Texture> Dx11Device::CreateStaticTexture(ptr<RawTextureData> data)
 
 				ID3D11Texture1D* textureInterface;
 				if(FAILED(device->CreateTexture1D(&desc, &*dataDescs.begin(), &textureInterface)))
-					THROW_PRIMARY_EXCEPTION("Can't create texture 1D");
+					THROW("Can't create texture 1D");
 				resource = textureInterface;
 			}
 
@@ -501,13 +501,13 @@ ptr<Texture> Dx11Device::CreateStaticTexture(ptr<RawTextureData> data)
 
 		ID3D11ShaderResourceView* shaderResourceViewInterface;
 		if(FAILED(device->CreateShaderResourceView(resource, &srvDesc, &shaderResourceViewInterface)))
-			THROW_PRIMARY_EXCEPTION("Can't create shader resource view");
+			THROW("Can't create shader resource view");
 
 		return NEW(Dx11Texture(shaderResourceViewInterface));
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create static DirectX 11 texture", exception);
+		THROW_SECONDARY("Can't create static DirectX 11 texture", exception);
 	}
 }
 

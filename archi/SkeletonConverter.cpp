@@ -27,10 +27,10 @@ void dfs(const std::vector<std::vector<int> >& h, int i)
 void SkeletonConverter::Run(const std::vector<String>& arguments)
 {
 	if(arguments.size() < 2)
-		THROW_PRIMARY_EXCEPTION("Must be at least 2 arguments");
+		THROW("Must be at least 2 arguments");
 
 	if(!_wfreopen(Strings::UTF82Unicode(arguments[0]).c_str(), L"r", stdin))
-		THROW_PRIMARY_EXCEPTION("Can't open source file");
+		THROW("Can't open source file");
 
 	StreamWriter writer(FolderFileSystem::GetNativeFileSystem()->SaveStream(arguments[1]));
 

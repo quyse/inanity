@@ -12,11 +12,11 @@ DxgiAdapter::DxgiAdapter(ComPointer<IDXGIAdapter> adapter)
 	try
 	{
 		if(FAILED(adapter->GetDesc(&desc)))
-			THROW_PRIMARY_EXCEPTION("Can't get adapter desc");
+			THROW("Can't get adapter desc");
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create DXGI Adapter", exception);
+		THROW_SECONDARY("Can't create DXGI Adapter", exception);
 	}
 }
 
@@ -46,14 +46,14 @@ const std::vector<ptr<Monitor> >& DxgiAdapter::GetMonitors()
 				else if(hr == DXGI_ERROR_NOT_FOUND)
 					break;
 				else
-					THROW_PRIMARY_EXCEPTION("Error enumerating outputs");
+					THROW("Error enumerating outputs");
 			}
 
 			monitorsInitialized = true;
 		}
 		catch(Exception* exception)
 		{
-			THROW_SECONDARY_EXCEPTION("Can't get monitors of DXGI adapter", exception);
+			THROW_SECONDARY("Can't get monitors of DXGI adapter", exception);
 		}
 
 	return monitors;

@@ -49,7 +49,7 @@ void Base64OutputStream::WriteDecode(unsigned char byte)
 		ProcessDecodeBuffer();
 	}
 	else
-		THROW_PRIMARY_EXCEPTION("Invalid byte");
+		THROW("Invalid byte");
 }
 
 void Base64OutputStream::ProcessEncodeBuffer()
@@ -116,7 +116,7 @@ void Base64OutputStream::ProcessDecodeBuffer()
 void Base64OutputStream::Write(const void* data, size_t size)
 {
 	if(flushed)
-		THROW_PRIMARY_EXCEPTION("Can't write to flushed base64 output stream");
+		THROW("Can't write to flushed base64 output stream");
 
 	const unsigned char* bytes = (const unsigned char*)data;
 	if(encoding)

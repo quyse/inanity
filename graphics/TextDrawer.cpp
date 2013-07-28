@@ -146,7 +146,7 @@ struct TextDrawerHelper : public Object
 		}
 		catch(Exception* exception)
 		{
-			THROW_SECONDARY_EXCEPTION("Can't create text drawer helper", exception);
+			THROW_SECONDARY("Can't create text drawer helper", exception);
 		}
 	}
 };

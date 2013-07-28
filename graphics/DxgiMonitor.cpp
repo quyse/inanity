@@ -13,11 +13,11 @@ DxgiMonitor::DxgiMonitor(ComPointer<IDXGIOutput> output)
 	try
 	{
 		if(FAILED(output->GetDesc(&desc)))
-			THROW_PRIMARY_EXCEPTION("Can't get desc");
+			THROW("Can't get desc");
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create DXGI monitor", exception);
+		THROW_SECONDARY("Can't create DXGI monitor", exception);
 	}
 }
 
@@ -40,10 +40,10 @@ const std::vector<ptr<MonitorMode> >& DxgiMonitor::GetModes()
 		{
 			UINT modesCount;
 			if(FAILED(output->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, 0, &modesCount, NULL)))
-				THROW_PRIMARY_EXCEPTION("Can't get modes count");
+				THROW("Can't get modes count");
 			std::vector<DXGI_MODE_DESC> modeDescs(modesCount);
 			if(FAILED(output->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, 0, &modesCount, &*modeDescs.begin())))
-				THROW_PRIMARY_EXCEPTION("Can't get modes");
+				THROW("Can't get modes");
 			for(UINT i = 0; i < modesCount; ++i)
 				modes.push_back(NEW(DxgiMonitorMode(modeDescs[i])));
 
@@ -51,7 +51,7 @@ const std::vector<ptr<MonitorMode> >& DxgiMonitor::GetModes()
 		}
 		catch(Exception* exception)
 		{
-			THROW_SECONDARY_EXCEPTION("Can't get modes of DXGI monitor", exception);
+			THROW_SECONDARY("Can't get modes of DXGI monitor", exception);
 		}
 
 	return modes;
@@ -76,7 +76,7 @@ ptr<MonitorMode> DxgiMonitor::TryCreateMode(int width, int height)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create DXGI mode", exception);
+		THROW_SECONDARY("Can't create DXGI mode", exception);
 	}
 }
 
@@ -94,7 +94,7 @@ ptr<Platform::Window> DxgiMonitor::CreateDefaultWindow(const String& title, int 
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create window centered in DXGI monitor", exception);
+		THROW_SECONDARY("Can't create window centered in DXGI monitor", exception);
 	}
 }
 
@@ -105,12 +105,12 @@ RECT DxgiMonitor::GetRect() const
 		MONITORINFO info;
 		info.cbSize = sizeof(info);
 		if(!GetMonitorInfo(desc.Monitor, &info))
-			THROW_PRIMARY_EXCEPTION("Can't get monitor info");
+			THROW("Can't get monitor info");
 		return info.rcMonitor;
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't get DXGI monitor rect", exception);
+		THROW_SECONDARY("Can't get DXGI monitor rect", exception);
 	}
 }
 

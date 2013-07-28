@@ -41,7 +41,7 @@ FolderFileSystem::FolderFileSystem(const String& userFolderName)
 		if(!GetCurrentDirectory(length, buffer))
 		{
 			delete [] buffer;
-			THROW_PRIMARY_EXCEPTION("Can't get current directory");
+			THROW("Can't get current directory");
 		}
 		folderName = Strings::Unicode2UTF8(buffer);
 		delete [] buffer;
@@ -81,15 +81,15 @@ size_t FolderFileSystem::GetFileSize(const String& fileName)
 {
 	Handle hFile = CreateFile(Strings::UTF82Unicode(GetFullName(fileName)).c_str(), FILE_READ_ATTRIBUTES, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
 	if(!hFile.IsValid())
-		THROW_PRIMARY_EXCEPTION("Can't open file to determine file size");
+		THROW("Can't open file to determine file size");
 
 	LARGE_INTEGER size;
 	if(!::GetFileSizeEx(hFile, &size))
-		THROW_PRIMARY_EXCEPTION("Can't get file size");
+		THROW("Can't get file size");
 
 	size_t resultSize = (size_t)size.QuadPart;
 	if(resultSize != size.QuadPart)
-		THROW_PRIMARY_EXCEPTION("File is too big");
+		THROW("File is too big");
 	
 	return resultSize;
 }
@@ -101,7 +101,7 @@ ptr<File> FolderFileSystem::LoadPartOfFile(const String& fileName, long long map
 	{
 		Handle hFile = CreateFile(Strings::UTF82Unicode(name).c_str(), GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, NULL);
 		if(!hFile.IsValid())
-			THROW_SECONDARY_EXCEPTION("Can't open file", Exception::SystemError());
+			THROW_SECONDARY("Can't open file", Exception::SystemError());
 		size_t size;
 		if(mappingSize)
 			size = mappingSize;
@@ -111,13 +111,13 @@ ptr<File> FolderFileSystem::LoadPartOfFile(const String& fileName, long long map
 			::GetFileSizeEx(hFile, &li);
 			size = (size_t)li.QuadPart;
 			if(size != li.QuadPart)
-				THROW_PRIMARY_EXCEPTION("File too long to map");
+				THROW("File too long to map");
 		}
 		if(!size)
 			return NEW(EmptyFile());
 		Handle hMapping = CreateFileMapping(hFile, 0, PAGE_READONLY, 0, 0, 0);
 		if(!hMapping)
-			THROW_SECONDARY_EXCEPTION("Can't create file mapping", Exception::SystemError());
+			THROW_SECONDARY("Can't create file mapping", Exception::SystemError());
 
 		//получить гранулярность выделения памяти
 		static unsigned allocationGranularity = 0;
@@ -135,7 +135,7 @@ ptr<File> FolderFileSystem::LoadPartOfFile(const String& fileName, long long map
 		//спроецировать файл с учетом этого сдвига
 		void* data = MapViewOfFile(hMapping, FILE_MAP_READ, realMappingStart >> 32, realMappingStart & ((1LL << 32) - 1), realMappingSize);
 		if(!data)
-			THROW_SECONDARY_EXCEPTION("Can't map view of file", Exception::SystemError());
+			THROW_SECONDARY("Can't map view of file", Exception::SystemError());
 
 		//если сдвиг был
 		if(realMappingStart < mappingStart)
@@ -146,7 +146,7 @@ ptr<File> FolderFileSystem::LoadPartOfFile(const String& fileName, long long map
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't load file \"" + fileName + "\" as \"" + name + "\"", exception);
+		THROW_SECONDARY("Can't load file \"" + fileName + "\" as \"" + name + "\"", exception);
 	}
 }
 
@@ -157,17 +157,17 @@ void FolderFileSystem::SaveFile(ptr<File> file, const String& fileName)
 	{
 		Handle hFile = CreateFile(Strings::UTF82Unicode(name).c_str(), GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, NULL);
 		if(!hFile.IsValid())
-			THROW_SECONDARY_EXCEPTION("Can't create file", Exception::SystemError());
+			THROW_SECONDARY("Can't create file", Exception::SystemError());
 		DWORD written;
 		size_t size = file->GetSize();
 		if((DWORD)size != size)
-			THROW_PRIMARY_EXCEPTION("So big files is not supported");
+			THROW("So big files is not supported");
 		if(!WriteFile(hFile, file->GetData(), (DWORD)size, &written, NULL) || written != size)
-			THROW_SECONDARY_EXCEPTION("Can't write file", Exception::SystemError());
+			THROW_SECONDARY("Can't write file", Exception::SystemError());
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION(String("Can't save file \"") + fileName + "\" as \"" + name + "\"", exception);
+		THROW_SECONDARY(String("Can't save file \"") + fileName + "\" as \"" + name + "\"", exception);
 	}
 }
 
@@ -178,12 +178,12 @@ ptr<InputStream> FolderFileSystem::LoadStream(const String& fileName)
 	{
 		ptr<Handle> file = NEW(Handle(CreateFile(Strings::UTF82Unicode(name).c_str(), GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL)));
 		if(!file->IsValid())
-			THROW_SECONDARY_EXCEPTION("Can't open file", Exception::SystemError());
+			THROW_SECONDARY("Can't open file", Exception::SystemError());
 		return NEW(DiskInputStream(file));
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION(String("Can't load file \"") + fileName + "\" as \"" + name + "\" as stream", exception);
+		THROW_SECONDARY(String("Can't load file \"") + fileName + "\" as \"" + name + "\" as stream", exception);
 	}
 }
 
@@ -194,12 +194,12 @@ ptr<OutputStream> FolderFileSystem::SaveStream(const String& fileName)
 	{
 		ptr<Handle> file = NEW(Handle(CreateFile(Strings::UTF82Unicode(name).c_str(), GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, NULL)));
 		if(!file->IsValid())
-			THROW_SECONDARY_EXCEPTION("Can't open file", Exception::SystemError());
+			THROW_SECONDARY("Can't open file", Exception::SystemError());
 		return NEW(DiskOutputStream(file));
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION(String("Can't save file \"") + fileName + "\" as \"" + name + "\" as stream", exception);
+		THROW_SECONDARY(String("Can't save file \"") + fileName + "\" as \"" + name + "\" as stream", exception);
 	}
 }
 
@@ -249,7 +249,7 @@ FolderFileSystem::FolderFileSystem(const String& userFolderName)
 		//получить полное имя текущего каталога
 		char* currentDirectory = getcwd(0, 0);
 		if(!currentDirectory)
-			THROW_PRIMARY_EXCEPTION("Can't get current directory");
+			THROW("Can't get current directory");
 		folderName = currentDirectory;
 		free(currentDirectory);
 
@@ -279,7 +279,7 @@ size_t FolderFileSystem::GetFileSize(const String& fileName)
 {
 	struct stat st;
 	if(stat(fileName.c_str(), &st) != 0)
-		THROW_PRIMARY_EXCEPTION("Can't determine file size");
+		THROW("Can't determine file size");
 
 	return st.st_size;
 }
@@ -291,7 +291,7 @@ ptr<File> FolderFileSystem::LoadPartOfFile(const String& fileName, long long map
 	{
 		int fd = open(name.c_str(), O_RDONLY, 0);
 		if(fd < 0)
-			THROW_SECONDARY_EXCEPTION("Can't open file", Exception::SystemError());
+			THROW_SECONDARY("Can't open file", Exception::SystemError());
 		size_t size;
 		if(mappingSize)
 			size = mappingSize;
@@ -299,7 +299,7 @@ ptr<File> FolderFileSystem::LoadPartOfFile(const String& fileName, long long map
 		{
 			struct stat st;
 			if(fstat(fd, &st) < 0)
-				THROW_SECONDARY_EXCEPTION("Can't get file size", Exception::SystemError());
+				THROW_SECONDARY("Can't get file size", Exception::SystemError());
 			size = st.st_size;
 		}
 		if(!size)
@@ -317,7 +317,7 @@ ptr<File> FolderFileSystem::LoadPartOfFile(const String& fileName, long long map
 		//спроецировать файл с учетом этого сдвига
 		void* data = mmap(0, realMappingSize, PROT_READ, MAP_PRIVATE, fd, realMappingStart);
 		if(data == (caddr_t)-1)
-			THROW_SECONDARY_EXCEPTION("Can't map file", Exception::SystemError());
+			THROW_SECONDARY("Can't map file", Exception::SystemError());
 
 		//если сдвиг был
 		if(realMappingStart < (unsigned long long)mappingStart)
@@ -328,7 +328,7 @@ ptr<File> FolderFileSystem::LoadPartOfFile(const String& fileName, long long map
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't load file \"" + fileName + "\" as \"" + name + "\"", exception);
+		THROW_SECONDARY("Can't load file \"" + fileName + "\" as \"" + name + "\"", exception);
 	}
 }
 
@@ -339,7 +339,7 @@ void FolderFileSystem::SaveFile(ptr<File> file, const String& fileName)
 	{
 		int fd = open(fileName.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0644);
 		if(fd < 0)
-			THROW_SECONDARY_EXCEPTION("Can't open file", Exception::SystemError());
+			THROW_SECONDARY("Can't open file", Exception::SystemError());
 
 		const char* data = (const char*)file->GetData();
 		size_t size = file->GetSize();
@@ -351,7 +351,7 @@ void FolderFileSystem::SaveFile(ptr<File> file, const String& fileName)
 			{
 				ptr<Exception> exception = Exception::SystemError();
 				close(fd);
-				THROW_SECONDARY_EXCEPTION("Can't write file", exception);
+				THROW_SECONDARY("Can't write file", exception);
 			}
 			size -= written;
 			data += written;
@@ -360,7 +360,7 @@ void FolderFileSystem::SaveFile(ptr<File> file, const String& fileName)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION(String("Can't save file \"") + fileName + "\" as \"" + name + "\"", exception);
+		THROW_SECONDARY(String("Can't save file \"") + fileName + "\" as \"" + name + "\"", exception);
 	}
 }
 
@@ -371,12 +371,12 @@ ptr<InputStream> FolderFileSystem::LoadStream(const String& fileName)
 	{
 		int fd = open(name.c_str(), O_RDONLY, 0);
 		if(fd < 0)
-			THROW_SECONDARY_EXCEPTION("Can't open file", Exception::SystemError());
+			THROW_SECONDARY("Can't open file", Exception::SystemError());
 		return NEW(DiskInputStream(NEW(Handle(fd))));
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION(String("Can't load file \"") + fileName + "\" as \"" + name + "\" as stream", exception);
+		THROW_SECONDARY(String("Can't load file \"") + fileName + "\" as \"" + name + "\" as stream", exception);
 	}
 }
 
@@ -387,12 +387,12 @@ ptr<OutputStream> FolderFileSystem::SaveStream(const String& fileName)
 	{
 		int fd = open(fileName.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0644);
 		if(fd < 0)
-			THROW_SECONDARY_EXCEPTION("Can't open file", Exception::SystemError());
+			THROW_SECONDARY("Can't open file", Exception::SystemError());
 		return NEW(DiskOutputStream(NEW(Handle(fd))));
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION(String("Can't save file \"") + fileName + "\" as \"" + name + "\" as stream", exception);
+		THROW_SECONDARY(String("Can't save file \"") + fileName + "\" as \"" + name + "\" as stream", exception);
 	}
 }
 
@@ -407,7 +407,7 @@ void FolderFileSystem::GetDirectoryEntries(const String& directoryName, std::vec
 		{
 			ptr<Exception> exception = Exception::SystemError();
 			closedir(dir);
-			THROW_SECONDARY_EXCEPTION("Can't read dir", exception);
+			THROW_SECONDARY("Can't read dir", exception);
 		}
 
 		String fileTitle = ent->d_name;
@@ -417,7 +417,7 @@ void FolderFileSystem::GetDirectoryEntries(const String& directoryName, std::vec
 		{
 			ptr<Exception> exception = Exception::SystemError();
 			closedir(dir);
-			THROW_SECONDARY_EXCEPTION("Can't stat file " + fullFileName, exception);
+			THROW_SECONDARY("Can't stat file " + fullFileName, exception);
 		}
 
 		// если файл скрыт (или ненужен: . или ..)

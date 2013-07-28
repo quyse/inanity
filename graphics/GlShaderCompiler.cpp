@@ -13,7 +13,7 @@ ptr<File> GlShaderCompiler::Compile(ptr<ShaderSource> shaderSource)
 		// получить код на GLSL
 		ptr<GlslSource> glslSource = shaderSource.FastCast<GlslSource>();
 		if(!glslSource)
-			THROW_PRIMARY_EXCEPTION("Shader source is not GLSL");
+			THROW("Shader source is not GLSL");
 
 		// сериализуем исходник шейдера в файл
 		ptr<MemoryStream> stream = NEW(MemoryStream());
@@ -22,7 +22,7 @@ ptr<File> GlShaderCompiler::Compile(ptr<ShaderSource> shaderSource)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't compile GLSL shader source", exception);
+		THROW_SECONDARY("Can't compile GLSL shader source", exception);
 	}
 }
 

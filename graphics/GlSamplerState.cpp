@@ -27,7 +27,7 @@ GLint GlSamplerState::ConvertWrap(Wrap wrap)
 	case wrapBorder:
 		return GL_CLAMP_TO_BORDER;
 	}
-	THROW_PRIMARY_EXCEPTION("Invalid wrap mode");
+	THROW("Invalid wrap mode");
 }
 
 GLuint GlSamplerState::GetName()
@@ -91,7 +91,7 @@ void GlSamplerState::Update()
 					break;
 				}
 			if(filterParam == -1)
-				THROW_PRIMARY_EXCEPTION("Invalid min or mip filter param");
+				THROW("Invalid min or mip filter param");
 			glSamplerParameteri(samplerName, GL_TEXTURE_MIN_FILTER, filterParam);
 			GlSystem::CheckErrors("Can't set texture min filter");
 		}
@@ -111,7 +111,7 @@ void GlSamplerState::Update()
 				break;
 			}
 			if(filterParam == -1)
-				THROW_PRIMARY_EXCEPTION("Invalid mag filter param");
+				THROW("Invalid mag filter param");
 			glSamplerParameteri(samplerName, GL_TEXTURE_MAG_FILTER, filterParam);
 			GlSystem::CheckErrors("Can't set texture mag filter");
 		}
@@ -138,7 +138,7 @@ void GlSamplerState::Update()
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't update OpenGL sampler", exception);
+		THROW_SECONDARY("Can't update OpenGL sampler", exception);
 	}
 }
 

@@ -79,11 +79,11 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 		// область вывода - только Win32
 		ptr<Win32Output> output = abstractOutput.DynamicCast<Win32Output>();
 		if(!output)
-			THROW_PRIMARY_EXCEPTION("Only Win32 output allowed");
+			THROW("Only Win32 output allowed");
 		// режим экрана - только Win32
 		ptr<Win32MonitorMode> mode = abstractMode.DynamicCast<Win32MonitorMode>();
 		if(!mode && abstractMode)
-			THROW_PRIMARY_EXCEPTION("Only Win32 monitor mode allowed");
+			THROW("Only Win32 monitor mode allowed");
 
 		// если режим полноэкранный, переключить его
 		if(mode)
@@ -91,20 +91,20 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 			// получить монитор окна
 			HMONITOR monitor = MonitorFromWindow(output->GetHWND(), MONITOR_DEFAULTTOPRIMARY);
 			if(!monitor)
-				THROW_PRIMARY_EXCEPTION("Can't get window monitor");
+				THROW("Can't get window monitor");
 			MONITORINFOEX monitorInfo;
 			monitorInfo.cbSize = sizeof(monitorInfo);
 			if(!GetMonitorInfo(monitor, &monitorInfo))
-				THROW_PRIMARY_EXCEPTION("Can't get monitor info");
+				THROW("Can't get monitor info");
 			DEVMODE modeInfo = mode->GetInfo();
 			if(ChangeDisplaySettingsEx(monitorInfo.szDevice, &modeInfo, NULL, CDS_FULLSCREEN, NULL) != DISP_CHANGE_SUCCESSFUL)
-				THROW_PRIMARY_EXCEPTION("Can't change display settings");
+				THROW("Can't change display settings");
 		}
 
 		// получить дескриптор окна
 		HDC hdc = GetDC(output->GetHWND());
 		if(!hdc)
-			THROW_PRIMARY_EXCEPTION("Can't get hdc");
+			THROW("Can't get hdc");
 
 		// подобрать формат пикселов
 		PIXELFORMATDESCRIPTOR pfd;
@@ -118,16 +118,16 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 		pfd.iLayerType = PFD_MAIN_PLANE;
 		int pixelFormat = ChoosePixelFormat(hdc, &pfd);
 		if(!pixelFormat)
-			THROW_PRIMARY_EXCEPTION("Can't choose pixel format");
+			THROW("Can't choose pixel format");
 		// и установить этот формат
 		if(!SetPixelFormat(hdc, pixelFormat, &pfd))
-			THROW_PRIMARY_EXCEPTION("Can't set pixel format");
+			THROW("Can't set pixel format");
 
 		// создать временный контекст
 		HGLRC hglrcTemp = wglCreateContext(hdc);
 		// сделать его текущим
 		if(!wglMakeCurrent(hdc, hglrcTemp))
-			THROW_SECONDARY_EXCEPTION("Can't make temp OpenGL context current", Exception::SystemError());
+			THROW_SECONDARY("Can't make temp OpenGL context current", Exception::SystemError());
 
 		// создать настоящий контекст
 		int attribs[] =
@@ -154,7 +154,7 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 		};
 		PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
 		if(!wglCreateContextAttribsARB)
-			THROW_PRIMARY_EXCEPTION("Can't get wglCreateContextAttribsARB");
+			THROW("Can't get wglCreateContextAttribsARB");
 		// цикл по попыткам создать контекст для какой-нибудь версии
 		for(int i = 0; i < sizeof(versions) / sizeof(versions[0]); ++i)
 		{
@@ -166,11 +166,11 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 		}
 		// если никакая версия OpenGL не поддерживается, то жопа
 		if(!hglrc)
-			THROW_PRIMARY_EXCEPTION("Can't create OpenGL window context");
+			THROW("Can't create OpenGL window context");
 
 		// сделать новый контекст текущим
 		if(!wglMakeCurrent(hdc, hglrc))
-			THROW_SECONDARY_EXCEPTION("Can't make OpenGL context current", Exception::SystemError());
+			THROW_SECONDARY("Can't make OpenGL context current", Exception::SystemError());
 
 		// удалить временный контекст
 		wglDeleteContext(hglrcTemp);
@@ -190,7 +190,7 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 		// only X11Output allowed
 		ptr<X11Output> output = abstractOutput.DynamicCast<X11Output>();
 		if(!output)
-			THROW_PRIMARY_EXCEPTION("Only X11 output is allowed");
+			THROW("Only X11 output is allowed");
 
 		ptr<Platform::X11Window> window = output->GetWindow();
 
@@ -218,7 +218,7 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 
 #define GETPROC(fnType, fn) \
 		fnType fn = (fnType)glXGetProcAddress((const GLubyte*)#fn); \
-		if(!fn) THROW_PRIMARY_EXCEPTION("Can't get " #fn)
+		if(!fn) THROW("Can't get " #fn)
 
 		GETPROC(PFNGLXCHOOSEFBCONFIGPROC, glXChooseFBConfig);
 		GETPROC(PFNGLXGETFBCONFIGATTRIBPROC, glXGetFBConfigAttrib);
@@ -233,7 +233,7 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 			&fbConfigsCount
 		);
 		if(!fbConfigs || !fbConfigsCount)
-			THROW_PRIMARY_EXCEPTION("Can't get FB configs");
+			THROW("Can't get FB configs");
 
 		// select first config
 		GLXFBConfig fbConfig = fbConfigs[0];
@@ -245,7 +245,7 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 		// create temp old-style context
 		GLXContext tempGlxContext = glXCreateContext(xDisplay, xVisualInfo, 0, True);
 		if(!tempGlxContext)
-			THROW_PRIMARY_EXCEPTION("Can't create temp context");
+			THROW("Can't create temp context");
 		// make it current
 		glXMakeCurrent(xDisplay, window->GetHandle(), tempGlxContext);
 
@@ -292,7 +292,7 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 
 		// if no version of OpenGL supported, this is end
 		if(!glxContext)
-			THROW_PRIMARY_EXCEPTION("Can't create OpenGL context");
+			THROW("Can't create OpenGL context");
 
 		GETPROC(PFNGLXCREATEWINDOWPROC, glXCreateWindow);
 		GETPROC(PFNGLXMAKECONTEXTCURRENTPROC, glXMakeContextCurrent);
@@ -302,14 +302,14 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 		if(!glxWindow)
 		{
 			glXDestroyContext(xDisplay, glxContext);
-			THROW_PRIMARY_EXCEPTION("Can't create GLX window");
+			THROW("Can't create GLX window");
 		}
 
 		// make OpenGL context current
 		if(!glXMakeContextCurrent(xDisplay, glxWindow, glxWindow, glxContext))
 		{
 			glXDestroyContext(xDisplay, glxContext);
-			THROW_PRIMARY_EXCEPTION("Can't make context current");
+			THROW("Can't make context current");
 		}
 
 		GlSystem::InitGLEW();
@@ -321,7 +321,7 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create presenter for GL device", exception);
+		THROW_SECONDARY("Can't create presenter for GL device", exception);
 	}
 }
 
@@ -340,7 +340,7 @@ ptr<RenderBuffer> GlDevice::CreateRenderBuffer(int width, int height, PixelForma
 		GLenum format;
 		GLenum type;
 		if(!GlSystem::GetTextureFormat(pixelFormat, internalFormat, format, type))
-			THROW_PRIMARY_EXCEPTION("Invalid pixel format");
+			THROW("Invalid pixel format");
 		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, (GLsizei)width, (GLsizei)height, 0, format, type, 0);
 		GlSystem::CheckErrors("Can't initialize texture");
 
@@ -355,7 +355,7 @@ ptr<RenderBuffer> GlDevice::CreateRenderBuffer(int width, int height, PixelForma
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create render buffer", exception);
+		THROW_SECONDARY("Can't create render buffer", exception);
 	}
 }
 
@@ -384,7 +384,7 @@ ptr<DepthStencilBuffer> GlDevice::CreateDepthStencilBuffer(int width, int height
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create depth stencil buffer", exception);
+		THROW_SECONDARY("Can't create depth stencil buffer", exception);
 	}
 }
 
@@ -421,7 +421,7 @@ void GlDevice::CompileShader(GLuint shaderName, ptr<File> file, ptr<GlShaderBind
 			GlSystem::ClearErrors();
 
 			// выбросить ошибку
-			THROW_PRIMARY_EXCEPTION("Can't compile shader:\n" + Strings::File2String(code) + "\n" + log);
+			THROW("Can't compile shader:\n" + Strings::File2String(code) + "\n" + log);
 		}
 	}
 }
@@ -440,7 +440,7 @@ ptr<VertexShader> GlDevice::CreateVertexShader(ptr<File> file)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create vertex shader", exception);
+		THROW_SECONDARY("Can't create vertex shader", exception);
 	}
 }
 
@@ -458,7 +458,7 @@ ptr<PixelShader> GlDevice::CreatePixelShader(ptr<File> file)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create pixel shader", exception);
+		THROW_SECONDARY("Can't create pixel shader", exception);
 	}
 }
 
@@ -481,7 +481,7 @@ ptr<UniformBuffer> GlDevice::CreateUniformBuffer(int size)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create uniform buffer", exception);
+		THROW_SECONDARY("Can't create uniform buffer", exception);
 	}
 }
 
@@ -504,7 +504,7 @@ ptr<VertexBuffer> GlDevice::CreateStaticVertexBuffer(ptr<File> file, ptr<VertexL
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create OpenGL static vertex buffer", exception);
+		THROW_SECONDARY("Can't create OpenGL static vertex buffer", exception);
 	}
 }
 
@@ -527,7 +527,7 @@ ptr<VertexBuffer> GlDevice::CreateDynamicVertexBuffer(int size, ptr<VertexLayout
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create OpenGL dynamic vertex buffer", exception);
+		THROW_SECONDARY("Can't create OpenGL dynamic vertex buffer", exception);
 	}
 }
 
@@ -550,7 +550,7 @@ ptr<IndexBuffer> GlDevice::CreateStaticIndexBuffer(ptr<File> file, int indexSize
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create index buffer", exception);
+		THROW_SECONDARY("Can't create index buffer", exception);
 	}
 }
 
@@ -579,7 +579,7 @@ void GlDevice::GetAttributeSizeAndType(DataType dataType, GLint& size, GLenum& t
 		integer = false;
 		break;
 	case DataTypes::_mat4x4:
-		THROW_PRIMARY_EXCEPTION("Matrices can't be used in attributes");
+		THROW("Matrices can't be used in attributes");
 	case DataTypes::_uint:
 		size = 1;
 		type = GL_UNSIGNED_INT;
@@ -601,7 +601,7 @@ void GlDevice::GetAttributeSizeAndType(DataType dataType, GLint& size, GLenum& t
 		integer = true;
 		break;
 	default:
-		THROW_PRIMARY_EXCEPTION("Unknown attribute element type");
+		THROW("Unknown attribute element type");
 	}
 }
 
@@ -705,7 +705,7 @@ ptr<AttributeBinding> GlDevice::CreateAttributeBinding(ptr<AttributeLayout> layo
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create GL attribute binding", exception);
+		THROW_SECONDARY("Can't create GL attribute binding", exception);
 	}
 }
 
@@ -727,7 +727,7 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data)
 		GLenum format;
 		GLenum type;
 		if(!GlSystem::GetTextureFormat(data->GetFormat(), internalFormat, format, type))
-			THROW_PRIMARY_EXCEPTION("Invalid pixel format");
+			THROW("Invalid pixel format");
 
 		int pixelSize = PixelFormat::GetPixelSize(data->GetFormat().size);
 
@@ -740,7 +740,7 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data)
 		{
 			// if array
 			if(data->GetCount())
-				THROW_PRIMARY_EXCEPTION("Arrays of 3D textures are not supported");
+				THROW("Arrays of 3D textures are not supported");
 
 			target = GL_TEXTURE_3D;
 
@@ -752,7 +752,7 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data)
 				int linePitch = data->GetMipLinePitch(mip);
 				int slicePitch = data->GetMipSlicePitch(mip);
 				if((linePitch % pixelSize) || (slicePitch % pixelSize))
-					THROW_PRIMARY_EXCEPTION("Wrong line or slice pitch");
+					THROW("Wrong line or slice pitch");
 				glPixelStorei(GL_PACK_ROW_LENGTH, linePitch / pixelSize);
 				glPixelStorei(GL_PACK_IMAGE_HEIGHT, slicePitch / pixelSize);
 				glTexImage3D(target, mip, internalFormat,
@@ -774,13 +774,13 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data)
 
 				int imagePitch = data->GetImageSize();
 				if(imagePitch % pixelSize)
-					THROW_PRIMARY_EXCEPTION("Wrong image pitch");
+					THROW("Wrong image pitch");
 				glPixelStorei(GL_PACK_IMAGE_HEIGHT, imagePitch / pixelSize);
 				for(int mip = 0; mip < mips; ++mip)
 				{
 					int linePitch = data->GetMipLinePitch(mip);
 					if(linePitch % pixelSize)
-						THROW_PRIMARY_EXCEPTION("Wrong line pitch");
+						THROW("Wrong line pitch");
 					glPixelStorei(GL_PACK_ROW_LENGTH, linePitch / pixelSize);
 					glTexImage3D(target, mip, internalFormat,
 						data->GetMipWidth(mip), data->GetMipHeight(mip), data->GetCount(),
@@ -800,7 +800,7 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data)
 				{
 					int linePitch = data->GetMipLinePitch(mip);
 					if(linePitch % pixelSize)
-						THROW_PRIMARY_EXCEPTION("Wrong line pitch");
+						THROW("Wrong line pitch");
 					glPixelStorei(GL_PACK_ROW_LENGTH, linePitch / pixelSize);
 					glTexImage2D(target, mip, internalFormat,
 						data->GetMipWidth(mip), data->GetMipHeight(mip),
@@ -822,7 +822,7 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data)
 
 				int imagePitch = data->GetImageSize();
 				if(imagePitch % pixelSize)
-					THROW_PRIMARY_EXCEPTION("Wrong image pitch");
+					THROW("Wrong image pitch");
 				glPixelStorei(GL_PACK_ROW_LENGTH, imagePitch / pixelSize);
 				for(int mip = 0; mip < mips; ++mip)
 				{
@@ -861,7 +861,7 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create static texture", exception);
+		THROW_SECONDARY("Can't create static texture", exception);
 	}
 }
 
@@ -877,7 +877,7 @@ ptr<SamplerState> GlDevice::CreateSamplerState()
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create OpenGL sampler state", exception);
+		THROW_SECONDARY("Can't create OpenGL sampler state", exception);
 	}
 }
 
@@ -889,7 +889,7 @@ ptr<BlendState> GlDevice::CreateBlendState()
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create OpenGL blend state", exception);
+		THROW_SECONDARY("Can't create OpenGL blend state", exception);
 	}
 }
 

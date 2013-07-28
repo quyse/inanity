@@ -14,23 +14,23 @@ RawTextureData::RawTextureData(ptr<File> pixels, PixelFormat format, int width, 
 	{
 		// check params
 		if(width <= 0)
-			THROW_PRIMARY_EXCEPTION("Width should be > 0");
+			THROW("Width should be > 0");
 		if(height < 0)
-			THROW_PRIMARY_EXCEPTION("Height should be >= 0");
+			THROW("Height should be >= 0");
 		if(height == 0)
 		{
 			if(depth != 0)
-				THROW_PRIMARY_EXCEPTION("Depth != 0, but height == 0");
+				THROW("Depth != 0, but height == 0");
 		}
 		else
 		{
 			if(depth < 0)
-				THROW_PRIMARY_EXCEPTION("Depth should be >= 0");
+				THROW("Depth should be >= 0");
 		}
 		if(mips <= 0)
-			THROW_PRIMARY_EXCEPTION("Mips should be > 0");
+			THROW("Mips should be > 0");
 		if(count < 0)
-			THROW_PRIMARY_EXCEPTION("Count should be >= 0");
+			THROW("Count should be >= 0");
 
 		// get a maximum dimension of image
 		int maxDimension = std::max(std::max(width, height), depth);
@@ -43,7 +43,7 @@ RawTextureData::RawTextureData(ptr<File> pixels, PixelFormat format, int width, 
 		{
 			// if we reach the zero dimension, mips was too big
 			if(maxDimension == 0)
-				THROW_PRIMARY_EXCEPTION("Too much mips");
+				THROW("Too much mips");
 
 			// store current offset
 			mipOffsets[i] = mipOffset;
@@ -64,14 +64,14 @@ RawTextureData::RawTextureData(ptr<File> pixels, PixelFormat format, int width, 
 		if(pixels)
 		{
 			if(pixels->GetSize() != arrayPitch * (count ? count : 1))
-				THROW_PRIMARY_EXCEPTION("Wrong file size");
+				THROW("Wrong file size");
 		}
 		else
 			this->pixels = NEW(MemoryFile(arrayPitch * (count ? count : 1)));
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create raw texture data", exception);
+		THROW_SECONDARY("Can't create raw texture data", exception);
 	}
 }
 
@@ -231,7 +231,7 @@ void RawTextureData::Serialize(ptr<OutputStream> stream)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't serialize raw texture data", exception);
+		THROW_SECONDARY("Can't serialize raw texture data", exception);
 	}
 }
 
@@ -277,7 +277,7 @@ ptr<RawTextureData> RawTextureData::Deserialize(ptr<InputStream> stream)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't deserialize raw texture data", exception);
+		THROW_SECONDARY("Can't deserialize raw texture data", exception);
 	}
 }
 

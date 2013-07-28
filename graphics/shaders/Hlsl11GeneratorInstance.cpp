@@ -49,7 +49,7 @@ void Hlsl11GeneratorInstance::PrintDataType(DataType dataType)
 	case DataTypes::_ivec3:		name = "int3";			break;
 	case DataTypes::_ivec4:		name = "int4";			break;
 	default:
-		THROW_PRIMARY_EXCEPTION("Unknown data type");
+		THROW("Unknown data type");
 	}
 	hlsl << name;
 }
@@ -65,7 +65,7 @@ void Hlsl11GeneratorInstance::RegisterNode(Node* node)
 		{
 			// атрибуты допустимы только в вершинном шейдере
 			if(shaderType != ShaderTypes::vertex)
-				THROW_PRIMARY_EXCEPTION("Only vertex shader can have attribute nodes");
+				THROW("Only vertex shader can have attribute nodes");
 
 			ptr<AttributeNode> attributeNode = fast_cast<AttributeNode*>(node);
 			// просто добавляем, дубликаты удалим потом
@@ -96,7 +96,7 @@ void Hlsl11GeneratorInstance::RegisterNode(Node* node)
 	case Node::typeRasterized:
 		// rasterized-переменые дапустимы только в пиксельном шейдере
 		if(shaderType != ShaderTypes::pixel)
-			THROW_PRIMARY_EXCEPTION("Only pixel shader can have rasterized nodes");
+			THROW("Only pixel shader can have rasterized nodes");
 		rasterized.push_back(fast_cast<RasterizedNode*>(node));
 		break;
 	case Node::typeSequence:
@@ -131,7 +131,7 @@ void Hlsl11GeneratorInstance::RegisterNode(Node* node)
 		RegisterNode(fast_cast<CastNode*>(node)->GetA());
 		break;
 	default:
-		THROW_PRIMARY_EXCEPTION("Unknown node type");
+		THROW("Unknown node type");
 	}
 }
 
@@ -158,13 +158,13 @@ void Hlsl11GeneratorInstance::PrintNode(Node* node)
 	case Node::typeSampler:
 		// семплер может участвовать, только в операции семплирования
 		// он никогда не должен приходить в PrintNode
-		THROW_PRIMARY_EXCEPTION("Invalid use of sampler");
+		THROW("Invalid use of sampler");
 	case Node::typeTemp:
 		{
 			// выяснить смещение переменной
 			std::unordered_map<ptr<TempNode>, int>::const_iterator i = temps.find(fast_cast<TempNode*>(node));
 			if(i == temps.end())
-				THROW_PRIMARY_EXCEPTION("Temp node is not registered");
+				THROW("Temp node is not registered");
 
 			// напечатать
 			hlsl << '_' << i->second;
@@ -215,7 +215,7 @@ void Hlsl11GeneratorInstance::PrintNode(Node* node)
 		}
 		break;
 	default:
-		THROW_PRIMARY_EXCEPTION("Unknown node type");
+		THROW("Unknown node type");
 	}
 }
 
@@ -337,7 +337,7 @@ void Hlsl11GeneratorInstance::PrintOperationNode(OperationNode* node)
 				OP(Clip, clip);
 #undef OP
 			default:
-				THROW_PRIMARY_EXCEPTION("Unknown operation type");
+				THROW("Unknown operation type");
 			}
 
 			// вывести
@@ -394,7 +394,7 @@ void Hlsl11GeneratorInstance::PrintUniforms()
 
 			// переменная должна лежать на границе float'а, как минимум
 			if(offset % sizeof(float))
-				THROW_PRIMARY_EXCEPTION("Wrong variable offset: should be on 4-byte boundary");
+				THROW("Wrong variable offset: should be on 4-byte boundary");
 
 			// печатаем определение переменной
 
@@ -408,7 +408,7 @@ void Hlsl11GeneratorInstance::PrintUniforms()
 				hlsl << '[' << count << ']';
 			// если массив, размер элемента должен быть кратен размеру vec4
 			if(count > 1 && GetDataTypeSize(valueType) % sizeof(vec4))
-				THROW_PRIMARY_EXCEPTION("Size of element of array should be multiply of vec4 size");
+				THROW("Size of element of array should be multiply of vec4 size");
 
 			// регистр и положение в нём переменной
 			hlsl << " : packoffset(c" << (offset / sizeof(vec4));
@@ -420,7 +420,7 @@ void Hlsl11GeneratorInstance::PrintUniforms()
 				int variableSize = GetDataTypeSize(valueType);
 				// переменная не должна пересекать границу регистра
 				if(registerOffset + variableSize > sizeof(vec4))
-					THROW_PRIMARY_EXCEPTION("Variable should not intersect a register boundary");
+					THROW("Variable should not intersect a register boundary");
 				// выложить столько буков, сколько нужно
 				registerOffset /= sizeof(float);
 				int endRegisterOffset = registerOffset + variableSize / sizeof(float);
@@ -473,7 +473,7 @@ ptr<ShaderSource> Hlsl11GeneratorInstance::Generate()
 		profile = "ps_4_0";
 		break;
 	default:
-		THROW_PRIMARY_EXCEPTION("Unknown shader type");
+		THROW("Unknown shader type");
 	}
 
 	// вывести атрибуты, если вершинный шейдер
@@ -588,7 +588,7 @@ ptr<ShaderSource> Hlsl11GeneratorInstance::Generate()
 			textureStr = "TextureCube";
 			break;
 		default:
-			THROW_PRIMARY_EXCEPTION("Invalid sampler coord type");
+			THROW("Invalid sampler coord type");
 		}
 		// текстура
 		hlsl << textureStr << '<';

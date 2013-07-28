@@ -59,7 +59,7 @@ ptr<RawTextureData> PngImageLoader::Load(ptr<File> file)
 
 		// проверить сигнатуру
 		if(fileSize < 8 || png_sig_cmp((png_const_bytep)fileData, 0, 8) != 0)
-			THROW_PRIMARY_EXCEPTION("PNG signature check failed");
+			THROW("PNG signature check failed");
 
 		/* Обработка ошибок в libpng идёт через setjmp/longjmp. Сначала устанавливается
 		точка возврата вызовом setjmp, затем выполняются необходимые вызовы функций libpng.
@@ -84,13 +84,13 @@ ptr<RawTextureData> PngImageLoader::Load(ptr<File> file)
 		// создать объекты libpng
 		png_structp pngPtr = png_create_read_struct(PNG_LIBPNG_VER_STRING, &errorStream, Helper::Error, Helper::Warning);
 		if(!pngPtr)
-			THROW_PRIMARY_EXCEPTION("Can't create read struct");
+			THROW("Can't create read struct");
 		png_infop infoPtr = png_create_info_struct(pngPtr);
 		if(!infoPtr)
 		{
 			png_destroy_read_struct(&pngPtr, (png_infopp)NULL, (png_infopp)NULL);
 			free(imageRows);
-			THROW_PRIMARY_EXCEPTION("Can't create info struct");
+			THROW("Can't create info struct");
 		}
 
 		// блок обработки ошибок
@@ -101,7 +101,7 @@ ptr<RawTextureData> PngImageLoader::Load(ptr<File> file)
 			// удалить структуру
 			png_destroy_read_struct(&pngPtr, &infoPtr, (png_infopp)NULL);
 			// выбросить исключение (режим тревоги уже кончился)
-			THROW_PRIMARY_EXCEPTION("Error when reading PNG: " + errorStream.str());
+			THROW("Error when reading PNG: " + errorStream.str());
 		}
 
 		// установить функцию для чтения данных
@@ -176,7 +176,7 @@ ptr<RawTextureData> PngImageLoader::Load(ptr<File> file)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't load PNG image", exception);
+		THROW_SECONDARY("Can't load PNG image", exception);
 	}
 }
 

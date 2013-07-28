@@ -21,7 +21,7 @@ GLenum GlBlendState::ConvertColorSource(ColorSource colorSource)
 	case colorSourceDestAlpha: cs = GL_DST_ALPHA; break;
 	case colorSourceInvDestAlpha: cs = GL_ONE_MINUS_DST_ALPHA; break;
 	default:
-		THROW_PRIMARY_EXCEPTION("Unknown blend state color source");
+		THROW("Unknown blend state color source");
 	}
 	return cs;
 }
@@ -38,7 +38,7 @@ GLenum GlBlendState::ConvertAlphaSource(AlphaSource alphaSource)
 	case alphaSourceDest: as = GL_DST_ALPHA; break;
 	case alphaSourceInvDest: as = GL_ONE_MINUS_DST_ALPHA; break;
 	default:
-		THROW_PRIMARY_EXCEPTION("Unknown blend state alpha source");
+		THROW("Unknown blend state alpha source");
 	}
 	return as;
 }
@@ -54,7 +54,7 @@ GLenum GlBlendState::ConvertOperation(Operation operation)
 	case operationMin: o = GL_MIN; break;
 	case operationMax: o = GL_MAX; break;
 	default:
-		THROW_PRIMARY_EXCEPTION("Unknown blend state operation");
+		THROW("Unknown blend state operation");
 	}
 	return o;
 }

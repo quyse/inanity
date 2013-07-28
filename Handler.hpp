@@ -112,7 +112,7 @@ private:
 
 		T GetData() const
 		{
-			THROW_SECONDARY_EXCEPTION("Async exception", exception);
+			THROW_SECONDARY("Async exception", exception);
 		}
 	};
 

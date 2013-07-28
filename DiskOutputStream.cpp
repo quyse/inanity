@@ -19,10 +19,10 @@ BEGIN_INANITY
 void DiskOutputStream::Write(const void *data, size_t size)
 {
 	if((DWORD)size != size)
-		THROW_PRIMARY_EXCEPTION("So big write size is not supported");
+		THROW("So big write size is not supported");
 	DWORD written;
 	if(!::WriteFile(*handle, data, (DWORD)size, &written, NULL) || written != size)
-		THROW_PRIMARY_EXCEPTION("Disk write error");
+		THROW("Disk write error");
 }
 
 END_INANITY
@@ -42,7 +42,7 @@ void DiskOutputStream::Write(const void *data, size_t size)
 	{
 		ssize_t written = write(*handle, dataPtr, size);
 		if(written < 0)
-			THROW_PRIMARY_EXCEPTION("Disk write error");
+			THROW("Disk write error");
 		size -= written;
 		dataPtr += written;
 	}

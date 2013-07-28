@@ -47,7 +47,7 @@ void AsioTcpListener::StartAccept()
 	try
 	{
 		if(acceptingSocket)
-			THROW_PRIMARY_EXCEPTION("Accepting sockets already started");
+			THROW("Accepting sockets already started");
 
 		// создать новый принимающий сокет
 		acceptingSocket = NEW(AsioTcpSocket(service));
@@ -55,7 +55,7 @@ void AsioTcpListener::StartAccept()
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't start accept", exception);
+		THROW_SECONDARY("Can't start accept", exception);
 	}
 }
 

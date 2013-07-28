@@ -82,7 +82,7 @@ ptr<File> Dx11ShaderCompiler::Compile(ptr<ShaderSource> shaderSource)
 		// получить код шейдера на HLSL
 		ptr<Hlsl11Source> hlslSource = shaderSource.FastCast<Hlsl11Source>();
 		if(!hlslSource)
-			THROW_PRIMARY_EXCEPTION("Shader source is not HLSL");
+			THROW("Shader source is not HLSL");
 
 		// получить код шейдера
 		ptr<File> code = hlslSource->GetCode();
@@ -117,7 +117,7 @@ ptr<File> Dx11ShaderCompiler::Compile(ptr<ShaderSource> shaderSource)
 
 		// если ошибка
 		if(FAILED(result))
-			THROW_PRIMARY_EXCEPTION("Compile error(s): " + Strings::File2String(errorsFile) + "\n" + Strings::File2String(code));
+			THROW("Compile error(s): " + Strings::File2String(errorsFile) + "\n" + Strings::File2String(code));
 
 		// создать скомпилированный шейдер
 		ptr<Dx11CompiledShader> compiledShader = NEW(Dx11CompiledShader(shaderFile, hlslSource->GetResources()));
@@ -128,7 +128,7 @@ ptr<File> Dx11ShaderCompiler::Compile(ptr<ShaderSource> shaderSource)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't compile shader", exception);
+		THROW_SECONDARY("Can't compile shader", exception);
 	}
 }
 

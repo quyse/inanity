@@ -118,7 +118,7 @@ void StreamWriter::WriteGap(size_t alignment)
 #ifdef _DEBUG
 	//проверить, что выравнивание - степень двойки
 	if(alignment & (alignment - 1))
-		THROW_PRIMARY_EXCEPTION("Alignment must be power of two");
+		THROW("Alignment must be power of two");
 #endif
 
 	//вычислить количество байт

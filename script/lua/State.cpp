@@ -18,7 +18,7 @@ State::State()
 	// создать состояние
 	state = lua_newstate(Alloc, this);
 	if(!state)
-		THROW_PRIMARY_EXCEPTION("Can't create Lua state");
+		THROW("Can't create Lua state");
 
 	// установить функцию окончания
 	lua_atpanic(state, Panic);
@@ -42,11 +42,11 @@ int State::Panic(lua_State* state)
 	try
 	{
 		ProcessError(state);
-		THROW_PRIMARY_EXCEPTION("Unprocessed lua panic");
+		THROW("Unprocessed lua panic");
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Lua panic", exception);
+		THROW_SECONDARY("Lua panic", exception);
 	}
 }
 

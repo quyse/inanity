@@ -43,19 +43,19 @@ ptr<File> CompositeFileSystem::LoadFile(const String& fileName)
 		String path = fileName;
 		ptr<FileSystem> fileSystem = GetFileSystemForPath(path);
 		if(!fileSystem)
-			THROW_PRIMARY_EXCEPTION("No mounted file system for such path");
+			THROW("No mounted file system for such path");
 		try
 		{
 			return fileSystem->LoadFile(path);
 		}
 		catch(Exception* exception)
 		{
-			THROW_SECONDARY_EXCEPTION("Mounted file system opening file exception", exception);
+			THROW_SECONDARY("Mounted file system opening file exception", exception);
 		}
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't load file " + fileName + " from composite file system", exception);
+		THROW_SECONDARY("Can't load file " + fileName + " from composite file system", exception);
 	}
 }
 
@@ -75,19 +75,19 @@ void CompositeFileSystem::SaveFile(ptr<File> file, const String& fileName)
 		String path = fileName;
 		ptr<FileSystem> fileSystem = GetFileSystemForPath(path);
 		if(!fileSystem)
-			THROW_PRIMARY_EXCEPTION("No mounted file system for such path");
+			THROW("No mounted file system for such path");
 		try
 		{
 			fileSystem->SaveFile(file, path);
 		}
 		catch(Exception* exception)
 		{
-			THROW_SECONDARY_EXCEPTION("Mounted file system saving file exception", exception);
+			THROW_SECONDARY("Mounted file system saving file exception", exception);
 		}
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't save file " + fileName + " into composite file system", exception);
+		THROW_SECONDARY("Can't save file " + fileName + " into composite file system", exception);
 	}
 }
 

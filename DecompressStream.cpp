@@ -28,7 +28,7 @@ DecompressStream::DecompressStream(ptr<InputStream> inputStream)
 		case Z_OK:
 			break;
 		default:
-			THROW_PRIMARY_EXCEPTION("Can't initialize inflation");
+			THROW("Can't initialize inflation");
 		}
 
 		//выделить память под выходной буфер
@@ -44,7 +44,7 @@ DecompressStream::DecompressStream(ptr<InputStream> inputStream)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't initialize compress stream", exception);
+		THROW_SECONDARY("Can't initialize compress stream", exception);
 	}
 }
 
@@ -115,7 +115,7 @@ size_t DecompressStream::Read(void* data, size_t size)
 					finished = true;
 					break;
 				default:
-					THROW_PRIMARY_EXCEPTION("Decompression error");
+					THROW("Decompression error");
 				}
 
 				//перенести данные, которые остались во входном буфере, в его начало
@@ -128,7 +128,7 @@ size_t DecompressStream::Read(void* data, size_t size)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't decompress data", exception);
+		THROW_SECONDARY("Can't decompress data", exception);
 	}
 }
 
@@ -152,7 +152,7 @@ ptr<File> DecompressStream::DecompressFile(ptr<File> file)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't decompress to file", exception);
+		THROW_SECONDARY("Can't decompress to file", exception);
 	}
 }
 

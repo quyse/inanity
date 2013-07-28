@@ -42,12 +42,12 @@ GlslGeneratorInstance::GlslGeneratorInstance(ptr<Node> rootNode, ShaderType shad
 			samplerPrefix = "sp";
 			break;
 		default:
-			THROW_PRIMARY_EXCEPTION("Wrong shader type");
+			THROW("Wrong shader type");
 		}
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create GLSL generator instance", exception);
+		THROW_SECONDARY("Can't create GLSL generator instance", exception);
 	}
 }
 
@@ -71,7 +71,7 @@ void GlslGeneratorInstance::PrintDataType(DataType dataType)
 	case DataTypes::_ivec3:			name = "ivec3";			break;
 	case DataTypes::_ivec4:			name = "ivec4";			break;
 	default:
-		THROW_PRIMARY_EXCEPTION("Unknown data type");
+		THROW("Unknown data type");
 	}
 	glsl << name;
 }
@@ -87,7 +87,7 @@ void GlslGeneratorInstance::RegisterNode(Node* node)
 		{
 			// атрибуты допустимы только в вершинном шейдере
 			if(shaderType != ShaderTypes::vertex)
-				THROW_PRIMARY_EXCEPTION("Only vertex shader can have attribute nodes");
+				THROW("Only vertex shader can have attribute nodes");
 
 			ptr<AttributeNode> attributeNode = fast_cast<AttributeNode*>(node);
 			// просто добавляем, дубликаты удалим потом
@@ -118,7 +118,7 @@ void GlslGeneratorInstance::RegisterNode(Node* node)
 	case Node::typeRasterized:
 		// rasterized-переменые дапустимы только в пиксельном шейдере
 		if(shaderType != ShaderTypes::pixel)
-			THROW_PRIMARY_EXCEPTION("Only pixel shader can have rasterized nodes");
+			THROW("Only pixel shader can have rasterized nodes");
 		rasterized.push_back(fast_cast<RasterizedNode*>(node));
 		break;
 	case Node::typeSequence:
@@ -150,7 +150,7 @@ void GlslGeneratorInstance::RegisterNode(Node* node)
 		RegisterNode(fast_cast<CastNode*>(node)->GetA());
 		break;
 	default:
-		THROW_PRIMARY_EXCEPTION("Unknown node type");
+		THROW("Unknown node type");
 	}
 }
 
@@ -177,13 +177,13 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 	case Node::typeSampler:
 		// семплер может участвовать, только в операции семплирования
 		// он никогда не должен приходить в PrintNode
-		THROW_PRIMARY_EXCEPTION("Invalid use of sampler");
+		THROW("Invalid use of sampler");
 	case Node::typeTemp:
 		{
 			// выяснить номер переменной
 			std::unordered_map<ptr<TempNode>, int>::const_iterator i = temps.find(fast_cast<TempNode*>(node));
 			if(i == temps.end())
-				THROW_PRIMARY_EXCEPTION("Temp node is not registered");
+				THROW("Temp node is not registered");
 
 			// напечатать
 			glsl << '_' << i->second;
@@ -245,7 +245,7 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 				valueSize = 4;
 				break;
 			default:
-				THROW_PRIMARY_EXCEPTION("Invalid sampler value type");
+				THROW("Invalid sampler value type");
 			}
 			if(valueSize < 4)
 			{
@@ -266,7 +266,7 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 		}
 		break;
 	default:
-		THROW_PRIMARY_EXCEPTION("Unknown node type");
+		THROW("Unknown node type");
 	}
 }
 
@@ -393,7 +393,7 @@ void GlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 				OP(Clip, clip);
 #undef OP
 			default:
-				THROW_PRIMARY_EXCEPTION("Unknown operation type");
+				THROW("Unknown operation type");
 			}
 
 			// вывести
@@ -454,7 +454,7 @@ void GlslGeneratorInstance::PrintUniforms()
 
 			// переменная должна лежать на границе float'а, как минимум
 			if(offset % sizeof(float))
-				THROW_PRIMARY_EXCEPTION("Wrong variable offset: should be on 4-byte boundary");
+				THROW("Wrong variable offset: should be on 4-byte boundary");
 
 			// если по умолчанию переменная попадёт в неправильное место, делаем пустые переменные, чтобы занять место
 			// автоматический сдвиг
@@ -484,7 +484,7 @@ void GlslGeneratorInstance::PrintUniforms()
 				glsl << '[' << count << ']';
 			// если массив, размер элемента должен быть кратен размеру vec4
 			if(count > 1 && valueSize % sizeof(vec4))
-				THROW_PRIMARY_EXCEPTION("Size of element of array should be multiply of vec4 size");
+				THROW("Size of element of array should be multiply of vec4 size");
 
 			// конец переменной
 			glsl << ";\n";
@@ -586,7 +586,7 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 			valueTypeStr = "i";
 			break;
 		default:
-			THROW_PRIMARY_EXCEPTION("Invalid sampler value type");
+			THROW("Invalid sampler value type");
 		}
 		// строка, описывающая размерность
 		const char* dimensionStr;
@@ -605,7 +605,7 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 			dimensionStr = "Cube";
 			break;
 		default:
-			THROW_PRIMARY_EXCEPTION("Invalid sampler coord type");
+			THROW("Invalid sampler coord type");
 		}
 		// вывести семплер
 		int slot = samplerNode->GetSlot();

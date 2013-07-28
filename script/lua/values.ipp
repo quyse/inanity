@@ -35,7 +35,7 @@ struct Value<int>
 		int isnum;
 		lua_Integer res = lua_tointegerx(state, index, &isnum);
 		if(!isnum)
-			THROW_PRIMARY_EXCEPTION("Expected an integer for argument");
+			THROW("Expected an integer for argument");
 		return (int)res;
 	}
 
@@ -55,7 +55,7 @@ struct Value<double>
 		int isnum;
 		lua_Number res = lua_tonumberx(state, index, &isnum);
 		if(!isnum)
-			THROW_PRIMARY_EXCEPTION("Expected a double for argument");
+			THROW("Expected a double for argument");
 		return (double)res;
 	}
 
@@ -75,7 +75,7 @@ struct Value<float>
 		int isnum;
 		lua_Number res = lua_tonumberx(state, index, &isnum);
 		if(!isnum)
-			THROW_PRIMARY_EXCEPTION("Expected a float for argument");
+			THROW("Expected a float for argument");
 		return (float)res;
 	}
 
@@ -95,7 +95,7 @@ struct Value<unsigned int>
 		int isnum;
 		lua_Integer res = lua_tointegerx(state, index, &isnum);
 		if(!isnum)
-			THROW_PRIMARY_EXCEPTION("Expected an integer for argument");
+			THROW("Expected an integer for argument");
 		return (unsigned int)res;
 	}
 
@@ -115,7 +115,7 @@ struct Value<long long>
 		int isnum;
 		lua_Number res = lua_tonumberx(state, index, &isnum);
 		if(!isnum)
-			THROW_PRIMARY_EXCEPTION("Expected an integer for argument");
+			THROW("Expected an integer for argument");
 		return (long long)res;
 	}
 
@@ -135,7 +135,7 @@ struct Value<unsigned long long>
 		int isnum;
 		lua_Number res = lua_tonumberx(state, index, &isnum);
 		if(!isnum)
-			THROW_PRIMARY_EXCEPTION("Expected an integer for argument");
+			THROW("Expected an integer for argument");
 		return (unsigned long long)res;
 	}
 
@@ -154,7 +154,7 @@ struct Value<const char*>
 	{
 		const char* res = lua_tostring(state, index);
 		if(!res)
-			THROW_PRIMARY_EXCEPTION("Expected a string for argument");
+			THROW("Expected a string for argument");
 		return res;
 	}
 
@@ -205,7 +205,7 @@ struct Value<ptr<ObjectType> >
 		// получить userdata для объекта, и проверить, что это объект
 		ObjectUserData* userData = (ObjectUserData*)lua_touserdata(state, index);
 		if(!userData || lua_islightuserdata(state, index) || userData->type != UserData::typeObject)
-			THROW_PRIMARY_EXCEPTION(String("Expected an object of type '") + ObjectType::meta.GetFullName() + "' for argument, but got " + DescribeValue(state, index));
+			THROW(String("Expected an object of type '") + ObjectType::meta.GetFullName() + "' for argument, but got " + DescribeValue(state, index));
 
 		// проверить тип объекта, в случае необходимости привести к вышестоящему типу
 		for(Meta::ClassBase* cls = userData->cls; cls; cls = cls->GetParent())
@@ -213,7 +213,7 @@ struct Value<ptr<ObjectType> >
 				// вернуть объект
 				return (ObjectType*)userData->object;
 		// если здесь, значит, мы проверили всю цепочку наследования, а тип не нашли
-		THROW_PRIMARY_EXCEPTION(String("Can't cast object of type '") + userData->cls->GetFullName() + "' to expected type '" + ObjectType::meta.GetFullName() + "'");
+		THROW(String("Can't cast object of type '") + userData->cls->GetFullName() + "' to expected type '" + ObjectType::meta.GetFullName() + "'");
 	}
 
 	static inline void Push(lua_State* state, ptr<ObjectType> value)

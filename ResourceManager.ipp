@@ -30,7 +30,7 @@ ptr<Resource> ResourceManager<Resource>::Get(const String& resourceName)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't get resource " + resourceName, exception);
+		THROW_SECONDARY("Can't get resource " + resourceName, exception);
 	}
 }
 

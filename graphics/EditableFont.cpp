@@ -69,7 +69,7 @@ void EditableFont::Serialize(ptr<OutputStream> outputStream)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't serialize editable font", exception);
+		THROW_SECONDARY("Can't serialize editable font", exception);
 	}
 }
 

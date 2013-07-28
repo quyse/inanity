@@ -47,7 +47,7 @@ void X11Adapter::GetAdapters(std::vector<ptr<Adapter> >& adapters)
 	// for now display specified in DISPLAY environment variable is only returned
 	const char* displayName = getenv("DISPLAY");
 	if(!displayName)
-		THROW_PRIMARY_EXCEPTION("DISPLAY variable is not set");
+		THROW("DISPLAY variable is not set");
 	adapters.push_back(NEW(X11Adapter(displayName, Platform::X11Display::Open(displayName))));
 
 	END_TRY("Can't get adapters");

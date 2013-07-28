@@ -14,7 +14,7 @@ Uniform<ValueType>::Uniform(ptr<UniformNode> node)
 {
 #ifdef _DEBUG
 	if(node->GetValueType() != DataTypeOf<ValueType>())
-		THROW_PRIMARY_EXCEPTION("Wrong uniform node type");
+		THROW("Wrong uniform node type");
 #endif
 }
 

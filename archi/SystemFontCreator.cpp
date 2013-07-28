@@ -55,12 +55,12 @@ void SystemFontCreator::CreateImage(const String& alphabatFileName, const String
 			GLYPHMETRICS& gm = metrics[i];
 			int size = GetGlyphOutline(hdc, str[i], GGO_GRAY8_BITMAP, &gm, 0, NULL, &mat);
 			if(size == GDI_ERROR)
-				THROW_PRIMARY_EXCEPTION("Can't get glyph size");
+				THROW("Can't get glyph size");
 			ptr<File> file = new MemoryFile(size);
 			images[i] = file;
 			unsigned char* fileData = static_cast<unsigned char*>(file->GetData());
 			if(GetGlyphOutline(hdc, str[i], GGO_GRAY8_BITMAP, &gm, size, fileData, &mat) == GDI_ERROR)
-				THROW_PRIMARY_EXCEPTION("Can't get glyph");
+				THROW("Can't get glyph");
 			
 			//как написано в MSDN, в этом режиме возвращаются значения от 0 до 64 включительно
 			//так что масштабируем цвета
@@ -69,7 +69,7 @@ void SystemFontCreator::CreateImage(const String& alphabatFileName, const String
 		}
 		catch(Exception* exception)
 		{
-			THROW_SECONDARY_EXCEPTION("Can't get symbol image", exception);
+			THROW_SECONDARY("Can't get symbol image", exception);
 		}
 
 	// получить кернинг-пары
@@ -77,7 +77,7 @@ void SystemFontCreator::CreateImage(const String& alphabatFileName, const String
 	ptr<File> kerningPairsFile = NEW(MemoryFile(kerningPairsCount * sizeof(KERNINGPAIR)));
 	KERNINGPAIR* kp = (KERNINGPAIR*)kerningPairsFile->GetData();
 	if(GetKerningPairs(hdc, kerningPairsCount, kp) != kerningPairsCount)
-		THROW_PRIMARY_EXCEPTION("Can't get kerning pairs");
+		THROW("Can't get kerning pairs");
 
 	// теперь можно освободить контекст, он больше не нужен
 	ReleaseDC(NULL, hdc);
@@ -308,7 +308,7 @@ void SystemFontCreator::PrintHelp() const
 void SystemFontCreator::Run(const std::vector<String>& arguments)
 {
 	if(arguments.size() < 3)
-		THROW_PRIMARY_EXCEPTION("Must be at least 3 arguments for command");
+		THROW("Must be at least 3 arguments for command");
 
 	GetObject(GetStockFont(DEFAULT_GUI_FONT), sizeof(lf), &lf);
 	{

@@ -22,7 +22,7 @@ HMODULE DllCache::Load(const String& name)
 		dll = i->second;
 
 	if(!dll)
-		THROW_PRIMARY_EXCEPTION("Can't load dll " + name);
+		THROW("Can't load dll " + name);
 
 	return dll;
 

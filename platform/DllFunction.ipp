@@ -16,7 +16,7 @@ DllFunction<Function>::DllFunction(const String& dllName, const char* functionNa
 	HMODULE hModule = DllCache::Load(dllName);
 	void* f = GetProcAddress(hModule, functionName);
 	if(!f)
-		THROW_PRIMARY_EXCEPTION("Function was not found");
+		THROW("Function was not found");
 	function = (Function)f;
 #endif
 

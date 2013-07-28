@@ -35,7 +35,7 @@ D3D11_BLEND Dx11BlendState::ConvertColorSource(ColorSource colorSource)
 	case colorSourceInvDestAlpha:
 		r = D3D11_BLEND_INV_DEST_ALPHA; break;
 	default:
-		THROW_PRIMARY_EXCEPTION("Unknown color source");
+		THROW("Unknown color source");
 	}
 	return r;
 }
@@ -58,7 +58,7 @@ D3D11_BLEND Dx11BlendState::ConvertAlphaSource(AlphaSource alphaSource)
 	case alphaSourceInvDest:
 		r = D3D11_BLEND_INV_DEST_ALPHA; break;
 	default:
-		THROW_PRIMARY_EXCEPTION("Unknown alpha source");
+		THROW("Unknown alpha source");
 	}
 	return r;
 }
@@ -79,7 +79,7 @@ D3D11_BLEND_OP Dx11BlendState::ConvertOperation(Operation operation)
 	case operationMax:
 		r = D3D11_BLEND_OP_MAX; break;
 	default:
-		THROW_PRIMARY_EXCEPTION("Unknown operation");
+		THROW("Unknown operation");
 	}
 	return r;
 }
@@ -113,7 +113,7 @@ void Dx11BlendState::Update(ID3D11Device* deviceInterface)
 
 		ID3D11BlendState* blendStateInterface;
 		if(FAILED(deviceInterface->CreateBlendState(&desc, &blendStateInterface)))
-			THROW_PRIMARY_EXCEPTION("Can't create blend state");
+			THROW("Can't create blend state");
 
 		blendState = blendStateInterface;
 
@@ -121,7 +121,7 @@ void Dx11BlendState::Update(ID3D11Device* deviceInterface)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't update DirectX blend state", exception);
+		THROW_SECONDARY("Can't update DirectX blend state", exception);
 	}
 }
 

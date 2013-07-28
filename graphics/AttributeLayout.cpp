@@ -26,7 +26,7 @@ ptr<AttributeLayoutElement> AttributeLayout::AddElement(ptr<AttributeLayoutSlot>
 	{
 		// проверить, что слот от этой разметки
 		if(static_cast<AttributeLayout*>(slot->GetLayout()) != this)
-			THROW_PRIMARY_EXCEPTION("Slot is from another attribute layout");
+			THROW("Slot is from another attribute layout");
 		// проверить, что разметка верная
 		int slotIndex = slot->GetIndex();
 
@@ -36,7 +36,7 @@ ptr<AttributeLayoutElement> AttributeLayout::AddElement(ptr<AttributeLayoutSlot>
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't add element to attribute layout", exception);
+		THROW_SECONDARY("Can't add element to attribute layout", exception);
 	}
 }
 

@@ -14,7 +14,7 @@ const Event& Frame::GetCurrentEvent() const
 {
 	if(currentEvent < events.size())
 		return events[currentEvent];
-	THROW_PRIMARY_EXCEPTION("There is no current event");
+	THROW("There is no current event");
 }
 
 const State& Frame::GetCurrentState() const

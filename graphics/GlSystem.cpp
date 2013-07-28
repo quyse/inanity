@@ -43,7 +43,7 @@ ptr<Device> GlSystem::CreateDevice(ptr<Adapter> abstractAdapter)
 #ifdef ___INANITY_WINDOWS
 	ptr<Win32Adapter> adapter = abstractAdapter.DynamicCast<Win32Adapter>();
 	if(!adapter)
-		THROW_PRIMARY_EXCEPTION("Wrong adapter type");
+		THROW("Wrong adapter type");
 	return NEW(GlDevice(this, adapter->GetId()));
 #endif
 
@@ -52,7 +52,7 @@ ptr<Device> GlSystem::CreateDevice(ptr<Adapter> abstractAdapter)
 #endif
 
 	// TODO
-	THROW_PRIMARY_EXCEPTION("Not implemented");
+	THROW("Not implemented");
 
 	END_TRY("Can't create OpenGL device");
 }
@@ -63,7 +63,7 @@ ptr<Context> GlSystem::CreateContext(ptr<Device> abstractDevice)
 
 	ptr<GlDevice> device = abstractDevice.DynamicCast<GlDevice>();
 	if(!device)
-		THROW_PRIMARY_EXCEPTION("Wrong device type");
+		THROW("Wrong device type");
 
 	return NEW(GlContext(device));
 
@@ -84,7 +84,7 @@ void GlSystem::InitGLEW()
 {
 	GLenum err = glewInit();
 	if(err != GLEW_OK)
-		THROW_PRIMARY_EXCEPTION(String("Can't initialize GLEW: ") + (const char*)glewGetErrorString(err));
+		THROW(String("Can't initialize GLEW: ") + (const char*)glewGetErrorString(err));
 }
 
 void GlSystem::ClearErrors()
@@ -132,9 +132,9 @@ void GlSystem::CheckErrors(const char* primaryExceptionString)
 		// всё, ошибки кончились, и флаги ошибок очищены
 		// бросить исключение
 		if(primaryExceptionString)
-			THROW_SECONDARY_EXCEPTION(primaryExceptionString, NEW(Exception(errorStrings)));
+			THROW_SECONDARY(primaryExceptionString, NEW(Exception(errorStrings)));
 		else
-			THROW_PRIMARY_EXCEPTION(errorStrings);
+			THROW(errorStrings);
 	}
 }
 
@@ -241,7 +241,7 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, GLint& internalFormat, 
 		}
 		break;
 	}
-	THROW_PRIMARY_EXCEPTION("Pixel format is unsupported in OpenGL");
+	THROW("Pixel format is unsupported in OpenGL");
 #undef T
 #undef P
 #undef F
@@ -258,7 +258,7 @@ int GlSystem::AttributeNameToSemantic(const String& name)
 		if(name[i] != beginStr[i])
 			break;
 	if(beginStr[i])
-		THROW_PRIMARY_EXCEPTION("Wrong attribute name");
+		THROW("Wrong attribute name");
 
 	// перевести имя в семантику
 	int semantic = 0;
@@ -266,7 +266,7 @@ int GlSystem::AttributeNameToSemantic(const String& name)
 	{
 		char ch = name[i];
 		if(ch < 'a' || ch > 'z')
-			THROW_PRIMARY_EXCEPTION("Wrong symbol in attribute semantic");
+			THROW("Wrong symbol in attribute semantic");
 		semantic = semantic * 26 + ch - 'a';
 	}
 

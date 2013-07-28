@@ -25,12 +25,12 @@ ptr<Texture> TextureManager::Load(const String& textureName)
 		size_t dotPos = textureName.find_last_of('.');
 		if(dotPos == std::string::npos)
 			// расширения нет
-			THROW_PRIMARY_EXCEPTION("No extension in texture name");
+			THROW("No extension in texture name");
 		String extension = textureName.substr(dotPos + 1);
 		// получить загрузчик
 		std::unordered_map<String, ptr<ImageLoader> >::const_iterator i = imageLoaders.find(extension);
 		if(i == imageLoaders.end())
-			THROW_PRIMARY_EXCEPTION("No image loader for this extension: " + extension);
+			THROW("No image loader for this extension: " + extension);
 		ptr<ImageLoader> imageLoader = i->second;
 
 		// загрузить изображение
@@ -41,7 +41,7 @@ ptr<Texture> TextureManager::Load(const String& textureName)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't load texture", exception);
+		THROW_SECONDARY("Can't load texture", exception);
 	}
 }
 

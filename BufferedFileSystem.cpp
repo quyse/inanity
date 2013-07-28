@@ -16,7 +16,7 @@ ptr<InputStream> BufferedFileSystem::LoadStream(const String& fileName)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't load stream from buffered file system", exception);
+		THROW_SECONDARY("Can't load stream from buffered file system", exception);
 	}
 }
 
@@ -28,7 +28,7 @@ ptr<OutputStream> BufferedFileSystem::SaveStream(const String& fileName)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't save stream in buffered file system", exception);
+		THROW_SECONDARY("Can't save stream in buffered file system", exception);
 	}
 }
 

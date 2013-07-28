@@ -27,9 +27,9 @@ CompressStream::CompressStream(ptr<OutputStream> outputStream, CompressionLevel 
 		case Z_OK:
 			break;
 		case Z_STREAM_ERROR:
-			THROW_PRIMARY_EXCEPTION("Invalid compression level");
+			THROW("Invalid compression level");
 		default:
-			THROW_PRIMARY_EXCEPTION("Can't initialize deflation");
+			THROW("Can't initialize deflation");
 		}
 
 		//выделить память под выходной буфер
@@ -44,7 +44,7 @@ CompressStream::CompressStream(ptr<OutputStream> outputStream, CompressionLevel 
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't initialize compress stream", exception);
+		THROW_SECONDARY("Can't initialize compress stream", exception);
 	}
 }
 
@@ -79,7 +79,7 @@ void CompressStream::Write(const void* data, size_t size)
 	{
 		//если финализация уже была выполнена, то записывать данные нельзя
 		if(finalized)
-			THROW_PRIMARY_EXCEPTION("Stream already finalized");
+			THROW("Stream already finalized");
 
 		//запомнить параметры буферов
 		Bytef* inputBuffer = zstream.next_in;
@@ -105,7 +105,7 @@ void CompressStream::Write(const void* data, size_t size)
 				case Z_BUF_ERROR:
 					break;
 				default:
-					THROW_PRIMARY_EXCEPTION("Compression error");
+					THROW("Compression error");
 				}
 
 				//записать данные в выходной поток
@@ -122,7 +122,7 @@ void CompressStream::Write(const void* data, size_t size)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't compress data", exception);
+		THROW_SECONDARY("Can't compress data", exception);
 	}
 }
 
@@ -153,7 +153,7 @@ void CompressStream::Flush()
 			case Z_OK:
 				break;
 			default:
-				THROW_PRIMARY_EXCEPTION("Compression error");
+				THROW("Compression error");
 			}
 
 			//записать вывод в поток
@@ -169,14 +169,14 @@ void CompressStream::Flush()
 
 		//завершить сжатие
 		if(deflateEnd(&zstream) != Z_OK)
-			THROW_PRIMARY_EXCEPTION("Finalize stream error");
+			THROW("Finalize stream error");
 
 		//установить флажок завершенности
 		finalized = true;
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't finalize compression", exception);
+		THROW_SECONDARY("Can't finalize compression", exception);
 	}
 }
 
@@ -197,7 +197,7 @@ ptr<File> CompressStream::CompressFile(ptr<File> file, CompressionLevel compress
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't decompress to file", exception);
+		THROW_SECONDARY("Can't decompress to file", exception);
 	}
 }
 

@@ -22,7 +22,7 @@ D3D11_TEXTURE_ADDRESS_MODE Dx11SamplerState::ConvertWrap(Wrap wrap)
 	case wrapBorder:
 		return D3D11_TEXTURE_ADDRESS_BORDER;
 	}
-	THROW_PRIMARY_EXCEPTION("Invalid wrap mode");
+	THROW("Invalid wrap mode");
 }
 
 void Dx11SamplerState::Update(ID3D11Device* deviceInterface)
@@ -47,7 +47,7 @@ void Dx11SamplerState::Update(ID3D11Device* deviceInterface)
 #ifdef _DEBUG
 			// если добавили ещё фильтры, то нужно дописать таблицу ниже
 			if(filterCount != 2)
-				THROW_PRIMARY_EXCEPTION("Please recode conversion map");
+				THROW("Please recode conversion map");
 #endif
 
 			filterConversionMap [filterPoint]  [filterPoint]  [filterPoint]  = D3D11_FILTER_MIN_MAG_MIP_POINT;
@@ -77,7 +77,7 @@ void Dx11SamplerState::Update(ID3D11Device* deviceInterface)
 		// создать sampler state
 		ID3D11SamplerState* samplerStateInterface;
 		if(FAILED(deviceInterface->CreateSamplerState(&desc, &samplerStateInterface)))
-			THROW_PRIMARY_EXCEPTION("Can't create sampler state");
+			THROW("Can't create sampler state");
 
 		samplerState = samplerStateInterface;
 
@@ -85,7 +85,7 @@ void Dx11SamplerState::Update(ID3D11Device* deviceInterface)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't update DirectX sampler", exception);
+		THROW_SECONDARY("Can't update DirectX sampler", exception);
 	}
 }
 

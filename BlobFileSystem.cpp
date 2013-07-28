@@ -25,17 +25,17 @@ BlobFileSystem::BlobFileSystem(ptr<File> file) : file(file)
 
 		//получить терминатор
 		if(size < sizeof(Terminator))
-			THROW_PRIMARY_EXCEPTION("Can't read terminator");
+			THROW("Can't read terminator");
 		Terminator* terminator = (Terminator*)((char*)fileData + fileSize) - 1;
 		size -= sizeof(*terminator);
 
 		//проверить сигнатуру
 		if(memcmp(terminator->magic, Terminator::magicValue, sizeof(terminator->magic)) != 0)
-			THROW_PRIMARY_EXCEPTION("Invalid magic");
+			THROW("Invalid magic");
 
 		//проверить, что заголовок читается
 		if(size < terminator->headerSize)
-			THROW_PRIMARY_EXCEPTION("Can't read header");
+			THROW("Can't read header");
 
 		//получить читатель заголовка
 		ptr<StreamReader> headerReader = NEW(StreamReader(NEW(FileInputStream(
@@ -57,7 +57,7 @@ BlobFileSystem::BlobFileSystem(ptr<File> file) : file(file)
 
 			//проверить, что файл читается
 			if(fileOffset > size || size - fileOffset < fileSize)
-				THROW_PRIMARY_EXCEPTION("Can't read file " + fileName);
+				THROW("Can't read file " + fileName);
 			
 			//добавить файл в карту
 			files[fileName] = NEW(PartFile(file, (char*)fileData + fileOffset, fileSize));
@@ -65,7 +65,7 @@ BlobFileSystem::BlobFileSystem(ptr<File> file) : file(file)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't load blob file system", exception);
+		THROW_SECONDARY("Can't load blob file system", exception);
 	}
 }
 

@@ -37,7 +37,7 @@ void Dx11AttributeBinding::Initialize(ptr<AttributeLayout> layout)
 			format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 			break;
 		case DataTypes::_mat4x4:
-			THROW_PRIMARY_EXCEPTION("Matrices can't be used in attributes");
+			THROW("Matrices can't be used in attributes");
 		case DataTypes::_uint:
 			format = DXGI_FORMAT_R32_UINT;
 			break;
@@ -51,7 +51,7 @@ void Dx11AttributeBinding::Initialize(ptr<AttributeLayout> layout)
 			format = DXGI_FORMAT_R32G32B32A32_UINT;
 			break;
 		default:
-			THROW_PRIMARY_EXCEPTION("Unknown element type");
+			THROW("Unknown element type");
 		}
 
 		// получить информацию о слоте
@@ -82,7 +82,7 @@ ID3D11InputLayout* Dx11AttributeBinding::CreateInputLayout(ID3D11Device* deviceI
 		&*descs.begin(), (UINT)descs.size(),
 		code->GetData(), code->GetSize(), &inputLayoutInterface
 	)))
-		THROW_PRIMARY_EXCEPTION("Can't create input layout");
+		THROW("Can't create input layout");
 
 	return inputLayoutInterface;
 }

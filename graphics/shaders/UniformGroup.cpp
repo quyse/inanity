@@ -28,7 +28,7 @@ void* UniformGroup::GetData() const
 {
 #ifdef _DEBUG
 	if(!dataFile)
-		THROW_PRIMARY_EXCEPTION("Uniform group has not finalized");
+		THROW("Uniform group has not finalized");
 #endif
 	return data;
 }
