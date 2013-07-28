@@ -195,6 +195,9 @@ class ManagedHeap::PtrTracer
 	typedef std::multimap<Objects::const_iterator, Objects::const_iterator> Links;
 	Links links;
 
+	std::vector<bool> levels;
+	std::vector<Objects::const_iterator> levelObjects;
+
 public:
 	PtrTracer(const ManagedHeap& heap)
 	{
@@ -222,8 +225,6 @@ public:
 
 	void Print(std::ostream& stream, Objects::const_iterator object, bool last = false)
 	{
-		static std::vector<bool> levels;
-
 		for(size_t i = 0; i < levels.size(); ++i)
 			if(i == levels.size() - 1)
 				stream << "|_";
@@ -232,10 +233,19 @@ public:
 			else
 				stream << "  ";
 
+		bool cyclicReference = std::find(levelObjects.begin(), levelObjects.end(), object) != levelObjects.end();
+		if(cyclicReference)
+			stream << "CYCLIC ";
+
 		stream << object->data << ", " << object->info << "\n";
+
+		if(cyclicReference)
+			return;
 
 		if(last)
 			levels[levels.size() - 1] = false;
+
+		levelObjects.push_back(object);
 
 		Links::const_iterator link = links.lower_bound(object);
 		Links::const_iterator endLink = links.upper_bound(object);
@@ -251,6 +261,8 @@ public:
 			}
 			levels.pop_back();
 		}
+
+		levelObjects.pop_back();
 	}
 
 	void Print(std::ostream& stream)
