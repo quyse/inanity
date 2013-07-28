@@ -1,6 +1,8 @@
 #ifndef ___INANITY_INPUT_KEY_HPP___
 #define ___INANITY_INPUT_KEY_HPP___
 
+#include "input.hpp"
+
 BEGIN_INANITY_INPUT
 
 /// Key numbers.

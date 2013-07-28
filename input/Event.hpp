@@ -1,38 +1,32 @@
 #ifndef ___INANITY_INPUT_EVENT_HPP___
 #define ___INANITY_INPUT_EVENT_HPP___
 
-#include "input.hpp"
+#include "Key.hpp"
+#include <iostream>
 
 BEGIN_INANITY_INPUT
 
-/// Структура, обозначающая событие ввода.
 struct Event
 {
-	/// Устройство, которое прислало событие.
 	enum Device
 	{
 		deviceKeyboard,
 		deviceMouse
 	} device;
 
-	/// Данные клавиатуры.
 	struct Keyboard
 	{
-		/// Тип события.
 		enum Type
 		{
 			typeKeyDown,
 			typeKeyUp,
 			typeKeyPress
 		} type;
-		/// Номер клавиши.
-		int key;
+		Key key;
 	};
 
-	/// Данные мыши.
 	struct Mouse
 	{
-		/// Тип события
 		enum Type
 		{
 			typeButtonDown,
@@ -40,7 +34,6 @@ struct Event
 			typeMove
 		} type;
 
-		/// Кнопка мыши.
 		enum Button
 		{
 			buttonLeft,
@@ -48,12 +41,11 @@ struct Event
 			buttonMiddle
 		};
 
-		/// Данные события
 		union
 		{
-			/// Кнопка мыши (в случае typeButtonDown, typeButtonUp)
+			// in case type == typeButton{Down,Up}
 			Button button;
-			/// смещение мыши (в случае typeMove)
+			// in case type == typeMove
 			struct
 			{
 				float offsetX;
@@ -62,12 +54,17 @@ struct Event
 			};
 		};
 	};
-	/// Объединение, содержащее данные.
+
 	union
 	{
+		// in case device == deviceKeyboard
 		Keyboard keyboard;
+		// in case device == deviceMouse
 		Mouse mouse;
 	};
+
+	// debug output into std::ostream
+	friend std::ostream& operator<<(std::ostream& stream, const Event& event);
 };
 
 END_INANITY_INPUT
