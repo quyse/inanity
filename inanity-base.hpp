@@ -41,6 +41,7 @@
 #include "Strings.hpp"
 #include "TempFileSystem.hpp"
 #include "Thread.hpp"
+#include "Ticker.hpp"
 #include "Time.hpp"
 
 #endif

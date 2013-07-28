@@ -28,7 +28,7 @@ var libraries = {
 		// совсем общее
 		'Object', 'ManagedHeap', 'Strings', 'StringTraveler', 'Exception',
 		// время
-		'Time',
+		'Time', 'Ticker',
 		// профилирование
 		'Profiling',
 		// синхронизация и потоки выполнения
