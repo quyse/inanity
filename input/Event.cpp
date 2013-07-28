@@ -1,4 +1,5 @@
 #include "Event.hpp"
+#include "../Strings.hpp"
 
 BEGIN_INANITY_INPUT
 
@@ -10,16 +11,18 @@ std::ostream& operator<<(std::ostream& stream, const Event& event)
 		switch(event.keyboard.type)
 		{
 		case Event::Keyboard::typeKeyDown:
-			stream << "KEYDOWN ";
+			stream << "KEYDOWN " << event.keyboard.key;
 			break;
 		case Event::Keyboard::typeKeyUp:
-			stream << "KEYUP ";
+			stream << "KEYUP " << event.keyboard.key;
 			break;
-		case Event::Keyboard::typeKeyPress:
-			stream << "KEYPRESS ";
+		case Event::Keyboard::typeCharacter:
+			{
+				wchar_t s[2] = { event.keyboard.character, 0 };
+				stream << "KEYPRESS " << Strings::Unicode2UTF8(s);
+			}
 			break;
 		}
-		stream << event.keyboard.key << ' ';
 		break;
 	case Event::deviceMouse:
 		switch(event.mouse.type)
