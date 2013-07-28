@@ -15,7 +15,7 @@ bool Dx11System::IsSupported()
 {
 	try
 	{
-		return DllCache::Load("dxgi.dll") && DllCache::Load("d3d11.dll");
+		return Platform::DllCache::Load("dxgi.dll") && Platform::DllCache::Load("d3d11.dll");
 	}
 	catch(Exception* exception)
 	{
