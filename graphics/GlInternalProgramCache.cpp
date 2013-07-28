@@ -3,6 +3,7 @@
 #include "GlVertexShader.hpp"
 #include "GlPixelShader.hpp"
 #include "GlShaderBindings.hpp"
+#include "GlDevice.hpp"
 #include "GlSystem.hpp"
 #include "../Exception.hpp"
 #include "opengl.hpp"
@@ -21,6 +22,9 @@ bool operator==(const GlInternalProgramKey& a, const GlInternalProgramKey& b)
 
 GlInternalProgramKey::GlInternalProgramKey(GlVertexShader* vertexShader, GlPixelShader* pixelShader)
 : vertexShader(vertexShader), pixelShader(pixelShader) {}
+
+GlInternalProgramCache::GlInternalProgramCache(ptr<GlDevice> device)
+: device(device) {}
 
 void GlInternalProgramCache::ApplyPreLinkBindings(GLuint programName, ptr<GlShaderBindings> shaderBindings)
 {
@@ -133,7 +137,7 @@ ptr<GlInternalProgram> GlInternalProgramCache::GetProgram(GlVertexShader* vertex
 	GlSystem::CheckErrors("Can't unbind program");
 
 	// записать программу
-	ptr<GlInternalProgram> program = NEW(GlInternalProgram(programName));
+	ptr<GlInternalProgram> program = NEW(GlInternalProgram(device, programName));
 	programs[key] = program;
 
 	return program;

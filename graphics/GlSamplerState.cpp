@@ -1,12 +1,13 @@
 #include "GlSamplerState.hpp"
+#include "GlDevice.hpp"
 #include "GlSystem.hpp"
 #include "../Exception.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
-GlSamplerState::GlSamplerState(GLuint samplerName) : samplerName(samplerName)
-{
-}
+GlSamplerState::GlSamplerState(ptr<GlDevice> device, GLuint samplerName)
+: device(device), samplerName(samplerName)
+{}
 
 GlSamplerState::~GlSamplerState()
 {

@@ -6,15 +6,18 @@
 
 BEGIN_INANITY_GRAPHICS
 
+class GlDevice;
+
 /// Класс, инкапсулирующий слинкованную программу OpenGL.
 /** Из программ составляется кэш. */
 class GlInternalProgram : public Object
 {
 private:
+	ptr<GlDevice> device;
 	GLuint name;
 
 public:
-	GlInternalProgram(GLuint name);
+	GlInternalProgram(ptr<GlDevice> device, GLuint name);
 	~GlInternalProgram();
 
 	GLuint GetName() const;

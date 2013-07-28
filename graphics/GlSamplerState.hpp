@@ -6,10 +6,13 @@
 
 BEGIN_INANITY_GRAPHICS
 
+class GlDevice;
+
 /// Класс настроек семплера OpenGL.
 class GlSamplerState : public SamplerState
 {
 private:
+	ptr<GlDevice> device;
 	GLuint samplerName;
 
 	/// Преобразовать режим свёртки в константу OpenGL.
@@ -19,7 +22,7 @@ private:
 	void Update();
 
 public:
-	GlSamplerState(GLuint samplerName);
+	GlSamplerState(ptr<GlDevice> device, GLuint samplerName);
 	~GlSamplerState();
 
 	GLuint GetName();

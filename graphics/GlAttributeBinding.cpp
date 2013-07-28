@@ -1,11 +1,12 @@
 #include "GlAttributeBinding.hpp"
+#include "GlDevice.hpp"
 #include "VertexLayout.hpp"
 #include "../Exception.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
-GlAttributeBinding::GlAttributeBinding(GLuint vertexArrayName)
-: vertexArrayName(vertexArrayName) {}
+GlAttributeBinding::GlAttributeBinding(ptr<GlDevice> device, GLuint vertexArrayName)
+: device(device), vertexArrayName(vertexArrayName) {}
 
 GlAttributeBinding::~GlAttributeBinding()
 {

@@ -6,14 +6,17 @@
 
 BEGIN_INANITY_GRAPHICS
 
+class GlDevice;
+
 /// Класс константного буфера OpenGL.
 class GlUniformBuffer : public UniformBuffer
 {
 private:
+	ptr<GlDevice> device;
 	GLuint name;
 
 public:
-	GlUniformBuffer(GLuint name, size_t size);
+	GlUniformBuffer(ptr<GlDevice> device, GLuint name, size_t size);
 	~GlUniformBuffer();
 
 	GLuint GetName() const;

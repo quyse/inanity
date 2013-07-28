@@ -6,17 +6,19 @@
 
 BEGIN_INANITY_GRAPHICS
 
+class GlDevice;
 class GlShaderBindings;
 
 /// Класс вершинного шейдера OpenGL.
 class GlVertexShader : public VertexShader
 {
 private:
+	ptr<GlDevice> device;
 	GLuint shaderName;
 	ptr<GlShaderBindings> shaderBindings;
 
 public:
-	GlVertexShader(GLuint shaderName, ptr<GlShaderBindings> shaderBindings);
+	GlVertexShader(ptr<GlDevice> device, GLuint shaderName, ptr<GlShaderBindings> shaderBindings);
 	~GlVertexShader();
 
 	GLuint GetShaderName() const;

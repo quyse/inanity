@@ -1,10 +1,11 @@
 #include "GlVertexBuffer.hpp"
+#include "GlDevice.hpp"
 #include "VertexLayout.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
-GlVertexBuffer::GlVertexBuffer(GLuint name, int verticesCount, ptr<VertexLayout> layout)
-: VertexBuffer(verticesCount, layout), name(name) {}
+GlVertexBuffer::GlVertexBuffer(ptr<GlDevice> device, GLuint name, int verticesCount, ptr<VertexLayout> layout)
+: VertexBuffer(verticesCount, layout), device(device), name(name) {}
 
 GlVertexBuffer::~GlVertexBuffer()
 {

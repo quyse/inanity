@@ -1,9 +1,10 @@
 #include "GlUniformBuffer.hpp"
+#include "GlDevice.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
-GlUniformBuffer::GlUniformBuffer(GLuint name, size_t size)
-: UniformBuffer(size), name(name) {}
+GlUniformBuffer::GlUniformBuffer(ptr<GlDevice> device, GLuint name, size_t size)
+: UniformBuffer(size), device(device), name(name) {}
 
 GlUniformBuffer::~GlUniformBuffer()
 {

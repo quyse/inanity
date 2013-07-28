@@ -33,10 +33,14 @@ namespace std
 
 BEGIN_INANITY_GRAPHICS
 
+class GlDevice;
+
 /// Класс кэша программ OpenGL.
 class GlInternalProgramCache : public Object
 {
 private:
+	ptr<GlDevice> device;
+
 	typedef std::unordered_map<GlInternalProgramKey, ptr<GlInternalProgram> > Programs;
 	Programs programs;
 
@@ -44,6 +48,8 @@ private:
 	static void ApplyPostLinkBindings(GLuint programName, ptr<GlShaderBindings> shaderBindings);
 
 public:
+	GlInternalProgramCache(ptr<GlDevice> device);
+
 	ptr<GlInternalProgram> GetProgram(GlVertexShader* vertexShader, GlPixelShader* pixelShader);
 };
 

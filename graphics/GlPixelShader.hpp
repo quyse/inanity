@@ -6,17 +6,19 @@
 
 BEGIN_INANITY_GRAPHICS
 
+class GlDevice;
 class GlShaderBindings;
 
 /// Класс пиксельного (фрагментного) шейдера OpenGL.
 class GlPixelShader : public PixelShader
 {
 private:
+	ptr<GlDevice> device;
 	GLuint shaderName;
 	ptr<GlShaderBindings> shaderBindings;
 
 public:
-	GlPixelShader(GLuint shaderName, ptr<GlShaderBindings> shaderBindings);
+	GlPixelShader(ptr<GlDevice> device, GLuint shaderName, ptr<GlShaderBindings> shaderBindings);
 	~GlPixelShader();
 
 	GLuint GetShaderName() const;

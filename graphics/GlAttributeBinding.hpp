@@ -7,6 +7,8 @@
 
 BEGIN_INANITY_GRAPHICS
 
+class GlDevice;
+
 /// Класс привязки атрибутов для OpenGL.
 /** Привязка работает через заранее сделанный VertexArrayObject, если
 поддерживается ARB_vertex_attrib_binding. Иначе все выставляется каждый
@@ -34,6 +36,8 @@ public:
 	typedef std::vector<Slot> Slots;
 
 private:
+	ptr<GlDevice> device;
+
 	/// Vertex Array Object.
 	/** Если используется ручная разметка, то 0. */
 	GLuint vertexArrayName;
@@ -41,7 +45,7 @@ private:
 	std::vector<Slot> slots;
 
 public:
-	GlAttributeBinding(GLuint vertexArrayName);
+	GlAttributeBinding(ptr<GlDevice> device, GLuint vertexArrayName);
 	~GlAttributeBinding();
 
 	GLuint GetVertexArrayName() const;

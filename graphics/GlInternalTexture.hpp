@@ -6,16 +6,19 @@
 
 BEGIN_INANITY_GRAPHICS
 
+class GlDevice;
+
 /// Объект, хранящий текстуру OpenGL.
 /** Используется объектами GlRenderBuffer, GlDepthStencilBuffer и GlTexture,
 так как все эти объекты реализованы через текстуры OpenGL. */
 class GlInternalTexture : public Object
 {
 private:
+	ptr<GlDevice> device;
 	GLuint name;
 
 public:
-	GlInternalTexture(GLuint name);
+	GlInternalTexture(ptr<GlDevice> device, GLuint name);
 	~GlInternalTexture();
 
 	GLuint GetName() const;

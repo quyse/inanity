@@ -1,9 +1,10 @@
 #include "GlIndexBuffer.hpp"
+#include "GlDevice.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
-GlIndexBuffer::GlIndexBuffer(GLuint name, int indicesCount, int indexSize)
-: IndexBuffer(indicesCount, indexSize), name(name) {}
+GlIndexBuffer::GlIndexBuffer(ptr<GlDevice> device, GLuint name, int indicesCount, int indexSize)
+: IndexBuffer(indicesCount, indexSize), device(device), name(name) {}
 
 GlIndexBuffer::~GlIndexBuffer()
 {

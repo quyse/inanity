@@ -1,9 +1,10 @@
 #include "GlInternalProgram.hpp"
+#include "GlDevice.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
-GlInternalProgram::GlInternalProgram(GLuint name)
-: name(name) {}
+GlInternalProgram::GlInternalProgram(ptr<GlDevice> device, GLuint name)
+: device(device), name(name) {}
 
 GlInternalProgram::~GlInternalProgram()
 {

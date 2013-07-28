@@ -1,10 +1,11 @@
 #include "GlPixelShader.hpp"
+#include "GlDevice.hpp"
 #include "GlShaderBindings.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
-GlPixelShader::GlPixelShader(GLuint shaderName, ptr<GlShaderBindings> shaderBindings)
-: shaderName(shaderName), shaderBindings(shaderBindings) {}
+GlPixelShader::GlPixelShader(ptr<GlDevice> device, GLuint shaderName, ptr<GlShaderBindings> shaderBindings)
+: device(device), shaderName(shaderName), shaderBindings(shaderBindings) {}
 
 GlPixelShader::~GlPixelShader()
 {

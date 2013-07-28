@@ -1,8 +1,10 @@
 #include "GlInternalTexture.hpp"
+#include "GlDevice.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
-GlInternalTexture::GlInternalTexture(GLuint name) : name(name) {}
+GlInternalTexture::GlInternalTexture(ptr<GlDevice> device, GLuint name)
+: device(device), name(name) {}
 
 GlInternalTexture::~GlInternalTexture()
 {

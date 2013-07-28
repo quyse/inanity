@@ -6,14 +6,17 @@
 
 BEGIN_INANITY_GRAPHICS
 
+class GlDevice;
+
 /// Класс индексного буфера OpenGL.
 class GlIndexBuffer : public IndexBuffer
 {
 private:
+	ptr<GlDevice> device;
 	GLuint name;
 
 public:
-	GlIndexBuffer(GLuint name, int indicesCount, int indexSize);
+	GlIndexBuffer(ptr<GlDevice> device, GLuint name, int indicesCount, int indexSize);
 	~GlIndexBuffer();
 
 	GLuint GetName() const;

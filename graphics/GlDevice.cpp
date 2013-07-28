@@ -329,7 +329,7 @@ ptr<RenderBuffer> GlDevice::CreateRenderBuffer(int width, int height, PixelForma
 		GLuint textureName;
 		glGenTextures(1, &textureName);
 		GlSystem::CheckErrors("Can't gen texture");
-		ptr<GlInternalTexture> internalTexture = NEW(GlInternalTexture(textureName));
+		ptr<GlInternalTexture> internalTexture = NEW(GlInternalTexture(this, textureName));
 		glBindTexture(GL_TEXTURE_2D, textureName);
 		GlSystem::CheckErrors("Can't bind texture");
 
@@ -363,7 +363,7 @@ ptr<DepthStencilBuffer> GlDevice::CreateDepthStencilBuffer(int width, int height
 		GLuint textureName;
 		glGenTextures(1, &textureName);
 		GlSystem::CheckErrors("Can't gen textures");
-		ptr<GlInternalTexture> internalTexture = NEW(GlInternalTexture(textureName));
+		ptr<GlInternalTexture> internalTexture = NEW(GlInternalTexture(this, textureName));
 		glBindTexture(GL_TEXTURE_2D, textureName);
 		GlSystem::CheckErrors("Can't bind texture");
 
@@ -433,7 +433,7 @@ ptr<VertexShader> GlDevice::CreateVertexShader(ptr<File> file)
 		ptr<GlShaderBindings> shaderBindings;
 		CompileShader(shaderName, file, shaderBindings);
 
-		return NEW(GlVertexShader(shaderName, shaderBindings));
+		return NEW(GlVertexShader(this, shaderName, shaderBindings));
 	}
 	catch(Exception* exception)
 	{
@@ -451,7 +451,7 @@ ptr<PixelShader> GlDevice::CreatePixelShader(ptr<File> file)
 		ptr<GlShaderBindings> shaderBindings;
 		CompileShader(shaderName, file, shaderBindings);
 
-		return NEW(GlPixelShader(shaderName, shaderBindings));
+		return NEW(GlPixelShader(this, shaderName, shaderBindings));
 	}
 	catch(Exception* exception)
 	{
@@ -466,7 +466,7 @@ ptr<UniformBuffer> GlDevice::CreateUniformBuffer(int size)
 		GLuint bufferName;
 		glGenBuffers(1, &bufferName);
 		GlSystem::CheckErrors("Can't gen buffer");
-		ptr<GlUniformBuffer> uniformBuffer = NEW(GlUniformBuffer(bufferName, size));
+		ptr<GlUniformBuffer> uniformBuffer = NEW(GlUniformBuffer(this, bufferName, size));
 
 		glBindBuffer(GL_UNIFORM_BUFFER, bufferName);
 		GlSystem::CheckErrors("Can't bind buffer");
@@ -489,7 +489,7 @@ ptr<VertexBuffer> GlDevice::CreateStaticVertexBuffer(ptr<File> file, ptr<VertexL
 		GLuint bufferName;
 		glGenBuffers(1, &bufferName);
 		GlSystem::CheckErrors("Can't gen buffer");
-		ptr<GlVertexBuffer> vertexBuffer = NEW(GlVertexBuffer(bufferName, file->GetSize() / layout->GetStride(), layout));
+		ptr<GlVertexBuffer> vertexBuffer = NEW(GlVertexBuffer(this, bufferName, file->GetSize() / layout->GetStride(), layout));
 
 		glBindBuffer(GL_ARRAY_BUFFER, bufferName);
 		GlSystem::CheckErrors("Can't bind buffer");
@@ -512,7 +512,7 @@ ptr<VertexBuffer> GlDevice::CreateDynamicVertexBuffer(int size, ptr<VertexLayout
 		GLuint bufferName;
 		glGenBuffers(1, &bufferName);
 		GlSystem::CheckErrors("Can't gen buffer");
-		ptr<GlVertexBuffer> vertexBuffer = NEW(GlVertexBuffer(bufferName, size / layout->GetStride(), layout));
+		ptr<GlVertexBuffer> vertexBuffer = NEW(GlVertexBuffer(this, bufferName, size / layout->GetStride(), layout));
 
 		glBindBuffer(GL_ARRAY_BUFFER, bufferName);
 		GlSystem::CheckErrors("Can't bind buffer");
@@ -535,7 +535,7 @@ ptr<IndexBuffer> GlDevice::CreateStaticIndexBuffer(ptr<File> file, int indexSize
 		GLuint bufferName;
 		glGenBuffers(1, &bufferName);
 		GlSystem::CheckErrors("Can't gen buffer");
-		ptr<GlIndexBuffer> indexBuffer = NEW(GlIndexBuffer(bufferName, file->GetSize() / indexSize, indexSize));
+		ptr<GlIndexBuffer> indexBuffer = NEW(GlIndexBuffer(this, bufferName, file->GetSize() / indexSize, indexSize));
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName);
 		GlSystem::CheckErrors("Can't bind buffer");
@@ -615,7 +615,7 @@ ptr<AttributeBinding> GlDevice::CreateAttributeBinding(ptr<AttributeLayout> layo
 			GlSystem::CheckErrors("Can't gen vertex array");
 
 			// сразу создать привязку
-			ptr<AttributeBinding> binding = NEW(GlAttributeBinding(vertexArrayName));
+			ptr<AttributeBinding> binding = NEW(GlAttributeBinding(this, vertexArrayName));
 
 			// задать все настройки для VAO
 
@@ -668,7 +668,7 @@ ptr<AttributeBinding> GlDevice::CreateAttributeBinding(ptr<AttributeLayout> layo
 		else
 		{
 			// создать привязку
-			ptr<GlAttributeBinding> binding = NEW(GlAttributeBinding(0));
+			ptr<GlAttributeBinding> binding = NEW(GlAttributeBinding(this, 0));
 
 			const AttributeLayout::Elements& elements = layout->GetElements();
 			const AttributeLayout::Slots& slots = layout->GetSlots();
@@ -713,7 +713,7 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data)
 		GLuint textureName;
 		glGenTextures(1, &textureName);
 		GlSystem::CheckErrors("Can't gen texture");
-		ptr<GlInternalTexture> internalTexture = NEW(GlInternalTexture(textureName));
+		ptr<GlInternalTexture> internalTexture = NEW(GlInternalTexture(this, textureName));
 
 		int mips = data->GetImageMips();
 		int realCount = data->GetCount();
@@ -870,7 +870,7 @@ ptr<SamplerState> GlDevice::CreateSamplerState()
 		glGenSamplers(1, &samplerName);
 		GlSystem::CheckErrors("Can't gen sampler");
 
-		return NEW(GlSamplerState(samplerName));
+		return NEW(GlSamplerState(this, samplerName));
 	}
 	catch(Exception* exception)
 	{

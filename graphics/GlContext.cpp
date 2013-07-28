@@ -32,7 +32,7 @@ GlContext::GlContext(ptr<GlDevice> device) :
 	device(device),
 	targetFramebuffer(0), boundFramebuffer(0), boundAttributesCount(0)
 {
-	programCache = NEW(GlInternalProgramCache());
+	programCache = NEW(GlInternalProgramCache(device));
 }
 
 GlContext::~GlContext()
@@ -405,7 +405,7 @@ ptr<GlRenderBuffer> GlContext::GetDummyRenderBuffer(int width, int height)
 		GLuint textureName;
 		glGenTextures(1, &textureName);
 		GlSystem::CheckErrors("Can't gen texture");
-		ptr<GlInternalTexture> internalTexture = NEW(GlInternalTexture(textureName));
+		ptr<GlInternalTexture> internalTexture = NEW(GlInternalTexture(device, textureName));
 		glBindTexture(GL_TEXTURE_2D, textureName);
 		GlSystem::CheckErrors("Can't bind texture");
 

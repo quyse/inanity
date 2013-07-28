@@ -6,14 +6,17 @@
 
 BEGIN_INANITY_GRAPHICS
 
+class GlDevice;
+
 /// Класс вершинного буфера OpenGL.
 class GlVertexBuffer : public VertexBuffer
 {
 private:
+	ptr<GlDevice> device;
 	GLuint name;
 
 public:
-	GlVertexBuffer(GLuint name, int verticesCount, ptr<VertexLayout> layout);
+	GlVertexBuffer(ptr<GlDevice> device, GLuint name, int verticesCount, ptr<VertexLayout> layout);
 	~GlVertexBuffer();
 
 	GLuint GetName() const;
