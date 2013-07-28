@@ -15,6 +15,7 @@ BEGIN_INANITY_GRAPHICS
 
 class Adapter;
 class Device;
+class Context;
 class ShaderCompiler;
 
 /// Класс графической подсистемы.
@@ -28,6 +29,8 @@ public:
 
 	/// Создать главное графическое устройство.
 	virtual ptr<Device> CreateDevice(ptr<Adapter> adapter) = 0;
+	/// Создать основной контект для графического устройства.
+	virtual ptr<Context> CreateContext(ptr<Device> device) = 0;
 
 	/// Создать компилятор шейдеров.
 	virtual ptr<ShaderCompiler> CreateShaderCompiler() = 0;

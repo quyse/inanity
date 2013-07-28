@@ -17,7 +17,6 @@ class Presenter;
 class Output;
 class MonitorMode;
 struct PresentMode;
-class Context;
 class RenderBuffer;
 class DepthStencilBuffer;
 class VertexShader;
@@ -46,9 +45,6 @@ public:
 	/// Создать выходное устройство.
 	/** \param mode Режим экрана, в случае, если режим должен быть полноэкранным. */
 	virtual ptr<Presenter> CreatePresenter(ptr<Output> output, ptr<MonitorMode> mode) = 0;
-
-	/// Получить графический контекст.
-	virtual ptr<Context> GetContext() = 0;
 
 	// ******* Методы для создания ресурсов устройства.
 
