@@ -34,12 +34,15 @@ namespace std
 
 BEGIN_INANITY_GRAPHICS
 
+class Dx11Device;
+
 /// Класс контекста DirectX 11.
 class Dx11Context : public Context
 {
 private:
-	ComPointer<ID3D11Device> device;
-	ComPointer<ID3D11DeviceContext> deviceContext;
+	ptr<Dx11Device> deviceObject;
+	ID3D11Device* device;
+	ID3D11DeviceContext* deviceContext;
 
 	/// Кэш входных разметок по шейдерам.
 	typedef std::unordered_map<Dx11InputLayoutCacheKey, ComPointer<ID3D11InputLayout> > InputLayoutCache;
@@ -62,7 +65,7 @@ private:
 	void SetBufferData(ID3D11Resource* resource, const void* data, int size, int bufferSize);
 
 public:
-	Dx11Context(ComPointer<ID3D11Device> device, ComPointer<ID3D11DeviceContext> deviceContext);
+	Dx11Context(ptr<Dx11Device> deviceObject);
 
 	// методы Context
 

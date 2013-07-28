@@ -8,7 +8,6 @@
 BEGIN_INANITY_GRAPHICS
 
 class Dx11System;
-class Dx11Context;
 class Dx11VertexShader;
 class Dx11InternalInputLayout;
 
@@ -20,20 +19,19 @@ private:
 	ptr<Dx11System> system;
 	/// 3D-устройство.
 	ComPointer<ID3D11Device> device;
-	/// Основной графический контекст.
-	ptr<Dx11Context> context;
+	/// Контекст устройства.
+	ComPointer<ID3D11DeviceContext> deviceContext;
 
 	/// Получить ближайший поддерживаемый режим экрана.
 	/** Получается для output по умолчанию (нулевого). */
 	DXGI_MODE_DESC GetClosestSupportedMode(const DXGI_MODE_DESC& desc) const;
 
 public:
-	Dx11Device(ptr<Dx11System> system, ComPointer<ID3D11Device> device, ptr<Dx11Context> context);
+	Dx11Device(ptr<Dx11System> system, ComPointer<ID3D11Device> device, ComPointer<ID3D11DeviceContext> deviceContext);
 
 	// методы Device
 	ptr<System> GetSystem() const;
 	ptr<Presenter> CreatePresenter(ptr<Output> output, ptr<MonitorMode> mode);
-	ptr<Context> GetContext();
 	ptr<RenderBuffer> CreateRenderBuffer(int width, int height, PixelFormat pixelFormat);
 	ptr<DepthStencilBuffer> CreateDepthStencilBuffer(int width, int height, bool canBeResource);
 	ptr<VertexShader> CreateVertexShader(ptr<File> file);
@@ -49,6 +47,8 @@ public:
 
 	/// Получить интерфейс устройства DirectX 11.
 	ID3D11Device* GetDeviceInterface() const;
+	/// Получить интерфейс контекста устройства DirectX 11.
+	ID3D11DeviceContext* GetDeviceContextInterface() const;
 };
 
 END_INANITY_GRAPHICS

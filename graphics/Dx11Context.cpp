@@ -32,8 +32,11 @@ bool operator==(const Dx11InputLayoutCacheKey& a, const Dx11InputLayoutCacheKey&
 	return a.attributeBinding == b.attributeBinding && a.vertexShader == b.vertexShader;
 }
 
-Dx11Context::Dx11Context(ComPointer<ID3D11Device> device, ComPointer<ID3D11DeviceContext> deviceContext)
-: device(device), deviceContext(deviceContext) {}
+Dx11Context::Dx11Context(ptr<Dx11Device> deviceObject) :
+	deviceObject(deviceObject),
+	device(deviceObject->GetDeviceInterface()),
+	deviceContext(deviceObject->GetDeviceInterface())
+{}
 
 ID3D11InputLayout* Dx11Context::GetInputLayout(ptr<Dx11AttributeBinding> attributeBinding, ptr<Dx11VertexShader> vertexShader)
 {

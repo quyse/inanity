@@ -1,6 +1,5 @@
 #include "Dx11Device.hpp"
 #include "Dx11System.hpp"
-#include "Dx11Context.hpp"
 #include "Dx11Texture.hpp"
 #include "Win32Output.hpp"
 #include "Dx11Presenter.hpp"
@@ -24,10 +23,9 @@
 
 BEGIN_INANITY_GRAPHICS
 
-Dx11Device::Dx11Device(ptr<Dx11System> system, ComPointer<ID3D11Device> device, ptr<Dx11Context> context)
-: system(system), device(device), context(context)
-{
-}
+Dx11Device::Dx11Device(ptr<Dx11System> system, ComPointer<ID3D11Device> device, ComPointer<ID3D11DeviceContext> deviceContext)
+: system(system), device(device), deviceContext(deviceContext)
+{}
 
 ptr<System> Dx11Device::GetSystem() const
 {
@@ -85,11 +83,6 @@ ptr<Presenter> Dx11Device::CreatePresenter(ptr<Output> abstractOutput, ptr<Monit
 	{
 		THROW_SECONDARY_EXCEPTION("Can't create presenter for DX device", exception);
 	}
-}
-
-ptr<Context> Dx11Device::GetContext()
-{
-	return context;
 }
 
 ptr<RenderBuffer> Dx11Device::CreateRenderBuffer(int width, int height, PixelFormat pixelFormat)
@@ -531,6 +524,11 @@ ptr<BlendState> Dx11Device::CreateBlendState()
 ID3D11Device* Dx11Device::GetDeviceInterface() const
 {
 	return device;
+}
+
+ID3D11DeviceContext* Dx11Device::GetDeviceContextInterface() const
+{
+	return deviceContext;
 }
 
 END_INANITY_GRAPHICS

@@ -263,15 +263,26 @@ ptr<Device> Dx11System::CreateDevice(ptr<Adapter> abstractAdapter)
 		ComPointer<ID3D11Device> device = deviceInterface;
 		ComPointer<ID3D11DeviceContext> deviceContext = deviceContextInterface;
 
-		ptr<Dx11Context> context = NEW(Dx11Context(device, deviceContext));
-
 		// вернуть объект
-		return NEW(Dx11Device(this, device, context));
+		return NEW(Dx11Device(this, device, deviceContext));
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create primary device", exception);
+		THROW_SECONDARY_EXCEPTION("Can't create DirectX 11 device", exception);
 	}
+}
+
+ptr<Context> Dx11System::CreateContext(ptr<Device> abstractDevice)
+{
+	BEGIN_TRY();
+
+	ptr<Dx11Device> device = abstractDevice.DynamicCast<Dx11Device>();
+	if(!device)
+		THROW_PRIMARY_EXCEPTION("Wrong device type");
+
+	return NEW(Dx11Context(device));
+
+	END_TRY("Can't create DirectX 11 context");
 }
 
 ptr<ShaderCompiler> Dx11System::CreateShaderCompiler()
