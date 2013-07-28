@@ -2,6 +2,7 @@
 #define ___INANITY_INPUT_WIN32_MANAGER_HPP___
 
 #include "Manager.hpp"
+#include "Key.hpp"
 #include "../windows.hpp"
 
 BEGIN_INANITY_INPUT
@@ -15,6 +16,8 @@ protected:
 
 protected:
 	Win32Manager(HWND hWnd);
+
+	static Key ConvertKey(USHORT key);
 
 public:
 	/// Обработать оконное сообщение.
