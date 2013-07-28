@@ -57,7 +57,10 @@ GlDevice::GlDevice(ptr<GlSystem> system)
 GlDevice::~GlDevice()
 {
 	if(display && glxContext)
+	{
+		glXMakeCurrent(display->GetDisplay(), None, 0);
 		glXDestroyContext(display->GetDisplay(), glxContext);
+	}
 }
 
 #endif
