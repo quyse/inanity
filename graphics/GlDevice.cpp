@@ -38,8 +38,8 @@ BEGIN_INANITY_GRAPHICS
 
 #ifdef ___INANITY_WINDOWS
 
-GlDevice::GlDevice(ptr<GlSystem> system, const String& deviceName, ptr<GlContext> context)
-: system(system), deviceName(deviceName), context(context), hglrc(0) {}
+GlDevice::GlDevice(ptr<GlSystem> system, const String& deviceName)
+: system(system), deviceName(deviceName), hglrc(0) {}
 
 GlDevice::~GlDevice()
 {
@@ -51,8 +51,8 @@ GlDevice::~GlDevice()
 
 #ifdef ___INANITY_LINUX
 
-GlDevice::GlDevice(ptr<GlSystem> system, ptr<GlContext> context)
-: system(system), context(context), glxContext(0) {}
+GlDevice::GlDevice(ptr<GlSystem> system)
+: system(system), glxContext(0) {}
 
 GlDevice::~GlDevice()
 {
@@ -320,11 +320,6 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 	{
 		THROW_SECONDARY_EXCEPTION("Can't create presenter for GL device", exception);
 	}
-}
-
-ptr<Context> GlDevice::GetContext()
-{
-	return context;
 }
 
 ptr<RenderBuffer> GlDevice::CreateRenderBuffer(int width, int height, PixelFormat pixelFormat)

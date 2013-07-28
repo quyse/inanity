@@ -21,6 +21,7 @@ public:
 	// методы System
 	const std::vector<ptr<Adapter> >& GetAdapters();
 	ptr<Device> CreateDevice(ptr<Adapter> adapter);
+	ptr<Context> CreateContext(ptr<Device> device);
 	ptr<ShaderCompiler> CreateShaderCompiler();
 	ptr<Shaders::ShaderGenerator> CreateShaderGenerator();
 

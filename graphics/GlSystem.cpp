@@ -44,17 +44,30 @@ ptr<Device> GlSystem::CreateDevice(ptr<Adapter> abstractAdapter)
 	ptr<Win32Adapter> adapter = abstractAdapter.DynamicCast<Win32Adapter>();
 	if(!adapter)
 		THROW_PRIMARY_EXCEPTION("Wrong adapter type");
-	return NEW(GlDevice(this, adapter->GetId(), NEW(GlContext())));
+	return NEW(GlDevice(this, adapter->GetId()));
 #endif
 
 #ifdef ___INANITY_LINUX
-	return NEW(GlDevice(this, NEW(GlContext())));
+	return NEW(GlDevice(this));
 #endif
 
 	// TODO
 	THROW_PRIMARY_EXCEPTION("Not implemented");
 
 	END_TRY("Can't create OpenGL device");
+}
+
+ptr<Context> GlSystem::CreateContext(ptr<Device> abstractDevice)
+{
+	BEGIN_TRY();
+
+	ptr<GlDevice> device = abstractDevice.DynamicCast<GlDevice>();
+	if(!device)
+		THROW_PRIMARY_EXCEPTION("Wrong device type");
+
+	return NEW(GlContext(device));
+
+	END_TRY("Can't create OpenGL context");
 }
 
 ptr<ShaderCompiler> GlSystem::CreateShaderCompiler()

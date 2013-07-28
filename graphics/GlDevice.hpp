@@ -24,7 +24,6 @@ END_INANITY_PLATFORM
 BEGIN_INANITY_GRAPHICS
 
 class GlSystem;
-class GlContext;
 class GlShaderBindings;
 
 /// Класс графического устройства OpenGL.
@@ -36,8 +35,6 @@ class GlDevice : public Device
 private:
 	/// Графическая система.
 	ptr<GlSystem> system;
-	/// Основной графический контекст.
-	ptr<GlContext> context;
 
 #ifdef ___INANITY_WINDOWS
 	/// Имя графического устройства.
@@ -62,11 +59,11 @@ private:
 public:
 
 #ifdef ___INANITY_WINDOWS
-	GlDevice(ptr<GlSystem> system, const String& deviceName, ptr<GlContext> context);
+	GlDevice(ptr<GlSystem> system, const String& deviceName);
 #endif
 
 #ifdef ___INANITY_LINUX
-	GlDevice(ptr<GlSystem> system, ptr<GlContext> context);
+	GlDevice(ptr<GlSystem> system);
 #endif
 
 	~GlDevice();
@@ -74,7 +71,6 @@ public:
 	// методы Device
 	ptr<System> GetSystem() const;
 	ptr<Presenter> CreatePresenter(ptr<Output> output, ptr<MonitorMode> mode);
-	ptr<Context> GetContext();
 	ptr<RenderBuffer> CreateRenderBuffer(int width, int height, PixelFormat pixelFormat);
 	ptr<DepthStencilBuffer> CreateDepthStencilBuffer(int width, int height, bool canBeResource);
 	ptr<VertexShader> CreateVertexShader(ptr<File> file);

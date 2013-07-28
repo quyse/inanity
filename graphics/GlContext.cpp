@@ -1,4 +1,5 @@
 #include "GlContext.hpp"
+#include "GlDevice.hpp"
 #include "GlSystem.hpp"
 #include "GlInternalProgramCache.hpp"
 #include "GlInternalProgram.hpp"
@@ -27,7 +28,9 @@ BEGIN_INANITY_GRAPHICS
 всё равно всё ясно, что привязано.
 */
 
-GlContext::GlContext() : targetFramebuffer(0), boundFramebuffer(0), boundAttributesCount(0)
+GlContext::GlContext(ptr<GlDevice> device) :
+	device(device),
+	targetFramebuffer(0), boundFramebuffer(0), boundAttributesCount(0)
 {
 	programCache = NEW(GlInternalProgramCache());
 }

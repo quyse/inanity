@@ -7,6 +7,7 @@
 
 BEGIN_INANITY_GRAPHICS
 
+class GlDevice;
 class GlInternalProgramCache;
 class GlInternalProgram;
 class GlRenderBuffer;
@@ -15,6 +16,8 @@ class GlRenderBuffer;
 class GlContext : public Context
 {
 private:
+	ptr<GlDevice> device;
+
 	/// Фреймбуфер для установки нестандартных рендертаргетов (целевой фреймбуфер).
 	GLuint targetFramebuffer;
 	/// Текущий фреймбуфер.
@@ -44,7 +47,7 @@ private:
 	void SetBufferData(GLenum target, GLuint bufferName, const void* data, int size, int bufferSize);
 
 public:
-	GlContext();
+	GlContext(ptr<GlDevice> device);
 	~GlContext();
 
 	// методы Context
