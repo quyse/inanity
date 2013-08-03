@@ -82,10 +82,10 @@ int Dx11Context::GetRasterizerStateKey(const ContextState& contextState)
 			break;
 		}
 
-		ID3D11RasterizerState* rasterizerStateInterface;
-		if(FAILED(device->CreateRasterizerState(&desc, &rasterizerStateInterface)))
+		ComPointer<ID3D11RasterizerState> rasterizerState;
+		if(FAILED(device->CreateRasterizerState(&desc, &rasterizerState)))
 			THROW("Can't create rasterizer state");
-		rasterizerStateCache[key] = rasterizerStateInterface;
+		rasterizerStateCache[key] = rasterizerState;
 	}
 
 	return key;

@@ -3,6 +3,7 @@
 
 #include "AttributeBinding.hpp"
 #include "d3d11.hpp"
+#include "../ComPointer.hpp"
 #include "../String.hpp"
 #include <vector>
 
@@ -27,7 +28,7 @@ private:
 public:
 	void Initialize(ptr<AttributeLayout> layout);
 
-	ID3D11InputLayout* CreateInputLayout(ID3D11Device* deviceInterface, Dx11VertexShader* vertexShader);
+	ComPointer<ID3D11InputLayout> CreateInputLayout(ID3D11Device* deviceInterface, Dx11VertexShader* vertexShader);
 };
 
 END_INANITY_GRAPHICS

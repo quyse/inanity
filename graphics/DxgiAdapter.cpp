@@ -39,7 +39,7 @@ const std::vector<ptr<Monitor> >& DxgiAdapter::GetMonitors()
 		{
 			for(UINT i = 0; ; ++i)
 			{
-				IDXGIOutput* outputInterface;
+				ComPointer<IDXGIOutput> outputInterface;
 				HRESULT hr = adapter->EnumOutputs(i, &outputInterface);
 				if(SUCCEEDED(hr))
 					monitors.push_back(NEW(DxgiMonitor(outputInterface)));

@@ -71,20 +71,20 @@ void Dx11AttributeBinding::Initialize(ptr<AttributeLayout> layout)
 	}
 }
 
-ID3D11InputLayout* Dx11AttributeBinding::CreateInputLayout(ID3D11Device* deviceInterface, Dx11VertexShader* vertexShader)
+ComPointer<ID3D11InputLayout> Dx11AttributeBinding::CreateInputLayout(ID3D11Device* deviceInterface, Dx11VertexShader* vertexShader)
 {
 	// получить код шейдера
 	ptr<File> code = vertexShader->GetCode();
 
 	// создать разметку
-	ID3D11InputLayout* inputLayoutInterface;
+	ComPointer<ID3D11InputLayout> inputLayout;
 	if(FAILED(deviceInterface->CreateInputLayout(
 		&*descs.begin(), (UINT)descs.size(),
-		code->GetData(), code->GetSize(), &inputLayoutInterface
+		code->GetData(), code->GetSize(), &inputLayout
 	)))
 		THROW("Can't create input layout");
 
-	return inputLayoutInterface;
+	return inputLayout;
 }
 
 END_INANITY_GRAPHICS

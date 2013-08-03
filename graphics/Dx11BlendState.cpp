@@ -111,11 +111,8 @@ void Dx11BlendState::Update(ID3D11Device* deviceInterface)
 		d.DestBlendAlpha = ConvertAlphaSource(destAlpha);
 		d.BlendOpAlpha = ConvertOperation(alphaOperation);
 
-		ID3D11BlendState* blendStateInterface;
-		if(FAILED(deviceInterface->CreateBlendState(&desc, &blendStateInterface)))
+		if(FAILED(deviceInterface->CreateBlendState(&desc, &blendState)))
 			THROW("Can't create blend state");
-
-		blendState = blendStateInterface;
 
 		dirty = false;
 	}

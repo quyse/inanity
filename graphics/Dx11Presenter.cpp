@@ -34,18 +34,16 @@ ptr<RenderBuffer> Dx11Presenter::GetBackBuffer()
 {
 	if(!backBuffer)
 	{
-		ID3D11Texture2D* backBufferTextureInterface;
-		if(FAILED(swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backBufferTextureInterface)))
+		ComPointer<ID3D11Texture2D> backBufferTexture;
+		if(FAILED(swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backBufferTexture)))
 			THROW("Can't get back buffer texture");
 
 		ID3D11Device* deviceInterface = device->GetDeviceInterface();
 
-		ID3D11RenderTargetView* renderTargetInterface;
-		HRESULT hr = deviceInterface->CreateRenderTargetView(backBufferTextureInterface, 0, &renderTargetInterface);
-		backBufferTextureInterface->Release();
-		if(FAILED(hr))
+		ComPointer<ID3D11RenderTargetView> renderTarget;
+		if(FAILED(deviceInterface->CreateRenderTargetView(backBufferTexture, 0, &renderTarget)))
 			THROW("Can't create back buffer render target view");
-		backBuffer = NEW(Dx11RenderBuffer(renderTargetInterface));
+		backBuffer = NEW(Dx11RenderBuffer(renderTarget));
 	}
 	return backBuffer;
 }

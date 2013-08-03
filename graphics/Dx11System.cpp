@@ -30,10 +30,8 @@ IDXGIFactory* Dx11System::GetDXGIFactory()
 	{
 		Platform::DllFunction<decltype(&CreateDXGIFactory)> functionCreateDXGIFactory("dxgi.dll", "CreateDXGIFactory");
 
-		IDXGIFactory* dxgiFactoryInterface;
-		if(FAILED(functionCreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&dxgiFactoryInterface)))
+		if(FAILED(functionCreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&dxgiFactory)))
 			THROW("Can't create DXGI Factory");
-		dxgiFactory = dxgiFactoryInterface;
 	}
 	return dxgiFactory;
 }
@@ -211,7 +209,7 @@ const std::vector<ptr<Adapter> >& Dx11System::GetAdapters()
 
 			for(UINT i = 0; ; ++i)
 			{
-				IDXGIAdapter* adapterInterface;
+				ComPointer<IDXGIAdapter> adapterInterface;
 				HRESULT hr = factory->EnumAdapters(i, &adapterInterface);
 				if(SUCCEEDED(hr))
 					adapters.push_back(NEW(DxgiAdapter(adapterInterface)));
@@ -252,16 +250,13 @@ ptr<Device> Dx11System::CreateDevice(ptr<Adapter> abstractAdapter)
 		// уровень устройства - DirectX 10
 		D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_10_0;
 		// создать устройство
-		ID3D11Device* deviceInterface;
-		ID3D11DeviceContext* deviceContextInterface;
+		ComPointer<ID3D11Device> device;
+		ComPointer<ID3D11DeviceContext> deviceContext;
 		D3D_FEATURE_LEVEL featureLevelSupported;
 		// здесь необходимо указывать D3D_DRIVER_TYPE_UNKNOWN, если мы указываем adapter.
 		// http://msdn.microsoft.com/en-us/library/ff476082 (remarks)
-		if(FAILED(functionD3D11CreateDevice(adapterInterface, D3D_DRIVER_TYPE_UNKNOWN, NULL, flags, &featureLevel, 1, D3D11_SDK_VERSION, &deviceInterface, &featureLevelSupported, &deviceContextInterface)))
+		if(FAILED(functionD3D11CreateDevice(adapterInterface, D3D_DRIVER_TYPE_UNKNOWN, NULL, flags, &featureLevel, 1, D3D11_SDK_VERSION, &device, &featureLevelSupported, &deviceContext)))
 			THROW("Can't create device and context");
-
-		ComPointer<ID3D11Device> device = deviceInterface;
-		ComPointer<ID3D11DeviceContext> deviceContext = deviceContextInterface;
 
 		// вернуть объект
 		return NEW(Dx11Device(this, device, deviceContext));
