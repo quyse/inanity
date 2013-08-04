@@ -25,4 +25,6 @@ The whole engine is work-in-progress, it is far from finished state. There are a
 
 ## License
 
-The license of my own code is MIT (see LICENSE file). See NOTICE file for the list of used third-party libraries and licenses.
+All the code is mine (Copyright (c) Alexander Bich aka Quyse Lert) except third-party code in `deps` directory. All my code was written from scratch.
+* My code is licensed under MIT. See LICENSE file.
+* All third-party code allows permissive licensing in some way. See NOTICE file for the full list of libraries and licenses.
