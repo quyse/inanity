@@ -1,13 +1,11 @@
 #ifndef ___INANITY_INANITY_LUA_HPP___
 #define ___INANITY_INANITY_LUA_HPP___
 
-#include "lua/State.hpp"
-#include "lua/Script.hpp"
-#include "lua/callable.hpp"
-#include "lua/reflection.hpp"
-#include "lua/stuff.hpp"
-#include "lua/thunks.hpp"
-#include "lua/userdata.hpp"
-#include "lua/values.hpp"
+#include "script/lua/Function.hpp"
+#include "script/lua/State.hpp"
+#include "script/lua/stuff.hpp"
+#include "script/lua/thunks.ipp"
+#include "script/lua/userdata.hpp"
+#include "script/lua/values.ipp"
 
 #endif

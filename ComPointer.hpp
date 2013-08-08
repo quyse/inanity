@@ -25,14 +25,12 @@ private:
 	T* object;
 
 public:
-	//конструктор
 	inline ComPointer(const ComPointer<T>& p)
 	{
 		object = p.object;
 		if(object) object->AddRef();
 	}
 
-	//конструктор, создающий указатель из другого указателя
 	template <typename TT>
 	inline ComPointer(const ComPointer<TT>& p)
 	{
@@ -88,6 +86,14 @@ public:
 	inline operator bool() const
 	{
 		return !!object;
+	}
+
+	/// Address-of operator.
+	/** Primarily for using in COM-getting functions. Such functions give a one
+	reference automatically, so reference counting will be ok. */
+	inline T** operator&()
+	{
+		return &object;
 	}
 };
 

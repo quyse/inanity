@@ -1,7 +1,10 @@
 #include "GlUniformBuffer.hpp"
+#include "GlDevice.hpp"
 
-GlUniformBuffer::GlUniformBuffer(GLuint name, size_t size)
-: UniformBuffer(size), name(name) {}
+BEGIN_INANITY_GRAPHICS
+
+GlUniformBuffer::GlUniformBuffer(ptr<GlDevice> device, GLuint name, size_t size)
+: UniformBuffer(size), device(device), name(name) {}
 
 GlUniformBuffer::~GlUniformBuffer()
 {
@@ -12,3 +15,5 @@ GLuint GlUniformBuffer::GetName() const
 {
 	return name;
 }
+
+END_INANITY_GRAPHICS

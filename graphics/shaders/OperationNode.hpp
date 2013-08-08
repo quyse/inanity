@@ -26,17 +26,31 @@ public:
 		operationLessEqual,
 		operationEqual,
 		operationNotEqual,
+		operationSetPosition,
+		operationGetInstanceID,
 		operationFloat11to2,
 		operationFloat111to3,
 		operationFloat1111to4,
 		operationFloat31to4,
+		operationFloat211to4,
 		operationDot,
 		operationCross,
 		operationMul,
+		operationLength,
 		operationNormalize,
 		operationPow,
 		operationMin,
-		operationMax
+		operationMax,
+		operationAbs,
+		operationSin,
+		operationCos,
+		operationExp,
+		operationExp2,
+		operationLog,
+		operationSaturate,
+		operationDdx,
+		operationDdy,
+		operationClip
 	};
 
 private:

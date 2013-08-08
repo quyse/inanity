@@ -1,6 +1,10 @@
 #include "GlInternalProgram.hpp"
+#include "GlDevice.hpp"
 
-GlInternalProgram::GlInternalProgram(GLuint name) : name(name) {}
+BEGIN_INANITY_GRAPHICS
+
+GlInternalProgram::GlInternalProgram(ptr<GlDevice> device, GLuint name)
+: device(device), name(name) {}
 
 GlInternalProgram::~GlInternalProgram()
 {
@@ -12,7 +16,4 @@ GLuint GlInternalProgram::GetName() const
 	return name;
 }
 
-std::vector<String>& GlInternalProgram::GetAttributes()
-{
-	return attributes;
-}
+END_INANITY_GRAPHICS

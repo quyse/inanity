@@ -6,15 +6,14 @@
 #include "UniformBuffer.hpp"
 #include "VertexShader.hpp"
 #include "PixelShader.hpp"
+#include "AttributeBinding.hpp"
 #include "VertexBuffer.hpp"
 #include "IndexBuffer.hpp"
+#include "BlendState.hpp"
+
+BEGIN_INANITY_GRAPHICS
 
 Context::Context() : forceReset(true) {}
-
-const ContextState& Context::GetBoundState() const
-{
-	return boundState;
-}
 
 ContextState& Context::GetTargetState()
 {
@@ -25,3 +24,5 @@ void Context::Reset()
 {
 	forceReset = true;
 }
+
+END_INANITY_GRAPHICS

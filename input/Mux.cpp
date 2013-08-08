@@ -2,6 +2,8 @@
 #include "Processor.hpp"
 #include "Frame.hpp"
 
+BEGIN_INANITY_INPUT
+
 void Mux::AddInputProcessor(ptr<Processor> processor)
 {
 	processors.push_back(processor);
@@ -22,3 +24,5 @@ void Mux::ProcessEvents(ptr<Frame> frame)
 	for(size_t i = 0; i < processors.size(); ++i)
 		processors[i]->ProcessState(state);
 }
+
+END_INANITY_INPUT

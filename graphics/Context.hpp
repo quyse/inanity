@@ -40,10 +40,6 @@ public:
 	/// Очистить глубину и трафарет в depth-stencil буфере.
 	virtual void ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, float depth, unsigned stencil) = 0;
 
-	/// Получить актуальное состояние контекста.
-	/** Может использоваться, чтобы сделать из него
-	новое состояние с минимальным количеством изменений. */
-	const ContextState& GetBoundState() const;
 	/// Получить требуемое состояние контекста.
 	/** Его можно менять, чтобы задать то, что требуется. */
 	ContextState& GetTargetState();
@@ -55,14 +51,13 @@ public:
 	/* Непосредственные методы. */
 	/// Указать данные для uniform-буфера.
 	/** Размер передаваемых данных должен совпадать с размером буфера. */
-	virtual void SetUniformBufferData(UniformBuffer* buffer, const void* data, size_t size) = 0;
+	virtual void SetUniformBufferData(UniformBuffer* buffer, const void* data, int size) = 0;
+	/// Указать данные для динамического вершинного буфера.
+	virtual void SetVertexBufferData(VertexBuffer* buffer, const void* data, int size) = 0;
 
 	//******* Методы рисования.
 	/* Непосредственные методы. Кроме того, могут выполнять ранее отложенные действия по привязке данных. */
 	/// Выполнить рисование.
-	/**
-	\param indicesCount Количество индексов. -1, если нужно нарисовать весь индексный буфер.
-	*/
 	virtual void Draw() = 0;
 	/// Выполнить instanced-рисование.
 	virtual void DrawInstanced(int instancesCount) = 0;

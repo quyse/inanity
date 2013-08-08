@@ -10,6 +10,8 @@
 #include "../FileInputStream.hpp"
 #include "../Exception.hpp"
 
+BEGIN_INANITY_CRYPTO
+
 StreamSigner::StreamSigner(ptr<HashAlgorithm> blockHashAlgorithm, ptr<HashAlgorithm> signatureHashAlgorithm, ptr<SignatureAlgorithm> signatureAlgorithm, size_t blockSize)
 : blockHashAlgorithm(blockHashAlgorithm), signatureHashAlgorithm(signatureHashAlgorithm), signatureAlgorithm(signatureAlgorithm), blockSize(blockSize)
 {
@@ -17,11 +19,11 @@ StreamSigner::StreamSigner(ptr<HashAlgorithm> blockHashAlgorithm, ptr<HashAlgori
 	{
 		// проверить совместимость алгоритмов
 		if(signatureAlgorithm->GetDataSize() != signatureHashAlgorithm->GetHashSize())
-			THROW_PRIMARY_EXCEPTION("Signature algorithm and signature hash algorithm are not compatible");
+			THROW("Signature algorithm and signature hash algorithm are not compatible");
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create stream signer", exception);
+		THROW_SECONDARY("Can't create stream signer", exception);
 	}
 }
 
@@ -31,7 +33,7 @@ void StreamSigner::WriteSigningHeader(ptr<InputStream> sourceStream, ptr<OutputS
 	{
 		// проверить, что закрытый ключ имеет правильный размер
 		if(privateKey->GetSize() != signatureAlgorithm->GetPrivateKeySize())
-			THROW_PRIMARY_EXCEPTION("Invalid private key size");
+			THROW("Invalid private key size");
 
 		ptr<StreamWriter> writer = NEW(StreamWriter(destStream));
 
@@ -42,7 +44,7 @@ void StreamSigner::WriteSigningHeader(ptr<InputStream> sourceStream, ptr<OutputS
 		{
 			ptr<StreamHasher> hasher = NEW(StreamHasher(blockHashAlgorithm, blockSize));
 			ptr<MemoryStream> hashesStream = NEW(MemoryStream());
-			ptr<OutputStream> hasherStream = hasher->CreateHasherStream(hashesStream);
+			ptr<StreamHasher::HasherStream> hasherStream = hasher->CreateHasherStream(hashesStream);
 			sourceDataSize = hasherStream->ReadAllFromStream(sourceStream);
 			hasherStream->Flush();
 			hashes = hashesStream->ToFile();
@@ -59,7 +61,7 @@ void StreamSigner::WriteSigningHeader(ptr<InputStream> sourceStream, ptr<OutputS
 			// для этого получить хеш от хешей
 			ptr<HashStream> hashStream = signatureHashAlgorithm->CreateHashStream();
 			hashStream->Write(hashes->GetData(), hashes->GetSize());
-			hashStream->Flush();
+			hashStream->End();
 			ptr<MemoryFile> hashesHash = NEW(MemoryFile(hashStream->GetHashSize()));
 			hashStream->GetHash(hashesHash->GetData());
 			// сделать подпись
@@ -71,7 +73,7 @@ void StreamSigner::WriteSigningHeader(ptr<InputStream> sourceStream, ptr<OutputS
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't sign file with stream signer", exception);
+		THROW_SECONDARY("Can't sign file with stream signer", exception);
 	}
 }
 
@@ -87,11 +89,11 @@ StreamSigner::VerifyStream::VerifyStream(ptr<StreamSigner> signer, ptr<InputStre
 	{
 		// проверить, что открытый ключ имеет правильный размер
 		if(publicKey->GetSize() != signer->signatureAlgorithm->GetPublicKeySize())
-			THROW_PRIMARY_EXCEPTION("Invalid public key size");
+			THROW("Invalid public key size");
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create stream signer\'s verify stream", exception);
+		THROW_SECONDARY("Can't create stream signer\'s verify stream", exception);
 	}
 }
 
@@ -111,20 +113,20 @@ void StreamSigner::VerifyStream::ReadHeader()
 		ptr<MemoryFile> hashesHash = NEW(MemoryFile(signer->signatureHashAlgorithm->GetHashSize()));
 		ptr<HashStream> hashStream = signer->signatureHashAlgorithm->CreateHashStream();
 		hashStream->Write(hashes->GetData(), hashes->GetSize());
-		hashStream->Flush();
+		hashStream->End();
 		hashStream->GetHash(hashesHash->GetData());
 		// считать цифровую подпись хешей
 		ptr<MemoryFile> signature = NEW(MemoryFile(signer->signatureAlgorithm->GetSignatureSize()));
 		reader->Read(signature->GetData(), signature->GetSize());
 		// и проверить её
 		if(!signer->signatureAlgorithm->Verify(hashesHash->GetData(), publicKey->GetData(), signature->GetData()))
-			THROW_PRIMARY_EXCEPTION("Wrong hashes signature");
+			THROW("Wrong hashes signature");
 		// создать поток для считывания данных
 		verifyStream = MakePointer(NEW(StreamHasher(signer->blockHashAlgorithm, signer->blockSize)))->CreateVerifyStream(sourceStream, NEW(FileInputStream(hashes)));
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't read signed stream\'s header", exception);
+		THROW_SECONDARY("Can't read signed stream\'s header", exception);
 	}
 }
 
@@ -139,6 +141,8 @@ size_t StreamSigner::VerifyStream::Read(void* data, size_t size)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't read from signed stream", exception);
+		THROW_SECONDARY("Can't read from signed stream", exception);
 	}
 }
+
+END_INANITY_CRYPTO

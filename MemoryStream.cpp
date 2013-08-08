@@ -3,6 +3,8 @@
 #include "PartFile.hpp"
 #include <string.h>
 
+BEGIN_INANITY
+
 MemoryStream::MemoryStream() : dataSize(0), lastDataSize(0), files(1)
 {
 	files[0] = NEW(MemoryFile(0x1000));
@@ -64,3 +66,5 @@ ptr<File> MemoryStream::ToFile()
 	Compact();
 	return dataSize < files[0]->GetSize() ? NEW(PartFile(files[0], files[0]->GetData(), dataSize)) : files[0];
 }
+
+END_INANITY

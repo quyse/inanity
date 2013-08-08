@@ -2,7 +2,6 @@
 #define ___INANITY_FONT_CHAR_HPP___
 
 #include "graphics.hpp"
-#include "../inanity-math.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
@@ -13,25 +12,23 @@ BEGIN_INANITY_GRAPHICS
 Ну, или отталкиваться от этого.
 */
 
-//структура символа в наборе
+/// Структура символа в наборе.
 struct FontChar
 {
-	//текстурные координаты левого нижнего угла
-	float2 firstUV;
-	//текстурные координаты правого верхнего угла
-	float2 secondUV;
+	/// Текстурные координаты левого нижнего угла
+	vec2 firstUV;
+	/// Текстурные координаты правого верхнего угла
+	vec2 secondUV;
 
-	//смещение на экране левого нижнего угла (в пикселах)
-	float2 screenFirstUV;
-	//смещение на экране правого верхнего угла (в пикселах)
-	float2 screenSecondUV;
+	/// Смещение на экране левого нижнего угла (в пикселах)
+	vec2 screenFirstUV;
+	/// Смещение на экране правого верхнего угла (в пикселах)
+	vec2 screenSecondUV;
 
-	//логическая ширина символа
+	/// Логическая ширина символа
 	float width;
 
-	FontChar() : firstUV(0, 0), screenFirstUV(0, 0), screenSecondUV(0, 0), width(0)
-	{
-	}
+	FontChar() : firstUV(0, 0), screenFirstUV(0, 0), screenSecondUV(0, 0), width(0) {}
 };
 
 END_INANITY_GRAPHICS

@@ -1,6 +1,8 @@
 #include "Semaphore.hpp"
 #include "Exception.hpp"
 
+BEGIN_INANITY
+
 Semaphore::Semaphore(int initialCount)
 {
 	try
@@ -12,11 +14,11 @@ Semaphore::Semaphore(int initialCount)
 #ifdef ___INANITY_LINUX
 		if(sem_init(&sem, 0, 0) != 0)
 #endif
-			THROW_SECONDARY_EXCEPTION("Can't initialize semaphore", Exception::SystemError());
+			THROW_SECONDARY("Can't initialize semaphore", Exception::SystemError());
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create semaphore", exception);
+		THROW_SECONDARY("Can't create semaphore", exception);
 	}
 }
 
@@ -35,7 +37,7 @@ void Semaphore::Acquire()
 #ifdef ___INANITY_LINUX
 	if(sem_wait(&sem) != 0)
 #endif
-		THROW_SECONDARY_EXCEPTION("Can't acquire semaphore", Exception::SystemError());
+		THROW_SECONDARY("Can't acquire semaphore", Exception::SystemError());
 }
 
 bool Semaphore::TryAcquire()
@@ -57,7 +59,7 @@ bool Semaphore::TryAcquire()
 		return false;
 #endif
 
-	THROW_SECONDARY_EXCEPTION("Error trying acquire semaphore", Exception::SystemError());
+	THROW_SECONDARY("Error trying acquire semaphore", Exception::SystemError());
 }
 
 void Semaphore::Release(int count)
@@ -70,5 +72,7 @@ void Semaphore::Release(int count)
 	for(i = 0; i < count && sem_post(&sem) == 0; ++i);
 	if(i < count)
 #endif
-		THROW_SECONDARY_EXCEPTION("Can't release semaphore", Exception::SystemError());
+		THROW_SECONDARY("Can't release semaphore", Exception::SystemError());
 }
+
+END_INANITY

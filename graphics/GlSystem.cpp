@@ -1,51 +1,90 @@
 #include "GlSystem.hpp"
 #include "GlDevice.hpp"
 #include "GlContext.hpp"
+#include "GlShaderCompiler.hpp"
+#include "shaders/GlslGenerator.hpp"
 #ifdef ___INANITY_WINDOWS
-#include "../Win32Window.hpp"
+#include "Win32Adapter.hpp"
+#include "../platform/Win32Window.hpp"
 #include "../Strings.hpp"
+#endif
+#ifdef ___INANITY_LINUX
+#include "X11Adapter.hpp"
+#include "../platform/X11Window.hpp"
+#include "../platform/X11Display.hpp"
 #endif
 #include "../Exception.hpp"
 
-ptr<Window> GlSystem::CreateDefaultWindow()
+BEGIN_INANITY_GRAPHICS
+
+GlSystem::GlSystem() : adaptersInitialized(false) {}
+
+const std::vector<ptr<Adapter> >& GlSystem::GetAdapters()
 {
+	if(!adaptersInitialized)
+	{
 #ifdef ___INANITY_WINDOWS
-	return Win32Window::CreateForOpenGL();
+		Win32Adapter::GetAdapters(adapters);
 #endif
 #ifdef ___INANITY_LINUX
-	return NEW(X11Window());
+		X11Adapter::GetAdapters(adapters);
 #endif
+
+		adaptersInitialized = true;
+	}
+
+	return adapters;
 }
 
-ptr<Device> GlSystem::CreatePrimaryDevice()
+ptr<Device> GlSystem::CreateDevice(ptr<Adapter> abstractAdapter)
 {
-	try
-	{
-#ifdef ___INANITY_WINDOWS
-		// получить всё устройства
-		DISPLAY_DEVICE deviceInfo;
-		deviceInfo.cb = sizeof(deviceInfo);
-		for(DWORD i = 0; EnumDisplayDevices(NULL, i, &deviceInfo, 0); ++i)
-			// если устройство primary
-			if(deviceInfo.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE)
-				// вернуть его
-				return NEW(GlDevice(this, Strings::Unicode2UTF8(deviceInfo.DeviceName), NEW(GlContext())));
+	BEGIN_TRY();
 
-		// в MSDN написано, устройство всегда есть, так что этого быть не должно
-		THROW_PRIMARY_EXCEPTION("Can't find primary device");
+#ifdef ___INANITY_WINDOWS
+	ptr<Win32Adapter> adapter = abstractAdapter.DynamicCast<Win32Adapter>();
+	if(!adapter)
+		THROW("Wrong adapter type");
+	return NEW(GlDevice(this, adapter->GetId()));
 #endif
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY_EXCEPTION("Can't create primary device", exception);
-	}
+
+#ifdef ___INANITY_LINUX
+	return NEW(GlDevice(this));
+#endif
+
+	// TODO
+	THROW("Not implemented");
+
+	END_TRY("Can't create OpenGL device");
+}
+
+ptr<Context> GlSystem::CreateContext(ptr<Device> abstractDevice)
+{
+	BEGIN_TRY();
+
+	ptr<GlDevice> device = abstractDevice.DynamicCast<GlDevice>();
+	if(!device)
+		THROW("Wrong device type");
+
+	return NEW(GlContext(device));
+
+	END_TRY("Can't create OpenGL context");
+}
+
+ptr<ShaderCompiler> GlSystem::CreateShaderCompiler()
+{
+	return NEW(GlShaderCompiler());
+}
+
+ptr<Shaders::ShaderGenerator> GlSystem::CreateShaderGenerator()
+{
+	return NEW(Shaders::GlslGenerator());
 }
 
 void GlSystem::InitGLEW()
 {
 	GLenum err = glewInit();
 	if(err != GLEW_OK)
-		THROW_PRIMARY_EXCEPTION(String("Can't initialize GLEW: ") + (const char*)glewGetErrorString(err));
+		THROW(String("Can't initialize GLEW: ") + (const char*)glewGetErrorString(err));
 }
 
 void GlSystem::ClearErrors()
@@ -93,41 +132,121 @@ void GlSystem::CheckErrors(const char* primaryExceptionString)
 		// всё, ошибки кончились, и флаги ошибок очищены
 		// бросить исключение
 		if(primaryExceptionString)
-			THROW_SECONDARY_EXCEPTION(primaryExceptionString, NEW(Exception(errorStrings)));
+			THROW_SECONDARY(primaryExceptionString, NEW(Exception(errorStrings)));
 		else
-			THROW_PRIMARY_EXCEPTION(errorStrings);
+			THROW(errorStrings);
 	}
 }
 
 bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, GLint& internalFormat, GLenum& format, GLenum& type)
 {
-	switch(pixelFormat)
+#define T(t) PixelFormat::type##t
+#define P(p) PixelFormat::pixel##p
+#define F(f) PixelFormat::format##f
+#define S(s) PixelFormat::size##s
+#define C(c) PixelFormat::compression##c
+	switch(pixelFormat.type)
 	{
-	case PixelFormats::intR8G8B8A8:
-		internalFormat = GL_RGBA8;
-		format = GL_RGBA;
-		type = GL_UNSIGNED_BYTE;
-		return true;
-	case PixelFormats::floatR11G11B10:
-		internalFormat = GL_R11F_G11F_B10F;
-		format = GL_RGB;
-		type = GL_UNSIGNED_BYTE;
-		return true;
-	//case PixelFormats::typelessR32:
-	case PixelFormats::floatR32:
-		internalFormat = GL_R32F;
-		format = GL_RED;
-		type = GL_UNSIGNED_BYTE;
-		return true;
-	case PixelFormats::floatR32Depth:
-		internalFormat = GL_DEPTH_COMPONENT32F;
-		format = GL_DEPTH_COMPONENT;
-		type = GL_FLOAT;
-		return true;
-	case PixelFormats::unknown:
-	default:
-		return false;
+	case T(Unknown): break;
+	case T(Uncompressed):
+		switch(pixelFormat.pixel)
+		{
+		case P(R):
+			format = GL_RED;
+			switch(pixelFormat.format)
+			{
+			case F(Untyped): break;
+			case F(Uint):
+				switch(pixelFormat.size)
+				{
+				case S(8bit): type = GL_UNSIGNED_BYTE; internalFormat = GL_R8; return true;
+				case S(16bit): type = GL_UNSIGNED_SHORT; internalFormat = GL_R16; return true;
+				}
+				break;
+			case F(Float):
+				switch(pixelFormat.size)
+				{
+				case S(16bit): type = GL_FLOAT; internalFormat = GL_R16F; return true;
+				case S(32bit): type = GL_FLOAT; internalFormat = GL_R32F; return true;
+				}
+				break;
+			}
+			break;
+		case PixelFormat::pixelRG:
+			format = GL_RG;
+			switch(pixelFormat.format)
+			{
+			case F(Untyped): break;
+			case F(Uint):
+				switch(pixelFormat.size)
+				{
+				case S(16bit): type = GL_UNSIGNED_BYTE; internalFormat = GL_RG8; return true;
+				case S(32bit): type = GL_UNSIGNED_SHORT; internalFormat = GL_RG16; return true;
+				}
+				break;
+			case F(Float):
+				switch(pixelFormat.size)
+				{
+				case S(32bit): type = GL_FLOAT; internalFormat = GL_RG16F; return true;
+				case S(64bit): type = GL_FLOAT; internalFormat = GL_RG32F; return true;
+				}
+				break;
+			}
+			break;
+		case PixelFormat::pixelRGB:
+			format = GL_RGB;
+			switch(pixelFormat.format)
+			{
+			case F(Untyped): break;
+			case F(Uint): break;
+			case F(Float):
+				switch(pixelFormat.size)
+				{
+				case S(32bit): type = GL_FLOAT; internalFormat = GL_R11F_G11F_B10F; return true;
+				case S(96bit): type = GL_FLOAT; internalFormat = GL_RGB32F; return true;
+				}
+				break;
+			}
+			break;
+		case PixelFormat::pixelRGBA:
+			format = GL_RGBA;
+			switch(pixelFormat.format)
+			{
+			case F(Untyped): break;
+			case F(Uint):
+				switch(pixelFormat.size)
+				{
+				case S(32bit): type = GL_UNSIGNED_BYTE; internalFormat = GL_RGBA8; return true;
+				case S(64bit): type = GL_UNSIGNED_SHORT; internalFormat = GL_RGBA16; return true;
+				}
+				break;
+			case F(Float):
+				switch(pixelFormat.size)
+				{
+				case S(64bit): type = GL_FLOAT; internalFormat = GL_RGBA16F; return true;
+				case S(128bit): type = GL_FLOAT; internalFormat = GL_RGBA32F; return true;
+				}
+				break;
+			}
+			break;
+		}
+	case T(Compressed):
+		switch(pixelFormat.compression)
+		{
+		case C(Dxt1): format = GL_RGB; type = GL_UNSIGNED_BYTE; internalFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT; return true;
+		case C(Dxt2): format = GL_RGBA; type = GL_UNSIGNED_BYTE; internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT; return true;
+		case C(Dxt3): break;
+		case C(Dxt4): format = GL_RGBA; type = GL_UNSIGNED_BYTE; internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT; return true;
+		case C(Dxt5): format = GL_RGBA; type = GL_UNSIGNED_BYTE; internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT; return true;
+		}
+		break;
 	}
+	THROW("Pixel format is unsupported in OpenGL");
+#undef T
+#undef P
+#undef F
+#undef S
+#undef C
 }
 
 int GlSystem::AttributeNameToSemantic(const String& name)
@@ -139,7 +258,7 @@ int GlSystem::AttributeNameToSemantic(const String& name)
 		if(name[i] != beginStr[i])
 			break;
 	if(beginStr[i])
-		THROW_PRIMARY_EXCEPTION("Wrong attribute name");
+		THROW("Wrong attribute name");
 
 	// перевести имя в семантику
 	int semantic = 0;
@@ -147,9 +266,11 @@ int GlSystem::AttributeNameToSemantic(const String& name)
 	{
 		char ch = name[i];
 		if(ch < 'a' || ch > 'z')
-			THROW_PRIMARY_EXCEPTION("Wrong symbol in attribute semantic");
+			THROW("Wrong symbol in attribute semantic");
 		semantic = semantic * 26 + ch - 'a';
 	}
 
 	return semantic;
 }
+
+END_INANITY_GRAPHICS

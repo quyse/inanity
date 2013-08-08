@@ -11,10 +11,19 @@ BEGIN_INANITY_GRAPHICS
 /// Класс графической системы OpenGL.
 class GlSystem : public System
 {
+private:
+	std::vector<ptr<Adapter> > adapters;
+	bool adaptersInitialized;
+
 public:
+	GlSystem();
+
 	// методы System
-	ptr<Window> CreateDefaultWindow();
-	ptr<Device> CreatePrimaryDevice();
+	const std::vector<ptr<Adapter> >& GetAdapters();
+	ptr<Device> CreateDevice(ptr<Adapter> adapter);
+	ptr<Context> CreateContext(ptr<Device> device);
+	ptr<ShaderCompiler> CreateShaderCompiler();
+	ptr<Shaders::ShaderGenerator> CreateShaderGenerator();
 
 	/// Инициализация GLEW.
 	/** Нужно вызывать после создания контекста OpenGL. */

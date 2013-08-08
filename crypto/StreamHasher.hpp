@@ -23,19 +23,6 @@ private:
 	size_t blockSize;
 
 public:
-	/// Создать хешер.
-	StreamHasher(ptr<HashAlgorithm> hashAlgorithm, size_t blockSize);
-
-	/// Создать поток хеширования.
-	/** Он принимает данные, а выдаёт цепочку хешей. */
-	ptr<OutputStream> CreateHasherStream(ptr<OutputStream> destStream);
-
-	/// Создать поток проверки.
-	/** Он принимает поток данных и поток хешей, а возвращает только проверенные данные.
-	Если данные оказываются повреждёнными, выбрасывается исключение при чтении. */
-	ptr<InputStream> CreateVerifyStream(ptr<InputStream> sourceDataStream, ptr<InputStream> sourceHashStream);
-
-private:
 	/// Класс потока хеширования.
 	class HasherStream : public OutputStream
 	{
@@ -62,6 +49,7 @@ private:
 		HasherStream(ptr<StreamHasher> hasher, ptr<OutputStream> destStream);
 
 		void Write(const void* data, size_t size);
+
 		void Flush();
 	};
 
@@ -97,6 +85,20 @@ private:
 
 		size_t Read(void* data, size_t size);
 	};
+
+public:
+	/// Создать хешер.
+	StreamHasher(ptr<HashAlgorithm> hashAlgorithm, size_t blockSize);
+
+	/// Создать поток хеширования.
+	/** Он принимает данные, а выдаёт цепочку хешей. */
+	ptr<HasherStream> CreateHasherStream(ptr<OutputStream> destStream);
+
+	/// Создать поток проверки.
+	/** Он принимает поток данных и поток хешей, а возвращает только проверенные данные.
+	Если данные оказываются повреждёнными, выбрасывается исключение при чтении. */
+	ptr<VerifyStream> CreateVerifyStream(ptr<InputStream> sourceDataStream, ptr<InputStream> sourceHashStream);
+
 };
 
 END_INANITY_CRYPTO

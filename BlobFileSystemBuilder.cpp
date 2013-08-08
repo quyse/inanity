@@ -7,15 +7,17 @@
 #include "FileInputStream.hpp"
 #include "File.hpp"
 #include "Exception.hpp"
-#include "scripting_impl.hpp"
+#include "meta/impl.hpp"
 #include <cstring>
 
-SCRIPTABLE_MAP_BEGIN(BlobFileSystemBuilder, Inanity.BlobFileSystemBuilder);
-	SCRIPTABLE_CONSTRUCTOR(BlobFileSystemBuilder, ptr<OutputStream>);
-	SCRIPTABLE_METHOD(BlobFileSystemBuilder, AddFile);
-	SCRIPTABLE_METHOD(BlobFileSystemBuilder, AddFileStream);
-	SCRIPTABLE_METHOD(BlobFileSystemBuilder, Finalize);
-SCRIPTABLE_MAP_END();
+BEGIN_INANITY
+
+META_CLASS(BlobFileSystemBuilder, Inanity.BlobFileSystemBuilder);
+	META_CONSTRUCTOR(ptr<OutputStream>);
+	META_METHOD(AddFile);
+	META_METHOD(AddFileStream);
+	META_METHOD(Finalize);
+META_CLASS_END();
 
 BlobFileSystemBuilder::BlobFileSystemBuilder(ptr<OutputStream> outputStream)
 {
@@ -28,7 +30,7 @@ BlobFileSystemBuilder::BlobFileSystemBuilder(ptr<OutputStream> outputStream)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create blob file system builder", exception);
+		THROW_SECONDARY("Can't create blob file system builder", exception);
 	}
 }
 
@@ -58,7 +60,7 @@ void BlobFileSystemBuilder::AddFileStream(const String& fileName, ptr<InputStrea
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't add file stream", exception);
+		THROW_SECONDARY("Can't add file stream", exception);
 	}
 }
 
@@ -83,6 +85,8 @@ void BlobFileSystemBuilder::Finalize()
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't finalize blob file system", exception);
+		THROW_SECONDARY("Can't finalize blob file system", exception);
 	}
 }
+
+END_INANITY

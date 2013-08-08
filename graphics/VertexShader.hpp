@@ -5,14 +5,10 @@
 
 BEGIN_INANITY_GRAPHICS
 
-class Layout;
-
 /// Абстрактный класс вершинного шейдера.
 class VertexShader : public Object
 {
 public:
-	/// Получить разметку атрибутов.
-	virtual ptr<Layout> GetAttributesLayout() = 0;
 };
 
 END_INANITY_GRAPHICS

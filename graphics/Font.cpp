@@ -1,10 +1,12 @@
 #include "Font.hpp"
-#include "../File.hpp"
-#include "../FileInputStream.hpp"
+#include "Texture.hpp"
+#include "TextureManager.hpp"
+#include "../InputStream.hpp"
 #include "../StreamReader.hpp"
-#include "../ResourceManager.hpp"
-#include "../ResourceLoader.hpp"
+#include "../ResourceManager.ipp"
 #include "../Exception.hpp"
+
+BEGIN_INANITY_GRAPHICS
 
 FontChar Font::defaultFontChar;
 
@@ -43,22 +45,22 @@ const FontChar& Font::GetChar(wchar_t symbol)
 
 float Font::GetKerning(wchar_t first, wchar_t second)
 {
-	KerningPairs::const_iterator i = kerningPairs.find(first | (second << 16));
+	KerningPairs::const_iterator i = kerningPairs.find(std::pair<wchar_t, wchar_t>(first, second));
 	return (i == kerningPairs.end()) ? 0 : i->second;
 }
 
-ptr<Font> Font::Deserialize(ptr<File> file, ResourceLoader* resourceLoader)
+ptr<Font> Font::Deserialize(ptr<InputStream> inputStream, ptr<TextureManager> textureManager)
 {
 	try
 	{
-		ptr<Inanity::StreamReader> reader = NEW(StreamReader(NEW(FileInputStream(file))));
+		ptr<StreamReader> reader = NEW(StreamReader(inputStream));
 
 		// считать заголовок файла
 		String textureName = reader->ReadString();
 		float charHeight = reader->Read<float>();
 
-		// загрузить текстуру
-		ptr<Texture> texture = resourceLoader->LoadResource<Texture>(textureName);
+		// получить текстуру
+		ptr<Texture> texture = textureManager->Get(textureName);
 
 		// считать символы
 		size_t charsetSize = reader->ReadShortly();
@@ -66,7 +68,7 @@ ptr<Font> Font::Deserialize(ptr<File> file, ResourceLoader* resourceLoader)
 		for(size_t i = 0; i < charsetSize; ++i)
 		{
 			std::pair<wchar_t, FontChar> symbol;
-			symbol.first = reader->Read<wchar_t>();
+			symbol.first = reader->ReadShortly();
 			symbol.second = reader->Read<FontChar>();
 			charset.insert(symbol);
 		}
@@ -76,9 +78,9 @@ ptr<Font> Font::Deserialize(ptr<File> file, ResourceLoader* resourceLoader)
 		KerningPairs kerningPairs;
 		for(size_t i = 0; i < kerningPairsCount; ++i)
 		{
-			std::pair<unsigned, float> kerningPair;
-			kerningPair.first = reader->Read<wchar_t>();
-			kerningPair.first |= reader->Read<wchar_t>() << 16;
+			std::pair<std::pair<wchar_t, wchar_t>, float> kerningPair;
+			kerningPair.first.first = (wchar_t)reader->ReadShortly();
+			kerningPair.first.second = (wchar_t)reader->ReadShortly();
 			kerningPair.second = reader->Read<float>();
 			kerningPairs.insert(kerningPair);
 		}
@@ -88,6 +90,8 @@ ptr<Font> Font::Deserialize(ptr<File> file, ResourceLoader* resourceLoader)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't deserialize font", exception);
+		THROW_SECONDARY("Can't deserialize font", exception);
 	}
 }
+
+END_INANITY_GRAPHICS

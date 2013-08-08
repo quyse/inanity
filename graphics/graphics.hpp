@@ -21,8 +21,5 @@
 BEGIN_INANITY_GRAPHICS
 using namespace Inanity::Math;
 END_INANITY_GRAPHICS
-#ifdef INANITY_LIB
-using namespace Graphics;
-#endif
 
 #endif

@@ -4,6 +4,8 @@
 #include "BtCharacter.hpp"
 #include "../Exception.hpp"
 
+BEGIN_INANITY_PHYSICS
+
 BtWorld::BtWorld() :
 	collisionConfiguration(0), collisionDispatcher(0), broadphase(0),
 	solver(0), dynamicsWorld(0)
@@ -22,7 +24,7 @@ BtWorld::BtWorld() :
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create bullet world", exception);
+		THROW_SECONDARY("Can't create bullet world", exception);
 	}
 }
 
@@ -45,7 +47,7 @@ btDynamicsWorld* BtWorld::GetInternalDynamicsWorld() const
 	return dynamicsWorld;
 }
 
-ptr<Shape> BtWorld::CreateBoxShape(const float3& halfSize)
+ptr<Shape> BtWorld::CreateBoxShape(const vec3& halfSize)
 {
 	try
 	{
@@ -55,7 +57,7 @@ ptr<Shape> BtWorld::CreateBoxShape(const float3& halfSize)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create bullet box shape", exception);
+		THROW_SECONDARY("Can't create bullet box shape", exception);
 	}
 }
 
@@ -69,7 +71,7 @@ ptr<Shape> BtWorld::CreateSphereShape(float radius)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create bullet box shape", exception);
+		THROW_SECONDARY("Can't create bullet box shape", exception);
 	}
 }
 
@@ -83,17 +85,17 @@ ptr<Shape> BtWorld::CreateCapsuleShape(float radius, float height)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create bullet box shape", exception);
+		THROW_SECONDARY("Can't create bullet box shape", exception);
 	}
 }
 
-ptr<RigidBody> BtWorld::CreateRigidBody(ptr<Shape> abstractShape, float mass, const float4x4& startTransform)
+ptr<RigidBody> BtWorld::CreateRigidBody(ptr<Shape> abstractShape, float mass, const mat4x4& startTransform)
 {
 	try
 	{
 		ptr<BtShape> shape = abstractShape.FastCast<BtShape>();
 		if(!shape)
-			THROW_PRIMARY_EXCEPTION("Non-bullet shape");
+			THROW("Non-bullet shape");
 
 		btCollisionShape* collisionShape = shape->GetInternalObject();
 		btVector3 localInertia(0, 0, 0);
@@ -111,17 +113,17 @@ ptr<RigidBody> BtWorld::CreateRigidBody(ptr<Shape> abstractShape, float mass, co
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create bullet rigid body", exception);
+		THROW_SECONDARY("Can't create bullet rigid body", exception);
 	}
 }
 
-ptr<Character> BtWorld::CreateCharacter(ptr<Shape> abstractShape, const float4x4& startTransform)
+ptr<Character> BtWorld::CreateCharacter(ptr<Shape> abstractShape, const mat4x4& startTransform)
 {
 	try
 	{
 		ptr<BtShape> shape = abstractShape.FastCast<BtShape>();
 		if(!shape)
-			THROW_PRIMARY_EXCEPTION("Non-bullet shape");
+			THROW("Non-bullet shape");
 
 		btConvexShape* collisionShape = fast_cast<btConvexShape*>(shape->GetInternalObject());
 
@@ -140,7 +142,7 @@ ptr<Character> BtWorld::CreateCharacter(ptr<Shape> abstractShape, const float4x4
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create bullet character", exception);
+		THROW_SECONDARY("Can't create bullet character", exception);
 	}
 }
 
@@ -148,3 +150,5 @@ void BtWorld::Simulate(float time)
 {
 	dynamicsWorld->stepSimulation(time, 10);
 }
+
+END_INANITY_PHYSICS

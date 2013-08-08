@@ -2,7 +2,7 @@
 #define ___INANITY_FILE_HPP___
 
 #include "Object.hpp"
-#include "scripting_decl.hpp"
+#include "meta/decl.hpp"
 
 BEGIN_INANITY
 
@@ -26,7 +26,7 @@ public:
 	*/
 	virtual size_t GetSize() const = 0;
 
-	SCRIPTABLE_CLASS(File);
+	META_DECLARE_CLASS(File);
 };
 
 END_INANITY

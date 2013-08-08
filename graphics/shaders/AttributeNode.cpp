@@ -1,7 +1,10 @@
 #include "AttributeNode.hpp"
+#include "../AttributeLayoutElement.hpp"
 
-AttributeNode::AttributeNode(DataType valueType, int layoutSemantic)
-: valueType(valueType), layoutSemantic(layoutSemantic) {}
+BEGIN_INANITY_SHADERS
+
+AttributeNode::AttributeNode(ptr<AttributeLayoutElement> element)
+: element(element) {}
 
 Node::Type AttributeNode::GetType() const
 {
@@ -10,15 +13,12 @@ Node::Type AttributeNode::GetType() const
 
 DataType AttributeNode::GetValueType() const
 {
-	return valueType;
+	return element->GetDataType();
 }
 
-int AttributeNode::GetLayoutSemantic() const
+int AttributeNode::GetElementIndex() const
 {
-	return layoutSemantic;
+	return element->GetIndex();
 }
 
-Semantic AttributeNode::GetSemantic() const
-{
-	return Semantic(Semantics::Custom0 + layoutSemantic);
-}
+END_INANITY_SHADERS

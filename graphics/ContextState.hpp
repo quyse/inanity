@@ -12,8 +12,10 @@ class SamplerState;
 class UniformBuffer;
 class VertexShader;
 class PixelShader;
+class AttributeBinding;
 class VertexBuffer;
 class IndexBuffer;
+class BlendState;
 
 /// Структура с состоянием контекста рисования.
 /** В контексте указываются различные настройки рендеринга,
@@ -45,8 +47,12 @@ struct ContextState
 	/// Привязанный пиксельный шейдер.
 	ptr<PixelShader> pixelShader;
 
-	/// Привязанный вершинный буфер.
-	ptr<VertexBuffer> vertexBuffer;
+	/// Привязка атрибутов.
+	ptr<AttributeBinding> attributeBinding;
+	/// Количество слотов для вершинных буферов.
+	static const int vertexBufferSlotsCount = 2;
+	/// Привязанные вершинные буферы.
+	ptr<VertexBuffer> vertexBuffers[vertexBufferSlotsCount];
 	/// Привязанный индексный буфер.
 	ptr<IndexBuffer> indexBuffer;
 
@@ -87,8 +93,13 @@ struct ContextState
 	/// Запись в буфер глубины.
 	bool depthWrite;
 
+	/// Смешивание.
+	ptr<BlendState> blendState;
+
 	ContextState();
 
+	/// Очистить все слоты вершинных буферов.
+	void ResetVertexBuffers();
 	/// Очистить все слоты вывода.
 	void ResetTargets();
 	/// Очистить все текстурные слоты.

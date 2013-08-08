@@ -3,10 +3,17 @@
 #include <algorithm>
 #include <cstring>
 
+BEGIN_INANITY
+
 BufferedOutputStream::BufferedOutputStream(ptr<OutputStream> stream, size_t bufferSize)
 	: stream(stream), bufferSize(bufferSize), dataSize(0)
 {
 	bufferFile = NEW(MemoryFile(bufferSize));
+}
+
+BufferedOutputStream::~BufferedOutputStream()
+{
+	FlushBuffer();
 }
 
 void BufferedOutputStream::Write(const void* data, size_t size)
@@ -53,5 +60,6 @@ void BufferedOutputStream::FlushBuffer()
 void BufferedOutputStream::Flush()
 {
 	FlushBuffer();
-	stream->Flush();
 }
+
+END_INANITY

@@ -1,5 +1,0 @@
-#ifndef ___INANITY_GRAPHICS_FONT_DRAWER_HPP___
-#define ___INANITY_GRAPHICS_FONT_DRAWER_HPP___
-
-
-#endif

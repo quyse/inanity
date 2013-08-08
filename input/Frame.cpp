@@ -1,5 +1,8 @@
 #include "Frame.hpp"
 #include "../Exception.hpp"
+#include <cstring>
+
+BEGIN_INANITY_INPUT
 
 Frame::Frame()
 {
@@ -11,7 +14,7 @@ const Event& Frame::GetCurrentEvent() const
 {
 	if(currentEvent < events.size())
 		return events[currentEvent];
-	THROW_PRIMARY_EXCEPTION("There is no current event");
+	THROW("There is no current event");
 }
 
 const State& Frame::GetCurrentState() const
@@ -85,3 +88,5 @@ void Frame::CopyTo(ptr<Frame> frame)
 	frame->currentEvent = currentEvent;
 	frame->state = state;
 }
+
+END_INANITY_INPUT

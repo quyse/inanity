@@ -22,8 +22,8 @@ private:
 	unsigned long long hash[8];    /* the hashing state */
 	/// Результирующий хеш.
 	unsigned char digest[64];
-	/// Сброшен ли буфер.
-	bool flushed;
+	/// Завершён ли буфер.
+	bool ended;
 
 	void processBuffer();
 	void add(const unsigned char * const source, unsigned long sourceBits);
@@ -32,8 +32,8 @@ public:
 	WhirlpoolStream();
 
 	void Write(const void* data, size_t size);
-	void Flush();
 
+	void End();
 	size_t GetHashSize() const;
 	void GetHash(void* data) const;
 	void Reset();

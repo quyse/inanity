@@ -4,6 +4,8 @@
 #include "Exception.hpp"
 #include <cstring>
 
+BEGIN_INANITY
+
 Out2InStream::Reader::Reader(ptr<Out2InStream> stream)
 	: stream(stream), firstOffset(0), flushed(false)
 {
@@ -80,17 +82,17 @@ void Out2InStream::WriteFile(ptr<File> file)
 	// просто передать файл всем читателям
 	CriticalCode code(criticalSection);
 	if(flushed)
-		THROW_PRIMARY_EXCEPTION("Out2InStream already flushed");
+		THROW("Out2InStream already flushed");
 	for(std::list<Reader*>::const_iterator i = readers.begin(); i != readers.end(); ++i)
 		(*i)->Push(file);
 }
 
-void Out2InStream::Flush()
+void Out2InStream::End()
 {
 	// просто передать всем
 	CriticalCode code(criticalSection);
 	if(flushed)
-		THROW_PRIMARY_EXCEPTION("Out2InStream already flushed");
+		THROW("Out2InStream already flushed");
 	flushed = true;
 	for(std::list<Reader*>::const_iterator i = readers.begin(); i != readers.end(); ++i)
 		(*i)->Push(0);
@@ -106,3 +108,5 @@ ptr<InputStream> Out2InStream::CreateInputStream()
 		reader->Push(0);
 	return reader;
 }
+
+END_INANITY

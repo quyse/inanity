@@ -16,21 +16,32 @@ BEGIN_INANITY_SHADERS
 /// Класс узла семплера.
 class SamplerNode : public Node
 {
+public:
+	enum CoordType
+	{
+		_1D,
+		_2D,
+		_3D,
+		_Cube
+	};
+
 private:
 	int slot;
 	DataType valueType;
-	DataType coordType;
+	CoordType coordType;
 
 public:
-	SamplerNode(int slot, DataType valueType, DataType coordType);
+	SamplerNode(int slot, DataType valueType, CoordType coordType);
 
 	Type GetType() const;
 
 	int GetSlot() const;
 	DataType GetValueType() const;
-	DataType GetCoordType() const;
+	CoordType GetCoordType() const;
 
 	void Apply(ContextState& contextState, ptr<Texture> texture, ptr<SamplerState> samplerState) const;
+
+	static CoordType CoordTypeFromDimensions(int dimensions);
 };
 
 END_INANITY_SHADERS

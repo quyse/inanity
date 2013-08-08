@@ -1,12 +1,13 @@
 #include "OutputStream.hpp"
 #include "InputStream.hpp"
 #include "MemoryFile.hpp"
-#include "scripting_impl.hpp"
+#include "meta/impl.hpp"
 #include <string.h>
 
-SCRIPTABLE_MAP_BEGIN(OutputStream, Inanity.OutputStream);
-	SCRIPTABLE_METHOD(OutputStream, Flush);
-SCRIPTABLE_MAP_END();
+BEGIN_INANITY
+
+META_CLASS(OutputStream, Inanity.OutputStream);
+META_CLASS_END();
 
 void OutputStream::Write(const void* data, size_t size)
 {
@@ -16,10 +17,6 @@ void OutputStream::Write(const void* data, size_t size)
 void OutputStream::WriteFile(ptr<File> file)
 {
 	Write(file->GetData(), file->GetSize());
-}
-
-void OutputStream::Flush()
-{
 }
 
 bigsize_t OutputStream::ReadAllFromStream(ptr<InputStream> inputStream)
@@ -35,3 +32,5 @@ bigsize_t OutputStream::ReadAllFromStream(ptr<InputStream> inputStream)
 	}
 	return totalRead;
 }
+
+END_INANITY

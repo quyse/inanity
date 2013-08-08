@@ -16,7 +16,7 @@ BEGIN_INANITY
 class Thread : public Object
 {
 public:
-	typedef Handler<ptr<Thread> > ThreadHandler;
+	typedef DataHandler<ptr<Thread> > ThreadHandler;
 
 private:
 	ptr<ThreadHandler> handler;

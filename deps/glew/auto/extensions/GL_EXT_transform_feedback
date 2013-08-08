@@ -21,5 +21,5 @@ GL_EXT_transform_feedback
 	void glBindBufferOffsetEXT (GLenum target, GLuint index, GLuint buffer, GLintptr offset)
 	void glBindBufferRangeEXT (GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size)
 	void glEndTransformFeedbackEXT (void)
-	void glGetTransformFeedbackVaryingEXT (GLuint program, GLuint index, GLsizei bufSize, GLsizei* length, GLsizei *size, GLenum *type, char *name)
-	void glTransformFeedbackVaryingsEXT (GLuint program, GLsizei count, const char ** varyings, GLenum bufferMode)
+	void glGetTransformFeedbackVaryingEXT (GLuint program, GLuint index, GLsizei bufSize, GLsizei* length, GLsizei *size, GLenum *type, GLchar *name)
+	void glTransformFeedbackVaryingsEXT (GLuint program, GLsizei count, const GLchar ** varyings, GLenum bufferMode)

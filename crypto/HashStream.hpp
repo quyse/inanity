@@ -12,10 +12,12 @@ BEGIN_INANITY_CRYPTO
 class HashStream : public OutputStream
 {
 public:
+	/// Указать, что данные закончились.
+	virtual void End() = 0;
 	/// Получить размер хеша в байтах.
 	virtual size_t GetHashSize() const = 0;
 	/// Получить хеш.
-	/** Функцию можно вызывать только после вызова Flush().
+	/** Функцию можно вызывать только после вызова End().
 	Допустимо вызывать её многократно.
 	\param data Буфер для хеша достаточного размера. */
 	virtual void GetHash(void* data) const = 0;

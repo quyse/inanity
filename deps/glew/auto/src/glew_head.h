@@ -5,6 +5,9 @@
 #if defined(__gl_h_) || defined(__GL_H__) || defined(__X_GL_H)
 #error gl.h included before glew.h
 #endif
+#if defined(__REGAL_H__)
+#error Regal.h included before glew.h
+#endif
 #if defined(__glext_h_) || defined(__GLEXT_H_)
 #error glext.h included before glew.h
 #endif
@@ -14,6 +17,7 @@
 
 #define __gl_h_
 #define __GL_H__
+#define __REGAL_H__
 #define __X_GL_H
 #define __glext_h_
 #define __GLEXT_H_
@@ -93,6 +97,10 @@ typedef _W64 int ptrdiff_t;
 #define GLAPIENTRY APIENTRY
 #endif
 
+#ifndef GLEWAPIENTRY
+#define GLEWAPIENTRY APIENTRY
+#endif
+
 /*
  * GLEW_STATIC is defined for static library.
  * GLEW_BUILD  is defined for building the DLL library.
@@ -153,8 +161,13 @@ typedef _W64 int ptrdiff_t;
 #ifndef GLAPI
 #define GLAPI extern
 #endif
+
 #ifndef GLAPIENTRY
 #define GLAPIENTRY
+#endif
+
+#ifndef GLEWAPIENTRY
+#define GLEWAPIENTRY
 #endif
 
 #endif /* _WIN32 */

@@ -30,10 +30,10 @@ public:
 	btRigidBody* GetInternalObject() const;
 
 	// методы RigidBody
-	float3 GetPosition() const;
-	float3x3 GetOrientation() const;
-	float4x4 GetTransform() const;
-	void ApplyImpulse(const float3& impulse);
+	vec3 GetPosition() const;
+	mat3x3 GetOrientation() const;
+	mat4x4 GetTransform() const;
+	void ApplyImpulse(const vec3& impulse);
 
 	// методы btMotionState
 	void getWorldTransform(btTransform& transform) const;

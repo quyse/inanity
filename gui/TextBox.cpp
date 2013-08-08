@@ -4,6 +4,8 @@
 // FIXME: зависимость от винды для макросов клавиш VK_*
 #include "../windows.hpp"
 
+BEGIN_INANITY_GUI
+
 TextBox::TextBox(ptr<Visualizer> visualizer) : Element(visualizer), selectionBegin(0), selectionEnd(0), shiftPressed(false)
 {
 }
@@ -125,3 +127,5 @@ void TextBox::EventKeyPress(wchar_t key)
 	text.insert(text.begin() + (selectionBegin++), key);
 	selectionEnd = selectionBegin;
 }
+
+END_INANITY_GUI

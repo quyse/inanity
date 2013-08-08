@@ -8,7 +8,7 @@ BEGIN_INANITY_SHADERS
 
 template <typename ValueType>
 Temp<ValueType>::Temp()
-: LValue<ValueType>(NEW(TempNode(GetDataType<ValueType>())))
+: LValue<ValueType>(NEW(TempNode(DataTypeOf<ValueType>())))
 {}
 
 template <typename ValueType>

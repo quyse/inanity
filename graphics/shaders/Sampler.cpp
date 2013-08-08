@@ -4,6 +4,8 @@
 #include "../SamplerState.hpp"
 #include "../ContextState.hpp"
 
+BEGIN_INANITY_SHADERS
+
 SamplerBase::SamplerBase(ptr<SamplerNode> node)
 : Expression(node) {}
 
@@ -21,3 +23,5 @@ void SamplerBase::Apply(ContextState& contextState) const
 {
 	node.FastCast<SamplerNode>()->Apply(contextState, texture, samplerState);
 }
+
+END_INANITY_SHADERS

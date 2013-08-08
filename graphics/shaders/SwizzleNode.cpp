@@ -1,5 +1,7 @@
 #include "SwizzleNode.hpp"
 
+BEGIN_INANITY_SHADERS
+
 SwizzleNode::SwizzleNode(ptr<Node> a, const char* map)
 : a(a), map(map) {}
 
@@ -17,3 +19,5 @@ const char* SwizzleNode::GetMap() const
 {
 	return map;
 }
+
+END_INANITY_SHADERS

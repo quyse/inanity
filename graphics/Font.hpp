@@ -3,28 +3,28 @@
 
 #include "graphics.hpp"
 #include "FontChar.hpp"
-#include "Texture.hpp"
 #include "../String.hpp"
 #include <unordered_map>
+#include <map>
 
 BEGIN_INANITY
 
-class ResourceLoader;
-class File;
+class InputStream;
 
 END_INANITY
 
 BEGIN_INANITY_GRAPHICS
 
-/// Шрифт.
+class Texture;
+class TextureManager;
+
+/// Raster font.
 class Font : public Object
 {
 public:
 	typedef std::unordered_map<wchar_t, FontChar> Charset;
-	/// Тип для кернинг-пар.
-	/** Для лучшей производительности пара wchar_t объединена в один unsigned int.
-	Младшее слово - первый символ, старшее - второй. */
-	typedef std::unordered_map<unsigned, float> KerningPairs;
+	/// Kerning pairs.
+	typedef std::map<std::pair<wchar_t, wchar_t>, float> KerningPairs;
 
 private:
 	/// Текстура.
@@ -57,7 +57,8 @@ public:
 	/** Если кернинг-пары нет, то возвращается 0. */
 	float GetKerning(wchar_t first, wchar_t second);
 
-	static ptr<Font> Deserialize(ptr<File> file, ResourceLoader* resourceLoader);
+	/// Загрузить шрифт.
+	static ptr<Font> Deserialize(ptr<InputStream> inputStream, ptr<TextureManager> textureManager);
 };
 
 END_INANITY_GRAPHICS

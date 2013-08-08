@@ -2,6 +2,8 @@
 
 #ifdef ___INANITY_WINDOWS
 
+BEGIN_INANITY
+
 Handle::Handle(HANDLE handle) : handle(handle) {}
 Handle::~Handle()
 {
@@ -24,11 +26,15 @@ Handle::operator HANDLE()
 	return handle;
 }
 
+END_INANITY
+
 #endif // ___INANITY_WINDOWS
 
 #ifdef ___INANITY_LINUX
 
 #include <unistd.h>
+
+BEGIN_INANITY
 
 Handle::Handle(int fd) : fd(fd) {}
 Handle::~Handle()
@@ -51,5 +57,7 @@ Handle::operator int()
 {
 	return fd;
 }
+
+END_INANITY
 
 #endif // ___INANITY_LINUX

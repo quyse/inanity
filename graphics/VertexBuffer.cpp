@@ -1,7 +1,9 @@
 #include "VertexBuffer.hpp"
-#include "Layout.hpp"
+#include "VertexLayout.hpp"
 
-VertexBuffer::VertexBuffer(int verticesCount, ptr<Layout> layout)
+BEGIN_INANITY_GRAPHICS
+
+VertexBuffer::VertexBuffer(int verticesCount, ptr<VertexLayout> layout)
 : verticesCount(verticesCount), layout(layout) {}
 
 int VertexBuffer::GetVerticesCount() const
@@ -9,7 +11,14 @@ int VertexBuffer::GetVerticesCount() const
 	return verticesCount;
 }
 
-ptr<Layout> VertexBuffer::GetLayout() const
+int VertexBuffer::GetSize() const
+{
+	return verticesCount * layout->GetStride();
+}
+
+ptr<VertexLayout> VertexBuffer::GetLayout() const
 {
 	return layout;
 }
+
+END_INANITY_GRAPHICS

@@ -1,6 +1,8 @@
 #include "Base64OutputStream.hpp"
 #include "Exception.hpp"
 
+BEGIN_INANITY
+
 const char Base64OutputStream::schema[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 unsigned char Base64OutputStream::inverseSchema[256];
 
@@ -15,6 +17,11 @@ Base64OutputStream::Base64OutputStream(bool encoding, ptr<OutputStream> outputSt
 		for(int i = 0; i < 64; ++i)
 			inverseSchema[(ptrdiff_t)schema[i]] = i;
 	}
+}
+
+Base64OutputStream::~Base64OutputStream()
+{
+	Flush();
 }
 
 void Base64OutputStream::WriteEncode(unsigned char byte)
@@ -42,7 +49,7 @@ void Base64OutputStream::WriteDecode(unsigned char byte)
 		ProcessDecodeBuffer();
 	}
 	else
-		THROW_PRIMARY_EXCEPTION("Invalid byte");
+		THROW("Invalid byte");
 }
 
 void Base64OutputStream::ProcessEncodeBuffer()
@@ -108,6 +115,9 @@ void Base64OutputStream::ProcessDecodeBuffer()
 
 void Base64OutputStream::Write(const void* data, size_t size)
 {
+	if(flushed)
+		THROW("Can't write to flushed base64 output stream");
+
 	const unsigned char* bytes = (const unsigned char*)data;
 	if(encoding)
 		for(size_t i = 0; i < size; ++i)
@@ -119,12 +129,15 @@ void Base64OutputStream::Write(const void* data, size_t size)
 
 void Base64OutputStream::Flush()
 {
+	if(flushed)
+		return;
+
 	flushed = true;
 	// обработать последние байты
 	if(encoding)
 		ProcessEncodeBuffer();
 	else
 		ProcessDecodeBuffer();
-	// передать Flush
-	outputStream->Flush();
 }
+
+END_INANITY

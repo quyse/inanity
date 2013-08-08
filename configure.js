@@ -15,7 +15,7 @@ exports.configureCompiler = function(objectFile, compiler) {
 		// .cpp-файл
 		source = source.replace(/\./g, '/') + '.cpp';
 	compiler.setSourceFile(source);
-	compiler.addMacro('INANITY_LIB');
+	compiler.addIncludeDir('deps/bullet/src');
 };
 
 /**
@@ -28,21 +28,20 @@ var libraries = {
 		// совсем общее
 		'Object', 'ManagedHeap', 'Strings', 'StringTraveler', 'Exception',
 		// время
-		'Time',
+		'Time', 'Ticker',
 		// профилирование
 		'Profiling',
 		// синхронизация и потоки выполнения
 		'Thread', 'CriticalSection', 'CriticalCode', 'Semaphore',
-		// очереди и обработчики
-		'HandlerQueue',
 		// общее: файлы и потоки
 		'File', 'EmptyFile', 'PartFile', 'MemoryFile', 'InputStream', 'OutputStream', 'FileInputStream', 'StreamReader', 'StreamWriter', 'BufferedInputStream', 'BufferedOutputStream', 'MemoryStream',
 		// преобразующие потоки
 		'Base64OutputStream', 'Out2InStream',
 		// файловые системы
-		'FileSystem', 'FolderFileSystem', 'FolderFile', 'Handle', 'DiskInputStream', 'DiskOutputStream', 'BlobFileSystem', 'BlobFileSystemBuilder', 'CompositeFileSystem', 'TempFileSystem',
-		// ресурсы
-		'ResourceManager', 'ResourceLoader']
+		'FileSystem', 'FolderFileSystem', 'FolderFile', 'Handle', 'DiskInputStream', 'DiskOutputStream',
+		'BlobFileSystem', 'BlobFileSystemBuilder', 'CompositeFileSystem', 'TempFileSystem',
+		'FilterFileSystem', 'BufferedFileSystem'
+		]
 	},
 	// ******* сжатие
 	'libinanity-compress': {
@@ -52,63 +51,89 @@ var libraries = {
 		// потоки для сжатия
 		'CompressStream', 'DecompressStream']
 	},
-	// ******* сетевая библиотека
-	'libinanity-net': {
+	// ******* сетевая библиотека ASIO
+	'libinanity-asio': {
 		objects: [
-		// базовая часть
-		'EventLoop',
-		// сокеты
-		'Socket', 'ClientSocket', 'ServerSocket',
-		// HTTP
-		'HttpClient', 'HttpResponseStream', 'http_parser']
+		'net.asio', 'net.AsioService', 'net.AsioTcpListener', 'net.AsioTcpSocket', 'net.AsioInternalUdpSocket', 'net.AsioUdpListener', 'net.AsioUdpSocket']
+	},
+	// ******* библиотека HTTP
+	'libinanity-http': {
+		objects: [
+		'net.HttpStream', 'net.HttpClient', 'deps.http-parser.http_parser.c']
+	},
+	// ******* файловая система на SQLite
+	'libinanity-sqlitefs': {
+		objects: ['SQLiteFileSystem']
+	},
+	// ******* метаинформация
+	'libinanity-meta': {
+		objects: ['meta.Class', 'meta.Function', 'meta.Method']
 	},
 	// ******* скрипты на lua
 	'libinanity-lua': {
-		objects: ['lua.stuff', 'lua.reflection', 'lua.State', 'lua.Script']
+		objects: ['script.lua.Function', 'script.lua.State', 'script.lua.stuff']
 	},
 	// ******* криптография
 	'libinanity-crypto': {
-		objects: ['crypto.CngRandomAlgorithm', 'crypto.HashStream', 'crypto.LamportSignatureAlgorithm', 'crypto.WhirlpoolStream', 'crypto.StreamHasher', 'crypto.StreamSigner']
+		objects: ['crypto.HashStream', 'crypto.LamportSignatureAlgorithm', 'crypto.WhirlpoolStream', 'crypto.StreamHasher', 'crypto.StreamSigner'],
+		'objects-win32': ['crypto.CngRandomAlgorithm']
 	},
 	// ******* подсистема ввода
 	'libinanity-input': {
-		objects: ['input.Frame', 'input.Manager', 'input.Mux', 'input.Processor', 'input.RawManager']
+		objects: ['input.Event', 'input.Frame', 'input.Manager', 'input.Mux', 'input.Processor'],
+		'objects-win32': ['input.Win32Manager', 'input.Win32RawManager'],
+		'objects-linux': ['input.X11Manager']
 	},
-	// ******* подсистема окон
-	'libinanity-win32window': {
-		objects: ['Win32Window', 'graphics.Win32Output']
+	// ******* general platform subsystem
+	'libinanity-platform': {
+		objects: ['platform.Game'],
+		'objects-win32': [
+			'platform.Win32Window', 'graphics.Win32Output',
+			'graphics.Win32Adapter', 'graphics.Win32Monitor', 'graphics.Win32MonitorMode',
+			'platform.DllCache'
+		],
+		'objects-linux': ['platform.X11Window', 'platform.X11Display', 'graphics.X11Output', 'graphics.X11Adapter', 'graphics.X11Monitor', 'graphics.X11MonitorMode']
 	},
 	// ******* общая графика
 	'libinanity-graphics': {
 		objects: [
-			'graphics.Context', 'graphics.ContextState',
-			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.Layout', 'graphics.LayoutBinding', 'graphics.IndexBuffer',
-			'graphics.SamplerState',
-			'graphics.ShaderSource',
-			'graphics.EditableFont']
+			'graphics.Context', 'graphics.ContextState', 'graphics.Output',
+			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.IndexBuffer',
+			'graphics.SamplerState', 'graphics.BlendState',
+			'graphics.VertexLayout', 'graphics.VertexLayoutElement',
+			'graphics.AttributeLayout', 'graphics.AttributeLayoutElement', 'graphics.AttributeLayoutSlot',
+			'graphics.ShaderCache',
+			'graphics.PixelFormat', 'graphics.RawTextureData', 'graphics.Texture', 'graphics.TextureManager',
+			'graphics.EditableFont', 'graphics.Font', 'graphics.FontManager', 'graphics.TextDrawer',
+			'graphics.BmpImageLoader', 'graphics.PngImageLoader'
+		]
 	},
 	// ******* подсистема DirectX 11
-	'libinanity-dx': {
+	'libinanity-dx11': {
 		objects: [
-			'graphics.DxSystem', 'graphics.DxDevice', 'graphics.DxPresenter', 'graphics.DxContext',
-			'graphics.DxInternalInputLayout', 'graphics.DxInternalInputLayoutCache',
-			'graphics.DxRenderBuffer', 'graphics.DxDepthStencilBuffer', 'graphics.DxTexture', 'graphics.DxUniformBuffer',
-			'graphics.DxVertexBuffer', 'graphics.DxIndexBuffer',
-			'graphics.DxVertexShader', 'graphics.DxPixelShader',
-			'graphics.DxSamplerState',
-			'graphics.D3D10BlobFile', 'graphics.DxShaderCompiler'
+			'graphics.Dx11System', 'graphics.Dx11Device', 'graphics.Dx11Presenter', 'graphics.Dx11Context',
+			'graphics.Dx11RenderBuffer', 'graphics.Dx11DepthStencilBuffer', 'graphics.Dx11Texture', 'graphics.Dx11UniformBuffer',
+			'graphics.Dx11VertexBuffer', 'graphics.Dx11IndexBuffer', 'graphics.Dx11AttributeBinding',
+			'graphics.Dx11VertexShader', 'graphics.Dx11PixelShader',
+			'graphics.Dx11CompiledShader', 'graphics.Dx11ShaderResources',
+			'graphics.Dx11SamplerState', 'graphics.Dx11BlendState',
+			'graphics.D3DBlobFile', 'graphics.Dx11ShaderCompiler', 'graphics.Hlsl11Source',
+			'graphics.DxgiAdapter', 'graphics.DxgiMonitor', 'graphics.DxgiMonitorMode'
 		]
 	},
 	// ******* подсистема OpenGl
 	'libinanity-gl': {
 		objects: [
-			'graphics.GlSystem', 'graphics.GlDevice', 'graphics.GlPresenter', 'graphics.GlContext',
+			'graphics.GlSystem', 'graphics.GlDevice', 'graphics.GlContext',
 			'graphics.GlInternalTexture', 'graphics.GlInternalProgram', 'graphics.GlInternalProgramCache',
-			'graphics.GlInternalAttributeBinding', 'graphics.GlInternalAttributeBindingCache',
 			'graphics.GlRenderBuffer', 'graphics.GlDepthStencilBuffer', 'graphics.GlTexture', 'graphics.GlUniformBuffer',
-			'graphics.GlVertexBuffer', 'graphics.GlIndexBuffer',
-			'graphics.GlVertexShader', 'graphics.GlPixelShader'
-		]
+			'graphics.GlVertexBuffer', 'graphics.GlIndexBuffer', 'graphics.GlAttributeBinding',
+			'graphics.GlVertexShader', 'graphics.GlPixelShader',
+			'graphics.GlSamplerState', 'graphics.GlBlendState',
+			'graphics.GlShaderCompiler', 'graphics.GlslSource', 'graphics.GlShaderBindings'
+		],
+		'objects-win32': ['graphics.WglPresenter'],
+		'objects-linux': ['graphics.GlxPresenter']
 	},
 	// ******* подсистема шейдеров
 	'libinanity-shaders': {
@@ -116,13 +141,14 @@ var libraries = {
 			'graphics.shaders.AttributeNode', 'graphics.shaders.SamplerNode',
 			'graphics.shaders.UniformNode', 'graphics.shaders.UniformGroup',
 			'graphics.shaders.SwizzleNode', 'graphics.shaders.OperationNode',
-			'graphics.shaders.SampleNode', 'graphics.shaders.FloatConstNode',
-			'graphics.shaders.SequenceNode', 'graphics.shaders.TransitionalNode',
+			'graphics.shaders.SampleNode', 'graphics.shaders.FloatConstNode', 'graphics.shaders.IntConstNode',
+			'graphics.shaders.SequenceNode',
+			'graphics.shaders.TransformedNode', 'graphics.shaders.RasterizedNode',
 			'graphics.shaders.TempNode', 'graphics.shaders.CastNode',
-			'graphics.shaders.SpecialNode',
 			'graphics.shaders.Expression', 'graphics.shaders.Sampler',
-			'graphics.shaders.HlslGenerator', 'graphics.shaders.HlslGeneratorInstance',
-		]
+			'graphics.shaders.GlslGenerator', 'graphics.shaders.GlslGeneratorInstance'
+		],
+		'objects-win32': ['graphics.shaders.Hlsl11Generator', 'graphics.shaders.Hlsl11GeneratorInstance']
 	},
 	// ******* общая физика
 	'libinanity-physics': {
@@ -145,9 +171,16 @@ var libraries = {
 
 var executables = {
 	archi: {
-		objects: ['archi.main', 'archi.BlobCreator', /*'archi.FontCreator',*/ /*'archi.SimpleGeometryCreator',*/ 'archi.SystemFontCreator', 'archi.WavefrontObj', /*'archi.XafConverter'*/],
+		objects: ['archi.main', 'archi.BlobCreator', /*'archi.FontCreator',*/ /*'archi.SimpleGeometryCreator',*/
+			'archi.SystemFontCreator', 'archi.WavefrontObj', /*'archi.XafConverter'*/ 'archi.SkeletonConverter',
+			'archi.BoneAnimationConverter'],
 		staticLibraries: ['libinanity-base', 'libinanity-graphics', 'libinanity-lua', 'deps/lua//liblua'],
 		dynamicLibraries: ['user32.lib', 'gdi32.lib', 'comdlg32.lib']
+	}
+	, adapterstest: {
+		objects: ['graphics.adapters_test'],
+		staticLibraries: ['libinanity-base', 'libinanity-graphics', 'libinanity-shaders', 'libinanity-dx11', 'libinanity-gl', 'deps/glew//libglew', 'libinanity-platform', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
+		dynamicLibraries: ['user32.lib', 'gdi32.lib', 'dxgi.lib', 'd3d11.lib', 'd3dx11.lib', 'd3dx10.lib', 'opengl32.lib']
 	}
 	// TEST
 	, shaderstest: {
@@ -163,8 +196,26 @@ var executables = {
 	}
 	// TEST
 	, luatest: {
-		objects: ['lua.test'],
-		staticLibraries: ['libinanity-base', 'libinanity-compress', 'libinanity-lua', 'deps/lua//liblua'],
+		objects: ['script.lua.test'],
+		staticLibraries: ['libinanity-base', 'libinanity-compress', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
+		dynamicLibraries: []
+	}
+	// TEST
+	, nettesttcp: {
+		objects: ['net.test-chat-tcp'],
+		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
+		dynamicLibraries: []
+	}
+	// TEST
+	, nettestudp: {
+		objects: ['net.test-chat-udp'],
+		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
+		dynamicLibraries: []
+	}
+	// TEST
+	, nettesthttpclient: {
+		objects: ['net.test-http-client'],
+		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-http', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
 		dynamicLibraries: []
 	}
 };
@@ -177,6 +228,9 @@ exports.configureComposer = function(libraryFile, composer) {
 	var library = libraries[a[3]];
 	for ( var i = 0; i < library.objects.length; ++i)
 		composer.addObjectFile(confDir + library.objects[i]);
+	var platformObjects = library['objects-' + composer.platform] || [];
+	for(var i = 0; i < platformObjects.length; ++i)
+		composer.addObjectFile(confDir + platformObjects[i]);
 };
 
 exports.configureLinker = function(executableFile, linker) {

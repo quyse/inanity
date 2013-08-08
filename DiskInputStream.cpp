@@ -6,10 +6,12 @@
 
 #include "windows.hpp"
 
+BEGIN_INANITY
+
 size_t DiskInputStream::Read(void *data, size_t size)
 {
 	if((DWORD)size != size)
-		THROW_PRIMARY_EXCEPTION("So big reading size is not supported");
+		THROW("So big reading size is not supported");
 	DWORD read;
 	ReadFile(*handle, data, (DWORD)size, &read, NULL);
 	return read;
@@ -19,12 +21,14 @@ size_t DiskInputStream::GetSize() const
 {
 	LARGE_INTEGER size;
 	if(!GetFileSizeEx(*handle, &size))
-		THROW_PRIMARY_EXCEPTION("Error getting size");
+		THROW("Error getting size");
 	size_t returnSize = (size_t)size.QuadPart;
 	if(returnSize != size.QuadPart)
-		THROW_PRIMARY_EXCEPTION("File is too big");
+		THROW("File is too big");
 	return returnSize;
 }
+
+END_INANITY
 
 #endif // ___INANITY_WINDOWS
 
@@ -34,6 +38,8 @@ size_t DiskInputStream::GetSize() const
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+BEGIN_INANITY
 
 size_t DiskInputStream::Read(void *data, size_t size)
 {
@@ -46,7 +52,7 @@ size_t DiskInputStream::Read(void *data, size_t size)
 			readSize = SSIZE_MAX;
 		readSize = read(*handle, dataPtr, readSize);
 		if(readSize < 0)
-			THROW_PRIMARY_EXCEPTION("Disk read error");
+			THROW("Disk read error");
 		if(readSize == 0)
 			break;
 		resultSize += readSize;
@@ -60,12 +66,18 @@ size_t DiskInputStream::GetSize() const
 {
 	struct stat st;
 	if(fstat(*handle, &st) != 0)
-		THROW_PRIMARY_EXCEPTION("Error getting size");
+		THROW("Error getting size");
 	return st.st_size;
 }
 
+END_INANITY
+
 #endif // ___INANITY_LINUX
+
+BEGIN_INANITY
 
 DiskInputStream::DiskInputStream(ptr<Handle> handle) : handle(handle)
 {
 }
+
+END_INANITY

@@ -2,6 +2,7 @@
 #define ___INANITY_PHYSICS_SHAPE_HPP___
 
 #include "physics.hpp"
+#include "../meta/decl.hpp"
 
 BEGIN_INANITY_PHYSICS
 
@@ -15,6 +16,8 @@ protected:
 
 public:
 	Shape(ptr<World> world);
+
+	META_DECLARE_CLASS(Shape);
 };
 
 END_INANITY_PHYSICS

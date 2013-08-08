@@ -4,6 +4,8 @@
 #include <pthread.h>
 #endif
 
+BEGIN_INANITY
+
 CriticalSection::CriticalSection()
 {
 	try
@@ -13,12 +15,12 @@ CriticalSection::CriticalSection()
 	#endif
 	#ifdef ___INANITY_LINUX
 		if(pthread_mutex_init(&mutex, 0))
-			THROW_SECONDARY_EXCEPTION("Can't initialize mutex", Exception::SystemError());
+			THROW_SECONDARY("Can't initialize mutex", Exception::SystemError());
 	#endif
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't create critical section", exception);
+		THROW_SECONDARY("Can't create critical section", exception);
 	}
 }
 
@@ -39,7 +41,7 @@ void CriticalSection::Enter()
 #endif
 #ifdef ___INANITY_LINUX
 	if(pthread_mutex_lock(&mutex))
-		THROW_SECONDARY_EXCEPTION("Can't enter critical section", Exception::SystemError());
+		THROW_SECONDARY("Can't enter critical section", Exception::SystemError());
 #endif
 }
 
@@ -50,6 +52,8 @@ void CriticalSection::Leave()
 #endif
 #ifdef ___INANITY_LINUX
 	if(pthread_mutex_unlock(&mutex))
-		THROW_SECONDARY_EXCEPTION("Can't leave critical section", Exception::SystemError());
+		THROW_SECONDARY("Can't leave critical section", Exception::SystemError());
 #endif
 }
+
+END_INANITY

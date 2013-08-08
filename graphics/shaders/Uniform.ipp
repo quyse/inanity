@@ -3,26 +3,26 @@
 
 #include "Uniform.hpp"
 #include "UniformNode.hpp"
-#include "uniform-translation.ipp"
+#include "UniformGroup.hpp"
 #include "../../Exception.hpp"
 
 BEGIN_INANITY_SHADERS
 
 template <typename ValueType>
 Uniform<ValueType>::Uniform(ptr<UniformNode> node)
-: Value<ValueType>(node)
+: Value<ValueType>(ptr<Node>(node))
 {
 #ifdef _DEBUG
-	if(node->GetValueType() != GetDataType<ValueType>())
-		THROW_PRIMARY_EXCEPTION("Wrong uniform node type");
+	if(node->GetValueType() != DataTypeOf<ValueType>())
+		THROW("Wrong uniform node type");
 #endif
 }
 
 template <typename ValueType>
 void Uniform<ValueType>::SetValue(const ValueType& value)
 {
-	UniformNode* uniformNode = fast_cast<UniformNode*>(&*node);
-	CopyUniformData<ValueType>(*(ValueType*)((char*)uniformNode->GetGroup()->GetData() + uniformNode->GetOffset()), value);
+	UniformNode* uniformNode = fast_cast<UniformNode*>(&*this->node);
+	*(ValueType*)((char*)uniformNode->GetGroup()->GetData() + uniformNode->GetOffset()) = value;
 }
 
 END_INANITY_SHADERS

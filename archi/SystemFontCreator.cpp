@@ -55,12 +55,12 @@ void SystemFontCreator::CreateImage(const String& alphabatFileName, const String
 			GLYPHMETRICS& gm = metrics[i];
 			int size = GetGlyphOutline(hdc, str[i], GGO_GRAY8_BITMAP, &gm, 0, NULL, &mat);
 			if(size == GDI_ERROR)
-				THROW_PRIMARY_EXCEPTION("Can't get glyph size");
+				THROW("Can't get glyph size");
 			ptr<File> file = new MemoryFile(size);
 			images[i] = file;
 			unsigned char* fileData = static_cast<unsigned char*>(file->GetData());
 			if(GetGlyphOutline(hdc, str[i], GGO_GRAY8_BITMAP, &gm, size, fileData, &mat) == GDI_ERROR)
-				THROW_PRIMARY_EXCEPTION("Can't get glyph");
+				THROW("Can't get glyph");
 			
 			//как написано в MSDN, в этом режиме возвращаются значения от 0 до 64 включительно
 			//так что масштабируем цвета
@@ -69,7 +69,7 @@ void SystemFontCreator::CreateImage(const String& alphabatFileName, const String
 		}
 		catch(Exception* exception)
 		{
-			THROW_SECONDARY_EXCEPTION("Can't get symbol image", exception);
+			THROW_SECONDARY("Can't get symbol image", exception);
 		}
 
 	// получить кернинг-пары
@@ -77,7 +77,7 @@ void SystemFontCreator::CreateImage(const String& alphabatFileName, const String
 	ptr<File> kerningPairsFile = NEW(MemoryFile(kerningPairsCount * sizeof(KERNINGPAIR)));
 	KERNINGPAIR* kp = (KERNINGPAIR*)kerningPairsFile->GetData();
 	if(GetKerningPairs(hdc, kerningPairsCount, kp) != kerningPairsCount)
-		THROW_PRIMARY_EXCEPTION("Can't get kerning pairs");
+		THROW("Can't get kerning pairs");
 
 	// теперь можно освободить контекст, он больше не нужен
 	ReleaseDC(NULL, hdc);
@@ -220,12 +220,12 @@ void SystemFontCreator::CreateImage(const String& alphabatFileName, const String
 		int charWidth = gm.gmBlackBoxX;
 		int charHeight = gm.gmBlackBoxY;
 		FontChar& fontChar = charset[str[i]];
-		fontChar.firstUV = float2(solver.coords[i].x * pixelWidth, (solver.coords[i].y + charHeight + 2) * pixelHeight);
-		fontChar.secondUV = float2((solver.coords[i].x + charWidth + 2) * pixelWidth, solver.coords[i].y * pixelHeight);
+		fontChar.firstUV = vec2(solver.coords[i].x * pixelWidth, (solver.coords[i].y + charHeight + 2) * pixelHeight);
+		fontChar.secondUV = vec2((solver.coords[i].x + charWidth + 2) * pixelWidth, solver.coords[i].y * pixelHeight);
 		//заметим, что тут хитро - Glyph Origin указывает на положение точки отсчета для символа
 		//в системе координат с Y, направленной вверх, причем в MSDN этого не написано
-		fontChar.screenFirstUV = float2(float(gm.gmptGlyphOrigin.x - 1), float(-charHeight + gm.gmptGlyphOrigin.y - 1));
-		fontChar.screenSecondUV = float2(float(gm.gmptGlyphOrigin.x + charWidth + 1), float(gm.gmptGlyphOrigin.y + 1));
+		fontChar.screenFirstUV = vec2(float(gm.gmptGlyphOrigin.x - 1), float(-charHeight + gm.gmptGlyphOrigin.y - 1));
+		fontChar.screenSecondUV = vec2(float(gm.gmptGlyphOrigin.x + charWidth + 1), float(gm.gmptGlyphOrigin.y + 1));
 		fontChar.width = gm.gmCellIncX;
 	}
 	//вычислим высоту символов (как максимум из их высот)
@@ -258,7 +258,7 @@ void SystemFontCreator::CreateImage(const String& alphabatFileName, const String
 
 	//записать картинку BMP
 	{
-		ptr<StreamWriter> writer = NEW(StreamWriter(FolderFileSystem::GetNativeFileSystem()->SaveFileAsStream(textureFileName)));
+		ptr<StreamWriter> writer = NEW(StreamWriter(FolderFileSystem::GetNativeFileSystem()->SaveStream(textureFileName)));
 
 		BITMAPFILEHEADER bfh;
 		bfh.bfType = 'MB';
@@ -308,7 +308,7 @@ void SystemFontCreator::PrintHelp() const
 void SystemFontCreator::Run(const std::vector<String>& arguments)
 {
 	if(arguments.size() < 3)
-		THROW_PRIMARY_EXCEPTION("Must be at least 3 arguments for command");
+		THROW("Must be at least 3 arguments for command");
 
 	GetObject(GetStockFont(DEFAULT_GUI_FONT), sizeof(lf), &lf);
 	{
@@ -322,5 +322,5 @@ void SystemFontCreator::Run(const std::vector<String>& arguments)
 	}
 
 	CreateImage(arguments[0], arguments[1]);
-	MakePointer(NEW(EditableFont(arguments[1], charset, kerningPairs, (float)charHeight)))->Serialize(FolderFileSystem::GetNativeFileSystem()->SaveFileAsStream(arguments[2]));
+	MakePointer(NEW(EditableFont(arguments[1], charset, kerningPairs, (float)charHeight)))->Serialize(FolderFileSystem::GetNativeFileSystem()->SaveStream(arguments[2]));
 }

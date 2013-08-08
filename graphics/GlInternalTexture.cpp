@@ -1,6 +1,10 @@
 #include "GlInternalTexture.hpp"
+#include "GlDevice.hpp"
 
-GlInternalTexture::GlInternalTexture(GLuint name) : name(name) {}
+BEGIN_INANITY_GRAPHICS
+
+GlInternalTexture::GlInternalTexture(ptr<GlDevice> device, GLuint name)
+: device(device), name(name) {}
 
 GlInternalTexture::~GlInternalTexture()
 {
@@ -11,3 +15,5 @@ GLuint GlInternalTexture::GetName() const
 {
 	return name;
 }
+
+END_INANITY_GRAPHICS

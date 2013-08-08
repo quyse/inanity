@@ -2,13 +2,16 @@
 #include "MemoryFile.hpp"
 #include "MemoryStream.hpp"
 #include "Exception.hpp"
-#include "scripting_impl.hpp"
+#include "meta/impl.hpp"
 #include <memory.h>
 
-SCRIPTABLE_MAP_BEGIN(CompressStream, Inanity.CompressStream);
-	SCRIPTABLE_PARENT(OutputStream);
-	SCRIPTABLE_METHOD(CompressStream, CreateMax);
-SCRIPTABLE_MAP_END();
+BEGIN_INANITY
+
+META_CLASS(CompressStream, Inanity.CompressStream);
+	META_CLASS_PARENT(OutputStream);
+	META_METHOD(Flush);
+	META_STATIC_METHOD(CreateMax);
+META_CLASS_END();
 
 CompressStream::CompressStream(ptr<OutputStream> outputStream, CompressionLevel compressionLevel)
 : inputFile(NEW(MemoryFile(inputBufferSize))), outputStream(outputStream), finalized(false)
@@ -24,9 +27,9 @@ CompressStream::CompressStream(ptr<OutputStream> outputStream, CompressionLevel 
 		case Z_OK:
 			break;
 		case Z_STREAM_ERROR:
-			THROW_PRIMARY_EXCEPTION("Invalid compression level");
+			THROW("Invalid compression level");
 		default:
-			THROW_PRIMARY_EXCEPTION("Can't initialize deflation");
+			THROW("Can't initialize deflation");
 		}
 
 		//выделить память под выходной буфер
@@ -41,7 +44,7 @@ CompressStream::CompressStream(ptr<OutputStream> outputStream, CompressionLevel 
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't initialize compress stream", exception);
+		THROW_SECONDARY("Can't initialize compress stream", exception);
 	}
 }
 
@@ -76,7 +79,7 @@ void CompressStream::Write(const void* data, size_t size)
 	{
 		//если финализация уже была выполнена, то записывать данные нельзя
 		if(finalized)
-			THROW_PRIMARY_EXCEPTION("Stream already finalized");
+			THROW("Stream already finalized");
 
 		//запомнить параметры буферов
 		Bytef* inputBuffer = zstream.next_in;
@@ -102,7 +105,7 @@ void CompressStream::Write(const void* data, size_t size)
 				case Z_BUF_ERROR:
 					break;
 				default:
-					THROW_PRIMARY_EXCEPTION("Compression error");
+					THROW("Compression error");
 				}
 
 				//записать данные в выходной поток
@@ -119,7 +122,7 @@ void CompressStream::Write(const void* data, size_t size)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't compress data", exception);
+		THROW_SECONDARY("Can't compress data", exception);
 	}
 }
 
@@ -150,7 +153,7 @@ void CompressStream::Flush()
 			case Z_OK:
 				break;
 			default:
-				THROW_PRIMARY_EXCEPTION("Compression error");
+				THROW("Compression error");
 			}
 
 			//записать вывод в поток
@@ -166,17 +169,14 @@ void CompressStream::Flush()
 
 		//завершить сжатие
 		if(deflateEnd(&zstream) != Z_OK)
-			THROW_PRIMARY_EXCEPTION("Finalize stream error");
+			THROW("Finalize stream error");
 
 		//установить флажок завершенности
 		finalized = true;
-
-		//выполнить финализацию потока
-		outputStream->Flush();
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't finalize compression", exception);
+		THROW_SECONDARY("Can't finalize compression", exception);
 	}
 }
 
@@ -187,7 +187,7 @@ ptr<File> CompressStream::CompressFile(ptr<File> file, CompressionLevel compress
 		//создать выходной поток
 		ptr<MemoryStream> outputStream = NEW(MemoryStream);
 		//создать поток для сжатия
-		ptr<OutputStream> stream = NEW(CompressStream(&*outputStream, compressionLevel));
+		ptr<CompressStream> stream = NEW(CompressStream(&*outputStream, compressionLevel));
 
 		//сжать данные
 		stream->Write(file->GetData(), file->GetSize());
@@ -197,7 +197,7 @@ ptr<File> CompressStream::CompressFile(ptr<File> file, CompressionLevel compress
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't decompress to file", exception);
+		THROW_SECONDARY("Can't decompress to file", exception);
 	}
 }
 
@@ -205,3 +205,5 @@ ptr<CompressStream> CompressStream::CreateMax(ptr<OutputStream> outputStream)
 {
 	return NEW(CompressStream(outputStream, compressionMax));
 }
+
+END_INANITY

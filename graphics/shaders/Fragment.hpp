@@ -2,7 +2,6 @@
 #define ___INANITY_GRAPHICS_SHADERS_FRAGMENT_HPP___
 
 #include "LValue.hpp"
-#include "Semantic.hpp"
 
 BEGIN_INANITY_SHADERS
 
@@ -11,7 +10,7 @@ template <typename ValueType>
 class Fragment : public LValue<ValueType>
 {
 public:
-	Fragment(Semantic semantic);
+	Fragment(int semantic);
 
 	/// Явный оператор присваивания.
 	Value<ValueType> operator=(Value<ValueType> a);

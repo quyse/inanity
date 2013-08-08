@@ -3,14 +3,16 @@
 #include "FileInputStream.hpp"
 #include "MemoryStream.hpp"
 #include "Exception.hpp"
-#include "scripting_impl.hpp"
+#include "meta/impl.hpp"
 #include <memory.h>
 
-SCRIPTABLE_MAP_BEGIN(DecompressStream, Inanity.DecompressStream);
-	SCRIPTABLE_PARENT(InputStream);
-	SCRIPTABLE_CONSTRUCTOR(DecompressStream, ptr<InputStream>);
-	SCRIPTABLE_METHOD(DecompressStream, DecompressFile);
-SCRIPTABLE_MAP_END();
+BEGIN_INANITY
+
+META_CLASS(DecompressStream, Inanity.DecompressStream);
+	META_CLASS_PARENT(InputStream);
+	META_CONSTRUCTOR(ptr<InputStream>);
+	META_STATIC_METHOD(DecompressFile);
+META_CLASS_END();
 
 DecompressStream::DecompressStream(ptr<InputStream> inputStream)
 : inputFile(NEW(MemoryFile(inputBufferSize))), inputStream(inputStream), finished(false)
@@ -26,7 +28,7 @@ DecompressStream::DecompressStream(ptr<InputStream> inputStream)
 		case Z_OK:
 			break;
 		default:
-			THROW_PRIMARY_EXCEPTION("Can't initialize inflation");
+			THROW("Can't initialize inflation");
 		}
 
 		//выделить память под выходной буфер
@@ -42,7 +44,7 @@ DecompressStream::DecompressStream(ptr<InputStream> inputStream)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't initialize compress stream", exception);
+		THROW_SECONDARY("Can't initialize compress stream", exception);
 	}
 }
 
@@ -113,7 +115,7 @@ size_t DecompressStream::Read(void* data, size_t size)
 					finished = true;
 					break;
 				default:
-					THROW_PRIMARY_EXCEPTION("Decompression error");
+					THROW("Decompression error");
 				}
 
 				//перенести данные, которые остались во входном буфере, в его начало
@@ -126,7 +128,7 @@ size_t DecompressStream::Read(void* data, size_t size)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't decompress data", exception);
+		THROW_SECONDARY("Can't decompress data", exception);
 	}
 }
 
@@ -146,11 +148,12 @@ ptr<File> DecompressStream::DecompressFile(ptr<File> file)
 		//цикл распаковки
 		while(size_t read = stream->Read(buffer, bufferSize))
 			outputStream->Write(buffer, read);
-		outputStream->Flush();
 		return outputStream->ToFile();
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't decompress to file", exception);
+		THROW_SECONDARY("Can't decompress to file", exception);
 	}
 }
+
+END_INANITY

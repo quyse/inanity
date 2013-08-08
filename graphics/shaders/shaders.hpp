@@ -12,20 +12,8 @@
 #define BEGIN_INANITY_SHADERS BEGIN_INANITY_GRAPHICS namespace Shaders {
 #define END_INANITY_SHADERS } END_INANITY_GRAPHICS
 
-// Выбор языка для генерации шейдеров.
-#ifdef ___INANITY_GRAPHICS_DX
-#define ___INANITY_SHADERS_HLSL
-#endif
-#ifdef ___INANITY_GRAPHICS_GL
-#define ___INANITY_SHADERS_GLSL
-#endif
-
-
 BEGIN_INANITY_SHADERS
 using namespace Inanity::Math;
 END_INANITY_SHADERS
-#ifdef INANITY_LIB
-using namespace Shaders;
-#endif
 
 #endif

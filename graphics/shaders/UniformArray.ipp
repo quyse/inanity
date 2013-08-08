@@ -3,32 +3,32 @@
 
 #include "UniformArray.hpp"
 #include "UniformNode.hpp"
-#include "uniform-translation.ipp"
+#include "UniformGroup.hpp"
 #include "../../Exception.hpp"
 
 BEGIN_INANITY_SHADERS
 
 template <typename ValueType>
 UniformArray<ValueType>::UniformArray(ptr<UniformNode> node)
-: Value<ValueType>(node)
+: Value<ValueType>(node.StaticCast<Node>())
 {
 #ifdef _DEBUG
-	if(node->GetValueType() != GetDataType<ValueType>())
-		THROW_PRIMARY_EXCEPTION("Wrong uniform node type");
+	if(node->GetValueType() != DataTypeOf<ValueType>())
+		THROW("Wrong uniform node type");
 #endif
 }
 
 template <typename ValueType>
 Value<ValueType> UniformArray<ValueType>::operator[](Value<unsigned int> index) const
 {
-	return NEW(OperationNode(OperationNode::operationIndex, node, index.GetNode()));
+	return Value<ValueType>(NEW(OperationNode(OperationNode::operationIndex, this->node, index.GetNode())));
 }
 
 template <typename ValueType>
 void UniformArray<ValueType>::SetValue(int index, const ValueType& value)
 {
-	UniformNode* uniformNode = fast_cast<UniformNode*>(&*node);
-	CopyUniformData<ValueType>(*((ValueType*)((char*)uniformNode->GetGroup()->GetData() + uniformNode->GetOffset()) + index), value);
+	UniformNode* uniformNode = fast_cast<UniformNode*>(&*this->node);
+	*((ValueType*)((char*)uniformNode->GetGroup()->GetData() + uniformNode->GetOffset()) + index) = value;
 }
 
 END_INANITY_SHADERS

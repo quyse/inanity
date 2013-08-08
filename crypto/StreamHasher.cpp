@@ -3,18 +3,21 @@
 #include "HashStream.hpp"
 #include "../MemoryFile.hpp"
 #include "../Exception.hpp"
+#include <cstring>
+
+BEGIN_INANITY_CRYPTO
 
 StreamHasher::StreamHasher(ptr<HashAlgorithm> hashAlgorithm, size_t blockSize)
 : hashAlgorithm(hashAlgorithm), blockSize(blockSize)
 {
 }
 
-ptr<OutputStream> StreamHasher::CreateHasherStream(ptr<OutputStream> destStream)
+ptr<StreamHasher::HasherStream> StreamHasher::CreateHasherStream(ptr<OutputStream> destStream)
 {
 	return NEW(HasherStream(this, destStream));
 }
 
-ptr<InputStream> StreamHasher::CreateVerifyStream(ptr<InputStream> sourceDataStream, ptr<InputStream> sourceHashStream)
+ptr<StreamHasher::VerifyStream> StreamHasher::CreateVerifyStream(ptr<InputStream> sourceDataStream, ptr<InputStream> sourceHashStream)
 {
 	return NEW(VerifyStream(this, sourceDataStream, sourceHashStream));
 }
@@ -31,7 +34,7 @@ void StreamHasher::HasherStream::WriteBlock()
 {
 	hashStream->Reset();
 	hashStream->Write(block, blockDataSize);
-	hashStream->Flush();
+	hashStream->End();
 	void* hash = alloca(hashSize);
 	hashStream->GetHash(hash);
 	destStream->Write(hash, hashSize);
@@ -61,8 +64,6 @@ void StreamHasher::HasherStream::Flush()
 {
 	if(blockDataSize)
 		WriteBlock();
-
-	destStream->Flush();
 }
 
 StreamHasher::VerifyStream::VerifyStream(ptr<StreamHasher> streamHasher, ptr<InputStream> sourceDataStream, ptr<InputStream> sourceHashStream)
@@ -89,12 +90,12 @@ void StreamHasher::VerifyStream::ReadBlock()
 		if(blockDataSize)
 		{
 			if(originalHashSize != hashSize)
-				THROW_PRIMARY_EXCEPTION("Can't read hash");
+				THROW("Can't read hash");
 		}
 		else
 		{
 			if(originalHashSize)
-				THROW_PRIMARY_EXCEPTION("Extra hash after data end");
+				THROW("Extra hash after data end");
 			// данных нет, и больше делать нечего
 			return;
 		}
@@ -102,19 +103,19 @@ void StreamHasher::VerifyStream::ReadBlock()
 		// получить хеш исходных данных
 		hashStream->Reset();
 		hashStream->Write(block, blockDataSize);
-		hashStream->Flush();
+		hashStream->End();
 		void* dataHash = alloca(hashSize);
 		hashStream->GetHash(dataHash);
 
 		// сравнить его с оригинальным
 		if(memcmp(originalHash, dataHash, hashSize) != 0)
-			THROW_PRIMARY_EXCEPTION("Wrong data hash");
+			THROW("Wrong data hash");
 
 		// всё хорошо, данные можно использовать
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't read block in verify stream of stream hasher", exception);
+		THROW_SECONDARY("Can't read block in verify stream of stream hasher", exception);
 	}
 }
 
@@ -137,3 +138,5 @@ size_t StreamHasher::VerifyStream::Read(void* data, size_t size)
 	}
 	return dataPtr - (char*)data;
 }
+
+END_INANITY_CRYPTO

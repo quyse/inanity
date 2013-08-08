@@ -25,8 +25,10 @@ private:
 public:
 	/// Создать буферизированный поток с заданным размером буфера.
 	BufferedOutputStream(ptr<OutputStream> stream, size_t bufferSize = defaultBufferSize);
+	~BufferedOutputStream();
 
 	void Write(const void* data, size_t size);
+
 	void Flush();
 };
 

@@ -2,26 +2,28 @@
 #define ___INANITY_GRAPHICS_SHADERS_ATTRIBUTE_NODE_HPP___
 
 #include "Node.hpp"
-#include "Semantic.hpp"
+
+BEGIN_INANITY_GRAPHICS
+
+class AttributeLayoutElement;
+
+END_INANITY_GRAPHICS
 
 BEGIN_INANITY_SHADERS
 
 /// Класс узла атрибута.
 class AttributeNode : public Node
 {
-protected:
-	DataType valueType;
-	/// Семантика атрибута - тот же номер, что и в семантике Layout.
-	int layoutSemantic;
+private:
+	ptr<AttributeLayoutElement> element;
 
 public:
-	AttributeNode(DataType valueType, int layoutSemantic);
+	AttributeNode(ptr<AttributeLayoutElement> element);
 
 	Type GetType() const;
 
 	DataType GetValueType() const;
-	int GetLayoutSemantic() const;
-	Semantic GetSemantic() const;
+	int GetElementIndex() const;
 };
 
 END_INANITY_SHADERS

@@ -3,6 +3,8 @@
 #include "../StreamWriter.hpp"
 #include "../Exception.hpp"
 
+BEGIN_INANITY_GRAPHICS
+
 EditableFont::EditableFont(const String& textureName, const Charset& charset, const KerningPairs& kerningPairs, float charHeight)
 : textureName(textureName), charset(charset), kerningPairs(kerningPairs), charHeight(charHeight)
 {
@@ -52,7 +54,7 @@ void EditableFont::Serialize(ptr<OutputStream> outputStream)
 		writer->WriteShortly(charset.size());
 		for(Charset::const_iterator i = charset.begin(); i != charset.end(); ++i)
 		{
-			writer->Write(i->first);
+			writer->WriteShortly(i->first);
 			writer->Write(i->second);
 		}
 
@@ -60,13 +62,15 @@ void EditableFont::Serialize(ptr<OutputStream> outputStream)
 		writer->WriteShortly(kerningPairs.size());
 		for(KerningPairs::const_iterator i = kerningPairs.begin(); i != kerningPairs.end(); ++i)
 		{
-			writer->Write(i->first.first);
-			writer->Write(i->first.second);
+			writer->WriteShortly(i->first.first);
+			writer->WriteShortly(i->first.second);
 			writer->Write(i->second);
 		}
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't serialize editable font", exception);
+		THROW_SECONDARY("Can't serialize editable font", exception);
 	}
 }
+
+END_INANITY_GRAPHICS

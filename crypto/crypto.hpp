@@ -5,10 +5,5 @@
 
 #define BEGIN_INANITY_CRYPTO BEGIN_INANITY namespace Crypto {
 #define END_INANITY_CRYPTO } END_INANITY
-#ifdef INANITY_LIB
-BEGIN_INANITY_CRYPTO
-END_INANITY_CRYPTO
-using namespace Crypto;
-#endif
 
 #endif

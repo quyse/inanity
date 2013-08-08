@@ -2,13 +2,13 @@
 #define ___INANITY_GRAPHICS_SHADERS_INTERPOLANT_IPP___
 
 #include "Interpolant.hpp"
-#include "TransitionalNode.hpp"
+#include "TransformedNode.hpp"
 
 BEGIN_INANITY_SHADERS
 
 template <typename ValueType>
-Interpolant<ValueType>::Interpolant(Semantic semantic)
-: LValue<ValueType>(NEW(TransitionalNode(GetDataType<ValueType>(), TransitionalNode::transitionalTypeTransformed, semantic)))
+Interpolant<ValueType>::Interpolant(int semantic)
+: LValue<ValueType>(NEW(TransformedNode(DataTypeOf<ValueType>(), semantic)))
 {}
 
 template <typename ValueType>

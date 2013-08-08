@@ -7,6 +7,8 @@
 #include <sys/mman.h>
 #endif
 
+BEGIN_INANITY
+
 FolderFile::FolderFile(void* data, size_t size) : data(data), size(size)
 {
 }
@@ -30,3 +32,5 @@ size_t FolderFile::GetSize() const
 {
 	return size;
 }
+
+END_INANITY

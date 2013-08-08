@@ -3,7 +3,7 @@
 
 #include "Object.hpp"
 #include "String.hpp"
-#include "scripting_decl.hpp"
+#include "meta/decl.hpp"
 #include <vector>
 
 BEGIN_INANITY
@@ -18,8 +18,6 @@ TryLoadFile может выдавать нулевую ссылку (при от
 class File;
 class InputStream;
 class OutputStream;
-template <typename T>
-class Future;
 /// Абстрактный класс файловой системы.
 /** Файловая система - это набор файлов, к которым можно обращаться по именам.
 Файловая система не гарантирует постоянство этого набора.
@@ -30,9 +28,9 @@ class Future;
 производительности (за счет перехвата исключений из LoadFile). Реализация LoadFile
 вполне эффективна (так как перехват исключений не требуется). Поэтому рекомендуется
 реализовывать хотя бы TryLoadFile.
-Для реализации также можно определить методы LoadFileAsStream и SaveFileAsStream.
-Реализация LoadFileAsStream по умолчанию использует метод LoadFile вместе с классом
-MemoryStream. Реализация SaveFileAsStream только бросает исключение.
+Для реализации также можно определить методы LoadStream и SaveStream.
+Реализация LoadStream по умолчанию использует метод LoadFile вместе с классом
+MemoryStream. Реализация SaveStream только бросает исключение.
 В качестве разделителя каталогов используется прямой слеш /.
 Путь должен начинаться со слеша.
 Имя каталога должно заканчиваться слешем.
@@ -48,10 +46,6 @@ public:
 	*/
 	virtual ptr<File> LoadFile(const String& fileName);
 
-	/// Загрузить файл асинхронно.
-	/** Реализация по умолчанию грузит файл синхронно через LoadFile. */
-	virtual ptr<Future<ptr<File> > > LoadFileAsync(const String& fileName);
-
 	/// Загрузить файл.
 	/** Возвращает объект File для заданного файла. При отсутствии файла
 	с заданным именем возвращает null.
@@ -66,7 +60,7 @@ public:
 	\param fileName Имя файла.
 	\return Поток ввода.
 	*/
-	virtual ptr<InputStream> LoadFileAsStream(const String& fileName);
+	virtual ptr<InputStream> LoadStream(const String& fileName);
 
 	/// Сохранить файл.
 	/** Сохраняет файл в файловой системе, с заданным именем. Если файловая
@@ -76,16 +70,12 @@ public:
 	*/
 	virtual void SaveFile(ptr<File> file, const String& fileName);
 
-	/// Сохранить файл асинхронно.
-	/** Реализация по умолчанию делает это синхронно через SaveFile. */
-	virtual ptr<Future<int> > SaveFileAsync(ptr<File> file, const String& fileName);
-
 	/// Открыть файл как поток вывода.
 	/** Возвращает поток вывода, предназначенный для записи в файл.
 	\param fileName Имя файла.
 	\return Поток вывода.
 	*/
-	virtual ptr<OutputStream> SaveFileAsStream(const String& fileName);
+	virtual ptr<OutputStream> SaveStream(const String& fileName);
 
 	/// Получить список имен файлов в файловой системе.
 	/** Получает список имен файлов. Не гарантируется, что он будет полным
@@ -110,7 +100,7 @@ public:
 	*/
 	virtual void GetAllDirectoryEntries(const String& directoryName, std::vector<String>& entries) const;
 
-	SCRIPTABLE_CLASS(FileSystem);
+	META_DECLARE_CLASS(FileSystem);
 };
 
 END_INANITY

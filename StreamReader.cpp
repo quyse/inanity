@@ -5,11 +5,13 @@
 #include <alloca.h>
 #endif
 
+BEGIN_INANITY
+
 StreamReader::StreamReader(ptr<InputStream> stream) : stream(stream), read(0)
 {
 }
 
-size_t StreamReader::GetReadSize() const
+bigsize_t StreamReader::GetReadSize() const
 {
 	return read;
 }
@@ -17,7 +19,7 @@ size_t StreamReader::GetReadSize() const
 size_t StreamReader::Read(void* data, size_t size)
 {
 	if(stream->Read(data, size) != size)
-		THROW_PRIMARY_EXCEPTION("Can't read data");
+		THROW("Can't read data");
 	read += size;
 	return size;
 }
@@ -38,7 +40,7 @@ size_t StreamReader::ReadShortly()
 	bigsize_t a = ReadShortlyBig();
 	size_t b = (size_t)a;
 	if(a != b)
-		THROW_PRIMARY_EXCEPTION("Can't read shortly because number is too big");
+		THROW("Can't read shortly because number is too big");
 	return b;
 }
 
@@ -107,7 +109,7 @@ void StreamReader::ReadGap(size_t alignment)
 #ifdef _DEBUG
 	//проверить, что выравнивание - степень двойки
 	if(alignment & (alignment - 1))
-		THROW_PRIMARY_EXCEPTION("Alignment must be power of two");
+		THROW("Alignment must be power of two");
 #endif
 
 	//вычислить количество байт
@@ -119,3 +121,13 @@ void StreamReader::ReadGap(size_t alignment)
 		Read(data, alignment);
 	}
 }
+
+bigsize_t StreamReader::Skip(bigsize_t size)
+{
+	bigsize_t skipped = stream->Skip(size);
+	if(skipped != size)
+		THROW("Not enough data to skip");
+	return skipped;
+}
+
+END_INANITY

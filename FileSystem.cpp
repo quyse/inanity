@@ -2,38 +2,25 @@
 #include "File.hpp"
 #include "FileInputStream.hpp"
 #include "OutputStream.hpp"
-#include "Future.hpp"
 #include "Exception.hpp"
-#include "scripting_impl.hpp"
+#include "meta/impl.hpp"
 
-SCRIPTABLE_MAP_BEGIN(FileSystem, Inanity.FileSystem);
-	SCRIPTABLE_METHOD(FileSystem, LoadFile);
-	SCRIPTABLE_METHOD(FileSystem, TryLoadFile);
-	SCRIPTABLE_METHOD(FileSystem, LoadFileAsStream);
-	SCRIPTABLE_METHOD(FileSystem, SaveFile);
-	SCRIPTABLE_METHOD(FileSystem, SaveFileAsStream);
-SCRIPTABLE_MAP_END();
+BEGIN_INANITY
+
+META_CLASS(FileSystem, Inanity.FileSystem);
+	META_METHOD(LoadFile);
+	META_METHOD(TryLoadFile);
+	META_METHOD(LoadStream);
+	META_METHOD(SaveFile);
+	META_METHOD(SaveStream);
+META_CLASS_END();
 
 ptr<File> FileSystem::LoadFile(const String& fileName)
 {
 	ptr<File> file = TryLoadFile(fileName);
 	if(file)
 		return file;
-	THROW_PRIMARY_EXCEPTION("Can't load file " + fileName);
-}
-
-ptr<Future<ptr<File> > > FileSystem::LoadFileAsync(const String& fileName)
-{
-	ptr<Future<ptr<File> > > future = NEW(Future<ptr<File> >());
-	try
-	{
-		future->Result(LoadFile(fileName));
-	}
-	catch(Exception* exception)
-	{
-		future->Error(exception);
-	}
-	return future;
+	THROW("Can't load file " + fileName);
 }
 
 ptr<File> FileSystem::TryLoadFile(const String& fileName)
@@ -49,7 +36,7 @@ ptr<File> FileSystem::TryLoadFile(const String& fileName)
 	}
 }
 
-ptr<InputStream> FileSystem::LoadFileAsStream(const String& fileName)
+ptr<InputStream> FileSystem::LoadStream(const String& fileName)
 {
 	try
 	{
@@ -57,43 +44,28 @@ ptr<InputStream> FileSystem::LoadFileAsStream(const String& fileName)
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY_EXCEPTION("Can't load file " + fileName + " as stream", exception);
+		THROW_SECONDARY("Can't load file " + fileName + " as stream", exception);
 	}
 }
 
 void FileSystem::SaveFile(ptr<File> file, const String& fileName)
 {
-	THROW_PRIMARY_EXCEPTION("Saving files in this filesystem is not supported");
+	THROW("Saving files in this filesystem is not supported");
 }
 
-ptr<Future<int> > FileSystem::SaveFileAsync(ptr<File> file, const String& fileName)
+ptr<OutputStream> FileSystem::SaveStream(const String& fileName)
 {
-	ptr<Future<int> > future = NEW(Future<int>());
-	try
-	{
-		SaveFile(file, fileName);
-		future->Result(0);
-	}
-	catch(Exception* exception)
-	{
-		future->Error(exception);
-	}
-	return future;
-}
-
-ptr<OutputStream> FileSystem::SaveFileAsStream(const String& fileName)
-{
-	THROW_PRIMARY_EXCEPTION("Saving files as stream in this filesystem is not supported");
+	THROW("Saving files as stream in this filesystem is not supported");
 }
 
 void FileSystem::GetFileNames(std::vector<String>& fileNames) const
 {
-	THROW_PRIMARY_EXCEPTION("Getting file names in this filesystem is not supported");
+	THROW("Getting file names in this filesystem is not supported");
 }
 
 void FileSystem::GetDirectoryEntries(const String& directoryName, std::vector<String>& entries) const
 {
-	THROW_PRIMARY_EXCEPTION("Getting directory entries in this filesystem is not supported");
+	THROW("Getting directory entries in this filesystem is not supported");
 }
 
 void FileSystem::GetAllDirectoryEntries(const String& directoryName, std::vector<String>& entries) const
@@ -117,3 +89,5 @@ void FileSystem::GetAllDirectoryEntries(const String& directoryName, std::vector
 			GetAllDirectoryEntries(String(entry), entries);
 	}
 }
+
+END_INANITY

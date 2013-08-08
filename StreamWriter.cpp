@@ -5,6 +5,8 @@
 #include <alloca.h>
 #endif
 
+BEGIN_INANITY
+
 StreamWriter::StreamWriter(ptr<OutputStream> stream) : stream(stream), written(0)
 {
 }
@@ -116,7 +118,7 @@ void StreamWriter::WriteGap(size_t alignment)
 #ifdef _DEBUG
 	//проверить, что выравнивание - степень двойки
 	if(alignment & (alignment - 1))
-		THROW_PRIMARY_EXCEPTION("Alignment must be power of two");
+		THROW("Alignment must be power of two");
 #endif
 
 	//вычислить количество байт
@@ -131,7 +133,4 @@ void StreamWriter::WriteGap(size_t alignment)
 	}
 }
 
-void StreamWriter::Flush()
-{
-	stream->Flush();
-}
+END_INANITY

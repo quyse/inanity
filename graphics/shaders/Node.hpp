@@ -16,6 +16,8 @@ public:
 	{
 		/// Константа float.
 		typeFloatConst,
+		/// Константа int.
+		typeIntConst,
 		/// Атрибут.
 		typeAttribute,
 		/// Uniform-переменная.
@@ -24,8 +26,6 @@ public:
 		typeSampler,
 		/// Временная переменная.
 		typeTemp,
-		/// Специальная переменная.
-		typeSpecial,
 		/// Выходная переменная вершинного шейдера.
 		typeTransformed,
 		/// Выходная переменная пиксельного шейдера.

@@ -3,6 +3,8 @@
 #include <sstream>
 #include <iomanip>
 
+BEGIN_INANITY_CRYPTO
+
 String HashStream::GetHashString() const
 {
 	size_t size = GetHashSize();
@@ -14,3 +16,5 @@ String HashStream::GetHashString() const
 		stream << std::setw(2) << (int)hash[i];
 	return stream.str();
 }
+
+END_INANITY_CRYPTO

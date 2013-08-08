@@ -3,7 +3,7 @@
 
 #include "Object.hpp"
 #include "String.hpp"
-#include "scripting_decl.hpp"
+#include "meta/decl.hpp"
 #include <ostream>
 
 BEGIN_INANITY
@@ -74,7 +74,7 @@ public:
 	static ptr<Exception> SystemError();
 	static ptr<Exception> SystemError(int errorCode);
 
-	SCRIPTABLE_CLASS(Exception);
+	META_DECLARE_CLASS(Exception);
 };
 
 #ifdef _DEBUG
@@ -82,15 +82,18 @@ public:
 #define __SLINE3__(x) __SLINE2__(x)
 #define __SLINE__ __SLINE3__(__LINE__)
 /// Макрос для вызова первичного исключения
-#define THROW_PRIMARY_EXCEPTION(message) throw NEW(Exception(String("[ " __FILE__ ", " __SLINE__ " ] ") + (message)))
+#define THROW(message) throw NEW(Inanity::Exception(Inanity::String("[ " __FILE__ ", " __SLINE__ " ] ") + (message)))
 /// Макрос для вызова вторичного исключения
-#define THROW_SECONDARY_EXCEPTION(message, exception) throw NEW(Exception(String("[ " __FILE__ ", " __SLINE__ " ] ") + (message), (exception)))
+#define THROW_SECONDARY(message, exception) throw NEW(Inanity::Exception(Inanity::String("[ " __FILE__ ", " __SLINE__ " ] ") + (message), (exception)))
 #else
 /// Макрос для вызова первичного исключения
-#define THROW_PRIMARY_EXCEPTION(message) throw NEW(Exception((message)))
+#define THROW(message) throw NEW(Inanity::Exception((message)))
 /// Макрос для вызова вторичного исключения
-#define THROW_SECONDARY_EXCEPTION(message, exception) throw NEW(Exception((message), (exception)))
+#define THROW_SECONDARY(message, exception) throw NEW(Inanity::Exception((message), (exception)))
 #endif
+
+#define BEGIN_TRY() try {
+#define END_TRY(message) } catch(Inanity::Exception* exception) { THROW_SECONDARY(message, exception); }
 
 END_INANITY
 

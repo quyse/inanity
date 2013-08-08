@@ -3,25 +3,24 @@
 
 #include "graphics.hpp"
 #include "opengl.hpp"
-#include "../String.hpp"
-#include <vector>
 
 BEGIN_INANITY_GRAPHICS
+
+class GlDevice;
 
 /// Класс, инкапсулирующий слинкованную программу OpenGL.
 /** Из программ составляется кэш. */
 class GlInternalProgram : public Object
 {
 private:
+	ptr<GlDevice> device;
 	GLuint name;
-	std::vector<String> attributes;
 
 public:
-	GlInternalProgram(GLuint name);
+	GlInternalProgram(ptr<GlDevice> device, GLuint name);
 	~GlInternalProgram();
 
 	GLuint GetName() const;
-	std::vector<String>& GetAttributes();
 };
 
 END_INANITY_GRAPHICS
