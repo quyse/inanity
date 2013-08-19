@@ -5,14 +5,15 @@
 
 BEGIN_INANITY_AUDIO
 
-/// Абстрактный класс устройства вывода звука.
+class Source;
+class Sound;
+
+/// Abstract sound device class.
 class Device : public Object
 {
 public:
-	/// Создать плейер буферизованного звука.
-	virtual ptr<BufferedPlayer> CreateBufferedPlayer(ptr<Source> source) = 0;
-	/// Создать плейер потокового звука.
-	virtual ptr<StreamedPlayer> CreateStreamedPlayer(ptr<Source> source) = 0;
+	virtual ptr<Sound> CreateBufferedSound(ptr<Source> source) = 0;
+	virtual ptr<Sound> CreateStreamedSound(ptr<Source> source) = 0;
 };
 
 END_INANITY_AUDIO

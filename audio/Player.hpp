@@ -5,19 +5,24 @@
 
 BEGIN_INANITY_AUDIO
 
-/// Абстрактный класс плеера звука.
-/** */
+/// Abstract player class.
+/** Holds a reference to a sound.
+When player has lost the last reference, it remains as is
+(if sound was playing, it continues, if it wasn't, it doesn't). */
 class Player : public Object
 {
 public:
-	/// Запустить проигрывание звука.
-	/** \param repeat Количество повторений. 0 - повторять бесконечно. */
+	/// Play a sound.
+	/** \param repeat Repeat count. 0 means infinity. */
 	virtual void Play(int repeat = 1) = 0;
 
-	/// Остановить проигрывание звука.
+	/// Pause playing.
+	virtual void Pause() = 0;
+
+	/// Stop playing.
 	virtual void Stop() = 0;
 
-	/// Получить, проигрывается ли звук.
+	/// Get if sound is playing.
 	virtual bool IsPlaying() const = 0;
 };
 

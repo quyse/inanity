@@ -5,17 +5,14 @@
 
 BEGIN_INANITY_AUDIO
 
-/// Структура формата аудиоданных.
+/// This struct represents format of a sound.
 struct Format
 {
-	/// Количество семплов в секунду.
 	int samplesPerSecond;
-	/// Количество битов на семпл.
 	char bitsPerSample;
-	/// Количество каналов.
 	char channelsCount;
 
-	/// Оператор для хеширования.
+	/// Operator which is needed for hashing.
 	operator size_t() const
 	{
 		return samplesPerSecond | (bitsPerSample << 20) | (channelsCount << 26);

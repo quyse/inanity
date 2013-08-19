@@ -5,19 +5,20 @@
 
 BEGIN_INANITY_AUDIO
 
-/// Абстрактный класс звуковой системы.
+class Device;
+class Source;
+class Sound;
+
+/// Abstract class of sound system.
+/** Sound system represents an API which is used to talk
+with audio devices. */
 class System : public Object
 {
 public:
-	/// Создать устройство вывода по умолчанию.
 	virtual ptr<Device> CreateDefaultDevice() = 0;
 
-	/// Создать звук из источника звуковых данных.
-	virtual ptr<Sound> CreateSound(ptr<Source> source) = 0;
-	/// Создать потоковый звук из источника звуковых данных.
-	virtual ptr<Sound> CreateStreamedSound(pr<Source> source) = 0;
-
-	/// Выполнить обработку звуковых изменений.
+	/// Performs sound processing.
+	/** Should be called periodically. */
 	virtual void Tick() = 0;
 };
 

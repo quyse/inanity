@@ -8,13 +8,13 @@ BEGIN_INANITY_AUDIO
 class Player;
 class Player3D;
 
-/// Абстрактный класс звука.
+/// Abstract class representing sound.
+/** This is a chunk of sound, which can be played by creation
+a Player (or Player3D). */
 class Sound : public Object
 {
 public:
-	/// Создать плеер для звука.
 	virtual ptr<Player> CreatePlayer() = 0;
-	/// Создать 3D-плеер для звука.
 	virtual ptr<Player3D> CreatePlayer3D() = 0;
 };
 
