@@ -150,6 +150,18 @@ var libraries = {
 		],
 		'objects-win32': ['graphics.shaders.Hlsl11Generator', 'graphics.shaders.Hlsl11GeneratorInstance']
 	},
+	// ******* общее аудио
+	'libinanity-audio': {
+		objects: [
+			'audio.Source', 'audio.OggVorbisSource'
+		]
+	},
+	// ******* OpenAL
+	'libinanity-al': {
+		objects: [
+			'audio.AlSystem', 'audio.AlDevice', 'audio.AlBufferedSound', 'audio.AlPlayer', 'audio.AlBufferedPlayer'
+		]
+	},
 	// ******* общая физика
 	'libinanity-physics': {
 		objects: [
