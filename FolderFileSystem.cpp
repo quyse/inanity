@@ -67,7 +67,7 @@ FolderFileSystem::FolderFileSystem()
 
 String FolderFileSystem::GetFullName(String fileName) const
 {
-	if(fileName.length() && fileName.front() == '/')
+	if(folderName.length() && fileName.length() && fileName.front() == '/')
 		fileName = fileName.substr(1);
 	String result = folderName.length() ? (folderName + "\\" + fileName) : fileName;
 	size_t length = result.length();
@@ -270,7 +270,7 @@ FolderFileSystem::FolderFileSystem()
 
 String FolderFileSystem::GetFullName(String fileName) const
 {
-	if(fileName.length() && fileName[0] == '/')
+	if(folderName.length() && fileName.length() && fileName[0] == '/')
 		fileName = fileName.substr(1);
 	return folderName.length() ? (folderName + "/" + fileName) : fileName;
 }
