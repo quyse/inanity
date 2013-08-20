@@ -10,7 +10,8 @@ BEGIN_INANITY_AUDIO
 AlDevice::AlDevice(ALCdevice* device) : device(device)
 {
 	context = alcCreateContext(device, 0);
-	AlSystem::CheckErrors("Can't create context");
+	if(!context)
+		THROW("Can't create context");
 
 	alcMakeContextCurrent(context);
 	AlSystem::CheckErrors("Can't make context current");
@@ -48,6 +49,7 @@ ptr<Sound> AlDevice::CreateBufferedSound(ptr<Source> source)
 		case 16: bufferFormat = AL_FORMAT_MONO16; break;
 		default: THROW("Unsupported bits per sample");
 		}
+		break;
 	case 2:
 		switch(format.bitsPerSample)
 		{
@@ -55,6 +57,7 @@ ptr<Sound> AlDevice::CreateBufferedSound(ptr<Source> source)
 		case 16: bufferFormat = AL_FORMAT_STEREO16; break;
 		default: THROW("Unsupported bits per sample");
 		}
+		break;
 	default:
 		THROW("Unsupported number of channels");
 	}
@@ -68,6 +71,11 @@ ptr<Sound> AlDevice::CreateBufferedSound(ptr<Source> source)
 	return NEW(AlBufferedSound(this, buffer));
 
 	END_TRY("Can't create OpenAL buffered sound");
+}
+
+ptr<Sound> AlDevice::CreateStreamedSound(ptr<Source> source)
+{
+	THROW("Not implemented");
 }
 
 END_INANITY_AUDIO

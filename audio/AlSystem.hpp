@@ -14,8 +14,6 @@ public:
 
 	//** System's methods.
 	ptr<Device> CreateDefaultDevice();
-	ptr<Sound> CreateBufferedSound(ptr<Source> source);
-	ptr<Sound> CreateStreamedSound(ptr<Source> source);
 	void Tick();
 };
 

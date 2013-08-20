@@ -44,11 +44,16 @@ ptr<Device> AlSystem::CreateDefaultDevice()
 	BEGIN_TRY();
 
 	::ALCdevice* device = alcOpenDevice(0);
-	CheckErrors("Can't open device");
+	if(!device)
+		THROW("Can't create device");
 
 	return NEW(AlDevice(device));
 
 	END_TRY("Can't create default OpenAL device");
+}
+
+void AlSystem::Tick()
+{
 }
 
 END_INANITY_AUDIO
