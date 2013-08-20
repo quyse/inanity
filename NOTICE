@@ -15,3 +15,5 @@ bullet (http://bulletphysics.org) - zlib license (http://zlib.net/zlib_license.h
 libuv [via git submodule] (https://github.com/joyent/libuv) - node.js license (https://github.com/joyent/libuv/blob/master/LICENSE)
 http-parser [via git submodule] (https://github.com/joyent/http-parser) - MIT license
 utf8 (http://utfcpp.sourceforge.net/) - own license (in /deps/utf8.h heading comment)
+libogg (http://xiph.org/ogg/) - BSD-style license (see /deps/libogg/COPYING)
+libvorbis (http://xiph.org/vorbis/) - BSD-style license (see /deps/libvorbis/COPYING)
