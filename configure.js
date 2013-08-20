@@ -153,7 +153,7 @@ var libraries = {
 	// ******* общее аудио
 	'libinanity-audio': {
 		objects: [
-			'audio.Source', 'audio.OggVorbisSource'
+			'audio.Source', 'audio.OggVorbisSource', 'audio.OggVorbisStream'
 		]
 	},
 	// ******* OpenAL
@@ -205,6 +205,12 @@ var executables = {
 		objects: ['graphics.test'],
 		staticLibraries: ['libinanity-base', 'libinanity-dx'],
 		dynamicLibraries: []
+	}
+	// TEST
+	, audiotest: {
+		objects: ['audio.test'],
+		staticLibraries: ['libinanity-audio', 'libinanity-al', 'libinanity-base', 'deps/libvorbis//libvorbisfile', 'deps/libvorbis//libvorbis', 'deps/libogg//libogg', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
+		dynamicLibraries: ['openal']
 	}
 	// TEST
 	, luatest: {
