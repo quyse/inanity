@@ -14,7 +14,7 @@ private:
 	ptr<AlBufferedSound> sound;
 
 public:
-	AlBufferedPlayer(ptr<AlBufferedSound> sound, ALuint source);
+	AlBufferedPlayer(ptr<AlBufferedSound> sound);
 
 	//** Player3D's methods.
 	void Play(int repeat = 1);

@@ -20,6 +20,7 @@ public:
 	~AlBufferedSound();
 
 	ptr<AlDevice> GetDevice() const;
+	ALuint GetBuffer() const;
 
 	ptr<Player> CreatePlayer();
 	ptr<Player3D> CreatePlayer3D();

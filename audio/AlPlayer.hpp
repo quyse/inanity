@@ -16,7 +16,7 @@ protected:
 	ALuint source;
 
 public:
-	AlPlayer(ptr<AlDevice> device, ALuint source);
+	AlPlayer(ptr<AlDevice> device);
 	~AlPlayer();
 };
 
