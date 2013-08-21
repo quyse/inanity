@@ -30,6 +30,11 @@ AlDevice::~AlDevice()
 		alcCloseDevice(device);
 }
 
+ptr<AlSystem> AlDevice::GetSystem() const
+{
+	return system;
+}
+
 ptr<AlBuffer> AlDevice::CreateBuffer(const Format& format, const void* data, size_t size)
 {
 	ALenum bufferFormat;

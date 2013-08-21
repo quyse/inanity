@@ -6,6 +6,7 @@
 
 BEGIN_INANITY_AUDIO
 
+class AlSystem;
 class AlBuffer;
 struct Format;
 
@@ -13,12 +14,15 @@ struct Format;
 class AlDevice : public Device
 {
 private:
+	ptr<AlSystem> system;
 	::ALCdevice* device;
 	::ALCcontext* context;
 
 public:
-	AlDevice(::ALCdevice* device);
+	AlDevice(ptr<AlSystem> system, ::ALCdevice* device);
 	~AlDevice();
+
+	ptr<AlSystem> GetSystem() const;
 
 	ptr<AlBuffer> CreateBuffer(const Format& format, const void* data, size_t size);
 

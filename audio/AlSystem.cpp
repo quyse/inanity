@@ -47,7 +47,7 @@ ptr<Device> AlSystem::CreateDefaultDevice()
 	if(!device)
 		THROW("Can't create device");
 
-	return NEW(AlDevice(device));
+	return NEW(AlDevice(this, device));
 
 	END_TRY("Can't create default OpenAL device");
 }
