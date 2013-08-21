@@ -2,25 +2,21 @@
 #define ___INANITY_AUDIO_AL_BUFFERED_SOUND_HPP___
 
 #include "Sound.hpp"
-#include "al.hpp"
 
 BEGIN_INANITY_AUDIO
 
-class AlDevice;
+class AlBuffer;
 
 /// Buffered sound for OpenAL sound system.
 class AlBufferedSound : public Sound
 {
 private:
-	ptr<AlDevice> device;
-	ALuint buffer;
+	ptr<AlBuffer> buffer;
 
 public:
-	AlBufferedSound(ptr<AlDevice> device, ALuint buffer);
-	~AlBufferedSound();
+	AlBufferedSound(ptr<AlBuffer> buffer);
 
-	ptr<AlDevice> GetDevice() const;
-	ALuint GetBuffer() const;
+	ptr<AlBuffer> GetBuffer() const;
 
 	ptr<Player> CreatePlayer();
 	ptr<Player3D> CreatePlayer3D();

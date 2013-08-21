@@ -5,16 +5,16 @@
 
 BEGIN_INANITY_AUDIO
 
-class AlBufferedSound;
+class AlBuffer;
 
 /// Class of OpenAL buffered player.
 class AlBufferedPlayer : public AlPlayer
 {
 private:
-	ptr<AlBufferedSound> sound;
+	ptr<AlBuffer> buffer;
 
 public:
-	AlBufferedPlayer(ptr<AlBufferedSound> sound);
+	AlBufferedPlayer(ptr<AlBuffer> buffer);
 
 	//** Player3D's methods.
 	void Play(int repeat = 1);

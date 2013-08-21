@@ -1,13 +1,15 @@
 #include "AlDevice.hpp"
-#include "AlBufferedSound.hpp"
 #include "AlSystem.hpp"
+#include "AlBuffer.hpp"
+#include "AlBufferedSound.hpp"
 #include "Source.hpp"
 #include "../File.hpp"
 #include "../Exception.hpp"
 
 BEGIN_INANITY_AUDIO
 
-AlDevice::AlDevice(ALCdevice* device) : device(device)
+AlDevice::AlDevice(ptr<AlSystem> system, ALCdevice* device)
+: system(system), device(device)
 {
 	context = alcCreateContext(device, 0);
 	if(!context)
@@ -28,17 +30,8 @@ AlDevice::~AlDevice()
 		alcCloseDevice(device);
 }
 
-ptr<Sound> AlDevice::CreateBufferedSound(ptr<Source> source)
+ptr<AlBuffer> AlDevice::CreateBuffer(const Format& format, const void* data, size_t size)
 {
-	BEGIN_TRY();
-
-	// create a buffer
-	ALuint buffer;
-	alGenBuffers(1, &buffer);
-	AlSystem::CheckErrors("Can't gen buffer");
-
-	Format format = source->GetFormat();
-
 	ALenum bufferFormat;
 	switch(format.channelsCount)
 	{
@@ -62,13 +55,26 @@ ptr<Sound> AlDevice::CreateBufferedSound(ptr<Source> source)
 		THROW("Unsupported number of channels");
 	}
 
-	ptr<File> file = source->GetData();
+	// create a buffer
+	ALuint bufferName;
+	alGenBuffers(1, &bufferName);
+	AlSystem::CheckErrors("Can't gen buffer");
+	ptr<AlBuffer> buffer = NEW(AlBuffer(this, bufferName));
 
 	// fill it with data
-	alBufferData(buffer, bufferFormat, file->GetData(), file->GetSize(), format.samplesPerSecond);
+	alBufferData(bufferName, bufferFormat, data, size, format.samplesPerSecond);
 	AlSystem::CheckErrors("Can't upload buffer data");
 
-	return NEW(AlBufferedSound(this, buffer));
+	return buffer;
+}
+
+ptr<Sound> AlDevice::CreateBufferedSound(ptr<Source> source)
+{
+	BEGIN_TRY();
+
+	ptr<File> file = source->GetData();
+
+	return NEW(AlBufferedSound(CreateBuffer(source->GetFormat(), file->GetData(), file->GetSize())));
 
 	END_TRY("Can't create OpenAL buffered sound");
 }

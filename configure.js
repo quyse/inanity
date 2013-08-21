@@ -159,7 +159,7 @@ var libraries = {
 	// ******* OpenAL
 	'libinanity-al': {
 		objects: [
-			'audio.AlSystem', 'audio.AlDevice', 'audio.AlBufferedSound', 'audio.AlPlayer', 'audio.AlBufferedPlayer'
+			'audio.AlSystem', 'audio.AlDevice', 'audio.AlBuffer', 'audio.AlBufferedSound', 'audio.AlPlayer', 'audio.AlBufferedPlayer'
 		]
 	},
 	// ******* общая физика

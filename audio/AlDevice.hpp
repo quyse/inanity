@@ -6,6 +6,9 @@
 
 BEGIN_INANITY_AUDIO
 
+class AlBuffer;
+struct Format;
+
 /// OpenAL sound device.
 class AlDevice : public Device
 {
@@ -16,6 +19,8 @@ private:
 public:
 	AlDevice(::ALCdevice* device);
 	~AlDevice();
+
+	ptr<AlBuffer> CreateBuffer(const Format& format, const void* data, size_t size);
 
 	//** Device's methods.
 	ptr<Sound> CreateBufferedSound(ptr<Source> source);

@@ -1,24 +1,13 @@
 #include "AlBufferedSound.hpp"
-#include "AlDevice.hpp"
+#include "AlBuffer.hpp"
 #include "AlBufferedPlayer.hpp"
 
 BEGIN_INANITY_AUDIO
 
-AlBufferedSound::AlBufferedSound(ptr<AlDevice> device, ALuint buffer)
-: device(device), buffer(buffer) {}
+AlBufferedSound::AlBufferedSound(ptr<AlBuffer> buffer)
+: buffer(buffer) {}
 
-AlBufferedSound::~AlBufferedSound()
-{
-	if(buffer)
-		alDeleteBuffers(1, &buffer);
-}
-
-ptr<AlDevice> AlBufferedSound::GetDevice() const
-{
-	return device;
-}
-
-ALuint AlBufferedSound::GetBuffer() const
+ptr<AlBuffer> AlBufferedSound::GetBuffer() const
 {
 	return buffer;
 }
@@ -30,7 +19,7 @@ ptr<Player> AlBufferedSound::CreatePlayer()
 
 ptr<Player3D> AlBufferedSound::CreatePlayer3D()
 {
-	return NEW(AlBufferedPlayer(this));
+	return NEW(AlBufferedPlayer(buffer));
 }
 
 END_INANITY_AUDIO

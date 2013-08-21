@@ -1,17 +1,17 @@
 #include "AlBufferedPlayer.hpp"
-#include "AlBufferedSound.hpp"
+#include "AlBuffer.hpp"
 #include "AlDevice.hpp"
 #include "AlSystem.hpp"
 #include "../Exception.hpp"
 
 BEGIN_INANITY_AUDIO
 
-AlBufferedPlayer::AlBufferedPlayer(ptr<AlBufferedSound> sound)
-: AlPlayer(sound->GetDevice()), sound(sound)
+AlBufferedPlayer::AlBufferedPlayer(ptr<AlBuffer> buffer)
+: AlPlayer(buffer->GetDevice()), buffer(buffer)
 {
 	BEGIN_TRY();
 
-	alSourcei(source, AL_BUFFER, sound->GetBuffer());
+	alSourcei(source, AL_BUFFER, buffer->GetBuffer());
 	AlSystem::CheckErrors("Can't set source buffer");
 
 	END_TRY("Can't create OpenAL buffered player");
