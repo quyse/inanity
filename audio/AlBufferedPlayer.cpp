@@ -44,22 +44,4 @@ bool AlBufferedPlayer::IsPlaying() const
 	return state == AL_PLAYING;
 }
 
-void AlBufferedPlayer::SetPosition(const Math::vec3& position)
-{
-	alSource3f(source, AL_POSITION, position.x, position.y, position.z);
-	AlSystem::CheckErrors("Can't set OpenAL buffered player position");
-}
-
-void AlBufferedPlayer::SetDirection(const Math::vec3& direction)
-{
-	alSource3f(source, AL_DIRECTION, direction.x, direction.y, direction.z);
-	AlSystem::CheckErrors("Can't set OpenAL buffered player direction");
-}
-
-void AlBufferedPlayer::SetVelocity(const Math::vec3& velocity)
-{
-	alSource3f(source, AL_VELOCITY, velocity.x, velocity.y, velocity.z);
-	AlSystem::CheckErrors("Can't set OpenAL buffered player velocity");
-}
-
 END_INANITY_AUDIO

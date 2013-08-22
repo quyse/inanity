@@ -18,6 +18,11 @@ protected:
 public:
 	AlPlayer(ptr<AlDevice> device);
 	~AlPlayer();
+
+	//** Player3D's methods
+	void SetPosition(const Math::vec3& position);
+	void SetDirection(const Math::vec3& direction);
+	void SetVelocity(const Math::vec3& velocity);
 };
 
 END_INANITY_AUDIO

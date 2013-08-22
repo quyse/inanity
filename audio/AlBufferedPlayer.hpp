@@ -16,14 +16,11 @@ private:
 public:
 	AlBufferedPlayer(ptr<AlBuffer> buffer);
 
-	//** Player3D's methods.
+	//** Player's methods.
 	void Play(int repeat = 1);
 	void Pause();
 	void Stop();
 	bool IsPlaying() const;
-	void SetPosition(const Math::vec3& position);
-	void SetDirection(const Math::vec3& direction);
-	void SetVelocity(const Math::vec3& velocity);
 };
 
 END_INANITY_AUDIO
