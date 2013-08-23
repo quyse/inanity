@@ -305,6 +305,11 @@ void Hlsl11GeneratorInstance::PrintOperationNode(OperationNode* node)
 	case OperationNode::operationGetInstanceID:
 		hlsl << "sI";
 		break;
+	case OperationNode::operationScreenToTexture:
+		hlsl << '(';
+		PrintNode(node->GetA());
+		hlsl << ") * float2(0.5f, -0.5f) + float2(0.5f, 0.5f)";
+		break;
 	default:
 		{
 			// остались только функции, которые делаются простым преобразованием имени

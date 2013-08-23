@@ -357,6 +357,11 @@ void GlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 	case OperationNode::operationGetInstanceID:
 		glsl << "uint(gl_InstanceID)";
 		break;
+	case OperationNode::operationScreenToTexture:
+		glsl << '(';
+		PrintNode(node->GetA());
+		glsl << ") * vec2(0.5f, 0.5f) + vec2(0.5f, 0.5f)";
+		break;
 	case OperationNode::operationSaturate:
 		glsl << "clamp(";
 		PrintNode(node->GetA());

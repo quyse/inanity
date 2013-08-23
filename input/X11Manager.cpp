@@ -180,10 +180,12 @@ void X11Manager::Process(const XEvent& event)
 			AddEvent(e);
 		}
 		break;
+	case EnterNotify:
+		mouseX = event.xcrossing.x;
+		mouseY = event.xcrossing.y;
+		break;
 	case LeaveNotify:
-		mouseX = 100;
-		mouseY = 100;
-		XWarpPointer(event.xcrossing.display, 0, event.xcrossing.window, 0, 0, 0, 0, mouseX, mouseY);
+		XWarpPointer(event.xcrossing.display, 0, event.xcrossing.window, 0, 0, 0, 0, 100, 100);
 		break;
 	}
 }
