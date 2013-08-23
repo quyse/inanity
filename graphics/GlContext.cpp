@@ -33,6 +33,9 @@ GlContext::GlContext(ptr<GlDevice> device) :
 	targetFramebuffer(0), boundFramebuffer(0), boundAttributesCount(0)
 {
 	programCache = NEW(GlInternalProgramCache(device));
+
+	// set front face like in Direct3D
+	glFrontFace(GL_CW);
 }
 
 GlContext::~GlContext()
