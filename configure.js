@@ -195,6 +195,27 @@ var executables = {
 		dynamicLibraries: []
 	}
 	// TEST
+	, quadtest: {
+		objects: ['examples.quad', 'examples.ExampleGame'],
+		staticLibraries: [
+			'libinanity-platform',
+			'libinanity-gl',
+			'libinanity-graphics',
+			'libinanity-platform',
+			'libinanity-shaders',
+			'libinanity-input',
+			'libinanity-crypto',
+			'libinanity-sqlitefs',
+			'libinanity-base',
+			'libinanity-meta',
+			'libinanity-lua',
+			'deps/lua//liblua',
+			'deps/sqlite//libsqlite',
+			'deps/glew//libglew'
+		],
+		dynamicLibraries: ['dl', 'pthread', 'GL', 'X11', 'xcb', 'X11-xcb']
+	}
+	// TEST
 	, luatest: {
 		objects: ['script.lua.test'],
 		staticLibraries: ['libinanity-base', 'libinanity-compress', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
