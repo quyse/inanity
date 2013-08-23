@@ -24,8 +24,6 @@ public:
 
 	ptr<AlSystem> GetSystem() const;
 
-	ptr<AlBuffer> CreateBuffer(const Format& format, const void* data, size_t size);
-
 	//** Device's methods.
 	ptr<Sound> CreateBufferedSound(ptr<Source> source);
 	ptr<Sound> CreateStreamedSound(ptr<Source> source);

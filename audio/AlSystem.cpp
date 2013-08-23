@@ -1,6 +1,10 @@
 #include "AlSystem.hpp"
 #include "AlDevice.hpp"
+#include "Format.hpp"
+#include "AlStreamedPlayer.hpp"
+#include "../Thread.hpp"
 #include "../Exception.hpp"
+#include <algorithm>
 
 BEGIN_INANITY_AUDIO
 
@@ -39,6 +43,42 @@ void AlSystem::CheckErrors(const char* primaryExceptionString)
 	}
 }
 
+ALenum AlSystem::ConvertFormat(const Format& format)
+{
+	switch(format.channelsCount)
+	{
+	case 1:
+		switch(format.bitsPerSample)
+		{
+		case 8: return AL_FORMAT_MONO8;
+		case 16: return AL_FORMAT_MONO16;
+		}
+		break;
+	case 2:
+		switch(format.bitsPerSample)
+		{
+		case 8: return AL_FORMAT_STEREO8;
+		case 16: return AL_FORMAT_STEREO16;
+		}
+		break;
+	}
+
+	THROW("Unsupported OpenAL buffer format");
+}
+
+void AlSystem::RegisterStreamedPlayer(AlStreamedPlayer* player)
+{
+	streamedPlayers.push_back(player);
+}
+
+void AlSystem::UnregisterStreamedPlayer(AlStreamedPlayer* player)
+{
+	std::vector<AlStreamedPlayer*>::iterator i =
+		std::find(streamedPlayers.begin(), streamedPlayers.end(), player);
+	if(i != streamedPlayers.end())
+		streamedPlayers.erase(i);
+}
+
 ptr<Device> AlSystem::CreateDefaultDevice()
 {
 	BEGIN_TRY();
@@ -54,6 +94,8 @@ ptr<Device> AlSystem::CreateDefaultDevice()
 
 void AlSystem::Tick()
 {
+	for(size_t i = 0; i < streamedPlayers.size(); ++i)
+		streamedPlayers[i]->Process();
 }
 
 END_INANITY_AUDIO

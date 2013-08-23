@@ -10,7 +10,7 @@ AlPlayer::AlPlayer(ptr<AlDevice> device)
 {
 	BEGIN_TRY();
 
-	alGenSources(1, &source);
+	alGenSources(1, &sourceName);
 	AlSystem::CheckErrors("Can't gen source");
 
 	END_TRY("Can't create OpenAL player");
@@ -18,25 +18,25 @@ AlPlayer::AlPlayer(ptr<AlDevice> device)
 
 AlPlayer::~AlPlayer()
 {
-	if(source)
-		alDeleteSources(1, &source);
+	if(sourceName)
+		alDeleteSources(1, &sourceName);
 }
 
 void AlPlayer::SetPosition(const Math::vec3& position)
 {
-	alSource3f(source, AL_POSITION, position.x, position.y, position.z);
+	alSource3f(sourceName, AL_POSITION, position.x, position.y, position.z);
 	AlSystem::CheckErrors("Can't set OpenAL player position");
 }
 
 void AlPlayer::SetDirection(const Math::vec3& direction)
 {
-	alSource3f(source, AL_DIRECTION, direction.x, direction.y, direction.z);
+	alSource3f(sourceName, AL_DIRECTION, direction.x, direction.y, direction.z);
 	AlSystem::CheckErrors("Can't set OpenAL player direction");
 }
 
 void AlPlayer::SetVelocity(const Math::vec3& velocity)
 {
-	alSource3f(source, AL_VELOCITY, velocity.x, velocity.y, velocity.z);
+	alSource3f(sourceName, AL_VELOCITY, velocity.x, velocity.y, velocity.z);
 	AlSystem::CheckErrors("Can't set OpenAL player velocity");
 }
 

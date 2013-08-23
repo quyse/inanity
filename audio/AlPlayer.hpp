@@ -13,7 +13,7 @@ class AlPlayer : public Player3D
 {
 protected:
 	ptr<AlDevice> device;
-	ALuint source;
+	ALuint sourceName;
 
 public:
 	AlPlayer(ptr<AlDevice> device);

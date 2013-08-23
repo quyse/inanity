@@ -12,14 +12,14 @@ class AlBuffer : public Object
 {
 private:
 	ptr<AlDevice> device;
-	ALuint buffer;
+	ALuint bufferName;
 
 public:
-	AlBuffer(ptr<AlDevice> device, ALuint buffer);
+	AlBuffer(ptr<AlDevice> device, ALuint bufferName);
 	~AlBuffer();
 
 	ptr<AlDevice> GetDevice() const;
-	ALuint GetBuffer() const;
+	ALuint GetName() const;
 };
 
 END_INANITY_AUDIO

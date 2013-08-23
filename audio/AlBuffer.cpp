@@ -3,12 +3,12 @@
 
 BEGIN_INANITY_AUDIO
 
-AlBuffer::AlBuffer(ptr<AlDevice> device, ALuint buffer)
-: device(device), buffer(buffer) {}
+AlBuffer::AlBuffer(ptr<AlDevice> device, ALuint bufferName)
+: device(device), bufferName(bufferName) {}
 
 AlBuffer::~AlBuffer()
 {
-	alDeleteBuffers(1, &buffer);
+	alDeleteBuffers(1, &bufferName);
 }
 
 ptr<AlDevice> AlBuffer::GetDevice() const
@@ -16,9 +16,9 @@ ptr<AlDevice> AlBuffer::GetDevice() const
 	return device;
 }
 
-ALuint AlBuffer::GetBuffer() const
+ALuint AlBuffer::GetName() const
 {
-	return buffer;
+	return bufferName;
 }
 
 END_INANITY_AUDIO
