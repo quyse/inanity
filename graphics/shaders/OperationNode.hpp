@@ -28,6 +28,7 @@ public:
 		operationNotEqual,
 		operationSetPosition,
 		operationGetInstanceID,
+		operationScreenToTexture,
 		operationFloat11to2,
 		operationFloat111to3,
 		operationFloat1111to4,

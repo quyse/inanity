@@ -24,6 +24,9 @@ inline Expression setPosition(Value<vec4> a) { return OP1(SetPosition); }
 // getInstanceID
 inline Value<uint> getInstanceID() { return OP0(GetInstanceID); }
 
+// screenToTexture
+inline Value<vec2> screenToTexture(Value<vec2> a) { return OP1(ScreenToTexture); }
+
 // dot
 template <typename T, int n>
 inline Value<T> dot(Value<xvec<T, n> > a, Value<xvec<T, n> > b) { return OP2(Dot); }
