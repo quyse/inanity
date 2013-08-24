@@ -151,14 +151,14 @@ void AlStreamedPlayer::Stop()
 
 bool AlStreamedPlayer::IsPlaying() const
 {
+	if(!playing)
+		return false;
+
 	ALint state;
 	alGetSourcei(sourceName, AL_SOURCE_STATE, &state);
 	AlSystem::CheckErrors("Can't get OpenAL streamed player playing state");
 	return state == AL_PLAYING ||
-		playing && (
-			state == AL_PAUSED
-			|| state == AL_STOPPED && stream
-		);
+		(state == AL_INITIAL || state == AL_STOPPED) && stream;
 }
 
 END_INANITY_AUDIO
