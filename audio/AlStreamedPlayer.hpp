@@ -11,7 +11,6 @@ END_INANITY
 
 BEGIN_INANITY_AUDIO
 
-class AlDevice;
 class Source;
 class AlBuffer;
 
@@ -24,7 +23,6 @@ private:
 	/// Number of buffers.
 	static const int buffersCount = 2;
 
-	ptr<AlDevice> device;
 	ptr<Source> source;
 
 	/// Size of one buffer in bytes.

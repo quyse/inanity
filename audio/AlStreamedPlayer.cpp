@@ -100,14 +100,36 @@ void AlStreamedPlayer::Process()
 		alGetSourcei(sourceName, AL_BUFFERS_QUEUED, &buffersQueued);
 		AlSystem::CheckErrors("Can't get number of queued buffers");
 
+		ALint initialBuffersQueued = buffersQueued;
+
 		while(buffersQueued < buffersCount && stream)
 			Fill(buffers[buffersQueued++]);
+
+		// queue new buffers
+		if(buffersQueued > initialBuffersQueued)
+		{
+			ALuint bufferNames[buffersCount];
+			for(int i = initialBuffersQueued; i < buffersQueued; ++i)
+				bufferNames[i] = buffers[i]->GetName();
+			alSourceQueueBuffers(
+				sourceName,
+				buffersQueued - initialBuffersQueued,
+				bufferNames + initialBuffersQueued
+			);
+		}
 
 		// ensure playing
 		if(playing)
 		{
-			alSourcePlay(sourceName);
-			AlSystem::CheckErrors("Can't play source");
+			ALint state;
+			alGetSourcei(sourceName, AL_SOURCE_STATE, &state);
+			AlSystem::CheckErrors("Can't get OpenAL streamed player playing state");
+
+			if(state != AL_PLAYING)
+			{
+				alSourcePlay(sourceName);
+				AlSystem::CheckErrors("Can't play source");
+			}
 		}
 	}
 }
@@ -132,7 +154,11 @@ bool AlStreamedPlayer::IsPlaying() const
 	ALint state;
 	alGetSourcei(sourceName, AL_SOURCE_STATE, &state);
 	AlSystem::CheckErrors("Can't get OpenAL streamed player playing state");
-	return state == AL_PLAYING || state == AL_PAUSED && playing;
+	return state == AL_PLAYING ||
+		playing && (
+			state == AL_PAUSED
+			|| state == AL_STOPPED && stream
+		);
 }
 
 END_INANITY_AUDIO
