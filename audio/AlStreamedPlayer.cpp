@@ -9,7 +9,7 @@
 BEGIN_INANITY_AUDIO
 
 AlStreamedPlayer::AlStreamedPlayer(ptr<AlDevice> device, ptr<Source> source)
-: AlPlayer(device), source(source), playing(false)
+: AlPlayer(device), source(source), playing(false), looping(false)
 {
 	// calculate size of one buffer in bytes
 	Format format = source->GetFormat();
@@ -41,7 +41,12 @@ size_t AlStreamedPlayer::Fill(ptr<AlBuffer>& buffer)
 	void* data = alloca(bufferSize);
 	size_t read = stream->Read(data, bufferSize);
 	if(read < bufferSize)
-		stream = 0;
+	{
+		if(looping)
+			stream = source->CreateStream();
+		else
+			stream = 0;
+	}
 
 	if(read)
 	{
@@ -58,7 +63,7 @@ size_t AlStreamedPlayer::Fill(ptr<AlBuffer>& buffer)
 	return read;
 }
 
-void AlStreamedPlayer::Play(int repeat)
+void AlStreamedPlayer::Play(bool looped)
 {
 	// get a stream
 	if(!stream)
@@ -66,6 +71,7 @@ void AlStreamedPlayer::Play(int repeat)
 
 	// set playing state
 	playing = true;
+	looping = looped;
 }
 
 void AlStreamedPlayer::Process()

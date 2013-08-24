@@ -17,7 +17,7 @@ public:
 	AlBufferedPlayer(ptr<AlBuffer> buffer);
 
 	//** Player's methods.
-	void Play(int repeat = 1);
+	void Play(bool looped = false);
 	void Pause();
 	void Stop();
 	bool IsPlaying() const;

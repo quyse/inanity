@@ -13,8 +13,7 @@ class Player : public Object
 {
 public:
 	/// Play a sound.
-	/** \param repeat Repeat count. 0 means infinity. */
-	virtual void Play(int repeat = 1) = 0;
+	virtual void Play(bool looped = false) = 0;
 
 	/// Pause playing.
 	virtual void Pause() = 0;

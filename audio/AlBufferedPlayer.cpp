@@ -17,9 +17,9 @@ AlBufferedPlayer::AlBufferedPlayer(ptr<AlBuffer> buffer)
 	END_TRY("Can't create OpenAL buffered player");
 }
 
-void AlBufferedPlayer::Play(int repeat)
+void AlBufferedPlayer::Play(bool looped)
 {
-	// FIXME: do repeat support
+	alSourcei(sourceName, AL_LOOPING, looped ? AL_TRUE : AL_FALSE);
 	alSourcePlay(sourceName);
 	AlSystem::CheckErrors("Can't play OpenAL buffered player");
 }

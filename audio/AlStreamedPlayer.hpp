@@ -21,7 +21,7 @@ private:
 	/// Length of sound in one buffer, in ms.
 	static const size_t bufferTime = 500;
 	/// Number of buffers.
-	static const int buffersCount = 2;
+	static const int buffersCount = 3;
 
 	ptr<Source> source;
 
@@ -33,6 +33,8 @@ private:
 	ptr<InputStream> stream;
 	/// Is playing in progress.
 	bool playing;
+	/// Is playing looped.
+	bool looping;
 
 	ptr<AlBuffer> buffers[buffersCount];
 
@@ -48,7 +50,7 @@ public:
 	void Process();
 
 	//** Player's methods.
-	void Play(int repeat = 1);
+	void Play(bool looped = false);
 	void Pause();
 	void Stop();
 	bool IsPlaying() const;
