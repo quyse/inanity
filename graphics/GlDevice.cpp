@@ -237,8 +237,11 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 		GLXFBConfig fbConfig = fbConfigs[0];
 		XFree(fbConfigs);
 		int visualId;
-		glXGetFBConfigAttrib(xDisplay, fbConfig, GLX_VISUAL_ID, &visualId);
+		if(glXGetFBConfigAttrib(xDisplay, fbConfig, GLX_VISUAL_ID, &visualId))
+			THROW("Can't get visual id of FB config");
 		XVisualInfo* xVisualInfo = glXGetVisualFromFBConfig(xDisplay, fbConfig);
+		if(!xVisualInfo)
+			THROW("Can't get visual from FB config");
 
 		// create temp old-style context
 		GLXContext tempGlxContext = glXCreateContext(xDisplay, xVisualInfo, 0, True);
