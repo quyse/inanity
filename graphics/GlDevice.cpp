@@ -211,8 +211,6 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 			GLX_DEPTH_SIZE, 24,
 			GLX_STENCIL_SIZE, 8,
 			GLX_DOUBLEBUFFER, True,
-			GLX_SAMPLE_BUFFERS, 1,
-			GLX_SAMPLES, 4,
 			0, 0
 		};
 
