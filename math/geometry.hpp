@@ -16,6 +16,16 @@ xmat<T, 4, 4> CreateTranslationMatrix(const xvec<T, 3>& translation)
 }
 
 template <typename T>
+xmat<T, 4, 4> CreateScalingMatrix(const xvec<T, 3>& scaling)
+{
+	xmat<T, 4, 4> r = identity_mat<T, 4>();
+	r(0, 0) = scaling(0);
+	r(1, 1) = scaling(1);
+	r(2, 2) = scaling(2);
+	return r;
+}
+
+template <typename T>
 xmat<T, 4, 4> CreateLookAtMatrix(const xvec<T, 3>& eye, const xvec<T, 3>& target, const xvec<T, 3>& up)
 {
 	xmat<T, 4, 4> r;
