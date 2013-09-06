@@ -1,13 +1,22 @@
 #include "X11Output.hpp"
 #include "../platform/X11Window.hpp"
+#include "../platform/X11Display.hpp"
 #include "../graphics/Presenter.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
 X11Output::X11Output(ptr<Platform::X11Window> window)
-: window(window), width(width), height(height)
+: window(window)
 {
 	window->SetOutput(this);
+
+	::Window root;
+	int x, y;
+	unsigned int tempWidth, tempHeight, borderWidth, depth;
+	XGetGeometry(window->GetDisplay()->GetDisplay(), window->GetHandle(),
+		&root, &x, &y, &tempWidth, &tempHeight, &borderWidth, &depth);
+	width = (int)tempWidth;
+	height = (int)tempHeight;
 }
 
 X11Output::~X11Output()
