@@ -77,8 +77,8 @@ public:
 	void SetUniformBufferData(UniformBuffer* buffer, const void* data, int size);
 	void SetVertexBufferData(VertexBuffer* buffer, const void* data, int size);
 
-	void Draw();
-	void DrawInstanced(int instancesCount);
+	void Draw(int count = -1);
+	void DrawInstanced(int instancesCount, int count = -1);
 };
 
 END_INANITY_GRAPHICS

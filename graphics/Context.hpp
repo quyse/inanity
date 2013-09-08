@@ -58,9 +58,9 @@ public:
 	//******* Методы рисования.
 	/* Непосредственные методы. Кроме того, могут выполнять ранее отложенные действия по привязке данных. */
 	/// Выполнить рисование.
-	virtual void Draw() = 0;
+	virtual void Draw(int count = -1) = 0;
 	/// Выполнить instanced-рисование.
-	virtual void DrawInstanced(int instancesCount) = 0;
+	virtual void DrawInstanced(int instancesCount, int count = -1) = 0;
 };
 
 END_INANITY_GRAPHICS

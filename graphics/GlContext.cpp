@@ -573,31 +573,31 @@ void GlContext::SetVertexBufferData(VertexBuffer* abstractVertexBuffer, const vo
 	SetBufferData(GL_ARRAY_BUFFER, vertexBuffer->GetName(), data, size, vertexBuffer->GetSize());
 }
 
-void GlContext::Draw()
+void GlContext::Draw(int count)
 {
 	Update();
 
 	if(boundState.indexBuffer)
 	{
 		GlIndexBuffer* indexBuffer = fast_cast<GlIndexBuffer*>(&*boundState.indexBuffer);
-		glDrawElements(GL_TRIANGLES, indexBuffer->GetIndicesCount(), indexBuffer->GetIndicesType(), (void*)0);
+		glDrawElements(GL_TRIANGLES, count >= 0 ? count : indexBuffer->GetIndicesCount(), indexBuffer->GetIndicesType(), (void*)0);
 	}
 	else
-		glDrawArrays(GL_TRIANGLES, 0, boundState.vertexBuffers[0]->GetVerticesCount());
+		glDrawArrays(GL_TRIANGLES, 0, count >= 0 ? count : boundState.vertexBuffers[0]->GetVerticesCount());
 	GlSystem::CheckErrors("Can't draw");
 }
 
-void GlContext::DrawInstanced(int instancesCount)
+void GlContext::DrawInstanced(int instancesCount, int count)
 {
 	Update();
 
 	if(boundState.indexBuffer)
 	{
 		GlIndexBuffer* indexBuffer = fast_cast<GlIndexBuffer*>(&*boundState.indexBuffer);
-		glDrawElementsInstanced(GL_TRIANGLES, indexBuffer->GetIndicesCount(), indexBuffer->GetIndicesType(), (void*)0, instancesCount);
+		glDrawElementsInstanced(GL_TRIANGLES, count >= 0 ? count : indexBuffer->GetIndicesCount(), indexBuffer->GetIndicesType(), (void*)0, instancesCount);
 	}
 	else
-		glDrawArraysInstanced(GL_TRIANGLES, 0, boundState.vertexBuffers[0]->GetVerticesCount(), instancesCount);
+		glDrawArraysInstanced(GL_TRIANGLES, 0, count >= 0 ? count : boundState.vertexBuffers[0]->GetVerticesCount(), instancesCount);
 	GlSystem::CheckErrors("Can't draw instanced");
 }
 

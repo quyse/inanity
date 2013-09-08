@@ -499,24 +499,24 @@ void Dx11Context::SetVertexBufferData(VertexBuffer* abstractVertexBuffer, const 
 	SetBufferData(vertexBuffer->GetBufferInterface(), data, size, vertexBuffer->GetSize());
 }
 
-void Dx11Context::Draw()
+void Dx11Context::Draw(int count)
 {
 	Update();
 
 	if(boundState.indexBuffer)
-		deviceContext->DrawIndexed(fast_cast<Dx11IndexBuffer*>(&*boundState.indexBuffer)->GetIndicesCount(), 0, 0);
+		deviceContext->DrawIndexed(count >= 0 ? count : fast_cast<Dx11IndexBuffer*>(&*boundState.indexBuffer)->GetIndicesCount(), 0, 0);
 	else
-		deviceContext->Draw(fast_cast<Dx11VertexBuffer*>(&*boundState.vertexBuffers[0])->GetVerticesCount(), 0);
+		deviceContext->Draw(count >= 0 ? count : fast_cast<Dx11VertexBuffer*>(&*boundState.vertexBuffers[0])->GetVerticesCount(), 0);
 }
 
-void Dx11Context::DrawInstanced(int instancesCount)
+void Dx11Context::DrawInstanced(int instancesCount, int count)
 {
 	Update();
 
 	if(boundState.indexBuffer)
-		deviceContext->DrawIndexedInstanced(fast_cast<Dx11IndexBuffer*>(&*boundState.indexBuffer)->GetIndicesCount(), instancesCount, 0, 0, 0);
+		deviceContext->DrawIndexedInstanced(count >= 0 ? count : fast_cast<Dx11IndexBuffer*>(&*boundState.indexBuffer)->GetIndicesCount(), instancesCount, 0, 0, 0);
 	else
-		deviceContext->DrawInstanced(fast_cast<Dx11VertexBuffer*>(&*boundState.vertexBuffers[0])->GetVerticesCount(), instancesCount, 0, 0);
+		deviceContext->DrawInstanced(count >= 0 ? count : fast_cast<Dx11VertexBuffer*>(&*boundState.vertexBuffers[0])->GetVerticesCount(), instancesCount, 0, 0);
 }
 
 END_INANITY_GRAPHICS
