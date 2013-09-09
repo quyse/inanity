@@ -6,21 +6,32 @@
 
 BEGIN_INANITY_META
 
-#ifdef ___INANITY_META_LUA___
 template <typename MethodType, MethodType method>
-Script::Lua::MethodExtensionBase* Method<MethodType, method>::GetLuaExtension()
+class Method : public MethodBase
 {
-	return &luaExtension;
-}
+private:
+#ifdef ___INANITY_META_LUA___
+	Script::Lua::Extension<Method<MethodType, method> > luaExtension;
 #endif
 
-template <typename MethodType, MethodType method>
-Method<MethodType, method>::Method(const char* name) : MethodBase(name)
-{
-	// register the method in the class
-	typedef typename Callable<MethodType>::ClassType ClassType;
-	ClassType::meta.AddMethod(this);
-}
+public:
+	Script::Lua::MethodExtensionBase* GetLuaExtension()
+	{
+#ifdef ___INANITY_META_LUA___
+		return &luaExtension;
+#else
+		return 0;
+#endif
+	}
+
+public:
+	Method(const char* name) : MethodBase(name)
+	{
+		// register the method in the class
+		typedef typename Callable<MethodType>::ClassType ClassType;
+		ClassType::GetMeta()->AddMethod(this);
+	}
+};
 
 END_INANITY_META
 

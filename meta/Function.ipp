@@ -5,16 +5,27 @@
 
 BEGIN_INANITY_META
 
-#ifdef ___INANITY_META_LUA___
 template <typename FunctionType, FunctionType function>
-Script::Lua::FunctionExtensionBase* Function<FunctionType, function>::GetLuaExtension()
+class Function : public FunctionBase
 {
-	return &luaExtension;
-}
+private:
+#ifdef ___INANITY_META_LUA___
+	Script::Lua::Extension<Function<FunctionType, function> > luaExtension;
 #endif
 
-template <typename FunctionType, FunctionType function>
-Function<FunctionType, function>::Function(const char* name) : FunctionBase(name) {}
+public:
+	Script::Lua::FunctionExtensionBase* GetLuaExtension()
+	{
+#ifdef ___INANITY_META_LUA___
+		return &luaExtension;
+#else
+		return 0;
+#endif
+	}
+
+public:
+	Function(const char* name) : FunctionBase(name) {}
+};
 
 END_INANITY_META
 

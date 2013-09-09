@@ -1,4 +1,4 @@
-#include "Class.ipp"
+#include "Class.hpp"
 
 BEGIN_INANITY_META
 

@@ -6,13 +6,24 @@
 
 BEGIN_INANITY_META
 
-#ifdef ___INANITY_META_LUA___
 template <typename ConstructorType>
-Script::Lua::ConstructorExtensionBase* Constructor<ConstructorType>::GetLuaExtension()
+class Constructor : public ConstructorBase
 {
-	return &luaExtension;
-}
+private:
+#ifdef ___INANITY_META_LUA___
+	Script::Lua::Extension<Constructor<ConstructorType> > luaExtension;
 #endif
+
+public:
+	Script::Lua::ConstructorExtensionBase* GetLuaExtension()
+	{
+#ifdef ___INANITY_META_LUA___
+		return &luaExtension;
+#else
+		return 0;
+#endif
+	}
+};
 
 END_INANITY_META
 

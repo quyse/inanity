@@ -8,13 +8,24 @@
 #include "Extension.ipp"
 
 #define META_CLASS(className, fullClassName) \
+	class className::ClassMeta : public Inanity::Meta::Class<className> \
+	{ \
+	private: \
+		typedef className ClassType; \
+	public: \
+		ClassMeta(); \
+	}; \
 	className::ClassMeta className::meta; \
+	Inanity::Meta::ClassBase* className::GetMeta() \
+	{ \
+		return &meta; \
+	} \
 	className::ClassMeta::ClassMeta() \
 		: Inanity::Meta::Class<className>(#className, #fullClassName) {
 #define META_CLASS_END() }
 
 #define META_CLASS_PARENT(parentClassName) \
-	SetParent(&parentClassName::meta)
+	SetParent(parentClassName::GetMeta())
 
 #define META_CONSTRUCTOR(...) \
 	{ \

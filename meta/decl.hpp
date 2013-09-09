@@ -1,19 +1,21 @@
 #ifndef ___INANITY_META_DECL_HPP___
 #define ___INANITY_META_DECL_HPP___
 
+#include "meta.hpp"
+
 // This file includes files necessary for declaring metadata.
 
-#include "Class.hpp"
+BEGIN_INANITY_META
+
+class ClassBase;
+
+END_INANITY_META;
 
 #define META_DECLARE_CLASS(className) \
 	public: \
-		class ClassMeta : public Inanity::Meta::Class<className> \
-		{ \
-		private: \
-			typedef className ClassType; \
-		public: \
-			ClassMeta(); \
-		}; \
+		static Inanity::Meta::ClassBase* GetMeta(); \
+	private: \
+		class ClassMeta; \
 		static ClassMeta meta
 
 #endif

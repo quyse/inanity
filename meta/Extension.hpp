@@ -3,8 +3,6 @@
 
 #include "meta.hpp"
 
-#define ___INANITY_META_LUA___
-
 #ifdef ___INANITY_META_LUA___
 #include "../script/lua/extension.hpp"
 #endif

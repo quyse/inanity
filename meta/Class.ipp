@@ -5,17 +5,32 @@
 
 BEGIN_INANITY_META
 
-#ifdef ___INANITY_META_LUA___
+/// Stores metainformation about C++ class.
 template <typename ClassType>
-Script::Lua::ClassExtensionBase* Class<ClassType>::GetLuaExtension()
+class Class : public ClassBase
 {
-	return &luaExtension;
-}
+private:
+#ifdef ___INANITY_META_LUA___
+	Script::Lua::Extension<Class<ClassType> > luaExtension;
 #endif
 
-template <typename ClassType>
-Class<ClassType>::Class(const char* name, const char* fullName)
-: ClassBase(name, fullName) {}
+public:
+
+	Script::Lua::ClassExtensionBase* GetLuaExtension()
+	{
+#ifdef ___INANITY_META_LUA___
+		return &luaExtension;
+#else
+		return 0;
+#endif
+	}
+
+public:
+	Class(const char* name, const char* fullName)
+	: ClassBase(name, fullName) {}
+};
+
+int InanityMetaClassIppShouldBeOne = 0;
 
 END_INANITY_META
 

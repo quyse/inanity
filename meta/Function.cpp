@@ -1,4 +1,4 @@
-#include "Function.ipp"
+#include "Function.hpp"
 
 BEGIN_INANITY_META
 

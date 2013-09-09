@@ -4,9 +4,7 @@
 #include "Extension.hpp"
 #include <vector>
 
-#ifdef ___INANITY_META_LUA___
 #include "../script/lua/extension.hpp"
-#endif
 
 BEGIN_INANITY_META
 
@@ -50,27 +48,11 @@ public:
 	const Methods& GetMethods() const;
 	const StaticMethods& GetStaticMethods() const;
 
-#ifdef ___INANITY_META_LUA___
 	virtual Script::Lua::ClassExtensionBase* GetLuaExtension() = 0;
-#endif
 };
 
-/// Stores metainformation about C++ class.
-/** Members of ParentClassType are inherited by derived class.
-If there is no parent class, it should be void. */
 template <typename ClassType>
-class Class : public ClassBase
-{
-#ifdef ___INANITY_META_LUA___
-private:
-	Script::Lua::Extension<Class<ClassType> > luaExtension;
-public:
-	Script::Lua::ClassExtensionBase* GetLuaExtension();
-#endif
-
-public:
-	Class(const char* name, const char* fullName);
-};
+class Class;
 
 END_INANITY_META
 
