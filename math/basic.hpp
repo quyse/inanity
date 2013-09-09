@@ -416,10 +416,30 @@ inline xvec<T, m> operator*(const xvec<T, n>& a, const xmat<T, n, m>& b)
 	return r;
 }
 
+template <typename T, int n, int m>
+inline xvec<T, n> operator*(const xmat<T, n, m>& a, const xvec<T, m>& b)
+{
+	xvec<T, n> r;
+	for(int i = 0; i < n; ++i)
+	{
+		T s = T();
+		for(int j = 0; j < m; ++j)
+			s += a(i, j) * b(j);
+		r(i) = s;
+	}
+	return r;
+}
+
 template <typename T>
 inline xvec<T, 4> operator*(const xvec<T, 3>& a, const xmat<T, 4, 4>& b)
 {
 	return xvec<T, 4>(a.x, a.y, a.z, 1) * b;
+}
+
+template <typename T>
+inline xvec<T, 4> operator*(const xmat<T, 4, 4>& a, const xvec<T, 3>& b)
+{
+	return a * xvec<T, 4>(b.x, b.y, b.z, 1);
 }
 
 template <typename T, int sn, int sm, int n, int m>
