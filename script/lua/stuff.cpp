@@ -1,9 +1,9 @@
 #include "stuff.hpp"
 #include "values.ipp"
-#include "../../meta/Class.ipp"
-#include "../../meta/Constructor.ipp"
-#include "../../meta/Method.ipp"
-#include "../../meta/Function.ipp"
+#include "../../meta/Class.hpp"
+#include "../../meta/Constructor.hpp"
+#include "../../meta/Method.hpp"
+#include "../../meta/Function.hpp"
 #include "../../Exception.hpp"
 #include <sstream>
 
@@ -235,7 +235,7 @@ ptr<Exception> ErrorToException(lua_State* state)
 	{
 		// full userdata, возможно, что Exception
 		ObjectUserData* userData = (ObjectUserData*)lua_touserdata(state, -1);
-		if(userData->type == UserData::typeObject && userData->cls == &Exception::meta)
+		if(userData->type == UserData::typeObject && userData->cls == Exception::GetMeta())
 			// да, Exception!
 			exception = (Exception*)userData->object;
 	}

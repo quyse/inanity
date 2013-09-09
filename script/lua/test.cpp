@@ -2,7 +2,11 @@
 #include "../../inanity-base.hpp"
 #include "../../inanity-compress.hpp"
 #include "../../inanity-lua.hpp"
-#include "../../meta/impl.hpp"
+
+#define ___INANITY_META_LUA___
+#include "../../inanity-base-meta.ipp"
+#include "../../inanity-compress-meta.ipp"
+
 #include <iostream>
 #include <sstream>
 

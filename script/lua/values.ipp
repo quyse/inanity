@@ -205,15 +205,15 @@ struct Value<ptr<ObjectType> >
 		// получить userdata для объекта, и проверить, что это объект
 		ObjectUserData* userData = (ObjectUserData*)lua_touserdata(state, index);
 		if(!userData || lua_islightuserdata(state, index) || userData->type != UserData::typeObject)
-			THROW(String("Expected an object of type '") + ObjectType::meta.GetFullName() + "' for argument, but got " + DescribeValue(state, index));
+			THROW(String("Expected an object of type '") + ObjectType::GetMeta()->GetFullName() + "' for argument, but got " + DescribeValue(state, index));
 
 		// проверить тип объекта, в случае необходимости привести к вышестоящему типу
 		for(Meta::ClassBase* cls = userData->cls; cls; cls = cls->GetParent())
-			if(cls == &ObjectType::meta)
+			if(cls == ObjectType::GetMeta())
 				// вернуть объект
 				return (ObjectType*)userData->object;
 		// если здесь, значит, мы проверили всю цепочку наследования, а тип не нашли
-		THROW(String("Can't cast object of type '") + userData->cls->GetFullName() + "' to expected type '" + ObjectType::meta.GetFullName() + "'");
+		THROW(String("Can't cast object of type '") + userData->cls->GetFullName() + "' to expected type '" + ObjectType::GetMeta()->GetFullName() + "'");
 	}
 
 	static inline void Push(lua_State* state, ptr<ObjectType> value)
@@ -228,9 +228,9 @@ struct Value<ptr<ObjectType> >
 		ObjectUserData* userData = (ObjectUserData*)lua_newuserdata(state, sizeof(ObjectUserData));
 		userData->type = UserData::typeObject;
 		userData->object = (Object*)(ObjectType*)value;
-		userData->cls = &ObjectType::meta;
+		userData->cls = ObjectType::GetMeta();
 		// указать метатаблицу
-		PushObjectMetaTable(state, &ObjectType::meta);
+		PushObjectMetaTable(state, ObjectType::GetMeta());
 		lua_setmetatable(state, -2);
 		// задать дополнительную ссылку объекту
 		userData->object->Reference();

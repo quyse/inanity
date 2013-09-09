@@ -27,7 +27,7 @@ public:
 	template <typename ClassType>
 	void Register()
 	{
-		Register(&ClassType::meta);
+		Register(ClassType::GetMeta());
 	}
 
 	/// Loads a script from file.

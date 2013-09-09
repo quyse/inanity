@@ -3,10 +3,10 @@
 
 #include "extension.hpp"
 #include "thunks.ipp"
-#include "../../meta/Class.ipp"
-#include "../../meta/Constructor.ipp"
-#include "../../meta/Method.ipp"
-#include "../../meta/Function.ipp"
+#include "../../meta/Class.hpp"
+#include "../../meta/Constructor.hpp"
+#include "../../meta/Method.hpp"
+#include "../../meta/Function.hpp"
 
 BEGIN_INANITY_LUA
 
