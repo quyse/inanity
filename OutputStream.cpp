@@ -1,13 +1,9 @@
 #include "OutputStream.hpp"
 #include "InputStream.hpp"
 #include "MemoryFile.hpp"
-#include "meta/impl.hpp"
 #include <string.h>
 
 BEGIN_INANITY
-
-META_CLASS(OutputStream, Inanity.OutputStream);
-META_CLASS_END();
 
 void OutputStream::Write(const void* data, size_t size)
 {

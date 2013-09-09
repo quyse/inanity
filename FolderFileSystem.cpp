@@ -6,17 +6,8 @@
 #include "DiskInputStream.hpp"
 #include "DiskOutputStream.hpp"
 #include "Exception.hpp"
-#include "meta/impl.hpp"
 
 BEGIN_INANITY
-
-META_CLASS(FolderFileSystem, Inanity.FolderFileSystem);
-	META_CLASS_PARENT(FileSystem);
-	META_CONSTRUCTOR(const String&);
-	META_STATIC_METHOD(GetNativeFileSystem);
-	META_METHOD(GetFileSize);
-	META_METHOD(LoadPartOfFile);
-META_CLASS_END();
 
 END_INANITY
 

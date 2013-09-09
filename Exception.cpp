@@ -11,12 +11,7 @@
 #include <cstring>
 #endif // ___INANITY_LINUX
 
-#include "meta/impl.hpp"
-
 BEGIN_INANITY
-
-META_CLASS(Exception, Inanity.Exception);
-META_CLASS_END();
 
 Exception::Exception(const String& message) : message(message)
 {

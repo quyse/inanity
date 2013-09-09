@@ -1,15 +1,9 @@
 #include "Strings.hpp"
 #include "MemoryFile.hpp"
-#include "meta/impl.hpp"
 #include "deps/utf8.h"
 #include <cstring>
 
 BEGIN_INANITY
-
-META_CLASS(Strings, Inanity.Strings);
-	META_STATIC_METHOD(String2File);
-	META_STATIC_METHOD(File2String);
-META_CLASS_END();
 
 std::string Strings::Unicode2UTF8(const std::wstring& str)
 {

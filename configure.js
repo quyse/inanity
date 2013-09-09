@@ -34,7 +34,7 @@ var libraries = {
 		// синхронизация и потоки выполнения
 		'Thread', 'CriticalSection', 'CriticalCode', 'Semaphore',
 		// общее: файлы и потоки
-		'File', 'EmptyFile', 'PartFile', 'MemoryFile', 'InputStream', 'OutputStream', 'FileInputStream', 'StreamReader', 'StreamWriter', 'BufferedInputStream', 'BufferedOutputStream', 'MemoryStream',
+		'EmptyFile', 'PartFile', 'MemoryFile', 'InputStream', 'OutputStream', 'FileInputStream', 'StreamReader', 'StreamWriter', 'BufferedInputStream', 'BufferedOutputStream', 'MemoryStream',
 		// преобразующие потоки
 		'Base64OutputStream', 'Out2InStream',
 		// файловые системы
@@ -103,7 +103,7 @@ var libraries = {
 			'graphics.VertexLayout', 'graphics.VertexLayoutElement',
 			'graphics.AttributeLayout', 'graphics.AttributeLayoutElement', 'graphics.AttributeLayoutSlot',
 			'graphics.ShaderCache',
-			'graphics.PixelFormat', 'graphics.RawTextureData', 'graphics.Texture', 'graphics.TextureManager',
+			'graphics.PixelFormat', 'graphics.RawTextureData', 'graphics.TextureManager',
 			'graphics.EditableFont', 'graphics.Font', 'graphics.FontManager', 'graphics.TextDrawer',
 			'graphics.BmpImageLoader', 'graphics.PngImageLoader'
 		]
@@ -188,12 +188,12 @@ var executables = {
 		objects: ['archi.main', 'archi.BlobCreator', /*'archi.FontCreator',*/ /*'archi.SimpleGeometryCreator',*/
 			'archi.SystemFontCreator', 'archi.WavefrontObj', /*'archi.XafConverter'*/ 'archi.SkeletonConverter',
 			'archi.BoneAnimationConverter'],
-		staticLibraries: ['libinanity-base', 'libinanity-graphics', 'libinanity-lua', 'deps/lua//liblua'],
+		staticLibraries: ['libinanity-base', 'libinanity-graphics'],
 		dynamicLibraries: ['user32.lib', 'gdi32.lib', 'comdlg32.lib']
 	}
 	, adapterstest: {
 		objects: ['graphics.adapters_test'],
-		staticLibraries: ['libinanity-base', 'libinanity-graphics', 'libinanity-shaders', 'libinanity-dx11', 'libinanity-gl', 'deps/glew//libglew', 'libinanity-platform', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
+		staticLibraries: ['libinanity-base', 'libinanity-graphics', 'libinanity-shaders', 'libinanity-dx11', 'libinanity-gl', 'deps/glew//libglew', 'libinanity-platform'],
 		dynamicLibraries: ['user32.lib', 'gdi32.lib', 'dxgi.lib', 'd3d11.lib', 'd3dx11.lib', 'd3dx10.lib', 'opengl32.lib']
 	}
 	// TEST
@@ -211,7 +211,7 @@ var executables = {
 	// TEST
 	, audiotest: {
 		objects: ['audio.test'],
-		staticLibraries: ['libinanity-audio', 'libinanity-al', 'libinanity-base', 'deps/libvorbis//libvorbisfile', 'deps/libvorbis//libvorbis', 'deps/libogg//libogg', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
+		staticLibraries: ['libinanity-audio', 'libinanity-al', 'libinanity-base', 'deps/libvorbis//libvorbisfile', 'deps/libvorbis//libvorbis', 'deps/libogg//libogg'],
 		dynamicLibraries: ['openal']
 	}
 	// TEST
@@ -223,19 +223,19 @@ var executables = {
 	// TEST
 	, nettesttcp: {
 		objects: ['net.test-chat-tcp'],
-		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
+		staticLibraries: ['libinanity-base', 'libinanity-asio'],
 		dynamicLibraries: []
 	}
 	// TEST
 	, nettestudp: {
 		objects: ['net.test-chat-udp'],
-		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
+		staticLibraries: ['libinanity-base', 'libinanity-asio'],
 		dynamicLibraries: []
 	}
 	// TEST
 	, nettesthttpclient: {
 		objects: ['net.test-http-client'],
-		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-http', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
+		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-http'],
 		dynamicLibraries: []
 	}
 };

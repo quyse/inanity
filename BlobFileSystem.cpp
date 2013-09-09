@@ -3,15 +3,9 @@
 #include "FileInputStream.hpp"
 #include "StreamReader.hpp"
 #include "Exception.hpp"
-#include "meta/impl.hpp"
 #include <string.h>
 
 BEGIN_INANITY
-
-META_CLASS(BlobFileSystem, Inanity.BlobFileSystem);
-	META_CLASS_PARENT(FileSystem);
-	META_CONSTRUCTOR(ptr<File>);
-META_CLASS_END();
 
 const char BlobFileSystem::Terminator::magicValue[4] = { 'B', 'L', 'O', 'B' };
 
