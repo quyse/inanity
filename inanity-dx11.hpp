@@ -11,7 +11,7 @@
 #error DirectX 11 works only on Windows.
 #endif
 
-#include "graphics/D3D10BlobFile.hpp"
+#include "graphics/D3DBlobFile.hpp"
 #include "graphics/Dx11AttributeBinding.hpp"
 #include "graphics/Dx11BlendState.hpp"
 #include "graphics/Dx11CompiledShader.hpp"
