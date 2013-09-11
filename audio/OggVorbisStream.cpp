@@ -61,7 +61,7 @@ int OggVorbisStream::SeekFunction(long long offset, int whence)
 		return -1;
 	}
 	if(newPosition < 0 || newPosition > fileSize) return -1;
-	position = newPosition;
+	position = (size_t)newPosition;
 	return 0;
 }
 

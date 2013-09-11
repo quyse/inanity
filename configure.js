@@ -16,6 +16,8 @@ exports.configureCompiler = function(objectFile, compiler) {
 		source = source.replace(/\./g, '/') + '.cpp';
 	compiler.setSourceFile(source);
 	compiler.addIncludeDir('deps/bullet/src');
+	compiler.addIncludeDir('deps/libogg/include');
+	compiler.addIncludeDir('deps/libvorbis/include');
 };
 
 /**
