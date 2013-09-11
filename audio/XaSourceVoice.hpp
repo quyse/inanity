@@ -1,36 +1,43 @@
-#ifndef ___INANITY_XA_SOURCE_VOICE_HPP___
-#define ___INANITY_XA_SOURCE_VOICE_HPP___
+#ifndef ___INANITY_AUDIO_XA_SOURCE_VOICE_HPP___
+#define ___INANITY_AUDIO_XA_SOURCE_VOICE_HPP___
 
 #include "audio.hpp"
+#include "Format.hpp"
 #include "xaudio2.hpp"
-#include "../ComPointer.hpp"
 
 BEGIN_INANITY_AUDIO
 
-/// Внутренний класс подсистемы XAudio2, инкапсулирующий интерфейс IXAudio2SourceVoice.
-/** Также реализует интерфейс IXAudio2VoiceCallback для принятия уведомлений. */
-class XASourceVoice : public Object, private IXAudio2VoiceCallback
+class XaDevice;
+class XaPlayer;
+
+/// Class incapsulates XAudio2 source voice object.
+class XaSourceVoice : public Object, private IXAudio2VoiceCallback
 {
 private:
-	ptr<XASystem> system;
-	ComPointer<IXAudio2SourceVoice> voice;
-
-	/// Очередь из буферов на проигрывание.
-	std::queue<ptr<File> file>
+	ptr<XaDevice> device;
+	Format format;
+	IXAudio2SourceVoice* voice;
+	/// Player to receive notifications.
+	XaPlayer* player;
 
 public:
-	XASourceVoice(ptr<XASystem> system);
+	XaSourceVoice(ptr<XaDevice> device, const Format& format);
+	~XaSourceVoice();
 
-	/// Установить интерфейс в Voice.
-	/** Не в конструкторе, потому что объект создаётся раньше интерфейса. */
-	void SetVoice(ComPointer<IXAudio2SourceVoice> voice);
+	ptr<XaDevice> GetDevice() const;
+	const Format& GetFormat() const;
+	IXAudio2SourceVoice* GetVoice() const;
 
-	/// Добавить буфер для проигрывания.
-	void PushBuffer(ptr<File> data);
+	/// Give voice to device.
+	void Release();
+	/// Grab voice from device.
+	void Grab(ptr<XaDevice> device);
+
+	/// Set player to send notifications.
+	void SetPlayer(XaPlayer* player);
 
 private:
-	//*** методы IXAudio2VoiceCallback
-	void CALLBACK OnVoiceProcessingPassStart(UINT32 BytesRequired);
+	//*** IXAudio2VoiceCallback methods.
 	void CALLBACK OnVoiceProcessingPassStart(UINT32 BytesRequired);
 	void CALLBACK OnVoiceProcessingPassEnd();
 	void CALLBACK OnStreamEnd();

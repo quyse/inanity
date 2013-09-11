@@ -166,6 +166,13 @@ var libraries = {
 			'audio.AlStreamedSound', 'audio.AlStreamedPlayer'
 		]
 	},
+	// ******* XAudio2
+	'libinanity-xa': {
+		objects: [
+			'audio.XaSystem', 'audio.XaDevice', 'audio.XaSourceVoice', 'audio.XaPlayer',
+			'audio.XaBufferedSound', 'audio.XaBufferedPlayer'
+		]
+	},
 	// ******* общая физика
 	'libinanity-physics': {
 		objects: [

@@ -5,33 +5,28 @@
 #include "xaudio2.hpp"
 #include "../ComPointer.hpp"
 #include "../windows.hpp"
-#include <unordered_multimap>
 
 BEGIN_INANITY_AUDIO
 
 class Device;
+class Sound;
 struct Format;
 
-/// Класс звуковой подсистемы для XAudio.
-class XASystem : public System
+/// XAudio2 sound system.
+class XaSystem : public System
 {
 private:
 	ComPointer<IXAudio2> xAudio2;
 
-	/// Внутренний кэш исходных voice по форматам.
-	std::unordered_multimap<Format, ptr<XASourceVoice> > freeSourceVoices;
-
-	/// Получить voice нужного формата.
-	ptr<XASourceVoice> AllocateSourceVoice(const Format& format);
-
 public:
-	XASystem();
+	XaSystem();
+
+	IXAudio2* GetInterface() const;
 
 	static WAVEFORMATEX ConvertFormat(const Format& format);
 
+	//*** System's methods.
 	ptr<Device> CreateDefaultDevice();
-	ptr<Sound> CreateBufferedSound(ptr<Source> source);
-	ptr<Sound> CreateStreamedSound(ptr<Source> source);
 	void Tick();
 };
 

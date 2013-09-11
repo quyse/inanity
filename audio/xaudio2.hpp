@@ -3,7 +3,7 @@
 
 /* Файл для использования, когда нужен XAudio2. */
 
-#include "windows.hpp"
+#include "../windows.hpp"
 #include <XAudio2.h>
 
 #endif

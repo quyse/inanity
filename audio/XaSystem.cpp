@@ -1,104 +1,34 @@
-#include "XASystem.hpp"
-#include "XADevice.hpp"
+#include "XaSystem.hpp"
+#include "XaDevice.hpp"
 #include "../Exception.hpp"
 
-XASystem::XASystem()
+BEGIN_INANITY_AUDIO
+
+XaSystem::XaSystem()
 {
-	try
-	{
-		IXAudio2* xAudio2Interface;
-		if(FAILED(XAudio2Create(&xAudio2Interface,
+	BEGIN_TRY();
+
+	IXAudio2* xAudio2Interface;
+	HRESULT hr = XAudio2Create(&xAudio2Interface,
 #ifdef _DEBUG
-			XAUDIO2_DEBUG_ENGINE
+		XAUDIO2_DEBUG_ENGINE
 #else
-			0
+		0
 #endif
-			, XAUDIO_DEFAULT_PROCESSOR)))
-			THROW_PRIMARY_EXCEPTION("Can't create XAudio2 object");
-		xAudio2 = xAudio2Interface;
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY_EXCEPTION("Can't create XAudio2 system", exception);
-	}
+		, XAUDIO2_DEFAULT_PROCESSOR);
+	if(FAILED(hr))
+		THROW("Can't create XAudio2 object");
+	xAudio2 = xAudio2Interface;
+
+	END_TRY("Can't create XAudio2 system");
 }
 
-ptr<XASourceVoice> XASystem::AllocateSourceVoice(const Format& format)
+IXAudio2* XaSystem::GetInterface() const
 {
-	try
-	{
-		// попробовать найти voice нужного формата в кэше
-		std::unordered_multimap<Format, ptr<XASourceVoice> >::iterator i = freeSourceVoices.find(format);
-		if(i != freeSourceVoices.end())
-		{
-			ptr<XASourceVoice> voice = i->second;
-			freeSourceVoices.erase(i);
-			return voice;
-		}
-
-		// создать новый voice
-		ptr<XASourceVoice> voice = NEW(XASourceVoice(this));
-
-		IXAudio2SourceVoice* voiceInterface;
-		if(FAILED(xAudio2->CreateSourceVoice(&voiceInterface, &ConvertFormat(format), 0, XAUDIO2_DEFAULT_FREQ_RATIO, &*voice, NULL, NULL)))
-			THROW_PRIMARY_EXCEPTION("Can't create source voice");
-		voice->SetVoice(voiceInterface);
-
-		return voice;
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY_EXCEPTION("Can't allocate source XAudio2 voice", exception);
-	}
+	return xAudio2;
 }
 
-ptr<Device> XASystem::CreateDefaultDevice()
-{
-	try
-	{
-		// получить количество устройств
-		UINT devicesCount;
-		if(FAILED(xAudio2->GetDeviceCount(&devicesCount)))
-			THROW_PRIMARY_EXCEPTION("Can't get devices count");
-
-		// если устройств вообще нет
-		if(!devicesCount)
-			THROW_PRIMARY_EXCEPTION("No audio devices found");
-
-		// перебрать все устройства, и выбрать самое подходящее
-		int preferredDevice = -1;
-		for(UINT i = 0; i < devicesCount; ++i)
-		{
-			XAUDIO2_DEVICE_DETAILS details;
-			if(FAILED(xAudio2->GetDeviceDetails(i, &details)))
-				THROW_PRIMARY_EXCEPTION("Can't get device details");
-			// если устройство является устройством по умолчанию
-			if(details.Role & DefaultGameDevice)
-				// выбрать его
-				preferredDevice = i;
-		}
-
-		// если устройство не выбрано
-		if(preferredDevice < 0)
-			// выбрать первое
-			preferredDevice = 0;
-
-		// создать объект устройства
-		IXAudio2MasteringVoice* voiceInterface;
-		if(FAILED(xAudio2->CreateMasteringVoice(&voiceInterface, XAUDIO2_DEFAULT_CHANNELS, XAUDIO2_DEFAULT_SAMPLERATE, 0, preferredDevice, NULL)))
-			THROW_PRIMARY_EXCEPTION("Can't create mastering voice");
-		ComPointer<IXAudio2MasteringVoice> voice = voiceInterface;
-
-		// всё
-		return NEW(XADevice(voice));
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY_EXCEPTION("Can't create default XAudio2 device", exception);
-	}
-}
-
-WAVEFORMATEX XASystem::ConvertFormat(const Format& format)
+WAVEFORMATEX XaSystem::ConvertFormat(const Format& format)
 {
 	WAVEFORMATEX r;
 	r.wFormatTag = WAVE_FORMAT_PCM;
@@ -112,7 +42,53 @@ WAVEFORMATEX XASystem::ConvertFormat(const Format& format)
 	return r;
 }
 
-ptr<Sound> XASystem::CreateSound(ptr<Source> source)
+ptr<Device> XaSystem::CreateDefaultDevice()
 {
-	return NEW(XABufferedSound(source->GetData()));
+	try
+	{
+		// получить количество устройств
+		UINT devicesCount;
+		if(FAILED(xAudio2->GetDeviceCount(&devicesCount)))
+			THROW("Can't get devices count");
+
+		// если устройств вообще нет
+		if(!devicesCount)
+			THROW("No audio devices found");
+
+		// перебрать все устройства, и выбрать самое подходящее
+		int preferredDevice = -1;
+		for(UINT i = 0; i < devicesCount; ++i)
+		{
+			XAUDIO2_DEVICE_DETAILS details;
+			if(FAILED(xAudio2->GetDeviceDetails(i, &details)))
+				THROW("Can't get device details");
+			// если устройство является устройством по умолчанию
+			if(details.Role & DefaultGameDevice)
+				// выбрать его
+				preferredDevice = i;
+		}
+
+		// если устройство не выбрано
+		if(preferredDevice < 0)
+			// выбрать первое
+			preferredDevice = 0;
+
+		// создать объект устройства
+		IXAudio2MasteringVoice* voice;
+		if(FAILED(xAudio2->CreateMasteringVoice(&voice, XAUDIO2_DEFAULT_CHANNELS, XAUDIO2_DEFAULT_SAMPLERATE, 0, preferredDevice, NULL)))
+			THROW("Can't create mastering voice");
+
+		// всё
+		return NEW(XaDevice(this, voice));
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY("Can't create default XAudio2 device", exception);
+	}
 }
+
+void XaSystem::Tick()
+{
+}
+
+END_INANITY_AUDIO
