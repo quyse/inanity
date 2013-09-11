@@ -3,6 +3,7 @@
 
 #include "platform.hpp"
 #include "../graphics/graphics.hpp"
+#include "../audio/audio.hpp"
 #include "../input/input.hpp"
 
 BEGIN_INANITY_GRAPHICS
@@ -12,6 +13,12 @@ class Device;
 class Presenter;
 
 END_INANITY_GRAPHICS
+
+BEGIN_INANITY_AUDIO
+
+class System;
+
+END_INANITY_AUDIO
 
 BEGIN_INANITY_INPUT
 
@@ -51,6 +58,8 @@ private:
 
 public:
 	static ptr<Graphics::System> CreateDefaultGraphicsSystem();
+
+	static ptr<Audio::System> CreateDefaultAudioSystem();
 
 	static ptr<Input::Manager> CreateInputManager(ptr<Window> window);
 };

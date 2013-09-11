@@ -4,12 +4,14 @@
 #ifdef ___INANITY_WINDOWS
 #include "Win32Window.hpp"
 #include "../graphics/Dx11System.hpp"
+#include "../audio/XaSystem.hpp"
 #include "../input/Win32RawManager.hpp"
 #endif
 
 #ifdef ___INANITY_LINUX
 #include "X11Window.hpp"
 #include "X11Display.hpp"
+#include "../audio/AlSystem.hpp"
 #include "../input/X11Manager.hpp"
 #endif
 
@@ -24,6 +26,16 @@ ptr<Graphics::System> Game::CreateDefaultGraphicsSystem()
 		return NEW(Graphics::Dx11System());
 #endif
 	return NEW(Graphics::GlSystem());
+}
+
+ptr<Audio::System> Game::CreateDefaultAudioSystem()
+{
+#ifdef ___INANITY_WINDOWS
+	return NEW(Audio::XaSystem());
+#endif
+#ifdef ___INANITY_LINUX
+	return NEW(Audio::AlSystem());
+#endif
 }
 
 ptr<Input::Manager> Game::CreateInputManager(ptr<Window> window)
