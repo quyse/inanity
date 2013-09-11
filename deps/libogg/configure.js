@@ -4,7 +4,7 @@
 
 var macros = [];
 
-var includes = [];
+var includes = ['include'];
 
 exports.configureCompiler = function(objectFile, compiler) {
 	// объектные файлы: <conf>/object
