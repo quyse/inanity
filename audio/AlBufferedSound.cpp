@@ -12,11 +12,6 @@ ptr<AlBuffer> AlBufferedSound::GetBuffer() const
 	return buffer;
 }
 
-ptr<Player> AlBufferedSound::CreatePlayer()
-{
-	return CreatePlayer3D();
-}
-
 ptr<Player3D> AlBufferedSound::CreatePlayer3D()
 {
 	return NEW(AlBufferedPlayer(buffer));

@@ -14,7 +14,7 @@ a Player (or Player3D). */
 class Sound : public Object
 {
 public:
-	virtual ptr<Player> CreatePlayer() = 0;
+	virtual ptr<Player> CreatePlayer();
 	virtual ptr<Player3D> CreatePlayer3D() = 0;
 };
 

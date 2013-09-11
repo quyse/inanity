@@ -19,7 +19,6 @@ public:
 	AlStreamedSound(ptr<AlDevice> device, ptr<Source> source);
 
 	//** Sound's methods.
-	ptr<Player> CreatePlayer();
 	ptr<Player3D> CreatePlayer3D();
 };
 

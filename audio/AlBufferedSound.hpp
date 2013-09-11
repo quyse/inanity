@@ -18,7 +18,6 @@ public:
 
 	ptr<AlBuffer> GetBuffer() const;
 
-	ptr<Player> CreatePlayer();
 	ptr<Player3D> CreatePlayer3D();
 };
 

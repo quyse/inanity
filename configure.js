@@ -155,7 +155,7 @@ var libraries = {
 	// ******* общее аудио
 	'libinanity-audio': {
 		objects: [
-			'audio.Source', 'audio.OggVorbisSource', 'audio.OggVorbisStream'
+			'audio.Sound', 'audio.Source', 'audio.OggVorbisSource', 'audio.OggVorbisStream'
 		]
 	},
 	// ******* OpenAL
