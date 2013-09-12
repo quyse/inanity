@@ -5,6 +5,12 @@
 #include "Format.hpp"
 #include "xaudio2.hpp"
 
+BEGIN_INANITY
+
+class File;
+
+END_INANITY
+
 BEGIN_INANITY_AUDIO
 
 class XaDevice;
@@ -19,6 +25,10 @@ private:
 	IXAudio2SourceVoice* voice;
 	/// Player to receive notifications.
 	XaPlayer* player;
+	/// Number of buffers queued.
+	int buffersCount;
+	/// Is voice playing.
+	bool playing;
 
 public:
 	XaSourceVoice(ptr<XaDevice> device, const Format& format);
@@ -35,6 +45,14 @@ public:
 
 	/// Set player to send notifications.
 	void SetPlayer(XaPlayer* player);
+
+	/// Send a buffer to play.
+	void Push(ptr<File> file);
+
+	void Play();
+	void Pause();
+	void Stop();
+	bool IsPlaying() const;
 
 private:
 	//*** IXAudio2VoiceCallback methods.

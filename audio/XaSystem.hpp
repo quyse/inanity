@@ -20,6 +20,7 @@ private:
 
 public:
 	XaSystem();
+	~XaSystem();
 
 	IXAudio2* GetInterface() const;
 

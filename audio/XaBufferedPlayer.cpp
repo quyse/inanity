@@ -2,6 +2,7 @@
 #include "XaDevice.hpp"
 #include "XaSourceVoice.hpp"
 #include "../File.hpp"
+#include "../Exception.hpp"
 
 BEGIN_INANITY_AUDIO
 
@@ -10,22 +11,23 @@ XaBufferedPlayer::XaBufferedPlayer(ptr<XaDevice> device, const Format& format, p
 
 void XaBufferedPlayer::Play(bool looped)
 {
-	voice->GetVoice()->Start(0);
+	voice->Push(file);
+	voice->Play();
 }
 
 void XaBufferedPlayer::Pause()
 {
-	voice->GetVoice()->Stop(0);
+	voice->Pause();
 }
 
 void XaBufferedPlayer::Stop()
 {
-	voice->GetVoice()->Stop(0);
+	voice->Stop();
 }
 
 bool XaBufferedPlayer::IsPlaying() const
 {
-	return false;
+	return voice->IsPlaying();
 }
 
 END_INANITY_AUDIO

@@ -8,8 +8,7 @@ XaSystem::XaSystem()
 {
 	BEGIN_TRY();
 
-	IXAudio2* xAudio2Interface;
-	HRESULT hr = XAudio2Create(&xAudio2Interface,
+	HRESULT hr = XAudio2Create(&xAudio2,
 #ifdef _DEBUG
 		XAUDIO2_DEBUG_ENGINE
 #else
@@ -18,9 +17,16 @@ XaSystem::XaSystem()
 		, XAUDIO2_DEFAULT_PROCESSOR);
 	if(FAILED(hr))
 		THROW("Can't create XAudio2 object");
-	xAudio2 = xAudio2Interface;
+
+	if(FAILED(xAudio2->StartEngine()))
+		THROW("Can't start engine");
 
 	END_TRY("Can't create XAudio2 system");
+}
+
+XaSystem::~XaSystem()
+{
+	xAudio2->StopEngine();
 }
 
 IXAudio2* XaSystem::GetInterface() const
