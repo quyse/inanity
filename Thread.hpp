@@ -43,6 +43,8 @@ public:
 	Thread(ptr<ThreadHandler> handler);
 
 	void WaitEnd();
+
+	static void Sleep(int milliseconds);
 };
 
 END_INANITY
