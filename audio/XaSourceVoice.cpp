@@ -76,10 +76,10 @@ void XaSourceVoice::SetPlayer(XaPlayer* player)
 	this->player = player;
 }
 
-void XaSourceVoice::Push(ptr<File> file)
+void XaSourceVoice::Push(ptr<File> file, bool last)
 {
 	XAUDIO2_BUFFER buffer;
-	buffer.Flags = 0;
+	buffer.Flags = last ? XAUDIO2_END_OF_STREAM : 0;
 	buffer.AudioBytes = (UINT32)file->GetSize();
 	buffer.pAudioData = (BYTE*)file->GetData();
 	buffer.PlayBegin = 0;

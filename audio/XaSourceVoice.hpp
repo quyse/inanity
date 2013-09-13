@@ -47,7 +47,7 @@ public:
 	void SetPlayer(XaPlayer* player);
 
 	/// Send a buffer to play.
-	void Push(ptr<File> file);
+	void Push(ptr<File> file, bool last);
 
 	void Play();
 	void Pause();

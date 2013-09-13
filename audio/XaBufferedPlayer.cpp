@@ -11,7 +11,7 @@ XaBufferedPlayer::XaBufferedPlayer(ptr<XaDevice> device, const Format& format, p
 
 void XaBufferedPlayer::Play(bool looped)
 {
-	voice->Push(file);
+	voice->Push(file, true);
 	voice->Play();
 }
 
