@@ -31,6 +31,7 @@ class X11Window : public Window
 private:
 	ptr<X11Display> display;
 	xcb_window_t handle;
+	xcb_colormap_t colormap;
 
 	/// Graphics output to receive notifications about resize.
 	Graphics::X11Output* output;
@@ -38,7 +39,7 @@ private:
 	ptr<Input::X11Manager> inputManager;
 
 private:
-	X11Window(ptr<X11Display> display, xcb_window_t handle);
+	X11Window(ptr<X11Display> display, xcb_window_t handle, xcb_colormap_t colormap);
 	~X11Window();
 
 	bool Do(Handler* activeHandler);

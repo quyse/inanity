@@ -7,8 +7,8 @@
 
 BEGIN_INANITY_PLATFORM
 
-X11Window::X11Window(ptr<X11Display> display, xcb_window_t handle)
-: display(display), handle(handle), output(0) {}
+X11Window::X11Window(ptr<X11Display> display, xcb_window_t handle, xcb_colormap_t colormap)
+: display(display), handle(handle), colormap(colormap), output(0) {}
 
 X11Window::~X11Window()
 {
@@ -35,6 +35,11 @@ void X11Window::Close()
 	{
 		xcb_destroy_window(display->GetConnection(), handle);
 		handle = 0;
+		if(colormap)
+		{
+			xcb_free_colormap(display->GetConnection(), colormap);
+			colormap = 0;
+		}
 		inputManager = 0;
 	}
 }
@@ -89,6 +94,10 @@ ptr<X11Window> X11Window::CreateForOpenGL(ptr<X11Display> display, int screenNum
 	if(!glXQueryExtension(d, NULL, NULL))
 		THROW("Display doesn't support GLX extension");
 
+	// создать colormap
+	xcb_colormap_t colormap = xcb_generate_id(connection);
+	xcb_create_colormap(connection, XCB_COLORMAP_ALLOC_NONE, colormap, screen->root, screen->root_visual);
+
 	// создать окно
 	xcb_window_t window = xcb_generate_id(connection);
 
@@ -102,6 +111,7 @@ ptr<X11Window> X11Window::CreateForOpenGL(ptr<X11Display> display, int screenNum
 		XCB_EVENT_MASK_BUTTON_PRESS |
 		XCB_EVENT_MASK_BUTTON_RELEASE |
 		XCB_EVENT_MASK_POINTER_MOTION,
+		colormap,
 		0
 	};
 
@@ -114,13 +124,14 @@ ptr<X11Window> X11Window::CreateForOpenGL(ptr<X11Display> display, int screenNum
 		0, // border width,
 		XCB_WINDOW_CLASS_INPUT_OUTPUT,
 		XCB_COPY_FROM_PARENT,
-		XCB_CW_EVENT_MASK,
+		XCB_CW_EVENT_MASK |
+		XCB_CW_COLORMAP,
 		values
 	);
 
 	xcb_map_window(connection, window);
 
-	return NEW(X11Window(display, window));
+	return NEW(X11Window(display, window, colormap));
 
 	END_TRY("Can't create X11 window for OpenGL");
 }
