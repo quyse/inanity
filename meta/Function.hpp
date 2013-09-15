@@ -4,6 +4,7 @@
 #include "Extension.hpp"
 
 #include "../script/lua/extension.hpp"
+#include "../script/v8/extension.hpp"
 
 BEGIN_INANITY_META
 
@@ -18,6 +19,7 @@ public:
 	const char* GetName() const;
 
 	virtual Script::Lua::FunctionExtensionBase* GetLuaExtension() = 0;
+	virtual Script::V8::FunctionExtensionBase* GetV8Extension() = 0;
 };
 
 template <typename FunctionType, FunctionType function>

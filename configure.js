@@ -75,6 +75,10 @@ var libraries = {
 	'libinanity-lua': {
 		objects: ['script.lua.Function', 'script.lua.State', 'script.lua.stuff']
 	},
+	// ******* скрипты на v8
+	'libinanity-v8': {
+		objects: ['script.v8.Function', 'script.v8.State']
+	},
 	// ******* криптография
 	'libinanity-crypto': {
 		objects: ['crypto.HashStream', 'crypto.LamportSignatureAlgorithm', 'crypto.WhirlpoolStream', 'crypto.StreamHasher', 'crypto.StreamSigner'],

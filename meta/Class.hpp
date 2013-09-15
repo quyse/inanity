@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "../script/lua/extension.hpp"
+#include "../script/v8/extension.hpp"
 
 BEGIN_INANITY_META
 
@@ -49,6 +50,7 @@ public:
 	const StaticMethods& GetStaticMethods() const;
 
 	virtual Script::Lua::ClassExtensionBase* GetLuaExtension() = 0;
+	virtual Script::V8::ClassExtensionBase* GetV8Extension() = 0;
 };
 
 template <typename ClassType>

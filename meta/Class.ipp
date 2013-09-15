@@ -10,8 +10,13 @@ template <typename ClassType>
 class Class : public ClassBase
 {
 private:
+
 #ifdef ___INANITY_META_LUA___
 	Script::Lua::Extension<Class<ClassType> > luaExtension;
+#endif
+
+#ifdef ___INANITY_META_V8___
+	Script::V8::Extension<Class<ClassType> > v8Extension;
 #endif
 
 public:
@@ -20,6 +25,15 @@ public:
 	{
 #ifdef ___INANITY_META_LUA___
 		return &luaExtension;
+#else
+		return 0;
+#endif
+	}
+
+	Script::V8::ClassExtensionBase* GetV8Extension()
+	{
+#ifdef ___INANITY_META_V8___
+		return &v8Extension;
 #else
 		return 0;
 #endif

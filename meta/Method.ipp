@@ -10,15 +10,30 @@ template <typename MethodType, MethodType method>
 class Method : public MethodBase
 {
 private:
+
 #ifdef ___INANITY_META_LUA___
 	Script::Lua::Extension<Method<MethodType, method> > luaExtension;
 #endif
 
+#ifdef ___INANITY_META_V8___
+	Script::V8::Extension<Method<MethodType, method> > v8Extension;
+#endif
+
 public:
+
 	Script::Lua::MethodExtensionBase* GetLuaExtension()
 	{
 #ifdef ___INANITY_META_LUA___
 		return &luaExtension;
+#else
+		return 0;
+#endif
+	}
+
+	Script::V8::MethodExtensionBase* GetV8Extension()
+	{
+#ifdef ___INANITY_META_V8___
+		return &v8Extension;
 #else
 		return 0;
 #endif
