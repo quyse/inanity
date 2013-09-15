@@ -12,9 +12,8 @@ GLEW (http://glew.sourceforge.net/) - modified MIT license (http://glew.sourcefo
 eigen (http://eigen.tuxfamily.org/) - Mozilla Public License 2.0 (LGPL parts of eigen are explicitly excluded by having "#define EIGEN_MPL2_ONLY" in /math/eigen.hpp)
 sqlite (http://www.sqlite.org/) - in public domain
 bullet (http://bulletphysics.org) - zlib license (http://zlib.net/zlib_license.html)
-libuv [via git submodule] (https://github.com/joyent/libuv) - node.js license (https://github.com/joyent/libuv/blob/master/LICENSE)
 http-parser [via git submodule] (https://github.com/joyent/http-parser) - MIT license
 utf8 (http://utfcpp.sourceforge.net/) - own license (in /deps/utf8.h heading comment)
 libogg (http://xiph.org/ogg/) - BSD-style license (see /deps/libogg/COPYING)
 libvorbis (http://xiph.org/vorbis/) - BSD-style license (see /deps/libvorbis/COPYING)
-v8 (https://developers.google.com/v8/) - New BSD license (see /deps/v8/LICENSE)
+v8 (https://developers.google.com/v8/) - New BSD license (see /deps/v8/repo/LICENSE)
