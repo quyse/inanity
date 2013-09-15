@@ -1,5 +1,5 @@
-[submodule "deps/libuv"]
-	path = deps/libuv
+[submodule "libuv"]
+	path = deps/libuv/repo
 	url = git://github.com/joyent/libuv.git
 [submodule "deps/http-parser"]
 	path = deps/http-parser

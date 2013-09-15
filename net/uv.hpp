@@ -3,6 +3,6 @@
 
 /* Включает зависимость - библиотеку libv. */
 
-#include "../deps/libuv/include/uv.h"
+#include "../deps/libuv/repo/include/uv.h"
 
 #endif
