@@ -1,0 +1,27 @@
+diff --git a/Makefile b/Makefile
+index 288c257..1cb5364 100644
+--- a/Makefile
++++ b/Makefile
+@@ -269,7 +269,7 @@ $(BUILDS): $(OUTDIR)/Makefile.$$(basename $$@)
+ 	@$(MAKE) -C "$(OUTDIR)" -f Makefile.$(basename $@) \
+ 	         CXX="$(CXX)" LINK="$(LINK)" \
+ 	         BUILDTYPE=$(shell echo $(subst .,,$(suffix $@)) | \
+-	                     python -c "print raw_input().capitalize()") \
++	                     python2 -c "print raw_input().capitalize()") \
+ 	         builddir="$(shell pwd)/$(OUTDIR)/$@"
+ 
+ native: $(OUTDIR)/Makefile.native
+diff --git a/build/standalone.gypi b/build/standalone.gypi
+index 5c017d5..cba3073 100644
+--- a/build/standalone.gypi
++++ b/build/standalone.gypi
+@@ -149,7 +149,8 @@
+     ['OS=="linux" or OS=="freebsd" or OS=="openbsd" or OS=="solaris" \
+        or OS=="netbsd"', {
+       'target_defaults': {
+-        'cflags': [ '-Wall', '<(werror)', '-W', '-Wno-unused-parameter',
++        'cflags': [ '-Wall', '<(werror)', '-W', '-Wno-unused-parameter', 
++'-Wno-unused-local-typedefs',
+                     '-pthread', '-fno-exceptions', '-pedantic' ],
+         'cflags_cc': [ '-Wnon-virtual-dtor', '-fno-rtti' ],
+         'ldflags': [ '-pthread', ],

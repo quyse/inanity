@@ -1,0 +1,7 @@
+Исправления для успешной сборки
+
+Все исправления в файле build-fixes.patch
+
+* Необходимо использовать Python 2, а не 3.
+
+* Ошибка компиляции в gcc 4.8: https://code.google.com/p/v8/issues/detail?id=2149. Для исправления использовать -Wno-unused-local-typedefs.
