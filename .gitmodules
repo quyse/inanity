@@ -4,6 +4,6 @@
 [submodule "deps/http-parser"]
 	path = deps/http-parser
 	url = git://github.com/joyent/http-parser.git
-[submodule "deps/v8"]
-	path = deps/v8
+[submodule "deps/v8/repo"]
+	path = deps/v8/repo
 	url = git://github.com/v8/v8.git
