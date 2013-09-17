@@ -1,0 +1,4 @@
+/debug/libv8_base.lib
+/debug/libv8_snapshot.lib
+/release/libv8_base.lib
+/release/libv8_snapshot.lib

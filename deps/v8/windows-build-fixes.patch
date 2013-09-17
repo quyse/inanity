@@ -1,0 +1,52 @@
+diff --git a/build/standalone.gypi b/build/standalone.gypi
+index 5c017d5..81e8f3c 100644
+--- a/build/standalone.gypi
++++ b/build/standalone.gypi
+@@ -177,7 +177,7 @@
+         'conditions': [
+           ['component=="static_library"', {
+             'defines': [
+-              '_HAS_EXCEPTIONS=0',
+             ],
+           }],
+         ],
+@@ -200,7 +200,7 @@
+               ['component=="shared_library"', {
+                 'ExceptionHandling': '1',  # /EHsc
+               }, {
+-                'ExceptionHandling': '0',
++                'ExceptionHandling': '1',
+               }],
+             ],
+           },
+diff --git a/build/toolchain.gypi b/build/toolchain.gypi
+index c1066eb..79c35c7 100644
+--- a/build/toolchain.gypi
++++ b/build/toolchain.gypi
+@@ -460,7 +460,7 @@
+                   ['component=="shared_library"', {
+                     'RuntimeLibrary': '3',  # /MDd
+                   }, {
+-                    'RuntimeLibrary': '1',  # /MTd
++                    'RuntimeLibrary': '3',  # /MDd
+                   }],
+                 ],
+               }],
+@@ -475,7 +475,7 @@
+                   ['component=="shared_library"', {
+                     'RuntimeLibrary': '3',  # /MDd
+                   }, {
+-                    'RuntimeLibrary': '1',  # /MTd
++                    'RuntimeLibrary': '3',  # /MDd
+                   }],
+                 ],
+               }],
+@@ -490,7 +490,7 @@
+                   ['component=="shared_library"', {
+                     'RuntimeLibrary': '3',  #/MDd
+                   }, {
+-                    'RuntimeLibrary': '1',  #/MTd
++                    'RuntimeLibrary': '3',  # /MDd
+                   }],
+                   ['v8_target_arch=="x64"', {
+                     # TODO(2207): remove this option once the bug is fixed.
