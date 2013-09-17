@@ -66,6 +66,34 @@ struct CalleeThunk
 	}
 };
 
+/// Thunk for classes without constructor.
+inline void DummyConstructorThunk(const v8::FunctionCallbackInfo<v8::Value>& info)
+{
+	v8::Local<v8::Object> instance = info.This();
+	State* state = State::GetFromIsolate(info.GetIsolate());
+
+	// check if the constructor called from NewInstance()
+	{
+		v8::Local<v8::Value> param = info[0];
+		if(param->IsExternal())
+		{
+			// put the pointer to internal field
+			instance->SetInternalField(0, param);
+
+			// we are here only for new objects
+			// so register instance
+			state->InternalRegisterInstance((Object*)v8::External::Cast(*param)->Value(), instance);
+
+			return;
+		}
+	}
+
+	// if we are there, constructor was called from javascript
+	v8::ThrowException(
+		v8::Exception::Error(
+			v8::String::New("Class have no constructor")));
+}
+
 template <typename CalleeType>
 struct ConstructorThunk
 {
@@ -104,7 +132,7 @@ struct ConstructorThunk
 		{
 			v8::ThrowException(
 				v8::Exception::Error(
-					v8::String::New("Inanity's object constructor should be called with 'new'")));
+					v8::String::New("Class constructor should be called with 'new'")));
 			return;
 		}
 

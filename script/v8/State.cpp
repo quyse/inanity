@@ -84,6 +84,14 @@ v8::Local<v8::FunctionTemplate> State::GetClassTemplate(Meta::ClassBase* classMe
 			ConstructorExtensionBase* extension = constructor->GetV8Extension();
 			classTemplate->SetCallHandler(extension->GetThunk());
 		}
+		else
+		{
+			// set dummy constructor
+			// it's actually necessary to use this.
+			// FunctionTemplate with zero call handler creates
+			// empty objects because internal field wouldn't set.
+			classTemplate->SetCallHandler(DummyConstructorThunk);
+		}
 	}
 
 	// add static methods to template
