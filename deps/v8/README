@@ -1,7 +1,30 @@
-Исправления для успешной сборки
+V8 Building Sequence
 
-Все исправления в файле build-fixes.patch
+1. Don't forget to run `git submodule update --init` to actually checkout v8.
+2. Apply fixes for successful compilation
 
-* Необходимо использовать Python 2, а не 3.
+build-fixes.patch (for UNIXes):
 
-* Ошибка компиляции в gcc 4.8: https://code.google.com/p/v8/issues/detail?id=2149. Для исправления использовать -Wno-unused-local-typedefs.
+* Use Python 2, not 3.
+* Compilation error on gcc 4.8: https://code.google.com/p/v8/issues/detail?id=2149. Use -Wno-unused-local-typedefs to fix.
+
+windows-build-fixes.patch (for Windows):
+
+* enable exceptions
+* use DLL runtime in debug
+
+3. Use instructions provided by Google: https://code.google.com/p/v8/wiki/BuildingWithGYP to build v8 libraries.
+On Windows you should run something like that (in compiler's command line environment):
+
+cd deps\v8\repo
+svn co http://gyp.googlecode.com/svn/trunk build/gyp
+svn co http://src.chromium.org/svn/trunk/deps/third_party/cygwin@66844 third_party/cygwin
+python build\gyp_v8
+cd build
+msbuild all.sln /t:v8 /p:configuration=debug
+msbuild all.sln /t:v8 /p:configuration=release
+
+4. Windows-only: you have to do additional step - running copytargetlibs.bat in order to copy libraries
+into their general directory. On UNIXes they are already symlinked, so nothing has to be done.
+
+5. After build you should be able to link with deps/v8/{debug,release}/{libv8_base,libv8_snapshot}.
