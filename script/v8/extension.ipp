@@ -12,13 +12,13 @@ v8::FunctionCallback Extension<Meta::Constructor<ConstructorType> >::GetThunk() 
 template <typename FunctionType, FunctionType function>
 v8::FunctionCallback Extension<Meta::Function<FunctionType, function> >::GetThunk() const
 {
-	return &CalleeThunk<FunctionType, function>::FunctionThunk;
+	return &CalleeThunk<FunctionType, function>::Thunk;
 }
 
 template <typename MethodType, MethodType method>
 v8::FunctionCallback Extension<Meta::Method<MethodType, method> >::GetThunk() const
 {
-	return &CalleeThunk<MethodType, method>::MethodThunk;
+	return &CalleeThunk<MethodType, method>::Thunk;
 }
 
 END_INANITY_V8

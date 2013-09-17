@@ -1,5 +1,6 @@
 #include "values.hpp"
 #include "../../String.hpp"
+#include "../../Exception.hpp"
 
 BEGIN_INANITY_V8
 
@@ -169,6 +170,11 @@ struct Value<ptr<ObjectType> >
 	static inline ptr<ObjectType> From(v8::Local<v8::Value> value)
 	{
 		void* thisValue = v8::External::Cast(*value->ToObject()->GetInternalField(0))->Value();
+
+		// if this is null, throw exception
+		if(!thisValue)
+			THROW(ObjectType::GetMeta()->GetFullName() + String(" instance is null"));
+
 		ObjectType* object = fast_cast<ObjectType*>((Object*)thisValue);
 
 		return object;

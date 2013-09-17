@@ -4,6 +4,7 @@
 #include "../../meta/Tuple.hpp"
 #include "../../meta/Callable.ipp"
 #include "../../Exception.hpp"
+#include <sstream>
 
 BEGIN_INANITY_V8
 
@@ -53,16 +54,21 @@ struct CalleeThunk
 		}
 	};
 
-	static inline void FunctionThunk(const v8::FunctionCallbackInfo<v8::Value>& info)
+	static inline void Thunk(const v8::FunctionCallbackInfo<v8::Value>& info)
 	{
-		ArgGettingState state(info, false);
-		CallAndReturn<Helper, ReturnType, Args>::Do(info, Args(state));
-	}
-
-	static inline void MethodThunk(const v8::FunctionCallbackInfo<v8::Value>& info)
-	{
-		ArgGettingState state(info, true);
-		CallAndReturn<Helper, ReturnType, Args>::Do(info, Args(state));
+		try
+		{
+			ArgGettingState state(info, (bool)Meta::Callable<CalleeType>::isMethod);
+			CallAndReturn<Helper, ReturnType, Args>::Do(info, Args(state));
+		}
+		catch(Exception* exception)
+		{
+			std::ostringstream stream;
+			MakePointer(exception)->PrintStack(stream);
+			v8::ThrowException(
+				v8::Exception::Error(
+					v8::String::New(stream.str().c_str())));
+		}
 	}
 };
 
@@ -97,6 +103,7 @@ inline void DummyConstructorThunk(const v8::FunctionCallbackInfo<v8::Value>& inf
 template <typename CalleeType>
 struct ConstructorThunk
 {
+	typedef typename Meta::CallableConstructor<CalleeType>::ClassType ClassType;
 	typedef typename Meta::CallableConstructor<CalleeType>::Args Args;
 	typedef typename Meta::CallableConstructor<CalleeType>::ReturnType ReturnType;
 
@@ -136,15 +143,28 @@ struct ConstructorThunk
 			return;
 		}
 
-		// create an object
-		ArgGettingState argGettingState(info, false);
-		ReturnType object = Meta::CallableConstructor<CalleeType>::Call(Args(argGettingState));
+		try
+		{
+			// create an object
+			ArgGettingState argGettingState(info, false);
+			ReturnType object = Meta::CallableConstructor<CalleeType>::Call(Args(argGettingState));
 
-		// store a pointer to the object
-		instance->SetInternalField(0, v8::External::New(object));
+			// store a pointer to the object
+			instance->SetInternalField(0, v8::External::New(object));
 
-		// register instance in state
-		state->InternalRegisterInstance(object, instance);
+			// register instance in state
+			state->InternalRegisterInstance(object, instance);
+		}
+		catch(Exception* exception)
+		{
+			std::ostringstream stream;
+			stream << ClassType::GetMeta()->GetFullName();
+			stream << " instance constructor failed:\n";
+			MakePointer(exception)->PrintStack(stream);
+			v8::ThrowException(
+				v8::Exception::Error(
+					v8::String::New(stream.str().c_str())));
+		}
 	}
 };
 
