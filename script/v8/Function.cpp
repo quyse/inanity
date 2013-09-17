@@ -10,16 +10,21 @@ Function::Function(ptr<State> state, v8::Local<v8::Script> script) :
 
 Function::~Function()
 {
-	script.Dispose();
+	script.Reset();
 }
 
 void Function::Run()
 {
 	State::Scope scope(state);
 
+	v8::TryCatch tryCatch;
+
 	v8::Local<v8::Script> script =
 		v8::Local<v8::Script>::New(state->GetIsolate(), this->script);
+
 	script->Run();
+
+	state->ProcessErrors(tryCatch);
 }
 
 END_INANITY_V8

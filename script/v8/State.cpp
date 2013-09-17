@@ -5,6 +5,7 @@
 #include "../../meta/Function.ipp"
 #include "../../meta/Method.ipp"
 #include "../../File.hpp"
+#include <sstream>
 
 BEGIN_INANITY_V8
 
@@ -20,6 +21,10 @@ State::State()
 
 	// create context
 	context.Reset(isolate, v8::Context::New(isolate));
+
+#ifdef _DEBUG
+	v8::V8::SetCaptureStackTraceForUncaughtExceptions(true);
+#endif
 }
 
 State::~State()
@@ -32,7 +37,7 @@ State::~State()
 		classes.clear();
 
 		for(Instances::iterator i = instances.begin(); i != instances.end(); ++i)
-			InternalWipeInstance(i);
+			InternalReclaimInstance(i);
 		instances.clear();
 	}
 
@@ -200,19 +205,19 @@ void State::InternalUnregisterInstance(Object* object)
 	{
 		// object is found
 
-		// wipe it
-		InternalWipeInstance(i);
+		// reclaim it
+		InternalReclaimInstance(i);
 
 		// delete from cache
 		instances.erase(i);
 	}
 }
 
-void State::InternalWipeInstance(Instances::iterator i)
+void State::InternalReclaimInstance(Instances::iterator i)
 {
 	// clear reference to it from script
 	v8::Local<v8::Object> instance = v8::Local<v8::Object>::New(isolate, i->second);
-	instance->SetInternalField(0, v8::Undefined());
+	instance->SetInternalField(0, v8::External::New(0));
 
 	// destroy persistent handle
 	i->second.Reset();
@@ -224,6 +229,67 @@ void State::InternalWipeInstance(Instances::iterator i)
 void State::InstanceWeakCallback(const v8::WeakCallbackData<v8::Object, Object>& data)
 {
 	State::GetFromIsolate(data.GetIsolate())->InternalUnregisterInstance(data.GetParameter());
+}
+
+void State::ProcessErrors(const v8::TryCatch& tryCatch)
+{
+	if(tryCatch.HasCaught())
+	{
+		std::ostringstream stream;
+
+		stream << "V8 Javascript Exception\n";
+
+		v8::Local<v8::Message> message = tryCatch.Message();
+
+		// print message
+		{
+			v8::String::Utf8Value s(message->Get());
+			stream << *s << '\n';
+		}
+
+		// print source line
+		stream << "Source line: ";
+		{
+			v8::String::Utf8Value s(message->GetSourceLine());
+			stream << *s << '\n';
+		}
+
+		// print script resource name
+		stream << "Script Resource: ";
+		{
+			v8::String::Utf8Value s(message->GetScriptResourceName());
+			stream << *s << '\n';
+		}
+
+		// print stack trace
+		v8::Local<v8::StackTrace> stackTrace = message->GetStackTrace();
+		if(!stackTrace.IsEmpty())
+		{
+			int frameCount = stackTrace->GetFrameCount();
+			if(frameCount)
+			{
+				stream << "Stack Trace:\n";
+				for(int i = 0; i < frameCount; ++i)
+				{
+					v8::Local<v8::StackFrame> frame = stackTrace->GetFrame(i);
+
+					v8::String::Utf8Value scriptName(frame->GetScriptName());
+					v8::String::Utf8Value functionName(frame->GetFunctionName());
+
+					stream << (i + 1) << ')';
+					if(scriptName.length())
+						stream << ' ' << *scriptName;
+					stream << " line " << frame->GetLineNumber();
+					stream << " column " << frame->GetColumn();
+					if(functionName.length())
+						stream << ' ' << *functionName;
+					stream << '\n';
+				}
+			}
+		}
+
+		THROW(stream.str());
+	}
 }
 
 void State::Register(Meta::ClassBase* classMeta)
@@ -279,10 +345,14 @@ ptr<Script::Function> State::LoadScript(ptr<File> file)
 {
 	Scope scope(this);
 
+	v8::TryCatch tryCatch;
+
 	v8::Local<v8::Script> script = v8::Script::Compile(
 		v8::String::New(
 			(const char*)file->GetData(),
 			file->GetSize()));
+
+	ProcessErrors(tryCatch);
 
 	return NEW(Function(this, script));
 }

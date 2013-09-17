@@ -162,6 +162,13 @@ struct Value<const String&>
 	}
 };
 
+/*
+ptr<Object> is represented as an External, or as null (zero pointer).
+External of corrent object contains non-null pointer.
+External with null pointer is a wiped object, i.e. object which was
+reclamed from script by C++ code.
+Other values are not accepted (i.e. zero, undefined).
+*/
 template <typename ObjectType>
 struct Value<ptr<ObjectType> >
 {
@@ -169,20 +176,38 @@ struct Value<ptr<ObjectType> >
 
 	static inline ptr<ObjectType> From(v8::Local<v8::Value> value)
 	{
-		void* thisValue = v8::External::Cast(*value->ToObject()->GetInternalField(0))->Value();
+		// get internal field of an object
+		v8::Local<v8::Value> thisValue = value->ToObject()->GetInternalField(0);
 
-		// if this is null, throw exception
-		if(!thisValue)
-			THROW(ObjectType::GetMeta()->GetFullName() + String(" instance is null"));
+		// if it's null object
+		if(thisValue->IsNull())
+			return 0;
 
-		ObjectType* object = fast_cast<ObjectType*>((Object*)thisValue);
+		// otherwise it should be an external
+		if(!thisValue->IsExternal())
+		{
+			v8::String::Utf8Value s(thisValue);
+			THROW(ObjectType::GetMeta()->GetFullName() + String(" instance can't be obtained from ") + *s);
+		}
+
+		// get the value
+		void* externalValue = v8::External::Cast(*thisValue)->Value();
+
+		// if the value is null, the object was reclaimed
+		if(!externalValue)
+			THROW(ObjectType::GetMeta()->GetFullName() + String(" instance was reclaimed"));
+
+		ObjectType* object = fast_cast<ObjectType*>((Object*)externalValue);
 
 		return object;
 	}
 
 	static inline v8::Local<v8::Value> To(ptr<ObjectType> value)
 	{
-		return State::GetCurrent()->ConvertObject(ObjectType::GetMeta(), static_cast<Object*>(&*value));
+		if(value)
+			return State::GetCurrent()->ConvertObject(ObjectType::GetMeta(), static_cast<Object*>(&*value));
+		else
+			return v8::Null();
 	}
 };
 

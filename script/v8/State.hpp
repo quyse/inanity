@@ -43,7 +43,7 @@ private:
 	/// Internal method to unregister instance.
 	void InternalUnregisterInstance(Object* object);
 	/// Dereference object and clear references to it from script.
-	void InternalWipeInstance(Instances::iterator i);
+	void InternalReclaimInstance(Instances::iterator i);
 
 public:
 	State();
@@ -56,9 +56,6 @@ public:
 	/// Get state from v8::Isolate.
 	static State* GetFromIsolate(v8::Isolate* isolate);
 
-	/// Convert object to a v8 value.
-	v8::Local<v8::Object> ConvertObject(Meta::ClassBase* classMeta, Object* object);
-
 	/// Unregister instance of object if exposed to script.
 	/** Invalidates object instances in script (if they exist), and releases a reference. */
 	void UnregisterInstance(Object* object);
@@ -69,8 +66,13 @@ public:
 
 	//******* DON'T CALL EXPLICITLY
 
+	/// Convert object to a v8 value.
+	/** Object should be not-null. */
+	v8::Local<v8::Object> ConvertObject(Meta::ClassBase* classMeta, Object* object);
 	/// Register instance to receive notification when all references from script are gone.
 	void InternalRegisterInstance(Object* object, v8::Local<v8::Object> instance);
+	/// Process errors from javascript, and throw exceptions.
+	void ProcessErrors(const v8::TryCatch& tryCatch);
 };
 
 END_INANITY_V8
