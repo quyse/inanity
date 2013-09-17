@@ -227,6 +227,12 @@ var executables = {
 		dynamicLibraries: []
 	}
 	// TEST
+	, v8test: {
+		objects: ['script.v8.test'],
+		staticLibraries: ['libinanity-base', 'libinanity-meta', 'libinanity-v8', 'deps/v8//libv8_base', 'deps/v8//libv8_snapshot'],
+		dynamicLibraries: ['ws2_32.lib', 'winmm.lib']
+	}
+	// TEST
 	, nettesttcp: {
 		objects: ['net.test-chat-tcp'],
 		staticLibraries: ['libinanity-base', 'libinanity-asio'],
