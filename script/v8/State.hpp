@@ -15,11 +15,11 @@ private:
 	v8::Isolate* isolate;
 	v8::Persistent<v8::Context> context;
 
-	typedef std::unordered_map<Meta::ClassBase*, v8::Persistent<v8::FunctionTemplate> > Classes;
+	typedef std::unordered_map<Meta::ClassBase*, v8::Persistent<v8::FunctionTemplate>*> Classes;
 	Classes classes;
 
 	/// Set of objects which sent to script.
-	typedef std::unordered_map<Object*, v8::Persistent<v8::Object> > Instances;
+	typedef std::unordered_map<Object*, v8::Persistent<v8::Object>*> Instances;
 	Instances instances;
 
 public:

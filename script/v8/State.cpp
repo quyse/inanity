@@ -33,7 +33,10 @@ State::~State()
 		Scope scope(this);
 
 		for(Classes::iterator i = classes.begin(); i != classes.end(); ++i)
-			i->second.Reset();
+		{
+			i->second->Reset();
+			delete i->second;
+		}
 		classes.clear();
 
 		for(Instances::iterator i = instances.begin(); i != instances.end(); ++i)
@@ -65,7 +68,7 @@ v8::Local<v8::FunctionTemplate> State::GetClassTemplate(Meta::ClassBase* classMe
 	{
 		Classes::iterator i = classes.find(classMeta);
 		if(i != classes.end())
-			return v8::Local<v8::FunctionTemplate>::New(isolate, i->second);
+			return v8::Local<v8::FunctionTemplate>::New(isolate, *i->second);
 	}
 
 	// register class
@@ -176,7 +179,9 @@ v8::Local<v8::FunctionTemplate> State::GetClassTemplate(Meta::ClassBase* classMe
 	}
 
 	// remember class template
-	classes[classMeta].Reset(isolate, classTemplate);
+	classes.insert(std::make_pair(
+		classMeta,
+		new v8::Persistent<v8::FunctionTemplate>(isolate, classTemplate)));
 
 	return classTemplate;
 }
@@ -189,9 +194,10 @@ void State::InternalRegisterInstance(Object* object, v8::Local<v8::Object> insta
 #endif
 
 	// create persistent handle to get notification when object dies
-	v8::Persistent<v8::Object>& persistentObject = instances[object];
-	persistentObject.Reset(isolate, instance);
-	persistentObject.SetWeak(object, &InstanceWeakCallback);
+	v8::Persistent<v8::Object>* persistentObject = new v8::Persistent<v8::Object>(isolate, instance);
+	persistentObject->SetWeak(object, &InstanceWeakCallback);
+
+	instances.insert(std::make_pair(object, persistentObject));
 
 	// increase reference count
 	object->Reference();
@@ -216,11 +222,12 @@ void State::InternalUnregisterInstance(Object* object)
 void State::InternalReclaimInstance(Instances::iterator i)
 {
 	// clear reference to it from script
-	v8::Local<v8::Object> instance = v8::Local<v8::Object>::New(isolate, i->second);
+	v8::Local<v8::Object> instance = v8::Local<v8::Object>::New(isolate, *i->second);
 	instance->SetInternalField(0, v8::External::New(0));
 
 	// destroy persistent handle
-	i->second.Reset();
+	i->second->Reset();
+	delete i->second;
 
 	// dereference object
 	i->first->Dereference();
@@ -311,7 +318,7 @@ v8::Local<v8::Object> State::ConvertObject(Meta::ClassBase* classMeta, Object* o
 	// check if the object is already in cache
 	Instances::const_iterator i = instances.find(object);
 	if(i != instances.end())
-		return v8::Local<v8::Object>::New(isolate, i->second);
+		return v8::Local<v8::Object>::New(isolate, *i->second);
 
 	// get meta
 	v8::Local<v8::FunctionTemplate> classTemplate = GetClassTemplate(classMeta);
