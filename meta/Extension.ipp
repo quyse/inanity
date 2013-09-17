@@ -7,4 +7,8 @@
 #include "../script/lua/extension.ipp"
 #endif
 
+#ifdef ___INANITY_META_V8___
+#include "../script/v8/extension.ipp"
+#endif
+
 #endif

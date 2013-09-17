@@ -1,5 +1,6 @@
 #include "State.hpp"
 #include "Function.hpp"
+#include "thunks.ipp"
 #include "../../meta/Constructor.ipp"
 #include "../../meta/Function.ipp"
 #include "../../meta/Method.ipp"
@@ -11,6 +12,9 @@ State::State()
 {
 	// create isolate
 	isolate = v8::Isolate::New();
+	isolate->SetData(this);
+
+	v8::Isolate::Scope isolateScope(isolate);
 
 	v8::HandleScope handleScope(isolate);
 
@@ -20,11 +24,23 @@ State::State()
 
 State::~State()
 {
+	{
+		Scope scope(this);
+
+		for(Classes::iterator i = classes.begin(); i != classes.end(); ++i)
+			i->second.Reset();
+		classes.clear();
+
+		for(Instances::iterator i = instances.begin(); i != instances.end(); ++i)
+			InternalWipeInstance(i);
+		instances.clear();
+	}
+
 	context.Dispose();
 	isolate->Dispose();
 }
 
-State::Scope::Scope(State* state) : state(state)
+State::Scope::Scope(State* state) : state(state), handleScope(state->isolate)
 {
 	state->isolate->Enter();
 	v8::Local<v8::Context> context = v8::Local<v8::Context>::New(state->isolate, state->context);
@@ -38,20 +54,27 @@ State::Scope::~Scope()
 	state->isolate->Exit();
 }
 
-v8::Isolate* State::GetIsolate() const
+v8::Local<v8::FunctionTemplate> State::GetClassTemplate(Meta::ClassBase* classMeta)
 {
-	return isolate;
-}
+	// if class template is already created, return it
+	{
+		Classes::iterator i = classes.find(classMeta);
+		if(i != classes.end())
+			return v8::Local<v8::FunctionTemplate>::New(isolate, i->second);
+	}
 
-void State::Register(Meta::ClassBase* classMeta)
-{
-	Scope scope(this);
+	// register class
 
 	// create template for global class object
-	v8::Handle<v8::FunctionTemplate> classTemplate = v8::FunctionTemplate::New();
+	v8::Local<v8::FunctionTemplate> classTemplate = v8::FunctionTemplate::New();
 
 	// set a name of the class
 	classTemplate->SetClassName(v8::String::New(classMeta->GetFullName()));
+
+	// inherit from parent class
+	Meta::ClassBase* parentClassMeta = classMeta->GetParent();
+	if(parentClassMeta)
+		classTemplate->Inherit(GetClassTemplate(parentClassMeta));
 
 	// set constructor callback
 	{
@@ -78,7 +101,7 @@ void State::Register(Meta::ClassBase* classMeta)
 	}
 
 	// add non-static methods to prototype
-	v8::Handle<v8::ObjectTemplate> prototypeTemplate = classTemplate->PrototypeTemplate();
+	v8::Local<v8::ObjectTemplate> prototypeTemplate = classTemplate->PrototypeTemplate();
 	const Meta::ClassBase::Methods& methods = classMeta->GetMethods();
 	for(size_t i = 0; i < methods.size(); ++i)
 	{
@@ -92,13 +115,17 @@ void State::Register(Meta::ClassBase* classMeta)
 		);
 	}
 
+	// set one memory cell for storing 'this' pointer
+	v8::Local<v8::ObjectTemplate> instanceTemplate = classTemplate->InstanceTemplate();
+	instanceTemplate->SetInternalFieldCount(1);
+
 	// parse full class name, and store the class object
 	{
 		const char* fullName = classMeta->GetFullName();
 
 		// current container
-		v8::Handle<v8::Context> context = v8::Handle<v8::Context>::New(isolate, this->context);
-		v8::Handle<v8::Object> container = context->Global();
+		v8::Local<v8::Context> context = v8::Local<v8::Context>::New(isolate, this->context);
+		v8::Local<v8::Object> container = context->Global();
 
 		for(size_t i = 0; fullName[i]; )
 		{
@@ -106,19 +133,21 @@ void State::Register(Meta::ClassBase* classMeta)
 			for(j = i + 1; fullName[j] && fullName[j] != '.'; ++j);
 
 			// get a part of the name
-			v8::Handle<v8::String> pathPart = v8::String::New(fullName + i, j - i);
+			v8::Local<v8::String> pathPart = v8::String::New(fullName + i, j - i);
 
 			// if this is a last part
 			if(!fullName[j])
 			{
 				// put an object into container
 				container->Set(pathPart, classTemplate->GetFunction());
+				// exit
+				break;
 			}
 			// else it's a transient part
 			else
 			{
 				// get a next container, create if needed
-				v8::Handle<v8::Value> nextContainer = container->Get(pathPart);
+				v8::Local<v8::Value> nextContainer = container->Get(pathPart);
 				if(nextContainer->IsUndefined())
 				{
 					nextContainer = v8::Object::New();
@@ -132,13 +161,117 @@ void State::Register(Meta::ClassBase* classMeta)
 			i = j + 1;
 		}
 	}
+
+	// remember class template
+	classes[classMeta].Reset(isolate, classTemplate);
+
+	return classTemplate;
+}
+
+void State::InternalRegisterInstance(Object* object, v8::Local<v8::Object> instance)
+{
+#ifdef _DEBUG
+	if(instances.find(object) != instances.end())
+		THROW("V8 instance already registered");
+#endif
+
+	// create persistent handle to get notification when object dies
+	v8::Persistent<v8::Object>& persistentObject = instances[object];
+	persistentObject.Reset(isolate, instance);
+	persistentObject.SetWeak(object, &InstanceWeakCallback);
+
+	// increase reference count
+	object->Reference();
+}
+
+void State::InternalUnregisterInstance(Object* object)
+{
+	// find an object in instances
+	Instances::iterator i = instances.find(object);
+	if(i != instances.end())
+	{
+		// object is found
+
+		// wipe it
+		InternalWipeInstance(i);
+
+		// delete from cache
+		instances.erase(i);
+	}
+}
+
+void State::InternalWipeInstance(Instances::iterator i)
+{
+	// clear reference to it from script
+	v8::Local<v8::Object> instance = v8::Local<v8::Object>::New(isolate, i->second);
+	instance->SetInternalField(0, v8::Undefined());
+
+	// destroy persistent handle
+	i->second.Reset();
+
+	// dereference object
+	i->first->Dereference();
+}
+
+void State::InstanceWeakCallback(const v8::WeakCallbackData<v8::Object, Object>& data)
+{
+	State::GetFromIsolate(data.GetIsolate())->InternalUnregisterInstance(data.GetParameter());
+}
+
+void State::Register(Meta::ClassBase* classMeta)
+{
+	Scope scope(this);
+
+	GetClassTemplate(classMeta);
+}
+
+void State::UnregisterInstance(Object* object)
+{
+	Scope scope(this);
+
+	InternalUnregisterInstance(object);
+}
+
+v8::Local<v8::Object> State::ConvertObject(Meta::ClassBase* classMeta, Object* object)
+{
+	// check if the object is already in cache
+	Instances::const_iterator i = instances.find(object);
+	if(i != instances.end())
+		return v8::Local<v8::Object>::New(isolate, i->second);
+
+	// get meta
+	v8::Local<v8::FunctionTemplate> classTemplate = GetClassTemplate(classMeta);
+
+	// wrap object into external
+	v8::Local<v8::Value> external = v8::External::New(object);
+
+	// create an instance of the class
+	// constructor thunk is called
+	v8::Local<v8::Object> instance = classTemplate->GetFunction()->NewInstance(1, &external);
+
+	return instance;
+}
+
+v8::Isolate* State::GetIsolate() const
+{
+	return isolate;
+}
+
+State* State::GetCurrent()
+{
+	return GetFromIsolate(v8::Isolate::GetCurrent());
+}
+
+State* State::GetFromIsolate(v8::Isolate* isolate)
+{
+	return (State*)isolate->GetData();
 }
 
 ptr<Script::Function> State::LoadScript(ptr<File> file)
 {
 	Scope scope(this);
 
-	v8::Handle<v8::Script> script = v8::Script::Compile(
+	v8::Local<v8::Script> script = v8::Script::Compile(
 		v8::String::New(
 			(const char*)file->GetData(),
 			file->GetSize()));

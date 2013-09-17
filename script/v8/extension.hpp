@@ -32,6 +32,7 @@ template <typename ConstructorType>
 class Extension<Meta::Constructor<ConstructorType> > : public ConstructorExtensionBase
 {
 public:
+	v8::FunctionCallback GetThunk() const;
 };
 
 typedef CallableExtensionBase FunctionExtensionBase;
@@ -40,6 +41,7 @@ template <typename FunctionType, FunctionType function>
 class Extension<Meta::Function<FunctionType, function> > : public FunctionExtensionBase
 {
 public:
+	v8::FunctionCallback GetThunk() const;
 };
 
 typedef CallableExtensionBase MethodExtensionBase;
@@ -48,6 +50,7 @@ template <typename MethodType, MethodType method>
 class Extension<Meta::Method<MethodType, method> > : public MethodExtensionBase
 {
 public:
+	v8::FunctionCallback GetThunk() const;
 };
 
 END_INANITY_V8

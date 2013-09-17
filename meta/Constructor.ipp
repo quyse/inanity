@@ -16,7 +16,7 @@ private:
 #endif
 
 #ifdef ___INANITY_META_V8___
-	Script::Lua::Extension<Constructor<ConstructorType> > v8Extension;
+	Script::V8::Extension<Constructor<ConstructorType> > v8Extension;
 #endif
 
 public:

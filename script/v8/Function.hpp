@@ -17,7 +17,7 @@ private:
 	v8::Persistent<v8::Script> script;
 
 public:
-	Function(ptr<State> state, v8::Handle<v8::Script> script);
+	Function(ptr<State> state, v8::Local<v8::Script> script);
 	~Function();
 
 	//*** Script::Function methods
