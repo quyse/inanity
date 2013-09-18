@@ -11,16 +11,22 @@ Thread::Thread(ptr<ThreadHandler> handler) : handler(handler)
 {
 	try
 	{
+		Reference();
 #ifdef ___INANITY_WINDOWS
 		thread = NEW(Handle(CreateThread(0, 0, ThreadRoutine, this, 0, 0)));
 		if(!thread->IsValid())
+		{
+			Dereference();
 			THROW_SECONDARY("CreateThread failed", Exception::SystemError());
+		}
 #endif
 #ifdef ___INANITY_LINUX
 		if(pthread_create(&thread, 0, ThreadRoutine, this))
+		{
+			Dereference();
 			THROW_SECONDARY("pthread_create failed", Exception::SystemError());
+		}
 #endif
-		Reference();
 	}
 	catch(Exception* exception)
 	{
