@@ -1,7 +1,7 @@
 #ifndef ___INANITY_HANDLER_HPP___
 #define ___INANITY_HANDLER_HPP___
 
-#include "Object.hpp"
+#include "SafeObject.hpp"
 #include "Exception.hpp"
 
 BEGIN_INANITY
@@ -10,7 +10,7 @@ template <typename T, typename Class>
 class Delegate;
 
 /// Класс обработчика, который просто принимает сообщение.
-class Handler : public Object
+class Handler : public SafeObject
 {
 public:
 	virtual void Fire() = 0;
@@ -51,7 +51,7 @@ public:
 };
 
 /// Класс обработчика, который может обрабатывать ошибки.
-class ErrorHandler : public Object
+class ErrorHandler : public SafeObject
 {
 protected:
 	/// Обработать исключение.

@@ -1,6 +1,7 @@
 #ifndef ___INANITY_THREAD_HPP___
 #define ___INANITY_THREAD_HPP___
 
+#include "SafeObject.hpp"
 #include "Handler.hpp"
 #ifdef ___INANITY_WINDOWS
 #include "Handle.hpp"
@@ -13,7 +14,7 @@
 BEGIN_INANITY
 
 /// Класс потока выполнения.
-class Thread : public Object
+class Thread : public SafeObject
 {
 public:
 	typedef DataHandler<ptr<Thread> > ThreadHandler;

@@ -51,8 +51,18 @@ void* Thread::ThreadRoutine(void* self)
 
 void Thread::Run()
 {
-	handler->FireData(this);
+	// make additional exception-safe reference
+	ptr<Thread> thread = this;
+	// remove reference from constructor
 	Dereference();
+
+	// get a handler
+	ptr<ThreadHandler> handler = this->handler;
+	// remove handler from thread (maybe break circular reference)
+	this->handler = 0;
+
+	// run thread
+	handler->FireData(this);
 }
 
 void Thread::WaitEnd()
