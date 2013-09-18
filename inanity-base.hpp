@@ -31,7 +31,6 @@
 #include "Out2InStream.hpp"
 #include "OutputStream.hpp"
 #include "PartFile.hpp"
-#include "Profiling.hpp"
 #include "ResourceManager.ipp"
 #include "SafeObject.hpp"
 #include "Semaphore.hpp"
