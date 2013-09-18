@@ -6,20 +6,17 @@
 
 BEGIN_INANITY
 
-/// Класс управляемого объекта. Базовый для всех классов, объекты которых создаются в управляемой куче.
+/// Managed object class.
+/** All managed thread-unsafe classes are inherited from that class. */
 class Object
 {
 private:
 	int referencesCount;
 
 public:
-	inline Object() : referencesCount(0)
-	{
-	}
+	inline Object() : referencesCount(0) {}
 
-	virtual ~Object()
-	{
-	}
+	virtual ~Object() {}
 
 	inline void Reference()
 	{
@@ -32,7 +29,7 @@ public:
 			delete this;
 	}
 
-	inline unsigned GetReferencesCount() const
+	inline int GetReferencesCount() const
 	{
 		return referencesCount;
 	}
@@ -41,13 +38,13 @@ public:
 	static void operator delete(void* data);
 };
 
-//макросы для выделения памяти с указанием информации о выделяемом кусочке
+//*** macros for memory allocation with tagging
 #ifdef _DEBUG
 #define INANITY_SIDENS2(x) #x
 #define INANITY_SIDENS(x) INANITY_SIDENS2(x)
 #define NEW(...) Inanity::ObjectSetAllocationInfo(new __VA_ARGS__, #__VA_ARGS__ "  " __FILE__ "(" INANITY_SIDENS(__LINE__) ")")
 #define NEW_WITH_TAG(tag, ...) Inanity::ObjectSetAllocationInfo(new __VA_ARGS__, "[" tag "] " #__VA_ARGS__ "  " __FILE__ "(" INANITY_SIDENS(__LINE__) ")")
-//функция определена в ManagedHeap.cpp
+// defined in ManagedHeap.cpp
 void ManagedHeapSetAllocationInfo(void*, const char* info);
 template <typename T>
 T* ObjectSetAllocationInfo(T* data, const char* info)
