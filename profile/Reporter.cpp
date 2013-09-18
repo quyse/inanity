@@ -12,7 +12,7 @@ BEGIN_INANITY_PROFILE
 
 double Ticks2Time(long long ticks)
 {
-	static double coef = 1.0 / Time::GetTicksPerSecond();
+	static double coef = 1000.0 / Time::GetTicksPerSecond();
 	return double(ticks) * coef;
 }
 
@@ -47,16 +47,26 @@ void Reporter::RawReport()
 
 void Reporter::Report()
 {
-	// красивый заголовочек
-	stream << "======= INANITY PROFILING REPORT =======\n";
+	// print header
+	stream <<
+		"<!doctype html>\n"
+		"<html>\n"
+		"\t<head>\n"
+		"\t\t<title>Inanity Profile Report</title>\n"
+		"\t</head>\n"
+		"\t<body>\n"
+		"\t\t<h1>Inanity Profile Report</h1>\n";
 
-	// сделать рейтинг точек профайлинга
-	stream << "******* Rating of profile points *******\n";
+	stream << "\t\t<h2>Points Rating</h2>\n";
 	ReportPoints();
 
-	// сделать рейтинг областей видимости
-	stream << "******* Rating of scopes *******\n";
+	stream << "\t\t<h2>Scopes Rating</h2>\n";
 	ReportScopes();
+
+	// print footer
+	stream <<
+		"\t</body>\n"
+		"</html>\n";
 }
 
 void Reporter::ReportPoints()
@@ -84,8 +94,23 @@ void Reporter::ReportPoints()
 	}
 	std::sort(pointsRating.begin(), pointsRating.end(), std::greater<std::pair<int, const char*> >());
 
+	// printing
+	stream <<
+		"\t\t<table>\n"
+		"\t\t\t<tr>\n"
+		"\t\t\t\t<th>Rating</th>\n"
+		"\t\t\t\t<th>Hits</th>\n"
+		"\t\t\t\t<th>Note</th>\n"
+		"\t\t\t</tr>\n";
 	for(size_t i = 0; i < pointsRating.size(); ++i)
-		stream << pointsRating[i].second << '\t' << pointsRating[i].first << '\n';
+		stream <<
+			"\t\t\t<tr>\n"
+			"\t\t\t\t<td>" << (i + 1) << "</td>\n"
+			"\t\t\t\t<td>" << pointsRating[i].first << "</td>\n"
+			"\t\t\t\t<td>" << pointsRating[i].second << "</td>\n"
+			"\t\t\t</tr>\n";
+	stream <<
+		"\t\t</table>\n";
 }
 
 void Reporter::ReportScopes()
@@ -193,9 +218,18 @@ void Reporter::ReportScopes()
 			// root печатать не надо
 			if(u > 0)
 			{
+				stream <<
+					"\t\t\t<tr>\n"
+					"\t\t\t\t<td>";
 				for(int i = 0; i < level; ++i)
-					stream << "  ";
-				stream << states[u].position << " hitcount=" << states[u].hitCount << " total=" << Ticks2Time(states[u].totalTime) << " own=" << Ticks2Time(states[u].ownTime) << " avgown=" << (Ticks2Time(states[u].ownTime) / states[u].hitCount) << '\n';
+					stream << "*&nbsp;&nbsp;&nbsp;";
+				stream <<
+					states[u].position << "</td>\n"
+					"\t\t\t\t<td>" << states[u].hitCount << "</td>\n"
+					"\t\t\t\t<td>" << Ticks2Time(states[u].totalTime) << "</td>\n"
+					"\t\t\t\t<td>" << Ticks2Time(states[u].ownTime) << "</td>\n"
+					"\t\t\t\t<td>" << (Ticks2Time(states[u].ownTime) / states[u].hitCount) << "</td>\n"
+					"\t\t\t</tr>\n";
 			}
 
 			if(u > 0)
@@ -251,8 +285,20 @@ void Reporter::ReportScopes()
 	trie.SortByAverageOwnTime(0);
 	// вывести всё
 	stream << std::fixed;
-	stream.precision(6);
+	stream.precision(3);
+
+	stream <<
+		"\t\t<table>\n"
+		"\t\t\t<tr>\n"
+		"\t\t\t\t<th>Note</th>\n"
+		"\t\t\t\t<th>HitCount</th>\n"
+		"\t\t\t\t<th>Total, ms</th>\n"
+		"\t\t\t\t<th>Own, ms</th>\n"
+		"\t\t\t\t<th>AvgOwn, ms</th>\n"
+		"\t\t\t</tr>\n";
 	trie.Print(stream, 0);
+	stream <<
+		"\t\t</table>\n";
 }
 
 END_INANITY_PROFILE
