@@ -35,6 +35,7 @@
 
 #define PROFILE_POINT()
 #define PROFILE_SCOPE()
+#define PROFILE_FUNCTION()
 
 #endif // ___INANITY_PROFILING
 

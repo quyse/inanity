@@ -5,6 +5,7 @@
 
 #ifdef ___INANITY_PROFILING
 
+#include "../CriticalSection.hpp"
 #include <vector>
 #include <iostream>
 
@@ -80,7 +81,7 @@ public:
 	};
 
 private:
-
+	CriticalSection cs;
 	std::vector<Chunk*> threadChunks;
 
 public:

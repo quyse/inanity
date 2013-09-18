@@ -3,6 +3,7 @@
 #ifdef ___INANITY_PROFILING
 
 #include "../Time.hpp"
+#include "../CriticalCode.hpp"
 #include <cstring>
 
 BEGIN_INANITY_PROFILE
@@ -40,7 +41,10 @@ void Profiler::FlushChunk(Chunk*& chunk, Record*& records, Record*& recordsEnd)
 	if(chunk)
 		chunk->nextChunk = newChunk;
 	else
+	{
+		CriticalCode cc(cs);
 		threadChunks.push_back(newChunk);
+	}
 
 	// allocate memory for new chunk
 	newChunk->recordsBegin = new Record[chunkRecordsCount];
