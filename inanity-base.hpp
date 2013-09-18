@@ -33,6 +33,7 @@
 #include "PartFile.hpp"
 #include "Profiling.hpp"
 #include "ResourceManager.ipp"
+#include "SafeObject.hpp"
 #include "Semaphore.hpp"
 #include "StreamReader.hpp"
 #include "StreamWriter.hpp"

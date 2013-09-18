@@ -28,7 +28,7 @@ var libraries = {
 	'libinanity-base': {
 		objects: [
 		// совсем общее
-		'Object', 'ManagedHeap', 'Strings', 'StringTraveler', 'Exception',
+		'Object', 'SafeObject', 'ManagedHeap', 'Strings', 'StringTraveler', 'Exception',
 		// время
 		'Time', 'Ticker',
 		// синхронизация и потоки выполнения
