@@ -10,6 +10,7 @@
 // для strerror
 #include <cstring>
 #endif // ___INANITY_LINUX
+#include <sstream>
 
 BEGIN_INANITY
 
@@ -42,6 +43,13 @@ void Exception::PrintStack(std::ostream& stream) const
 		stream << "    ---- BECAUSE OF ----\n";
 		innerException->PrintStack(stream);
 	}
+}
+
+String Exception::GetStackText() const
+{
+	std::ostringstream stream;
+	PrintStack(stream);
+	return stream.str();
 }
 
 ptr<Exception> Exception::SystemError()
