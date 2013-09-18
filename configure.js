@@ -31,8 +31,6 @@ var libraries = {
 		'Object', 'ManagedHeap', 'Strings', 'StringTraveler', 'Exception',
 		// время
 		'Time', 'Ticker',
-		// профилирование
-		'Profiling',
 		// синхронизация и потоки выполнения
 		'Thread', 'CriticalSection', 'CriticalCode', 'Semaphore',
 		// общее: файлы и потоки
@@ -43,6 +41,12 @@ var libraries = {
 		'FileSystem', 'FolderFileSystem', 'FolderFile', 'Handle', 'DiskInputStream', 'DiskOutputStream',
 		'BlobFileSystem', 'BlobFileSystemBuilder', 'CompositeFileSystem', 'TempFileSystem',
 		'FilterFileSystem', 'BufferedFileSystem'
+		]
+	},
+	// ******* profiling
+	'libinanity-profile': {
+		objects: [
+		'profile.Profiler', 'profile.Reporter', 'profile.global'
 		]
 	},
 	// ******* сжатие
