@@ -2,7 +2,6 @@
 #define ___INANITY_SCRIPT_LUA_THUNKS_HPP___
 
 #include "lua.hpp"
-#include "lualib.hpp"
 
 BEGIN_INANITY_LUA
 

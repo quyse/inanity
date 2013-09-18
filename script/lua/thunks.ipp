@@ -3,6 +3,7 @@
 
 #include "thunks.hpp"
 #include "values.ipp"
+#include "lualib.hpp"
 #include "../../meta/Tuple.hpp"
 #include "../../meta/Callable.ipp"
 #include "../../Exception.hpp"

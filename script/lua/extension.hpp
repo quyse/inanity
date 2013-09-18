@@ -2,8 +2,8 @@
 #define ___INANITY_SCRIPT_LUA_EXTENSION_HPP___
 
 #include "lua.hpp"
-#include "thunks.hpp"
 #include "../../meta/extension_decl.hpp"
+#include "lualib.hpp"
 
 BEGIN_INANITY_LUA
 
