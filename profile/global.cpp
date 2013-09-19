@@ -22,7 +22,7 @@ THREAD_LOCAL Profiler::Chunk* g_chunk = 0;
 
 Profiler g_profiler;
 
-void Issue(RecordType type, const char* note)
+void Issue(RecordType type, const void* note)
 {
 	if(g_enable)
 	{
@@ -41,7 +41,13 @@ void Start()
 	if(!g_enable)
 	{
 		g_enable = true;
-		Issue(recordTypeStart, "Manual start");
+		// Issue a record only if there are some records before.
+		// Otherwise there is no need in this record.
+		// There is one more reason to skip adding first record.
+		// Profiler::FlushChunk would add stop-resume records
+		// before that "manual start" record, and this is strange.
+		if(g_records)
+			Issue(recordTypeStart, "Manual start");
 	}
 }
 

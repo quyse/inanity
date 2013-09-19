@@ -29,18 +29,31 @@ void Reporter::RawReport()
 		for(Profiler::RecordIterator j = Profiler::RecordIterator(*i); j; ++j)
 		{
 			Profiler::Record* record = *j;
-			stream << "  ";
-#define T(t) case recordType##t: stream << #t; break
+			stream << '\t';
 			switch(record->type)
 			{
-			T(Start);
-			T(Stop);
-			T(Point);
-			T(ScopeEnter);
-			T(ScopeLeave);
+			case recordTypeStart:
+				stream << "Start\t" << (const char*)record->note;
+				break;
+			case recordTypeStop:
+				stream << "Stop\t" << (const char*)record->note;
+				break;
+			case recordTypePoint:
+			case recordTypeScopeEnter:
+			case recordTypeScopeLeave:
+				switch(record->type)
+				{
+				case recordTypePoint: stream << "Point\t"; break;
+				case recordTypeScopeEnter: stream << "ScopeEnter\t"; break;
+				case recordTypeScopeLeave: stream << "ScopeLeave\t"; break;
+				};
+				{
+					const RecordNote* note = (const RecordNote*)record->note;
+					stream << note->file << ':' << note->line << '\t' << note->function << '\t' << note->description;
+				}
+				break;
 			}
-#undef T
-			stream << ' ' << record->time << ' ' << record->note << '\n';
+			stream << '\n';
 		}
 	}
 }
@@ -71,28 +84,28 @@ void Reporter::Report()
 
 void Reporter::ReportPoints()
 {
-	std::vector<const char*> points;
+	std::vector<const RecordNote*> points;
 	for(Profiler::ThreadChunkIterator i = threadChunkIterator; i; ++i)
 	{
 		for(Profiler::RecordIterator j = Profiler::RecordIterator(*i); j; ++j)
 		{
 			Profiler::Record* record = *j;
 			if(record->type == recordTypePoint)
-				points.push_back(record->note);
+				points.push_back((const RecordNote*)record->note);
 		}
 	}
 
 	std::sort(points.begin(), points.end());
 
-	std::vector<std::pair<int, const char*> > pointsRating;
+	std::vector<std::pair<int, const RecordNote*> > pointsRating;
 	for(size_t i = 0; i < points.size(); )
 	{
 		size_t j;
 		for(j = i + 1; j < points.size() && points[i] == points[j]; ++j);
-		pointsRating.push_back(std::pair<int, const char*>(j - i, points[i]));
+		pointsRating.push_back(std::pair<int, const RecordNote*>(j - i, points[i]));
 		i = j;
 	}
-	std::sort(pointsRating.begin(), pointsRating.end(), std::greater<std::pair<int, const char*> >());
+	std::sort(pointsRating.begin(), pointsRating.end(), std::greater<std::pair<int, const RecordNote*> >());
 
 	// printing
 	stream <<
@@ -100,14 +113,20 @@ void Reporter::ReportPoints()
 		"\t\t\t<tr>\n"
 		"\t\t\t\t<th>Rating</th>\n"
 		"\t\t\t\t<th>Hits</th>\n"
-		"\t\t\t\t<th>Note</th>\n"
+		"\t\t\t\t<th>File</th>\n"
+		"\t\t\t\t<th>Line</th>\n"
+		"\t\t\t\t<th>Function</th>\n"
+		"\t\t\t\t<th>Description</th>\n"
 		"\t\t\t</tr>\n";
 	for(size_t i = 0; i < pointsRating.size(); ++i)
 		stream <<
 			"\t\t\t<tr>\n"
 			"\t\t\t\t<td>" << (i + 1) << "</td>\n"
 			"\t\t\t\t<td>" << pointsRating[i].first << "</td>\n"
-			"\t\t\t\t<td>" << pointsRating[i].second << "</td>\n"
+			"\t\t\t\t<td>" << pointsRating[i].second->file << "</td>\n"
+			"\t\t\t\t<td>" << pointsRating[i].second->line << "</td>\n"
+			"\t\t\t\t<td>" << pointsRating[i].second->function << "</td>\n"
+			"\t\t\t\t<td>" << pointsRating[i].second->description << "</td>\n"
 			"\t\t\t</tr>\n";
 	stream <<
 		"\t\t</table>\n";
@@ -127,8 +146,8 @@ void Reporter::ReportScopes()
 		/// Индекс первого дочернего состояния.
 		int firstChild;
 
-		/// Строка, соответствующая последнему scope в стеке.
-		const char* position;
+		/// Record note of last scope in stack.
+		const RecordNote* note;
 		/// Общее время вызова.
 		long long totalTime;
 		/// Собственное время.
@@ -136,7 +155,7 @@ void Reporter::ReportScopes()
 		/// Количество вызовов.
 		int hitCount;
 
-		State() : parent(-1), suffix(-1), nextSibling(-1), firstChild(-1), position(0), totalTime(0), ownTime(0), hitCount(0) {}
+		State() : parent(-1), suffix(-1), nextSibling(-1), firstChild(-1), note(0), totalTime(0), ownTime(0), hitCount(0) {}
 	};
 
 	/// Дерево состояний.
@@ -159,18 +178,18 @@ void Reporter::ReportScopes()
 			averageOwnTimeSorter.trie = this;
 		}
 
-		int Go(int u, const char* position)
+		int Go(int u, const RecordNote* note)
 		{
 			for(int i = states[u].firstChild; i >= 0; i = states[i].nextSibling)
-				if(states[i].position == position)
+				if(states[i].note == note)
 					return i;
 			int z = (int)states.size();
 			states.push_back(State());
 			states[z].parent = u;
 			states[z].nextSibling = states[u].firstChild;
 			states[u].firstChild = z;
-			states[z].suffix = u > 0 ? Go(GetSuffix(u), position) : 0;
-			states[z].position = position;
+			states[z].suffix = u > 0 ? Go(GetSuffix(u), note) : 0;
+			states[z].note = note;
 			return z;
 		}
 
@@ -179,7 +198,7 @@ void Reporter::ReportScopes()
 		int GetSuffix(int u)
 		{
 			if(states[u].suffix < 0 && u > 0)
-				states[u].suffix = states[u].parent > 0 ? Go(GetSuffix(states[u].parent), states[u].position) : 0;
+				states[u].suffix = states[u].parent > 0 ? Go(GetSuffix(states[u].parent), states[u].note) : 0;
 			return states[u].suffix;
 		}
 
@@ -224,7 +243,10 @@ void Reporter::ReportScopes()
 				for(int i = 0; i < level; ++i)
 					stream << "*&nbsp;&nbsp;&nbsp;";
 				stream <<
-					states[u].position << "</td>\n"
+					states[u].note->description << "</td>\n"
+					"\t\t\t\t<td>" << states[u].note->file << "</td>\n"
+					"\t\t\t\t<td>" << states[u].note->line << "</td>\n"
+					"\t\t\t\t<td>" << states[u].note->function << "</td>\n"
 					"\t\t\t\t<td>" << states[u].hitCount << "</td>\n"
 					"\t\t\t\t<td>" << Ticks2Time(states[u].totalTime) << "</td>\n"
 					"\t\t\t\t<td>" << Ticks2Time(states[u].ownTime) << "</td>\n"
@@ -258,7 +280,7 @@ void Reporter::ReportScopes()
 				// запомнить, когда начался scope
 				currentStackEnterTimes.push(record->time);
 				// добавить уровень в стеке
-				currentStackState = trie.Go(currentStackState, record->note);
+				currentStackState = trie.Go(currentStackState, (const RecordNote*)record->note);
 				break;
 			case recordTypeScopeLeave:
 				{
@@ -290,7 +312,10 @@ void Reporter::ReportScopes()
 	stream <<
 		"\t\t<table>\n"
 		"\t\t\t<tr>\n"
-		"\t\t\t\t<th>Note</th>\n"
+		"\t\t\t\t<th>Name</th>\n"
+		"\t\t\t\t<th>File</th>\n"
+		"\t\t\t\t<th>Line</th>\n"
+		"\t\t\t\t<th>Function</th>\n"
 		"\t\t\t\t<th>HitCount</th>\n"
 		"\t\t\t\t<th>Total, ms</th>\n"
 		"\t\t\t\t<th>Own, ms</th>\n"

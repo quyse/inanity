@@ -10,10 +10,10 @@ BEGIN_INANITY_PROFILE
 class Scope
 {
 private:
-	const char* note;
+	const void* note;
 
 public:
-	inline Scope(const char* note) : note(note)
+	inline Scope(const void* note) : note(note)
 	{
 		Issue(recordTypeScopeEnter, note);
 	}

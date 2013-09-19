@@ -1,7 +1,7 @@
 #ifndef ___INANITY_PROFILE_PROFILER_HPP___
 #define ___INANITY_PROFILE_PROFILER_HPP___
 
-#include "RecordType.hpp"
+#include "record.hpp"
 
 #ifdef ___INANITY_PROFILING
 
@@ -23,7 +23,8 @@ public:
 	{
 		long long time;
 		RecordType type;
-		const char* note;
+		/// Additional data.
+		const void* note;
 	};
 
 	struct Chunk

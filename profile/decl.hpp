@@ -17,17 +17,16 @@
 
 /// Profile some point in code.
 /** Counts a number of executions of this point. */
-#define PROFILE_POINT() \
-	Inanity::Profile::Issue(Inanity::Profile::recordTypePoint, PROFILE_CODE_POSITION)
+#define PROFILE_POINT(name) \
+	{ \
+		static const Inanity::Profile::RecordNote note = { __FILE__, __LINE__, __FUNCTION__, name }; \
+		Inanity::Profile::Issue(Inanity::Profile::recordTypePoint, &note); \
+	}
 
 /// Profile scope.
-#define PROFILE_SCOPE() \
-	Inanity::Profile::Scope profileScope(PROFILE_CODE_POSITION)
-
-/// Profile function scope.
-/** Uses name of the function instead of code position. */
-#define PROFILE_FUNCTION() \
-	Inanity::Profile::Scope profileFunctionScope(__FUNCTION__)
+#define PROFILE_SCOPE(name) \
+	static const Inanity::Profile::RecordNote profileScopeNote = { __FILE__, __LINE__, __FUNCTION__, name }; \
+	Inanity::Profile::Scope profileScope(&profileScopeNote)
 
 #else // ___INANITY_PROFILING
 
@@ -35,7 +34,6 @@
 
 #define PROFILE_POINT()
 #define PROFILE_SCOPE()
-#define PROFILE_FUNCTION()
 
 #endif // ___INANITY_PROFILING
 
