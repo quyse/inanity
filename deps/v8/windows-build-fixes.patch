@@ -1,8 +1,8 @@
 diff --git a/build/standalone.gypi b/build/standalone.gypi
-index 5c017d5..81e8f3c 100644
+index 5c017d5..8bc1dc0 100644
 --- a/build/standalone.gypi
 +++ b/build/standalone.gypi
-@@ -177,7 +177,7 @@
+@@ -177,7 +177,6 @@
          'conditions': [
            ['component=="static_library"', {
              'defines': [
@@ -10,7 +10,7 @@ index 5c017d5..81e8f3c 100644
              ],
            }],
          ],
-@@ -200,7 +200,7 @@
+@@ -200,7 +199,7 @@
                ['component=="shared_library"', {
                  'ExceptionHandling': '1',  # /EHsc
                }, {
@@ -20,7 +20,7 @@ index 5c017d5..81e8f3c 100644
              ],
            },
 diff --git a/build/toolchain.gypi b/build/toolchain.gypi
-index c1066eb..79c35c7 100644
+index c1066eb..d74dee4 100644
 --- a/build/toolchain.gypi
 +++ b/build/toolchain.gypi
 @@ -460,7 +460,7 @@
@@ -50,3 +50,16 @@ index c1066eb..79c35c7 100644
                    }],
                    ['v8_target_arch=="x64"', {
                      # TODO(2207): remove this option once the bug is fixed.
+@@ -503,10 +503,10 @@
+           'VCLinkerTool': {
+             'conditions': [
+               ['v8_optimized_debug==0', {
+-                'LinkIncremental': '2',
++                'LinkIncremental': '1',
+               }],
+               ['v8_optimized_debug==1', {
+-                'LinkIncremental': '2',
++                'LinkIncremental': '1',
+               }],
+               ['v8_optimized_debug==2', {
+                 'LinkIncremental': '1',
