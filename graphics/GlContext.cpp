@@ -550,13 +550,8 @@ void GlContext::SetBufferData(GLenum target, GLuint bufferName, const void* data
 	// Сказано, что такая привязка не снимает буферы, привязанные
 	// через glBindBufferBase. Верим, но надо проверить.
 	glBindBuffer(target, bufferName);
-	void* bufferData = glMapBuffer(target, GL_WRITE_ONLY);
-	GlSystem::CheckErrors("Can't map OpenGL buffer");
-
-	memcpy(bufferData, data, size);
-
-	glUnmapBuffer(target);
-	GlSystem::CheckErrors("Can't unmap OpenGL buffer");
+	glBufferData(target, size, data, GL_DYNAMIC_DRAW);
+	GlSystem::CheckErrors("Can't upload data into OpenGL buffer");
 }
 
 void GlContext::SetUniformBufferData(UniformBuffer* abstractUniformBuffer, const void* data, int size)
