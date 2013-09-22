@@ -12,6 +12,7 @@ windows-build-fixes.patch (for Windows):
 
 * enable exceptions
 * use DLL runtime in debug
+* disable incremental linking
 
 3. Use instructions provided by Google: https://code.google.com/p/v8/wiki/BuildingWithGYP to build v8 libraries.
 On Windows you should run something like that (in compiler's command line environment):
