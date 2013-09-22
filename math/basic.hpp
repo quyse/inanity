@@ -8,6 +8,12 @@
 BEGIN_INANITY_MATH
 
 template <typename T>
+inline T sqr(T t)
+{
+	return t * t;
+}
+
+template <typename T>
 inline T clamp(T t, T a, T b)
 {
 	return t < a ? a : t > b ? b : t;
