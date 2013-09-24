@@ -32,23 +32,26 @@ GlContext::GlContext(ptr<GlDevice> device) :
 	glFrontFace(GL_CW);
 }
 
-void GlContext::Update()
+void GlContext::UpdateFramebuffer()
 {
 	// framebuffer
+	GlFrameBuffer* targetFrameBuffer = fast_cast<GlFrameBuffer*>(&*targetState.frameBuffer);
+	GLuint targetFrameBufferName = targetFrameBuffer->GetName();
+	// check if need to bind
+	if(forceReset || targetState.frameBuffer != boundState.frameBuffer || boundFrameBuffer != targetFrameBufferName || targetFrameBuffer->IsDirty())
 	{
-		GlFrameBuffer* targetFrameBuffer = fast_cast<GlFrameBuffer*>(&*targetState.frameBuffer);
-		GLuint targetFrameBufferName = targetFrameBuffer->GetName();
-		// check if need to bind
-		if(forceReset || targetState.frameBuffer != boundState.frameBuffer || boundFrameBuffer != targetFrameBufferName || targetFrameBuffer->IsDirty())
-		{
-			// bind framebuffer
-			targetFrameBuffer->Apply();
+		// bind framebuffer
+		targetFrameBuffer->Apply();
 
-			// remember new state
-			boundState.frameBuffer = targetState.frameBuffer;
-			boundFrameBuffer = targetFrameBufferName;
-		}
+		// remember new state
+		boundState.frameBuffer = targetState.frameBuffer;
+		boundFrameBuffer = targetFrameBufferName;
 	}
+}
+
+void GlContext::Update()
+{
+	UpdateFramebuffer();
 
 	// текстуры
 	for(int i = 0; i < ContextState::textureSlotsCount; ++i)
@@ -347,12 +350,14 @@ ptr<GlRenderBuffer> GlContext::GetDummyRenderBuffer(int width, int height)
 
 void GlContext::ClearColor(int colorBufferIndex, const float* color)
 {
+	UpdateFramebuffer();
 	glClearBufferfv(GL_COLOR, (GLint)colorBufferIndex, color);
 	GlSystem::CheckErrors("Can't clear color buffer");
 }
 
 void GlContext::ClearDepth(float depth)
 {
+	UpdateFramebuffer();
 	// nesessary for depth clear
 	glEnable(GL_DEPTH_TEST);
 	boundState.depthTestFunc = ContextState::depthTestFuncAlways;
@@ -366,6 +371,7 @@ void GlContext::ClearDepth(float depth)
 
 void GlContext::ClearStencil(unsigned stencil)
 {
+	UpdateFramebuffer();
 	GLint s = stencil;
 	glClearBufferiv(GL_STENCIL, 0, &s);
 	GlSystem::CheckErrors("Can't clear stencil");
@@ -373,6 +379,7 @@ void GlContext::ClearStencil(unsigned stencil)
 
 void GlContext::ClearDepthStencil(float depth, unsigned stencil)
 {
+	UpdateFramebuffer();
 	glClearBufferfi(GL_DEPTH_STENCIL, 0, depth, stencil);
 	GlSystem::CheckErrors("Can't clear depth and stencil");
 }

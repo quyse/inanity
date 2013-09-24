@@ -29,6 +29,8 @@ private:
 	/// Текущая программа.
 	ptr<GlInternalProgram> boundProgram;
 
+	/// Perform framebuffer update.
+	void UpdateFramebuffer();
 	/// Выполнить обновление в API всех "грязных" состояний.
 	void Update();
 
