@@ -132,6 +132,7 @@ var libraries = {
 	'libinanity-gl': {
 		objects: [
 			'graphics.GlSystem', 'graphics.GlDevice', 'graphics.GlContext',
+			'graphics.GlFrameBuffer',
 			'graphics.GlInternalTexture', 'graphics.GlInternalProgram', 'graphics.GlInternalProgramCache',
 			'graphics.GlRenderBuffer', 'graphics.GlDepthStencilBuffer', 'graphics.GlTexture', 'graphics.GlUniformBuffer',
 			'graphics.GlVertexBuffer', 'graphics.GlIndexBuffer', 'graphics.GlAttributeBinding',

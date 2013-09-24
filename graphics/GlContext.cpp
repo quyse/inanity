@@ -3,6 +3,7 @@
 #include "GlSystem.hpp"
 #include "GlInternalProgramCache.hpp"
 #include "GlInternalProgram.hpp"
+#include "GlFrameBuffer.hpp"
 #include "GlRenderBuffer.hpp"
 #include "GlDepthStencilBuffer.hpp"
 #include "GlTexture.hpp"
@@ -21,16 +22,9 @@
 
 BEGIN_INANITY_GRAPHICS
 
-/*
-Примечание к реализации. GlContext использует boundState.renderBuffers и boundState.depthStencilBuffer
-для хранения только нестандартных таргетов. Соответственно, эта информация актуальна только в то время,
-когда к контексту привязан targetFramebuffer. Когда к контексту привязан фреймбуфер по умолчанию (0),
-всё равно всё ясно, что привязано.
-*/
-
 GlContext::GlContext(ptr<GlDevice> device) :
 	device(device),
-	targetFramebuffer(0), boundFramebuffer(0), boundAttributesCount(0)
+	boundFrameBuffer(0), boundAttributesCount(0)
 {
 	programCache = NEW(GlInternalProgramCache(device));
 
@@ -38,97 +32,23 @@ GlContext::GlContext(ptr<GlDevice> device) :
 	glFrontFace(GL_CW);
 }
 
-GlContext::~GlContext()
-{
-	if(targetFramebuffer)
-		glDeleteFramebuffers(1, &targetFramebuffer);
-}
-
-void GlContext::BindTargetsFramebuffer()
-{
-	if(!targetFramebuffer)
-	{
-		glGenFramebuffers(1, &targetFramebuffer);
-		GlSystem::CheckErrors("Can't gen targets framebuffer");
-	}
-
-	if(forceReset || targetFramebuffer != boundFramebuffer)
-	{
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetFramebuffer);
-		GlSystem::CheckErrors("Can't bind targets framebuffer");
-		boundFramebuffer = targetFramebuffer;
-	}
-}
-
-void GlContext::BindDefaultFramebuffer()
-{
-	if(forceReset || boundFramebuffer != 0)
-	{
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-		GlSystem::CheckErrors("Can't bind service framebuffer");
-		boundFramebuffer = 0;
-	}
-}
-
 void GlContext::Update()
 {
-	// проверить, если первый рендербуфер - по умолчанию (а непервым он быть не может),
-	// то он должен быть единственным, и depth-stencil буфера не может быть
-	if(targetState.renderBuffers[0] && fast_cast<GlRenderBuffer*>(&*targetState.renderBuffers[0])->GetName() == 0)
+	// framebuffer
 	{
-		if(targetState.depthStencilBuffer)
-			THROW("Default renderbuffer can be bound only without depth-stencil buffer");
-		for(int i = 1; i < ContextState::renderTargetSlotsCount; ++i)
-			if(targetState.renderBuffers[i])
-				THROW("Default renderbuffer can be bound only without other buffers");
-
-		// привязать фреймбуфер по умолчанию
-		BindDefaultFramebuffer();
-
-		// больше ничего привязывать не надо
-	}
-	// иначе все рендербуферы - не по умолчанию
-	// определяем, что поменялось, и меняем
-	else
-	{
-		// привязать целевой фреймбуфер
-		BindTargetsFramebuffer();
-
-		// привязать изменившиеся рендербуферы
-		for(int i = 0; i < ContextState::renderTargetSlotsCount; ++i)
-			if(forceReset || targetState.renderBuffers[i] != boundState.renderBuffers[i])
-			{
-				RenderBuffer* abstractRenderBuffer = targetState.renderBuffers[i];
-				if(abstractRenderBuffer)
-				{
-					GLuint name = fast_cast<GlRenderBuffer*>(abstractRenderBuffer)->GetName();
-					if(name == 0)
-						THROW("Default renderbuffer can't be bound with other buffers");
-					glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, name, 0);
-				}
-				else if(i == 0)
-					THROW("Zero color attachment can't be not set");
-				else
-					glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, 0, 0);
-
-				boundState.renderBuffers[i] = targetState.renderBuffers[i];
-			}
-		GlSystem::CheckErrors("qqq1_1");
-
-		// привязать изменившийся depth-stencil буфер
-		if(forceReset || targetState.depthStencilBuffer != boundState.depthStencilBuffer)
+		GlFrameBuffer* targetFrameBuffer = fast_cast<GlFrameBuffer*>(&*targetState.frameBuffer);
+		GLuint targetFrameBufferName = targetFrameBuffer->GetName();
+		// check if need to bind
+		if(forceReset || targetState.frameBuffer != boundState.frameBuffer || boundFrameBuffer != targetFrameBufferName || targetFrameBuffer->IsDirty())
 		{
-			DepthStencilBuffer* abstractDepthStencilBuffer = targetState.depthStencilBuffer;
-			glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-				abstractDepthStencilBuffer ? fast_cast<GlDepthStencilBuffer*>(abstractDepthStencilBuffer)->GetName() : 0, 0);
+			// bind framebuffer
+			targetFrameBuffer->Apply();
 
-			boundState.depthStencilBuffer = targetState.depthStencilBuffer;
+			// remember new state
+			boundState.frameBuffer = targetState.frameBuffer;
+			boundFrameBuffer = targetFrameBufferName;
 		}
-
-		GlSystem::CheckErrors("qqq2");
 	}
-
-	GlSystem::CheckErrors("Can't bind render buffers and depth stencil buffers");
 
 	// текстуры
 	for(int i = 0; i < ContextState::textureSlotsCount; ++i)
@@ -425,117 +345,34 @@ ptr<GlRenderBuffer> GlContext::GetDummyRenderBuffer(int width, int height)
 	}
 }
 
-void GlContext::ClearRenderBuffer(RenderBuffer* renderBuffer, const float* color)
+void GlContext::ClearColor(int colorBufferIndex, const float* color)
 {
-	GLuint name = fast_cast<GlRenderBuffer*>(renderBuffer)->GetName();
-	if(name)
-	{
-		BindTargetsFramebuffer();
-		if(renderBuffer != (RenderBuffer*)boundState.renderBuffers[0])
-		{
-			glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, name, 0);
-			boundState.renderBuffers[0] = renderBuffer;
-		}
-	}
-	else
-	{
-		BindDefaultFramebuffer();
-	}
-
-	glClearBufferfv(GL_COLOR, 0, color);
-	GlSystem::CheckErrors("Can't clear render buffer");
+	glClearBufferfv(GL_COLOR, (GLint)colorBufferIndex, color);
+	GlSystem::CheckErrors("Can't clear color buffer");
 }
 
-void GlContext::ClearDepthStencilBuffer(DepthStencilBuffer* abstractDepthStencilBuffer, float depth)
+void GlContext::ClearDepth(float depth)
 {
-	GlDepthStencilBuffer* depthStencilBuffer = fast_cast<GlDepthStencilBuffer*>(abstractDepthStencilBuffer);
-	GLuint name = depthStencilBuffer->GetName();
-
-	if(name)
-	{
-		BindTargetsFramebuffer();
-		GlRenderBuffer* dummyRenderBuffer = GetDummyRenderBuffer(depthStencilBuffer->GetWidth(), depthStencilBuffer->GetHeight());
-		if(dummyRenderBuffer != (RenderBuffer*)boundState.renderBuffers[0])
-		{
-			glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, dummyRenderBuffer->GetName(), 0);
-			boundState.renderBuffers[0] = dummyRenderBuffer;
-		}
-		if(depthStencilBuffer != (DepthStencilBuffer*)boundState.depthStencilBuffer)
-		{
-			glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, name, 0);
-			boundState.depthStencilBuffer = depthStencilBuffer;
-		}
-	}
-	else
-	{
-		BindDefaultFramebuffer();
-	}
-
-	// необходимо для очистки
+	// nesessary for depth clear
 	glEnable(GL_DEPTH_TEST);
 	boundState.depthTestFunc = ContextState::depthTestFuncAlways;
 	glDepthFunc(GL_ALWAYS);
 	boundState.depthWrite = true;
 	glDepthMask(GL_TRUE);
+
 	glClearBufferfv(GL_DEPTH, 0, &depth);
 	GlSystem::CheckErrors("Can't clear depth");
 }
 
-void GlContext::ClearDepthStencilBuffer(DepthStencilBuffer* abstractDepthStencilBuffer, unsigned stencil)
+void GlContext::ClearStencil(unsigned stencil)
 {
-	GlDepthStencilBuffer* depthStencilBuffer = fast_cast<GlDepthStencilBuffer*>(abstractDepthStencilBuffer);
-	GLuint name = depthStencilBuffer->GetName();
-
-	if(name)
-	{
-		BindTargetsFramebuffer();
-		GlRenderBuffer* dummyRenderBuffer = GetDummyRenderBuffer(depthStencilBuffer->GetWidth(), depthStencilBuffer->GetHeight());
-		if(dummyRenderBuffer != (RenderBuffer*)boundState.renderBuffers[0])
-		{
-			glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, dummyRenderBuffer->GetName(), 0);
-			boundState.renderBuffers[0] = dummyRenderBuffer;
-		}
-		if(depthStencilBuffer != (DepthStencilBuffer*)boundState.depthStencilBuffer)
-		{
-			glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, name, 0);
-			boundState.depthStencilBuffer = depthStencilBuffer;
-		}
-	}
-	else
-	{
-		BindDefaultFramebuffer();
-	}
-
 	GLint s = stencil;
 	glClearBufferiv(GL_STENCIL, 0, &s);
 	GlSystem::CheckErrors("Can't clear stencil");
 }
 
-void GlContext::ClearDepthStencilBuffer(DepthStencilBuffer* abstractDepthStencilBuffer, float depth, unsigned stencil)
+void GlContext::ClearDepthStencil(float depth, unsigned stencil)
 {
-	GlDepthStencilBuffer* depthStencilBuffer = fast_cast<GlDepthStencilBuffer*>(abstractDepthStencilBuffer);
-	GLuint name = depthStencilBuffer->GetName();
-
-	if(name)
-	{
-		BindTargetsFramebuffer();
-		GlRenderBuffer* dummyRenderBuffer = GetDummyRenderBuffer(depthStencilBuffer->GetWidth(), depthStencilBuffer->GetHeight());
-		if(dummyRenderBuffer != (RenderBuffer*)boundState.renderBuffers[0])
-		{
-			glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, dummyRenderBuffer->GetName(), 0);
-			boundState.renderBuffers[0] = dummyRenderBuffer;
-		}
-		if(depthStencilBuffer != (DepthStencilBuffer*)boundState.depthStencilBuffer)
-		{
-			glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, name, 0);
-			boundState.depthStencilBuffer = depthStencilBuffer;
-		}
-	}
-	else
-	{
-		BindDefaultFramebuffer();
-	}
-
 	glClearBufferfi(GL_DEPTH_STENCIL, 0, depth, stencil);
 	GlSystem::CheckErrors("Can't clear depth and stencil");
 }

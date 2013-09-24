@@ -1,5 +1,6 @@
 #include "GlDevice.hpp"
 #include "GlSystem.hpp"
+#include "GlFrameBuffer.hpp"
 #include "GlRenderBuffer.hpp"
 #include "GlDepthStencilBuffer.hpp"
 #include "GlContext.hpp"
@@ -316,7 +317,7 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 		GlSystem::InitGLEW();
 		GlSystem::ClearErrors();
 
-		return NEW(GlxPresenter(this, NEW(GlRenderBuffer(0, 0)), output, glxWindow));
+		return NEW(GlxPresenter(this, NEW(GlFrameBuffer(this, 0)), output, glxWindow));
 #endif
 
 	}
@@ -324,6 +325,14 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 	{
 		THROW_SECONDARY("Can't create presenter for GL device", exception);
 	}
+}
+
+ptr<FrameBuffer> GlDevice::CreateFrameBuffer()
+{
+	GLuint name;
+	glGenFramebuffers(1, &name);
+	GlSystem::CheckErrors("Can't create OpenGL framebuffer");
+	return NEW(GlFrameBuffer(this, name));
 }
 
 ptr<RenderBuffer> GlDevice::CreateRenderBuffer(int width, int height, PixelFormat pixelFormat)

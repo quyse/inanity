@@ -1,6 +1,6 @@
 #include "GlxPresenter.hpp"
 #include "GlDevice.hpp"
-#include "GlRenderBuffer.hpp"
+#include "GlFrameBuffer.hpp"
 #include "X11MonitorMode.hpp"
 #include "X11Output.hpp"
 #include "../platform/X11Window.hpp"
@@ -8,8 +8,8 @@
 
 BEGIN_INANITY_GRAPHICS
 
-GlxPresenter::GlxPresenter(ptr<GlDevice> device, ptr<GlRenderBuffer> backBuffer, ptr<X11Output> output, GLXWindow glxWindow)
-: device(device), backBuffer(backBuffer), output(output), glxWindow(glxWindow)
+GlxPresenter::GlxPresenter(ptr<GlDevice> device, ptr<GlFrameBuffer> frameBuffer, ptr<X11Output> output, GLXWindow glxWindow)
+: device(device), frameBuffer(frameBuffer), output(output), glxWindow(glxWindow)
 {
 	output->SetPresenter(this);
 }
@@ -24,9 +24,9 @@ ptr<Device> GlxPresenter::GetDevice()
 	return device;
 }
 
-ptr<RenderBuffer> GlxPresenter::GetBackBuffer()
+ptr<FrameBuffer> GlxPresenter::GetFrameBuffer()
 {
-	return backBuffer;
+	return frameBuffer;
 }
 
 void GlxPresenter::SetMode(ptr<MonitorMode> abstractMode)

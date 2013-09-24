@@ -10,6 +10,7 @@
 #include "graphics/GlContext.hpp"
 #include "graphics/GlDepthStencilBuffer.hpp"
 #include "graphics/GlDevice.hpp"
+#include "graphics/GlFrameBuffer.hpp"
 #include "graphics/GlIndexBuffer.hpp"
 #include "graphics/GlInternalProgram.hpp"
 #include "graphics/GlInternalProgramCache.hpp"
