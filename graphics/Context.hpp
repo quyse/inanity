@@ -5,15 +5,7 @@
 
 BEGIN_INANITY_GRAPHICS
 
-/// Абстрактный класс графического контекста.
-/** Контекст выполняет собственно рисование.
-Передаёт состояние контекста в графическое API,
-обновляя только то, что изменилось, и только тогда,
-когда нужно.
-Контекст удерживает ссылки как на объекты, уже
-установленные в конвейер, так и на объекты, которым
-это предстоит.
-*/
+/// Abstract graphics context class.
 class Context : public Object
 {
 protected:
@@ -29,16 +21,16 @@ protected:
 	Context();
 
 public:
-	//******* Методы очистки рендербуферов и depth-stencil буферов.
-	/* Непосредственные методы - тут же выполняют вызов к API. */
-	/// Очистить рендербуфер.
-	virtual void ClearRenderBuffer(RenderBuffer* renderBuffer, const float* color) = 0;
-	/// Очистить глубину в depth-stencil буфере.
-	virtual void ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, float depth) = 0;
-	/// Очистить трафарет в depth-stencil буфере.
-	virtual void ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, unsigned stencil) = 0;
-	/// Очистить глубину и трафарет в depth-stencil буфере.
-	virtual void ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, float depth, unsigned stencil) = 0;
+	//******* Methods to clean color/depth/stencil buffers of bound framebuffer.
+	/* These are immediate methods. */
+	/// Clear color buffer.
+	virtual void ClearColor(int colorBufferIndex, const float* color) = 0;
+	/// Clear depth in depth-stencil buffer.
+	virtual void ClearDepth(float depth) = 0;
+	/// Clear stencil in depth-stencil buffer.
+	virtual void ClearStencil(unsigned stencil) = 0;
+	/// Clear depth & stencil in depth-stencil buffer.
+	virtual void ClearDepthStencil(float depth, unsigned stencil) = 0;
 
 	/// Получить требуемое состояние контекста.
 	/** Его можно менять, чтобы задать то, что требуется. */

@@ -1,4 +1,5 @@
 #include "ContextState.hpp"
+#include "FrameBuffer.hpp"
 #include "RenderBuffer.hpp"
 #include "DepthStencilBuffer.hpp"
 #include "Texture.hpp"
@@ -24,13 +25,6 @@ void ContextState::ResetVertexBuffers()
 {
 	for(int i = 0; i < vertexBufferSlotsCount; ++i)
 		vertexBuffers[i] = 0;
-}
-
-void ContextState::ResetTargets()
-{
-	for(int i = 0; i < renderTargetSlotsCount; ++i)
-		renderBuffers[i] = 0;
-	depthStencilBuffer = 0;
 }
 
 void ContextState::ResetTextures()

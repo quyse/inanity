@@ -6,7 +6,7 @@
 BEGIN_INANITY_GRAPHICS
 
 class Device;
-class RenderBuffer;
+class FrameBuffer;
 class MonitorMode;
 
 /// Абстрактный класс "представлятеля" графики на экран.
@@ -16,8 +16,8 @@ public:
 	/// Получить устройство, создавшее Presenter.
 	virtual ptr<Device> GetDevice() = 0;
 
-	/// Получить вторичный буфер.
-	virtual ptr<RenderBuffer> GetBackBuffer() = 0;
+	/// Get a default framebuffer.
+	virtual ptr<FrameBuffer> GetFrameBuffer() = 0;
 
 	/// Сменить режим экрана.
 	virtual void SetMode(ptr<MonitorMode> mode) = 0;

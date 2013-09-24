@@ -17,6 +17,7 @@ class Presenter;
 class Output;
 class MonitorMode;
 struct PresentMode;
+class FrameBuffer;
 class RenderBuffer;
 class DepthStencilBuffer;
 class VertexShader;
@@ -47,6 +48,9 @@ public:
 	virtual ptr<Presenter> CreatePresenter(ptr<Output> output, ptr<MonitorMode> mode) = 0;
 
 	// ******* Методы для создания ресурсов устройства.
+
+	/// Creates framebuffer.
+	virtual ptr<FrameBuffer> CreateFrameBuffer() = 0;
 
 	/// Создать рендербуфер.
 	/** Всегда доступен для чтения GPU. */

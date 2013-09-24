@@ -5,8 +5,7 @@
 
 BEGIN_INANITY_GRAPHICS
 
-class RenderBuffer;
-class DepthStencilBuffer;
+class FrameBuffer;
 class Texture;
 class SamplerState;
 class UniformBuffer;
@@ -22,12 +21,8 @@ class BlendState;
 задаются источники данных и так далее. */
 struct ContextState
 {
-	/// Количество рендертаргетов.
-	static const int renderTargetSlotsCount = 8;
-	/// Привязанные рендертаргеты.
-	ptr<RenderBuffer> renderBuffers[renderTargetSlotsCount];
-	/// Привязанный depth-stencil буфер.
-	ptr<DepthStencilBuffer> depthStencilBuffer;
+	/// Framebuffer.
+	ptr<FrameBuffer> frameBuffer;
 
 	/// Количество текстурных слотов.
 	static const int textureSlotsCount = 16;
@@ -100,8 +95,6 @@ struct ContextState
 
 	/// Очистить все слоты вершинных буферов.
 	void ResetVertexBuffers();
-	/// Очистить все слоты вывода.
-	void ResetTargets();
 	/// Очистить все текстурные слоты.
 	void ResetTextures();
 	/// Очистить все семплерные слоты.

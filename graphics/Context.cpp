@@ -1,4 +1,5 @@
 #include "Context.hpp"
+#include "FrameBuffer.hpp"
 #include "RenderBuffer.hpp"
 #include "DepthStencilBuffer.hpp"
 #include "Texture.hpp"

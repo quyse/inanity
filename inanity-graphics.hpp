@@ -25,6 +25,7 @@
 #include "graphics/FontAlignment.hpp"
 #include "graphics/FontChar.hpp"
 #include "graphics/FontManager.hpp"
+#include "graphics/FrameBuffer.hpp"
 #include "graphics/ImageLoader.hpp"
 #include "graphics/IndexBuffer.hpp"
 #include "graphics/Monitor.hpp"

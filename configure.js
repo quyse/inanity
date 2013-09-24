@@ -104,6 +104,7 @@ var libraries = {
 	'libinanity-graphics': {
 		objects: [
 			'graphics.Context', 'graphics.ContextState', 'graphics.Output',
+			'graphics.FrameBuffer',
 			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.IndexBuffer',
 			'graphics.SamplerState', 'graphics.BlendState',
 			'graphics.VertexLayout', 'graphics.VertexLayoutElement',
