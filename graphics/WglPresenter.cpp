@@ -1,21 +1,21 @@
 #include "WglPresenter.hpp"
 #include "GlDevice.hpp"
-#include "GlRenderBuffer.hpp"
+#include "GlFrameBuffer.hpp"
 #include "Win32MonitorMode.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
-WglPresenter::WglPresenter(ptr<GlDevice> device, ptr<GlRenderBuffer> backBuffer, HDC hdc)
-: device(device), backBuffer(backBuffer), hdc(hdc) {}
+WglPresenter::WglPresenter(ptr<GlDevice> device, ptr<GlFrameBuffer> frameBuffer, HDC hdc)
+: device(device), frameBuffer(frameBuffer), hdc(hdc) {}
 
-ptr<Device> WglPresenter::GetDevice()
+ptr<Device> WglPresenter::GetDevice() const
 {
 	return device;
 }
 
-ptr<RenderBuffer> WglPresenter::GetBackBuffer()
+ptr<FrameBuffer> WglPresenter::GetFrameBuffer() const
 {
-	return backBuffer;
+	return frameBuffer;
 }
 
 void WglPresenter::SetMode(ptr<MonitorMode> abstractMode)

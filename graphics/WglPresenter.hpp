@@ -7,22 +7,22 @@
 BEGIN_INANITY_GRAPHICS
 
 class GlDevice;
-class GlRenderBuffer;
+class GlFrameBuffer;
 
 /// Presenter class for OpenGL on Windows.
 class WglPresenter : public Presenter
 {
 private:
 	ptr<GlDevice> device;
-	ptr<GlRenderBuffer> backBuffer;
+	ptr<GlFrameBuffer> frameBuffer;
 	HDC hdc;
 
 public:
-	WglPresenter(ptr<GlDevice> device, ptr<GlRenderBuffer> backBuffer, HDC hdc);
+	WglPresenter(ptr<GlDevice> device, ptr<GlFrameBuffer> frameBuffer, HDC hdc);
 
 	// Presenter's methods.
-	ptr<Device> GetDevice();
-	ptr<RenderBuffer> GetBackBuffer();
+	ptr<Device> GetDevice() const;
+	ptr<FrameBuffer> GetFrameBuffer() const;
 	void SetMode(ptr<MonitorMode> mode);
 	void Present();
 	void Resize(int width, int height);

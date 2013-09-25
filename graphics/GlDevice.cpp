@@ -184,7 +184,7 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 		GlSystem::ClearErrors();
 
 		// создать и вернуть Presenter
-		return NEW(WglPresenter(this, NEW(GlRenderBuffer(0, 0)), hdc));
+		return NEW(WglPresenter(this, NEW(GlFrameBuffer(this, 0)), hdc));
 #endif
 
 #ifdef ___INANITY_LINUX
