@@ -18,6 +18,7 @@
 #include "graphics/Dx11Context.hpp"
 #include "graphics/Dx11DepthStencilBuffer.hpp"
 #include "graphics/Dx11Device.hpp"
+#include "graphics/Dx11FrameBuffer.hpp"
 #include "graphics/Dx11IndexBuffer.hpp"
 #include "graphics/Dx11PixelShader.hpp"
 #include "graphics/Dx11Presenter.hpp"

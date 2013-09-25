@@ -69,10 +69,10 @@ public:
 
 	// методы Context
 
-	void ClearRenderBuffer(RenderBuffer* renderBuffer, const float* color);
-	void ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, float depth);
-	void ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, unsigned stencil);
-	void ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, float depth, unsigned stencil);
+	void ClearColor(int colorBufferIndex, const float* color);
+	void ClearDepth(float depth);
+	void ClearStencil(unsigned stencil);
+	void ClearDepthStencil(float depth, unsigned stencil);
 
 	void SetUniformBufferData(UniformBuffer* buffer, const void* data, int size);
 	void SetVertexBufferData(VertexBuffer* buffer, const void* data, int size);

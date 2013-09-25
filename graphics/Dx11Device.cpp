@@ -3,6 +3,7 @@
 #include "Dx11Texture.hpp"
 #include "Win32Output.hpp"
 #include "Dx11Presenter.hpp"
+#include "Dx11FrameBuffer.hpp"
 #include "Dx11RenderBuffer.hpp"
 #include "Dx11DepthStencilBuffer.hpp"
 #include "Dx11CompiledShader.hpp"
@@ -81,6 +82,11 @@ ptr<Presenter> Dx11Device::CreatePresenter(ptr<Output> abstractOutput, ptr<Monit
 	{
 		THROW_SECONDARY("Can't create presenter for DX device", exception);
 	}
+}
+
+ptr<FrameBuffer> Dx11Device::CreateFrameBuffer()
+{
+	return NEW(Dx11FrameBuffer(this));
 }
 
 ptr<RenderBuffer> Dx11Device::CreateRenderBuffer(int width, int height, PixelFormat pixelFormat)

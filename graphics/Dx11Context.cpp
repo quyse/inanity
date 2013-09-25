@@ -1,6 +1,7 @@
 #include "Dx11Context.hpp"
 #include "Dx11System.hpp"
 #include "Dx11Device.hpp"
+#include "Dx11FrameBuffer.hpp"
 #include "Dx11RenderBuffer.hpp"
 #include "Dx11DepthStencilBuffer.hpp"
 #include "Dx11Texture.hpp"
@@ -93,54 +94,14 @@ int Dx11Context::GetRasterizerStateKey(const ContextState& contextState)
 
 void Dx11Context::Update()
 {
-	// рендертаргеты
+	// framebuffer
 	{
-		// определить, изменился ли хотя бы один рендертаргет
-		bool dirty = false;
-		if(forceReset || targetState.depthStencilBuffer != boundState.depthStencilBuffer)
-			dirty = true;
-		else
+		Dx11FrameBuffer* targetFrameBuffer = fast_cast<Dx11FrameBuffer*>(&*targetState.frameBuffer);
+		if(forceReset || targetState.frameBuffer != boundState.frameBuffer || targetFrameBuffer->IsDirty())
 		{
-			for(int i = 0; i < ContextState::renderTargetSlotsCount; ++i)
-				if(targetState.renderBuffers[i] != boundState.renderBuffers[i])
-				{
-					dirty = true;
-					break;
-				}
-		}
+			targetFrameBuffer->Apply(deviceContext);
 
-		if(dirty)
-		{
-			ID3D11RenderTargetView* views[ContextState::renderTargetSlotsCount];
-			for(int i = 0; i < ContextState::renderTargetSlotsCount; ++i)
-			{
-				RenderBuffer* abstractRenderBuffer = targetState.renderBuffers[i];
-				if(abstractRenderBuffer)
-				{
-					Dx11RenderBuffer* renderBuffer = fast_cast<Dx11RenderBuffer*>(abstractRenderBuffer);
-					views[i] = renderBuffer->GetRenderTargetViewInterface();
-				}
-				else
-					views[i] = 0;
-			}
-
-			ID3D11DepthStencilView* depthStencilView;
-			DepthStencilBuffer* abstractDepthStencilBuffer = targetState.depthStencilBuffer;
-			if(abstractDepthStencilBuffer)
-			{
-				Dx11DepthStencilBuffer* depthStencilBuffer = fast_cast<Dx11DepthStencilBuffer*>(abstractDepthStencilBuffer);
-				depthStencilView = depthStencilBuffer->GetDepthStencilViewInterface();
-			}
-			else
-				depthStencilView = 0;
-
-			// выполнить вызов
-			deviceContext->OMSetRenderTargets(ContextState::renderTargetSlotsCount, views, depthStencilView);
-
-			// обновить актуальное состояние
-			for(int i = 0; i < ContextState::renderTargetSlotsCount; ++i)
-				boundState.renderBuffers[i] = targetState.renderBuffers[i];
-			boundState.depthStencilBuffer = targetState.depthStencilBuffer;
+			boundState.frameBuffer = targetState.frameBuffer;
 		}
 	}
 
@@ -439,31 +400,39 @@ void Dx11Context::Update()
 	forceReset = false;
 }
 
-void Dx11Context::ClearRenderBuffer(RenderBuffer* renderBuffer, const float* color)
+void Dx11Context::ClearColor(int colorBufferIndex, const float* color)
 {
 	deviceContext->ClearRenderTargetView(
-		fast_cast<Dx11RenderBuffer*>(renderBuffer)->GetRenderTargetViewInterface(),
+		fast_cast<Dx11FrameBuffer*>((FrameBuffer*)targetState.frameBuffer)
+			->GetColorBuffer(colorBufferIndex)
+				->GetRenderTargetViewInterface(),
 		color);
 }
 
-void Dx11Context::ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, float depth)
+void Dx11Context::ClearDepth(float depth)
 {
 	deviceContext->ClearDepthStencilView(
-		fast_cast<Dx11DepthStencilBuffer*>(depthStencilBuffer)->GetDepthStencilViewInterface(),
+		fast_cast<Dx11DepthStencilBuffer*>(
+			&*targetState.frameBuffer->GetDepthStencilBuffer()
+		)->GetDepthStencilViewInterface(),
 		D3D11_CLEAR_DEPTH, depth, 0);
 }
 
-void Dx11Context::ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, unsigned stencil)
+void Dx11Context::ClearStencil(unsigned stencil)
 {
 	deviceContext->ClearDepthStencilView(
-		fast_cast<Dx11DepthStencilBuffer*>(depthStencilBuffer)->GetDepthStencilViewInterface(),
+		fast_cast<Dx11DepthStencilBuffer*>(
+			&*targetState.frameBuffer->GetDepthStencilBuffer()
+		)->GetDepthStencilViewInterface(),
 		D3D11_CLEAR_STENCIL, 0, stencil);
 }
 
-void Dx11Context::ClearDepthStencilBuffer(DepthStencilBuffer* depthStencilBuffer, float depth, unsigned stencil)
+void Dx11Context::ClearDepthStencil(float depth, unsigned stencil)
 {
 	deviceContext->ClearDepthStencilView(
-		fast_cast<Dx11DepthStencilBuffer*>(depthStencilBuffer)->GetDepthStencilViewInterface(),
+		fast_cast<Dx11DepthStencilBuffer*>(
+			&*targetState.frameBuffer->GetDepthStencilBuffer()
+		)->GetDepthStencilViewInterface(),
 		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, stencil);
 }
 

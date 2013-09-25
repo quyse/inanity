@@ -1,6 +1,7 @@
 #include "Dx11Presenter.hpp"
 #include "Dx11System.hpp"
 #include "Dx11Device.hpp"
+#include "Dx11FrameBuffer.hpp"
 #include "Dx11RenderBuffer.hpp"
 #include "Dx11Texture.hpp"
 #include "Win32Output.hpp"
@@ -13,6 +14,7 @@ BEGIN_INANITY_GRAPHICS
 Dx11Presenter::Dx11Presenter(ptr<Dx11Device> device, ptr<Win32Output> output, ComPointer<IDXGISwapChain> swapChain)
 : device(device), output(output), swapChain(swapChain), currentMode(0)
 {
+	frameBuffer = NEW(Dx11FrameBuffer(device, this));
 	output->SetPresenter(this);
 }
 
@@ -20,17 +22,12 @@ Dx11Presenter::~Dx11Presenter()
 {
 	output->SetPresenter(0);
 
-	// перед уничтожением swap chain, необходимо выключить полноэкранность
+	// switch off fullscreeness before destroying
 	if(currentMode)
 		swapChain->SetFullscreenState(FALSE, NULL);
 }
 
-ptr<Device> Dx11Presenter::GetDevice()
-{
-	return device;
-}
-
-ptr<RenderBuffer> Dx11Presenter::GetBackBuffer()
+ptr<Dx11RenderBuffer> Dx11Presenter::GetBackBuffer()
 {
 	if(!backBuffer)
 	{
@@ -46,6 +43,16 @@ ptr<RenderBuffer> Dx11Presenter::GetBackBuffer()
 		backBuffer = NEW(Dx11RenderBuffer(renderTarget));
 	}
 	return backBuffer;
+}
+
+ptr<Device> Dx11Presenter::GetDevice() const
+{
+	return device;
+}
+
+ptr<FrameBuffer> Dx11Presenter::GetFrameBuffer() const
+{
+	return frameBuffer;
 }
 
 void Dx11Presenter::SetMode(ptr<MonitorMode> abstractMode)

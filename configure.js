@@ -119,6 +119,7 @@ var libraries = {
 	'libinanity-dx11': {
 		objects: [
 			'graphics.Dx11System', 'graphics.Dx11Device', 'graphics.Dx11Presenter', 'graphics.Dx11Context',
+			'graphics.Dx11FrameBuffer',
 			'graphics.Dx11RenderBuffer', 'graphics.Dx11DepthStencilBuffer', 'graphics.Dx11Texture', 'graphics.Dx11UniformBuffer',
 			'graphics.Dx11VertexBuffer', 'graphics.Dx11IndexBuffer', 'graphics.Dx11AttributeBinding',
 			'graphics.Dx11VertexShader', 'graphics.Dx11PixelShader',
