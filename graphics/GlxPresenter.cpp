@@ -19,12 +19,12 @@ GlxPresenter::~GlxPresenter()
 	output->SetPresenter(0);
 }
 
-ptr<Device> GlxPresenter::GetDevice()
+ptr<Device> GlxPresenter::GetDevice() const
 {
 	return device;
 }
 
-ptr<FrameBuffer> GlxPresenter::GetFrameBuffer()
+ptr<FrameBuffer> GlxPresenter::GetFrameBuffer() const
 {
 	return frameBuffer;
 }

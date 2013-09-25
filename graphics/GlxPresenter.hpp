@@ -24,8 +24,8 @@ public:
 	~GlxPresenter();
 
 	// Presenter's methods.
-	ptr<Device> GetDevice();
-	ptr<FrameBuffer> GetFrameBuffer();
+	ptr<Device> GetDevice() const;
+	ptr<FrameBuffer> GetFrameBuffer() const;
 	void SetMode(ptr<MonitorMode> mode);
 	void Present();
 	void Resize(int width, int height);

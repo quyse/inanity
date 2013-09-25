@@ -14,10 +14,10 @@ class Presenter : public Object
 {
 public:
 	/// Получить устройство, создавшее Presenter.
-	virtual ptr<Device> GetDevice() = 0;
+	virtual ptr<Device> GetDevice() const = 0;
 
 	/// Get a default framebuffer.
-	virtual ptr<FrameBuffer> GetFrameBuffer() = 0;
+	virtual ptr<FrameBuffer> GetFrameBuffer() const = 0;
 
 	/// Сменить режим экрана.
 	virtual void SetMode(ptr<MonitorMode> mode) = 0;
