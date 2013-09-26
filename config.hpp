@@ -2,7 +2,7 @@
 #define ___INANITY_CONFIG_HPP___
 
 /*
- * Конфигурация Inanity для компиляции.
+ * Inanity compilation configuration.
  */
 
 #if defined(_WIN32) || defined(__WIN32__)
@@ -15,11 +15,9 @@
 #define DebugBreak() asm("int3")
 #endif // ___INANITY_LINUX
 
-//#define ___INANITY_SCRIPTING
-
-/// Тип для "больших размеров" данных.
-/** То есть для таких, которые, возможно, не помещаются
-в память целиком, но мы хотим их обрабатывать. */
+/// "Big data size" type.
+/** I.e. that amount of data maybe not fit in memory,
+but we want to deal with such amounts. */
 typedef unsigned long long bigsize_t;
 
 #define BEGIN_INANITY namespace Inanity {
@@ -27,8 +25,8 @@ typedef unsigned long long bigsize_t;
 
 BEGIN_INANITY
 
-/// "Быстрое" преобразование типа.
-/** В отладке это dynamic_cast, в релизе - static_cast. */
+/// "Fast" type conversion.
+/** dynamic_cast in debug, static_cast in release. */
 template <typename ToType, typename FromType>
 ToType fast_cast(FromType object)
 {
@@ -41,13 +39,13 @@ ToType fast_cast(FromType object)
 
 END_INANITY
 
-//*** Отладочные проверки
+//*** Debug checks.
 #ifdef _DEBUG
 
-/// Включить трассировку кучи.
+/// Heap tracing enabled.
 #define ___INANITY_TRACE_HEAP
-/// Включить трассировку указателей.
-/** Требует включенного ___INANITY_TRACE_HEAP. */
+/// Managed pointers tracing enabled.
+/** Requires enable ___INANITY_TRACE_HEAP. */
 #define ___INANITY_TRACE_PTR
 
 #endif

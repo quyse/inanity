@@ -15,20 +15,20 @@ BEGIN_INANITY
 #endif
 
 #ifdef ___INANITY_TRACE_PTR
-// функция определена в ManagedHeap.cpp
+// defined in ManagedHeap.cpp
 void ManagedHeapTracePtr(void* ptr, void* object);
 #endif
 
-/// Класс указателя на управляемый объект.
+/// Pointer to managed object.
 template <typename T>
 class ptr
 {
 private:
-	/// Указатель на управляемый объект.
+	/// The pointer.
 	T* object;
 
 public:
-	/// Конструктор.
+	/// Copy constructor.
 	inline ptr(const ptr<T>& p)
 	{
 		object = p.object;
@@ -38,7 +38,7 @@ public:
 #endif
 	}
 
-	/// Конструктор, создающий указатель из другого указателя.
+	/// Templated copy constructor.
 	template <typename TT>
 	inline ptr(const ptr<TT>& p)
 	{
@@ -49,8 +49,8 @@ public:
 #endif
 	}
 
-	/// Конструктор, создающий указатель из неуправляемого указателя.
-	/// Автоматически обрабатываются подчиненные типы.
+	/// Plain pointer constructor.
+	/// Derived types are served automatically.
 	inline ptr(T* p = 0)
 	{
 		object = p;
@@ -60,7 +60,6 @@ public:
 #endif
 	}
 
-	/// Деструктор.
 	inline ~ptr()
 	{
 		if(object) object->Dereference();
@@ -69,7 +68,7 @@ public:
 #endif
 	}
 
-	/// Оператор присваивания указателя.
+	/// Assign operator.
 	inline void operator = (const ptr<T>& p)
 	{
 		if(object) object->Dereference();
@@ -79,7 +78,7 @@ public:
 		ManagedHeapTracePtr(this, object);
 #endif
 	}
-	/// Оператор присваивания указателя совместимого типа.
+	/// Templated assign operator.
 	template <typename TT>
 	inline void operator = (const ptr<TT>& p)
 	{
@@ -91,66 +90,65 @@ public:
 #endif
 	}
 
-	/// Оператор разыменования указателя.
+	/// Dereference pointer operator.
 	inline T& operator*() const
 	{
 		CHECK_OBJECT();
 		return *object;
 	}
 
-	/// Оператор стрелки.
+	/// Method call operator.
 	inline T* operator->() const
 	{
 		CHECK_OBJECT();
 		return object;
 	}
 
-	/// Оператор для неявного преобразования в указатель.
+	/// Implicit conversion to plain pointer.
 	inline operator T*() const
 	{
 		return object;
 	}
 
-	/// Оператор для проверки указателя на валидность.
+	/// Validity check operator.
 	inline operator bool() const
 	{
 		return !!object;
 	}
 
-	/// Оператор для сравнения указателей.
+	/// Compare operator.
 	inline friend bool operator<(const ptr<T>& a, const ptr<T>& b)
 	{
 		return a.object < b.object;
 	}
 
-	/// Еще один оператор для сравнения указателей.
+	/// Equality operator.
 	inline friend bool operator==(const ptr<T>& a, const ptr<T>& b)
 	{
 		return a.object == b.object;
 	}
 
-	/// И еще один оператор для сравнения указателей.
+	/// Inequality operator.
 	inline friend bool operator!=(const ptr<T>& a, const ptr<T>& b)
 	{
 		return a.object != b.object;
 	}
 
-	/// Оператор для статического преобразования типа.
+	/// Static cast method.
 	template <typename TT>
 	ptr<TT> StaticCast() const
 	{
 		return static_cast<TT*>(object);
 	}
 
-	/// Оператор для динамического преобразования типа.
+	/// Dynamic cast method.
 	template <typename TT>
 	ptr<TT> DynamicCast() const
 	{
 		return dynamic_cast<TT*>(object);
 	}
 
-	/// Оператор для быстрого преобразования типа.
-	/** В отладочном режиме он всё проверяет, в релизе - нет. */
+	/// "Fast cast" method.
 	template <typename TT>
 	ptr<TT> FastCast() const
 	{
@@ -162,7 +160,7 @@ public:
 	}
 };
 
-/// Специальная функция для явного создания управляемого указателя
+/// Explicit wrapping plain pointer into managed one.
 template <typename T>
 inline ptr<T> MakePointer(T* p)
 {
@@ -173,7 +171,7 @@ inline ptr<T> MakePointer(T* p)
 
 END_INANITY
 
-// Оператор для хеширования указателей.
+// Hash operator for managed pointers.
 namespace std
 {
 	template <typename T>
