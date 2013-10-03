@@ -19,7 +19,7 @@ private:
 	Classes classes;
 
 	/// Set of objects which sent to script.
-	typedef std::unordered_map<Object*, v8::Persistent<v8::Object>*> Instances;
+	typedef std::unordered_map<RefCounted*, v8::Persistent<v8::Object>*> Instances;
 	Instances instances;
 
 public:
@@ -58,7 +58,7 @@ public:
 
 	/// Unregister instance of object if exposed to script.
 	/** Invalidates object instances in script (if they exist), and releases a reference. */
-	void UnregisterInstance(Object* object);
+	void UnregisterInstance(RefCounted* object);
 
 	// Script::State's methods.
 	void Register(Meta::ClassBase* classMeta);
@@ -68,9 +68,9 @@ public:
 
 	/// Convert object to a v8 value.
 	/** Object should be not-null. */
-	v8::Local<v8::Object> ConvertObject(Meta::ClassBase* classMeta, Object* object);
+	v8::Local<v8::Object> ConvertObject(Meta::ClassBase* classMeta, RefCounted* object);
 	/// Register instance to receive notification when all references from script are gone.
-	void InternalRegisterInstance(Object* object, v8::Local<v8::Object> instance);
+	void InternalRegisterInstance(RefCounted* object, v8::Local<v8::Object> instance);
 	/// Process errors from javascript, and throw exceptions.
 	void ProcessErrors(const v8::TryCatch& tryCatch);
 };

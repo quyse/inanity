@@ -163,7 +163,7 @@ struct Value<const String&>
 };
 
 /*
-ptr<Object> is represented as an External, or as null (zero pointer).
+ptr<RefCounted> is represented as an External, or as null (zero pointer).
 External of corrent object contains non-null pointer.
 External with null pointer is a wiped object, i.e. object which was
 reclamed from script by C++ code.
@@ -197,7 +197,7 @@ struct Value<ptr<ObjectType> >
 		if(!externalValue)
 			THROW(ObjectType::GetMeta()->GetFullName() + String(" instance was reclaimed"));
 
-		ObjectType* object = fast_cast<ObjectType*>((Object*)externalValue);
+		ObjectType* object = fast_cast<ObjectType*>((RefCounted*)externalValue);
 
 		return object;
 	}
@@ -205,7 +205,7 @@ struct Value<ptr<ObjectType> >
 	static inline v8::Local<v8::Value> To(ptr<ObjectType> value)
 	{
 		if(value)
-			return State::GetCurrent()->ConvertObject(ObjectType::GetMeta(), static_cast<Object*>(&*value));
+			return State::GetCurrent()->ConvertObject(ObjectType::GetMeta(), static_cast<RefCounted*>(&*value));
 		else
 			return v8::Null();
 	}

@@ -186,7 +186,7 @@ v8::Local<v8::FunctionTemplate> State::GetClassTemplate(Meta::ClassBase* classMe
 	return classTemplate;
 }
 
-void State::InternalRegisterInstance(Object* object, v8::Local<v8::Object> instance)
+void State::InternalRegisterInstance(RefCounted* object, v8::Local<v8::Object> instance)
 {
 #ifdef _DEBUG
 	if(instances.find(object) != instances.end())
@@ -203,7 +203,7 @@ void State::InternalRegisterInstance(Object* object, v8::Local<v8::Object> insta
 	object->Reference();
 }
 
-void State::InternalUnregisterInstance(Object* object)
+void State::InternalUnregisterInstance(RefCounted* object)
 {
 	// find an object in instances
 	Instances::iterator i = instances.find(object);
@@ -233,7 +233,7 @@ void State::InternalReclaimInstance(Instances::iterator i)
 	i->first->Dereference();
 }
 
-void State::InstanceWeakCallback(const v8::WeakCallbackData<v8::Object, Object>& data)
+void State::InstanceWeakCallback(const v8::WeakCallbackData<v8::Object, RefCounted>& data)
 {
 	State::GetFromIsolate(data.GetIsolate())->InternalUnregisterInstance(data.GetParameter());
 }
@@ -306,14 +306,14 @@ void State::Register(Meta::ClassBase* classMeta)
 	GetClassTemplate(classMeta);
 }
 
-void State::UnregisterInstance(Object* object)
+void State::UnregisterInstance(RefCounted* object)
 {
 	Scope scope(this);
 
 	InternalUnregisterInstance(object);
 }
 
-v8::Local<v8::Object> State::ConvertObject(Meta::ClassBase* classMeta, Object* object)
+v8::Local<v8::Object> State::ConvertObject(Meta::ClassBase* classMeta, RefCounted* object)
 {
 	// check if the object is already in cache
 	Instances::const_iterator i = instances.find(object);
