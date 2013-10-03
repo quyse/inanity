@@ -78,18 +78,25 @@ public:
 };
 
 #ifdef _DEBUG
+
 #define __SLINE2__(x) #x
 #define __SLINE3__(x) __SLINE2__(x)
 #define __SLINE__ __SLINE3__(__LINE__)
-/// Макрос для вызова первичного исключения
+
+/// Throw primary exception.
 #define THROW(message) throw NEW(Inanity::Exception(Inanity::String("[ " __FILE__ ", " __SLINE__ " ] ") + (message)))
-/// Макрос для вызова вторичного исключения
+/// Throw secondary exception.
 #define THROW_SECONDARY(message, exception) throw NEW(Inanity::Exception(Inanity::String("[ " __FILE__ ", " __SLINE__ " ] ") + (message), (exception)))
+/// Throw exception in case of assert failure.
+#define THROW_ASSERT(condition) \
+	if(!(condition)) THROW(#condition)
+
 #else
-/// Макрос для вызова первичного исключения
+
 #define THROW(message) throw NEW(Inanity::Exception((message)))
-/// Макрос для вызова вторичного исключения
 #define THROW_SECONDARY(message, exception) throw NEW(Inanity::Exception((message), (exception)))
+#define THROW_ASSERT(condition)
+
 #endif
 
 #define BEGIN_TRY() try {
