@@ -59,6 +59,8 @@ struct TextDrawerHelper : public Object
 	/// Текстура шрифта.
 	/** Задаёт альфу для шрифта. */
 	Sampler<float, 2> uFontSampler;
+	/// Sampler state.
+	ptr<SamplerState> ss;
 
 	ptr<VertexBuffer> vb;
 	ptr<VertexShader> vs;
@@ -137,12 +139,11 @@ struct TextDrawerHelper : public Object
 			bs->SetColor(BlendState::colorSourceSrcAlpha, BlendState::colorSourceInvSrcAlpha, BlendState::operationAdd);
 
 			// настройки семплирования для шрифта
-			ptr<SamplerState> ss = device->CreateSamplerState();
+			ss = device->CreateSamplerState();
 			ss->SetFilter(SamplerState::filterLinear, SamplerState::filterLinear, SamplerState::filterLinear);
 			ss->SetWrap(SamplerState::wrapBorder, SamplerState::wrapBorder, SamplerState::wrapBorder);
 			float color[] = { 0, 0, 0, 0 };
 			ss->SetBorderColor(color);
-			uFontSampler.SetSamplerState(ss);
 		}
 		catch(Exception* exception)
 		{
@@ -154,31 +155,17 @@ struct TextDrawerHelper : public Object
 TextDrawer::TextDrawer(ptr<TextDrawerHelper> helper)
 : helper(helper), queuedCharsCount(0) {}
 
-void TextDrawer::Prepare(ptr<Context> context)
+void TextDrawer::Prepare(ptr<Context> context, int viewportWidth, int viewportHeight)
 {
 	this->context = context;
-
-	// установить всё, что можно, в состояние контекста
-	ContextState& cs = context->GetTargetState();
-	cs.ResetVertexBuffers();
-	cs.attributeBinding = helper->ab;
-	cs.vertexBuffers[0] = helper->vb;
-	cs.indexBuffer = 0;
-	cs.vertexShader = helper->vs;
-	cs.pixelShader = helper->ps;
-	cs.blendState = helper->bs;
-	cs.cullMode = ContextState::cullModeNone;
-	cs.depthTestFunc = ContextState::depthTestFuncAlways;
-	cs.depthWrite = false;
-	helper->ugSymbols->Apply(cs);
 
 	// сбросить текущий шрифт и текстуру
 	currentFont = 0;
 	currentFontTexture = 0;
 
 	// вычислить масштабирование
-	scaleX = 2.0f / cs.viewportWidth;
-	scaleY = 2.0f / cs.viewportHeight;
+	scaleX = 2.0f / viewportWidth;
+	scaleY = 2.0f / viewportHeight;
 }
 
 void TextDrawer::SetFont(ptr<Font> font)
@@ -303,9 +290,17 @@ void TextDrawer::Flush()
 	if(!queuedCharsCount)
 		return;
 
-	// установить текстуру в контекст
-	helper->uFontSampler.SetTexture(currentFontTexture);
-	helper->uFontSampler.Apply(context->GetTargetState());
+	Context::LetAttributeBinding lab(context, helper->ab);
+	Context::LetVertexBuffer lvb(context, 0, helper->vb);
+	Context::LetIndexBuffer lib(context, 0);
+	Context::LetVertexShader lvs(context, helper->vs);
+	Context::LetPixelShader lps(context, helper->ps);
+	Context::LetBlendState lbs(context, helper->bs);
+	Context::LetCullMode lcm(context, Context::cullModeNone);
+	Context::LetDepthTestFunc ldtf(context, Context::depthTestFuncAlways);
+	Context::LetDepthWrite ldw(context, false);
+	Context::LetUniformBuffer lub(context, helper->ugSymbols);
+	Context::LetSampler ls(context, helper->uFontSampler, currentFontTexture, helper->ss);
 
 	// загрузить символы
 	helper->ugSymbols->Upload(context);

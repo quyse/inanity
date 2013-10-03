@@ -41,7 +41,7 @@ public:
 	TextDrawer(ptr<TextDrawerHelper> helper);
 
 	/// Подготовить графический контекст для рисования текста.
-	void Prepare(ptr<Context> context);
+	void Prepare(ptr<Context> context, int viewportWidth, int viewportHeight);
 
 	/// Установить шрифт.
 	void SetFont(ptr<Font> font);
