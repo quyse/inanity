@@ -20,10 +20,11 @@ On Windows you should run something like that (in compiler's command line enviro
 cd deps\v8\repo
 svn co http://gyp.googlecode.com/svn/trunk build/gyp
 svn co http://src.chromium.org/svn/trunk/deps/third_party/cygwin@66844 third_party/cygwin
+set GYP_MSVS_VERSION=2013
 python build\gyp_v8
 cd build
-msbuild all.sln /t:v8 /p:configuration=debug
-msbuild all.sln /t:v8 /p:configuration=release
+msbuild all.sln /p:configuration=debug
+msbuild all.sln /p:configuration=release
 
 4. Windows-only: you have to do additional step - running copytargetlibs.bat in order to copy libraries
 into their general directory. On UNIXes they are already symlinked, so nothing has to be done.
