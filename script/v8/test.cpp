@@ -20,7 +20,7 @@ public:
 	ptr<TestClass> work(const String& a, int b, double c)
 	{
 		std::cout << "Work: " << a << ' ' << b << ' ' << c << '\n';
-		((Script::V8::State*)globalState)->UnregisterInstance(this);
+		globalState->ReclaimInstance(this);
 		return this;
 	}
 

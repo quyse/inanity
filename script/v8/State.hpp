@@ -39,9 +39,9 @@ private:
 	/** Register if needed. */
 	v8::Local<v8::FunctionTemplate> GetClassTemplate(Meta::ClassBase* classMeta);
 	/// Callback for dereferencing object.
-	static void InstanceWeakCallback(const v8::WeakCallbackData<v8::Object, Object>& data);
+	static void InstanceWeakCallback(const v8::WeakCallbackData<v8::Object, RefCounted>& data);
 	/// Internal method to unregister instance.
-	void InternalUnregisterInstance(Object* object);
+	void InternalUnregisterInstance(RefCounted* object);
 	/// Dereference object and clear references to it from script.
 	void InternalReclaimInstance(Instances::iterator i);
 
@@ -56,13 +56,10 @@ public:
 	/// Get state from v8::Isolate.
 	static State* GetFromIsolate(v8::Isolate* isolate);
 
-	/// Unregister instance of object if exposed to script.
-	/** Invalidates object instances in script (if they exist), and releases a reference. */
-	void UnregisterInstance(RefCounted* object);
-
 	// Script::State's methods.
 	void Register(Meta::ClassBase* classMeta);
 	ptr<Script::Function> LoadScript(ptr<File> file);
+	void ReclaimInstance(RefCounted* object);
 
 	//******* DON'T CALL EXPLICITLY
 

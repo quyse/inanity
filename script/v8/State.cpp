@@ -299,20 +299,6 @@ void State::ProcessErrors(const v8::TryCatch& tryCatch)
 	}
 }
 
-void State::Register(Meta::ClassBase* classMeta)
-{
-	Scope scope(this);
-
-	GetClassTemplate(classMeta);
-}
-
-void State::UnregisterInstance(RefCounted* object)
-{
-	Scope scope(this);
-
-	InternalUnregisterInstance(object);
-}
-
 v8::Local<v8::Object> State::ConvertObject(Meta::ClassBase* classMeta, RefCounted* object)
 {
 	// check if the object is already in cache
@@ -348,6 +334,13 @@ State* State::GetFromIsolate(v8::Isolate* isolate)
 	return (State*)isolate->GetData();
 }
 
+void State::Register(Meta::ClassBase* classMeta)
+{
+	Scope scope(this);
+
+	GetClassTemplate(classMeta);
+}
+
 ptr<Script::Function> State::LoadScript(ptr<File> file)
 {
 	Scope scope(this);
@@ -362,6 +355,13 @@ ptr<Script::Function> State::LoadScript(ptr<File> file)
 	ProcessErrors(tryCatch);
 
 	return NEW(Function(this, script));
+}
+
+void State::ReclaimInstance(RefCounted* object)
+{
+	Scope scope(this);
+
+	InternalUnregisterInstance(object);
 }
 
 END_INANITY_V8
