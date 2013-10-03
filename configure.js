@@ -29,6 +29,8 @@ var libraries = {
 		objects: [
 		// совсем общее
 		'Object', 'ManagedHeap', 'Strings', 'StringTraveler', 'Exception',
+		// выделение памяти
+		'MemoryPool', 'ChunkPool', 'PoolObject',
 		// время
 		'Time', 'Ticker',
 		// профилирование
