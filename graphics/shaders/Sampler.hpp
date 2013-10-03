@@ -4,35 +4,17 @@
 #include "Expression.hpp"
 #include "Value.hpp"
 
-BEGIN_INANITY_GRAPHICS
-
-class Texture;
-class SamplerState;
-struct ContextState;
-
-END_INANITY_GRAPHICS
-
 BEGIN_INANITY_SHADERS
 
 class SamplerNode;
 
 class SamplerBase : public Expression
 {
-private:
-	ptr<Texture> texture;
-	ptr<SamplerState> samplerState;
-
 protected:
 	SamplerBase(ptr<SamplerNode> node);
 
 public:
-	/// Установить текстуру в семплер.
-	void SetTexture(ptr<Texture> texture);
-	/// Установить настройки семплера в семплер.
-	void SetSamplerState(ptr<SamplerState> samplerState);
-
-	/// Применить семплер к состоянию.
-	void Apply(ContextState& contextState) const;
+	int GetSlot() const;
 };
 
 /// Класс выражения-семплера (обыкновенного, 1D, 2D или 3D).

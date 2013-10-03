@@ -16,7 +16,6 @@ BEGIN_INANITY_GRAPHICS
 
 class Device;
 class UniformBuffer;
-struct ContextState;
 class Context;
 
 END_INANITY_GRAPHICS
@@ -25,27 +24,26 @@ BEGIN_INANITY_SHADERS
 
 class UniformNode;
 
-/// Группа uniform-переменных.
-/** Хранит переменные, и управляет их памятью.
-Распределяет переменные, выравнивая их по vec4-регистрам. */
+/// Group of uniform variables.
 class UniformGroup : public Object
 {
 private:
+	/// Slot number of uniform buffer.
+	int slot;
 	/// Uniform-буфер.
 	ptr<UniformBuffer> buffer;
-	/// Номер слота для uniform-буфера.
-	int slot;
-	/// Требуемый размер буфера.
+	/// Size of buffer.
 	int bufferSize;
-	/// Память для переменных.
+	/// Memory for variables.
 	ptr<MemoryFile> dataFile;
-	/// Указатель на данные файла, для производительности.
+	/// Data pointer (for performance).
 	void* data;
 
 public:
 	UniformGroup(int slot);
 
 	int GetSlot() const;
+	ptr<UniformBuffer> GetBuffer() const;
 
 	/// Добавить узел uniform-переменной.
 	template <typename ValueType>
@@ -91,8 +89,6 @@ public:
 	void* GetData() const;
 	/// Получить размер данных группы.
 	int GetSize() const;
-	/// Применить группу к состоянию контекста.
-	void Apply(ContextState& contextState);
 	/// Загрузить данные буфера в контекст.
 	void Upload(Context* context);
 };

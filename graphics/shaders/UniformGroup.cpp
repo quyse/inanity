@@ -2,7 +2,6 @@
 #include "UniformNode.hpp"
 #include "../Device.hpp"
 #include "../UniformBuffer.hpp"
-#include "../ContextState.hpp"
 #include "../Context.hpp"
 #include "../../MemoryFile.hpp"
 #include "../../Exception.hpp"
@@ -15,6 +14,11 @@ UniformGroup::UniformGroup(int slot)
 int UniformGroup::GetSlot() const
 {
 	return slot;
+}
+
+ptr<UniformBuffer> UniformGroup::GetBuffer() const
+{
+	return buffer;
 }
 
 void UniformGroup::Finalize(ptr<Device> device)
@@ -38,14 +42,9 @@ int UniformGroup::GetSize() const
 	return bufferSize;
 }
 
-void UniformGroup::Apply(ContextState& contextState)
-{
-	contextState.uniformBuffers[slot] = buffer;
-}
-
 void UniformGroup::Upload(Context* context)
 {
-	context->SetUniformBufferData(buffer, data, bufferSize);
+	context->UploadUniformBufferData(buffer, data, bufferSize);
 }
 
 END_INANITY_SHADERS

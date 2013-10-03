@@ -5,7 +5,6 @@
 
 BEGIN_INANITY_GRAPHICS
 
-struct ContextState;
 class Texture;
 class SamplerState;
 
@@ -38,8 +37,6 @@ public:
 	int GetSlot() const;
 	DataType GetValueType() const;
 	CoordType GetCoordType() const;
-
-	void Apply(ContextState& contextState, ptr<Texture> texture, ptr<SamplerState> samplerState) const;
 
 	static CoordType CoordTypeFromDimensions(int dimensions);
 };

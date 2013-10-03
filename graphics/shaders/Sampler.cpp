@@ -1,27 +1,14 @@
 #include "Sampler.hpp"
 #include "SamplerNode.hpp"
-#include "../Texture.hpp"
-#include "../SamplerState.hpp"
-#include "../ContextState.hpp"
 
 BEGIN_INANITY_SHADERS
 
 SamplerBase::SamplerBase(ptr<SamplerNode> node)
 : Expression(node) {}
 
-void SamplerBase::SetTexture(ptr<Texture> texture)
+int SamplerBase::GetSlot() const
 {
-	this->texture = texture;
-}
-
-void SamplerBase::SetSamplerState(ptr<SamplerState> samplerState)
-{
-	this->samplerState = samplerState;
-}
-
-void SamplerBase::Apply(ContextState& contextState) const
-{
-	node.FastCast<SamplerNode>()->Apply(contextState, texture, samplerState);
+	return fast_cast<SamplerNode*>(&*node)->GetSlot();
 }
 
 END_INANITY_SHADERS

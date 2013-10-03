@@ -1,5 +1,4 @@
 #include "SamplerNode.hpp"
-#include "../ContextState.hpp"
 #include "../Texture.hpp"
 #include "../SamplerState.hpp"
 #include "../../Exception.hpp"
@@ -27,12 +26,6 @@ DataType SamplerNode::GetValueType() const
 SamplerNode::CoordType SamplerNode::GetCoordType() const
 {
 	return coordType;
-}
-
-void SamplerNode::Apply(ContextState& contextState, ptr<Texture> texture, ptr<SamplerState> samplerState) const
-{
-	contextState.textures[slot] = texture;
-	contextState.samplerStates[slot] = samplerState;
 }
 
 SamplerNode::CoordType SamplerNode::CoordTypeFromDimensions(int dimensions)
