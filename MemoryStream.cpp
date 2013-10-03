@@ -2,6 +2,7 @@
 #include "MemoryFile.hpp"
 #include "PartFile.hpp"
 #include <string.h>
+#include <algorithm>
 
 BEGIN_INANITY
 
