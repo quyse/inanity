@@ -32,7 +32,7 @@ struct ClassUserData : public UserData
 /// Структура объекта, представляющего управляемый указатель в Lua.
 struct ObjectUserData : public UserData
 {
-	Object* object;
+	RefCounted* object;
 	Meta::ClassBase* cls;
 };
 

@@ -227,7 +227,7 @@ struct Value<ptr<ObjectType> >
 
 		ObjectUserData* userData = (ObjectUserData*)lua_newuserdata(state, sizeof(ObjectUserData));
 		userData->type = UserData::typeObject;
-		userData->object = (Object*)(ObjectType*)value;
+		userData->object = (RefCounted*)(ObjectType*)value;
 		userData->cls = ObjectType::GetMeta();
 		// указать метатаблицу
 		PushObjectMetaTable(state, ObjectType::GetMeta());
