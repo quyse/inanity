@@ -35,17 +35,20 @@ GlContext::GlContext(ptr<GlDevice> device) :
 void GlContext::UpdateFramebuffer()
 {
 	// framebuffer
-	GlFrameBuffer* targetFrameBuffer = fast_cast<GlFrameBuffer*>(&*targetState.frameBuffer);
-	GLuint targetFrameBufferName = targetFrameBuffer->GetName();
-	// check if need to bind
-	if(forceReset || targetState.frameBuffer != boundState.frameBuffer || boundFrameBuffer != targetFrameBufferName || targetFrameBuffer->IsDirty())
+	THROW_ASSERT(cellFrameBuffer.top);
+	if(!cellFrameBuffer.IsActual())
 	{
-		// bind framebuffer
-		targetFrameBuffer->Apply();
+		THROW_ASSERT(((LetFrameBuffer*)cellFrameBuffer.top)->frameBuffer);
 
-		// remember new state
-		boundState.frameBuffer = targetState.frameBuffer;
-		boundFrameBuffer = targetFrameBufferName;
+		LetFrameBuffer* top = (LetFrameBuffer*)cellFrameBuffer.top;
+		LetFrameBuffer* current = (LetFrameBuffer*)cellFrameBuffer.current;
+
+		GlFrameBuffer* frameBuffer = fast_cast<GlFrameBuffer*>(&*top->frameBuffer);
+		GLuint frameBufferName = frameBuffer->GetName();
+		if(!current || current->frameBuffer != top->frameBuffer || boundFrameBuffer != frameBufferName || frameBuffer->IsDirty())
+			frameBuffer->Apply();
+
+		cellFrameBuffer.Actual();
 	}
 }
 
@@ -53,70 +56,79 @@ void GlContext::Update()
 {
 	UpdateFramebuffer();
 
-	// текстуры
-	for(int i = 0; i < ContextState::textureSlotsCount; ++i)
-		if(forceReset || targetState.textures[i] != boundState.textures[i])
+	// samplers
+	for(int i = 0; i < samplersCount; ++i)
+		if(!cellSamplers[i].IsActual())
 		{
+			LetSampler* let = (LetSampler*)cellSamplers[i].top;
+
 			glActiveTexture(GL_TEXTURE0 + i);
-			Texture* abstractTexture = targetState.textures[i];
+
+			Texture* abstractTexture = let ? let->texture : 0;
 			glBindTexture(GL_TEXTURE_2D, abstractTexture ? fast_cast<GlTexture*>(abstractTexture)->GetName() : 0);
 
-			boundState.textures[i] = targetState.textures[i];
-		}
-	// семплеры
-	for(int i = 0; i < ContextState::textureSlotsCount; ++i)
-		if(forceReset || targetState.samplerStates[i] != boundState.samplerStates[i])
-		{
-			SamplerState* abstractSamplerState = targetState.samplerStates[i];
+			SamplerState* abstractSamplerState = let ? let->samplerState : 0;
 			glBindSampler(i, abstractSamplerState ? fast_cast<GlSamplerState*>(abstractSamplerState)->GetName() : 0);
 
-			boundState.samplerStates[i] = targetState.samplerStates[i];
+			cellSamplers[i].Actual();
 		}
 	GlSystem::CheckErrors("Can't bind textures and samplers");
 
-	// uniform-буферы
-	for(int i = 0; i < ContextState::uniformBufferSlotsCount; ++i)
-		if(forceReset || targetState.uniformBuffers[i] != boundState.uniformBuffers[i])
+	// uniform buffers
+	for(int i = 0; i < uniformBuffersCount; ++i)
+		if(!cellUniformBuffers[i].IsActual())
 		{
-			UniformBuffer* abstractUniformBuffer = targetState.uniformBuffers[i];
+			LetUniformBuffer* let = (LetUniformBuffer*)cellUniformBuffers[i].top;
+			UniformBuffer* abstractUniformBuffer = let ? let->uniformBuffer : 0;
 			glBindBufferBase(GL_UNIFORM_BUFFER, i, abstractUniformBuffer ? fast_cast<GlUniformBuffer*>(abstractUniformBuffer)->GetName() : 0);
 
-			boundState.uniformBuffers[i] = targetState.uniformBuffers[i];
+			cellUniformBuffers[i].Actual();
 		}
 	GlSystem::CheckErrors("Can't bind uniform buffers");
 
-	// вершинный и пиксельный шейдеры
-	if(forceReset || targetState.vertexShader != boundState.vertexShader || targetState.pixelShader != boundState.pixelShader)
+	// vertex and pixel shaders
+	if(!cellVertexShader.IsActual() || !cellPixelShader.IsActual())
 	{
-		ptr<GlInternalProgram> program = programCache->GetProgram(fast_cast<GlVertexShader*>(&*targetState.vertexShader), fast_cast<GlPixelShader*>(&*targetState.pixelShader));
-		if(forceReset || boundProgram != program)
+		LetVertexShader* letV = (LetVertexShader*)cellVertexShader.top;
+		VertexShader* abstractVertexShader = letV ? letV->vertexShader : 0;
+		LetPixelShader* letP = (LetPixelShader*)cellPixelShader.top;
+		PixelShader* abstractPixelShader = letP ? letP->pixelShader : 0;
+		ptr<GlInternalProgram> program = programCache->GetProgram(
+			fast_cast<GlVertexShader*>(abstractVertexShader),
+			fast_cast<GlPixelShader*>(abstractPixelShader)
+		);
+		if(boundProgram != program)
 		{
 			glUseProgram(program->GetName());
 			GlSystem::CheckErrors("Can't bind program");
 			boundProgram = program;
 		}
 
-		boundState.vertexShader = targetState.vertexShader;
-		boundState.pixelShader = targetState.pixelShader;
+		cellVertexShader.Actual();
+		cellPixelShader.Actual();
 	}
 
-	// если вершинные буферы поддерживаются, используем их
+	// if vertex buffers supported, use them
 	if(GLEW_ARB_vertex_attrib_binding)
 	{
-		// привязка атрибутов
-		if(forceReset || targetState.attributeBinding != boundState.attributeBinding)
+		// attribute binding
+		THROW_ASSERT(cellAttributeBinding.top);
+		if(!cellAttributeBinding.IsActual())
 		{
-			glBindVertexArray(fast_cast<GlAttributeBinding*>(&*targetState.attributeBinding)->GetVertexArrayName());
+			LetAttributeBinding* let = (LetAttributeBinding*)cellAttributeBinding.top;
+			AttributeBinding* abstractAttributeBinding = let ? let->attributeBinding : 0;
+			glBindVertexArray(fast_cast<GlAttributeBinding*>(abstractAttributeBinding)->GetVertexArrayName());
 			GlSystem::CheckErrors("Can't bind attribute binding");
 
-			boundState.attributeBinding = targetState.attributeBinding;
+			cellAttributeBinding.Actual();
 		}
 
-		// вершинные буферы
-		for(int i = 0; i < ContextState::vertexBufferSlotsCount; ++i)
-			if(forceReset || targetState.vertexBuffers[i] != boundState.vertexBuffers[i])
+		// vertex buffers
+		for(int i = 0; i < vertexBuffersCount; ++i)
+			if(!cellVertexBuffers[i].IsActual())
 			{
-				VertexBuffer* abstractVertexBuffer = targetState.vertexBuffers[i];
+				LetVertexBuffer* let = (LetVertexBuffer*)cellVertexBuffers[i].top;
+				VertexBuffer* abstractVertexBuffer = let->vertexBuffer;
 				if(abstractVertexBuffer)
 				{
 					GlVertexBuffer* vertexBuffer = fast_cast<GlVertexBuffer*>(abstractVertexBuffer);
@@ -126,28 +138,33 @@ void GlContext::Update()
 					glBindVertexBuffer((GLuint)i, 0, 0, 0);
 				GlSystem::CheckErrors("Can't bind vertex buffer");
 
-				boundState.vertexBuffers[i] = targetState.vertexBuffers[i];
+				cellVertexBuffers[i].Actual();
 			}
 	}
-	// иначе выполняем привязку "вручную"
+	// otherwise do manual binding
 	else
 	{
-		GlAttributeBinding* attributeBinding = fast_cast<GlAttributeBinding*>(&*targetState.attributeBinding);
-		// если привязка атрибутов изменилась, перепривязываем все слоты
-		// а если только вершинные буферы изменились, можно перепривязать
-		// только изменившиеся слоты
-		bool rebindAllSlots = forceReset || targetState.attributeBinding != boundState.attributeBinding;
+		// attribute binding
+		THROW_ASSERT(cellAttributeBinding.top);
+		LetAttributeBinding* letAB = (LetAttributeBinding*)cellAttributeBinding.top;
+		AttributeBinding* abstractAttributeBinding = letAB ? letAB->attributeBinding : 0;
+		GlAttributeBinding* attributeBinding = fast_cast<GlAttributeBinding*>(abstractAttributeBinding);
+
+		// if attribute binding has changed, rebind all slots
+		// else we may rebind changed slots only
+		bool rebindAllSlots = !cellAttributeBinding.IsActual();
 
 		const GlAttributeBinding::Slots& slots = attributeBinding->GetSlots();
 
 		int maxUsedElement = 0;
 
-		for(int i = 0; i < ContextState::vertexBufferSlotsCount; ++i)
-			if(rebindAllSlots || targetState.vertexBuffers[i] != boundState.vertexBuffers[i])
+		for(int i = 0; i < vertexBuffersCount; ++i)
+			if(rebindAllSlots || !cellVertexBuffers[i].IsActual())
 			{
 				if(i < (int)slots.size())
 				{
-					VertexBuffer* abstractVertexBuffer = targetState.vertexBuffers[i];
+					LetVertexBuffer* letVB = (LetVertexBuffer*)cellVertexBuffers[i].top;
+					VertexBuffer* abstractVertexBuffer = letVB ? letVB->vertexBuffer : 0;
 					if(abstractVertexBuffer)
 					{
 						GlVertexBuffer* vertexBuffer = fast_cast<GlVertexBuffer*>(abstractVertexBuffer);
@@ -173,10 +190,10 @@ void GlContext::Update()
 					}
 				}
 
-				boundState.vertexBuffers[i] = targetState.vertexBuffers[i];
+				cellVertexBuffers[i].Actual();
 			}
 
-		// если привязка менялась, отключить неиспользуемые атрибуты
+		// if binding has changed, disable unused attributes
 		if(rebindAllSlots)
 		{
 			for(int i = maxUsedElement + 1; i < boundAttributesCount; ++i)
@@ -184,28 +201,31 @@ void GlContext::Update()
 			boundAttributesCount = maxUsedElement + 1;
 			GlSystem::CheckErrors("Can't disable unused attributes");
 
-			boundState.attributeBinding = targetState.attributeBinding;
+			cellAttributeBinding.Actual();
 		}
 	}
 
-	// индексный буфер
-	if(forceReset || targetState.indexBuffer != boundState.indexBuffer)
+	// index buffer
+	if(!cellIndexBuffer.IsActual())
 	{
-		IndexBuffer* abstractIndexBuffer = targetState.indexBuffer;
+		LetIndexBuffer* let = (LetIndexBuffer*)cellIndexBuffer.top;
+		IndexBuffer* abstractIndexBuffer = let ? let->indexBuffer : 0;
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, abstractIndexBuffer ? fast_cast<GlIndexBuffer*>(abstractIndexBuffer)->GetName() : 0);
 		GlSystem::CheckErrors("Can't bind index buffer");
 
-		boundState.indexBuffer = targetState.indexBuffer;
+		cellIndexBuffer.Actual();
 	}
 
-	if(forceReset || targetState.fillMode != boundState.fillMode)
+	if(!cellFillMode.IsActual())
 	{
-		switch(targetState.fillMode)
+		LetFillMode* let = (LetFillMode*)cellFillMode.top;
+		FillMode fillMode = let ? let->fillMode : fillModeSolid;
+		switch(fillMode)
 		{
-		case ContextState::fillModeWireframe:
+		case fillModeWireframe:
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			break;
-		case ContextState::fillModeSolid:
+		case fillModeSolid:
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			break;
 		default:
@@ -213,21 +233,23 @@ void GlContext::Update()
 		}
 		GlSystem::CheckErrors("Can't bind fill mode");
 
-		boundState.fillMode = targetState.fillMode;
+		cellFillMode.Actual();
 	}
 
-	if(forceReset || targetState.cullMode != boundState.cullMode)
+	if(!cellCullMode.IsActual())
 	{
-		switch(targetState.cullMode)
+		LetCullMode* let = (LetCullMode*)cellCullMode.top;
+		CullMode cullMode = let ? let->cullMode : cullModeBack;
+		switch(cullMode)
 		{
-		case ContextState::cullModeNone:
+		case cullModeNone:
 			glDisable(GL_CULL_FACE);
 			break;
-		case ContextState::cullModeBack:
+		case cullModeBack:
 			glEnable(GL_CULL_FACE);
 			glCullFace(GL_BACK);
 			break;
-		case ContextState::cullModeFront:
+		case cullModeFront:
 			glEnable(GL_CULL_FACE);
 			glCullFace(GL_FRONT);
 			break;
@@ -236,50 +258,59 @@ void GlContext::Update()
 		}
 		GlSystem::CheckErrors("Can't bind cull mode");
 
-		boundState.cullMode = targetState.cullMode;
+		cellCullMode.Actual();
 	}
 
-	if(forceReset || targetState.viewportWidth != boundState.viewportWidth || targetState.viewportHeight != boundState.viewportHeight)
+	// viewport
+	THROW_ASSERT(cellViewport.top);
+	if(!cellViewport.IsActual())
 	{
-		glViewport(0, 0, targetState.viewportWidth, targetState.viewportHeight);
+		LetViewport* let = (LetViewport*)cellViewport.top;
+		glViewport(0, 0, let->viewportWidth, let->viewportHeight);
 		GlSystem::CheckErrors("Can't bind viewport");
 
-		boundState.viewportWidth = targetState.viewportWidth;
-		boundState.viewportHeight = targetState.viewportHeight;
+		cellViewport.Actual();
 	}
 
-	if(forceReset || targetState.depthTestFunc != boundState.depthTestFunc || targetState.depthWrite != boundState.depthWrite)
+	// depth test func & depth write
+	LetDepthTestFunc* letDTF = (LetDepthTestFunc*)cellDepthTestFunc.top;
+	DepthTestFunc depthTestFunc = letDTF ? letDTF->depthTestFunc : depthTestFuncLess;
+	LetDepthWrite* letDW = (LetDepthWrite*)cellDepthWrite.top;
+	bool depthWrite = letDW ? letDW->depthWrite : true;
+	// enable or disable depth test
+	if(!cellDepthTestFunc.IsActual() || !cellDepthWrite.IsActual())
 	{
-		((targetState.depthTestFunc != ContextState::depthTestFuncAlways || targetState.depthWrite) ? glEnable : glDisable)(GL_DEPTH_TEST);
+		((depthTestFunc != depthTestFuncAlways || depthWrite) ? glEnable : glDisable)(GL_DEPTH_TEST);
 	}
 
-	if(forceReset || targetState.depthTestFunc != boundState.depthTestFunc)
+	// depth test func
+	if(!cellDepthTestFunc.IsActual())
 	{
 		GLenum func;
-		switch(targetState.depthTestFunc)
+		switch(depthTestFunc)
 		{
-		case ContextState::depthTestFuncNever:
+		case depthTestFuncNever:
 			func = GL_NEVER;
 			break;
-		case ContextState::depthTestFuncLess:
+		case depthTestFuncLess:
 			func = GL_LESS;
 			break;
-		case ContextState::depthTestFuncLessOrEqual:
+		case depthTestFuncLessOrEqual:
 			func = GL_LEQUAL;
 			break;
-		case ContextState::depthTestFuncEqual:
+		case depthTestFuncEqual:
 			func = GL_EQUAL;
 			break;
-		case ContextState::depthTestFuncNonEqual:
+		case depthTestFuncNonEqual:
 			func = GL_NOTEQUAL;
 			break;
-		case ContextState::depthTestFuncGreaterOrEqual:
+		case depthTestFuncGreaterOrEqual:
 			func = GL_GEQUAL;
 			break;
-		case ContextState::depthTestFuncGreater:
+		case depthTestFuncGreater:
 			func = GL_GREATER;
 			break;
-		case ContextState::depthTestFuncAlways:
+		case depthTestFuncAlways:
 			func = GL_ALWAYS;
 			break;
 		default:
@@ -290,33 +321,35 @@ void GlContext::Update()
 
 		GlSystem::CheckErrors("Can't bind depth test func");
 
-		boundState.depthTestFunc = targetState.depthTestFunc;
+		cellDepthTestFunc.Actual();
 	}
 
-	if(forceReset || targetState.depthWrite != boundState.depthWrite)
+	// depth write
+	if(!cellDepthWrite.IsActual())
 	{
-		glDepthMask(targetState.depthWrite ? GL_TRUE : GL_FALSE);
+		glDepthMask(depthWrite ? GL_TRUE : GL_FALSE);
 
 		GlSystem::CheckErrors("Can't bind depth write");
 
-		boundState.depthWrite = targetState.depthWrite;
+		cellDepthWrite.Actual();
 	}
 
-	if(forceReset || targetState.blendState != boundState.blendState)
+	// blend state
+	if(!cellBlendState.IsActual())
 	{
-		if(targetState.blendState)
-			fast_cast<GlBlendState*>(&*targetState.blendState)->Apply();
+		LetBlendState* let = (LetBlendState*)cellBlendState.top;
+		BlendState* abstractBlendState = let ? let->blendState : 0;
+		if(abstractBlendState)
+			fast_cast<GlBlendState*>(abstractBlendState)->Apply();
 		else
 			GlBlendState::ApplyDefault();
 
 		GlSystem::CheckErrors("Can't bind blend state");
 
-		boundState.blendState = targetState.blendState;
+		cellBlendState.Actual();
 	}
 
 	GlSystem::CheckErrors("Can't update context");
-
-	forceReset = false;
 }
 
 ptr<GlRenderBuffer> GlContext::GetDummyRenderBuffer(int width, int height)
@@ -360,9 +393,9 @@ void GlContext::ClearDepth(float depth)
 	UpdateFramebuffer();
 	// nesessary for depth clear
 	glEnable(GL_DEPTH_TEST);
-	boundState.depthTestFunc = ContextState::depthTestFuncAlways;
+	cellDepthTestFunc.Reset();
 	glDepthFunc(GL_ALWAYS);
-	boundState.depthWrite = true;
+	cellDepthWrite.Reset();
 	glDepthMask(GL_TRUE);
 
 	glClearBufferfv(GL_DEPTH, 0, &depth);
@@ -384,7 +417,7 @@ void GlContext::ClearDepthStencil(float depth, unsigned stencil)
 	GlSystem::CheckErrors("Can't clear depth and stencil");
 }
 
-void GlContext::SetBufferData(GLenum target, GLuint bufferName, const void* data, int size, int bufferSize)
+void GlContext::UploadBufferData(GLenum target, GLuint bufferName, const void* data, int size, int bufferSize)
 {
 	// проверить, что размер правильный
 	if(size > bufferSize)
@@ -398,31 +431,38 @@ void GlContext::SetBufferData(GLenum target, GLuint bufferName, const void* data
 	GlSystem::CheckErrors("Can't upload data into OpenGL buffer");
 }
 
-void GlContext::SetUniformBufferData(UniformBuffer* abstractUniformBuffer, const void* data, int size)
+void GlContext::UploadUniformBufferData(UniformBuffer* abstractUniformBuffer, const void* data, int size)
 {
 	GlUniformBuffer* uniformBuffer = fast_cast<GlUniformBuffer*>(&*abstractUniformBuffer);
 
-	SetBufferData(GL_UNIFORM_BUFFER, uniformBuffer->GetName(), data, size, uniformBuffer->GetSize());
+	UploadBufferData(GL_UNIFORM_BUFFER, uniformBuffer->GetName(), data, size, uniformBuffer->GetSize());
 }
 
-void GlContext::SetVertexBufferData(VertexBuffer* abstractVertexBuffer, const void* data, int size)
+void GlContext::UploadVertexBufferData(VertexBuffer* abstractVertexBuffer, const void* data, int size)
 {
 	GlVertexBuffer* vertexBuffer = fast_cast<GlVertexBuffer*>(&*abstractVertexBuffer);
 
-	SetBufferData(GL_ARRAY_BUFFER, vertexBuffer->GetName(), data, size, vertexBuffer->GetSize());
+	UploadBufferData(GL_ARRAY_BUFFER, vertexBuffer->GetName(), data, size, vertexBuffer->GetSize());
 }
 
 void GlContext::Draw(int count)
 {
 	Update();
 
-	if(boundState.indexBuffer)
+	LetIndexBuffer* let = (LetIndexBuffer*)cellIndexBuffer.current;
+	IndexBuffer* abstractIndexBuffer = let ? let->indexBuffer : 0;
+	if(abstractIndexBuffer)
 	{
-		GlIndexBuffer* indexBuffer = fast_cast<GlIndexBuffer*>(&*boundState.indexBuffer);
+		GlIndexBuffer* indexBuffer = fast_cast<GlIndexBuffer*>(abstractIndexBuffer);
 		glDrawElements(GL_TRIANGLES, count >= 0 ? count : indexBuffer->GetIndicesCount(), indexBuffer->GetIndicesType(), (void*)0);
 	}
 	else
-		glDrawArrays(GL_TRIANGLES, 0, count >= 0 ? count : boundState.vertexBuffers[0]->GetVerticesCount());
+	{
+		THROW_ASSERT(cellVertexBuffers[0].current);
+		VertexBuffer* abstractVertexBuffer = ((LetVertexBuffer*)cellVertexBuffers[0].current)->vertexBuffer;
+		THROW_ASSERT(abstractVertexBuffer);
+		glDrawArrays(GL_TRIANGLES, 0, count >= 0 ? count : fast_cast<GlVertexBuffer*>(abstractVertexBuffer)->GetVerticesCount());
+	}
 	GlSystem::CheckErrors("Can't draw");
 }
 
@@ -430,13 +470,20 @@ void GlContext::DrawInstanced(int instancesCount, int count)
 {
 	Update();
 
-	if(boundState.indexBuffer)
+	LetIndexBuffer* let = (LetIndexBuffer*)cellIndexBuffer.current;
+	IndexBuffer* abstractIndexBuffer = let ? let->indexBuffer : 0;
+	if(abstractIndexBuffer)
 	{
-		GlIndexBuffer* indexBuffer = fast_cast<GlIndexBuffer*>(&*boundState.indexBuffer);
+		GlIndexBuffer* indexBuffer = fast_cast<GlIndexBuffer*>(abstractIndexBuffer);
 		glDrawElementsInstanced(GL_TRIANGLES, count >= 0 ? count : indexBuffer->GetIndicesCount(), indexBuffer->GetIndicesType(), (void*)0, instancesCount);
 	}
 	else
-		glDrawArraysInstanced(GL_TRIANGLES, 0, count >= 0 ? count : boundState.vertexBuffers[0]->GetVerticesCount(), instancesCount);
+	{
+		THROW_ASSERT(cellVertexBuffers[0].current);
+		VertexBuffer* abstractVertexBuffer = ((LetVertexBuffer*)cellVertexBuffers[0].current)->vertexBuffer;
+		THROW_ASSERT(abstractVertexBuffer);
+		glDrawArraysInstanced(GL_TRIANGLES, 0, count >= 0 ? count : fast_cast<GlVertexBuffer*>(abstractVertexBuffer)->GetVerticesCount(), instancesCount);
+	}
 	GlSystem::CheckErrors("Can't draw instanced");
 }
 

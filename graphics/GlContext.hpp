@@ -42,7 +42,7 @@ private:
 	/// Получить пустой рендербуфер нужных размеров.
 	ptr<GlRenderBuffer> GetDummyRenderBuffer(int width, int height);
 
-	void SetBufferData(GLenum target, GLuint bufferName, const void* data, int size, int bufferSize);
+	void UploadBufferData(GLenum target, GLuint bufferName, const void* data, int size, int bufferSize);
 
 public:
 	GlContext(ptr<GlDevice> device);
@@ -54,8 +54,8 @@ public:
 	void ClearStencil(unsigned stencil);
 	void ClearDepthStencil(float depth, unsigned stencil);
 
-	void SetUniformBufferData(UniformBuffer* buffer, const void* data, int size);
-	void SetVertexBufferData(VertexBuffer* buffer, const void* data, int size);
+	void UploadUniformBufferData(UniformBuffer* buffer, const void* data, int size);
+	void UploadVertexBufferData(VertexBuffer* buffer, const void* data, int size);
 
 	void Draw(int count = -1);
 	void DrawInstanced(int instancesCount, int count = -1);

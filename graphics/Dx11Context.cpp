@@ -52,33 +52,35 @@ ID3D11InputLayout* Dx11Context::GetInputLayout(ptr<Dx11AttributeBinding> attribu
 	return inputLayout;
 }
 
-int Dx11Context::GetRasterizerStateKey(const ContextState& contextState)
+int Dx11Context::GetRasterizerStateKey()
 {
-	int key = ((int)contextState.fillMode) | (((int)contextState.cullMode) << 1);
-	// если состояние растеризатора отсутствует, создать его
+	FillMode fillMode = cellFillMode.top ? ((LetFillMode*)cellFillMode.top)->fillMode : fillModeSolid;
+	CullMode cullMode = cellCullMode.top ? ((LetCullMode*)cellCullMode.top)->cullMode : cullModeBack;
+	int key = ((int)fillMode) | (((int)cullMode) << 1);
+	// if rasterizer state missed, create new
 	if(!rasterizerStateCache[key])
 	{
 		D3D11_RASTERIZER_DESC desc = CD3D11_RASTERIZER_DESC(CD3D11_DEFAULT());
 
-		switch(contextState.fillMode)
+		switch(fillMode)
 		{
-		case ContextState::fillModeWireframe:
+		case fillModeWireframe:
 			desc.FillMode = D3D11_FILL_WIREFRAME;
 			break;
-		case ContextState::fillModeSolid:
+		case fillModeSolid:
 			desc.FillMode = D3D11_FILL_SOLID;
 			break;
 		}
 
-		switch(contextState.cullMode)
+		switch(cullMode)
 		{
-		case ContextState::cullModeNone:
+		case cullModeNone:
 			desc.CullMode = D3D11_CULL_NONE;
 			break;
-		case ContextState::cullModeBack:
+		case cullModeBack:
 			desc.CullMode = D3D11_CULL_BACK;
 			break;
-		case ContextState::cullModeFront:
+		case cullModeFront:
 			desc.CullMode = D3D11_CULL_FRONT;
 			break;
 		}
@@ -95,202 +97,134 @@ int Dx11Context::GetRasterizerStateKey(const ContextState& contextState)
 void Dx11Context::Update()
 {
 	// framebuffer
+	THROW_ASSERT(cellFrameBuffer.top);
+	if(!cellFrameBuffer.IsActual())
 	{
-		Dx11FrameBuffer* targetFrameBuffer = fast_cast<Dx11FrameBuffer*>(&*targetState.frameBuffer);
-		if(forceReset || targetState.frameBuffer != boundState.frameBuffer || targetFrameBuffer->IsDirty())
-		{
-			targetFrameBuffer->Apply(deviceContext);
+		LetFrameBuffer* top = (LetFrameBuffer*)cellFrameBuffer.top;
+		LetFrameBuffer* current = (LetFrameBuffer*)cellFrameBuffer.current;
 
-			boundState.frameBuffer = targetState.frameBuffer;
-		}
+		THROW_ASSERT(top->frameBuffer);
+
+		Dx11FrameBuffer* frameBuffer = fast_cast<Dx11FrameBuffer*>(&*top->frameBuffer);
+		if(!current || current->frameBuffer != top->frameBuffer || frameBuffer->IsDirty())
+			frameBuffer->Apply(deviceContext);
+
+		cellFrameBuffer.Actual();
 	}
 
-	// текстуры
+	// samplers
 	{
-		// сейчас единственная оптимизация - начало и конец в списке обновляемых текстур
+		// the only optimization for now is begin and end
 		int end;
-		if(forceReset)
-			end = ContextState::textureSlotsCount;
-		else
-		{
-			for(end = ContextState::textureSlotsCount - 1; end >= 0; --end)
-				if(targetState.textures[end] != boundState.textures[end])
-					break;
-			++end;
-		}
+		for(end = samplersCount - 1; end >= 0; --end)
+			if(!cellSamplers[end].IsActual())
+				break;
+		++end;
 		int begin;
-		if(forceReset)
-			begin = 0;
-		else
-		{
-			for(begin = 0; begin < end; ++begin)
-				if(targetState.textures[begin] != boundState.textures[begin])
-					break;
-		}
+		for(begin = 0; begin < end; ++begin)
+			if(!cellSamplers[begin].IsActual())
+				break;
 
 		if(begin < end)
 		{
-			ID3D11ShaderResourceView* views[ContextState::textureSlotsCount];
+			ID3D11ShaderResourceView* views[samplersCount];
+			ID3D11SamplerState* states[samplersCount];
 			for(int i = begin; i < end; ++i)
 			{
-				Texture* abstractTexture = targetState.textures[i];
-				if(abstractTexture)
-				{
-					Dx11Texture* texture = fast_cast<Dx11Texture*>(abstractTexture);
-					views[i] = texture->GetShaderResourceViewInterface();
-				}
-				else
-					views[i] = 0;
+				const LetSampler* let = (LetSampler*)cellSamplers[i].top;
+				Texture* abstractTexture = let ? let->texture : 0;
+				views[i] = abstractTexture
+					? fast_cast<Dx11Texture*>(abstractTexture)->GetShaderResourceViewInterface()
+					: 0;
+				SamplerState* abstractSamplerState = let ? let->samplerState : 0;
+				states[i] = abstractSamplerState
+					? fast_cast<Dx11SamplerState*>(abstractSamplerState)->GetSamplerStateInterface(device)
+					: 0;
 			}
 
-			// установить текстуры
+			// set textures
 			deviceContext->VSSetShaderResources(begin, end - begin, views + begin);
 			deviceContext->PSSetShaderResources(begin, end - begin, views + begin);
-
-			// обновить актуальное состояние
-			for(int i = begin; i < end; ++i)
-				boundState.textures[i] = targetState.textures[i];
-		}
-	}
-
-	// семплеры
-	{
-		// сейчас единственная оптимизация - начало и конец в списке обновляемых семплеров
-		int end;
-		if(forceReset)
-			end = ContextState::textureSlotsCount;
-		else
-		{
-			for(end = ContextState::textureSlotsCount - 1; end >= 0; --end)
-				if(targetState.samplerStates[end] != boundState.samplerStates[end])
-					break;
-			++end;
-		}
-		int begin;
-		if(forceReset)
-			begin = 0;
-		else
-		{
-			for(begin = 0; begin < end; ++begin)
-				if(targetState.samplerStates[begin] != boundState.samplerStates[begin])
-					break;
-		}
-
-		if(begin < end)
-		{
-			ID3D11SamplerState* states[ContextState::textureSlotsCount];
-			for(int i = begin; i < end; ++i)
-			{
-				SamplerState* abstractSamplerState = targetState.samplerStates[i];
-				if(abstractSamplerState)
-				{
-					Dx11SamplerState* samplerState = fast_cast<Dx11SamplerState*>(abstractSamplerState);
-					states[i] = samplerState->GetSamplerStateInterface(device);
-				}
-				else
-					states[i] = 0;
-			}
-
-			// установить семплеры
+			// set samplers
 			deviceContext->VSSetSamplers(begin, end - begin, states + begin);
 			deviceContext->PSSetSamplers(begin, end - begin, states + begin);
 
-			// обновить актуальное состояние
+			// update actual state
 			for(int i = begin; i < end; ++i)
-				boundState.samplerStates[i] = targetState.samplerStates[i];
+				cellSamplers[i].Actual();
 		}
 	}
 
-	// константные буферы
+	// uniform buffers
 	{
-		// сейчас единственная оптимизация - начало и конец в списке обновляемых константных буферов
+		// the only optimization for now is begin and end
 		int end;
-		if(forceReset)
-			end = ContextState::uniformBufferSlotsCount;
-		else
-		{
-			for(end = ContextState::uniformBufferSlotsCount - 1; end >= 0; --end)
-				if(targetState.uniformBuffers[end] != boundState.uniformBuffers[end])
-					break;
-			++end;
-		}
+		for(end = uniformBuffersCount - 1; end >= 0; --end)
+			if(!cellUniformBuffers[end].IsActual())
+				break;
+		++end;
 		int begin;
-		if(forceReset)
-			begin = 0;
-		else
-		{
-			for(begin = 0; begin < end; ++begin)
-				if(targetState.uniformBuffers[begin] != boundState.uniformBuffers[begin])
-					break;
-		}
+		for(begin = 0; begin < end; ++begin)
+			if(!cellUniformBuffers[begin].IsActual())
+				break;
 
 		if(begin < end)
 		{
-			ID3D11Buffer* buffers[ContextState::uniformBufferSlotsCount];
+			ID3D11Buffer* buffers[uniformBuffersCount];
 			for(int i = begin; i < end; ++i)
 			{
-				UniformBuffer* abstractUniformBuffer = targetState.uniformBuffers[i];
-				if(abstractUniformBuffer)
-				{
-					Dx11UniformBuffer* uniformBuffer = fast_cast<Dx11UniformBuffer*>(abstractUniformBuffer);
-					buffers[i] = uniformBuffer->GetBufferInterface();
-				}
-				else
-					buffers[i] = 0;
+				LetUniformBuffer* let = (LetUniformBuffer*)cellUniformBuffers[i].top;
+				UniformBuffer* abstractUniformBuffer = let ? let->uniformBuffer : 0;
+				buffers[i] = abstractUniformBuffer
+					? fast_cast<Dx11UniformBuffer*>(abstractUniformBuffer)->GetBufferInterface()
+					: 0;
 			}
 
-			// установить буферы
+			// set buffers
 			deviceContext->VSSetConstantBuffers(begin, end - begin, buffers + begin);
 			deviceContext->PSSetConstantBuffers(begin, end - begin, buffers + begin);
 
-			// обновить актуальное состояние
+			// update actual state
 			for(int i = begin; i < end; ++i)
-				boundState.uniformBuffers[i] = targetState.uniformBuffers[i];
+				cellUniformBuffers[i].Actual();
 		}
 	}
 
-	// разметка атрибутов
-	if(forceReset || targetState.attributeBinding != boundState.attributeBinding || targetState.vertexShader != boundState.vertexShader)
+	// input layout (depends on attribute binding and vertex shader)
+	THROW_ASSERT(cellAttributeBinding.top);
+	THROW_ASSERT(cellVertexShader.top);
+	if(!cellAttributeBinding.IsActual() || !cellVertexShader.IsActual())
 	{
 		deviceContext->IASetInputLayout(GetInputLayout(
-			targetState.attributeBinding.FastCast<Dx11AttributeBinding>(),
-			targetState.vertexShader.FastCast<Dx11VertexShader>()
+			((LetAttributeBinding*)cellAttributeBinding.top)->attributeBinding.FastCast<Dx11AttributeBinding>(),
+			((LetVertexShader*)cellVertexShader.top)->vertexShader.FastCast<Dx11VertexShader>()
 		));
 
-		boundState.attributeBinding = targetState.attributeBinding;
+		cellAttributeBinding.Actual();
 	}
 
-	// вершинные буферы
+	// vertex buffers
 	{
-		// сейчас единственная оптимизация - начало и конец в списке обновляемых вершинных буферов
+		// the only optimization for now is begin and end
 		int end;
-		if(forceReset)
-			end = ContextState::vertexBufferSlotsCount;
-		else
-		{
-			for(end = ContextState::vertexBufferSlotsCount - 1; end >= 0; --end)
-				if(targetState.vertexBuffers[end] != boundState.vertexBuffers[end])
-					break;
-			++end;
-		}
+		for(end = vertexBuffersCount - 1; end >= 0; --end)
+			if(!cellVertexBuffers[end].IsActual())
+				break;
+		++end;
 		int begin;
-		if(forceReset)
-			begin = 0;
-		else
-		{
-			for(begin = 0; begin < end; ++begin)
-				if(targetState.vertexBuffers[begin] != boundState.vertexBuffers[begin])
-					break;
-		}
+		for(begin = 0; begin < end; ++begin)
+			if(!cellVertexBuffers[begin].IsActual())
+				break;
 
 		if(begin < end)
 		{
-			ID3D11Buffer* buffers[ContextState::vertexBufferSlotsCount];
-			UINT strides[ContextState::vertexBufferSlotsCount];
-			UINT offsets[ContextState::vertexBufferSlotsCount];
+			ID3D11Buffer* buffers[vertexBuffersCount];
+			UINT strides[vertexBuffersCount];
+			UINT offsets[vertexBuffersCount];
 			for(int i = begin; i < end; ++i)
 			{
-				VertexBuffer* abstractVertexBuffer = targetState.vertexBuffers[i];
+				LetVertexBuffer* let = (LetVertexBuffer*)cellVertexBuffers[i].top;
+				VertexBuffer* abstractVertexBuffer = let ? let->vertexBuffer : 0;
 				if(abstractVertexBuffer)
 				{
 					Dx11VertexBuffer* vertexBuffer = fast_cast<Dx11VertexBuffer*>(abstractVertexBuffer);
@@ -306,21 +240,21 @@ void Dx11Context::Update()
 				}
 			}
 
-			// установить буферы
+			// set buffers and primitive topology
 			deviceContext->IASetVertexBuffers(begin, end - begin, buffers + begin, strides + begin, offsets + begin);
-			// установить топологию геометрии
 			deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-			// обновить актуальное состояние
+			// update actual state
 			for(int i = begin; i < end; ++i)
-				boundState.vertexBuffers[i] = targetState.vertexBuffers[i];
+				cellVertexBuffers[i].Actual();
 		}
 	}
 
-	// индексный буфер
-	if(forceReset || targetState.indexBuffer != boundState.indexBuffer)
+	// index buffer
+	if(!cellIndexBuffer.IsActual())
 	{
-		IndexBuffer* abstractIndexBuffer = targetState.indexBuffer;
+		LetIndexBuffer* let = (LetIndexBuffer*)cellIndexBuffer.top;
+		IndexBuffer* abstractIndexBuffer = let ? let->indexBuffer : 0;
 		if(abstractIndexBuffer)
 		{
 			Dx11IndexBuffer* indexBuffer = fast_cast<Dx11IndexBuffer*>(abstractIndexBuffer);
@@ -329,81 +263,83 @@ void Dx11Context::Update()
 		else
 			deviceContext->IASetIndexBuffer(NULL, DXGI_FORMAT_R16_UINT, 0);
 
-		boundState.indexBuffer = targetState.indexBuffer;
+		cellIndexBuffer.Actual();
 	}
 
-	// вершинный шейдер
-	if(forceReset || targetState.vertexShader != boundState.vertexShader)
+	// vertex shader
+	if(!cellVertexShader.IsActual())
 	{
-		ID3D11VertexShader* shader;
-		if(targetState.vertexShader)
-			shader = fast_cast<Dx11VertexShader*>(&*targetState.vertexShader)->GetVertexShaderInterface();
-		else
-			shader = 0;
+		LetVertexShader* let = (LetVertexShader*)cellVertexShader.top;
+		VertexShader* abstractVertexShader = let ? let->vertexShader : 0;
+		ID3D11VertexShader* shader = abstractVertexShader
+			? fast_cast<Dx11VertexShader*>(abstractVertexShader)->GetVertexShaderInterface()
+			: 0;
 		deviceContext->VSSetShader(shader, NULL, 0);
 
-		boundState.vertexShader = targetState.vertexShader;
+		cellVertexShader.Actual();
 	}
 
-	// пиксельный шейдер
-	if(forceReset || targetState.pixelShader != boundState.pixelShader)
+	// pixel shader
+	if(!cellPixelShader.IsActual())
 	{
-		ID3D11PixelShader* shader;
-		if(targetState.pixelShader)
-			shader = fast_cast<Dx11PixelShader*>(&*targetState.pixelShader)->GetPixelShaderInterface();
-		else
-			shader = 0;
+		LetPixelShader* let = (LetPixelShader*)cellPixelShader.top;
+		PixelShader* abstractPixelShader = let ? let->pixelShader : 0;
+		ID3D11PixelShader* shader = abstractPixelShader
+			? fast_cast<Dx11PixelShader*>(abstractPixelShader)->GetPixelShaderInterface()
+			: 0;
 		deviceContext->PSSetShader(shader, NULL, 0);
 
-		boundState.pixelShader = targetState.pixelShader;
+		cellPixelShader.Actual();
 	}
 
-	// состояние растеризатора (fill mode & cull mode)
-	if(forceReset || targetState.fillMode != boundState.fillMode || targetState.cullMode != boundState.cullMode)
+	// rasterizer state (fill mode & cull mode)
+	if(!cellFillMode.IsActual() || !cellCullMode.IsActual())
 	{
-		int key = GetRasterizerStateKey(targetState);
+		int key = GetRasterizerStateKey();
 		deviceContext->RSSetState(rasterizerStateCache[key]);
 
-		boundState.fillMode = targetState.fillMode;
-		boundState.cullMode = targetState.cullMode;
+		cellFillMode.Actual();
+		cellCullMode.Actual();
 	}
 
 	// viewport
-	if(forceReset || targetState.viewportWidth != boundState.viewportWidth || targetState.viewportHeight != boundState.viewportHeight)
+	THROW_ASSERT(cellViewport.top);
+	if(!cellViewport.IsActual())
 	{
+		LetViewport* let = (LetViewport*)cellViewport.top;
 		D3D11_VIEWPORT viewport;
 		viewport.TopLeftX = 0;
 		viewport.TopLeftY = 0;
-		viewport.Width = (float)targetState.viewportWidth;
-		viewport.Height = (float)targetState.viewportHeight;
+		viewport.Width = (float)let->viewportWidth;
+		viewport.Height = (float)let->viewportHeight;
 		viewport.MinDepth = 0;
 		viewport.MaxDepth = 1;
 		deviceContext->RSSetViewports(1, &viewport);
 
-		boundState.viewportWidth = targetState.viewportWidth;
-		boundState.viewportHeight = targetState.viewportHeight;
+		cellViewport.Actual();
 	}
 
 	// blend state
-	if(forceReset || targetState.blendState != boundState.blendState)
+	if(!cellBlendState.IsActual())
 	{
-		ID3D11BlendState* blendState;
-		if(targetState.blendState)
-			blendState = fast_cast<Dx11BlendState*>(&*targetState.blendState)->GetBlendStateInterface(device);
-		else
-			blendState = 0;
+		LetBlendState* let = (LetBlendState*)cellBlendState.top;
+		BlendState* abstractBlendState = let ? let->blendState : 0;
+		ID3D11BlendState* blendState = abstractBlendState
+			? fast_cast<Dx11BlendState*>(abstractBlendState)->GetBlendStateInterface(device)
+			: 0;
 		deviceContext->OMSetBlendState(blendState, 0, 0xffffffff);
 
-		boundState.blendState = targetState.blendState;
+		cellBlendState.Actual();
 	}
-
-	forceReset = false;
 }
 
 void Dx11Context::ClearColor(int colorBufferIndex, const float* color)
 {
+	LetFrameBuffer* let = (LetFrameBuffer*)cellFrameBuffer.top;
+	THROW_ASSERT(let);
+	THROW_ASSERT(let->frameBuffer);
 	deviceContext->ClearRenderTargetView(
-		fast_cast<Dx11FrameBuffer*>((FrameBuffer*)targetState.frameBuffer)
+		fast_cast<Dx11FrameBuffer*>((FrameBuffer*)let->frameBuffer)
 			->GetColorBuffer(colorBufferIndex)
 				->GetRenderTargetViewInterface(),
 		color);
@@ -411,32 +347,41 @@ void Dx11Context::ClearColor(int colorBufferIndex, const float* color)
 
 void Dx11Context::ClearDepth(float depth)
 {
+	LetFrameBuffer* let = (LetFrameBuffer*)cellFrameBuffer.top;
+	THROW_ASSERT(let);
+	THROW_ASSERT(let->frameBuffer);
 	deviceContext->ClearDepthStencilView(
 		fast_cast<Dx11DepthStencilBuffer*>(
-			&*targetState.frameBuffer->GetDepthStencilBuffer()
+			&*let->frameBuffer->GetDepthStencilBuffer()
 		)->GetDepthStencilViewInterface(),
 		D3D11_CLEAR_DEPTH, depth, 0);
 }
 
 void Dx11Context::ClearStencil(unsigned stencil)
 {
+	LetFrameBuffer* let = (LetFrameBuffer*)cellFrameBuffer.top;
+	THROW_ASSERT(let);
+	THROW_ASSERT(let->frameBuffer);
 	deviceContext->ClearDepthStencilView(
 		fast_cast<Dx11DepthStencilBuffer*>(
-			&*targetState.frameBuffer->GetDepthStencilBuffer()
+			&*let->frameBuffer->GetDepthStencilBuffer()
 		)->GetDepthStencilViewInterface(),
 		D3D11_CLEAR_STENCIL, 0, stencil);
 }
 
 void Dx11Context::ClearDepthStencil(float depth, unsigned stencil)
 {
+	LetFrameBuffer* let = (LetFrameBuffer*)cellFrameBuffer.top;
+	THROW_ASSERT(let);
+	THROW_ASSERT(let->frameBuffer);
 	deviceContext->ClearDepthStencilView(
 		fast_cast<Dx11DepthStencilBuffer*>(
-			&*targetState.frameBuffer->GetDepthStencilBuffer()
+			&*let->frameBuffer->GetDepthStencilBuffer()
 		)->GetDepthStencilViewInterface(),
 		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, stencil);
 }
 
-void Dx11Context::SetBufferData(ID3D11Resource* resource, const void* data, int size, int bufferSize)
+void Dx11Context::UploadBufferData(ID3D11Resource* resource, const void* data, int size, int bufferSize)
 {
 	// проверить, что размер не больше, чем нужно
 	if(size > bufferSize)
@@ -454,38 +399,52 @@ void Dx11Context::SetBufferData(ID3D11Resource* resource, const void* data, int 
 	deviceContext->Unmap(resource, 0);
 }
 
-void Dx11Context::SetUniformBufferData(UniformBuffer* abstractUniformBuffer, const void* data, int size)
+void Dx11Context::UploadUniformBufferData(UniformBuffer* abstractUniformBuffer, const void* data, int size)
 {
 	Dx11UniformBuffer* uniformBuffer = fast_cast<Dx11UniformBuffer*>(abstractUniformBuffer);
 
-	SetBufferData(uniformBuffer->GetBufferInterface(), data, size, uniformBuffer->GetSize());
+	UploadBufferData(uniformBuffer->GetBufferInterface(), data, size, uniformBuffer->GetSize());
 }
 
-void Dx11Context::SetVertexBufferData(VertexBuffer* abstractVertexBuffer, const void* data, int size)
+void Dx11Context::UploadVertexBufferData(VertexBuffer* abstractVertexBuffer, const void* data, int size)
 {
 	Dx11VertexBuffer* vertexBuffer = fast_cast<Dx11VertexBuffer*>(abstractVertexBuffer);
 
-	SetBufferData(vertexBuffer->GetBufferInterface(), data, size, vertexBuffer->GetSize());
+	UploadBufferData(vertexBuffer->GetBufferInterface(), data, size, vertexBuffer->GetSize());
 }
 
 void Dx11Context::Draw(int count)
 {
 	Update();
 
-	if(boundState.indexBuffer)
-		deviceContext->DrawIndexed(count >= 0 ? count : fast_cast<Dx11IndexBuffer*>(&*boundState.indexBuffer)->GetIndicesCount(), 0, 0);
+	LetIndexBuffer* letIndexBuffer = (LetIndexBuffer*)cellIndexBuffer.current;
+	IndexBuffer* abstractIndexBuffer = letIndexBuffer ? letIndexBuffer->indexBuffer : 0;
+	if(abstractIndexBuffer)
+		deviceContext->DrawIndexed(count >= 0 ? count : fast_cast<Dx11IndexBuffer*>(abstractIndexBuffer)->GetIndicesCount(), 0, 0);
 	else
-		deviceContext->Draw(count >= 0 ? count : fast_cast<Dx11VertexBuffer*>(&*boundState.vertexBuffers[0])->GetVerticesCount(), 0);
+	{
+		THROW_ASSERT(cellVertexBuffers[0].current);
+		VertexBuffer* abstractVertexBuffer = ((LetVertexBuffer*)cellVertexBuffers[0].current)->vertexBuffer;
+		THROW_ASSERT(abstractVertexBuffer);
+		deviceContext->Draw(count >= 0 ? count : fast_cast<Dx11VertexBuffer*>(abstractVertexBuffer)->GetVerticesCount(), 0);
+	}
 }
 
 void Dx11Context::DrawInstanced(int instancesCount, int count)
 {
 	Update();
 
-	if(boundState.indexBuffer)
-		deviceContext->DrawIndexedInstanced(count >= 0 ? count : fast_cast<Dx11IndexBuffer*>(&*boundState.indexBuffer)->GetIndicesCount(), instancesCount, 0, 0, 0);
+	LetIndexBuffer* letIndexBuffer = (LetIndexBuffer*)cellIndexBuffer.current;
+	IndexBuffer* abstractIndexBuffer = letIndexBuffer ? letIndexBuffer->indexBuffer : 0;
+	if(abstractIndexBuffer)
+		deviceContext->DrawIndexedInstanced(count >= 0 ? count : fast_cast<Dx11IndexBuffer*>(abstractIndexBuffer)->GetIndicesCount(), instancesCount, 0, 0, 0);
 	else
-		deviceContext->DrawInstanced(count >= 0 ? count : fast_cast<Dx11VertexBuffer*>(&*boundState.vertexBuffers[0])->GetVerticesCount(), instancesCount, 0, 0);
+	{
+		THROW_ASSERT(cellVertexBuffers[0].current);
+		VertexBuffer* abstractVertexBuffer = ((LetVertexBuffer*)cellVertexBuffers[0].current)->vertexBuffer;
+		THROW_ASSERT(abstractVertexBuffer);
+		deviceContext->DrawInstanced(count >= 0 ? count : fast_cast<Dx11VertexBuffer*>(abstractVertexBuffer)->GetVerticesCount(), instancesCount, 0, 0);
+	}
 }
 
 END_INANITY_GRAPHICS

@@ -52,7 +52,7 @@ private:
 	ID3D11InputLayout* GetInputLayout(ptr<Dx11AttributeBinding> attributeBinding, ptr<Dx11VertexShader> vertexShader);
 
 	/// Закодировать состояние растеризатора, и добавить его в кэш, если ещё нет.
-	int GetRasterizerStateKey(const ContextState& contextState);
+	int GetRasterizerStateKey();
 	/// Максимальное количество состояний растеризатора.
 	static const int rasterizerStateCacheSize = 8;
 	/// Кэш состояний растеризатора.
@@ -62,7 +62,7 @@ private:
 	void Update();
 
 	/// Указать данные буфера.
-	void SetBufferData(ID3D11Resource* resource, const void* data, int size, int bufferSize);
+	void UploadBufferData(ID3D11Resource* resource, const void* data, int size, int bufferSize);
 
 public:
 	Dx11Context(ptr<Dx11Device> deviceObject);
@@ -74,8 +74,8 @@ public:
 	void ClearStencil(unsigned stencil);
 	void ClearDepthStencil(float depth, unsigned stencil);
 
-	void SetUniformBufferData(UniformBuffer* buffer, const void* data, int size);
-	void SetVertexBufferData(VertexBuffer* buffer, const void* data, int size);
+	void UploadUniformBufferData(UniformBuffer* buffer, const void* data, int size);
+	void UploadVertexBufferData(VertexBuffer* buffer, const void* data, int size);
 
 	void Draw(int count = -1);
 	void DrawInstanced(int instancesCount, int count = -1);
