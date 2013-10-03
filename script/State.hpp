@@ -32,6 +32,11 @@ public:
 
 	/// Loads a script from file.
 	virtual ptr<Function> LoadScript(ptr<File> file) = 0;
+
+	/// Unregister instance of object if exposed to script.
+	/** Invalidates object instances in script (if they exist), and releases a reference.
+	Invalidated instances should not be touched by script ever. */
+	virtual void ReclaimInstance(RefCounted* object) = 0;
 };
 
 END_INANITY_SCRIPT
