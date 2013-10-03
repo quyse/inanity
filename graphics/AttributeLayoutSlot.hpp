@@ -6,7 +6,6 @@
 BEGIN_INANITY_GRAPHICS
 
 class AttributeLayout;
-struct ContextState;
 class VertexBuffer;
 
 /// Класс слота для разметки атрибутов.
@@ -21,8 +20,6 @@ public:
 
 	ptr<AttributeLayout> GetLayout() const;
 	int GetIndex() const;
-
-	void Apply(ContextState& contextState, ptr<VertexBuffer> vertexBuffer);
 };
 
 END_INANITY_GRAPHICS

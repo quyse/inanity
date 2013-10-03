@@ -1,6 +1,5 @@
 #include "AttributeLayoutSlot.hpp"
 #include "AttributeLayout.hpp"
-#include "ContextState.hpp"
 #include "VertexBuffer.hpp"
 
 BEGIN_INANITY_GRAPHICS
@@ -16,11 +15,6 @@ ptr<AttributeLayout> AttributeLayoutSlot::GetLayout() const
 int AttributeLayoutSlot::GetIndex() const
 {
 	return index;
-}
-
-void AttributeLayoutSlot::Apply(ContextState& contextState, ptr<VertexBuffer> vertexBuffer)
-{
-	contextState.vertexBuffers[index] = vertexBuffer;
 }
 
 END_INANITY_GRAPHICS

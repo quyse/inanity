@@ -103,7 +103,7 @@ var libraries = {
 	// ******* общая графика
 	'libinanity-graphics': {
 		objects: [
-			'graphics.Context', 'graphics.ContextState', 'graphics.Output',
+			'graphics.Context', 'graphics.Output',
 			'graphics.FrameBuffer',
 			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.IndexBuffer',
 			'graphics.SamplerState', 'graphics.BlendState',

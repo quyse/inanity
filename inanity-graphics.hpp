@@ -15,7 +15,6 @@
 #include "graphics/BlendState.hpp"
 #include "graphics/BmpImageLoader.hpp"
 #include "graphics/Context.hpp"
-#include "graphics/ContextState.hpp"
 #include "graphics/DataType.hpp"
 #include "graphics/DepthStencilBuffer.hpp"
 #include "graphics/Device.hpp"
