@@ -97,4 +97,9 @@ void State::Register(Meta::ClassBase* classMeta)
 	RegisterClassMeta(state, classMeta);
 }
 
+void State::ReclaimInstance(RefCounted* object)
+{
+	ReclaimObject(state, object);
+}
+
 END_INANITY_LUA

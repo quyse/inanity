@@ -44,6 +44,7 @@ public:
 	//*** Script::State methods.
 	void Register(Meta::ClassBase* classMeta);
 	ptr<Script::Function> LoadScript(ptr<File> file);
+	void ReclaimInstance(RefCounted* object);
 };
 
 END_INANITY_LUA

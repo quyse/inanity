@@ -225,15 +225,32 @@ struct Value<ptr<ObjectType> >
 			return;
 		}
 
-		ObjectUserData* userData = (ObjectUserData*)lua_newuserdata(state, sizeof(ObjectUserData));
-		userData->type = UserData::typeObject;
-		userData->object = (RefCounted*)(ObjectType*)value;
-		userData->cls = ObjectType::GetMeta();
-		// указать метатаблицу
-		PushObjectMetaTable(state, ObjectType::GetMeta());
-		lua_setmetatable(state, -2);
-		// задать дополнительную ссылку объекту
-		userData->object->Reference();
+		// попробовать найти существующее userdata для объекта
+		lua_pushlightuserdata(state, (ObjectType*)value);		// value
+		lua_gettable(state, LUA_REGISTRYINDEX);							// userdata
+		// если нет, сделать
+		if(lua_isnil(state, -1))
+		{
+			// выбросить nil из стека
+			lua_pop(state, 1);																//
+
+			ObjectUserData* userData = (ObjectUserData*)lua_newuserdata(state, sizeof(ObjectUserData));
+			userData->type = UserData::typeObject;
+			userData->object = (RefCounted*)(ObjectType*)value;
+			userData->cls = ObjectType::GetMeta();
+			// указать метатаблицу
+			PushObjectMetaTable(state, ObjectType::GetMeta());
+			lua_setmetatable(state, -2);
+			// задать дополнительную ссылку объекту
+			userData->object->Reference();
+
+			// положить адрес объекта
+			lua_pushlightuserdata(state, (ObjectType*)value);
+			// продублировать userdata в стеке
+			lua_pushvalue(state, -2);
+			// сохранить userdata по адресу объекта, для повторного использования
+			lua_settable(state, LUA_REGISTRYINDEX);
+		}
 	}
 };
 

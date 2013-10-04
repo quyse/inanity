@@ -32,7 +32,11 @@ struct ClassUserData : public UserData
 /// Структура объекта, представляющего управляемый указатель в Lua.
 struct ObjectUserData : public UserData
 {
+	/// Pointer to object.
+	/** If null, the object was reclaimed. */
 	RefCounted* object;
+	/** Type of the object. */
+	/** Not null even for reclaimed objects. */
 	Meta::ClassBase* cls;
 };
 

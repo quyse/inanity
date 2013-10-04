@@ -14,6 +14,16 @@ int MetaTable_index(lua_State* state)
 	// в стеке лежит: сначала userdata, затем индекс
 	// а в замыкании лежит таблица методов
 
+	// проверить, что объект не отозван
+	ObjectUserData* userData = (ObjectUserData*)lua_touserdata(state, -2);
+	if(!userData->object)
+	{
+		// вернуть понятную ошибку
+		lua_pushliteral(state, "Object reclaimed");
+		lua_error(state);
+		// управление не возвращается
+	}
+
 	// продублировать индекс
 	lua_pushvalue(state, 2);
 	// получить метод
@@ -161,12 +171,41 @@ int ObjectMetaTable_gc(lua_State* state)
 {
 	// в стеке лежит: userdata
 
-	ObjectUserData* userData = (ObjectUserData*)lua_touserdata(state, -1);
-	// освободить ссылку на объект
-	userData->object->Dereference();
-	userData->object = 0;
-	userData->cls = 0;
+	ReclaimObjectFromUserData(state);
+
 	return 0;
+}
+
+void ReclaimObjectFromUserData(lua_State* state)
+{
+	ObjectUserData* userData = (ObjectUserData*)lua_touserdata(state, -1);
+	// if object is not reclaimed yet, reclaim it
+	RefCounted* object = userData->object;
+	if(object)
+	{
+		// dereference object
+		userData->object->Dereference();
+		// clear pointer
+		userData->object = 0;
+
+		// remove userdata from registry
+		lua_pushlightuserdata(state, object);
+		lua_pushnil(state);
+		lua_settable(state, LUA_REGISTRYINDEX);
+	}
+}
+
+void ReclaimObject(lua_State* state, RefCounted* object)
+{
+	// find an object by pointer
+	lua_pushlightuserdata(state, object);
+	lua_gettable(state, LUA_REGISTRYINDEX);
+	// if object doesn't exist, just pop nil from stack
+	if(lua_isnil(state, -1))
+		lua_pop(state, 1);
+	// else reclaim the object
+	else
+		ReclaimObjectFromUserData(state);
 }
 
 void PushObjectMetaTable(lua_State* state, Meta::ClassBase* cls)

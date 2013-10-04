@@ -27,6 +27,11 @@ void RegisterClassMeta(lua_State* state, Meta::ClassBase* cls);
 /// Структура с методами метатаблицы объектов.
 int ObjectMetaTable_gc(lua_State* state);
 
+/// Reclaim object from userdata on top of the stack.
+void ReclaimObjectFromUserData(lua_State* state);
+/// Reclaim object by pointer.
+void ReclaimObject(lua_State* state, RefCounted* object);
+
 /// Push object metatable in stack.
 void PushObjectMetaTable(lua_State* state, Meta::ClassBase* cls);
 
