@@ -5,14 +5,16 @@ V8 Building Sequence
 
 build-fixes.patch (for UNIXes):
 
-* Use Python 2, not 3.
-* Compilation error on gcc 4.8: https://code.google.com/p/v8/issues/detail?id=2149. Use -Wno-unused-local-typedefs to fix.
+* use Python 2, not 3.
+* compilation error on gcc 4.8: https://code.google.com/p/v8/issues/detail?id=2149. Use -Wno-unused-local-typedefs to fix.
+* disable ICU dependency
 
 windows-build-fixes.patch (for Windows):
 
 * enable exceptions
 * use DLL runtime in debug
 * disable incremental linking
+* disable ICU dependency
 
 3. Use instructions provided by Google: https://code.google.com/p/v8/wiki/BuildingWithGYP to build v8 libraries.
 On Windows you should run something like that (in compiler's command line environment):
