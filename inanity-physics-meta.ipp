@@ -1,8 +1,6 @@
 #ifndef ___INANITY_INANITY_PHYSICS_META_IPP___
 #define ___INANITY_INANITY_PHYSICS_META_IPP___
 
-#include "meta/impl.hpp"
-
 #include "physics/RigidBody.hpp"
 META_CLASS(Inanity::Physics::RigidBody, Inanity.Physics.RigidBody);
 META_CLASS_END();
