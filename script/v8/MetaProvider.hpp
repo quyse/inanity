@@ -64,6 +64,20 @@ public:
 	};
 
 	typedef Inanity::Meta::ClassBase<ConstructorBase, FunctionBase, MethodBase> ClassBase;
+
+	/// Class represents a script value.
+	class Any
+	{
+	private:
+		v8::Local<v8::Value> value;
+
+	public:
+		Any(v8::Local<v8::Value> value);
+
+		operator float() const;
+		operator double() const;
+		Any operator[](int i) const;
+	};
 };
 
 END_INANITY_V8

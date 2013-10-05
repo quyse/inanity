@@ -218,6 +218,28 @@ struct Value<ptr<ObjectType> >
 	}
 };
 
+template <typename T>
+struct Value
+{
+	typedef T ValueType;
+
+	static inline T From(v8::Local<v8::Value> value)
+	{
+		return Meta::ConverterFromScript<MetaProvider, T>::Convert(MetaProvider::Any(value));
+	}
+};
+
+template <typename T>
+struct Value<const T&>
+{
+	typedef T ValueType;
+
+	static inline T From(v8::Local<v8::Value> value)
+	{
+		return Meta::ConverterFromScript<MetaProvider, T>::Convert(MetaProvider::Any(value));
+	}
+};
+
 END_INANITY_V8
 
 #endif

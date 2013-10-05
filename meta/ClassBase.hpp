@@ -54,6 +54,16 @@ class Class;
 template <typename Provider, typename ClassType>
 typename Provider::ClassBase* MetaOf();
 
+/// Converter of value-type things from script.
+template <typename Provider, typename Type>
+struct ConverterFromScript;
+
+template <typename Provider, typename Type>
+Type ConvertFromScript(const typename Provider::Any& value)
+{
+	return ConverterFromScript<Provider, Type>::Convert(value);
+}
+
 END_INANITY_META
 
 #endif

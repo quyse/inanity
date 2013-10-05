@@ -1,11 +1,13 @@
 #include "State.hpp"
 #include "../Function.hpp"
 #include "../../FolderFileSystem.hpp"
+#include "../../inanity-math.hpp"
 #include <iostream>
 using namespace Inanity;
 
 #include "impl.ipp"
 #include "../../inanity-base-meta.ipp"
+#include "../../inanity-math-meta.ipp"
 
 Script::State* globalState;
 
@@ -24,6 +26,19 @@ public:
 		return this;
 	}
 
+	void printvec3(const Math::vec3& a)
+	{
+		std::cout << a << '\n';
+	}
+	void printvec4(Math::vec4 a)
+	{
+		std::cout << a << '\n';
+	}
+	void printmat4x4(const Math::mat4x4& a)
+	{
+		std::cout << a << '\n';
+	}
+
 	META_DECLARE_CLASS(TestClass);
 };
 
@@ -31,6 +46,9 @@ META_CLASS(TestClass, TestClass);
 	META_CONSTRUCTOR();
 	META_STATIC_METHOD(print);
 	META_METHOD(work);
+	META_METHOD(printvec3);
+	META_METHOD(printvec4);
+	META_METHOD(printmat4x4);
 META_CLASS_END();
 
 int main(int argc, char* argv[])
