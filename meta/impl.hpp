@@ -1,47 +1,56 @@
 #ifndef ___INANITY_META_IMPL_HPP___
 #define ___INANITY_META_IMPL_HPP___
 
-#include "Class.ipp"
-#include "Constructor.ipp"
-#include "Method.ipp"
-#include "Function.ipp"
-#include "Extension.ipp"
+#include "ClassBase.ipp"
+
+// Before inclusion of this header, do the following:
+// * include header of needed meta provider class
+// * define a macro META_PROVIDER to a full name of the meta provider class
+// After inclusion you likely want to undef META_PROVIDER.
+
+#ifndef META_PROVIDER
+#error META_PROVIDER isn't defined
+#endif
 
 #define META_CLASS(className, fullClassName) \
-	class className::ClassMeta : public Inanity::Meta::Class<className> \
+	template <> \
+	class Inanity::Meta::Class<META_PROVIDER, className> : public META_PROVIDER::ClassBase \
 	{ \
 	private: \
+		typedef META_PROVIDER Provider; \
 		typedef className ClassType; \
 	public: \
-		ClassMeta(); \
+		Class(); \
 	}; \
-	className::ClassMeta className::meta; \
-	Inanity::Meta::ClassBase* className::GetMeta() \
+	template <> \
+	META_PROVIDER::ClassBase* Inanity::Meta::MetaOf<META_PROVIDER, className>() \
 	{ \
-		return &meta; \
+		static Class<META_PROVIDER, className> instance; \
+		return &instance; \
 	} \
-	className::ClassMeta::ClassMeta() \
-		: Inanity::Meta::Class<className>(#className, #fullClassName) {
+	Inanity::Meta::Class<META_PROVIDER, className>::Class() \
+		: META_PROVIDER::ClassBase(#className, #fullClassName) \
+	{
 #define META_CLASS_END() }
 
 #define META_CLASS_PARENT(parentClassName) \
-	SetParent(parentClassName::GetMeta())
+	SetParent(Inanity::Meta::MetaOf<Provider, parentClassName>())
 
 #define META_CONSTRUCTOR(...) \
 	{ \
-		static Inanity::Meta::Constructor<void (ClassType::*)(__VA_ARGS__)> c; \
+		static Provider::Constructor<void (ClassType::*)(__VA_ARGS__)> c; \
 		SetConstructor(&c); \
 	}
 
 #define META_METHOD(methodName) \
 	{ \
-		static Inanity::Meta::Method<decltype(&ClassType::methodName), &ClassType::methodName> m(#methodName); \
+		static Provider::Method<decltype(&ClassType::methodName), &ClassType::methodName> m(#methodName); \
 		AddMethod(&m); \
 	}
 
 #define META_STATIC_METHOD(methodName) \
 	{ \
-		static Inanity::Meta::Function<decltype(&ClassType::methodName), &ClassType::methodName> f(#methodName); \
+		static Provider::Function<decltype(&ClassType::methodName), &ClassType::methodName> f(#methodName); \
 		AddStaticMethod(&f); \
 	}
 

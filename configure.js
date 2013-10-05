@@ -69,10 +69,6 @@ var libraries = {
 	'libinanity-sqlitefs': {
 		objects: ['SQLiteFileSystem']
 	},
-	// ******* метаинформация
-	'libinanity-meta': {
-		objects: ['meta.Class', 'meta.Function', 'meta.Method']
-	},
 	// ******* скрипты на lua
 	'libinanity-lua': {
 		objects: ['script.lua.Function', 'script.lua.State', 'script.lua.stuff']
@@ -228,13 +224,13 @@ var executables = {
 	// TEST
 	, luatest: {
 		objects: ['script.lua.test'],
-		staticLibraries: ['libinanity-base', 'libinanity-compress', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
+		staticLibraries: ['libinanity-base', 'libinanity-compress', 'libinanity-lua', 'deps/lua//liblua'],
 		dynamicLibraries: []
 	}
 	// TEST
 	, v8test: {
 		objects: ['script.v8.test'],
-		staticLibraries: ['libinanity-base', 'libinanity-meta', 'libinanity-v8', 'deps/v8//libv8_base', 'deps/v8//libv8_snapshot'],
+		staticLibraries: ['libinanity-base', 'libinanity-v8', 'deps/v8//libv8_base', 'deps/v8//libv8_snapshot'],
 		dynamicLibraries: ['ws2_32.lib', 'winmm.lib']
 	}
 	// TEST

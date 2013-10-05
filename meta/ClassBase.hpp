@@ -1,19 +1,13 @@
-#ifndef ___INANITY_META_CLASS_HPP___
-#define ___INANITY_META_CLASS_HPP___
+#ifndef ___INANITY_META_CLASS_BASE_HPP___
+#define ___INANITY_META_CLASS_BASE_HPP___
 
-#include "Extension.hpp"
+#include "meta.hpp"
 #include <vector>
-
-#include "../script/lua/extension.hpp"
-#include "../script/v8/extension.hpp"
 
 BEGIN_INANITY_META
 
-class ConstructorBase;
-class MethodBase;
-class FunctionBase;
-
-/// Base non-templated class.
+/// Foundation class for writing class bases.
+template <typename ConstructorBase, typename FunctionBase, typename MethodBase>
 class ClassBase
 {
 public:
@@ -36,9 +30,11 @@ protected:
 
 public:
 	const char* GetName() const;
+
 	const char* GetFullName() const;
 
 	void SetParent(ClassBase* parent);
+
 	ClassBase* GetParent() const;
 
 	void SetConstructor(ConstructorBase* constructor);
@@ -48,13 +44,15 @@ public:
 	ConstructorBase* GetConstructor() const;
 	const Methods& GetMethods() const;
 	const StaticMethods& GetStaticMethods() const;
-
-	virtual Script::Lua::ClassExtensionBase* GetLuaExtension() = 0;
-	virtual Script::V8::ClassExtensionBase* GetV8Extension() = 0;
 };
 
-template <typename ClassType>
+/// Metainformation of class.
+template <typename Provider, typename ClassType>
 class Class;
+
+/// Get metainformation of class with specified provider.
+template <typename Provider, typename ClassType>
+typename Provider::ClassBase* MetaOf();
 
 END_INANITY_META
 
