@@ -1,9 +1,7 @@
 #include "State.hpp"
 #include "Function.hpp"
 #include "thunks.ipp"
-#include "../../meta/Constructor.ipp"
-#include "../../meta/Function.ipp"
-#include "../../meta/Method.ipp"
+#include "MetaProvider.ipp"
 #include "../../File.hpp"
 #include <sstream>
 
@@ -62,7 +60,7 @@ State::Scope::~Scope()
 	state->isolate->Exit();
 }
 
-v8::Local<v8::FunctionTemplate> State::GetClassTemplate(Meta::ClassBase* classMeta)
+v8::Local<v8::FunctionTemplate> State::GetClassTemplate(MetaProvider::ClassBase* classMeta)
 {
 	// if class template is already created, return it
 	{
@@ -80,18 +78,15 @@ v8::Local<v8::FunctionTemplate> State::GetClassTemplate(Meta::ClassBase* classMe
 	classTemplate->SetClassName(v8::String::New(classMeta->GetFullName()));
 
 	// inherit from parent class
-	Meta::ClassBase* parentClassMeta = classMeta->GetParent();
+	MetaProvider::ClassBase* parentClassMeta = classMeta->GetParent();
 	if(parentClassMeta)
 		classTemplate->Inherit(GetClassTemplate(parentClassMeta));
 
 	// set constructor callback
 	{
-		Meta::ConstructorBase* constructor = classMeta->GetConstructor();
+		MetaProvider::ConstructorBase* constructor = classMeta->GetConstructor();
 		if(constructor)
-		{
-			ConstructorExtensionBase* extension = constructor->GetV8Extension();
-			classTemplate->SetCallHandler(extension->GetThunk());
-		}
+			classTemplate->SetCallHandler(constructor->GetThunk());
 		else
 		{
 			// set dummy constructor
@@ -103,31 +98,27 @@ v8::Local<v8::FunctionTemplate> State::GetClassTemplate(Meta::ClassBase* classMe
 	}
 
 	// add static methods to template
-	const Meta::ClassBase::StaticMethods& staticMethods = classMeta->GetStaticMethods();
+	const MetaProvider::ClassBase::StaticMethods& staticMethods = classMeta->GetStaticMethods();
 	for(size_t i = 0; i < staticMethods.size(); ++i)
 	{
-		Meta::FunctionBase* function = staticMethods[i];
-
-		FunctionExtensionBase* extension = function->GetV8Extension();
+		MetaProvider::FunctionBase* function = staticMethods[i];
 
 		classTemplate->Set(
 			v8::String::New(function->GetName()),
-			v8::FunctionTemplate::New(extension->GetThunk())
+			v8::FunctionTemplate::New(function->GetThunk())
 		);
 	}
 
 	// add non-static methods to prototype
 	v8::Local<v8::ObjectTemplate> prototypeTemplate = classTemplate->PrototypeTemplate();
-	const Meta::ClassBase::Methods& methods = classMeta->GetMethods();
+	const MetaProvider::ClassBase::Methods& methods = classMeta->GetMethods();
 	for(size_t i = 0; i < methods.size(); ++i)
 	{
-		Meta::MethodBase* method = methods[i];
-
-		MethodExtensionBase* extension = method->GetV8Extension();
+		MetaProvider::MethodBase* method = methods[i];
 
 		prototypeTemplate->Set(
 			v8::String::New(method->GetName()),
-			v8::FunctionTemplate::New(extension->GetThunk())
+			v8::FunctionTemplate::New(method->GetThunk())
 		);
 	}
 
@@ -299,7 +290,7 @@ void State::ProcessErrors(const v8::TryCatch& tryCatch)
 	}
 }
 
-v8::Local<v8::Object> State::ConvertObject(Meta::ClassBase* classMeta, RefCounted* object)
+v8::Local<v8::Object> State::ConvertObject(MetaProvider::ClassBase* classMeta, RefCounted* object)
 {
 	// check if the object is already in cache
 	Instances::const_iterator i = instances.find(object);
@@ -332,13 +323,6 @@ State* State::GetCurrent()
 State* State::GetFromIsolate(v8::Isolate* isolate)
 {
 	return (State*)isolate->GetData();
-}
-
-void State::Register(Meta::ClassBase* classMeta)
-{
-	Scope scope(this);
-
-	GetClassTemplate(classMeta);
 }
 
 ptr<Script::Function> State::LoadScript(ptr<File> file)

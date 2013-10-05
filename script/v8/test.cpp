@@ -4,7 +4,7 @@
 #include <iostream>
 using namespace Inanity;
 
-#define ___INANITY_META_V8___
+#include "impl.ipp"
 #include "../../inanity-base-meta.ipp"
 
 Script::State* globalState;
@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
 {
 	try
 	{
-		ptr<Script::State> state = NEW(Script::V8::State());
+		ptr<Script::V8::State> state = NEW(Script::V8::State());
 		globalState = state;
 		state->Register<FolderFileSystem>();
 		state->Register<TestClass>();

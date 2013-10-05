@@ -2,6 +2,7 @@
 #define ___INANITY_SCRIPT_V8_STATE_HPP___
 
 #include "v8.hpp"
+#include "MetaProvider.hpp"
 #include "../State.hpp"
 #include "v8lib.hpp"
 #include <unordered_map>
@@ -15,7 +16,7 @@ private:
 	v8::Isolate* isolate;
 	v8::Persistent<v8::Context> context;
 
-	typedef std::unordered_map<Meta::ClassBase*, v8::Persistent<v8::FunctionTemplate>*> Classes;
+	typedef std::unordered_map<MetaProvider::ClassBase*, v8::Persistent<v8::FunctionTemplate>*> Classes;
 	Classes classes;
 
 	/// Set of objects which sent to script.
@@ -37,7 +38,7 @@ public:
 private:
 	/// Get a function template for class.
 	/** Register if needed. */
-	v8::Local<v8::FunctionTemplate> GetClassTemplate(Meta::ClassBase* classMeta);
+	v8::Local<v8::FunctionTemplate> GetClassTemplate(MetaProvider::ClassBase* classMeta);
 	/// Callback for dereferencing object.
 	static void InstanceWeakCallback(const v8::WeakCallbackData<v8::Object, RefCounted>& data);
 	/// Internal method to unregister instance.
@@ -56,8 +57,15 @@ public:
 	/// Get state from v8::Isolate.
 	static State* GetFromIsolate(v8::Isolate* isolate);
 
+	/// Register class.
+	template <typename ClassType>
+	void Register()
+	{
+		Scope scope(this);
+		GetClassTemplate(Meta::MetaOf<MetaProvider, ClassType>());
+	}
+
 	// Script::State's methods.
-	void Register(Meta::ClassBase* classMeta);
 	ptr<Script::Function> LoadScript(ptr<File> file);
 	void ReclaimInstance(RefCounted* object);
 
@@ -65,7 +73,7 @@ public:
 
 	/// Convert object to a v8 value.
 	/** Object should be not-null. */
-	v8::Local<v8::Object> ConvertObject(Meta::ClassBase* classMeta, RefCounted* object);
+	v8::Local<v8::Object> ConvertObject(MetaProvider::ClassBase* classMeta, RefCounted* object);
 	/// Register instance to receive notification when all references from script are gone.
 	void InternalRegisterInstance(RefCounted* object, v8::Local<v8::Object> instance);
 	/// Process errors from javascript, and throw exceptions.

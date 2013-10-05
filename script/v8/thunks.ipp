@@ -1,5 +1,9 @@
+#ifndef ___INANITY_SCRIPT_V8_THUNKS_IPP___
+#define ___INANITY_SCRIPT_V8_THUNKS_IPP___
+
 #include "thunks.hpp"
 #include "values.ipp"
+#include "State.hpp"
 #include "v8lib.hpp"
 #include "../../meta/Tuple.hpp"
 #include "../../meta/Callable.ipp"
@@ -158,7 +162,7 @@ struct ConstructorThunk
 		catch(Exception* exception)
 		{
 			std::ostringstream stream;
-			stream << ClassType::GetMeta()->GetFullName();
+			stream << Meta::MetaOf<MetaProvider, ClassType>()->GetFullName();
 			stream << " instance constructor failed:\n";
 			MakePointer(exception)->PrintStack(stream);
 			v8::ThrowException(
@@ -169,3 +173,5 @@ struct ConstructorThunk
 };
 
 END_INANITY_V8
+
+#endif

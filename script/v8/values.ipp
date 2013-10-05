@@ -1,3 +1,6 @@
+#ifndef ___INANITY_SCRIPT_V8_VALUES_IPP___
+#define ___INANITY_SCRIPT_V8_VALUES_IPP___
+
 #include "values.hpp"
 #include "../../String.hpp"
 #include "../../Exception.hpp"
@@ -187,7 +190,8 @@ struct Value<ptr<ObjectType> >
 		if(!thisValue->IsExternal())
 		{
 			v8::String::Utf8Value s(thisValue);
-			THROW(ObjectType::GetMeta()->GetFullName() + String(" instance can't be obtained from ") + *s);
+			const char* classFullName = Meta::MetaOf<MetaProvider, ObjectType>()->GetFullName();
+			THROW(classFullName + String(" instance can't be obtained from ") + *s);
 		}
 
 		// get the value
@@ -195,7 +199,10 @@ struct Value<ptr<ObjectType> >
 
 		// if the value is null, the object was reclaimed
 		if(!externalValue)
-			THROW(ObjectType::GetMeta()->GetFullName() + String(" instance was reclaimed"));
+		{
+			const char* classFullName = Meta::MetaOf<MetaProvider, ObjectType>()->GetFullName();
+			THROW(classFullName + String(" instance was reclaimed"));
+		}
 
 		ObjectType* object = fast_cast<ObjectType*>((RefCounted*)externalValue);
 
@@ -205,10 +212,12 @@ struct Value<ptr<ObjectType> >
 	static inline v8::Local<v8::Value> To(ptr<ObjectType> value)
 	{
 		if(value)
-			return State::GetCurrent()->ConvertObject(ObjectType::GetMeta(), static_cast<RefCounted*>(&*value));
+			return State::GetCurrent()->ConvertObject(Meta::MetaOf<MetaProvider, ObjectType>(), static_cast<RefCounted*>(&*value));
 		else
 			return v8::Null();
 	}
 };
 
 END_INANITY_V8
+
+#endif
