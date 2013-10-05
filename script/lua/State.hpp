@@ -5,20 +5,9 @@
  */
 
 #include "lua.hpp"
+#include "MetaProvider.hpp"
 #include "lualib.hpp"
 #include "../State.hpp"
-
-BEGIN_INANITY
-
-class File;
-
-END_INANITY
-
-BEGIN_INANITY_META
-
-class ClassBase;
-
-END_INANITY_META
 
 BEGIN_INANITY_LUA
 
@@ -34,6 +23,9 @@ private:
 	/// Lua fatal error callback.
 	static int Panic(lua_State* state);
 
+	/// Register class by meta.
+	void InternalRegister(MetaProvider::ClassBase* classMeta);
+
 public:
 	State();
 	~State();
@@ -41,8 +33,14 @@ public:
 	/// Get internal Lua state.
 	lua_State* GetState();
 
+	/// Register class.
+	template <typename ClassType>
+	void Register()
+	{
+		InternalRegister(Meta::MetaOf<MetaProvider, ClassType>());
+	}
+
 	//*** Script::State methods.
-	void Register(Meta::ClassBase* classMeta);
 	ptr<Script::Function> LoadScript(ptr<File> file);
 	void ReclaimInstance(RefCounted* object);
 };

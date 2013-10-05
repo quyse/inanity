@@ -1,9 +1,6 @@
 #include "stuff.hpp"
 #include "values.ipp"
-#include "../../meta/Class.hpp"
-#include "../../meta/Constructor.hpp"
-#include "../../meta/Method.hpp"
-#include "../../meta/Function.hpp"
+#include "MetaProvider.ipp"
 #include "../../Exception.hpp"
 #include <sstream>
 
@@ -56,17 +53,17 @@ int NonConstructableClass_call(lua_State* state)
 	return 0;
 }
 
-void PushClassMetaTable(lua_State* state, Meta::ClassBase* cls)
+void PushClassMetaTable(lua_State* state, MetaProvider::ClassBase* cls)
 {
 	// создать табличку
 	lua_createtable(state, 0, 2);     // metatable
 	
 	// сделать call
 	lua_pushliteral(state, "__call");                    // metatable "__call"
-	Meta::ConstructorBase* constructor = cls->GetConstructor();
+	MetaProvider::ConstructorBase* constructor = cls->GetConstructor();
 	// если конструктор есть, то добавить его
 	if(constructor)
-		constructor->GetLuaExtension()->PushThunk(state);  // metatable "__call" thunk
+		constructor->PushThunk(state);                     // metatable "__call" thunk
 	else
 	{
 		// а если конструктора нет, добавить заглушку
@@ -78,14 +75,14 @@ void PushClassMetaTable(lua_State* state, Meta::ClassBase* cls)
 	// сделать index для статических методов
 	lua_pushliteral(state, "__index");                   // metatable "__index"
 	// создать таблицу методов
-	const Meta::ClassBase::StaticMethods& staticMethods = cls->GetStaticMethods();
+	const MetaProvider::ClassBase::StaticMethods& staticMethods = cls->GetStaticMethods();
 	lua_createtable(state, 0, (int)staticMethods.size()); // metatable "__index" staticMethods
 	for(size_t i = 0; i < staticMethods.size(); ++i)
 	{
-		Meta::FunctionBase* function = staticMethods[i];
+		MetaProvider::FunctionBase* function = staticMethods[i];
 
 		lua_pushstring(state, function->GetName());        // metatable "__index" staticMethods functionName
-		function->GetLuaExtension()->PushThunk(state);     // metatable "__index" staticMethods functionName thunk
+		function->PushThunk(state);                        // metatable "__index" staticMethods functionName thunk
 		lua_settable(state, -3);                           // metatable "__index" staticMethods
 	}
 	// таблица методов попадает в замыкание
@@ -96,7 +93,7 @@ void PushClassMetaTable(lua_State* state, Meta::ClassBase* cls)
 	// всё.
 }
 
-void RegisterClassMeta(lua_State* state, Meta::ClassBase* cls)
+void RegisterClassMeta(lua_State* state, MetaProvider::ClassBase* cls)
 {
 	// разобрать полное имя класса (вида Inanity.Namespace1.Namespace2.ClassName),
 	// пройтись по этому пути, и создать глобальный объект
@@ -208,7 +205,7 @@ void ReclaimObject(lua_State* state, RefCounted* object)
 		ReclaimObjectFromUserData(state);
 }
 
-void PushObjectMetaTable(lua_State* state, Meta::ClassBase* cls)
+void PushObjectMetaTable(lua_State* state, MetaProvider::ClassBase* cls)
 {
 	// получить метатаблицу объектов
 	lua_pushlightuserdata(state, cls);                   // cls
@@ -233,19 +230,19 @@ void PushObjectMetaTable(lua_State* state, Meta::ClassBase* cls)
 		// вот в этом месте создать таблицу методов
 		// посчитать количество методов
 		size_t methodsCount = 0;
-		for(Meta::ClassBase* c = cls; c; c = c->GetParent())
+		for(MetaProvider::ClassBase* c = cls; c; c = c->GetParent())
 			methodsCount += c->GetMethods().size();
 		// создать таблицу
 		lua_createtable(state, 0, (int)methodsCount);      // cls metatable "__index" methods
 		// и наполнить методами
-		for(Meta::ClassBase* c = cls; c; c = c->GetParent())
+		for(MetaProvider::ClassBase* c = cls; c; c = c->GetParent())
 		{
-			const Meta::ClassBase::Methods& methods = c->GetMethods();
+			const MetaProvider::ClassBase::Methods& methods = c->GetMethods();
 			for(size_t i = 0; i < methods.size(); ++i)
 			{
-				Meta::MethodBase* method = methods[i];
+				MetaProvider::MethodBase* method = methods[i];
 				lua_pushstring(state, method->GetName());      // cls metatable "__index" methods methodName
-				method->GetLuaExtension()->PushThunk(state);   // cls metatable "__index" methods methodName thunk
+				method->PushThunk(state);                      // cls metatable "__index" methods methodName thunk
 				lua_settable(state, -3);                       // cls metatable "__index" methods
 			}
 		}
@@ -274,7 +271,7 @@ ptr<Exception> ErrorToException(lua_State* state)
 	{
 		// full userdata, возможно, что Exception
 		ObjectUserData* userData = (ObjectUserData*)lua_touserdata(state, -1);
-		if(userData->type == UserData::typeObject && userData->cls == Exception::GetMeta())
+		if(userData->type == UserData::typeObject && userData->cls == Meta::MetaOf<MetaProvider, Exception>())
 			// да, Exception!
 			exception = (Exception*)userData->object;
 	}

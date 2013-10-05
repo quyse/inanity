@@ -205,15 +205,19 @@ struct Value<ptr<ObjectType> >
 		// получить userdata для объекта, и проверить, что это объект
 		ObjectUserData* userData = (ObjectUserData*)lua_touserdata(state, index);
 		if(!userData || lua_islightuserdata(state, index) || userData->type != UserData::typeObject)
-			THROW(String("Expected an object of type '") + ObjectType::GetMeta()->GetFullName() + "' for argument, but got " + DescribeValue(state, index));
+		{
+			const char* fullClassName = Meta::MetaOf<MetaProvider, ObjectType>()->GetFullName();
+			THROW(String("Expected an object of type '") + fullClassName + "' for argument, but got " + DescribeValue(state, index));
+		}
 
 		// проверить тип объекта, в случае необходимости привести к вышестоящему типу
-		for(Meta::ClassBase* cls = userData->cls; cls; cls = cls->GetParent())
-			if(cls == ObjectType::GetMeta())
+		for(MetaProvider::ClassBase* cls = userData->cls; cls; cls = cls->GetParent())
+			if(cls == Meta::MetaOf<MetaProvider, ObjectType>())
 				// вернуть объект
 				return (ObjectType*)userData->object;
 		// если здесь, значит, мы проверили всю цепочку наследования, а тип не нашли
-		THROW(String("Can't cast object of type '") + userData->cls->GetFullName() + "' to expected type '" + ObjectType::GetMeta()->GetFullName() + "'");
+		const char* fullClassName = Meta::MetaOf<MetaProvider, ObjectType>()->GetFullName();
+		THROW(String("Can't cast object of type '") + userData->cls->GetFullName() + "' to expected type '" + fullClassName + "'");
 	}
 
 	static inline void Push(lua_State* state, ptr<ObjectType> value)
@@ -237,9 +241,9 @@ struct Value<ptr<ObjectType> >
 			ObjectUserData* userData = (ObjectUserData*)lua_newuserdata(state, sizeof(ObjectUserData));
 			userData->type = UserData::typeObject;
 			userData->object = (RefCounted*)(ObjectType*)value;
-			userData->cls = ObjectType::GetMeta();
+			userData->cls = Meta::MetaOf<MetaProvider, ObjectType>();
 			// указать метатаблицу
-			PushObjectMetaTable(state, ObjectType::GetMeta());
+			PushObjectMetaTable(state, userData->cls);
 			lua_setmetatable(state, -2);
 			// задать дополнительную ссылку объекту
 			userData->object->Reference();

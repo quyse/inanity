@@ -2,10 +2,6 @@
 #include "Function.hpp"
 #include "stuff.hpp"
 #include "userdata.hpp"
-#include "../../meta/Class.hpp"
-#include "../../meta/Constructor.hpp"
-#include "../../meta/Method.hpp"
-#include "../../meta/Function.hpp"
 #include "../../File.hpp"
 #include "../../Exception.hpp"
 #include <cstdlib>
@@ -50,6 +46,11 @@ int State::Panic(lua_State* state)
 	}
 }
 
+void State::InternalRegister(MetaProvider::ClassBase* classMeta)
+{
+	RegisterClassMeta(state, classMeta);
+}
+
 lua_State* State::GetState()
 {
 	return state;
@@ -90,11 +91,6 @@ ptr<Script::Function> State::LoadScript(ptr<File> file)
 	ProcessError(state);
 	// ProcessError никогда не возвращает управления
 	return 0;
-}
-
-void State::Register(Meta::ClassBase* classMeta)
-{
-	RegisterClassMeta(state, classMeta);
 }
 
 void State::ReclaimInstance(RefCounted* object)
