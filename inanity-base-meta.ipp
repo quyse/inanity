@@ -3,6 +3,20 @@
 
 #include "meta/impl.hpp"
 
+#include "File.hpp"
+META_CLASS(Inanity::File, Inanity.File);
+	META_METHOD(GetSize);
+META_CLASS_END();
+
+#include "FileSystem.hpp"
+META_CLASS(Inanity::FileSystem, Inanity.FileSystem);
+	META_METHOD(LoadFile);
+	META_METHOD(TryLoadFile);
+	META_METHOD(LoadStream);
+	META_METHOD(SaveFile);
+	META_METHOD(SaveStream);
+META_CLASS_END();
+
 #include "BlobFileSystem.hpp"
 META_CLASS(Inanity::BlobFileSystem, Inanity.BlobFileSystem);
 	META_CLASS_PARENT(Inanity::FileSystem);
@@ -19,20 +33,6 @@ META_CLASS_END();
 
 #include "Exception.hpp"
 META_CLASS(Inanity::Exception, Inanity.Exception);
-META_CLASS_END();
-
-#include "File.hpp"
-META_CLASS(Inanity::File, Inanity.File);
-	META_METHOD(GetSize);
-META_CLASS_END();
-
-#include "FileSystem.hpp"
-META_CLASS(Inanity::FileSystem, Inanity.FileSystem);
-	META_METHOD(LoadFile);
-	META_METHOD(TryLoadFile);
-	META_METHOD(LoadStream);
-	META_METHOD(SaveFile);
-	META_METHOD(SaveStream);
 META_CLASS_END();
 
 #include "FolderFileSystem.hpp"
