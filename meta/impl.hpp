@@ -9,12 +9,13 @@
 // After inclusion you likely want to undef META_PROVIDER.
 
 #ifndef META_PROVIDER
-#error META_PROVIDER isn't defined
+#error "META_PROVIDER isn't defined"
 #endif
 
 #define META_CLASS(className, fullClassName) \
+	BEGIN_INANITY_META \
 	template <> \
-	class Inanity::Meta::Class<META_PROVIDER, className> : public META_PROVIDER::ClassBase \
+	class Class<META_PROVIDER, className> : public META_PROVIDER::ClassBase \
 	{ \
 	private: \
 		typedef META_PROVIDER Provider; \
@@ -23,18 +24,18 @@
 		Class(); \
 	}; \
 	template <> \
-	META_PROVIDER::ClassBase* Inanity::Meta::MetaOf<META_PROVIDER, className>() \
+	META_PROVIDER::ClassBase* MetaOf<META_PROVIDER, className>() \
 	{ \
 		static Class<META_PROVIDER, className> instance; \
 		return &instance; \
 	} \
-	Inanity::Meta::Class<META_PROVIDER, className>::Class() \
+	Class<META_PROVIDER, className>::Class() \
 		: META_PROVIDER::ClassBase(#className, #fullClassName) \
 	{
-#define META_CLASS_END() }
+#define META_CLASS_END() } END_INANITY_META
 
 #define META_CLASS_PARENT(parentClassName) \
-	SetParent(Inanity::Meta::MetaOf<Provider, parentClassName>())
+	SetParent(MetaOf<Provider, parentClassName>())
 
 #define META_CONSTRUCTOR(...) \
 	{ \
