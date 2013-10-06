@@ -112,7 +112,7 @@ ptr<Script::Any> Any::ApplyWith(ptr<Script::Any> thisValue, ptr<Script::Any> arg
 	v8::Local<v8::Value> value = v8::Local<v8::Value>::New(isolate, this->value);
 	v8::Local<v8::Value> v8ThisValue = thisValue
 		? v8::Handle<v8::Value>::New(isolate, fast_cast<Any*>(&*thisValue)->value)
-		: v8::Undefined();
+		: v8::Handle<v8::Value>(v8::Undefined());
 
 	v8::Local<v8::Value> returnValue = v8::Function::Cast(*value)->Call(v8ThisValue, count, args);
 
