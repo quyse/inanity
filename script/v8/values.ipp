@@ -4,6 +4,7 @@
 #include "values.hpp"
 #include "State.hpp"
 #include "Any.hpp"
+#include "../convert.hpp"
 #include "../../String.hpp"
 #include "../../Exception.hpp"
 
@@ -243,14 +244,12 @@ struct Value
 
 	static inline T From(v8::Local<v8::Value> value)
 	{
-		return Meta::ConverterFromScript<MetaProvider, T>::Convert(MetaProvider::Any(value));
+		return ConvertFromScript<T>(State::GetCurrent()->CreateAny(value));
 	}
 
 	static inline v8::Local<v8::Value> To(const T& value)
 	{
-		MetaProvider::ReturnAny returnAny;
-		Meta::ConverterToScript<MetaProvider, T>::Convert(value, returnAny);
-		return returnAny.ToValue();
+		return fast_cast<Any*>(&*ConvertToScript<T>(State::GetCurrent(), value))->GetV8Value();
 	}
 };
 
@@ -261,14 +260,12 @@ struct Value<const T&>
 
 	static inline T From(v8::Local<v8::Value> value)
 	{
-		return Meta::ConverterFromScript<MetaProvider, T>::Convert(MetaProvider::Any(value));
+		return ConvertFromScript<T>(State::GetCurrent()->CreateAny(value));
 	}
 
 	static inline v8::Local<v8::Value> To(const T& value)
 	{
-		MetaProvider::ReturnAny returnAny;
-		Meta::ConverterToScript<MetaProvider, T>::Convert(value, returnAny);
-		return returnAny.ToValue();
+		return fast_cast<Any*>(&*ConvertToScript<T>(State::GetCurrent(), value))->GetV8Value();
 	}
 };
 

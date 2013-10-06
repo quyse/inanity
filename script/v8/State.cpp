@@ -365,7 +365,7 @@ ptr<Script::Any> State::NewNumber(float number)
 ptr<Script::Any> State::NewNumber(double number)
 {
 	Scope scope(this);
-	return CreateAny(v8::NumberObject::New(number));
+	return CreateAny(v8::Number::New(number));
 }
 
 ptr<Script::Any> State::NewArray(int length)

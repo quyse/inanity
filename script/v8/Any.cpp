@@ -69,21 +69,21 @@ int Any::AsInt() const
 {
 	State::Scope scope(state);
 	v8::Local<v8::Value> value = v8::Local<v8::Value>::New(state->GetIsolate(), this->value);
-	return (int)v8::NumberObject::Cast(*value)->ValueOf();
+	return (int)v8::Number::Cast(*value)->Value();
 }
 
 float Any::AsFloat() const
 {
 	State::Scope scope(state);
 	v8::Local<v8::Value> value = v8::Local<v8::Value>::New(state->GetIsolate(), this->value);
-	return (float)v8::NumberObject::Cast(*value)->ValueOf();
+	return (float)v8::Number::Cast(*value)->Value();
 }
 
 double Any::AsDouble() const
 {
 	State::Scope scope(state);
 	v8::Local<v8::Value> value = v8::Local<v8::Value>::New(state->GetIsolate(), this->value);
-	return (double)v8::NumberObject::Cast(*value)->ValueOf();
+	return (double)v8::Number::Cast(*value)->Value();
 }
 
 ptr<Script::Any> Any::CallWith(ptr<Script::Any> arguments[], int count)

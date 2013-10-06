@@ -7,7 +7,7 @@ using namespace Inanity;
 
 #include "impl.ipp"
 #include "../../inanity-base-meta.ipp"
-#include "../../inanity-math-meta.ipp"
+#include "../../inanity-math-script.ipp"
 
 Script::State* globalState;
 
