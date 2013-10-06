@@ -43,14 +43,20 @@ public:
 
 	//*** Function methods.
 	/** Throw exception if this is not a function. */
-	virtual ptr<Any> CallWith(ptr<Any>* arguments, int count) = 0;
-	virtual ptr<Any> ApplyWith(ptr<Any> thisValue, ptr<Any>* arguments, int count) = 0;
+	virtual ptr<Any> CallWith(ptr<Any> arguments[], int count) = 0;
+	virtual ptr<Any> ApplyWith(ptr<Any> thisValue, ptr<Any> arguments[], int count) = 0;
 	//*** Helper call methods.
 	template <typename... Args>
 	ptr<Any> Call(Args... args)
 	{
-		ptr<Any> arguments[] = { args... };
-		return CallWith(arguments, sizeof(arguments) / sizeof(arguments[0]));
+		ptr<Any> arguments[] = { 0, args... };
+		return CallWith(arguments + 1, sizeof(arguments) / sizeof(arguments[0]) - 1);
+	}
+	template <typename... Args>
+	ptr<Any> Apply(ptr<Any> thisValue, Args... args)
+	{
+		ptr<Any> arguments[] = { 0, args... };
+		return ApplyWith(thisValue, arguments + 1, sizeof(arguments) / sizeof(arguments[0]) - 1);
 	}
 
 	//*** Index methods for arrays.

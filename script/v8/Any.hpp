@@ -31,8 +31,8 @@ public:
 	int AsInt() const;
 	float AsFloat() const;
 	double AsDouble() const;
-	ptr<Script::Any> CallWith(ptr<Script::Any>* arguments, int count);
-	ptr<Script::Any> ApplyWith(ptr<Script::Any> thisValue, ptr<Script::Any>* arguments, int count);
+	ptr<Script::Any> CallWith(ptr<Script::Any> arguments[], int count);
+	ptr<Script::Any> ApplyWith(ptr<Script::Any> thisValue, ptr<Script::Any> arguments[], int count);
 	ptr<Script::Any> Get(int index) const;
 	ptr<Script::Any> Get(ptr<Script::Any> index) const;
 	void Set(int index, ptr<Script::Any> value);

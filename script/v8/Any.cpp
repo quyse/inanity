@@ -86,12 +86,12 @@ double Any::AsDouble() const
 	return (double)v8::NumberObject::Cast(*value)->ValueOf();
 }
 
-ptr<Script::Any> Any::CallWith(ptr<Script::Any>* arguments, int count)
+ptr<Script::Any> Any::CallWith(ptr<Script::Any> arguments[], int count)
 {
 	return ApplyWith(0, arguments, count);
 }
 
-ptr<Script::Any> Any::ApplyWith(ptr<Script::Any> thisValue, ptr<Script::Any>* arguments, int count)
+ptr<Script::Any> Any::ApplyWith(ptr<Script::Any> thisValue, ptr<Script::Any> arguments[], int count)
 {
 	State::Scope scope(state);
 

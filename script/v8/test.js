@@ -24,6 +24,10 @@
 	test.printvec4(m);
 	test.printmat4x4(m);
 
+	test.apply(function() {
+		this.printvec3([0,1,2]);
+	}, test);
+
 	test.printvec3(test.cross([1, 2, 3], [4, 5, 6]));
 	test.printvec4(test.sum([7, 6, 9, -3], [-4, 5, 2, 1]));
 	test.printmat4x4(test.scaling(test.cross([1, 2, 3], [4, 5, 6])));

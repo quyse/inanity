@@ -77,6 +77,11 @@ public:
 		return array;
 	}
 
+	ptr<Script::Any> apply(ptr<Script::Any> function, ptr<Script::Any> thisValue)
+	{
+		return function->Apply(thisValue);
+	}
+
 	META_DECLARE_CLASS(TestClass);
 };
 
@@ -92,6 +97,7 @@ META_CLASS(TestClass, TestClass);
 	META_METHOD(sum);
 	META_METHOD(scaling);
 	META_METHOD(createsomething);
+	META_METHOD(apply);
 META_CLASS_END();
 
 int main(int argc, char* argv[])
