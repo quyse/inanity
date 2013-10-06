@@ -3,6 +3,7 @@
 
 #include "values.hpp"
 #include "State.hpp"
+#include "Any.hpp"
 #include "../../String.hpp"
 #include "../../Exception.hpp"
 
@@ -166,6 +167,22 @@ struct Value<const String&>
 	}
 };
 
+template <>
+struct Value<ptr<Script::Any> >
+{
+	typedef ptr<Script::Any> ValueType;
+
+	static inline ptr<Script::Any> From(v8::Local<v8::Value> value)
+	{
+		return State::GetCurrent()->CreateAny(value);
+	}
+
+	static inline v8::Local<v8::Value> To(ptr<Script::Any> value)
+	{
+		return fast_cast<Any*>(&*value)->GetV8Value();
+	}
+};
+
 /*
 ptr<RefCounted> is represented as an External, or as null (zero pointer).
 External of corrent object contains non-null pointer.
@@ -180,12 +197,12 @@ struct Value<ptr<ObjectType> >
 
 	static inline ptr<ObjectType> From(v8::Local<v8::Value> value)
 	{
+		// if it's null object
+		if(value->IsNull())
+			return 0;
+
 		// get internal field of an object
 		v8::Local<v8::Value> thisValue = value->ToObject()->GetInternalField(0);
-
-		// if it's null object
-		if(thisValue->IsNull())
-			return 0;
 
 		// otherwise it should be an external
 		if(!thisValue->IsExternal())

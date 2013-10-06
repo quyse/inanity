@@ -14,9 +14,22 @@ Script::State* globalState;
 class TestClass : public Object
 {
 public:
-	static void print(const String& a, const String& b)
+	static void print(const String& s)
 	{
-		std::cout << "Test print: " << a << ", " << b << '\n';
+		std::cout << s << '\n';
+	}
+
+	static String isflags(ptr<Script::Any> any)
+	{
+		std::ostringstream ss;
+		ss
+			<< (any->IsNull() ? "(null)" : "")
+			<< (any->IsNumber() ? "(number)" : "")
+			<< (any->IsArray() ? "(array)" : "")
+			<< (any->IsFunction() ? "(function)" : "")
+			<< (any->IsObject() ? "(object)" : "")
+			<< '\n';
+		return ss.str();
 	}
 
 	ptr<TestClass> work(const String& a, int b, double c)
@@ -54,12 +67,23 @@ public:
 		return Math::CreateScalingMatrix(s);
 	}
 
+	ptr<Script::Any> createsomething(ptr<Script::Any> function, ptr<Script::Any> a, ptr<Script::Any> b)
+	{
+		ptr<Script::Any> r = function->Call(a, b);
+		ptr<Script::Any> array = globalState->NewArray(3);
+		array->Set(0, a);
+		array->Set(1, b);
+		array->Set(2, r);
+		return array;
+	}
+
 	META_DECLARE_CLASS(TestClass);
 };
 
 META_CLASS(TestClass, TestClass);
 	META_CONSTRUCTOR();
 	META_STATIC_METHOD(print);
+	META_STATIC_METHOD(isflags);
 	META_METHOD(work);
 	META_METHOD(printvec3);
 	META_METHOD(printvec4);
@@ -67,6 +91,7 @@ META_CLASS(TestClass, TestClass);
 	META_METHOD(cross);
 	META_METHOD(sum);
 	META_METHOD(scaling);
+	META_METHOD(createsomething);
 META_CLASS_END();
 
 int main(int argc, char* argv[])

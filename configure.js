@@ -75,7 +75,7 @@ var libraries = {
 	},
 	// ******* скрипты на v8
 	'libinanity-v8': {
-		objects: ['script.v8.Function', 'script.v8.MetaProvider', 'script.v8.State']
+		objects: ['script.v8.Any', 'script.v8.Function', 'script.v8.MetaProvider', 'script.v8.State']
 	},
 	// ******* криптография
 	'libinanity-crypto': {

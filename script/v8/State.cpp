@@ -2,6 +2,7 @@
 #include "Function.hpp"
 #include "thunks.ipp"
 #include "MetaProvider.ipp"
+#include "Any.hpp"
 #include "../../File.hpp"
 #include <sstream>
 
@@ -23,6 +24,9 @@ State::State()
 #ifdef _DEBUG
 	v8::V8::SetCaptureStackTraceForUncaughtExceptions(true);
 #endif
+
+	// create pool of script values
+	anyPool = NEW(ObjectPool<Any>());
 }
 
 State::~State()
@@ -346,6 +350,28 @@ void State::ReclaimInstance(RefCounted* object)
 	Scope scope(this);
 
 	InternalUnregisterInstance(object);
+}
+
+ptr<Any> State::CreateAny(v8::Local<v8::Value> value)
+{
+	return anyPool->New(this, value);
+}
+
+ptr<Script::Any> State::NewNumber(float number)
+{
+	return NewNumber((double)number);
+}
+
+ptr<Script::Any> State::NewNumber(double number)
+{
+	Scope scope(this);
+	return CreateAny(v8::NumberObject::New(number));
+}
+
+ptr<Script::Any> State::NewArray(int length)
+{
+	Scope scope(this);
+	return CreateAny(v8::Array::New(length));
 }
 
 END_INANITY_V8
