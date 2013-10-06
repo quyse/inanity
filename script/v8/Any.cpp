@@ -95,6 +95,8 @@ ptr<Script::Any> Any::ApplyWith(ptr<Script::Any> thisValue, ptr<Script::Any> arg
 {
 	State::Scope scope(state);
 
+	v8::TryCatch tryCatch;
+
 	static const int maxArgs = 8;
 #ifdef _DEBUG
 	if(count > maxArgs)
@@ -112,7 +114,11 @@ ptr<Script::Any> Any::ApplyWith(ptr<Script::Any> thisValue, ptr<Script::Any> arg
 		? v8::Handle<v8::Value>::New(isolate, fast_cast<Any*>(&*thisValue)->value)
 		: v8::Undefined();
 
-	return state->CreateAny(v8::Function::Cast(*value)->Call(v8ThisValue, count, args));
+	v8::Local<v8::Value> returnValue = v8::Function::Cast(*value)->Call(v8ThisValue, count, args);
+
+	state->ProcessErrors(tryCatch);
+
+	return state->CreateAny(returnValue);
 }
 
 ptr<Script::Any> Any::Get(int index) const
