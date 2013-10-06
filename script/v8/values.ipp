@@ -2,6 +2,7 @@
 #define ___INANITY_SCRIPT_V8_VALUES_IPP___
 
 #include "values.hpp"
+#include "State.hpp"
 #include "../../String.hpp"
 #include "../../Exception.hpp"
 
