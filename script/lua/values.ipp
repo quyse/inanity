@@ -2,6 +2,8 @@
 #define ___INANITY_SCRIPT_LUA_VALUES_IPP___
 
 #include "values.hpp"
+#include "Any.hpp"
+#include "State.hpp"
 #include "stuff.hpp"
 #include "userdata.hpp"
 #include "lualib.hpp"
@@ -191,6 +193,23 @@ struct Value<const String&>
 	}
 };
 
+template <>
+struct Value<ptr<Script::Any> >
+{
+	typedef ptr<Script::Any> ValueType;
+
+	static inline ptr<Script::Any> Get(lua_State* state, int index)
+	{
+		lua_pushvalue(state, index);
+		return State::GetStateByLuaState(state)->CreateAny();
+	}
+
+	static void Push(lua_State* state, ptr<Script::Any> value)
+	{
+		fast_cast<Any*>(&*value)->PushValue();
+	}
+};
+
 template <typename ObjectType>
 struct Value<ptr<ObjectType> >
 {
@@ -255,6 +274,40 @@ struct Value<ptr<ObjectType> >
 			// сохранить userdata по адресу объекта, для повторного использования
 			lua_settable(state, LUA_REGISTRYINDEX);
 		}
+	}
+};
+
+template <typename T>
+struct Value
+{
+	typedef T ValueType;
+
+	static inline T Get(lua_State* state, int index)
+	{
+		lua_pushvalue(state, index);
+		return ConvertFromScript<T>(State::GetStateByLuaState(state)->CreateAny());
+	}
+
+	static inline void Push(lua_State* state, const T& value)
+	{
+		fast_cast<Any*>(&*ConvertToScript<T>(State::GetStateByLuaState(state), value))->PushValue();
+	}
+};
+
+template <typename T>
+struct Value<const T&>
+{
+	typedef T ValueType;
+
+	static inline T Get(lua_State* state, int index)
+	{
+		lua_pushvalue(state, index);
+		return ConvertFromScript<T>(State::GetStateByLuaState(state)->CreateAny());
+	}
+
+	static inline void Push(lua_State* state, const T& value)
+	{
+		fast_cast<Any*>(&*ConvertToScript<T>(State::GetStateByLuaState(state), value))->PushValue();
 	}
 };
 

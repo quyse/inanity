@@ -4,6 +4,7 @@
 #define META_PROVIDER Inanity::Script::Lua::MetaProvider
 
 #include "../../meta/impl.hpp"
+#include "../impl.hpp"
 #include "MetaProvider.ipp"
 
 #endif
