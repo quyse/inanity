@@ -5,12 +5,14 @@
 
 BEGIN_INANITY_SCRIPT
 
+class Any;
+
 /// Abstract class represents function from script.
 class Function : public Object
 {
 public:
 	/// Run the function.
-	virtual void Run() = 0;
+	virtual ptr<Any> Run() = 0;
 };
 
 END_INANITY_SCRIPT

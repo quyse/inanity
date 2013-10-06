@@ -1,5 +1,6 @@
 #include "Function.hpp"
 #include "State.hpp"
+#include "Any.hpp"
 
 BEGIN_INANITY_V8
 
@@ -13,7 +14,7 @@ Function::~Function()
 	script.Reset();
 }
 
-void Function::Run()
+ptr<Script::Any> Function::Run()
 {
 	State::Scope scope(state);
 
@@ -22,9 +23,11 @@ void Function::Run()
 	v8::Local<v8::Script> script =
 		v8::Local<v8::Script>::New(state->GetIsolate(), this->script);
 
-	script->Run();
+	v8::Local<v8::Value> returnValue = script->Run();
 
 	state->ProcessErrors(tryCatch);
+
+	return state->CreateAny(returnValue);
 }
 
 END_INANITY_V8
