@@ -64,6 +64,16 @@ Type ConvertFromScript(const typename Provider::Any& value)
 	return ConverterFromScript<Provider, Type>::Convert(value);
 }
 
+/// Converter of value-type things to script.
+template <typename Provider, typename Type>
+struct ConverterToScript;
+
+template <typename Provider, typename Type>
+void ConvertToScript(const Type& value, typename Provider::ReturnAny& returnValue)
+{
+	ConverterToScript<Provider, Type>::Convert(value, returnValue);
+}
+
 END_INANITY_META
 
 #endif

@@ -20,4 +20,17 @@ MetaProvider::Any MetaProvider::Any::operator[](int i) const
 	return v8::Object::Cast(*value)->Get(i);
 }
 
+v8::Local<v8::Value> MetaProvider::ReturnAny::ToValue() const
+{
+	return value;
+}
+
+void MetaProvider::ReturnAny::SetFloatArray(const float* floats, int count)
+{
+	v8::Local<v8::Array> array = v8::Array::New(count);
+	value = array;
+	for(int i = 0; i < count; ++i)
+		array->Set(i, v8::NumberObject::New(floats[i]));
+}
+
 END_INANITY_V8

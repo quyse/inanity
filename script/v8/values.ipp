@@ -228,6 +228,13 @@ struct Value
 	{
 		return Meta::ConverterFromScript<MetaProvider, T>::Convert(MetaProvider::Any(value));
 	}
+
+	static inline v8::Local<v8::Value> To(const T& value)
+	{
+		MetaProvider::ReturnAny returnAny;
+		Meta::ConverterToScript<MetaProvider, T>::Convert(value, returnAny);
+		return returnAny.ToValue();
+	}
 };
 
 template <typename T>
@@ -238,6 +245,13 @@ struct Value<const T&>
 	static inline T From(v8::Local<v8::Value> value)
 	{
 		return Meta::ConverterFromScript<MetaProvider, T>::Convert(MetaProvider::Any(value));
+	}
+
+	static inline v8::Local<v8::Value> To(const T& value)
+	{
+		MetaProvider::ReturnAny returnAny;
+		Meta::ConverterToScript<MetaProvider, T>::Convert(value, returnAny);
+		return returnAny.ToValue();
 	}
 };
 

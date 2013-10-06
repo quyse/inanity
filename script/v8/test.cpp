@@ -39,6 +39,21 @@ public:
 		std::cout << a << '\n';
 	}
 
+	Math::vec3 cross(const Math::vec3& a, const Math::vec3& b)
+	{
+		return Math::cross(a, b);
+	}
+
+	Math::vec4 sum(const Math::vec4& a, const Math::vec4& b)
+	{
+		return a + b;
+	}
+
+	Math::mat4x4 scaling(const Math::vec3& s)
+	{
+		return Math::CreateScalingMatrix(s);
+	}
+
 	META_DECLARE_CLASS(TestClass);
 };
 
@@ -49,6 +64,9 @@ META_CLASS(TestClass, TestClass);
 	META_METHOD(printvec3);
 	META_METHOD(printvec4);
 	META_METHOD(printmat4x4);
+	META_METHOD(cross);
+	META_METHOD(sum);
+	META_METHOD(scaling);
 META_CLASS_END();
 
 int main(int argc, char* argv[])

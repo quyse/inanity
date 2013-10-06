@@ -78,6 +78,18 @@ public:
 		operator double() const;
 		Any operator[](int i) const;
 	};
+
+	/// Class represents a return-to-script value.
+	class ReturnAny
+	{
+	private:
+		v8::Local<v8::Value> value;
+
+	public:
+		v8::Local<v8::Value> ToValue() const;
+
+		void SetFloatArray(const float* floats, int count);
+	};
 };
 
 END_INANITY_V8
