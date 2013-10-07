@@ -23,7 +23,7 @@ private:
 	Classes classes;
 
 	/// Set of objects which sent to script.
-	typedef std::unordered_map<RefCounted*, v8::Persistent<v8::Object>*> Instances;
+	typedef std::unordered_multimap<RefCounted*, std::pair<MetaProvider::ClassBase*, v8::Persistent<v8::Object>* > > Instances;
 	Instances instances;
 
 	/// Pool of script values.
@@ -46,9 +46,9 @@ private:
 	/** Register if needed. */
 	v8::Local<v8::FunctionTemplate> GetClassTemplate(MetaProvider::ClassBase* classMeta);
 	/// Callback for dereferencing object.
-	static void InstanceWeakCallback(const v8::WeakCallbackData<v8::Object, RefCounted>& data);
+	static void InstanceWeakCallback(const v8::WeakCallbackData<v8::Object, MetaProvider::ClassBase>& data);
 	/// Internal method to unregister instance.
-	void InternalUnregisterInstance(RefCounted* object);
+	void InternalUnregisterInstance(RefCounted* object, MetaProvider::ClassBase* classMeta);
 	/// Dereference object and clear references to it from script.
 	void InternalReclaimInstance(Instances::iterator i);
 
@@ -91,7 +91,7 @@ public:
 	/** Object should be not-null. */
 	v8::Local<v8::Object> ConvertObject(MetaProvider::ClassBase* classMeta, RefCounted* object);
 	/// Register instance to receive notification when all references from script are gone.
-	void InternalRegisterInstance(RefCounted* object, v8::Local<v8::Object> instance);
+	void InternalRegisterInstance(RefCounted* object, MetaProvider::ClassBase* classMeta, v8::Local<v8::Object> instance);
 	/// Process errors from javascript, and throw exceptions.
 	void ProcessErrors(const v8::TryCatch& tryCatch);
 };

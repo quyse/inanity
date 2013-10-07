@@ -25,6 +25,12 @@ v8::FunctionCallback MetaProvider::Method<MethodType, method>::GetThunk() const
 	return &CalleeThunk<MethodType, method>::Thunk;
 }
 
+template <typename ClassType>
+v8::FunctionCallback MetaProvider::Class<ClassType>::GetDummyConstructorThunk() const
+{
+	return &DummyConstructorThunk<ClassType>;
+}
+
 END_INANITY_V8
 
 #endif

@@ -77,6 +77,7 @@ struct CalleeThunk
 };
 
 /// Thunk for classes without constructor.
+template <typename ClassType>
 inline void DummyConstructorThunk(const v8::FunctionCallbackInfo<v8::Value>& info)
 {
 	v8::Local<v8::Object> instance = info.This();
@@ -92,7 +93,11 @@ inline void DummyConstructorThunk(const v8::FunctionCallbackInfo<v8::Value>& inf
 
 			// we are here only for new objects
 			// so register instance
-			state->InternalRegisterInstance((Object*)v8::External::Cast(*param)->Value(), instance);
+			state->InternalRegisterInstance(
+				(Object*)v8::External::Cast(*param)->Value(),
+				Meta::MetaOf<MetaProvider,
+				ClassType>(), instance
+			);
 
 			return;
 		}
@@ -130,7 +135,11 @@ struct ConstructorThunk
 
 				// we are here only for new objects
 				// so register instance
-				state->InternalRegisterInstance((Object*)v8::External::Cast(*param)->Value(), instance);
+				state->InternalRegisterInstance(
+					(Object*)v8::External::Cast(*param)->Value(),
+					Meta::MetaOf<MetaProvider, ClassType>(),
+					instance
+				);
 
 				return;
 			}
@@ -157,7 +166,11 @@ struct ConstructorThunk
 			instance->SetInternalField(0, v8::External::New(object));
 
 			// register instance in state
-			state->InternalRegisterInstance(object, instance);
+			state->InternalRegisterInstance(
+				object,
+				Meta::MetaOf<MetaProvider, ClassType>(),
+				instance
+			);
 		}
 		catch(Exception* exception)
 		{

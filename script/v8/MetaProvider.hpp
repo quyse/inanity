@@ -63,7 +63,34 @@ public:
 		v8::FunctionCallback GetThunk() const;
 	};
 
-	typedef Inanity::Meta::ClassBase<ConstructorBase, FunctionBase, MethodBase> ClassBase;
+	class ClassBase;
+
+	struct Traits
+	{
+		typedef ConstructorBase ConstructorBase;
+		typedef FunctionBase FunctionBase;
+		typedef MethodBase MethodBase;
+		typedef ClassBase ClassBase;
+	};
+
+	class ClassBase : public Meta::ClassBase<Traits>
+	{
+	public:
+		ClassBase(const char* name, const char* fullName)
+		: Meta::ClassBase<Traits>(name, fullName)
+		{}
+
+		virtual v8::FunctionCallback GetDummyConstructorThunk() const = 0;
+	};
+
+	template <typename ClassType>
+	class Class : public ClassBase
+	{
+	public:
+		Class(const char* name, const char* fullName)
+		: ClassBase(name, fullName) {}
+		v8::FunctionCallback GetDummyConstructorThunk() const;
+	};
 };
 
 END_INANITY_V8

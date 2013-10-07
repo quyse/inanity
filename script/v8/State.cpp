@@ -97,7 +97,7 @@ v8::Local<v8::FunctionTemplate> State::GetClassTemplate(MetaProvider::ClassBase*
 			// it's actually necessary to use this.
 			// FunctionTemplate with zero call handler creates
 			// empty objects because internal field wouldn't set.
-			classTemplate->SetCallHandler(DummyConstructorThunk);
+			classTemplate->SetCallHandler(classMeta->GetDummyConstructorThunk());
 		}
 	}
 
@@ -181,56 +181,65 @@ v8::Local<v8::FunctionTemplate> State::GetClassTemplate(MetaProvider::ClassBase*
 	return classTemplate;
 }
 
-void State::InternalRegisterInstance(RefCounted* object, v8::Local<v8::Object> instance)
+void State::InternalRegisterInstance(RefCounted* object, MetaProvider::ClassBase* classMeta, v8::Local<v8::Object> instance)
 {
 #ifdef _DEBUG
-	if(instances.find(object) != instances.end())
-		THROW("V8 instance already registered");
+	{
+		std::pair<Instances::const_iterator, Instances::const_iterator> range = instances.equal_range(object);
+		for(Instances::const_iterator i = range.first; i != range.second; ++i)
+			if(i->second.first == classMeta)
+				THROW("V8 instance with such meta already registered");
+	}
 #endif
 
 	// create persistent handle to get notification when object dies
 	v8::Persistent<v8::Object>* persistentObject = new v8::Persistent<v8::Object>(isolate, instance);
-	persistentObject->SetWeak(object, &InstanceWeakCallback);
+	persistentObject->SetWeak(classMeta, &InstanceWeakCallback);
 
-	instances.insert(std::make_pair(object, persistentObject));
+	instances.insert(std::make_pair(object, std::make_pair(classMeta, persistentObject)));
 
 	// increase reference count
 	object->Reference();
 }
 
-void State::InternalUnregisterInstance(RefCounted* object)
+void State::InternalUnregisterInstance(RefCounted* object, MetaProvider::ClassBase* classMeta)
 {
 	// find an object in instances
-	Instances::iterator i = instances.find(object);
-	if(i != instances.end())
-	{
-		// object is found
+	std::pair<Instances::iterator, Instances::iterator> range = instances.equal_range(object);
+	for(Instances::iterator i = range.first; i != range.second; ++i)
+		if(i->second.first == classMeta)
+		{
+			// object is found
 
-		// reclaim it
-		InternalReclaimInstance(i);
+			// reclaim it
+			InternalReclaimInstance(i);
 
-		// delete from cache
-		instances.erase(i);
-	}
+			// delete from cache
+			instances.erase(i);
+
+			break;
+		}
 }
 
 void State::InternalReclaimInstance(Instances::iterator i)
 {
 	// clear reference to it from script
-	v8::Local<v8::Object> instance = v8::Local<v8::Object>::New(isolate, *i->second);
+	v8::Local<v8::Object> instance = v8::Local<v8::Object>::New(isolate, *i->second.second);
 	instance->SetInternalField(0, v8::External::New(0));
 
 	// destroy persistent handle
-	i->second->Reset();
-	delete i->second;
+	i->second.second->Reset();
+	delete i->second.second;
 
 	// dereference object
 	i->first->Dereference();
 }
 
-void State::InstanceWeakCallback(const v8::WeakCallbackData<v8::Object, RefCounted>& data)
+void State::InstanceWeakCallback(const v8::WeakCallbackData<v8::Object, MetaProvider::ClassBase>& data)
 {
-	State::GetFromIsolate(data.GetIsolate())->InternalUnregisterInstance(data.GetParameter());
+	// get object
+	RefCounted* object = (RefCounted*)v8::External::Cast(*data.GetValue()->ToObject()->GetInternalField(0))->Value();
+	State::GetFromIsolate(data.GetIsolate())->InternalUnregisterInstance(object, data.GetParameter());
 }
 
 void State::ProcessErrors(const v8::TryCatch& tryCatch)
@@ -297,9 +306,11 @@ void State::ProcessErrors(const v8::TryCatch& tryCatch)
 v8::Local<v8::Object> State::ConvertObject(MetaProvider::ClassBase* classMeta, RefCounted* object)
 {
 	// check if the object is already in cache
-	Instances::const_iterator i = instances.find(object);
-	if(i != instances.end())
-		return v8::Local<v8::Object>::New(isolate, *i->second);
+	std::pair<Instances::const_iterator, Instances::const_iterator> range = instances.equal_range(object);
+	// find an object with right meta
+	for(Instances::const_iterator i = range.first; i != range.second; ++i)
+		if(i->second.first == classMeta)
+			return v8::Local<v8::Object>::New(isolate, *i->second.second);
 
 	// get meta
 	v8::Local<v8::FunctionTemplate> classTemplate = GetClassTemplate(classMeta);
@@ -349,7 +360,10 @@ void State::ReclaimInstance(RefCounted* object)
 {
 	Scope scope(this);
 
-	InternalUnregisterInstance(object);
+	std::pair<Instances::iterator, Instances::iterator> range = instances.equal_range(object);
+	for(Instances::iterator i = range.first; i != range.second; ++i)
+		InternalReclaimInstance(i);
+	instances.erase(range.first, range.second);
 }
 
 ptr<Any> State::CreateAny(v8::Local<v8::Value> value)
