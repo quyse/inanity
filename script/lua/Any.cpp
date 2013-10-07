@@ -44,11 +44,29 @@ bool Any::IsNull() const
 	return r;
 }
 
+bool Any::IsBoolean() const
+{
+	lua_State* luaState = state->GetState();
+	PushValue();
+	bool r = lua_isboolean(luaState, -1);
+	lua_pop(luaState, 1);
+	return r;
+}
+
 bool Any::IsNumber() const
 {
 	lua_State* luaState = state->GetState();
 	PushValue();
 	bool r = !!lua_isnumber(luaState, -1);
+	lua_pop(luaState, 1);
+	return r;
+}
+
+bool Any::IsString() const
+{
+	lua_State* luaState = state->GetState();
+	PushValue();
+	bool r = !!lua_isstring(luaState, -1);
 	lua_pop(luaState, 1);
 	return r;
 }
@@ -89,6 +107,15 @@ ptr<RefCounted> Any::AsObject() const
 	return r;
 }
 
+bool Any::AsBool() const
+{
+	lua_State* luaState = state->GetState();
+	PushValue();
+	bool r = Value<bool>::Get(luaState, -1);
+	lua_pop(luaState, 1);
+	return r;
+}
+
 int Any::AsInt() const
 {
 	lua_State* luaState = state->GetState();
@@ -112,6 +139,15 @@ double Any::AsDouble() const
 	lua_State* luaState = state->GetState();
 	PushValue();
 	double r = Value<double>::Get(luaState, -1);
+	lua_pop(luaState, 1);
+	return r;
+}
+
+String Any::AsString() const
+{
+	lua_State* luaState = state->GetState();
+	PushValue();
+	String r = Value<String>::Get(luaState, -1);
 	lua_pop(luaState, 1);
 	return r;
 }

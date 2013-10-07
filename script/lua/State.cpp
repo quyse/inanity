@@ -2,6 +2,7 @@
 #include "Any.hpp"
 #include "Function.hpp"
 #include "stuff.hpp"
+#include "values.ipp"
 #include "userdata.hpp"
 #include "../../File.hpp"
 #include "../../Exception.hpp"
@@ -120,21 +121,50 @@ void State::ReclaimInstance(RefCounted* object)
 	ReclaimObject(state, object);
 }
 
+ptr<Script::Any> State::NewBoolean(bool boolean)
+{
+	Value<bool>::Push(state, boolean);
+	return CreateAny();
+}
+
+ptr<Script::Any> State::NewNumber(int number)
+{
+	Value<int>::Push(state, number);
+	return CreateAny();
+}
+
 ptr<Script::Any> State::NewNumber(float number)
 {
-	lua_pushnumber(state, (lua_Number)number);
+	Value<float>::Push(state, number);
 	return CreateAny();
 }
 
 ptr<Script::Any> State::NewNumber(double number)
 {
-	lua_pushnumber(state, (lua_Number)number);
+	Value<double>::Push(state, number);
+	return CreateAny();
+}
+
+ptr<Script::Any> State::NewString(const String& string)
+{
+	Value<String>::Push(state, string);
 	return CreateAny();
 }
 
 ptr<Script::Any> State::NewArray(int length)
 {
 	lua_createtable(state, length, 0);
+	return CreateAny();
+}
+
+ptr<Script::Any> State::NewDict()
+{
+	return NewArray(0);
+}
+
+ptr<Script::Any> State::WrapObject(ptr<RefCounted> object)
+{
+	Value<ptr<RefCounted> >::Push(state, object);
 	return CreateAny();
 }
 
