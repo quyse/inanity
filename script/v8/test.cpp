@@ -24,12 +24,27 @@ public:
 		std::ostringstream ss;
 		ss
 			<< (any->IsNull() ? "(null)" : "")
+			<< (any->IsBoolean() ? "(boolean)" : "")
 			<< (any->IsNumber() ? "(number)" : "")
+			<< (any->IsString() ? "(string)" : "")
 			<< (any->IsArray() ? "(array)" : "")
 			<< (any->IsFunction() ? "(function)" : "")
-			<< (any->IsObject() ? "(object)" : "")
-			<< '\n';
+			<< (any->IsObject() ? "(object)" : "");
 		return ss.str();
+	}
+
+	static void test_creation(ptr<Script::Any> print)
+	{
+		print->Call(globalState->NewBoolean(false));
+		print->Call(globalState->NewBoolean(true));
+		print->Call(globalState->NewNumber(123));
+		print->Call(globalState->NewNumber(123.4f));
+		print->Call(globalState->NewNumber(123.4));
+		print->Call(globalState->NewString("this is string"));
+		print->Call(globalState->NewArray());
+		print->Call(globalState->NewDict());
+		print->Call(globalState->ConvertValue(Math::vec3(1.0f, 2.0f, 3.0f)));
+		print->Call(globalState->WrapObject(globalState));
 	}
 
 	ptr<TestClass> work(const String& a, int b, double c)
@@ -89,6 +104,7 @@ META_CLASS(TestClass, TestClass);
 	META_CONSTRUCTOR();
 	META_STATIC_METHOD(print);
 	META_STATIC_METHOD(isflags);
+	META_STATIC_METHOD(test_creation);
 	META_METHOD(work);
 	META_METHOD(printvec3);
 	META_METHOD(printvec4);

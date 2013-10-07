@@ -21,7 +21,7 @@ struct Value<bool>
 
 	static inline v8::Local<v8::Value> To(bool value)
 	{
-		return v8::BooleanObject::New(value);
+		return v8::Boolean::New(value);
 	}
 };
 
@@ -37,7 +37,7 @@ struct Value<int>
 
 	static inline v8::Local<v8::Value> To(int value)
 	{
-		return v8::NumberObject::New((double)value);
+		return v8::Number::New((double)value);
 	}
 };
 
@@ -53,7 +53,7 @@ struct Value<double>
 
 	static inline v8::Local<v8::Value> To(double value)
 	{
-		return v8::NumberObject::New(value);
+		return v8::Number::New(value);
 	}
 };
 
@@ -69,7 +69,7 @@ struct Value<float>
 
 	static inline v8::Local<v8::Value> To(float value)
 	{
-		return v8::NumberObject::New((double)value);
+		return v8::Number::New((double)value);
 	}
 };
 
@@ -85,7 +85,7 @@ struct Value<unsigned int>
 
 	static inline v8::Local<v8::Value> To(unsigned int value)
 	{
-		return v8::NumberObject::New((double)value);
+		return v8::Number::New((double)value);
 	}
 };
 
@@ -101,7 +101,7 @@ struct Value<long long>
 
 	static inline v8::Local<v8::Value> To(long long value)
 	{
-		return v8::NumberObject::New((double)value);
+		return v8::Number::New((double)value);
 	}
 };
 
@@ -117,7 +117,7 @@ struct Value<unsigned long long>
 
 	static inline v8::Local<v8::Value> To(unsigned long long value)
 	{
-		return v8::NumberObject::New((double)value);
+		return v8::Number::New((double)value);
 	}
 };
 

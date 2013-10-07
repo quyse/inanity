@@ -357,21 +357,52 @@ ptr<Any> State::CreateAny(v8::Local<v8::Value> value)
 	return anyPool->New(this, value);
 }
 
+ptr<Script::Any> State::NewBoolean(bool boolean)
+{
+	Scope scope(this);
+	return CreateAny(Value<bool>::To(boolean));
+}
+
+ptr<Script::Any> State::NewNumber(int number)
+{
+	Scope scope(this);
+	return CreateAny(Value<int>::To(number));
+}
+
 ptr<Script::Any> State::NewNumber(float number)
 {
-	return NewNumber((double)number);
+	Scope scope(this);
+	return CreateAny(Value<float>::To(number));
 }
 
 ptr<Script::Any> State::NewNumber(double number)
 {
 	Scope scope(this);
-	return CreateAny(v8::Number::New(number));
+	return CreateAny(Value<double>::To(number));
+}
+
+ptr<Script::Any> State::NewString(const String& string)
+{
+	Scope scope(this);
+	return CreateAny(Value<String>::To(string));
 }
 
 ptr<Script::Any> State::NewArray(int length)
 {
 	Scope scope(this);
 	return CreateAny(v8::Array::New(length));
+}
+
+ptr<Script::Any> State::NewDict()
+{
+	Scope scope(this);
+	return CreateAny(v8::Object::New());
+}
+
+ptr<Script::Any> State::WrapObject(ptr<RefCounted> object)
+{
+	Scope scope(this);
+	return CreateAny(Value<ptr<RefCounted> >::To(object));
 }
 
 END_INANITY_V8

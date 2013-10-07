@@ -74,9 +74,14 @@ public:
 	// Script::State's methods.
 	ptr<Script::Function> LoadScript(ptr<File> file);
 	void ReclaimInstance(RefCounted* object);
+	ptr<Script::Any> NewBoolean(bool boolean);
+	ptr<Script::Any> NewNumber(int number);
 	ptr<Script::Any> NewNumber(float number);
 	ptr<Script::Any> NewNumber(double number);
+	ptr<Script::Any> NewString(const String& string);
 	ptr<Script::Any> NewArray(int length = 0);
+	ptr<Script::Any> NewDict();
+	ptr<Script::Any> WrapObject(ptr<RefCounted> object);
 
 	//******* DON'T CALL EXPLICITLY
 

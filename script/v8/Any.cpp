@@ -28,11 +28,25 @@ bool Any::IsNull() const
 	return value->IsUndefined() || value->IsNull();
 }
 
+bool Any::IsBoolean() const
+{
+	State::Scope scope(state);
+	v8::Local<v8::Value> value = v8::Local<v8::Value>::New(state->GetIsolate(), this->value);
+	return value->IsBoolean();
+}
+
 bool Any::IsNumber() const
 {
 	State::Scope scope(state);
 	v8::Local<v8::Value> value = v8::Local<v8::Value>::New(state->GetIsolate(), this->value);
 	return value->IsNumber();
+}
+
+bool Any::IsString() const
+{
+	State::Scope scope(state);
+	v8::Local<v8::Value> value = v8::Local<v8::Value>::New(state->GetIsolate(), this->value);
+	return value->IsString();
 }
 
 bool Any::IsArray() const
@@ -65,25 +79,39 @@ ptr<RefCounted> Any::AsObject() const
 	return Value<ptr<RefCounted> >::From(value);
 }
 
+bool Any::AsBool() const
+{
+	State::Scope scope(state);
+	v8::Local<v8::Value> value = v8::Local<v8::Value>::New(state->GetIsolate(), this->value);
+	return Value<bool>::From(value);
+}
+
 int Any::AsInt() const
 {
 	State::Scope scope(state);
 	v8::Local<v8::Value> value = v8::Local<v8::Value>::New(state->GetIsolate(), this->value);
-	return (int)v8::Number::Cast(*value)->Value();
+	return Value<int>::From(value);
 }
 
 float Any::AsFloat() const
 {
 	State::Scope scope(state);
 	v8::Local<v8::Value> value = v8::Local<v8::Value>::New(state->GetIsolate(), this->value);
-	return (float)v8::Number::Cast(*value)->Value();
+	return Value<float>::From(value);
 }
 
 double Any::AsDouble() const
 {
 	State::Scope scope(state);
 	v8::Local<v8::Value> value = v8::Local<v8::Value>::New(state->GetIsolate(), this->value);
-	return (double)v8::Number::Cast(*value)->Value();
+	return Value<double>::From(value);
+}
+
+String Any::AsString() const
+{
+	State::Scope scope(state);
+	v8::Local<v8::Value> value = v8::Local<v8::Value>::New(state->GetIsolate(), this->value);
+	return Value<String>::From(value);
 }
 
 ptr<Script::Any> Any::CallWith(ptr<Script::Any> arguments[], int count)

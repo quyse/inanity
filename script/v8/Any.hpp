@@ -23,14 +23,18 @@ public:
 
 	//*** Script::Any's methods.
 	bool IsNull() const;
+	bool IsBoolean() const;
 	bool IsNumber() const;
+	bool IsString() const;
 	bool IsArray() const;
 	bool IsFunction() const;
 	bool IsObject() const;
 	ptr<RefCounted> AsObject() const;
+	bool AsBool() const;
 	int AsInt() const;
 	float AsFloat() const;
 	double AsDouble() const;
+	String AsString() const;
 	ptr<Script::Any> CallWith(ptr<Script::Any> arguments[], int count);
 	ptr<Script::Any> ApplyWith(ptr<Script::Any> thisValue, ptr<Script::Any> arguments[], int count);
 	ptr<Script::Any> Get(int index) const;
