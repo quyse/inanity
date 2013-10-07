@@ -4,7 +4,6 @@
 #include "values.hpp"
 #include "State.hpp"
 #include "Any.hpp"
-#include "../convert.hpp"
 #include "../../String.hpp"
 #include "../../Exception.hpp"
 

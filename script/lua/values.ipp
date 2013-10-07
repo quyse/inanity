@@ -7,7 +7,6 @@
 #include "stuff.hpp"
 #include "userdata.hpp"
 #include "lualib.hpp"
-#include "../convert.hpp"
 #include "../../Exception.hpp"
 
 BEGIN_INANITY_LUA

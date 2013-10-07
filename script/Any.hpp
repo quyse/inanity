@@ -3,6 +3,7 @@
 
 #include "script.hpp"
 #include "../PoolObject.hpp"
+#include "../String.hpp"
 
 BEGIN_INANITY_SCRIPT
 
@@ -12,7 +13,9 @@ class Any : public PoolObject
 public:
 	//*** Is-type methods.
 	virtual bool IsNull() const = 0;
+	virtual bool IsBoolean() const = 0;
 	virtual bool IsNumber() const = 0;
+	virtual bool IsString() const = 0;
 	/// Gets if this is an array or script object.
 	virtual bool IsArray() const = 0;
 	virtual bool IsFunction() const = 0;
@@ -24,10 +27,16 @@ public:
 
 	//*** Number conversion methods.
 	/** Throw exception if it is not a number. */
+	virtual bool AsBool() const = 0;
 	virtual int AsInt() const = 0;
 	virtual float AsFloat() const = 0;
 	virtual double AsDouble() const = 0;
+	virtual String AsString() const = 0;
 	//*** Helper conversion operators.
+	operator bool() const
+	{
+		return AsBool();
+	}
 	operator int() const
 	{
 		return AsInt();
@@ -39,6 +48,10 @@ public:
 	operator double() const
 	{
 		return AsDouble();
+	}
+	operator String() const
+	{
+		return AsString();
 	}
 
 	//*** Function methods.
