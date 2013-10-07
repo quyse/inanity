@@ -5,66 +5,66 @@
 
 BEGIN_INANITY_META
 
-template <typename ConstructorBase, typename FunctionBase, typename MethodBase>
-ClassBase<ConstructorBase, FunctionBase, MethodBase>::ClassBase(const char* name, const char* fullName)
+template <typename Traits>
+ClassBase<Traits>::ClassBase(const char* name, const char* fullName)
 : name(name), fullName(fullName) {}
 
-template <typename ConstructorBase, typename FunctionBase, typename MethodBase>
-const char* ClassBase<ConstructorBase, FunctionBase, MethodBase>::GetName() const
+template <typename Traits>
+const char* ClassBase<Traits>::GetName() const
 {
 	return name;
 }
 
-template <typename ConstructorBase, typename FunctionBase, typename MethodBase>
-const char* ClassBase<ConstructorBase, FunctionBase, MethodBase>::GetFullName() const
+template <typename Traits>
+const char* ClassBase<Traits>::GetFullName() const
 {
 	return fullName;
 }
 
-template <typename ConstructorBase, typename FunctionBase, typename MethodBase>
-void ClassBase<ConstructorBase, FunctionBase, MethodBase>::SetParent(ClassBase* parent)
+template <typename Traits>
+void ClassBase<Traits>::SetParent(ParentClassBase* parent)
 {
 	this->parent = parent;
 }
 
-template <typename ConstructorBase, typename FunctionBase, typename MethodBase>
-ClassBase<ConstructorBase, FunctionBase, MethodBase>* ClassBase<ConstructorBase, FunctionBase, MethodBase>::GetParent() const
+template <typename Traits>
+typename ClassBase<Traits>::ParentClassBase* ClassBase<Traits>::GetParent() const
 {
 	return parent;
 }
 
-template <typename ConstructorBase, typename FunctionBase, typename MethodBase>
-void ClassBase<ConstructorBase, FunctionBase, MethodBase>::SetConstructor(ConstructorBase* constructor)
+template <typename Traits>
+void ClassBase<Traits>::SetConstructor(ConstructorBase* constructor)
 {
 	this->constructor = constructor;
 }
 
-template <typename ConstructorBase, typename FunctionBase, typename MethodBase>
-void ClassBase<ConstructorBase, FunctionBase, MethodBase>::AddMethod(MethodBase* method)
+template <typename Traits>
+void ClassBase<Traits>::AddMethod(MethodBase* method)
 {
 	methods.push_back(method);
 }
 
-template <typename ConstructorBase, typename FunctionBase, typename MethodBase>
-void ClassBase<ConstructorBase, FunctionBase, MethodBase>::AddStaticMethod(FunctionBase* staticMethod)
+template <typename Traits>
+void ClassBase<Traits>::AddStaticMethod(FunctionBase* staticMethod)
 {
 	staticMethods.push_back(staticMethod);
 }
 
-template <typename ConstructorBase, typename FunctionBase, typename MethodBase>
-ConstructorBase* ClassBase<ConstructorBase, FunctionBase, MethodBase>::GetConstructor() const
+template <typename Traits>
+typename ClassBase<Traits>::ConstructorBase* ClassBase<Traits>::GetConstructor() const
 {
 	return constructor;
 }
 
-template <typename ConstructorBase, typename FunctionBase, typename MethodBase>
-const typename ClassBase<ConstructorBase, FunctionBase, MethodBase>::Methods& ClassBase<ConstructorBase, FunctionBase, MethodBase>::GetMethods() const
+template <typename Traits>
+const typename ClassBase<Traits>::Methods& ClassBase<Traits>::GetMethods() const
 {
 	return methods;
 }
 
-template <typename ConstructorBase, typename FunctionBase, typename MethodBase>
-const typename ClassBase<ConstructorBase, FunctionBase, MethodBase>::StaticMethods& ClassBase<ConstructorBase, FunctionBase, MethodBase>::GetStaticMethods() const
+template <typename Traits>
+const typename ClassBase<Traits>::StaticMethods& ClassBase<Traits>::GetStaticMethods() const
 {
 	return staticMethods;
 }

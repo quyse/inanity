@@ -15,7 +15,7 @@
 #define META_CLASS(className, fullClassName) \
 	BEGIN_INANITY_META \
 	template <> \
-	class Class<META_PROVIDER, className> : public META_PROVIDER::ClassBase \
+	class Class<META_PROVIDER, className> : public META_PROVIDER::Class<className> \
 	{ \
 	private: \
 		typedef META_PROVIDER Provider; \
@@ -30,7 +30,7 @@
 		return &instance; \
 	} \
 	Class<META_PROVIDER, className>::Class() \
-		: META_PROVIDER::ClassBase(#className, #fullClassName) \
+		: META_PROVIDER::Class<className>(#className, #fullClassName) \
 	{
 #define META_CLASS_END() } END_INANITY_META
 

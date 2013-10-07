@@ -7,10 +7,18 @@
 BEGIN_INANITY_META
 
 /// Foundation class for writing class bases.
-template <typename ConstructorBase, typename FunctionBase, typename MethodBase>
+/** Traits should contain:
+ClassBase, ConstructorBase, FunctionBase, MethodBase.
+*/
+template <typename Traits>
 class ClassBase
 {
 public:
+	typedef typename Traits::ConstructorBase ConstructorBase;
+	typedef typename Traits::FunctionBase FunctionBase;
+	typedef typename Traits::MethodBase MethodBase;
+	typedef typename Traits::ClassBase ParentClassBase;
+
 	typedef std::vector<MethodBase*> Methods;
 	typedef std::vector<FunctionBase*> StaticMethods;
 
@@ -20,7 +28,7 @@ protected:
 	/// Full name of the class (with namespaces).
 	const char* fullName;
 
-	ClassBase* parent;
+	ParentClassBase* parent;
 
 	ConstructorBase* constructor;
 	Methods methods;
@@ -33,9 +41,9 @@ public:
 
 	const char* GetFullName() const;
 
-	void SetParent(ClassBase* parent);
+	void SetParent(ParentClassBase* parent);
 
-	ClassBase* GetParent() const;
+	ParentClassBase* GetParent() const;
 
 	void SetConstructor(ConstructorBase* constructor);
 	void AddMethod(MethodBase* method);
