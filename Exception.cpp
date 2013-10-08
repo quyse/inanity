@@ -33,13 +33,10 @@ ptr<Exception> Exception::GetInnerException() const
 
 void Exception::PrintStack(std::ostream& stream) const
 {
-	//сначала печатаем собственное сообщение
-	stream << message << '\n';
-	//затем, если есть внутреннее исключение
+	stream << message;
 	if(innerException)
 	{
-		//печатаем его
-		stream << "    ---- BECAUSE OF ----\n";
+		stream << " BECAUSE ";
 		innerException->PrintStack(stream);
 	}
 }
