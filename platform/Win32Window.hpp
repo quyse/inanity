@@ -10,7 +10,7 @@
 #error Win32Window is implemented only on Windows.
 #endif
 
-#include "../windows.hpp"
+#include "windows.hpp"
 
 BEGIN_INANITY_GRAPHICS
 

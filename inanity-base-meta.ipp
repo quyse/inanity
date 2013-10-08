@@ -37,15 +37,6 @@ META_CLASS_END();
 META_CLASS(Inanity::Exception, Inanity.Exception);
 META_CLASS_END();
 
-#include "FolderFileSystem.hpp"
-META_CLASS(Inanity::FolderFileSystem, Inanity.FolderFileSystem);
-	META_CLASS_PARENT(FileSystem);
-	META_CONSTRUCTOR(const String&);
-	META_STATIC_METHOD(GetNativeFileSystem);
-	META_METHOD(GetFileSize);
-	META_METHOD(LoadPartOfFile);
-META_CLASS_END();
-
 #include "InputStream.hpp"
 META_CLASS(Inanity::InputStream, Inanity.InputStream);
 META_CLASS_END();

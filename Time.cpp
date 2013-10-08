@@ -1,6 +1,6 @@
 #include "Time.hpp"
 #ifdef ___INANITY_WINDOWS
-#include "windows.hpp"
+#include "platform/windows.hpp"
 #endif
 #include <ctime>
 

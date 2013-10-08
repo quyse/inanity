@@ -6,7 +6,7 @@
 #include "../String.hpp"
 #include <vector>
 #ifdef ___INANITY_WINDOWS
-#include "../windows.hpp"
+#include "../platform/windows.hpp"
 #endif
 
 BEGIN_INANITY_PLATFORM

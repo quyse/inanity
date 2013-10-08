@@ -3,8 +3,8 @@
 
 #include "Handler.hpp"
 #ifdef ___INANITY_WINDOWS
-#include "Handle.hpp"
-#include "windows.hpp"
+#include "platform/Win32Handle.hpp"
+#include "platform/windows.hpp"
 #endif
 #ifdef ___INANITY_LINUX
 #include <sys/types.h>
@@ -23,7 +23,7 @@ private:
 
 #ifdef ___INANITY_WINDOWS
 
-	ptr<Handle> thread;
+	ptr<Platform::Win32Handle> thread;
 
 	static DWORD CALLBACK ThreadRoutine(void* self);
 

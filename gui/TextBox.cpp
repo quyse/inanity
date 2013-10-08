@@ -2,7 +2,7 @@
 #include "Visualizer.hpp"
 #include "Visuals.hpp"
 // FIXME: зависимость от винды для макросов клавиш VK_*
-#include "../windows.hpp"
+#include "../platform/windows.hpp"
 
 BEGIN_INANITY_GUI
 

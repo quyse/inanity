@@ -3,5 +3,6 @@
 
 #include "platform/Game.hpp"
 #include "platform/Window.hpp"
+#include "platform/FileSystem.hpp"
 
 #endif

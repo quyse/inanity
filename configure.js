@@ -42,7 +42,7 @@ var libraries = {
 		// преобразующие потоки
 		'Base64OutputStream', 'Out2InStream',
 		// файловые системы
-		'FileSystem', 'FolderFileSystem', 'FolderFile', 'Handle', 'DiskInputStream', 'DiskOutputStream',
+		'FileSystem',
 		'BlobFileSystem', 'BlobFileSystemBuilder', 'CompositeFileSystem', 'TempFileSystem',
 		'FilterFileSystem', 'BufferedFileSystem'
 		]
@@ -92,11 +92,16 @@ var libraries = {
 	'libinanity-platform': {
 		objects: ['platform.Game'],
 		'objects-win32': [
+			'platform.Win32Handle', 'platform.Win32FileSystem',
 			'platform.Win32Window', 'graphics.Win32Output',
 			'graphics.Win32Adapter', 'graphics.Win32Monitor', 'graphics.Win32MonitorMode',
 			'platform.DllCache'
 		],
-		'objects-linux': ['platform.X11Window', 'platform.X11Display', 'graphics.X11Output', 'graphics.X11Adapter', 'graphics.X11Monitor', 'graphics.X11MonitorMode']
+		'objects-linux': [
+			'platform.PosixFileSystem',
+			'platform.X11Window', 'platform.X11Display', 'graphics.X11Output',
+			'graphics.X11Adapter', 'graphics.X11Monitor', 'graphics.X11MonitorMode'
+		]
 	},
 	// ******* общая графика
 	'libinanity-graphics': {

@@ -12,7 +12,7 @@ Thread::Thread(ptr<ThreadHandler> handler) : handler(handler)
 	try
 	{
 #ifdef ___INANITY_WINDOWS
-		thread = NEW(Handle(CreateThread(0, 0, ThreadRoutine, this, 0, 0)));
+		thread = NEW(Platform::Win32Handle(CreateThread(0, 0, ThreadRoutine, this, 0, 0)));
 		if(!thread->IsValid())
 			THROW_SECONDARY("CreateThread failed", Exception::SystemError());
 #endif

@@ -2,7 +2,7 @@
 #define ___INANITY_GRAPHICS_WIN32_ADAPTER_HPP___
 
 #include "Adapter.hpp"
-#include "../windows.hpp"
+#include "../platform/windows.hpp"
 
 BEGIN_INANITY_GRAPHICS
 

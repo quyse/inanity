@@ -1,5 +1,5 @@
-#ifndef ___INANITY_WINDOWS_HPP___
-#define ___INANITY_WINDOWS_HPP___
+#ifndef ___INANITY_PLATFORM_WINDOWS_HPP___
+#define ___INANITY_PLATFORM_WINDOWS_HPP___
 
 #ifndef ___INANITY_WINDOWS
 #error This is not windows!

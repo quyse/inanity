@@ -3,8 +3,8 @@
 
 #include "Object.hpp"
 #ifdef ___INANITY_WINDOWS
-#include "windows.hpp"
-#include "Handle.hpp"
+#include "platform/windows.hpp"
+#include "platform/Win32Handle.hpp"
 #endif
 #ifdef ___INANITY_LINUX
 //#include <sys/types.h>
@@ -18,7 +18,7 @@ class Semaphore
 {
 private:
 #ifdef ___INANITY_WINDOWS
-	Handle handle;
+	Platform::Win32Handle handle;
 #endif
 #ifdef ___INANITY_LINUX
 	sem_t sem;

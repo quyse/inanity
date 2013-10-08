@@ -3,7 +3,7 @@
 
 #include "Manager.hpp"
 #include "Key.hpp"
-#include "../windows.hpp"
+#include "../platform/windows.hpp"
 
 BEGIN_INANITY_INPUT
 

@@ -8,7 +8,7 @@
 #include "../deps/glew/include/GL/glew.h"
 
 #ifdef ___INANITY_WINDOWS
-#include "../windows.hpp"
+#include "../platform/windows.hpp"
 #include "../deps/glew/include/GL/wglew.h"
 #endif
 

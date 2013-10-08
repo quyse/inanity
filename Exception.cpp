@@ -2,7 +2,7 @@
 #include "Strings.hpp"
 
 #ifdef ___INANITY_WINDOWS
-#include "windows.hpp"
+#include "platform/windows.hpp"
 #endif // ___INANITY_WINDOWS
 
 #ifdef ___INANITY_LINUX
