@@ -65,9 +65,9 @@ public:
 
 	struct Traits
 	{
-		typedef ConstructorBase ConstructorBase;
-		typedef FunctionBase FunctionBase;
-		typedef MethodBase MethodBase;
+		typedef MetaProvider::ConstructorBase ConstructorBase;
+		typedef MetaProvider::FunctionBase FunctionBase;
+		typedef MetaProvider::MethodBase MethodBase;
 		typedef Meta::ClassBase<Traits> ClassBase;
 	};
 
