@@ -63,7 +63,23 @@ public:
 		void PushThunk(lua_State* luaState);
 	};
 
-	typedef Inanity::Meta::ClassBase<ConstructorBase, FunctionBase, MethodBase> ClassBase;
+	struct Traits
+	{
+		typedef ConstructorBase ConstructorBase;
+		typedef FunctionBase FunctionBase;
+		typedef MethodBase MethodBase;
+		typedef Meta::ClassBase<Traits> ClassBase;
+	};
+
+	typedef Meta::ClassBase<Traits> ClassBase;
+
+	template <typename ClassType>
+	class Class : public ClassBase
+	{
+	public:
+		Class(const char* name, const char* fullName)
+		: ClassBase(name, fullName) {}
+	};
 };
 
 END_INANITY_LUA
