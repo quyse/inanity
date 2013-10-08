@@ -1,7 +1,23 @@
 #ifndef ___INANITY_INANITY_BASE_META_IPP___
 #define ___INANITY_INANITY_BASE_META_IPP___
 
-#include "meta/impl.hpp"
+#include "RefCounted.hpp"
+META_CLASS(Inanity::RefCounted, Inanity.RefCounted);
+META_CLASS_END();
+
+#include "File.hpp"
+META_CLASS(Inanity::File, Inanity.File);
+	META_METHOD(GetSize);
+META_CLASS_END();
+
+#include "FileSystem.hpp"
+META_CLASS(Inanity::FileSystem, Inanity.FileSystem);
+	META_METHOD(LoadFile);
+	META_METHOD(TryLoadFile);
+	META_METHOD(LoadStream);
+	META_METHOD(SaveFile);
+	META_METHOD(SaveStream);
+META_CLASS_END();
 
 #include "BlobFileSystem.hpp"
 META_CLASS(Inanity::BlobFileSystem, Inanity.BlobFileSystem);
@@ -19,29 +35,6 @@ META_CLASS_END();
 
 #include "Exception.hpp"
 META_CLASS(Inanity::Exception, Inanity.Exception);
-META_CLASS_END();
-
-#include "File.hpp"
-META_CLASS(Inanity::File, Inanity.File);
-	META_METHOD(GetSize);
-META_CLASS_END();
-
-#include "FileSystem.hpp"
-META_CLASS(Inanity::FileSystem, Inanity.FileSystem);
-	META_METHOD(LoadFile);
-	META_METHOD(TryLoadFile);
-	META_METHOD(LoadStream);
-	META_METHOD(SaveFile);
-	META_METHOD(SaveStream);
-META_CLASS_END();
-
-#include "FolderFileSystem.hpp"
-META_CLASS(Inanity::FolderFileSystem, Inanity.FolderFileSystem);
-	META_CLASS_PARENT(FileSystem);
-	META_CONSTRUCTOR(const String&);
-	META_STATIC_METHOD(GetNativeFileSystem);
-	META_METHOD(GetFileSize);
-	META_METHOD(LoadPartOfFile);
 META_CLASS_END();
 
 #include "InputStream.hpp"

@@ -1,8 +1,8 @@
 diff --git a/Makefile b/Makefile
-index 288c257..1cb5364 100644
+index 6f1de5c..2f8e373 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -269,7 +269,7 @@ $(BUILDS): $(OUTDIR)/Makefile.$$(basename $$@)
+@@ -274,7 +274,7 @@ $(BUILDS): $(OUTDIR)/Makefile.$$(basename $$@)
  	@$(MAKE) -C "$(OUTDIR)" -f Makefile.$(basename $@) \
  	         CXX="$(CXX)" LINK="$(LINK)" \
  	         BUILDTYPE=$(shell echo $(subst .,,$(suffix $@)) | \
@@ -11,11 +11,24 @@ index 288c257..1cb5364 100644
  	         builddir="$(shell pwd)/$(OUTDIR)/$@"
  
  native: $(OUTDIR)/Makefile.native
+diff --git a/build/features.gypi b/build/features.gypi
+index 08ea11a..3c952ff 100644
+--- a/build/features.gypi
++++ b/build/features.gypi
+@@ -54,7 +54,7 @@
+ 
+     # Enable ECMAScript Internationalization API. Enabling this feature will
+     # add a dependency on the ICU library.
+-    'v8_enable_i18n_support%': 1,
++    'v8_enable_i18n_support%': 0,
+ 
+     # Enable compiler warnings when using V8_DEPRECATED apis.
+     'v8_deprecation_warnings%': 0,
 diff --git a/build/standalone.gypi b/build/standalone.gypi
-index 5c017d5..cba3073 100644
+index 3d4f804..b23ab3e 100644
 --- a/build/standalone.gypi
 +++ b/build/standalone.gypi
-@@ -149,7 +149,8 @@
+@@ -152,7 +152,8 @@
      ['OS=="linux" or OS=="freebsd" or OS=="openbsd" or OS=="solaris" \
         or OS=="netbsd"', {
        'target_defaults': {

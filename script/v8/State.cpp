@@ -1,9 +1,8 @@
 #include "State.hpp"
 #include "Function.hpp"
 #include "thunks.ipp"
-#include "../../meta/Constructor.ipp"
-#include "../../meta/Function.ipp"
-#include "../../meta/Method.ipp"
+#include "MetaProvider.ipp"
+#include "Any.hpp"
 #include "../../File.hpp"
 #include <sstream>
 
@@ -25,6 +24,9 @@ State::State()
 #ifdef _DEBUG
 	v8::V8::SetCaptureStackTraceForUncaughtExceptions(true);
 #endif
+
+	// create pool of script values
+	anyPool = NEW(ObjectPool<Any>());
 }
 
 State::~State()
@@ -62,7 +64,7 @@ State::Scope::~Scope()
 	state->isolate->Exit();
 }
 
-v8::Local<v8::FunctionTemplate> State::GetClassTemplate(Meta::ClassBase* classMeta)
+v8::Local<v8::FunctionTemplate> State::GetClassTemplate(MetaProvider::ClassBase* classMeta)
 {
 	// if class template is already created, return it
 	{
@@ -80,54 +82,47 @@ v8::Local<v8::FunctionTemplate> State::GetClassTemplate(Meta::ClassBase* classMe
 	classTemplate->SetClassName(v8::String::New(classMeta->GetFullName()));
 
 	// inherit from parent class
-	Meta::ClassBase* parentClassMeta = classMeta->GetParent();
+	MetaProvider::ClassBase* parentClassMeta = classMeta->GetParent();
 	if(parentClassMeta)
 		classTemplate->Inherit(GetClassTemplate(parentClassMeta));
 
 	// set constructor callback
 	{
-		Meta::ConstructorBase* constructor = classMeta->GetConstructor();
+		MetaProvider::ConstructorBase* constructor = classMeta->GetConstructor();
 		if(constructor)
-		{
-			ConstructorExtensionBase* extension = constructor->GetV8Extension();
-			classTemplate->SetCallHandler(extension->GetThunk());
-		}
+			classTemplate->SetCallHandler(constructor->GetThunk());
 		else
 		{
 			// set dummy constructor
 			// it's actually necessary to use this.
 			// FunctionTemplate with zero call handler creates
 			// empty objects because internal field wouldn't set.
-			classTemplate->SetCallHandler(DummyConstructorThunk);
+			classTemplate->SetCallHandler(classMeta->GetDummyConstructorThunk());
 		}
 	}
 
 	// add static methods to template
-	const Meta::ClassBase::StaticMethods& staticMethods = classMeta->GetStaticMethods();
+	const MetaProvider::ClassBase::StaticMethods& staticMethods = classMeta->GetStaticMethods();
 	for(size_t i = 0; i < staticMethods.size(); ++i)
 	{
-		Meta::FunctionBase* function = staticMethods[i];
-
-		FunctionExtensionBase* extension = function->GetV8Extension();
+		MetaProvider::FunctionBase* function = staticMethods[i];
 
 		classTemplate->Set(
 			v8::String::New(function->GetName()),
-			v8::FunctionTemplate::New(extension->GetThunk())
+			v8::FunctionTemplate::New(function->GetThunk())
 		);
 	}
 
 	// add non-static methods to prototype
 	v8::Local<v8::ObjectTemplate> prototypeTemplate = classTemplate->PrototypeTemplate();
-	const Meta::ClassBase::Methods& methods = classMeta->GetMethods();
+	const MetaProvider::ClassBase::Methods& methods = classMeta->GetMethods();
 	for(size_t i = 0; i < methods.size(); ++i)
 	{
-		Meta::MethodBase* method = methods[i];
-
-		MethodExtensionBase* extension = method->GetV8Extension();
+		MetaProvider::MethodBase* method = methods[i];
 
 		prototypeTemplate->Set(
 			v8::String::New(method->GetName()),
-			v8::FunctionTemplate::New(extension->GetThunk())
+			v8::FunctionTemplate::New(method->GetThunk())
 		);
 	}
 
@@ -186,56 +181,65 @@ v8::Local<v8::FunctionTemplate> State::GetClassTemplate(Meta::ClassBase* classMe
 	return classTemplate;
 }
 
-void State::InternalRegisterInstance(Object* object, v8::Local<v8::Object> instance)
+void State::InternalRegisterInstance(RefCounted* object, MetaProvider::ClassBase* classMeta, v8::Local<v8::Object> instance)
 {
 #ifdef _DEBUG
-	if(instances.find(object) != instances.end())
-		THROW("V8 instance already registered");
+	{
+		std::pair<Instances::const_iterator, Instances::const_iterator> range = instances.equal_range(object);
+		for(Instances::const_iterator i = range.first; i != range.second; ++i)
+			if(i->second.first == classMeta)
+				THROW("V8 instance with such meta already registered");
+	}
 #endif
 
 	// create persistent handle to get notification when object dies
 	v8::Persistent<v8::Object>* persistentObject = new v8::Persistent<v8::Object>(isolate, instance);
-	persistentObject->SetWeak(object, &InstanceWeakCallback);
+	persistentObject->SetWeak(classMeta, &InstanceWeakCallback);
 
-	instances.insert(std::make_pair(object, persistentObject));
+	instances.insert(std::make_pair(object, std::make_pair(classMeta, persistentObject)));
 
 	// increase reference count
 	object->Reference();
 }
 
-void State::InternalUnregisterInstance(Object* object)
+void State::InternalUnregisterInstance(RefCounted* object, MetaProvider::ClassBase* classMeta)
 {
 	// find an object in instances
-	Instances::iterator i = instances.find(object);
-	if(i != instances.end())
-	{
-		// object is found
+	std::pair<Instances::iterator, Instances::iterator> range = instances.equal_range(object);
+	for(Instances::iterator i = range.first; i != range.second; ++i)
+		if(i->second.first == classMeta)
+		{
+			// object is found
 
-		// reclaim it
-		InternalReclaimInstance(i);
+			// reclaim it
+			InternalReclaimInstance(i);
 
-		// delete from cache
-		instances.erase(i);
-	}
+			// delete from cache
+			instances.erase(i);
+
+			break;
+		}
 }
 
 void State::InternalReclaimInstance(Instances::iterator i)
 {
 	// clear reference to it from script
-	v8::Local<v8::Object> instance = v8::Local<v8::Object>::New(isolate, *i->second);
+	v8::Local<v8::Object> instance = v8::Local<v8::Object>::New(isolate, *i->second.second);
 	instance->SetInternalField(0, v8::External::New(0));
 
 	// destroy persistent handle
-	i->second->Reset();
-	delete i->second;
+	i->second.second->Reset();
+	delete i->second.second;
 
 	// dereference object
 	i->first->Dereference();
 }
 
-void State::InstanceWeakCallback(const v8::WeakCallbackData<v8::Object, Object>& data)
+void State::InstanceWeakCallback(const v8::WeakCallbackData<v8::Object, MetaProvider::ClassBase>& data)
 {
-	State::GetFromIsolate(data.GetIsolate())->InternalUnregisterInstance(data.GetParameter());
+	// get object
+	RefCounted* object = (RefCounted*)v8::External::Cast(*data.GetValue()->ToObject()->GetInternalField(0))->Value();
+	State::GetFromIsolate(data.GetIsolate())->InternalUnregisterInstance(object, data.GetParameter());
 }
 
 void State::ProcessErrors(const v8::TryCatch& tryCatch)
@@ -299,26 +303,14 @@ void State::ProcessErrors(const v8::TryCatch& tryCatch)
 	}
 }
 
-void State::Register(Meta::ClassBase* classMeta)
-{
-	Scope scope(this);
-
-	GetClassTemplate(classMeta);
-}
-
-void State::UnregisterInstance(Object* object)
-{
-	Scope scope(this);
-
-	InternalUnregisterInstance(object);
-}
-
-v8::Local<v8::Object> State::ConvertObject(Meta::ClassBase* classMeta, Object* object)
+v8::Local<v8::Object> State::ConvertObject(MetaProvider::ClassBase* classMeta, RefCounted* object)
 {
 	// check if the object is already in cache
-	Instances::const_iterator i = instances.find(object);
-	if(i != instances.end())
-		return v8::Local<v8::Object>::New(isolate, *i->second);
+	std::pair<Instances::const_iterator, Instances::const_iterator> range = instances.equal_range(object);
+	// find an object with right meta
+	for(Instances::const_iterator i = range.first; i != range.second; ++i)
+		if(i->second.first == classMeta)
+			return v8::Local<v8::Object>::New(isolate, *i->second.second);
 
 	// get meta
 	v8::Local<v8::FunctionTemplate> classTemplate = GetClassTemplate(classMeta);
@@ -362,6 +354,69 @@ ptr<Script::Function> State::LoadScript(ptr<File> file)
 	ProcessErrors(tryCatch);
 
 	return NEW(Function(this, script));
+}
+
+void State::ReclaimInstance(RefCounted* object)
+{
+	Scope scope(this);
+
+	std::pair<Instances::iterator, Instances::iterator> range = instances.equal_range(object);
+	for(Instances::iterator i = range.first; i != range.second; ++i)
+		InternalReclaimInstance(i);
+	instances.erase(range.first, range.second);
+}
+
+ptr<Any> State::CreateAny(v8::Local<v8::Value> value)
+{
+	return anyPool->New(this, value);
+}
+
+ptr<Script::Any> State::NewBoolean(bool boolean)
+{
+	Scope scope(this);
+	return CreateAny(Value<bool>::To(boolean));
+}
+
+ptr<Script::Any> State::NewNumber(int number)
+{
+	Scope scope(this);
+	return CreateAny(Value<int>::To(number));
+}
+
+ptr<Script::Any> State::NewNumber(float number)
+{
+	Scope scope(this);
+	return CreateAny(Value<float>::To(number));
+}
+
+ptr<Script::Any> State::NewNumber(double number)
+{
+	Scope scope(this);
+	return CreateAny(Value<double>::To(number));
+}
+
+ptr<Script::Any> State::NewString(const String& string)
+{
+	Scope scope(this);
+	return CreateAny(Value<String>::To(string));
+}
+
+ptr<Script::Any> State::NewArray(int length)
+{
+	Scope scope(this);
+	return CreateAny(v8::Array::New(length));
+}
+
+ptr<Script::Any> State::NewDict()
+{
+	Scope scope(this);
+	return CreateAny(v8::Object::New());
+}
+
+ptr<Script::Any> State::WrapObject(ptr<RefCounted> object)
+{
+	Scope scope(this);
+	return CreateAny(Value<ptr<RefCounted> >::To(object));
 }
 
 END_INANITY_V8

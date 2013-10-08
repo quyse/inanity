@@ -1,24 +1,50 @@
-#include "test.hpp"
 #include "../../inanity-base.hpp"
 #include "../../inanity-compress.hpp"
 #include "../../inanity-lua.hpp"
 
-#define ___INANITY_META_LUA___
+#include "impl.ipp"
 #include "../../inanity-base-meta.ipp"
 #include "../../inanity-compress-meta.ipp"
 
 #include <iostream>
 #include <sstream>
 
-BEGIN_INANITY_LUA
+using namespace Inanity;
 
-META_CLASS(ClassA, Inanity.Lua.ClassA);
+class ClassA : public Object
+{
+public:
+	ClassA();
+
+	virtual void print(const String& a);
+	void print2(int a, const String& b);
+
+	static void printFile(ptr<File> a);
+
+	META_DECLARE_CLASS(ClassA);
+};
+
+class ClassB : public ClassA
+{
+private:
+	ptr<ClassA> a;
+
+public:
+	ClassB(ptr<ClassA> a);
+
+	void print(const String& a);
+	void print3(ptr<ClassA> a);
+
+	META_DECLARE_CLASS(ClassB);
+};
+
+META_CLASS(ClassA, ClassA);
 	META_CONSTRUCTOR();
 	META_METHOD(print);
 	META_METHOD(print2);
 	META_STATIC_METHOD(printFile);
 META_CLASS_END();
-META_CLASS(ClassB, Inanity.Lua.ClassB);
+META_CLASS(ClassB, ClassB);
 	META_CLASS_PARENT(ClassA);
 	META_CONSTRUCTOR(ptr<ClassA>);
 	META_METHOD(print3);
@@ -53,18 +79,14 @@ void ClassB::print3(ptr<ClassA> a)
 	std::cout << "ClassB::print3: " << (ClassA*)a << '\n';
 }
 
-END_INANITY_LUA
-
-using namespace Inanity;
-
 static void Run()
 {
 	try
 	{
-		ptr<Script::State> state = NEW(Script::Lua::State());
+		ptr<Script::Lua::State> state = NEW(Script::Lua::State());
 
-		state->Register<Script::Lua::ClassA>();
-		state->Register<Script::Lua::ClassB>();
+		state->Register<ClassA>();
+		state->Register<ClassB>();
 		state->Register<FileSystem>();
 		state->Register<File>();
 		state->Register<FolderFileSystem>();

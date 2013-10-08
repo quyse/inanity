@@ -29,6 +29,8 @@ var libraries = {
 		objects: [
 		// совсем общее
 		'Object', 'ManagedHeap', 'Strings', 'StringTraveler', 'Exception',
+		// выделение памяти
+		'MemoryPool', 'ChunkPool', 'PoolObject',
 		// время
 		'Time', 'Ticker',
 		// профилирование
@@ -40,7 +42,7 @@ var libraries = {
 		// преобразующие потоки
 		'Base64OutputStream', 'Out2InStream',
 		// файловые системы
-		'FileSystem', 'FolderFileSystem', 'FolderFile', 'Handle', 'DiskInputStream', 'DiskOutputStream',
+		'FileSystem',
 		'BlobFileSystem', 'BlobFileSystemBuilder', 'CompositeFileSystem', 'TempFileSystem',
 		'FilterFileSystem', 'BufferedFileSystem'
 		]
@@ -67,17 +69,13 @@ var libraries = {
 	'libinanity-sqlitefs': {
 		objects: ['SQLiteFileSystem']
 	},
-	// ******* метаинформация
-	'libinanity-meta': {
-		objects: ['meta.Class', 'meta.Function', 'meta.Method']
-	},
 	// ******* скрипты на lua
 	'libinanity-lua': {
-		objects: ['script.lua.Function', 'script.lua.State', 'script.lua.stuff']
+		objects: ['script.lua.Any', 'script.lua.Function', 'script.lua.State', 'script.lua.stuff']
 	},
 	// ******* скрипты на v8
 	'libinanity-v8': {
-		objects: ['script.v8.Function', 'script.v8.State']
+		objects: ['script.v8.Any', 'script.v8.Function', 'script.v8.State']
 	},
 	// ******* криптография
 	'libinanity-crypto': {
@@ -94,11 +92,16 @@ var libraries = {
 	'libinanity-platform': {
 		objects: ['platform.Game'],
 		'objects-win32': [
+			'platform.Win32Handle', 'platform.Win32FileSystem',
 			'platform.Win32Window', 'graphics.Win32Output',
 			'graphics.Win32Adapter', 'graphics.Win32Monitor', 'graphics.Win32MonitorMode',
 			'platform.DllCache'
 		],
-		'objects-linux': ['platform.X11Window', 'platform.X11Display', 'graphics.X11Output', 'graphics.X11Adapter', 'graphics.X11Monitor', 'graphics.X11MonitorMode']
+		'objects-linux': [
+			'platform.PosixFileSystem',
+			'platform.X11Window', 'platform.X11Display', 'graphics.X11Output',
+			'graphics.X11Adapter', 'graphics.X11Monitor', 'graphics.X11MonitorMode'
+		]
 	},
 	// ******* общая графика
 	'libinanity-graphics': {
@@ -226,13 +229,13 @@ var executables = {
 	// TEST
 	, luatest: {
 		objects: ['script.lua.test'],
-		staticLibraries: ['libinanity-base', 'libinanity-compress', 'libinanity-meta', 'libinanity-lua', 'deps/lua//liblua'],
+		staticLibraries: ['libinanity-base', 'libinanity-compress', 'libinanity-lua', 'deps/lua//liblua'],
 		dynamicLibraries: []
 	}
 	// TEST
 	, v8test: {
 		objects: ['script.v8.test'],
-		staticLibraries: ['libinanity-base', 'libinanity-meta', 'libinanity-v8', 'deps/v8//libv8_base', 'deps/v8//libv8_snapshot'],
+		staticLibraries: ['libinanity-base', 'libinanity-v8', 'deps/v8//libv8_base', 'deps/v8//libv8_snapshot'],
 		dynamicLibraries: ['ws2_32.lib', 'winmm.lib']
 	}
 	// TEST

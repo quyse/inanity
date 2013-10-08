@@ -2,6 +2,7 @@
 #include "Exception.hpp"
 #ifdef ___INANITY_LINUX
 #include <pthread.h>
+#include <time.h>
 #endif
 
 BEGIN_INANITY
@@ -11,7 +12,7 @@ Thread::Thread(ptr<ThreadHandler> handler) : handler(handler)
 	try
 	{
 #ifdef ___INANITY_WINDOWS
-		thread = NEW(Handle(CreateThread(0, 0, ThreadRoutine, this, 0, 0)));
+		thread = NEW(Platform::Win32Handle(CreateThread(0, 0, ThreadRoutine, this, 0, 0)));
 		if(!thread->IsValid())
 			THROW_SECONDARY("CreateThread failed", Exception::SystemError());
 #endif
@@ -57,6 +58,19 @@ void Thread::WaitEnd()
 	if(pthread_join(thread, 0))
 #endif
 		THROW_SECONDARY("Can't wait for thread end", Exception::SystemError());
+}
+
+void Thread::Sleep(int milliseconds)
+{
+#ifdef ___INANITY_WINDOWS
+  ::Sleep(milliseconds);
+#endif
+#ifdef ___INANITY_LINUX
+  struct timespec t;
+  t.tv_sec = (time_t)(milliseconds / 1000);
+  t.tv_nsec = (long)((milliseconds % 1000) * 1000000);
+  nanosleep(&t, 0);
+#endif
 }
 
 END_INANITY

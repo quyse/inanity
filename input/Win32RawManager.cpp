@@ -14,7 +14,7 @@ Win32RawManager::Win32RawManager(HWND hWnd) : Win32Manager(hWnd)
 		//мышь
 		devices[0].usUsagePage = 0x01;
 		devices[0].usUsage = 0x02;
-		devices[0].dwFlags = RIDEV_NOLEGACY;
+		devices[0].dwFlags = 0;//RIDEV_NOLEGACY;
 		devices[0].hwndTarget = hWnd;
 		//клавиатура
 		devices[1].usUsagePage = 0x01;
@@ -95,12 +95,12 @@ bool Win32RawManager::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lPara
 						AddEvent(e);
 					}
 
-					if(block.data.mouse.lLastX != 0 || block.data.mouse.lLastY != 0)
+					if(block.data.mouse.lLastX != 0 || block.data.mouse.lLastY != 0 || (flags & RI_MOUSE_WHEEL))
 					{
 						e.mouse.type = Event::Mouse::typeMove;
 						e.mouse.offsetX = (float)block.data.mouse.lLastX;
 						e.mouse.offsetY = (float)block.data.mouse.lLastY;
-						e.mouse.offsetZ = 0;
+						e.mouse.offsetZ = (float)((flags & RI_MOUSE_WHEEL) ? *(SHORT*)&block.data.mouse.usButtonData : 0);
 						AddEvent(e);
 					}
 				}

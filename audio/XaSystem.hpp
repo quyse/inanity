@@ -4,7 +4,7 @@
 #include "System.hpp"
 #include "xaudio2.hpp"
 #include "../ComPointer.hpp"
-#include "../windows.hpp"
+#include "../platform/windows.hpp"
 #include <unordered_multimap>
 
 BEGIN_INANITY_AUDIO

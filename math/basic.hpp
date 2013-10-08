@@ -122,13 +122,11 @@ struct generalxvec<T, 1>
 };
 
 template <typename T, int n, int m>
-class xmat
+struct xmat
 {
-private:
 	// Порядок column-major.
 	T t[m][n];
 
-public:
 	inline T& operator()(int i, int j)
 	{
 		return t[j][i];

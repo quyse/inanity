@@ -2,7 +2,7 @@
 #define ___INANITY_GRAPHICS_WGL_PRESENTER_HPP___
 
 #include "Presenter.hpp"
-#include "../windows.hpp"
+#include "../platform/windows.hpp"
 
 BEGIN_INANITY_GRAPHICS
 

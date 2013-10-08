@@ -6,23 +6,19 @@
 
 BEGIN_INANITY_LUA
 
-class State;
+class Any;
 
 /// Lua function class.
-/** Stores function in Lua Registry by address of the object. */
 class Function : public Script::Function
 {
 private:
-	ptr<State> state;
+	ptr<Any> function;
 
 public:
-	/// Create Lua function.
-	/** Pops function from top of the stack. */
-	Function(ptr<State> state);
-	~Function();
+	Function(ptr<Any> function);
 
-	//*** Script::Function methods
-	void Run();
+	//*** Script::Function method.
+	ptr<Script::Any> Run();
 };
 
 END_INANITY_LUA

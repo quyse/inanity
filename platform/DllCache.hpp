@@ -5,7 +5,7 @@
 #ifdef ___INANITY_WINDOWS
 #include <unordered_map>
 #include "../String.hpp"
-#include "../windows.hpp"
+#include "windows.hpp"
 #endif
 
 BEGIN_INANITY_PLATFORM

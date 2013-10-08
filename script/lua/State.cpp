@@ -1,17 +1,17 @@
 #include "State.hpp"
+#include "Any.hpp"
 #include "Function.hpp"
 #include "stuff.hpp"
+#include "values.ipp"
 #include "userdata.hpp"
-#include "../../meta/Class.hpp"
-#include "../../meta/Constructor.hpp"
-#include "../../meta/Method.hpp"
-#include "../../meta/Function.hpp"
 #include "../../File.hpp"
 #include "../../Exception.hpp"
 #include <cstdlib>
 #include <sstream>
 
 BEGIN_INANITY_LUA
+
+State::States State::states;
 
 State::State()
 {
@@ -22,10 +22,17 @@ State::State()
 
 	// установить функцию окончания
 	lua_atpanic(state, Panic);
+
+	// create pool of Any objects
+	anyPool = NEW(ObjectPool<Any>());
+
+	// add state to global list of states
+	states.insert(std::make_pair(state, this));
 }
 
 State::~State()
 {
+	states.erase(state);
 	lua_close(state);
 }
 
@@ -50,9 +57,27 @@ int State::Panic(lua_State* state)
 	}
 }
 
+void State::InternalRegister(MetaProvider::ClassBase* classMeta)
+{
+	RegisterClassMeta(state, classMeta);
+}
+
 lua_State* State::GetState()
 {
 	return state;
+}
+
+ptr<State> State::GetStateByLuaState(lua_State* state)
+{
+	States::const_iterator i = states.find(state);
+	if(i != states.end())
+		return i->second;
+	return 0;
+}
+
+ptr<Any> State::CreateAny()
+{
+	return anyPool->New(this);
 }
 
 ptr<Script::Function> State::LoadScript(ptr<File> file)
@@ -84,17 +109,63 @@ ptr<Script::Function> State::LoadScript(ptr<File> file)
 
 	Reader reader(file);
 	if(lua_load(state, Reader::Callback, &reader, "=noname", 0) == LUA_OK)
-		// конструктор Script заберёт функцию из стека, и сохранит её себе
-		return NEW(Function(this));
+		return NEW(Function(CreateAny()));
 	// обработать ошибку
 	ProcessError(state);
 	// ProcessError никогда не возвращает управления
 	return 0;
 }
 
-void State::Register(Meta::ClassBase* classMeta)
+void State::ReclaimInstance(RefCounted* object)
 {
-	RegisterClassMeta(state, classMeta);
+	ReclaimObject(state, object);
+}
+
+ptr<Script::Any> State::NewBoolean(bool boolean)
+{
+	Value<bool>::Push(state, boolean);
+	return CreateAny();
+}
+
+ptr<Script::Any> State::NewNumber(int number)
+{
+	Value<int>::Push(state, number);
+	return CreateAny();
+}
+
+ptr<Script::Any> State::NewNumber(float number)
+{
+	Value<float>::Push(state, number);
+	return CreateAny();
+}
+
+ptr<Script::Any> State::NewNumber(double number)
+{
+	Value<double>::Push(state, number);
+	return CreateAny();
+}
+
+ptr<Script::Any> State::NewString(const String& string)
+{
+	Value<String>::Push(state, string);
+	return CreateAny();
+}
+
+ptr<Script::Any> State::NewArray(int length)
+{
+	lua_createtable(state, length, 0);
+	return CreateAny();
+}
+
+ptr<Script::Any> State::NewDict()
+{
+	return NewArray(0);
+}
+
+ptr<Script::Any> State::WrapObject(ptr<RefCounted> object)
+{
+	Value<ptr<RefCounted> >::Push(state, object);
+	return CreateAny();
 }
 
 END_INANITY_LUA

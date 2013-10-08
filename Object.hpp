@@ -1,53 +1,31 @@
 #ifndef ___INANITY_OBJECT_HPP___
 #define ___INANITY_OBJECT_HPP___
 
-#include "ptr.hpp"
+#include "RefCounted.hpp"
 #include <cstddef>
 
 BEGIN_INANITY
 
-/// Класс управляемого объекта. Базовый для всех классов, объекты которых создаются в управляемой куче.
-class Object
+/// Managed object class.
+/** A simple object allocated in global managed heap. */
+class Object : public RefCounted
 {
-private:
-	int referencesCount;
+protected:
+	//*** RefCounted's method.
+	void FreeAsNotReferenced();
 
 public:
-	inline Object() : referencesCount(0)
-	{
-	}
-
-	virtual ~Object()
-	{
-	}
-
-	inline void Reference()
-	{
-		referencesCount++;
-	}
-
-	inline void Dereference()
-	{
-		if(!--referencesCount)
-			delete this;
-	}
-
-	inline unsigned GetReferencesCount() const
-	{
-		return referencesCount;
-	}
-
 	static void* operator new(size_t size);
 	static void operator delete(void* data);
 };
 
-//макросы для выделения памяти с указанием информации о выделяемом кусочке
+//*** Macros to create managed object with debug information
 #ifdef _DEBUG
 #define INANITY_SIDENS2(x) #x
 #define INANITY_SIDENS(x) INANITY_SIDENS2(x)
 #define NEW(...) Inanity::ObjectSetAllocationInfo(new __VA_ARGS__, #__VA_ARGS__ "  " __FILE__ "(" INANITY_SIDENS(__LINE__) ")")
 #define NEW_WITH_TAG(tag, ...) Inanity::ObjectSetAllocationInfo(new __VA_ARGS__, "[" tag "] " #__VA_ARGS__ "  " __FILE__ "(" INANITY_SIDENS(__LINE__) ")")
-//функция определена в ManagedHeap.cpp
+// defined in ManagedHeap.cpp
 void ManagedHeapSetAllocationInfo(void*, const char* info);
 template <typename T>
 T* ObjectSetAllocationInfo(T* data, const char* info)

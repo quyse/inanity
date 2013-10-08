@@ -1,8 +1,30 @@
+diff --git a/build/features.gypi b/build/features.gypi
+index 08ea11a..3c952ff 100644
+--- a/build/features.gypi
++++ b/build/features.gypi
+@@ -54,7 +54,7 @@
+ 
+     # Enable ECMAScript Internationalization API. Enabling this feature will
+     # add a dependency on the ICU library.
+-    'v8_enable_i18n_support%': 1,
++    'v8_enable_i18n_support%': 0,
+ 
+     # Enable compiler warnings when using V8_DEPRECATED apis.
+     'v8_deprecation_warnings%': 0,
 diff --git a/build/standalone.gypi b/build/standalone.gypi
-index 5c017d5..8bc1dc0 100644
+index 3d4f804..2dde3fc 100644
 --- a/build/standalone.gypi
 +++ b/build/standalone.gypi
-@@ -177,7 +177,6 @@
+@@ -36,7 +36,7 @@
+     'clang%': 0,
+     'visibility%': 'hidden',
+     'v8_enable_backtrace%': 0,
+-    'v8_enable_i18n_support%': 1,
++    'v8_enable_i18n_support%': 0,
+     'msvs_multi_core_compile%': '1',
+     'mac_deployment_target%': '10.5',
+     'variables': {
+@@ -180,7 +180,6 @@
          'conditions': [
            ['component=="static_library"', {
              'defines': [
@@ -10,7 +32,7 @@ index 5c017d5..8bc1dc0 100644
              ],
            }],
          ],
-@@ -200,7 +199,7 @@
+@@ -203,7 +202,7 @@
                ['component=="shared_library"', {
                  'ExceptionHandling': '1',  # /EHsc
                }, {
@@ -20,7 +42,7 @@ index 5c017d5..8bc1dc0 100644
              ],
            },
 diff --git a/build/toolchain.gypi b/build/toolchain.gypi
-index c1066eb..d74dee4 100644
+index c1066eb..8ee5d76 100644
 --- a/build/toolchain.gypi
 +++ b/build/toolchain.gypi
 @@ -460,7 +460,7 @@
@@ -46,7 +68,7 @@ index c1066eb..d74dee4 100644
                      'RuntimeLibrary': '3',  #/MDd
                    }, {
 -                    'RuntimeLibrary': '1',  #/MTd
-+                    'RuntimeLibrary': '3',  # /MDd
++                    'RuntimeLibrary': '3',  #/MDd
                    }],
                    ['v8_target_arch=="x64"', {
                      # TODO(2207): remove this option once the bug is fixed.

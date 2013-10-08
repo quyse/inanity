@@ -4,7 +4,7 @@
 #include "net.hpp"
 
 #ifdef ___INANITY_WINDOWS
-#include "../windows.hpp"
+#include "../platform/windows.hpp"
 #endif
 
 #define BOOST_ASIO_SEPARATE_COMPILATION

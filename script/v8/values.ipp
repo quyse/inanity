@@ -1,4 +1,9 @@
+#ifndef ___INANITY_SCRIPT_V8_VALUES_IPP___
+#define ___INANITY_SCRIPT_V8_VALUES_IPP___
+
 #include "values.hpp"
+#include "State.hpp"
+#include "Any.hpp"
 #include "../../String.hpp"
 #include "../../Exception.hpp"
 
@@ -16,7 +21,7 @@ struct Value<bool>
 
 	static inline v8::Local<v8::Value> To(bool value)
 	{
-		return v8::BooleanObject::New(value);
+		return v8::Boolean::New(value);
 	}
 };
 
@@ -32,7 +37,7 @@ struct Value<int>
 
 	static inline v8::Local<v8::Value> To(int value)
 	{
-		return v8::NumberObject::New((double)value);
+		return v8::Number::New((double)value);
 	}
 };
 
@@ -48,7 +53,7 @@ struct Value<double>
 
 	static inline v8::Local<v8::Value> To(double value)
 	{
-		return v8::NumberObject::New(value);
+		return v8::Number::New(value);
 	}
 };
 
@@ -64,7 +69,7 @@ struct Value<float>
 
 	static inline v8::Local<v8::Value> To(float value)
 	{
-		return v8::NumberObject::New((double)value);
+		return v8::Number::New((double)value);
 	}
 };
 
@@ -80,7 +85,7 @@ struct Value<unsigned int>
 
 	static inline v8::Local<v8::Value> To(unsigned int value)
 	{
-		return v8::NumberObject::New((double)value);
+		return v8::Number::New((double)value);
 	}
 };
 
@@ -96,7 +101,7 @@ struct Value<long long>
 
 	static inline v8::Local<v8::Value> To(long long value)
 	{
-		return v8::NumberObject::New((double)value);
+		return v8::Number::New((double)value);
 	}
 };
 
@@ -112,7 +117,7 @@ struct Value<unsigned long long>
 
 	static inline v8::Local<v8::Value> To(unsigned long long value)
 	{
-		return v8::NumberObject::New((double)value);
+		return v8::Number::New((double)value);
 	}
 };
 
@@ -162,8 +167,24 @@ struct Value<const String&>
 	}
 };
 
+template <>
+struct Value<ptr<Script::Any> >
+{
+	typedef ptr<Script::Any> ValueType;
+
+	static inline ptr<Script::Any> From(v8::Local<v8::Value> value)
+	{
+		return State::GetCurrent()->CreateAny(value);
+	}
+
+	static inline v8::Local<v8::Value> To(ptr<Script::Any> value)
+	{
+		return fast_cast<Any*>(&*value)->GetV8Value();
+	}
+};
+
 /*
-ptr<Object> is represented as an External, or as null (zero pointer).
+ptr<RefCounted> is represented as an External, or as null (zero pointer).
 External of corrent object contains non-null pointer.
 External with null pointer is a wiped object, i.e. object which was
 reclamed from script by C++ code.
@@ -176,18 +197,19 @@ struct Value<ptr<ObjectType> >
 
 	static inline ptr<ObjectType> From(v8::Local<v8::Value> value)
 	{
+		// if it's null object
+		if(value->IsNull())
+			return 0;
+
 		// get internal field of an object
 		v8::Local<v8::Value> thisValue = value->ToObject()->GetInternalField(0);
-
-		// if it's null object
-		if(thisValue->IsNull())
-			return 0;
 
 		// otherwise it should be an external
 		if(!thisValue->IsExternal())
 		{
 			v8::String::Utf8Value s(thisValue);
-			THROW(ObjectType::GetMeta()->GetFullName() + String(" instance can't be obtained from ") + *s);
+			const char* classFullName = Meta::MetaOf<MetaProvider, ObjectType>()->GetFullName();
+			THROW(classFullName + String(" instance can't be obtained from ") + *s);
 		}
 
 		// get the value
@@ -195,9 +217,12 @@ struct Value<ptr<ObjectType> >
 
 		// if the value is null, the object was reclaimed
 		if(!externalValue)
-			THROW(ObjectType::GetMeta()->GetFullName() + String(" instance was reclaimed"));
+		{
+			const char* classFullName = Meta::MetaOf<MetaProvider, ObjectType>()->GetFullName();
+			THROW(classFullName + String(" instance was reclaimed"));
+		}
 
-		ObjectType* object = fast_cast<ObjectType*>((Object*)externalValue);
+		ObjectType* object = fast_cast<ObjectType*>((RefCounted*)externalValue);
 
 		return object;
 	}
@@ -205,10 +230,44 @@ struct Value<ptr<ObjectType> >
 	static inline v8::Local<v8::Value> To(ptr<ObjectType> value)
 	{
 		if(value)
-			return State::GetCurrent()->ConvertObject(ObjectType::GetMeta(), static_cast<Object*>(&*value));
+			return State::GetCurrent()->ConvertObject(Meta::MetaOf<MetaProvider, ObjectType>(), static_cast<RefCounted*>(&*value));
 		else
 			return v8::Null();
 	}
 };
 
+template <typename T>
+struct Value
+{
+	typedef T ValueType;
+
+	static inline T From(v8::Local<v8::Value> value)
+	{
+		return ConvertFromScript<T>(State::GetCurrent()->CreateAny(value));
+	}
+
+	static inline v8::Local<v8::Value> To(const T& value)
+	{
+		return fast_cast<Any*>(&*ConvertToScript<T>(State::GetCurrent(), value))->GetV8Value();
+	}
+};
+
+template <typename T>
+struct Value<const T&>
+{
+	typedef T ValueType;
+
+	static inline T From(v8::Local<v8::Value> value)
+	{
+		return ConvertFromScript<T>(State::GetCurrent()->CreateAny(value));
+	}
+
+	static inline v8::Local<v8::Value> To(const T& value)
+	{
+		return fast_cast<Any*>(&*ConvertToScript<T>(State::GetCurrent(), value))->GetV8Value();
+	}
+};
+
 END_INANITY_V8
+
+#endif

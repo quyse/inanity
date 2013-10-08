@@ -2,7 +2,7 @@
 #define ___INANITY_GRAPHICS_WIN32_MONITOR_MODE_HPP___
 
 #include "MonitorMode.hpp"
-#include "../windows.hpp"
+#include "../platform/windows.hpp"
 
 BEGIN_INANITY_GRAPHICS
 

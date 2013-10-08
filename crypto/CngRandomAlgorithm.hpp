@@ -7,7 +7,7 @@
 #error CNG Random implemented on Windows only.
 #endif
 
-#include "../windows.hpp"
+#include "../platform/windows.hpp"
 #include <bcrypt.h>
 
 BEGIN_INANITY_CRYPTO

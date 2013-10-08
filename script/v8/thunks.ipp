@@ -1,5 +1,9 @@
+#ifndef ___INANITY_SCRIPT_V8_THUNKS_IPP___
+#define ___INANITY_SCRIPT_V8_THUNKS_IPP___
+
 #include "thunks.hpp"
 #include "values.ipp"
+#include "State.hpp"
 #include "v8lib.hpp"
 #include "../../meta/Tuple.hpp"
 #include "../../meta/Callable.ipp"
@@ -73,6 +77,7 @@ struct CalleeThunk
 };
 
 /// Thunk for classes without constructor.
+template <typename ClassType>
 inline void DummyConstructorThunk(const v8::FunctionCallbackInfo<v8::Value>& info)
 {
 	v8::Local<v8::Object> instance = info.This();
@@ -88,7 +93,11 @@ inline void DummyConstructorThunk(const v8::FunctionCallbackInfo<v8::Value>& inf
 
 			// we are here only for new objects
 			// so register instance
-			state->InternalRegisterInstance((Object*)v8::External::Cast(*param)->Value(), instance);
+			state->InternalRegisterInstance(
+				(Object*)v8::External::Cast(*param)->Value(),
+				Meta::MetaOf<MetaProvider,
+				ClassType>(), instance
+			);
 
 			return;
 		}
@@ -126,7 +135,11 @@ struct ConstructorThunk
 
 				// we are here only for new objects
 				// so register instance
-				state->InternalRegisterInstance((Object*)v8::External::Cast(*param)->Value(), instance);
+				state->InternalRegisterInstance(
+					(Object*)v8::External::Cast(*param)->Value(),
+					Meta::MetaOf<MetaProvider, ClassType>(),
+					instance
+				);
 
 				return;
 			}
@@ -153,12 +166,16 @@ struct ConstructorThunk
 			instance->SetInternalField(0, v8::External::New(object));
 
 			// register instance in state
-			state->InternalRegisterInstance(object, instance);
+			state->InternalRegisterInstance(
+				object,
+				Meta::MetaOf<MetaProvider, ClassType>(),
+				instance
+			);
 		}
 		catch(Exception* exception)
 		{
 			std::ostringstream stream;
-			stream << ClassType::GetMeta()->GetFullName();
+			stream << Meta::MetaOf<MetaProvider, ClassType>()->GetFullName();
 			stream << " instance constructor failed:\n";
 			MakePointer(exception)->PrintStack(stream);
 			v8::ThrowException(
@@ -169,3 +186,5 @@ struct ConstructorThunk
 };
 
 END_INANITY_V8
+
+#endif

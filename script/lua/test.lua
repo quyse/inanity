@@ -1,6 +1,6 @@
 -- Тестовый скрипт
 
-local a = Inanity.Lua.ClassB(Inanity.Lua.ClassA())
+local a = ClassB(ClassA())
 a:print("this is a test string")
 a:print2(1234, "fdsfe")
 

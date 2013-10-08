@@ -3,6 +3,7 @@
 #include "MemoryStream.hpp"
 #include "Exception.hpp"
 #include <memory.h>
+#include <algorithm>
 
 BEGIN_INANITY
 

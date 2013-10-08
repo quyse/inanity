@@ -1,15 +1,11 @@
 #ifndef ___INANITY_SCRIPT_LUA_USERDATA_HPP___
 #define ___INANITY_SCRIPT_LUA_USERDATA_HPP___
 
-#include "lua.hpp"
+#include "MetaProvider.hpp"
 
 /* Файл содержит определения структур пользовательских данных
 (userdata), которые хранят в Lua различные вещи.
 */
-
-BEGIN_INANITY_META
-
-END_INANITY_META
 
 BEGIN_INANITY_LUA
 
@@ -32,8 +28,12 @@ struct ClassUserData : public UserData
 /// Структура объекта, представляющего управляемый указатель в Lua.
 struct ObjectUserData : public UserData
 {
-	Object* object;
-	Meta::ClassBase* cls;
+	/// Pointer to object.
+	/** If null, the object was reclaimed. */
+	RefCounted* object;
+	/** Type of the object. */
+	/** Not null even for reclaimed objects. */
+	MetaProvider::ClassBase* cls;
 };
 
 END_INANITY_LUA

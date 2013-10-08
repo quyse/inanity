@@ -3,7 +3,7 @@
 
 #include "Output.hpp"
 #include "../platform/platform.hpp"
-#include "../windows.hpp"
+#include "../platform/windows.hpp"
 
 BEGIN_INANITY_PLATFORM
 

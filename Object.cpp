@@ -2,6 +2,11 @@
 
 BEGIN_INANITY
 
+void Object::FreeAsNotReferenced()
+{
+	delete this;
+}
+
 void* Object::operator new(size_t size)
 {
 	return managedHeap.Allocate(size);

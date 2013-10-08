@@ -3,7 +3,7 @@
 
 #include "Object.hpp"
 #ifdef ___INANITY_WINDOWS
-#include "windows.hpp"
+#include "platform/windows.hpp"
 #endif
 #ifdef ___INANITY_LINUX
 #include <sys/types.h>

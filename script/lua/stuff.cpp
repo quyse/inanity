@@ -1,9 +1,6 @@
 #include "stuff.hpp"
 #include "values.ipp"
-#include "../../meta/Class.hpp"
-#include "../../meta/Constructor.hpp"
-#include "../../meta/Method.hpp"
-#include "../../meta/Function.hpp"
+#include "MetaProvider.ipp"
 #include "../../Exception.hpp"
 #include <sstream>
 
@@ -13,6 +10,16 @@ int MetaTable_index(lua_State* state)
 {
 	// в стеке лежит: сначала userdata, затем индекс
 	// а в замыкании лежит таблица методов
+
+	// проверить, что объект не отозван
+	ObjectUserData* userData = (ObjectUserData*)lua_touserdata(state, -2);
+	if(!userData->object)
+	{
+		// вернуть понятную ошибку
+		lua_pushliteral(state, "Object reclaimed");
+		lua_error(state);
+		// управление не возвращается
+	}
 
 	// продублировать индекс
 	lua_pushvalue(state, 2);
@@ -46,17 +53,17 @@ int NonConstructableClass_call(lua_State* state)
 	return 0;
 }
 
-void PushClassMetaTable(lua_State* state, Meta::ClassBase* cls)
+void PushClassMetaTable(lua_State* state, MetaProvider::ClassBase* cls)
 {
 	// создать табличку
 	lua_createtable(state, 0, 2);     // metatable
 	
 	// сделать call
 	lua_pushliteral(state, "__call");                    // metatable "__call"
-	Meta::ConstructorBase* constructor = cls->GetConstructor();
+	MetaProvider::ConstructorBase* constructor = cls->GetConstructor();
 	// если конструктор есть, то добавить его
 	if(constructor)
-		constructor->GetLuaExtension()->PushThunk(state);  // metatable "__call" thunk
+		constructor->PushThunk(state);                     // metatable "__call" thunk
 	else
 	{
 		// а если конструктора нет, добавить заглушку
@@ -68,14 +75,14 @@ void PushClassMetaTable(lua_State* state, Meta::ClassBase* cls)
 	// сделать index для статических методов
 	lua_pushliteral(state, "__index");                   // metatable "__index"
 	// создать таблицу методов
-	const Meta::ClassBase::StaticMethods& staticMethods = cls->GetStaticMethods();
+	const MetaProvider::ClassBase::StaticMethods& staticMethods = cls->GetStaticMethods();
 	lua_createtable(state, 0, (int)staticMethods.size()); // metatable "__index" staticMethods
 	for(size_t i = 0; i < staticMethods.size(); ++i)
 	{
-		Meta::FunctionBase* function = staticMethods[i];
+		MetaProvider::FunctionBase* function = staticMethods[i];
 
 		lua_pushstring(state, function->GetName());        // metatable "__index" staticMethods functionName
-		function->GetLuaExtension()->PushThunk(state);     // metatable "__index" staticMethods functionName thunk
+		function->PushThunk(state);                        // metatable "__index" staticMethods functionName thunk
 		lua_settable(state, -3);                           // metatable "__index" staticMethods
 	}
 	// таблица методов попадает в замыкание
@@ -86,7 +93,7 @@ void PushClassMetaTable(lua_State* state, Meta::ClassBase* cls)
 	// всё.
 }
 
-void RegisterClassMeta(lua_State* state, Meta::ClassBase* cls)
+void RegisterClassMeta(lua_State* state, MetaProvider::ClassBase* cls)
 {
 	// разобрать полное имя класса (вида Inanity.Namespace1.Namespace2.ClassName),
 	// пройтись по этому пути, и создать глобальный объект
@@ -161,15 +168,44 @@ int ObjectMetaTable_gc(lua_State* state)
 {
 	// в стеке лежит: userdata
 
-	ObjectUserData* userData = (ObjectUserData*)lua_touserdata(state, -1);
-	// освободить ссылку на объект
-	userData->object->Dereference();
-	userData->object = 0;
-	userData->cls = 0;
+	ReclaimObjectFromUserData(state);
+
 	return 0;
 }
 
-void PushObjectMetaTable(lua_State* state, Meta::ClassBase* cls)
+void ReclaimObjectFromUserData(lua_State* state)
+{
+	ObjectUserData* userData = (ObjectUserData*)lua_touserdata(state, -1);
+	// if object is not reclaimed yet, reclaim it
+	RefCounted* object = userData->object;
+	if(object)
+	{
+		// dereference object
+		userData->object->Dereference();
+		// clear pointer
+		userData->object = 0;
+
+		// remove userdata from registry
+		lua_pushlightuserdata(state, object);
+		lua_pushnil(state);
+		lua_settable(state, LUA_REGISTRYINDEX);
+	}
+}
+
+void ReclaimObject(lua_State* state, RefCounted* object)
+{
+	// find an object by pointer
+	lua_pushlightuserdata(state, object);
+	lua_gettable(state, LUA_REGISTRYINDEX);
+	// if object doesn't exist, just pop nil from stack
+	if(lua_isnil(state, -1))
+		lua_pop(state, 1);
+	// else reclaim the object
+	else
+		ReclaimObjectFromUserData(state);
+}
+
+void PushObjectMetaTable(lua_State* state, MetaProvider::ClassBase* cls)
 {
 	// получить метатаблицу объектов
 	lua_pushlightuserdata(state, cls);                   // cls
@@ -194,19 +230,19 @@ void PushObjectMetaTable(lua_State* state, Meta::ClassBase* cls)
 		// вот в этом месте создать таблицу методов
 		// посчитать количество методов
 		size_t methodsCount = 0;
-		for(Meta::ClassBase* c = cls; c; c = c->GetParent())
+		for(MetaProvider::ClassBase* c = cls; c; c = c->GetParent())
 			methodsCount += c->GetMethods().size();
 		// создать таблицу
 		lua_createtable(state, 0, (int)methodsCount);      // cls metatable "__index" methods
 		// и наполнить методами
-		for(Meta::ClassBase* c = cls; c; c = c->GetParent())
+		for(MetaProvider::ClassBase* c = cls; c; c = c->GetParent())
 		{
-			const Meta::ClassBase::Methods& methods = c->GetMethods();
+			const MetaProvider::ClassBase::Methods& methods = c->GetMethods();
 			for(size_t i = 0; i < methods.size(); ++i)
 			{
-				Meta::MethodBase* method = methods[i];
+				MetaProvider::MethodBase* method = methods[i];
 				lua_pushstring(state, method->GetName());      // cls metatable "__index" methods methodName
-				method->GetLuaExtension()->PushThunk(state);   // cls metatable "__index" methods methodName thunk
+				method->PushThunk(state);                      // cls metatable "__index" methods methodName thunk
 				lua_settable(state, -3);                       // cls metatable "__index" methods
 			}
 		}
@@ -235,7 +271,7 @@ ptr<Exception> ErrorToException(lua_State* state)
 	{
 		// full userdata, возможно, что Exception
 		ObjectUserData* userData = (ObjectUserData*)lua_touserdata(state, -1);
-		if(userData->type == UserData::typeObject && userData->cls == Exception::GetMeta())
+		if(userData->type == UserData::typeObject && userData->cls == Meta::MetaOf<MetaProvider, Exception>())
 			// да, Exception!
 			exception = (Exception*)userData->object;
 	}

@@ -2,6 +2,8 @@
 #define ___INANITY_SCRIPT_LUA_VALUES_IPP___
 
 #include "values.hpp"
+#include "Any.hpp"
+#include "State.hpp"
 #include "stuff.hpp"
 #include "userdata.hpp"
 #include "lualib.hpp"
@@ -191,6 +193,23 @@ struct Value<const String&>
 	}
 };
 
+template <>
+struct Value<ptr<Script::Any> >
+{
+	typedef ptr<Script::Any> ValueType;
+
+	static inline ptr<Script::Any> Get(lua_State* state, int index)
+	{
+		lua_pushvalue(state, index);
+		return State::GetStateByLuaState(state)->CreateAny();
+	}
+
+	static void Push(lua_State* state, ptr<Script::Any> value)
+	{
+		fast_cast<Any*>(&*value)->PushValue();
+	}
+};
+
 template <typename ObjectType>
 struct Value<ptr<ObjectType> >
 {
@@ -205,15 +224,19 @@ struct Value<ptr<ObjectType> >
 		// получить userdata для объекта, и проверить, что это объект
 		ObjectUserData* userData = (ObjectUserData*)lua_touserdata(state, index);
 		if(!userData || lua_islightuserdata(state, index) || userData->type != UserData::typeObject)
-			THROW(String("Expected an object of type '") + ObjectType::GetMeta()->GetFullName() + "' for argument, but got " + DescribeValue(state, index));
+		{
+			const char* fullClassName = Meta::MetaOf<MetaProvider, ObjectType>()->GetFullName();
+			THROW(String("Expected an object of type '") + fullClassName + "' for argument, but got " + DescribeValue(state, index));
+		}
 
 		// проверить тип объекта, в случае необходимости привести к вышестоящему типу
-		for(Meta::ClassBase* cls = userData->cls; cls; cls = cls->GetParent())
-			if(cls == ObjectType::GetMeta())
+		for(MetaProvider::ClassBase* cls = userData->cls; cls; cls = cls->GetParent())
+			if(cls == Meta::MetaOf<MetaProvider, ObjectType>())
 				// вернуть объект
 				return (ObjectType*)userData->object;
 		// если здесь, значит, мы проверили всю цепочку наследования, а тип не нашли
-		THROW(String("Can't cast object of type '") + userData->cls->GetFullName() + "' to expected type '" + ObjectType::GetMeta()->GetFullName() + "'");
+		const char* fullClassName = Meta::MetaOf<MetaProvider, ObjectType>()->GetFullName();
+		THROW(String("Can't cast object of type '") + userData->cls->GetFullName() + "' to expected type '" + fullClassName + "'");
 	}
 
 	static inline void Push(lua_State* state, ptr<ObjectType> value)
@@ -225,15 +248,66 @@ struct Value<ptr<ObjectType> >
 			return;
 		}
 
-		ObjectUserData* userData = (ObjectUserData*)lua_newuserdata(state, sizeof(ObjectUserData));
-		userData->type = UserData::typeObject;
-		userData->object = (Object*)(ObjectType*)value;
-		userData->cls = ObjectType::GetMeta();
-		// указать метатаблицу
-		PushObjectMetaTable(state, ObjectType::GetMeta());
-		lua_setmetatable(state, -2);
-		// задать дополнительную ссылку объекту
-		userData->object->Reference();
+		// попробовать найти существующее userdata для объекта
+		lua_pushlightuserdata(state, (ObjectType*)value);		// value
+		lua_gettable(state, LUA_REGISTRYINDEX);							// userdata
+		// если нет, сделать
+		if(lua_isnil(state, -1))
+		{
+			// выбросить nil из стека
+			lua_pop(state, 1);																//
+
+			ObjectUserData* userData = (ObjectUserData*)lua_newuserdata(state, sizeof(ObjectUserData));
+			userData->type = UserData::typeObject;
+			userData->object = (RefCounted*)(ObjectType*)value;
+			userData->cls = Meta::MetaOf<MetaProvider, ObjectType>();
+			// указать метатаблицу
+			PushObjectMetaTable(state, userData->cls);
+			lua_setmetatable(state, -2);
+			// задать дополнительную ссылку объекту
+			userData->object->Reference();
+
+			// положить адрес объекта
+			lua_pushlightuserdata(state, (ObjectType*)value);
+			// продублировать userdata в стеке
+			lua_pushvalue(state, -2);
+			// сохранить userdata по адресу объекта, для повторного использования
+			lua_settable(state, LUA_REGISTRYINDEX);
+		}
+	}
+};
+
+template <typename T>
+struct Value
+{
+	typedef T ValueType;
+
+	static inline T Get(lua_State* state, int index)
+	{
+		lua_pushvalue(state, index);
+		return ConvertFromScript<T>(State::GetStateByLuaState(state)->CreateAny());
+	}
+
+	static inline void Push(lua_State* state, const T& value)
+	{
+		fast_cast<Any*>(&*ConvertToScript<T>(State::GetStateByLuaState(state), value))->PushValue();
+	}
+};
+
+template <typename T>
+struct Value<const T&>
+{
+	typedef T ValueType;
+
+	static inline T Get(lua_State* state, int index)
+	{
+		lua_pushvalue(state, index);
+		return ConvertFromScript<T>(State::GetStateByLuaState(state)->CreateAny());
+	}
+
+	static inline void Push(lua_State* state, const T& value)
+	{
+		fast_cast<Any*>(&*ConvertToScript<T>(State::GetStateByLuaState(state), value))->PushValue();
 	}
 };
 

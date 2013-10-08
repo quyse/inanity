@@ -2,8 +2,8 @@
 #define ___INANITY_SCRIPT_LUA_STUFF_HPP___
 
 #include "lua.hpp"
+#include "MetaProvider.hpp"
 #include "lualib.hpp"
-#include "../../meta/Class.hpp"
 #include "../../String.hpp"
 
 BEGIN_INANITY
@@ -19,16 +19,21 @@ BEGIN_INANITY_LUA
 int MetaTable_index(lua_State* state);
 
 /// Push class metatable in stack.
-void PushClassMetaTable(lua_State* state, Meta::ClassBase* cls);
+void PushClassMetaTable(lua_State* state, MetaProvider::ClassBase* cls);
 
 /// Register a class in Lua state.
-void RegisterClassMeta(lua_State* state, Meta::ClassBase* cls);
+void RegisterClassMeta(lua_State* state, MetaProvider::ClassBase* cls);
 
 /// Структура с методами метатаблицы объектов.
 int ObjectMetaTable_gc(lua_State* state);
 
+/// Reclaim object from userdata on top of the stack.
+void ReclaimObjectFromUserData(lua_State* state);
+/// Reclaim object by pointer.
+void ReclaimObject(lua_State* state, RefCounted* object);
+
 /// Push object metatable in stack.
-void PushObjectMetaTable(lua_State* state, Meta::ClassBase* cls);
+void PushObjectMetaTable(lua_State* state, MetaProvider::ClassBase* cls);
 
 /// Converts Lua error to exception.
 /** Pops an error out from stack. */

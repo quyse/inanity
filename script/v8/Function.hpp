@@ -21,7 +21,7 @@ public:
 	~Function();
 
 	//*** Script::Function methods
-	void Run();
+	ptr<Script::Any> Run();
 };
 
 END_INANITY_V8
