@@ -13,6 +13,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <climits>
 
 BEGIN_INANITY_PLATFORM
 
