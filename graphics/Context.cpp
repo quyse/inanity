@@ -127,7 +127,7 @@ void Context::LetUniformBuffer::operator()(Context* context, int i, ptr<UniformB
 void Context::LetUniformBuffer::operator()(Context* context, Shaders::UniformGroup* uniformGroup)
 {
 	Init(&context->cellUniformBuffers[uniformGroup->GetSlot()]);
-	this->uniformBuffer = uniformBuffer;
+	this->uniformBuffer = uniformGroup->GetBuffer();
 }
 
 //*** Context::LetVertexShader
