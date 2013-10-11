@@ -38,10 +38,12 @@ public:
 	String AsString() const;
 	ptr<Script::Any> CallWith(ptr<Script::Any> arguments[], int count);
 	ptr<Script::Any> ApplyWith(ptr<Script::Any> thisValue, ptr<Script::Any> arguments[], int count);
+	int GetLength() const;
 	ptr<Script::Any> Get(int index) const;
 	ptr<Script::Any> Get(ptr<Script::Any> index) const;
 	void Set(int index, ptr<Script::Any> value);
 	void Set(ptr<Script::Any> index, ptr<Script::Any> value);
+	void Dump(std::ostream& stream) const;
 };
 
 END_INANITY_LUA
