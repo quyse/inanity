@@ -54,8 +54,8 @@ ID3D11InputLayout* Dx11Context::GetInputLayout(ptr<Dx11AttributeBinding> attribu
 
 int Dx11Context::GetRasterizerStateKey()
 {
-	FillMode fillMode = cellFillMode.top ? ((LetFillMode*)cellFillMode.top)->fillMode : fillModeSolid;
-	CullMode cullMode = cellCullMode.top ? ((LetCullMode*)cellCullMode.top)->cullMode : cullModeBack;
+	FillMode fillMode = ((LetFillMode*)cellFillMode.top)->fillMode;
+	CullMode cullMode = ((LetCullMode*)cellCullMode.top)->cullMode;
 	int key = ((int)fillMode) | (((int)cullMode) << 1);
 	// if rasterizer state missed, create new
 	if(!rasterizerStateCache[key])
@@ -254,7 +254,7 @@ void Dx11Context::Update()
 	if(!cellIndexBuffer.IsActual())
 	{
 		LetIndexBuffer* let = (LetIndexBuffer*)cellIndexBuffer.top;
-		IndexBuffer* abstractIndexBuffer = let ? let->indexBuffer : 0;
+		IndexBuffer* abstractIndexBuffer = let->indexBuffer;
 		if(abstractIndexBuffer)
 		{
 			Dx11IndexBuffer* indexBuffer = fast_cast<Dx11IndexBuffer*>(abstractIndexBuffer);
@@ -270,7 +270,7 @@ void Dx11Context::Update()
 	if(!cellVertexShader.IsActual())
 	{
 		LetVertexShader* let = (LetVertexShader*)cellVertexShader.top;
-		VertexShader* abstractVertexShader = let ? let->vertexShader : 0;
+		VertexShader* abstractVertexShader = let->vertexShader;
 		ID3D11VertexShader* shader = abstractVertexShader
 			? fast_cast<Dx11VertexShader*>(abstractVertexShader)->GetVertexShaderInterface()
 			: 0;
@@ -283,7 +283,7 @@ void Dx11Context::Update()
 	if(!cellPixelShader.IsActual())
 	{
 		LetPixelShader* let = (LetPixelShader*)cellPixelShader.top;
-		PixelShader* abstractPixelShader = let ? let->pixelShader : 0;
+		PixelShader* abstractPixelShader = let->pixelShader;
 		ID3D11PixelShader* shader = abstractPixelShader
 			? fast_cast<Dx11PixelShader*>(abstractPixelShader)->GetPixelShaderInterface()
 			: 0;
@@ -323,7 +323,7 @@ void Dx11Context::Update()
 	if(!cellBlendState.IsActual())
 	{
 		LetBlendState* let = (LetBlendState*)cellBlendState.top;
-		BlendState* abstractBlendState = let ? let->blendState : 0;
+		BlendState* abstractBlendState = let->blendState;
 		ID3D11BlendState* blendState = abstractBlendState
 			? fast_cast<Dx11BlendState*>(abstractBlendState)->GetBlendStateInterface(device)
 			: 0;

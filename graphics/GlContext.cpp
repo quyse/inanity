@@ -90,9 +90,9 @@ void GlContext::Update()
 	if(!cellVertexShader.IsActual() || !cellPixelShader.IsActual())
 	{
 		LetVertexShader* letV = (LetVertexShader*)cellVertexShader.top;
-		VertexShader* abstractVertexShader = letV ? letV->vertexShader : 0;
+		VertexShader* abstractVertexShader = letV->vertexShader;
 		LetPixelShader* letP = (LetPixelShader*)cellPixelShader.top;
-		PixelShader* abstractPixelShader = letP ? letP->pixelShader : 0;
+		PixelShader* abstractPixelShader = letP->pixelShader;
 		ptr<GlInternalProgram> program = programCache->GetProgram(
 			fast_cast<GlVertexShader*>(abstractVertexShader),
 			fast_cast<GlPixelShader*>(abstractPixelShader)
@@ -209,7 +209,7 @@ void GlContext::Update()
 	if(!cellIndexBuffer.IsActual())
 	{
 		LetIndexBuffer* let = (LetIndexBuffer*)cellIndexBuffer.top;
-		IndexBuffer* abstractIndexBuffer = let ? let->indexBuffer : 0;
+		IndexBuffer* abstractIndexBuffer = let->indexBuffer;
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, abstractIndexBuffer ? fast_cast<GlIndexBuffer*>(abstractIndexBuffer)->GetName() : 0);
 		GlSystem::CheckErrors("Can't bind index buffer");
 
@@ -219,7 +219,7 @@ void GlContext::Update()
 	if(!cellFillMode.IsActual())
 	{
 		LetFillMode* let = (LetFillMode*)cellFillMode.top;
-		FillMode fillMode = let ? let->fillMode : fillModeSolid;
+		FillMode fillMode = let->fillMode;
 		switch(fillMode)
 		{
 		case fillModeWireframe:
@@ -239,7 +239,7 @@ void GlContext::Update()
 	if(!cellCullMode.IsActual())
 	{
 		LetCullMode* let = (LetCullMode*)cellCullMode.top;
-		CullMode cullMode = let ? let->cullMode : cullModeBack;
+		CullMode cullMode = let->cullMode;
 		switch(cullMode)
 		{
 		case cullModeNone:
@@ -274,9 +274,9 @@ void GlContext::Update()
 
 	// depth test func & depth write
 	LetDepthTestFunc* letDTF = (LetDepthTestFunc*)cellDepthTestFunc.top;
-	DepthTestFunc depthTestFunc = letDTF ? letDTF->depthTestFunc : depthTestFuncLess;
+	DepthTestFunc depthTestFunc = letDTF->depthTestFunc;
 	LetDepthWrite* letDW = (LetDepthWrite*)cellDepthWrite.top;
-	bool depthWrite = letDW ? letDW->depthWrite : true;
+	bool depthWrite = letDW->depthWrite;
 	// enable or disable depth test
 	if(!cellDepthTestFunc.IsActual() || !cellDepthWrite.IsActual())
 	{
@@ -338,7 +338,7 @@ void GlContext::Update()
 	if(!cellBlendState.IsActual())
 	{
 		LetBlendState* let = (LetBlendState*)cellBlendState.top;
-		BlendState* abstractBlendState = let ? let->blendState : 0;
+		BlendState* abstractBlendState = let->blendState;
 		if(abstractBlendState)
 			fast_cast<GlBlendState*>(abstractBlendState)->Apply();
 		else
