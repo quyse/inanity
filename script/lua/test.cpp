@@ -1,82 +1,52 @@
 #include "../../inanity-base.hpp"
-#include "../../inanity-compress.hpp"
 #include "../../inanity-lua.hpp"
+#include "../../inanity-platform.hpp"
 
 #include "impl.ipp"
 #include "../../inanity-base-meta.ipp"
-#include "../../inanity-compress-meta.ipp"
 
 #include <iostream>
 #include <sstream>
 
 using namespace Inanity;
 
-class ClassA : public Object
+class TestClass : public Object
 {
 public:
-	ClassA();
+	TestClass();
 
-	virtual void print(const String& a);
-	void print2(int a, const String& b);
+	static void print(ptr<Script::Any> any);
+	static String isflags(ptr<Script::Any> any);
 
-	static void printFile(ptr<File> a);
-
-	META_DECLARE_CLASS(ClassA);
+	META_DECLARE_CLASS(TestClass);
 };
 
-class ClassB : public ClassA
-{
-private:
-	ptr<ClassA> a;
-
-public:
-	ClassB(ptr<ClassA> a);
-
-	void print(const String& a);
-	void print3(ptr<ClassA> a);
-
-	META_DECLARE_CLASS(ClassB);
-};
-
-META_CLASS(ClassA, ClassA);
+META_CLASS(TestClass, TestClass);
 	META_CONSTRUCTOR();
-	META_METHOD(print);
-	META_METHOD(print2);
-	META_STATIC_METHOD(printFile);
-META_CLASS_END();
-META_CLASS(ClassB, ClassB);
-	META_CLASS_PARENT(ClassA);
-	META_CONSTRUCTOR(ptr<ClassA>);
-	META_METHOD(print3);
+	META_STATIC_METHOD(print);
+	META_STATIC_METHOD(isflags);
 META_CLASS_END();
 
-ClassA::ClassA() {}
+TestClass::TestClass() {}
 
-void ClassA::print(const String& a)
+void TestClass::print(ptr<Script::Any> any)
 {
-	std::cout << "ClassA::print: " << a << '\n';
+	any->Dump(std::cout);
+	std::cout << "\n";
 }
 
-void ClassA::print2(int a, const String& b)
+String TestClass::isflags(ptr<Script::Any> any)
 {
-	std::cout << "ClassA::print2: " << a << ", " << b << '\n';
-}
-
-void ClassA::printFile(ptr<File> file)
-{
-	std::cout << Strings::File2String(file);
-}
-
-ClassB::ClassB(ptr<ClassA> a) : a(a) {}
-
-void ClassB::print(const String& a)
-{
-	std::cout << "ClassB::print: " << a << '\n';
-}
-
-void ClassB::print3(ptr<ClassA> a)
-{
-	std::cout << "ClassB::print3: " << (ClassA*)a << '\n';
+	std::ostringstream ss;
+	ss
+		<< (any->IsNull() ? "(null)" : "")
+		<< (any->IsBoolean() ? "(boolean)" : "")
+		<< (any->IsNumber() ? "(number)" : "")
+		<< (any->IsString() ? "(string)" : "")
+		<< (any->IsArray() ? "(array)" : "")
+		<< (any->IsFunction() ? "(function)" : "")
+		<< (any->IsObject() ? "(object)" : "");
+	return ss.str();
 }
 
 static void Run()
@@ -85,17 +55,9 @@ static void Run()
 	{
 		ptr<Script::Lua::State> state = NEW(Script::Lua::State());
 
-		state->Register<ClassA>();
-		state->Register<ClassB>();
-		state->Register<FileSystem>();
-		state->Register<File>();
-		state->Register<FolderFileSystem>();
-		state->Register<BlobFileSystem>();
-		state->Register<BlobFileSystemBuilder>();
-		state->Register<CompressStream>();
-		state->Register<DecompressStream>();
+		state->Register<TestClass>();
 
-		ptr<Script::Function> function = state->LoadScript(FolderFileSystem::GetNativeFileSystem()->LoadFile("script/lua/test.lua"));
+		ptr<Script::Function> function = state->LoadScript(Platform::FileSystem::GetNativeFileSystem()->LoadFile("script/lua/test.lua"));
 
 		function->Run();
 	}

@@ -1,13 +1,17 @@
--- Тестовый скрипт
+local testis = function(value)
+	TestClass.print(value)
+	TestClass.print(TestClass.isflags(value))
+end
 
-local a = ClassB(ClassA())
-a:print("this is a test string")
-a:print2(1234, "fdsfe")
+testis(false)
+testis(true)
+testis({ a = "a", b = "b" })
+testis(testis)
+testis({ 1, 2, 3})
+testis(2134)
+testis("fadfsgd")
 
-local fileSystem = Inanity.FolderFileSystem.GetNativeFileSystem()
+TestClass.print({"a","b"})
 
-local bfsStream = Inanity.CompressStream.CreateMax(fileSystem:SaveStream("script/lua/test.bfs"))
-local bfsBuilder = Inanity.BlobFileSystemBuilder(bfsStream)
-bfsBuilder:AddFile("gdfsgfd", fileSystem:LoadFile("script/lua/test.lua"), 4)
-bfsBuilder:Finalize()
-bfsStream:Flush()
+local test = TestClass()
+testis(test, "(object)")
