@@ -4,6 +4,7 @@
 #include "script.hpp"
 #include "../PoolObject.hpp"
 #include "../String.hpp"
+#include <iostream>
 
 BEGIN_INANITY_SCRIPT
 
@@ -72,12 +73,39 @@ public:
 		return ApplyWith(thisValue, arguments + 1, sizeof(arguments) / sizeof(arguments[0]) - 1);
 	}
 
-	//*** Index methods for arrays.
+	//*** Methods for arrays.
+
 	/** Throw exception if this is not an array. */
+	/// Get length of an array.
+	/** Depending on script, length may not include all elements,
+	but only "integer-indexed" or "sequentially indexed". */
+	virtual int GetLength() const = 0;
+
+	/// Gets an element by numerical index.
+	/** Index always 0-based, even in scripts with 1-based arrays.
+	So index should be in [0, length). This method returns
+	elements from "sequential" part of an array,
+	but maybe not return elements from "hash" part.
+	To get any element by real index without rebasing,
+	use "any" version of Get method. */
 	virtual ptr<Any> Get(int index) const = 0;
+
+	/// Gets an element by any index.
+	/** No conversions/rebasing are done on index. */
 	virtual ptr<Any> Get(ptr<Any> index) const = 0;
+
+	/// Sets an element by numerical index.
+	/** Same rules applied as with Get method.
+	See comments above. */
 	virtual void Set(int index, ptr<Any> value) = 0;
+
+	/// Sets an element by any index.
 	virtual void Set(ptr<Any> index, ptr<Any> value) = 0;
+
+	//*** Miscellaneous.
+
+	/// Dumps text representation of a value in a script-specific way.
+	virtual void Dump(std::ostream& stream) const = 0;
 };
 
 END_INANITY_SCRIPT
