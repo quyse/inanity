@@ -8,6 +8,7 @@
 #include "userdata.hpp"
 #include "lualib.hpp"
 #include "../../Exception.hpp"
+#include <sstream>
 
 BEGIN_INANITY_LUA
 
@@ -226,7 +227,13 @@ struct Value<ptr<ObjectType> >
 		if(!userData || lua_islightuserdata(state, index) || userData->type != UserData::typeObject)
 		{
 			const char* fullClassName = Meta::MetaOf<MetaProvider, ObjectType>()->GetFullName();
-			THROW(String("Expected an object of type '") + fullClassName + "' for argument, but got " + DescribeValue(state, index));
+			std::ostringstream stream;
+			stream
+				<< "Expected an object of type '"
+				<< fullClassName
+				<< "' for argument, but got ";
+			DescribeValue(state, index, stream);
+			THROW(stream.str());
 		}
 
 		// проверить тип объекта, в случае необходимости привести к вышестоящему типу
