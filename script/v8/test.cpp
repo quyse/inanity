@@ -1,6 +1,6 @@
 #include "State.hpp"
 #include "../Function.hpp"
-#include "../../FolderFileSystem.hpp"
+#include "../../platform/FileSystem.hpp"
 #include "../../inanity-math.hpp"
 #include <iostream>
 using namespace Inanity;
@@ -14,6 +14,11 @@ Script::State* globalState;
 class TestClass : public Object
 {
 public:
+	static ptr<FileSystem> fs()
+	{
+		return Platform::FileSystem::GetNativeFileSystem();
+	}
+
 	static void print(const String& s)
 	{
 		std::cout << s << '\n';
@@ -102,6 +107,7 @@ public:
 
 META_CLASS(TestClass, TestClass);
 	META_CONSTRUCTOR();
+	META_STATIC_METHOD(fs);
 	META_STATIC_METHOD(print);
 	META_STATIC_METHOD(isflags);
 	META_STATIC_METHOD(test_creation);
@@ -122,9 +128,8 @@ int main(int argc, char* argv[])
 	{
 		ptr<Script::V8::State> state = NEW(Script::V8::State());
 		globalState = state;
-		state->Register<FolderFileSystem>();
 		state->Register<TestClass>();
-		state->LoadScript(FolderFileSystem::GetNativeFileSystem()->LoadFile("script/v8/test.js"))->Run();
+		state->LoadScript(Platform::FileSystem::GetNativeFileSystem()->LoadFile("script/v8/test.js"))->Run();
 	}
 	catch(Exception* exception)
 	{
