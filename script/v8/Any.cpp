@@ -149,6 +149,13 @@ ptr<Script::Any> Any::ApplyWith(ptr<Script::Any> thisValue, ptr<Script::Any> arg
 	return state->CreateAny(returnValue);
 }
 
+int Any::GetLength() const
+{
+	State::Scope scope(state);
+	v8::Local<v8::Value> value = v8::Local<v8::Value>::New(state->GetIsolate(), this->value);
+	return (int)v8::Array::Cast(*value)->Length();
+}
+
 ptr<Script::Any> Any::Get(int index) const
 {
 	State::Scope scope(state);
@@ -183,6 +190,11 @@ void Any::Set(ptr<Script::Any> index, ptr<Script::Any> value)
 	v8::Object::Cast(*array)->Set(
 		v8::Local<v8::Value>::New(isolate, fast_cast<Any*>(&*index)->value),
 		v8::Local<v8::Value>::New(isolate, fast_cast<Any*>(&*value)->value));
+}
+
+void Any::Dump(std::ostream& stream) const
+{
+	THROW("Not implemented yet");
 }
 
 END_INANITY_V8
