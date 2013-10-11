@@ -11,6 +11,7 @@ Any::Any(ptr<State> state) : state(state)
 	lua_State* luaState = state->GetState();
 
 	// pop the value from the stack and store it to registry
+	lua_checkstack(luaState, 1);
 	lua_pushlightuserdata(luaState, (void*)&this->state);   // value index
 	lua_insert(luaState, lua_absindex(luaState, -2));       // index value
 	lua_settable(luaState, LUA_REGISTRYINDEX);
@@ -21,6 +22,7 @@ Any::~Any()
 	lua_State* luaState = state->GetState();
 
 	// remove value from registry
+	lua_checkstack(luaState, 2);
 	lua_pushlightuserdata(luaState, (void*)&state);
 	lua_pushnil(luaState);
 	lua_settable(luaState, LUA_REGISTRYINDEX);
@@ -31,6 +33,7 @@ void Any::PushValue() const
 	lua_State* luaState = state->GetState();
 
 	// push value into stack
+	lua_checkstack(luaState, 1);
 	lua_pushlightuserdata(luaState, (void*)&state);
 	lua_gettable(luaState, LUA_REGISTRYINDEX);
 }
@@ -57,7 +60,7 @@ bool Any::IsNumber() const
 {
 	lua_State* luaState = state->GetState();
 	PushValue();
-	bool r = !!lua_isnumber(luaState, -1);
+	bool r = lua_type(luaState, -1) == LUA_TNUMBER;
 	lua_pop(luaState, 1);
 	return r;
 }
@@ -66,7 +69,7 @@ bool Any::IsString() const
 {
 	lua_State* luaState = state->GetState();
 	PushValue();
-	bool r = !!lua_isstring(luaState, -1);
+	bool r = lua_type(luaState, -1) == LUA_TSTRING;
 	lua_pop(luaState, 1);
 	return r;
 }
@@ -179,6 +182,8 @@ ptr<Script::Any> Any::ApplyWith(ptr<Script::Any> thisValue, ptr<Script::Any> arg
 	StackBalanceCheck check(luaState);
 #endif
 
+	lua_checkstack(luaState, 3 + count);
+
 	// push error handler function
 	lua_pushcclosure(luaState, ScriptErrorHook, 0);
 	// save index of error handler
@@ -227,10 +232,27 @@ ptr<Script::Any> Any::ApplyWith(ptr<Script::Any> thisValue, ptr<Script::Any> arg
 	return 0;
 }
 
-ptr<Script::Any> Any::Get(int index) const
+int Any::GetLength() const
 {
 	lua_State* luaState = state->GetState();
+	lua_checkstack(luaState, 2);
+	PushValue();
+	lua_len(luaState, -1);
+	int length = (int)lua_tointeger(luaState, -1);
+	lua_pop(luaState, 2);
+	return length;
+}
+
+ptr<Script::Any> Any::Get(int index) const
+{
+	// index is 0-based, convert to 1-base
+	++index;
+
+	lua_State* luaState = state->GetState();
+
+	lua_checkstack(luaState, 2);
 	PushValue();                                      // table
+
 	lua_pushinteger(luaState, (lua_Integer)index);    // table index
 	lua_gettable(luaState, -2);                       // table result
 	ptr<Any> result = state->CreateAny();             // table
@@ -241,6 +263,7 @@ ptr<Script::Any> Any::Get(int index) const
 ptr<Script::Any> Any::Get(ptr<Script::Any> index) const
 {
 	lua_State* luaState = state->GetState();
+	lua_checkstack(luaState, 2);
 	PushValue();                                      // table
 	fast_cast<Any*>(&*index)->PushValue();            // table index
 	lua_gettable(luaState, -2);                       // table result
@@ -251,7 +274,11 @@ ptr<Script::Any> Any::Get(ptr<Script::Any> index) const
 
 void Any::Set(int index, ptr<Script::Any> value)
 {
+	// index is 0-based, convert to 1-base
+	++index;
+
 	lua_State* luaState = state->GetState();
+	lua_checkstack(luaState, 3);
 	PushValue();                                      // table
 	lua_pushinteger(luaState, index);                 // table index
 	fast_cast<Any*>(&*value)->PushValue();            // table index value
@@ -262,11 +289,21 @@ void Any::Set(int index, ptr<Script::Any> value)
 void Any::Set(ptr<Script::Any> index, ptr<Script::Any> value)
 {
 	lua_State* luaState = state->GetState();
+	lua_checkstack(luaState, 3);
 	PushValue();                                      // table
 	fast_cast<Any*>(&*index)->PushValue();            // table index
 	fast_cast<Any*>(&*value)->PushValue();            // table index value
 	lua_settable(luaState, -3);                       // table
 	lua_pop(luaState, 1);                             //
+}
+
+void Any::Dump(std::ostream& stream) const
+{
+	lua_State* luaState = state->GetState();
+	lua_checkstack(luaState, 1);
+	PushValue();
+	DescribeValue(luaState, -1, stream);
+	lua_pop(luaState, 1);
 }
 
 END_INANITY_LUA

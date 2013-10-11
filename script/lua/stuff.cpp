@@ -277,7 +277,12 @@ ptr<Exception> ErrorToException(lua_State* state)
 	}
 	// если это не Exception, то вывести, как произвольное значение
 	if(!exception)
-		exception = NEW(Exception("Lua error: " + DescribeValue(state, -1)));
+	{
+		std::ostringstream stream;
+		stream << "Lua error: ";
+		DescribeValue(state, -1, stream);
+		exception = NEW(Exception(stream.str()));
+	}
 
 	lua_pop(state, 1);
 
@@ -335,7 +340,7 @@ int ScriptErrorHook(lua_State* state)
 				if(upvalueName && upvalueName[0])
 					stream << upvalueName << " = ";
 				// вывести значение upvalue
-				stream << DescribeValue(state, -1);
+				DescribeValue(state, -1, stream);
 				// выбросить значение из стека
 				lua_pop(state, 1);
 			}
@@ -356,7 +361,7 @@ int ScriptErrorHook(lua_State* state)
 			if(paramName && paramName[0])
 				stream << paramName << " = ";
 			// вывести значение параметра
-			stream << DescribeValue(state, -1);
+			DescribeValue(state, -1, stream);
 			// выбросить значение из стека
 			lua_pop(state, 1);
 		}
@@ -375,7 +380,7 @@ int ScriptErrorHook(lua_State* state)
 				if(paramName && paramName[0])
 					stream << paramName << " = ";
 				// вывести значение параметра
-				stream << DescribeValue(state, -1);
+				DescribeValue(state, -1, stream);
 				// выбросить значение из стека
 				lua_pop(state, 1);
 			}
@@ -391,7 +396,7 @@ int ScriptErrorHook(lua_State* state)
 				if(paramName && paramName[0])
 					stream << paramName << " = ";
 				// вывести значение параметра
-				stream << DescribeValue(state, -1);
+				DescribeValue(state, -1, stream);
 				// выбросить значение из стека
 				lua_pop(state, 1);
 			}
@@ -413,29 +418,52 @@ int ScriptErrorHook(lua_State* state)
 	return 1;
 }
 
-String DescribeValue(lua_State* state, int index)
+void DescribeValue(lua_State* state, int index, std::ostream& stream)
 {
 	switch(lua_type(state, index))
 	{
 	case LUA_TNONE:
-		return "<non-valid index>";
+		stream << "<non-valid index>";
+		break;
 	case LUA_TNIL:
-		return "nil";
+		stream << "nil";
+		break;
 	case LUA_TNUMBER:
-		{
-			char str[10];
-			sprintf(str, "%lf", lua_tonumber(state, index));
-			return str;
-		}
+		stream << lua_tonumber(state, index);
+		break;
 	case LUA_TBOOLEAN:
-		return lua_toboolean(state, index) ? "true" : "false";
+		stream << (lua_toboolean(state, index) ? "true" : "false");
+		break;
 	case LUA_TSTRING:
-		return String("\"") + lua_tostring(state, index) + "\"";
+		stream << '"' << lua_tostring(state, index) << '"';
+		break;
 	case LUA_TTABLE:
-		// TODO: сделать разбор таблицы
-		return "<table>";
+		{
+			stream << "{ ";
+			lua_checkstack(state, 2);
+			index = lua_absindex(state, index);
+			lua_pushnil(state);             // table ... nil
+			bool notFirst = false;
+			while(lua_next(state, index))
+			{
+				                              // table ... key value
+				if(notFirst)
+					stream << ", ";
+				else
+					notFirst = true;
+				stream << "[ ";
+				DescribeValue(state, -2, stream);
+				stream << " ] = ";
+				DescribeValue(state, -1, stream);
+
+				lua_pop(state, 1);            // table ... key
+			}
+			stream << " }";
+		}
+		break;
 	case LUA_TFUNCTION:
-		return "<function>";
+		stream << "<function>";
+		break;
 	case LUA_TUSERDATA:
 		{
 			UserData* userData = (UserData*)lua_touserdata(state, index);
@@ -443,21 +471,30 @@ String DescribeValue(lua_State* state, int index)
 			{
 			case UserData::typeClass:
 				// TODO: разобрать, что это
-				return "<ClassUserData>";
+				stream << "<ClassUserData>";
+				break;
 			case UserData::typeObject:
 				{
 					ObjectUserData* objectUserData = (ObjectUserData*)userData;
-					return String("ptr<") + objectUserData->cls->GetFullName() + ">";
+					stream << "ptr<" << objectUserData->cls->GetFullName() << ">";
 				}
+				break;
+			default:
+				stream << "<unknown full userdata>";
+				break;
 			}
-			return "<unknown full userdata>";
 		}
+		break;
 	case LUA_TTHREAD:
-		return "<thread>";
+		stream << "<thread>";
+		break;
 	case LUA_TLIGHTUSERDATA:
-		return "<light userdata>";
+		stream << "<light userdata: " << lua_touserdata(state, index) << ">";
+		break;
+	default:
+		stream << "<unknown value>";
+		break;
 	}
-	return "<unknown value>";
 }
 
 END_INANITY_LUA

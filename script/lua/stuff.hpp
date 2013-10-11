@@ -5,6 +5,7 @@
 #include "MetaProvider.hpp"
 #include "lualib.hpp"
 #include "../../String.hpp"
+#include <iostream>
 
 BEGIN_INANITY
 
@@ -45,7 +46,7 @@ void ProcessError(lua_State* state);
 int ScriptErrorHook(lua_State* state);
 
 /// Convert Lua value to string.
-String DescribeValue(lua_State* state, int index);
+void DescribeValue(lua_State* state, int index, std::ostream& stream);
 
 END_INANITY_LUA
 
