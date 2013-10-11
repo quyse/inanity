@@ -297,6 +297,7 @@ void TextDrawer::Flush()
 	Context::LetPixelShader lps(context, helper->ps);
 	Context::LetBlendState lbs(context, helper->bs);
 	Context::LetCullMode lcm(context, Context::cullModeNone);
+	Context::LetFillMode lfm(context, Context::fillModeSolid);
 	Context::LetDepthTestFunc ldtf(context, Context::depthTestFuncAlways);
 	Context::LetDepthWrite ldw(context, false);
 	Context::LetUniformBuffer lub(context, helper->ugSymbols);
