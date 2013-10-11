@@ -309,6 +309,15 @@ void Context::LetBlendState::operator()(Context* context, ptr<BlendState> blendS
 
 //*** Context
 
-Context::Context() {}
+Context::Context() :
+	letDefaultVertexShader(this, 0),
+	letDefaultPixelShader(this, 0),
+	letDefaultIndexBuffer(this, 0),
+	letDefaultFillMode(this, fillModeSolid),
+	letDefaultCullMode(this, cullModeBack),
+	letDefaultDepthTestFunc(this, depthTestFuncLess),
+	letDefaultDepthWrite(this, true),
+	letDefaultBlendState(this, 0)
+{}
 
 END_INANITY_GRAPHICS

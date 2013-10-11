@@ -254,6 +254,16 @@ protected:
 	Cell cellDepthWrite;
 	Cell cellBlendState;
 
+	//*** Default lets for necessary cells.
+	LetVertexShader letDefaultVertexShader;
+	LetPixelShader letDefaultPixelShader;
+	LetIndexBuffer letDefaultIndexBuffer;
+	LetFillMode letDefaultFillMode;
+	LetCullMode letDefaultCullMode;
+	LetDepthTestFunc letDefaultDepthTestFunc;
+	LetDepthWrite letDefaultDepthWrite;
+	LetBlendState letDefaultBlendState;
+
 protected:
 	Context();
 
