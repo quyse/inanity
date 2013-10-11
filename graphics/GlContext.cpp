@@ -64,10 +64,10 @@ void GlContext::Update()
 
 			glActiveTexture(GL_TEXTURE0 + i);
 
-			Texture* abstractTexture = let ? let->texture : 0;
+			Texture* abstractTexture = let ? let->texture : nullptr;
 			glBindTexture(GL_TEXTURE_2D, abstractTexture ? fast_cast<GlTexture*>(abstractTexture)->GetName() : 0);
 
-			SamplerState* abstractSamplerState = let ? let->samplerState : 0;
+			SamplerState* abstractSamplerState = let ? let->samplerState : nullptr;
 			glBindSampler(i, abstractSamplerState ? fast_cast<GlSamplerState*>(abstractSamplerState)->GetName() : 0);
 
 			cellSamplers[i].Actual();
@@ -79,7 +79,7 @@ void GlContext::Update()
 		if(!cellUniformBuffers[i].IsActual())
 		{
 			LetUniformBuffer* let = (LetUniformBuffer*)cellUniformBuffers[i].top;
-			UniformBuffer* abstractUniformBuffer = let ? let->uniformBuffer : 0;
+			UniformBuffer* abstractUniformBuffer = let ? let->uniformBuffer : nullptr;
 			glBindBufferBase(GL_UNIFORM_BUFFER, i, abstractUniformBuffer ? fast_cast<GlUniformBuffer*>(abstractUniformBuffer)->GetName() : 0);
 
 			cellUniformBuffers[i].Actual();
@@ -116,7 +116,7 @@ void GlContext::Update()
 		if(!cellAttributeBinding.IsActual())
 		{
 			LetAttributeBinding* let = (LetAttributeBinding*)cellAttributeBinding.top;
-			AttributeBinding* abstractAttributeBinding = let ? let->attributeBinding : 0;
+			AttributeBinding* abstractAttributeBinding = let ? let->attributeBinding : nullptr;
 			glBindVertexArray(fast_cast<GlAttributeBinding*>(abstractAttributeBinding)->GetVertexArrayName());
 			GlSystem::CheckErrors("Can't bind attribute binding");
 
@@ -147,7 +147,7 @@ void GlContext::Update()
 		// attribute binding
 		THROW_ASSERT(cellAttributeBinding.top);
 		LetAttributeBinding* letAB = (LetAttributeBinding*)cellAttributeBinding.top;
-		AttributeBinding* abstractAttributeBinding = letAB ? letAB->attributeBinding : 0;
+		AttributeBinding* abstractAttributeBinding = letAB ? letAB->attributeBinding : nullptr;
 		GlAttributeBinding* attributeBinding = fast_cast<GlAttributeBinding*>(abstractAttributeBinding);
 
 		// if attribute binding has changed, rebind all slots
@@ -164,7 +164,7 @@ void GlContext::Update()
 				if(i < (int)slots.size())
 				{
 					LetVertexBuffer* letVB = (LetVertexBuffer*)cellVertexBuffers[i].top;
-					VertexBuffer* abstractVertexBuffer = letVB ? letVB->vertexBuffer : 0;
+					VertexBuffer* abstractVertexBuffer = letVB ? letVB->vertexBuffer : nullptr;
 					if(abstractVertexBuffer)
 					{
 						GlVertexBuffer* vertexBuffer = fast_cast<GlVertexBuffer*>(abstractVertexBuffer);
@@ -450,7 +450,7 @@ void GlContext::Draw(int count)
 	Update();
 
 	LetIndexBuffer* let = (LetIndexBuffer*)cellIndexBuffer.current;
-	IndexBuffer* abstractIndexBuffer = let ? let->indexBuffer : 0;
+	IndexBuffer* abstractIndexBuffer = let ? let->indexBuffer : nullptr;
 	if(abstractIndexBuffer)
 	{
 		GlIndexBuffer* indexBuffer = fast_cast<GlIndexBuffer*>(abstractIndexBuffer);
@@ -471,7 +471,7 @@ void GlContext::DrawInstanced(int instancesCount, int count)
 	Update();
 
 	LetIndexBuffer* let = (LetIndexBuffer*)cellIndexBuffer.current;
-	IndexBuffer* abstractIndexBuffer = let ? let->indexBuffer : 0;
+	IndexBuffer* abstractIndexBuffer = let ? let->indexBuffer : nullptr;
 	if(abstractIndexBuffer)
 	{
 		GlIndexBuffer* indexBuffer = fast_cast<GlIndexBuffer*>(abstractIndexBuffer);
