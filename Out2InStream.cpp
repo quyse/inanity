@@ -7,7 +7,7 @@
 BEGIN_INANITY
 
 Out2InStream::Reader::Reader(ptr<Out2InStream> stream)
-	: stream(stream), firstOffset(0), flushed(false)
+	: stream(stream), firstOffset(0)
 {
 	// зарегистрировать считыватель в потоке
 	CriticalCode code(stream->criticalSection);

@@ -40,8 +40,6 @@ private:
 		CriticalSection criticalSection;
 		/// Смещение в первом файле, то есть сколько байт в нём уже пройдено.
 		size_t firstOffset;
-		/// Флажок, что данные закончились.
-		bool flushed;
 
 	public:
 		Reader(ptr<Out2InStream> stream);
