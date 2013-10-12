@@ -57,10 +57,10 @@ public:
 private:
 	/// Операция.
 	Operation operation;
-	/// Аргументы.
-	ptr<Node> a, b, c, d;
 	/// Количество аргументов.
 	int argumentsCount;
+	/// Аргументы.
+	ptr<Node> a, b, c, d;
 
 public:
 	/// Конструкторы.

@@ -181,8 +181,9 @@ int RawTextureData::GetMipLinePitch(int mip) const
 			return width / 4 * blockSize;
 		}
 		break;
+	default:
+		return 0;
 	}
-	return 0;
 }
 
 int RawTextureData::GetMipSlicePitch(int mip) const

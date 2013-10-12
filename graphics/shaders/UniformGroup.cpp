@@ -3,6 +3,10 @@
 #include "../Device.hpp"
 #include "../UniformBuffer.hpp"
 #include "../Context.hpp"
+#include "../VertexShader.hpp"
+#include "../PixelShader.hpp"
+#include "../IndexBuffer.hpp"
+#include "../BlendState.hpp"
 #include "../../MemoryFile.hpp"
 #include "../../Exception.hpp"
 

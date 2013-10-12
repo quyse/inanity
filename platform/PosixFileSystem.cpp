@@ -5,6 +5,7 @@
 #include "../EmptyFile.hpp"
 #include "../PartFile.hpp"
 #include "../Exception.hpp"
+#include <limits>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -13,7 +14,6 @@
 #include <dirent.h>
 #include <errno.h>
 #include <stdlib.h>
-#include <climits>
 
 BEGIN_INANITY_PLATFORM
 
@@ -63,8 +63,8 @@ public:
 		while(size > 0)
 		{
 			ssize_t readSize = size;
-			if(readSize > SSIZE_MAX)
-				readSize = SSIZE_MAX;
+			if(readSize > std::numeric_limits<ssize_t>::max())
+				readSize = std::numeric_limits<ssize_t>::max();
 			readSize = read(fd, dataPtr, readSize);
 			if(readSize < 0)
 				THROW("Disk read error");
