@@ -8,6 +8,10 @@
 
 BEGIN_INANITY
 
+#if !defined(___INANITY_PLATFORM_WINDOWS)
+#define DebugBreak() asm("int3")
+#endif
+
 #ifdef ___INANITY_TRACE_PTR
 /// Выключить трассировку указателей?
 /** Она очень замедляет работу в debug. */
@@ -27,7 +31,7 @@ ManagedHeap::ManagedHeap()
 : totalAllocationsCount(0), totalAllocationsSize(0)
 #endif
 {
-#ifdef ___INANITY_WINDOWS
+#ifdef ___INANITY_PLATFORM_WINDOWS
 
 	// создать кучу (растущую, с нулевым начальным размером)
 	heap = HeapCreate(0, 0, 0);
@@ -38,12 +42,12 @@ ManagedHeap::ManagedHeap()
 	// обработка ошибок не производится, чтобы работало на не-XP и не-Vista
 	HeapSetInformation(heap, HeapCompatibilityInformation, &heapFragValue, sizeof(heapFragValue));
 
-#endif // ___INANITY_WINDOWS
+#endif // ___INANITY_PLATFORM_WINDOWS
 }
 
 ManagedHeap::~ManagedHeap()
 {
-#ifdef ___INANITY_WINDOWS
+#ifdef ___INANITY_PLATFORM_WINDOWS
 
 	//удалить кучу
 	HeapDestroy(heap);
@@ -57,7 +61,7 @@ ManagedHeap::~ManagedHeap()
 	std::cout << "Allocations count: " << totalAllocationsCount <<  "\nAllocations size: " << totalAllocationsSize << "\n";
 	if(allocations.size())
 	{
-#ifdef ___INANITY_WINDOWS
+#ifdef ___INANITY_PLATFORM_WINDOWS
 		Beep(750, 300);
 #endif
 		std::cout << "ATTENTION! SOME LEAKS DETECTED!\n";
@@ -83,7 +87,7 @@ ManagedHeap::~ManagedHeap()
 
 void* ManagedHeap::Allocate(size_t size)
 {
-#ifdef ___INANITY_WINDOWS
+#ifdef ___INANITY_PLATFORM_WINDOWS
 
 	void* data = HeapAlloc(heap, 0, size);
 	if(!data)
@@ -111,7 +115,7 @@ void* ManagedHeap::Allocate(size_t size)
 void ManagedHeap::Free(void *data)
 {
 	// освободить память
-#ifdef ___INANITY_WINDOWS
+#ifdef ___INANITY_PLATFORM_WINDOWS
 	if(!HeapFree(heap, 0, data))
 		ExitProcess(1);
 #else

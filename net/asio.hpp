@@ -3,7 +3,7 @@
 
 #include "net.hpp"
 
-#ifdef ___INANITY_WINDOWS
+#ifdef ___INANITY_PLATFORM_WINDOWS
 #include "../platform/windows.hpp"
 #endif
 

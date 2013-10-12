@@ -2,13 +2,13 @@
 #define ___INANITY_SEMAPHORE_H___
 
 #include "Object.hpp"
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 #include "platform/windows.hpp"
 #include "platform/Win32Handle.hpp"
-#endif
-#ifdef ___INANITY_LINUX
-//#include <sys/types.h>
+#elif defined(___INANITY_PLATFORM_POSIX)
 #include <semaphore.h>
+#else
+#error Unknown platform
 #endif
 
 BEGIN_INANITY
@@ -17,11 +17,12 @@ BEGIN_INANITY
 class Semaphore
 {
 private:
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 	Platform::Win32Handle handle;
-#endif
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_POSIX)
 	sem_t sem;
+#else
+#error Unknown platform
 #endif
 
 public:

@@ -6,7 +6,7 @@
 #include "../Handler.hpp"
 #include "../input/input.hpp"
 
-#ifndef ___INANITY_WINDOWS
+#ifndef ___INANITY_PLATFORM_WINDOWS
 #error Win32Window is implemented only on Windows.
 #endif
 

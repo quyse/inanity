@@ -7,13 +7,19 @@
 
 #include "../deps/glew/include/GL/glew.h"
 
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
+
 #include "../platform/windows.hpp"
 #include "../deps/glew/include/GL/wglew.h"
-#endif
 
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_LINUX)
+
 #include "../deps/glew/include/GL/glxew.h"
+
+#else
+
+#error Unknown platform
+
 #endif
 
 #include <GL/gl.h>

@@ -1,6 +1,6 @@
 #include "CriticalSection.hpp"
 #include "Exception.hpp"
-#ifdef ___INANITY_LINUX
+#ifdef ___INANITY_PLATFORM_POSIX
 #include <pthread.h>
 #endif
 
@@ -10,13 +10,14 @@ CriticalSection::CriticalSection()
 {
 	try
 	{
-	#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 		InitializeCriticalSection(&criticalSection);
-	#endif
-	#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_POSIX)
 		if(pthread_mutex_init(&mutex, 0))
 			THROW_SECONDARY("Can't initialize mutex", Exception::SystemError());
-	#endif
+#else
+#error Unknown platform
+#endif
 	}
 	catch(Exception* exception)
 	{
@@ -26,33 +27,36 @@ CriticalSection::CriticalSection()
 
 CriticalSection::~CriticalSection()
 {
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 	DeleteCriticalSection(&criticalSection);
-#endif
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_POSIX)
 	pthread_mutex_destroy(&mutex);
+#else
+#error Unknown platform
 #endif
 }
 
 void CriticalSection::Enter()
 {
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 	EnterCriticalSection(&criticalSection);
-#endif
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_POSIX)
 	if(pthread_mutex_lock(&mutex))
 		THROW_SECONDARY("Can't enter critical section", Exception::SystemError());
+#else
+#error Unknown platform
 #endif
 }
 
 void CriticalSection::Leave()
 {
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 	LeaveCriticalSection(&criticalSection);
-#endif
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_POSIX)
 	if(pthread_mutex_unlock(&mutex))
 		THROW_SECONDARY("Can't leave critical section", Exception::SystemError());
+#else
+#error Unknown platform
 #endif
 }
 

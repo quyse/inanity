@@ -2,7 +2,7 @@
 #define ___INANITY_PLATFORM_DLL_CACHE_HPP___
 
 #include "platform.hpp"
-#ifdef ___INANITY_WINDOWS
+#ifdef ___INANITY_PLATFORM_WINDOWS
 #include <unordered_map>
 #include "../String.hpp"
 #include "windows.hpp"
@@ -13,7 +13,7 @@ BEGIN_INANITY_PLATFORM
 /// Cache of dynamic-link libraries.
 class DllCache
 {
-#ifdef ___INANITY_WINDOWS
+#ifdef ___INANITY_PLATFORM_WINDOWS
 
 private:
 	typedef std::unordered_map<String, HMODULE> Dlls;

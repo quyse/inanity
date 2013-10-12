@@ -15,9 +15,6 @@
 #define BEGIN_INANITY_GRAPHICS BEGIN_INANITY namespace Graphics {
 #define END_INANITY_GRAPHICS } END_INANITY
 
-#ifdef ___INANITY_WINDOWS
-#define ___INANITY_GRAPHICS_DX
-#endif
 BEGIN_INANITY_GRAPHICS
 using namespace Inanity::Math;
 END_INANITY_GRAPHICS

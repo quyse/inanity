@@ -12,7 +12,7 @@ DllFunction<Function>::DllFunction(const String& dllName, const char* functionNa
 {
 	BEGIN_TRY();
 
-#ifdef ___INANITY_WINDOWS
+#ifdef ___INANITY_PLATFORM_WINDOWS
 	HMODULE hModule = DllCache::Load(dllName);
 	void* f = GetProcAddress(hModule, functionName);
 	if(!f)

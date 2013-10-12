@@ -6,14 +6,14 @@
  */
 
 #if defined(_WIN32) || defined(__WIN32__)
-#define ___INANITY_WINDOWS
+#define ___INANITY_PLATFORM_WINDOWS
+#elif defined(EMSCRIPTEN)
+#define ___INANITY_PLATFORM_EMSCRIPTEN
+#define ___INANITY_PLATFORM_POSIX
 #else
-#define ___INANITY_LINUX
+#define ___INANITY_PLATFORM_LINUX
+#define ___INANITY_PLATFORM_POSIX
 #endif
-
-#ifdef ___INANITY_LINUX
-#define DebugBreak() asm("int3")
-#endif // ___INANITY_LINUX
 
 /// "Big data size" type.
 /** I.e. that amount of data maybe not fit in memory,

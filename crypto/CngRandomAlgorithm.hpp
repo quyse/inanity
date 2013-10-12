@@ -3,7 +3,7 @@
 
 #include "RandomAlgorithm.hpp"
 
-#ifndef ___INANITY_WINDOWS
+#ifndef ___INANITY_PLATFORM_WINDOWS
 #error CNG Random implemented on Windows only.
 #endif
 

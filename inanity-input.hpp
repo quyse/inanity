@@ -8,7 +8,7 @@
 #include "input/Manager.hpp"
 #include "input/Processor.hpp"
 
-#ifdef ___INANITY_WINDOWS
+#ifdef ___INANITY_PLATFORM_WINDOWS
 #include "input/Win32RawManager.hpp"
 #endif
 

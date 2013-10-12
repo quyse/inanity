@@ -6,7 +6,7 @@
  */
 
 #include "Object.hpp"
-#ifdef ___INANITY_WINDOWS
+#ifdef ___INANITY_PLATFORM_WINDOWS
 #include "platform/windows.hpp"
 #endif
 #include <vector>
@@ -54,7 +54,7 @@ private:
 #endif
 
 private:
-#ifdef ___INANITY_WINDOWS
+#ifdef ___INANITY_PLATFORM_WINDOWS
 	//куча для медленного выделения памяти
 	HANDLE heap;
 #endif

@@ -6,7 +6,7 @@
 #include "../Handler.hpp"
 #include "../input/input.hpp"
 
-#ifndef ___INANITY_LINUX
+#ifndef ___INANITY_PLATFORM_LINUX
 #error X11Window implemented only on Linux.
 #endif
 

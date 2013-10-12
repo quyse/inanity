@@ -7,12 +7,13 @@ Semaphore::Semaphore(int initialCount)
 {
 	try
 	{
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 		handle = CreateSemaphore(NULL, initialCount, 0x7fffffff, NULL);
 		if(!handle.IsValid())
-#endif
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_POSIX)
 		if(sem_init(&sem, 0, 0) != 0)
+#else
+#error Unknown platform
 #endif
 			THROW_SECONDARY("Can't initialize semaphore", Exception::SystemError());
 	}
@@ -24,25 +25,26 @@ Semaphore::Semaphore(int initialCount)
 
 Semaphore::~Semaphore()
 {
-#ifdef ___INANITY_LINUX
+#ifdef ___INANITY_PLATFORM_POSIX
 	sem_destroy(&sem);
 #endif
 }
 
 void Semaphore::Acquire()
 {
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 	if(WaitForSingleObject(handle, INFINITE) != WAIT_OBJECT_0)
-#endif
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_POSIX)
 	if(sem_wait(&sem) != 0)
+#else
+#error Unknown platform
 #endif
 		THROW_SECONDARY("Can't acquire semaphore", Exception::SystemError());
 }
 
 bool Semaphore::TryAcquire()
 {
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 	switch(WaitForSingleObject(handle, 0))
 	{
 	case WAIT_OBJECT_0:
@@ -50,13 +52,13 @@ bool Semaphore::TryAcquire()
 	case WAIT_TIMEOUT:
 		return false;
 	}
-#endif
-
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_POSIX)
 	if(sem_trywait(&sem) == 0)
 		return true;
 	if(errno == EAGAIN)
 		return false;
+#else
+#error Unknown platform
 #endif
 
 	THROW_SECONDARY("Error trying acquire semaphore", Exception::SystemError());
@@ -64,13 +66,14 @@ bool Semaphore::TryAcquire()
 
 void Semaphore::Release(int count)
 {
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 	if(!ReleaseSemaphore(handle, count, NULL))
-#endif
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_POSIX)
 	int i;
 	for(i = 0; i < count && sem_post(&sem) == 0; ++i);
 	if(i < count)
+#else
+#error Unknown platform
 #endif
 		THROW_SECONDARY("Can't release semaphore", Exception::SystemError());
 }

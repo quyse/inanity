@@ -4,7 +4,7 @@
 
 BEGIN_INANITY_PLATFORM
 
-#ifdef ___INANITY_WINDOWS
+#ifdef ___INANITY_PLATFORM_WINDOWS
 
 DllCache::Dlls DllCache::dlls;
 

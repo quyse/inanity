@@ -3,15 +3,16 @@
 #include "GlContext.hpp"
 #include "GlShaderCompiler.hpp"
 #include "shaders/GlslGenerator.hpp"
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 #include "Win32Adapter.hpp"
 #include "../platform/Win32Window.hpp"
 #include "../Strings.hpp"
-#endif
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_LINUX)
 #include "X11Adapter.hpp"
 #include "../platform/X11Window.hpp"
 #include "../platform/X11Display.hpp"
+#else
+#error Unknown platform
 #endif
 #include "../Exception.hpp"
 
@@ -23,11 +24,12 @@ const std::vector<ptr<Adapter> >& GlSystem::GetAdapters()
 {
 	if(!adaptersInitialized)
 	{
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 		Win32Adapter::GetAdapters(adapters);
-#endif
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_LINUX)
 		X11Adapter::GetAdapters(adapters);
+#else
+#error Unknown platform
 #endif
 
 		adaptersInitialized = true;
@@ -40,15 +42,15 @@ ptr<Device> GlSystem::CreateDevice(ptr<Adapter> abstractAdapter)
 {
 	BEGIN_TRY();
 
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 	ptr<Win32Adapter> adapter = abstractAdapter.DynamicCast<Win32Adapter>();
 	if(!adapter)
 		THROW("Wrong adapter type");
 	return NEW(GlDevice(this, adapter->GetId()));
-#endif
-
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_LINUX)
 	return NEW(GlDevice(this));
+#else
+#error Unknown platform
 #endif
 
 	// TODO

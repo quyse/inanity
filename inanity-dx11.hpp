@@ -7,7 +7,7 @@
 #include "Object.hpp"
 
 // Если это не Windows, то капец.
-#ifndef ___INANITY_WINDOWS
+#ifndef ___INANITY_PLATFORM_WINDOWS
 #error DirectX 11 works only on Windows.
 #endif
 

@@ -1,5 +1,5 @@
 #include "Time.hpp"
-#ifdef ___INANITY_WINDOWS
+#ifdef ___INANITY_PLATFORM_WINDOWS
 #include "platform/windows.hpp"
 #endif
 #include <ctime>
@@ -12,30 +12,40 @@ long long Time::GetUnixTime()
 	return time(0);
 }
 
+#if defined(___INANITY_PLATFORM_WINDOWS)
+
 long long Time::GetTicks()
 {
-#ifdef ___INANITY_WINDOWS
 	LARGE_INTEGER li;
 	QueryPerformanceCounter(&li);
 	return li.QuadPart;
-#endif
-#ifdef ___INANITY_LINUX
-	struct timespec t;
-	clock_gettime(CLOCK_MONOTONIC, &t);
-	return t.tv_sec * 1000000000LL + t.tv_nsec;
-#endif
 }
 
 long long Time::GetTicksPerSecond()
 {
-#ifdef ___INANITY_WINDOWS
 	LARGE_INTEGER li;
 	QueryPerformanceFrequency(&li);
 	return li.QuadPart;
-#endif
-#ifdef ___INANITY_LINUX
-	return 1000000000LL;
-#endif
 }
+
+#elif defined(___INANITY_PLATFORM_POSIX)
+
+long long Time::GetTicks()
+{
+	struct timespec t;
+	clock_gettime(CLOCK_MONOTONIC, &t);
+	return t.tv_sec * 1000000000LL + t.tv_nsec;
+}
+
+long long Time::GetTicksPerSecond()
+{
+	return 1000000000LL;
+}
+
+#else
+
+#error Unknown platform
+
+#endif
 
 END_INANITY

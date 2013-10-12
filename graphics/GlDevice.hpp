@@ -6,12 +6,10 @@
 #include "opengl.hpp"
 #include "../String.hpp"
 
-#ifdef ___INANITY_LINUX
+#ifdef ___INANITY_PLATFORM_LINUX
+
 #include "../platform/platform.hpp"
 #include "../platform/x11.hpp"
-#endif
-
-#ifdef ___INANITY_LINUX
 
 BEGIN_INANITY_PLATFORM
 
@@ -19,7 +17,9 @@ class X11Display;
 
 END_INANITY_PLATFORM
 
-#endif
+#endif // ___INANITY_PLATFORM_LINUX
+
+
 
 BEGIN_INANITY_GRAPHICS
 
@@ -36,20 +36,21 @@ private:
 	/// Графическая система.
 	ptr<GlSystem> system;
 
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 	/// Имя графического устройства.
 	String deviceName;
 	/// Контекст рендеринга OpenGL.
 	/** Создаётся при первом создании Presenter'а.
 	Является общим для всех Presenter'ов. */
 	HGLRC hglrc;
-#endif
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_LINUX)
 	ptr<Platform::X11Display> display;
 	/// Контекст рендеринга OpenGL.
 	/** Создаётся при первом создании Presenter'а.
 	Является общим для всех Presenter'ов. */
 	GLXContext glxContext;
+#else
+#error Unknown platform
 #endif
 
 	/// Скомпилировать шейдер.
@@ -58,12 +59,12 @@ private:
 
 public:
 
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 	GlDevice(ptr<GlSystem> system, const String& deviceName);
-#endif
-
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_LINUX)
 	GlDevice(ptr<GlSystem> system);
+#else
+#error Unknown platform
 #endif
 
 	~GlDevice();

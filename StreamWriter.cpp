@@ -1,7 +1,7 @@
 #include "StreamWriter.hpp"
 #include "OutputStream.hpp"
 #include "Exception.hpp"
-#ifdef ___INANITY_LINUX
+#ifdef ___INANITY_PLATFORM_POSIX
 #include <alloca.h>
 #endif
 

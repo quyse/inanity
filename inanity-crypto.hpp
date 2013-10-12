@@ -10,7 +10,7 @@
 #include "crypto/RandomAlgorithm.hpp"
 #include "crypto/StreamHasher.hpp"
 #include "crypto/StreamSigner.hpp"
-#ifdef ___INANITY_WINDOWS
+#ifdef ___INANITY_PLATFORM_WINDOWS
 #include "crypto/CngRandomAlgorithm.hpp"
 #endif
 

@@ -5,7 +5,7 @@
 #include "../platform/platform.hpp"
 #include "../String.hpp"
 #include <vector>
-#ifdef ___INANITY_WINDOWS
+#ifdef ___INANITY_PLATFORM_WINDOWS
 #include "../platform/windows.hpp"
 #endif
 
@@ -37,7 +37,7 @@ public:
 	/// Create window in the default position on the monitor.
 	virtual ptr<Platform::Window> CreateDefaultWindow(const String& title, int width, int height) = 0;
 
-#ifdef ___INANITY_WINDOWS
+#ifdef ___INANITY_PLATFORM_WINDOWS
 	/// Получить координаты монитора на рабочем столе.
 	virtual RECT GetRect() const = 0;
 #endif

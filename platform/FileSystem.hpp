@@ -3,28 +3,24 @@
 
 #include "platform.hpp"
 
-#ifdef ___INANITY_WINDOWS
-#include "Win32FileSystem.hpp"
-#endif
+#if defined(___INANITY_PLATFORM_WINDOWS)
 
-#ifdef ___INANITY_LINUX
-#include "PosixFileSystem.hpp"
-#endif
+#include "Win32FileSystem.hpp"
 
 BEGIN_INANITY_PLATFORM
-
-#ifdef ___INANITY_WINDOWS
-
 typedef Win32FileSystem FileSystem;
-
-#endif
-
-#ifdef ___INANITY_LINUX
-
-typedef PosixFileSystem FileSystem;
-
-#endif
-
 END_INANITY_PLATFORM
+
+#elif defined(___INANITY_PLATFORM_POSIX)
+
+#include "PosixFileSystem.hpp"
+
+BEGIN_INANITY_PLATFORM
+typedef PosixFileSystem FileSystem;
+END_INANITY_PLATFORM
+
+#else
+#error Unknown platform
+#endif
 
 #endif

@@ -23,21 +23,22 @@
 #include "../FileInputStream.hpp"
 #include "../Exception.hpp"
 #include "../Strings.hpp"
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 #include "WglPresenter.hpp"
 #include "Win32Output.hpp"
 #include "Win32MonitorMode.hpp"
-#endif
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_LINUX)
 #include "GlxPresenter.hpp"
 #include "X11Output.hpp"
 #include "../platform/X11Window.hpp"
 #include "../platform/X11Display.hpp"
+#else
+#error Unknown platform
 #endif
 
 BEGIN_INANITY_GRAPHICS
 
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 
 GlDevice::GlDevice(ptr<GlSystem> system, const String& deviceName)
 : system(system), deviceName(deviceName), hglrc(0) {}
@@ -48,9 +49,7 @@ GlDevice::~GlDevice()
 		wglDeleteContext(hglrc);
 }
 
-#endif
-
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_LINUX)
 
 GlDevice::GlDevice(ptr<GlSystem> system)
 : system(system), glxContext(0) {}
@@ -64,6 +63,10 @@ GlDevice::~GlDevice()
 	}
 }
 
+#else
+
+#error Unknown platform
+
 #endif
 
 ptr<System> GlDevice::GetSystem() const
@@ -76,7 +79,8 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 	try
 	{
 
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
+
 		// область вывода - только Win32
 		ptr<Win32Output> output = abstractOutput.DynamicCast<Win32Output>();
 		if(!output)
@@ -185,9 +189,9 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 
 		// создать и вернуть Presenter
 		return NEW(WglPresenter(this, NEW(GlFrameBuffer(this, 0)), hdc));
-#endif
 
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_LINUX)
+
 		// only X11Output allowed
 		ptr<X11Output> output = abstractOutput.DynamicCast<X11Output>();
 		if(!output)
@@ -318,6 +322,11 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 		GlSystem::ClearErrors();
 
 		return NEW(GlxPresenter(this, NEW(GlFrameBuffer(this, 0)), output, glxWindow));
+
+#else
+
+#error Unknown platform
+
 #endif
 
 	}

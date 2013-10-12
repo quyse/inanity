@@ -2,12 +2,13 @@
 #define ___INANITY_THREAD_HPP___
 
 #include "Handler.hpp"
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 #include "platform/Win32Handle.hpp"
 #include "platform/windows.hpp"
-#endif
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_POSIX)
 #include <sys/types.h>
+#else
+#error Unknown platform
 #endif
 
 BEGIN_INANITY
@@ -21,19 +22,21 @@ public:
 private:
 	ptr<ThreadHandler> handler;
 
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 
 	ptr<Platform::Win32Handle> thread;
 
 	static DWORD CALLBACK ThreadRoutine(void* self);
 
-#endif
-
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_POSIX)
 
 	pthread_t thread;
 
 	static void* ThreadRoutine(void* self);
+
+#else
+
+#error Unknown platform
 
 #endif
 

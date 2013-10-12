@@ -3,7 +3,7 @@
 #include "../File.hpp"
 #include "../Exception.hpp"
 
-#ifdef ___INANITY_WINDOWS
+#ifdef ___INANITY_PLATFORM_WINDOWS
 #include "../platform/windows.hpp"
 #endif
 
@@ -11,7 +11,7 @@ BEGIN_INANITY_GRAPHICS
 
 ptr<RawTextureData> BmpImageLoader::Load(ptr<File> file)
 {
-#ifdef ___INANITY_WINDOWS
+#ifdef ___INANITY_PLATFORM_WINDOWS
 	try
 	{
 		const unsigned char* fileData = (const unsigned char*)file->GetData();
@@ -106,7 +106,7 @@ ptr<RawTextureData> BmpImageLoader::Load(ptr<File> file)
 	{
 		THROW_SECONDARY("Can't load BMP image", exception);
 	}
-#else // ___INANITY_WINDOWS
+#else // ___INANITY_PLATFORM_WINDOWS
 	THROW("BmpImageLoader implemented only on Windows");
 #endif
 }

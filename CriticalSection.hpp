@@ -2,11 +2,12 @@
 #define ___INANITY_CRITICAL_SECTION_H___
 
 #include "Object.hpp"
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 #include "platform/windows.hpp"
-#endif
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_POSIX)
 #include <sys/types.h>
+#else
+#error Unknown platform
 #endif
 
 BEGIN_INANITY
@@ -15,11 +16,12 @@ BEGIN_INANITY
 class CriticalSection
 {
 private:
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 	CRITICAL_SECTION criticalSection;
-#endif
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_POSIX)
 	pthread_mutex_t mutex;
+#else
+#error Unknown platform
 #endif
 
 public:

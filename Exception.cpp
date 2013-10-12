@@ -1,15 +1,15 @@
 #include "Exception.hpp"
 #include "Strings.hpp"
 
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 #include "platform/windows.hpp"
-#endif // ___INANITY_WINDOWS
-
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_POSIX)
 #include <errno.h>
 // для strerror
 #include <cstring>
-#endif // ___INANITY_LINUX
+#else
+#error Unknown platform
+#endif
 
 BEGIN_INANITY
 
@@ -43,20 +43,20 @@ void Exception::PrintStack(std::ostream& stream) const
 
 ptr<Exception> Exception::SystemError()
 {
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 	int errorCode = GetLastError();
-#endif // ___INANITY_WINDOWS
-
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_POSIX)
 	int errorCode  = errno;
-#endif // ___INANITY_LINUX
+#else
+#error Unknown platform
+#endif
 
 	return SystemError(errorCode);
 }
 
 ptr<Exception> Exception::SystemError(int errorCode)
 {
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 
 	wchar_t* buffer;
 	if(!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, 0, errorCode, 0, (wchar_t*)&buffer, 0, 0))
@@ -67,13 +67,15 @@ ptr<Exception> Exception::SystemError(int errorCode)
 
 	return exception;
 
-#endif // ___INANITY_WINDOWS
-
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_POSIX)
 
 	return NEW(Exception(strerror(errorCode)));
 
-#endif // ___INANITY_LINUX
+#else
+
+#error Unknown platform
+
+#endif
 }
 
 END_INANITY

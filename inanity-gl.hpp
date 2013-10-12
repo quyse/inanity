@@ -26,11 +26,12 @@
 #include "graphics/GlUniformBuffer.hpp"
 #include "graphics/GlVertexBuffer.hpp"
 #include "graphics/GlVertexShader.hpp"
-#ifdef ___INANITY_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 #include "graphics/WglPresenter.hpp"
-#endif
-#ifdef ___INANITY_LINUX
+#elif defined(___INANITY_PLATFORM_LINUX)
 #include "graphics/GlxPresenter.hpp"
+#else
+#error Unknown platform
 #endif
 
 #endif
