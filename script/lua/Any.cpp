@@ -2,6 +2,7 @@
 #include "State.hpp"
 #include "userdata.hpp"
 #include "values.ipp"
+#include "MetaProvider.ipp"
 #include "../../Exception.hpp"
 
 BEGIN_INANITY_LUA
