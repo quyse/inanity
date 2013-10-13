@@ -1,7 +1,7 @@
 #ifndef ___INANITY_TICKER_HPP___
 #define ___INANITY_TICKER_HPP___
 
-#include "Object.hpp"
+#include "Time.hpp"
 
 BEGIN_INANITY
 
@@ -13,10 +13,10 @@ private:
 	float tickCoef;
 	/// Last clock tick value.
 	/** -1 if there was no tick yet. */
-	long long lastTick;
+	Time::Tick lastTick;
 	/// Pause tick value.
 	/** -1 if not paused */
-	long long pauseTick;
+	Time::Tick pauseTick;
 
 public:
 	Ticker();

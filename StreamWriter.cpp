@@ -73,6 +73,9 @@ void StreamWriter::WriteShortlyBig(bigsize_t data)
 		length = 3;
 		first = 0xE0;
 	}
+	// eliminate warnings about always-true comparison
+	// in case of small bigsize_t
+#ifdef ___INANITY_BIGSIZE_IS_BIG
 	else if(data < 0x800000000ULL)
 	{
 		length = 4;
@@ -98,6 +101,13 @@ void StreamWriter::WriteShortlyBig(bigsize_t data)
 		length = 8;
 		first = 0xFF;
 	}
+#else
+	else
+	{
+		length = 4;
+		first = 0xF0;
+	}
+#endif
 
 	//добавить в первый байт старший байт числа, и записать первый байт
 	Write<unsigned char>((unsigned char)(first | (data >> (length * 8))));

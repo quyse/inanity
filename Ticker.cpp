@@ -1,5 +1,4 @@
 #include "Ticker.hpp"
-#include "Time.hpp"
 
 BEGIN_INANITY
 
@@ -23,10 +22,10 @@ void Ticker::Pause()
 float Ticker::Tick()
 {
 	// get current time
-	long long currentTick = Time::GetTicks();
+	Time::Tick currentTick = Time::GetTicks();
 
 	// calculate amount of ticks from last tick
-	long long ticks = 0;
+	Time::Tick ticks = 0;
 	if(lastTick >= 0)
 	{
 		if(pauseTick >= 0)

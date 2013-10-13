@@ -2,6 +2,9 @@
 #ifdef ___INANITY_PLATFORM_WINDOWS
 #include "platform/windows.hpp"
 #endif
+#ifdef ___INANITY_PLATFORM_EMSCRIPTEN
+#include <emscripten/emscripten.h>
+#endif
 #include <ctime>
 
 BEGIN_INANITY
@@ -26,6 +29,18 @@ long long Time::GetTicksPerSecond()
 	LARGE_INTEGER li;
 	QueryPerformanceFrequency(&li);
 	return li.QuadPart;
+}
+
+#elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
+
+Time::Tick Time::GetTicks()
+{
+	return emscripten_get_now();
+}
+
+Time::Tick Time::GetTicksPerSecond()
+{
+	return 1000.0f;
 }
 
 #elif defined(___INANITY_PLATFORM_POSIX)

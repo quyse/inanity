@@ -18,7 +18,13 @@
 /// "Big data size" type.
 /** I.e. that amount of data maybe not fit in memory,
 but we want to deal with such amounts. */
+#ifdef ___INANITY_PLATFORM_EMSCRIPTEN
+// On Emscripten long long is slow.
+typedef unsigned int bigsize_t;
+#else
 typedef unsigned long long bigsize_t;
+#define ___INANITY_BIGSIZE_IS_BIG
+#endif
 
 #define BEGIN_INANITY namespace Inanity {
 #define END_INANITY }
