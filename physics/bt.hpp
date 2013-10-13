@@ -3,10 +3,10 @@
 
 /* Файл для поддержки библиотеки Bullet. */
 
-#include "../deps/bullet/src/btBulletCollisionCommon.h"
-#include "../deps/bullet/src/btBulletDynamicsCommon.h"
-#include "../deps/bullet/src/BulletCollision/CollisionDispatch/btGhostObject.h"
-#include "../deps/bullet/src/BulletDynamics/Character/btKinematicCharacterController.h"
+#include "../deps/bullet/repo/src/btBulletCollisionCommon.h"
+#include "../deps/bullet/repo/src/btBulletDynamicsCommon.h"
+#include "../deps/bullet/repo/src/BulletCollision/CollisionDispatch/btGhostObject.h"
+#include "../deps/bullet/repo/src/BulletDynamics/Character/btKinematicCharacterController.h"
 
 BEGIN_INANITY_PHYSICS
 

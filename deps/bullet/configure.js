@@ -19,8 +19,9 @@ exports.configureCompiler = function(objectFile, compiler) {
 	else
 		// .cpp-файл
 		source = source.replace(/\./g, '/') + '.cpp';
-	compiler.setSourceFile('src/' + source);
-	compiler.addIncludeDir('src');
+	compiler.setSourceFile('repo/src/' + source);
+	compiler.addIncludeDir('repo/src');
+	compiler.strict = false;
 };
 
 // объектные файлы по библиотекам
