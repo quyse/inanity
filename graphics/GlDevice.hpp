@@ -49,6 +49,8 @@ private:
 	/** Создаётся при первом создании Presenter'а.
 	Является общим для всех Presenter'ов. */
 	GLXContext glxContext;
+#elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
+	// nothing needed
 #else
 #error Unknown platform
 #endif
@@ -62,6 +64,8 @@ public:
 #if defined(___INANITY_PLATFORM_WINDOWS)
 	GlDevice(ptr<GlSystem> system, const String& deviceName);
 #elif defined(___INANITY_PLATFORM_LINUX)
+	GlDevice(ptr<GlSystem> system);
+#elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	GlDevice(ptr<GlSystem> system);
 #else
 #error Unknown platform

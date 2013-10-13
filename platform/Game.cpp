@@ -1,18 +1,21 @@
 #include "Game.hpp"
 #include "../Exception.hpp"
 
-#ifdef ___INANITY_PLATFORM_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 #include "Win32Window.hpp"
 #include "../graphics/Dx11System.hpp"
 #include "../input/Win32RawManager.hpp"
-#endif
-
-#ifdef ___INANITY_PLATFORM_LINUX
+#elif defined(___INANITY_PLATFORM_LINUX)
 #include "X11Window.hpp"
 #include "X11Display.hpp"
 #include "../input/X11Manager.hpp"
+#elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
+#include "../input/EmsManager.hpp"
+#else
+#error Unknown platform
 #endif
 
+#include "../input/Frame.hpp"
 #include "../graphics/GlSystem.hpp"
 
 BEGIN_INANITY_PLATFORM
@@ -40,6 +43,8 @@ ptr<Input::Manager> Game::CreateInputManager(ptr<Window> window)
 	ptr<Input::X11Manager> inputManager = NEW(Input::X11Manager(x11Window->GetDisplay()));
 	x11Window->SetInputManager(inputManager);
 	return inputManager;
+#elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
+	return NEW(Input::EmsManager());
 #else
 #error Unknown platform
 #endif

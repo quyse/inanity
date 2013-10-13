@@ -11,6 +11,9 @@
 #include "X11Adapter.hpp"
 #include "../platform/X11Window.hpp"
 #include "../platform/X11Display.hpp"
+#elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
+#include "EmsAdapter.hpp"
+#include "../platform/EmsWindow.hpp"
 #else
 #error Unknown platform
 #endif
@@ -28,6 +31,8 @@ const std::vector<ptr<Adapter> >& GlSystem::GetAdapters()
 		Win32Adapter::GetAdapters(adapters);
 #elif defined(___INANITY_PLATFORM_LINUX)
 		X11Adapter::GetAdapters(adapters);
+#elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
+		EmsAdapter::GetAdapters(adapters);
 #else
 #error Unknown platform
 #endif
@@ -47,7 +52,7 @@ ptr<Device> GlSystem::CreateDevice(ptr<Adapter> abstractAdapter)
 	if(!adapter)
 		THROW("Wrong adapter type");
 	return NEW(GlDevice(this, adapter->GetId()));
-#elif defined(___INANITY_PLATFORM_LINUX)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	return NEW(GlDevice(this));
 #else
 #error Unknown platform
@@ -86,7 +91,11 @@ void GlSystem::InitGLEW()
 {
 	GLenum err = glewInit();
 	if(err != GLEW_OK)
+#ifdef ___INANITY_PLATFORM_EMSCRIPTEN
+		THROW("Can't initialize GLEW");
+#else
 		THROW(String("Can't initialize GLEW: ") + (const char*)glewGetErrorString(err));
+#endif
 }
 
 void GlSystem::ClearErrors()
@@ -163,6 +172,7 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, GLint& internalFormat, 
 				{
 				case S(8bit): type = GL_UNSIGNED_BYTE; internalFormat = GL_R8; return true;
 				case S(16bit): type = GL_UNSIGNED_SHORT; internalFormat = GL_R16; return true;
+				default: break;
 				}
 				break;
 			case F(Float):
@@ -170,6 +180,7 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, GLint& internalFormat, 
 				{
 				case S(16bit): type = GL_FLOAT; internalFormat = GL_R16F; return true;
 				case S(32bit): type = GL_FLOAT; internalFormat = GL_R32F; return true;
+				default: break;
 				}
 				break;
 			}
@@ -184,6 +195,7 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, GLint& internalFormat, 
 				{
 				case S(16bit): type = GL_UNSIGNED_BYTE; internalFormat = GL_RG8; return true;
 				case S(32bit): type = GL_UNSIGNED_SHORT; internalFormat = GL_RG16; return true;
+				default: break;
 				}
 				break;
 			case F(Float):
@@ -191,6 +203,7 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, GLint& internalFormat, 
 				{
 				case S(32bit): type = GL_FLOAT; internalFormat = GL_RG16F; return true;
 				case S(64bit): type = GL_FLOAT; internalFormat = GL_RG32F; return true;
+				default: break;
 				}
 				break;
 			}
@@ -206,6 +219,7 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, GLint& internalFormat, 
 				{
 				case S(32bit): type = GL_FLOAT; internalFormat = GL_R11F_G11F_B10F; return true;
 				case S(96bit): type = GL_FLOAT; internalFormat = GL_RGB32F; return true;
+				default: break;
 				}
 				break;
 			}
@@ -220,6 +234,7 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, GLint& internalFormat, 
 				{
 				case S(32bit): type = GL_UNSIGNED_BYTE; internalFormat = GL_RGBA8; return true;
 				case S(64bit): type = GL_UNSIGNED_SHORT; internalFormat = GL_RGBA16; return true;
+				default: break;
 				}
 				break;
 			case F(Float):
@@ -227,6 +242,7 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, GLint& internalFormat, 
 				{
 				case S(64bit): type = GL_FLOAT; internalFormat = GL_RGBA16F; return true;
 				case S(128bit): type = GL_FLOAT; internalFormat = GL_RGBA32F; return true;
+				default: break;
 				}
 				break;
 			}

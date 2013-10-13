@@ -41,6 +41,7 @@ bool Frame::NextEvent()
 			case Event::Keyboard::typeKeyUp:
 				state.keyboard[e.keyboard.key] = 0;
 				break;
+			default: break;
 			}
 			break;
 		case Event::deviceMouse:

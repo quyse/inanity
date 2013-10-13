@@ -15,7 +15,7 @@ exports.configureCompiler = function(objectFile, compiler) {
 		// .cpp-файл
 		source = source.replace(/\./g, '/') + '.cpp';
 	compiler.setSourceFile(source);
-	compiler.addIncludeDir('deps/bullet/src');
+	compiler.addIncludeDir('deps/bullet/repo/src');
 	compiler.addIncludeDir('deps/libogg/include');
 	compiler.addIncludeDir('deps/libvorbis/include');
 };
@@ -86,7 +86,8 @@ var libraries = {
 	'libinanity-input': {
 		objects: ['input.Event', 'input.Frame', 'input.Manager', 'input.Mux', 'input.Processor'],
 		'objects-win32': ['input.Win32Manager', 'input.Win32RawManager'],
-		'objects-linux': ['input.X11Manager']
+		'objects-linux': ['input.X11Manager'],
+		'objects-emscripten': ['input.EmsManager']
 	},
 	// ******* general platform subsystem
 	'libinanity-platform': {
@@ -101,6 +102,11 @@ var libraries = {
 			'platform.PosixFileSystem',
 			'platform.X11Window', 'platform.X11Display', 'graphics.X11Output',
 			'graphics.X11Adapter', 'graphics.X11Monitor', 'graphics.X11MonitorMode'
+		],
+		'objects-emscripten': [
+			'platform.PosixFileSystem',
+			'platform.EmsWindow', 'graphics.EmsOutput',
+			'graphics.EmsAdapter', 'graphics.EmsMonitor'
 		]
 	},
 	// ******* общая графика
@@ -145,7 +151,8 @@ var libraries = {
 			'graphics.GlShaderCompiler', 'graphics.GlslSource', 'graphics.GlShaderBindings'
 		],
 		'objects-win32': ['graphics.WglPresenter'],
-		'objects-linux': ['graphics.GlxPresenter']
+		'objects-linux': ['graphics.GlxPresenter'],
+		'objects-emscripten': ['graphics.EmsPresenter']
 	},
 	// ******* подсистема шейдеров
 	'libinanity-shaders': {

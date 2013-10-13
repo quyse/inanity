@@ -3,6 +3,9 @@
 #include "HashStream.hpp"
 #include "RandomAlgorithm.hpp"
 #include <cstring>
+#ifdef ___INANITY_PLATFORM_POSIX
+#include <alloca.h>
+#endif
 
 BEGIN_INANITY_CRYPTO
 

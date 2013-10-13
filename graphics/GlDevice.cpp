@@ -32,6 +32,10 @@
 #include "X11Output.hpp"
 #include "../platform/X11Window.hpp"
 #include "../platform/X11Display.hpp"
+#elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
+#include "EmsPresenter.hpp"
+#include "EmsOutput.hpp"
+#include <emscripten/emscripten.h>
 #else
 #error Unknown platform
 #endif
@@ -62,6 +66,13 @@ GlDevice::~GlDevice()
 		glXDestroyContext(display->GetDisplay(), glxContext);
 	}
 }
+
+#elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
+
+GlDevice::GlDevice(ptr<GlSystem> system)
+: system(system) {}
+
+GlDevice::~GlDevice() {}
 
 #else
 
@@ -322,6 +333,17 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 		GlSystem::ClearErrors();
 
 		return NEW(GlxPresenter(this, NEW(GlFrameBuffer(this, 0)), output, glxWindow));
+
+#elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
+
+		EM_ASM(
+			window.Browser.createContext(window.Module.canvas, true, true);
+		);
+
+		ptr<EmsOutput> output = abstractOutput.DynamicCast<EmsOutput>();
+		if(!output)
+			THROW("Only Emscripten output allowed");
+		return NEW(EmsPresenter(this, NEW(GlFrameBuffer(this, 0)), output));
 
 #else
 
