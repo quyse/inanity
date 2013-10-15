@@ -191,14 +191,6 @@ bool Win32Window::Do(Handler* activeHandler)
 			return false;
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
-		if(active != lastActive)
-		{
-			if(inputManager)
-				if(active)
-					inputManager->AcquireDevices();
-				else
-					inputManager->UnacquireDevices();
-		}
 	}
 
 	// если окно активно, работаем

@@ -8,12 +8,13 @@ BEGIN_INANITY_INPUT
 /// Структура, хранящая текущее состояние устройств ввода.
 struct State
 {
-	/// Состояние клавиш клавиатуры.
+	/// Keyboard keys state.
 	unsigned char keyboard[256];
-	/// Нажатость кнопок мыши.
+	/// Mouse buttons state.
 	bool mouseButtons[3];
-	/// Координаты мыши.
-	float mouseX, mouseY, mouseZ;
+	/// Mouse cursor position.
+	/** Mouse cursor as moved by OS. */
+	int cursorX, cursorY;
 };
 
 END_INANITY_INPUT

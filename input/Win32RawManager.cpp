@@ -97,10 +97,10 @@ bool Win32RawManager::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lPara
 
 					if(block.data.mouse.lLastX != 0 || block.data.mouse.lLastY != 0 || (flags & RI_MOUSE_WHEEL))
 					{
-						e.mouse.type = Event::Mouse::typeMove;
-						e.mouse.offsetX = (float)block.data.mouse.lLastX;
-						e.mouse.offsetY = (float)block.data.mouse.lLastY;
-						e.mouse.offsetZ = (float)((flags & RI_MOUSE_WHEEL) ? *(SHORT*)&block.data.mouse.usButtonData : 0);
+						e.mouse.type = Event::Mouse::typeRawMove;
+						e.mouse.rawMoveX = (float)block.data.mouse.lLastX;
+						e.mouse.rawMoveY = (float)block.data.mouse.lLastY;
+						e.mouse.rawMoveZ = (float)((flags & RI_MOUSE_WHEEL) ? *(SHORT*)&block.data.mouse.usButtonData : 0);
 						AddEvent(e);
 					}
 				}

@@ -33,29 +33,37 @@ std::ostream& operator<<(std::ostream& stream, const Event& event)
 			case Event::Mouse::typeButtonUp:
 				stream << "MOUSEUP";
 				break;
-			case Event::Mouse::typeMove:
-				stream << "MOUSEMOVE";
+			case Event::Mouse::typeRawMove:
+				stream << "MOUSERAWMOVE";
+				break;
+			case Event::Mouse::typeCursorMove:
+				stream << "MOUSECURSORMOVE";
 				break;
 		}
 		stream << ' ';
-		if(event.mouse.type == Event::Mouse::typeButtonDown || event.mouse.type == Event::Mouse::typeButtonUp)
+		switch(event.mouse.type)
 		{
-			switch(event.mouse.button)
-			{
-			case Event::Mouse::buttonLeft:
-				stream << "LEFT";
+			case Event::Mouse::typeButtonDown:
+			case Event::Mouse::typeButtonUp:
+				switch(event.mouse.button)
+				{
+				case Event::Mouse::buttonLeft:
+					stream << "LEFT";
+					break;
+				case Event::Mouse::buttonRight:
+					stream << "RIGHT";
+					break;
+				case Event::Mouse::buttonMiddle:
+					stream << "MIDDLE";
+					break;
+				}
 				break;
-			case Event::Mouse::buttonRight:
-				stream << "RIGHT";
+			case Event::Mouse::typeRawMove:
+				stream << event.mouse.rawMoveX << ' ' << event.mouse.rawMoveY << ' ' << event.mouse.rawMoveZ;
 				break;
-			case Event::Mouse::buttonMiddle:
-				stream << "MIDDLE";
+			case Event::Mouse::typeCursorMove:
+				stream << event.mouse.cursorMoveX << ' ' << event.mouse.cursorMoveY;
 				break;
-			}
-		}
-		else
-		{
-			stream << event.mouse.offsetX << ' ' << event.mouse.offsetY << ' ' << event.mouse.offsetZ;
 		}
 		break;
 	}

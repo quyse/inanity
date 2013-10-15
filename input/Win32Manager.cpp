@@ -103,11 +103,12 @@ Key Win32Manager::ConvertKey(USHORT key)
 	}
 }
 
-Win32Manager::Win32Manager(HWND hWnd) : hWnd(hWnd) {}
+Win32Manager::Win32Manager(HWND hWnd)
+: hWnd(hWnd), cursorX(0), cursorY(0) {}
 
 bool Win32Manager::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	//по умолчанию выполняется обработка символов
+	// process characters
 	if(msg == WM_CHAR)
 	{
 		Event e;
@@ -117,15 +118,21 @@ bool Win32Manager::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 		AddEvent(e);
 		return true;
 	}
+	// process cursor mouse move
+	else if(msg == WM_MOUSEMOVE)
+	{
+		Event e;
+		e.device = Event::deviceMouse;
+		e.mouse.type = Event::Mouse::typeCursorMove;
+		int newCursorX = LOWORD(lParam);
+		int newCursorY = HIWORD(lParam);
+		e.mouse.cursorMoveX = newCursorX - cursorX;
+		e.mouse.cursorMoveY = newCursorY - cursorY;
+		AddEvent(e);
+		cursorX = newCursorX;
+		cursorY = newCursorY;
+	}
 	return false;
-}
-
-void Win32Manager::AcquireDevices()
-{
-}
-
-void Win32Manager::UnacquireDevices()
-{
 }
 
 END_INANITY_INPUT

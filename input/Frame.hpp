@@ -7,40 +7,39 @@
 
 BEGIN_INANITY_INPUT
 
-/// Класс кадра устройства ввода.
-/** Предоставляет доступ к последовательности событий устройства ввода,
-произошедших за кадр, и получать состояние устройства.
-Методы, которые получают собственно состояние, а также текущее событие,
-определяются в подклассе.
+/// Input frame.
+/** Provides list of events happened in a frame, and tracks current input state
+while events are forwarding.
+
+Usage:
+
+while(frame->NextEvent())
+{
+	e = GetCurrentEvent();
+	// parse event...
+	s = GetCurrentState();
+	// use current state
+}
 */
 class Frame : public Object
 {
 private:
-	/// Вектор событий.
 	std::vector<Event> events;
-	/// Индекс текущего события
-	size_t currentEvent;
-	/// Состояние устройств.
+	size_t nextEvent;
 	State state;
 
 public:
 	Frame();
 
-	/// Получить текущее событие.
 	const Event& GetCurrentEvent() const;
-	/// Получить текущее состояние.
 	const State& GetCurrentState() const;
-	/// Перейти к следующему событию.
 	bool NextEvent();
-	/// Перемотать все оставшиеся события.
 	void ForwardEvents();
 
-	/// Сбросить фрейм.
-	/** Очищает список событий, сбрасывает индекс текущего события в ноль. */
+	/// Resets frame.
+	/** Clears event list. */
 	void Reset();
-	/// Добавить событие.
 	void AddEvent(const Event& e);
-	/// Скопировать события и состояние в другой кадр.
 	void CopyTo(ptr<Frame> frame);
 };
 
