@@ -11,7 +11,7 @@ Win32Window* Win32Window::singleWindow = 0;
 
 Win32Window::Win32Window(ATOM windowClass, const String& title,
 	int left, int top, int width, int height)
-: active(true), output(0), clientWidth(0), clientHeight(0)
+: active(true), output(0), clientWidth(0), clientHeight(0), cursorHidden(false)
 {
 	try
 	{
@@ -26,7 +26,6 @@ Win32Window::Win32Window(ATOM windowClass, const String& title,
 			NULL, NULL, GetModuleHandle(NULL), NULL);
 		if(!hWnd)
 			THROW("Can't create window");
-		ShowCursor(FALSE);
 
 		RECT rect;
 		GetClientRect(hWnd, &rect);
@@ -130,21 +129,20 @@ LRESULT CALLBACK Win32Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 		{
 			unsigned state = LOWORD(wParam);
 			bool active = (state == WA_ACTIVE || state == WA_CLICKACTIVE);
-			//обновить флаг активности
 			if(singleWindow)
-				singleWindow->active = active;
-			//включить или отключить ограничение курсора мыши
-			if(active)
 			{
-				RECT rect;
-				GetWindowRect(hWnd, &rect);
-				ClipCursor(&rect);
+				// update activity flag
+				singleWindow->active = active;
+				// update mouse lock
+				singleWindow->UpdateMouseLock();
+				// update cursor visibility
+				singleWindow->UpdateCursorVisible();
 			}
-			else
-				ClipCursor(NULL);
 		}
 		return 0;
 	case WM_MOVE:
+		if(singleWindow)
+			singleWindow->UpdateMouseLock();
 		return 0;
 	case WM_SIZE:
 		if(singleWindow)
@@ -153,6 +151,7 @@ LRESULT CALLBACK Win32Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 			singleWindow->clientHeight = HIWORD(lParam);
 			if(singleWindow->output)
 				singleWindow->output->Resize(singleWindow->clientWidth, singleWindow->clientHeight);
+			singleWindow->UpdateMouseLock();
 		}
 		return 0;
 	case WM_CLOSE:
@@ -216,6 +215,32 @@ void Win32Window::Close()
 void Win32Window::Run(ptr<Handler> activeHandler)
 {
 	while(Do(activeHandler));
+}
+
+void Win32Window::UpdateMouseLock()
+{
+	// get if we actually want to set mouse lock
+	bool actualMouseLock = mouseLock && active;
+
+	if(actualMouseLock)
+	{
+		// clip cursor into client rect in screen coordinates
+		RECT rect;
+		GetClientRect(hWnd, &rect);
+		MapWindowPoints(hWnd, NULL, (LPPOINT)&rect, 2);
+		ClipCursor(&rect);
+	}
+	else
+		ClipCursor(NULL);
+}
+
+void Win32Window::UpdateCursorVisible()
+{
+	if(cursorVisible == cursorHidden)
+	{
+		ShowCursor(cursorVisible ? TRUE : FALSE);
+		cursorHidden = !cursorVisible;
+	}
 }
 
 END_INANITY_PLATFORM

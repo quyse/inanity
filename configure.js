@@ -90,7 +90,7 @@ var libraries = {
 	},
 	// ******* general platform subsystem
 	'libinanity-platform': {
-		objects: ['platform.Game'],
+		objects: ['platform.Window', 'platform.Game'],
 		'objects-win32': [
 			'platform.Win32Handle', 'platform.Win32FileSystem',
 			'platform.Win32Window', 'graphics.Win32Output',

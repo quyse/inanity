@@ -29,6 +29,24 @@ public:
 
 	/// Создать область вывода, покрывающую всё окно.
 	virtual ptr<Graphics::Output> CreateOutput() = 0;
+
+	/// Set mouse lock state.
+	void SetMouseLock(bool mouseLock);
+	/// Set hardware (OS) mouse cursor visibility.
+	void SetCursorVisible(bool cursorVisible);
+
+protected:
+	/// Mouse lock state.
+	/** When mouse lock is enabled, cursor can't get out
+	from window. */
+	bool mouseLock;
+	/// Mouse cursor visibility.
+	bool cursorVisible;
+
+	Window();
+
+	virtual void UpdateMouseLock() = 0;
+	virtual void UpdateCursorVisible() = 0;
 };
 
 END_INANITY_PLATFORM
