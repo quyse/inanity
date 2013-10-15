@@ -23,15 +23,13 @@ void Manager::Update()
 {
 	CriticalCode criticalCode(criticalSection);
 
-	//теперь текущим кадром становится внутренний
+	// switch frames
 	std::swap(currentFrame, internalFrame);
-	//у нового внутреннего кадра нужно сделать корректное состояние
-	//оно должно быть равно состоянию старого внутреннего кадра
-	//как если бы мы выполнили бы все события
+	// old internal frame (new current frame)
+	// should be copied to new internal frame,
+	// and state is rewinded forward
 	currentFrame->CopyTo(internalFrame);
-	//перемотать скопированные события
 	internalFrame->ForwardEvents();
-	//сбросить данные внутреннего кадра
 	internalFrame->Reset();
 }
 
