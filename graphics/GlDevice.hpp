@@ -55,6 +55,20 @@ private:
 #error Unknown platform
 #endif
 
+	//*** Internal capabilities.
+	struct InternalCaps
+	{
+		enum _
+		{
+			uniformBufferObject = 1,
+			vertexAttribBinding = 2
+		};
+	};
+	int internalCaps;
+
+	/// Init capabilities.
+	void InitCaps();
+
 	/// Скомпилировать шейдер.
 	static void CompileShader(GLuint shaderName, ptr<File> file, ptr<GlShaderBindings>& shaderBindings);
 	static void GetAttributeSizeAndType(DataType dataType, GLint& size, GLenum& type, bool& integer);
@@ -72,6 +86,8 @@ public:
 #endif
 
 	~GlDevice();
+
+	int GetInternalCaps() const;
 
 	// методы Device
 	ptr<System> GetSystem() const;

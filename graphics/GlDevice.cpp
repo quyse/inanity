@@ -82,6 +82,30 @@ GlDevice::~GlDevice() {}
 
 #endif
 
+void GlDevice::InitCaps()
+{
+#if defined(___INANITY_PLATFORM_WINDOWS) || defined(___INANITY_PLATFORM_LINUX)
+	internalCaps =
+		(GLEW_ARB_uniform_buffer_object ? InternalCaps::uniformBufferObject : 0) |
+		(GLEW_ARB_vertex_attrib_binding ? InternalCaps::vertexAttribBinding : 0)
+		;
+	caps.flags =
+		(GLEW_ARB_instanced_arrays ? Caps::attributeInstancing : 0) |
+		(GLEW_ARB_draw_instanced ? Caps::drawInstancing : 0) |
+		(GLEW_ARB_framebuffer_object ? Caps::multipleRenderTargets : 0);
+#elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
+	internalCaps = 0;
+	caps.flags = Caps::multipleRenderTargets;
+#else
+#error Unknown platform
+#endif
+}
+
+int GlDevice::GetInternalCaps() const
+{
+	return internalCaps;
+}
+
 ptr<System> GlDevice::GetSystem() const
 {
 	return system;
@@ -663,7 +687,7 @@ ptr<AttributeBinding> GlDevice::CreateAttributeBinding(ptr<AttributeLayout> layo
 	try
 	{
 		// если поддерживается vertex bindings, используем их как более оптимальный метод
-		if(GLEW_ARB_vertex_attrib_binding)
+		if(internalCaps & InternalCaps::vertexAttribBinding)
 		{
 			// создать Vertex Array Object
 			GLuint vertexArrayName;

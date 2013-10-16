@@ -28,7 +28,10 @@ BEGIN_INANITY_GRAPHICS
 
 Dx11Device::Dx11Device(ptr<Dx11System> system, ComPointer<ID3D11Device> device, ComPointer<ID3D11DeviceContext> deviceContext)
 : system(system), device(device), deviceContext(deviceContext)
-{}
+{
+	// setup caps
+	caps.flags = Caps::attributeInstancing | Caps::drawInstancing | Caps::multipleRenderTargets;
+}
 
 ptr<System> Dx11Device::GetSystem() const
 {

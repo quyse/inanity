@@ -48,6 +48,29 @@ class BlendState;
 class Device : public Object
 {
 public:
+	struct Caps
+	{
+		enum _
+		{
+			/// Multiple attribute slots allowed, divisors are supported.
+			attributeInstancing = 1,
+			drawInstancing = 2,
+			multipleRenderTargets = 4
+		};
+		int flags;
+
+		Caps();
+	};
+
+protected:
+	/// Capabilities of the device.
+	/** Should be set by subclasses. */
+	Caps caps;
+
+public:
+	/// Get caps of device.
+	const Caps& GetCaps() const;
+
 	/// Получить графическую систему.
 	virtual ptr<System> GetSystem() const = 0;
 
