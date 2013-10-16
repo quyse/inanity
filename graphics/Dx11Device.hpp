@@ -32,6 +32,8 @@ public:
 	// методы Device
 	ptr<System> GetSystem() const;
 	ptr<Presenter> CreatePresenter(ptr<Output> output, ptr<MonitorMode> mode);
+	ptr<ShaderCompiler> CreateShaderCompiler();
+	ptr<Shaders::ShaderGenerator> CreateShaderGenerator();
 	ptr<FrameBuffer> CreateFrameBuffer();
 	ptr<RenderBuffer> CreateRenderBuffer(int width, int height, PixelFormat pixelFormat);
 	ptr<DepthStencilBuffer> CreateDepthStencilBuffer(int width, int height, bool canBeResource);

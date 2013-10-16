@@ -1,5 +1,7 @@
 #include "GlDevice.hpp"
 #include "GlSystem.hpp"
+#include "GlShaderCompiler.hpp"
+#include "shaders/GlslGenerator.hpp"
 #include "GlFrameBuffer.hpp"
 #include "GlRenderBuffer.hpp"
 #include "GlDepthStencilBuffer.hpp"
@@ -356,6 +358,16 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 	{
 		THROW_SECONDARY("Can't create presenter for GL device", exception);
 	}
+}
+
+ptr<ShaderCompiler> GlDevice::CreateShaderCompiler()
+{
+	return NEW(GlShaderCompiler());
+}
+
+ptr<Shaders::ShaderGenerator> GlDevice::CreateShaderGenerator()
+{
+	return NEW(Shaders::GlslGenerator(internalCaps & InternalCaps::uniformBufferObject));
 }
 
 ptr<FrameBuffer> GlDevice::CreateFrameBuffer()

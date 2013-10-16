@@ -1,8 +1,6 @@
 #include "Dx11System.hpp"
 #include "Dx11Device.hpp"
 #include "Dx11Context.hpp"
-#include "Dx11ShaderCompiler.hpp"
-#include "shaders/Hlsl11Generator.hpp"
 #include "DxgiAdapter.hpp"
 #include "DxgiMonitorMode.hpp"
 #include "Output.hpp"
@@ -278,16 +276,6 @@ ptr<Context> Dx11System::CreateContext(ptr<Device> abstractDevice)
 	return NEW(Dx11Context(device));
 
 	END_TRY("Can't create DirectX 11 context");
-}
-
-ptr<ShaderCompiler> Dx11System::CreateShaderCompiler()
-{
-	return NEW(Dx11ShaderCompiler());
-}
-
-ptr<Shaders::ShaderGenerator> Dx11System::CreateShaderGenerator()
-{
-	return NEW(Shaders::Hlsl11Generator());
 }
 
 END_INANITY_GRAPHICS

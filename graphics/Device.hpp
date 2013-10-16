@@ -2,6 +2,7 @@
 #define ___INANITY_GRAPHICS_DEVICE_HPP___
 
 #include "graphics.hpp"
+#include "shaders/shaders.hpp"
 #include "PixelFormat.hpp"
 
 BEGIN_INANITY
@@ -10,10 +11,17 @@ class File;
 
 END_INANITY
 
+BEGIN_INANITY_SHADERS
+
+class ShaderGenerator;
+
+END_INANITY_SHADERS
+
 BEGIN_INANITY_GRAPHICS
 
 class System;
 class Presenter;
+class ShaderCompiler;
 class Output;
 class MonitorMode;
 struct PresentMode;
@@ -46,6 +54,11 @@ public:
 	/// Создать выходное устройство.
 	/** \param mode Режим экрана, в случае, если режим должен быть полноэкранным. */
 	virtual ptr<Presenter> CreatePresenter(ptr<Output> output, ptr<MonitorMode> mode) = 0;
+
+	/// Создать компилятор шейдеров.
+	virtual ptr<ShaderCompiler> CreateShaderCompiler() = 0;
+	/// Создать генератор шейдеров.
+	virtual ptr<Shaders::ShaderGenerator> CreateShaderGenerator() = 0;
 
 	// ******* Методы для создания ресурсов устройства.
 

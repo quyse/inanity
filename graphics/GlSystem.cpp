@@ -1,8 +1,6 @@
 #include "GlSystem.hpp"
 #include "GlDevice.hpp"
 #include "GlContext.hpp"
-#include "GlShaderCompiler.hpp"
-#include "shaders/GlslGenerator.hpp"
 #if defined(___INANITY_PLATFORM_WINDOWS)
 #include "Win32Adapter.hpp"
 #include "../platform/Win32Window.hpp"
@@ -75,16 +73,6 @@ ptr<Context> GlSystem::CreateContext(ptr<Device> abstractDevice)
 	return NEW(GlContext(device));
 
 	END_TRY("Can't create OpenGL context");
-}
-
-ptr<ShaderCompiler> GlSystem::CreateShaderCompiler()
-{
-	return NEW(GlShaderCompiler());
-}
-
-ptr<Shaders::ShaderGenerator> GlSystem::CreateShaderGenerator()
-{
-	return NEW(Shaders::GlslGenerator());
 }
 
 void GlSystem::InitGLEW()

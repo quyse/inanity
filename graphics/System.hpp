@@ -2,21 +2,13 @@
 #define ___INANITY_GRAPHICS_SYSTEM_HPP___
 
 #include "graphics.hpp"
-#include "shaders/shaders.hpp"
 #include <vector>
-
-BEGIN_INANITY_SHADERS
-
-class ShaderGenerator;
-
-END_INANITY_SHADERS
 
 BEGIN_INANITY_GRAPHICS
 
 class Adapter;
 class Device;
 class Context;
-class ShaderCompiler;
 
 /// Класс графической подсистемы.
 /** Абстрактная фабрика для создания объектов
@@ -31,11 +23,6 @@ public:
 	virtual ptr<Device> CreateDevice(ptr<Adapter> adapter) = 0;
 	/// Создать основной контект для графического устройства.
 	virtual ptr<Context> CreateContext(ptr<Device> device) = 0;
-
-	/// Создать компилятор шейдеров.
-	virtual ptr<ShaderCompiler> CreateShaderCompiler() = 0;
-	/// Создать генератор шейдеров.
-	virtual ptr<Shaders::ShaderGenerator> CreateShaderGenerator() = 0;
 };
 
 END_INANITY_GRAPHICS
