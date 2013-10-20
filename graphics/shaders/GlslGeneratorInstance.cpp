@@ -12,7 +12,7 @@
 #include "UniformNode.hpp"
 #include "TempNode.hpp"
 #include "TransformedNode.hpp"
-#include "RasterizedNode.hpp"
+#include "FragmentNode.hpp"
 #include "CastNode.hpp"
 #include "../GlslSource.hpp"
 #include "../GlShaderBindings.hpp"
@@ -27,7 +27,7 @@
 BEGIN_INANITY_SHADERS
 
 GlslGeneratorInstance::GlslGeneratorInstance(ptr<Node> rootNode, ShaderType shaderType)
-: rootNode(rootNode), shaderType(shaderType), tempsCount(0)
+: rootNode(rootNode), shaderType(shaderType), tempsCount(0), fragmentTargetsCount(0)
 {
 	try
 	{
@@ -115,12 +115,6 @@ void GlslGeneratorInstance::RegisterNode(Node* node)
 	case Node::typeTransformed:
 		transformed.push_back(fast_cast<TransformedNode*>(node));
 		break;
-	case Node::typeRasterized:
-		// rasterized-переменые дапустимы только в пиксельном шейдере
-		if(shaderType != ShaderTypes::pixel)
-			THROW("Only pixel shader can have rasterized nodes");
-		rasterized.push_back(fast_cast<RasterizedNode*>(node));
-		break;
 	case Node::typeSequence:
 		{
 			SequenceNode* sequenceNode = fast_cast<SequenceNode*>(node);
@@ -144,6 +138,17 @@ void GlslGeneratorInstance::RegisterNode(Node* node)
 			SampleNode* sampleNode = fast_cast<SampleNode*>(node);
 			RegisterNode(sampleNode->GetSamplerNode());
 			RegisterNode(sampleNode->GetCoordsNode());
+		}
+		break;
+	case Node::typeFragment:
+		{
+			// fragment output is allowed only in pixel shader
+			if(shaderType != ShaderTypes::pixel)
+				THROW("Only pixel shader can do fragment output");
+			FragmentNode* fragmentNode = fast_cast<FragmentNode*>(node);
+			// register maximum number of fragment outputs
+			fragmentTargetsCount = std::max(fragmentTargetsCount, fragmentNode->GetTarget() + 1);
+			RegisterNode(fragmentNode->GetNode());
 		}
 		break;
 	case Node::typeCast:
@@ -191,9 +196,6 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 		break;
 	case Node::typeTransformed:
 		glsl << "v" << fast_cast<TransformedNode*>(node)->GetSemantic();
-		break;
-	case Node::typeRasterized:
-		glsl << "r" << fast_cast<RasterizedNode*>(node)->GetTarget();
 		break;
 	case Node::typeSequence:
 		{
@@ -253,6 +255,14 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 				for(int i = 0; i < valueSize; ++i)
 					glsl << "xyzw"[i];
 			}
+			glsl << ')';
+		}
+		break;
+	case Node::typeFragment:
+		{
+			FragmentNode* fragmentNode = fast_cast<FragmentNode*>(node);
+			glsl << "r" << fragmentNode->GetTarget() << " = (";
+			PrintNode(fragmentNode->GetNode());
 			glsl << ')';
 		}
 		break;
@@ -547,15 +557,11 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 	// вывести пиксельные переменные, если это пиксельный шейдер
 	if(shaderType == ShaderTypes::pixel)
 	{
-		std::sort(rasterized.begin(), rasterized.end());
-		rasterized.resize(std::unique(rasterized.begin(), rasterized.end()) - rasterized.begin());
-		for(size_t i = 0; i < rasterized.size(); ++i)
+		for(int i = 0; i < fragmentTargetsCount; ++i)
 		{
-			ptr<RasterizedNode> node = rasterized[i];
-			int target = node->GetTarget();
 			glsl << "out ";
-			PrintDataType(node->GetValueType());
-			glsl << " r" << target << ";\n";
+			PrintDataType(DataTypes::_vec4);
+			glsl << " r" << i << ";\n";
 		}
 	}
 
@@ -680,14 +686,13 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 	}
 
 	// сформировать список привязок целевых переменных
-	GlShaderBindings::Bindings targetBindings(rasterized.size());
-	for(size_t i = 0; i < rasterized.size(); ++i)
+	GlShaderBindings::Bindings targetBindings(fragmentTargetsCount);
+	for(int i = 0; i < fragmentTargetsCount; ++i)
 	{
-		int target = rasterized[i]->GetTarget();
 		char name[16];
-		sprintf(name, "r%d", target);
+		sprintf(name, "r%d", i);
 		targetBindings[i].first = name;
-		targetBindings[i].second = target;
+		targetBindings[i].second = i;
 	}
 
 	return NEW(GlslSource(

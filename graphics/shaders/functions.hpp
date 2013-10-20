@@ -3,6 +3,7 @@
 
 #include "Value.hpp"
 #include "OperationNode.hpp"
+#include "FragmentNode.hpp"
 
 BEGIN_INANITY_SHADERS
 
@@ -23,6 +24,12 @@ inline Value<vec4> newvec4(Value<vec2> a, Value<float> b, Value<float> c) { retu
 inline Expression setPosition(Value<vec4> a) { return OP1(SetPosition); }
 // getInstanceID
 inline Value<uint> getInstanceID() { return OP0(GetInstanceID); }
+
+// output fragment
+inline Expression fragment(int target, Value<vec4> f)
+{
+	return NEW(FragmentNode(target, f.GetNode()));
+}
 
 // screenToTexture
 inline Value<vec2> screenToTexture(Value<vec2> a) { return OP1(ScreenToTexture); }

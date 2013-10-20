@@ -155,8 +155,9 @@ var libraries = {
 			'graphics.shaders.SwizzleNode', 'graphics.shaders.OperationNode',
 			'graphics.shaders.SampleNode', 'graphics.shaders.FloatConstNode', 'graphics.shaders.IntConstNode',
 			'graphics.shaders.SequenceNode',
-			'graphics.shaders.TransformedNode', 'graphics.shaders.RasterizedNode',
-			'graphics.shaders.TempNode', 'graphics.shaders.CastNode',
+			'graphics.shaders.TransformedNode', 'graphics.shaders.TempNode',
+			'graphics.shaders.FragmentNode',
+			'graphics.shaders.CastNode',
 			'graphics.shaders.Expression', 'graphics.shaders.Sampler',
 			'graphics.shaders.GlslGenerator', 'graphics.shaders.GlslGeneratorInstance'
 		],
