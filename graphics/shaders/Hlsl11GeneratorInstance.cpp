@@ -12,7 +12,7 @@
 #include "UniformNode.hpp"
 #include "TempNode.hpp"
 #include "TransformedNode.hpp"
-#include "RasterizedNode.hpp"
+#include "FragmentNode.hpp"
 #include "CastNode.hpp"
 #include "../Hlsl11Source.hpp"
 #include "../Dx11System.hpp"
@@ -25,8 +25,12 @@
 
 BEGIN_INANITY_SHADERS
 
-Hlsl11GeneratorInstance::Hlsl11GeneratorInstance(ptr<Node> rootNode, ShaderType shaderType)
-: rootNode(rootNode), shaderType(shaderType), tempsCount(0), needInstanceID(false)
+Hlsl11GeneratorInstance::Hlsl11GeneratorInstance(ptr<Node> rootNode, ShaderType shaderType) :
+	rootNode(rootNode),
+	shaderType(shaderType),
+	tempsCount(0),
+	needInstanceID(false),
+	fragmentTargetsCount(0)
 {}
 
 void Hlsl11GeneratorInstance::PrintDataType(DataType dataType)
@@ -93,12 +97,6 @@ void Hlsl11GeneratorInstance::RegisterNode(Node* node)
 	case Node::typeTransformed:
 		transformed.push_back(fast_cast<TransformedNode*>(node));
 		break;
-	case Node::typeRasterized:
-		// rasterized-переменые дапустимы только в пиксельном шейдере
-		if(shaderType != ShaderTypes::pixel)
-			THROW("Only pixel shader can have rasterized nodes");
-		rasterized.push_back(fast_cast<RasterizedNode*>(node));
-		break;
 	case Node::typeSequence:
 		{
 			SequenceNode* sequenceNode = fast_cast<SequenceNode*>(node);
@@ -125,6 +123,17 @@ void Hlsl11GeneratorInstance::RegisterNode(Node* node)
 			SampleNode* sampleNode = fast_cast<SampleNode*>(node);
 			RegisterNode(sampleNode->GetSamplerNode());
 			RegisterNode(sampleNode->GetCoordsNode());
+		}
+		break;
+	case Node::typeFragment:
+		{
+			// fragment output is allowed only in pixel shader
+			if(shaderType != ShaderTypes::pixel)
+				THROW("Only pixel shader can do fragment output");
+			FragmentNode* fragmentNode = fast_cast<FragmentNode*>(node);
+			// register maximum number of fragment outputs
+			fragmentTargetsCount = std::max(fragmentTargetsCount, fragmentNode->GetTarget() + 1);
+			RegisterNode(fragmentNode->GetNode());
 		}
 		break;
 	case Node::typeCast:
@@ -173,9 +182,6 @@ void Hlsl11GeneratorInstance::PrintNode(Node* node)
 	case Node::typeTransformed:
 		hlsl << "v.v" << fast_cast<TransformedNode*>(node)->GetSemantic();
 		break;
-	case Node::typeRasterized:
-		hlsl << "r.r" << fast_cast<RasterizedNode*>(node)->GetTarget();
-		break;
 	case Node::typeSequence:
 		{
 			SequenceNode* sequenceNode = fast_cast<SequenceNode*>(node);
@@ -201,6 +207,14 @@ void Hlsl11GeneratorInstance::PrintNode(Node* node)
 			int slot = sampleNode->GetSamplerNode()->GetSlot();
 			hlsl << 't' << slot << ".Sample(s" << slot << ", ";
 			PrintNode(sampleNode->GetCoordsNode());
+			hlsl << ')';
+		}
+		break;
+	case Node::typeFragment:
+		{
+			FragmentNode* fragmentNode = fast_cast<FragmentNode*>(node);
+			hlsl << "r.r" << fragmentNode->GetTarget() << " = (";
+			PrintNode(fragmentNode->GetNode());
 			hlsl << ')';
 		}
 		break;
@@ -540,24 +554,13 @@ ptr<ShaderSource> Hlsl11GeneratorInstance::Generate()
 	{
 		hlsl << "struct R\n{\n";
 
-		struct TargetSorter
+		for(int i = 0; i < fragmentTargetsCount; ++i)
 		{
-			bool operator()(RasterizedNode* a, RasterizedNode* b) const
-			{
-				return a->GetTarget() < b->GetTarget();
-			}
-		};
-
-		std::sort(rasterized.begin(), rasterized.end(), TargetSorter());
-		rasterized.resize(std::unique(rasterized.begin(), rasterized.end()) - rasterized.begin());
-		for(size_t i = 0; i < rasterized.size(); ++i)
-		{
-			ptr<RasterizedNode> node = rasterized[i];
 			hlsl << '\t';
-			PrintDataType(node->GetValueType());
-			int target = node->GetTarget();
-			hlsl << " r" << target << " : SV_Target" << target << ";\n";
+			PrintDataType(DataTypes::_vec4);
+			hlsl << " r" << i << " : SV_Target" << i << ";\n";
 		}
+
 		hlsl << "};\n";
 	}
 

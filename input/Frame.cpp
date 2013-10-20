@@ -12,8 +12,8 @@ Frame::Frame()
 
 const Event& Frame::GetCurrentEvent() const
 {
-	if(currentEvent < events.size())
-		return events[currentEvent];
+	if(nextEvent > 0 && nextEvent <= events.size())
+		return events[nextEvent - 1];
 	THROW("There is no current event");
 }
 
@@ -24,12 +24,12 @@ const State& Frame::GetCurrentState() const
 
 bool Frame::NextEvent()
 {
-	//если текущее событие есть
-	if(currentEvent < events.size())
+	// if next event is present
+	if(nextEvent < events.size())
 	{
-		//учесть текущее событие в состоянии
-		const Event& e = events[currentEvent];
-		//выбор по устройству
+		// process next event in state
+		const Event& e = events[nextEvent];
+
 		switch(e.device)
 		{
 		case Event::deviceKeyboard:
@@ -53,18 +53,20 @@ bool Frame::NextEvent()
 			case Event::Mouse::typeButtonUp:
 				state.mouseButtons[e.mouse.button] = false;
 				break;
-			case Event::Mouse::typeMove:
-				state.mouseX += e.mouse.offsetX;
-				state.mouseY += e.mouse.offsetY;
-				state.mouseZ += e.mouse.offsetZ;
+			case Event::Mouse::typeRawMove:
+				// there is no state for raw move
+				break;
+			case Event::Mouse::typeCursorMove:
+				state.cursorX += e.mouse.cursorMoveX;
+				state.cursorY += e.mouse.cursorMoveY;
 				break;
 			}
 			break;
 		}
 	}
 
-	//перейти к следующему событию
-	return ++currentEvent < events.size();
+	// make the next event current
+	return nextEvent++ < events.size();
 }
 
 void Frame::ForwardEvents()
@@ -75,7 +77,7 @@ void Frame::ForwardEvents()
 void Frame::Reset()
 {
 	events.clear();
-	currentEvent = (size_t)-1;
+	nextEvent = 0;
 }
 
 void Frame::AddEvent(const Event& e)
@@ -86,7 +88,7 @@ void Frame::AddEvent(const Event& e)
 void Frame::CopyTo(ptr<Frame> frame)
 {
 	frame->events = events;
-	frame->currentEvent = currentEvent;
+	frame->nextEvent = nextEvent;
 	frame->state = state;
 }
 

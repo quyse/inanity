@@ -53,8 +53,8 @@ private:
 	std::vector<ptr<SamplerNode> > samplers;
 	/// transformed-переменные.
 	std::vector<ptr<TransformedNode> > transformed;
-	/// rasterized-переменные.
-	std::vector<ptr<RasterizedNode> > rasterized;
+	/// Number of fragment targets.
+	int fragmentTargetsCount;
 
 private:
 	/// Напечатать имя типа.

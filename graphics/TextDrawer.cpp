@@ -46,8 +46,6 @@ struct TextDrawerHelper : public Object
 	Interpolant<vec2> iTexcoord;
 	Interpolant<vec4> iColor;
 
-	Fragment<vec4> fTarget;
-
 	ptr<UniformGroup> ugSymbols;
 	/// Координаты символов на экране.
 	UniformArray<vec4> uPositions;
@@ -79,8 +77,6 @@ struct TextDrawerHelper : public Object
 
 		iTexcoord(1),
 		iColor(2),
-
-		fTarget(0),
 
 		ugSymbols(NEW(UniformGroup(0))),
 		uPositions(ugSymbols->AddUniformArray<vec4>(maxSymbolsCount)),
@@ -131,7 +127,7 @@ struct TextDrawerHelper : public Object
 				iTexcoord,
 				iColor,
 
-				fTarget = newvec4(iColor["xyz"], iColor["w"] * uFontSampler.Sample(iTexcoord))
+				fragment(0, newvec4(iColor["xyz"], iColor["w"] * uFontSampler.Sample(iTexcoord)))
 			));
 
 			// настройки смешивания

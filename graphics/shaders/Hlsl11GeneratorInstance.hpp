@@ -29,29 +29,26 @@ class OperationNode;
 class Hlsl11GeneratorInstance
 {
 private:
-	/// Исходный код шейдера.
+	/// Root node of shader's source code.
 	ptr<Node> rootNode;
-	/// Тип конструируемого шейдера.
+	/// Type of the shader.
 	ShaderType shaderType;
-	/// Результирующий текст шейдера на HLSL.
+	/// Text of the shader in HLSL.
 	std::ostringstream hlsl;
 
-	/// Атрибутные переменные.
+	/// Attribute variables.
 	std::vector<ptr<AttributeNode> > attributes;
-	/// Временные переменные.
-	/** Мап узел-индекс. */
+	/// Temp variables.
+	/** Maps node to index. */
 	std::unordered_map<ptr<TempNode>, int> temps;
 	int tempsCount;
-	/// Нужен ли шейдеру Instance ID.
 	bool needInstanceID;
-	/// uniform-переменные по группам.
+	/// Uniform variables grouped by uniform groups.
 	std::vector<std::pair<ptr<UniformGroup>, ptr<UniformNode> > > uniforms;
-	/// Семплеры.
 	std::vector<ptr<SamplerNode> > samplers;
-	/// transformed-переменные.
 	std::vector<ptr<TransformedNode> > transformed;
-	/// rasterized-переменные.
-	std::vector<ptr<RasterizedNode> > rasterized;
+	/// Number of fragment targets.
+	int fragmentTargetsCount;
 
 private:
 	/// Напечатать имя типа.

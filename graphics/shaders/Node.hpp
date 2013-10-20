@@ -6,44 +6,39 @@
 
 BEGIN_INANITY_SHADERS
 
-/// Абстрактный класс выражения.
+/// Abstract node of expression tree.
 class Node : public Object
 {
 public:
-	/// Тип выражения.
-	/** Типы соответствуют классам, к которым можно привести класс. */
+	/// Expression types.
+	/** Corresponds to a class node can be casted to. */
 	enum Type
 	{
-		/// Константа float.
 		typeFloatConst,
-		/// Константа int.
 		typeIntConst,
-		/// Атрибут.
 		typeAttribute,
-		/// Uniform-переменная.
 		typeUniform,
-		/// Семплер.
 		typeSampler,
-		/// Временная переменная.
+		/// Temporary variable.
 		typeTemp,
-		/// Выходная переменная вершинного шейдера.
+		/// Transformed variable.
+		/** Output vertex or input pixel variable. */
 		typeTransformed,
-		/// Выходная переменная пиксельного шейдера.
-		typeRasterized,
-		/// Последовательность выражений.
+		/// Several expressions in order.
 		typeSequence,
-		/// Операция перестановки компонент.
+		/// Vector component swizzle operation.
 		typeSwizzle,
-		/// Операция.
+		/// General operation.
 		typeOperation,
-		/// Семплирование.
+		/// Texture sample.
 		typeSample,
-		/// Преобразование типа.
+		/// Fragment output.
+		typeFragment,
+		/// Casting.
 		typeCast
 	};
 
 public:
-	/// Получить тип класса.
 	virtual Type GetType() const = 0;
 };
 

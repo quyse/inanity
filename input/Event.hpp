@@ -38,7 +38,8 @@ struct Event
 		{
 			typeButtonDown,
 			typeButtonUp,
-			typeMove
+			typeRawMove,
+			typeCursorMove
 		} type;
 
 		enum Button
@@ -52,12 +53,22 @@ struct Event
 		{
 			// in case type == typeButton{Down,Up}
 			Button button;
-			// in case type == typeMove
+			// in case type == typeRawMove
 			struct
 			{
-				float offsetX;
-				float offsetY;
-				float offsetZ;
+				//*** Raw relative moving.
+				/** In "device" arbitrary units, no kind of acceleration applied. */
+				float rawMoveX;
+				float rawMoveY;
+				float rawMoveZ;
+			};
+			// in case type == typeCursorMove
+			struct
+			{
+				//*** OS-dependent relative cursor moving.
+				/** In pixels, cropped by window, mouse ballistics applied. */
+				int cursorMoveX;
+				int cursorMoveY;
 			};
 		};
 	};

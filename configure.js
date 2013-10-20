@@ -91,7 +91,7 @@ var libraries = {
 	},
 	// ******* general platform subsystem
 	'libinanity-platform': {
-		objects: ['platform.Game'],
+		objects: ['platform.Window', 'platform.Game'],
 		'objects-win32': [
 			'platform.Win32Handle', 'platform.Win32FileSystem',
 			'platform.Win32Window', 'graphics.Win32Output',
@@ -162,8 +162,9 @@ var libraries = {
 			'graphics.shaders.SwizzleNode', 'graphics.shaders.OperationNode',
 			'graphics.shaders.SampleNode', 'graphics.shaders.FloatConstNode', 'graphics.shaders.IntConstNode',
 			'graphics.shaders.SequenceNode',
-			'graphics.shaders.TransformedNode', 'graphics.shaders.RasterizedNode',
-			'graphics.shaders.TempNode', 'graphics.shaders.CastNode',
+			'graphics.shaders.TransformedNode', 'graphics.shaders.TempNode',
+			'graphics.shaders.FragmentNode',
+			'graphics.shaders.CastNode',
 			'graphics.shaders.Expression', 'graphics.shaders.Sampler',
 			'graphics.shaders.GlslGenerator', 'graphics.shaders.GlslGeneratorInstance'
 		],

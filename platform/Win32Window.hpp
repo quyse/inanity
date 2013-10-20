@@ -38,8 +38,12 @@ private:
 
 	/// Graphics output for window.
 	Graphics::Win32Output* output;
-	/// Менеждер ввода.
 	ptr<Input::Win32Manager> inputManager;
+
+	/// Is cursor was hided.
+	/** This needed to not to break things, because
+	ShowCursor() works like a counter. */
+	bool cursorHidden;
 
 	/// Единственный экземпляр главного окна.
 	/** больше одного не разрешается, для ускорения обработки сообщений */
@@ -49,6 +53,9 @@ private:
 
 	/// Выполнить одну итерацию оконного цикла.
 	bool Do(Handler* activeHandler);
+
+	void UpdateMouseLock();
+	void UpdateCursorVisible();
 
 public:
 	Win32Window(ATOM windowClass, const String& title,
