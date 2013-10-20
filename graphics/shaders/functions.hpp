@@ -28,7 +28,7 @@ inline Value<uint> getInstanceID() { return OP0(GetInstanceID); }
 // output fragment
 inline Expression fragment(int target, Value<vec4> f)
 {
-	return NEW(FragmentNode(target, f.GetNode()));
+	return ptr<Node>(NEW(FragmentNode(target, f.GetNode())));
 }
 
 // screenToTexture

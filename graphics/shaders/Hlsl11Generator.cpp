@@ -8,7 +8,6 @@
 #include "UniformNode.hpp"
 #include "SamplerNode.hpp"
 #include "TransformedNode.hpp"
-#include "RasterizedNode.hpp"
 #include "OperationNode.hpp"
 
 BEGIN_INANITY_SHADERS
