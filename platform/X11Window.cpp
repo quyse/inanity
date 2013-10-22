@@ -185,4 +185,14 @@ bool X11Window::Do(Handler* activeHandler)
 	return true;
 }
 
+void X11Window::UpdateMouseLock()
+{
+	// not implemented yet
+}
+
+void X11Window::UpdateCursorVisible()
+{
+	// not implemented yet
+}
+
 END_INANITY_PLATFORM
