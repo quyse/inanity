@@ -87,6 +87,7 @@ void GlDevice::InitCaps()
 #if defined(___INANITY_PLATFORM_WINDOWS) || defined(___INANITY_PLATFORM_LINUX)
 	internalCaps =
 		(GLEW_ARB_uniform_buffer_object ? InternalCaps::uniformBufferObject : 0) |
+		(GLEW_ARB_sampler_objects ? InternalCaps::samplerObjects : 0) |
 		(GLEW_ARB_vertex_attrib_binding ? InternalCaps::vertexAttribBinding : 0)
 		;
 	caps.flags =
@@ -391,7 +392,14 @@ ptr<ShaderCompiler> GlDevice::CreateShaderCompiler()
 
 ptr<Shaders::ShaderGenerator> GlDevice::CreateShaderGenerator()
 {
-	return NEW(Shaders::GlslGenerator(internalCaps & InternalCaps::uniformBufferObject));
+	Shaders::GlslVersion glslVersion =
+#ifdef ___INANITY_PLATFORM_EMSCRIPTEN
+		Shaders::GlslVersions::webgl
+#else
+		Shaders::GlslVersions::opengl33
+#endif
+		;
+	return NEW(Shaders::GlslGenerator(glslVersion, internalCaps & InternalCaps::uniformBufferObject));
 }
 
 ptr<FrameBuffer> GlDevice::CreateFrameBuffer()
@@ -418,6 +426,15 @@ ptr<RenderBuffer> GlDevice::CreateRenderBuffer(int width, int height, PixelForma
 		GLenum type;
 		if(!GlSystem::GetTextureFormat(pixelFormat, internalFormat, format, type))
 			THROW("Invalid pixel format");
+
+#ifdef ___INANITY_PLATFORM_EMSCRIPTEN
+		if(internalFormat == GL_R16F || internalFormat == GL_R32F || internalFormat == GL_R11F_G11F_B10F)
+		{
+			format = GL_RGB;
+			internalFormat = GL_RGB;
+		}
+#endif
+
 		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, (GLsizei)width, (GLsizei)height, 0, format, type, 0);
 		GlSystem::CheckErrors("Can't initialize texture");
 
@@ -425,7 +442,9 @@ ptr<RenderBuffer> GlDevice::CreateRenderBuffer(int width, int height, PixelForma
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+#ifndef ___INANITY_PLATFORM_EMSCRIPTEN
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+#endif
 		GlSystem::CheckErrors("Can't set texture parameters");
 
 		return NEW(GlRenderBuffer(internalTexture, NEW(GlTexture(internalTexture))));
@@ -447,14 +466,16 @@ ptr<DepthStencilBuffer> GlDevice::CreateDepthStencilBuffer(int width, int height
 		glBindTexture(GL_TEXTURE_2D, textureName);
 		GlSystem::CheckErrors("Can't bind texture");
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, (GLsizei)width, (GLsizei)height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, 0);
+		glTexImage2D(GL_TEXTURE_2D, 0, /*GL_DEPTH24_STENCIL8*/ GL_DEPTH_STENCIL, (GLsizei)width, (GLsizei)height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, 0);
 		GlSystem::CheckErrors("Can't initialize texture");
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+#ifndef ___INANITY_PLATFORM_EMSCRIPTEN
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+#endif
 		GlSystem::CheckErrors("Can't set texture parameters");
 
 		return NEW(GlDepthStencilBuffer(internalTexture, NEW(GlTexture(internalTexture)), width, height));
@@ -543,18 +564,25 @@ ptr<UniformBuffer> GlDevice::CreateUniformBuffer(int size)
 {
 	try
 	{
-		GLuint bufferName;
-		glGenBuffers(1, &bufferName);
-		GlSystem::CheckErrors("Can't gen buffer");
-		ptr<GlUniformBuffer> uniformBuffer = NEW(GlUniformBuffer(this, bufferName, size));
+		// if hardware uniform buffers are supported
+		if(internalCaps & InternalCaps::uniformBufferObject)
+		{
+			GLuint bufferName;
+			glGenBuffers(1, &bufferName);
+			GlSystem::CheckErrors("Can't gen buffer");
+			ptr<GlUniformBuffer> uniformBuffer = NEW(GlUniformBuffer(this, bufferName, size));
 
-		glBindBuffer(GL_UNIFORM_BUFFER, bufferName);
-		GlSystem::CheckErrors("Can't bind buffer");
+			glBindBuffer(GL_UNIFORM_BUFFER, bufferName);
+			GlSystem::CheckErrors("Can't bind buffer");
 
-		glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
-		GlSystem::CheckErrors("Can't setup buffer data");
+			glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
+			GlSystem::CheckErrors("Can't setup buffer data");
 
-		return uniformBuffer;
+			return uniformBuffer;
+		}
+		// else create emulated uniform buffer
+		else
+			return NEW(GlUniformBuffer(this, 0, size));
 	}
 	catch(Exception* exception)
 	{
@@ -947,8 +975,13 @@ ptr<SamplerState> GlDevice::CreateSamplerState()
 	try
 	{
 		GLuint samplerName;
-		glGenSamplers(1, &samplerName);
-		GlSystem::CheckErrors("Can't gen sampler");
+		if(internalCaps & InternalCaps::samplerObjects)
+		{
+			glGenSamplers(1, &samplerName);
+			GlSystem::CheckErrors("Can't gen sampler");
+		}
+		else
+			samplerName = 0;
 
 		return NEW(GlSamplerState(this, samplerName));
 	}

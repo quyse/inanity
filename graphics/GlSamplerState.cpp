@@ -5,13 +5,14 @@
 
 BEGIN_INANITY_GRAPHICS
 
-GlSamplerState::GlSamplerState(ptr<GlDevice> device, GLuint samplerName)
-: device(device), samplerName(samplerName)
+GlSamplerState::GlSamplerState(ptr<GlDevice> device, GLuint name)
+: device(device), name(name)
 {}
 
 GlSamplerState::~GlSamplerState()
 {
-	glDeleteSamplers(1, &samplerName);
+	if(name)
+		glDeleteSamplers(1, &name);
 }
 
 GLint GlSamplerState::ConvertWrap(Wrap wrap)
@@ -33,17 +34,17 @@ GLint GlSamplerState::ConvertWrap(Wrap wrap)
 GLuint GlSamplerState::GetName()
 {
 	Update();
-	return samplerName;
+	return name;
 }
 
 void GlSamplerState::Update()
 {
-	if(!dirty)
+	if(!dirty || !name)
 		return;
 
 	try
 	{
-		// разобраться с фильтрацией уменьшения
+		// set min filter
 		{
 			GLint filterParam = -1;
 			if(mipMapping)
@@ -92,11 +93,11 @@ void GlSamplerState::Update()
 				}
 			if(filterParam == -1)
 				THROW("Invalid min or mip filter param");
-			glSamplerParameteri(samplerName, GL_TEXTURE_MIN_FILTER, filterParam);
+			glSamplerParameteri(name, GL_TEXTURE_MIN_FILTER, filterParam);
 			GlSystem::CheckErrors("Can't set texture min filter");
 		}
 
-		// разобраться с фильтрацией увеличения
+		// set mag filter
 		{
 			GLint filterParam = -1;
 			switch(magFilter)
@@ -112,26 +113,26 @@ void GlSamplerState::Update()
 			}
 			if(filterParam == -1)
 				THROW("Invalid mag filter param");
-			glSamplerParameteri(samplerName, GL_TEXTURE_MAG_FILTER, filterParam);
+			glSamplerParameteri(name, GL_TEXTURE_MAG_FILTER, filterParam);
 			GlSystem::CheckErrors("Can't set texture mag filter");
 		}
 
-		// установить режимы свёртки
-		glSamplerParameteri(samplerName, GL_TEXTURE_WRAP_S, ConvertWrap(wrapU));
+		// set wrapping modes
+		glSamplerParameteri(name, GL_TEXTURE_WRAP_S, ConvertWrap(wrapU));
 		GlSystem::CheckErrors("Can't set texture wrap U");
-		glSamplerParameteri(samplerName, GL_TEXTURE_WRAP_T, ConvertWrap(wrapV));
+		glSamplerParameteri(name, GL_TEXTURE_WRAP_T, ConvertWrap(wrapV));
 		GlSystem::CheckErrors("Can't set texture wrap V");
-		glSamplerParameteri(samplerName, GL_TEXTURE_WRAP_R, ConvertWrap(wrapW));
+		glSamplerParameteri(name, GL_TEXTURE_WRAP_R, ConvertWrap(wrapW));
 		GlSystem::CheckErrors("Can't set texture wrap W");
 
-		// установить минимальный и максимальный LOD.
-		glSamplerParameterf(samplerName, GL_TEXTURE_MIN_LOD, minLOD);
+		// set min and max LOD.
+		glSamplerParameterf(name, GL_TEXTURE_MIN_LOD, minLOD);
 		GlSystem::CheckErrors("Can't set min LOD");
-		glSamplerParameterf(samplerName, GL_TEXTURE_MAX_LOD, maxLOD);
+		glSamplerParameterf(name, GL_TEXTURE_MAX_LOD, maxLOD);
 		GlSystem::CheckErrors("Can't set max LOD");
 
-		// установить цвет границы
-		glSamplerParameterfv(samplerName, GL_TEXTURE_BORDER_COLOR, borderColor);
+		// set border color
+		glSamplerParameterfv(name, GL_TEXTURE_BORDER_COLOR, borderColor);
 		GlSystem::CheckErrors("Can't set border color");
 
 		dirty = false;

@@ -8,17 +8,19 @@ BEGIN_INANITY_GRAPHICS
 
 class GlDevice;
 
-/// Класс настроек семплера OpenGL.
+/// OpenGL sampler state class.
+/** Could be real OpenGL sampler, or an emulation. */
 class GlSamplerState : public SamplerState
 {
 private:
 	ptr<GlDevice> device;
-	GLuint samplerName;
+	/// Sampler name, or 0 in case of emulation.
+	GLuint name;
 
-	/// Преобразовать режим свёртки в константу OpenGL.
+	/// Convert abstracted wrap into OpenGL enum.
 	static GLint ConvertWrap(Wrap wrap);
 
-	/// Обновить настройки семплера, если они менялись.
+	/// Update sampler settings if they changed.
 	void Update();
 
 public:

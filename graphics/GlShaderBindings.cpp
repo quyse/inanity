@@ -5,11 +5,13 @@
 BEGIN_INANITY_GRAPHICS
 
 GlShaderBindings::GlShaderBindings(
+	const UniformBindings& uniformBindings,
 	const Bindings& uniformBlockBindings,
 	const Bindings& samplerBindings,
 	const Bindings& attributeBindings,
 	const Bindings& targetBindings
 ) :
+	uniformBindings(uniformBindings),
 	uniformBlockBindings(uniformBlockBindings),
 	samplerBindings(samplerBindings),
 	attributeBindings(attributeBindings),
@@ -59,6 +61,15 @@ const GlShaderBindings::Bindings& GlShaderBindings::GetTargetBindings() const
 
 void GlShaderBindings::Serialize(StreamWriter& writer)
 {
+	writer.WriteShortly(uniformBindings.size());
+	for(size_t i = 0; i < uniformBindings.size(); ++i)
+	{
+		const UniformBinding& ub = uniformBindings[i];
+		writer.WriteShortly(ub.dataType);
+		writer.WriteShortly(ub.count);
+		writer.WriteShortly(ub.slot);
+		writer.WriteShortly(ub.offset);
+	}
 	WriteBindings(writer, uniformBlockBindings);
 	WriteBindings(writer, samplerBindings);
 	WriteBindings(writer, attributeBindings);
@@ -67,13 +78,24 @@ void GlShaderBindings::Serialize(StreamWriter& writer)
 
 ptr<GlShaderBindings> GlShaderBindings::Deserialize(StreamReader& reader)
 {
+	UniformBindings uniformBindings;
+	uniformBindings.resize(reader.ReadShortly());
+	for(size_t i = 0; i < uniformBindings.size(); ++i)
+	{
+		UniformBinding& ub = uniformBindings[i];
+		ub.dataType = (DataType)reader.ReadShortly();
+		ub.count = reader.ReadShortly();
+		ub.slot = reader.ReadShortly();
+		ub.offset = reader.ReadShortly();
+	}
+
 	Bindings uniformBlockBindings, samplerBindings, attributeBindings, targetBindings;
 	ReadBindings(reader, uniformBlockBindings);
 	ReadBindings(reader, samplerBindings);
 	ReadBindings(reader, attributeBindings);
 	ReadBindings(reader, targetBindings);
 
-	return NEW(GlShaderBindings(uniformBlockBindings, samplerBindings, attributeBindings, targetBindings));
+	return NEW(GlShaderBindings(uniformBindings, uniformBlockBindings, samplerBindings, attributeBindings, targetBindings));
 }
 
 END_INANITY_GRAPHICS

@@ -435,7 +435,16 @@ void GlContext::UploadUniformBufferData(UniformBuffer* abstractUniformBuffer, co
 {
 	GlUniformBuffer* uniformBuffer = fast_cast<GlUniformBuffer*>(&*abstractUniformBuffer);
 
-	UploadBufferData(GL_UNIFORM_BUFFER, uniformBuffer->GetName(), data, size, uniformBuffer->GetSize());
+	THROW_ASSERT(!uniformBuffer->GetName() == !(device->GetInternalCaps() & GlDevice::InternalCaps::uniformBufferObject));
+
+	// if uniform buffer is real, do upload
+	GLuint name = uniformBuffer->GetName();
+	if(name)
+		UploadBufferData(GL_UNIFORM_BUFFER, name, data, size, uniformBuffer->GetSize());
+
+	// else data is stored in memory buffer
+	// nothing has to be done, actual uploading
+	// is deferred until drawing
 }
 
 void GlContext::UploadVertexBufferData(VertexBuffer* abstractVertexBuffer, const void* data, int size)

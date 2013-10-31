@@ -2,6 +2,7 @@
 #define ___INANITY_GRAPHICS_SHADERS_GLSL_GENERATOR_INSTANCE_HPP___
 
 #include "ShaderType.hpp"
+#include "GlslVersion.hpp"
 #include "../DataType.hpp"
 #include <vector>
 #include <unordered_map>
@@ -25,7 +26,8 @@ class TransformedNode;
 class RasterizedNode;
 class OperationNode;
 
-/// Экземпляр генератора шейдеров на GLSL.
+/// GLSL shader generator instance.
+/** Supports generating shaders with uniform buffers and without. */
 class GlslGeneratorInstance
 {
 private:
@@ -36,6 +38,13 @@ private:
 	/// Результирующий текст шейдера на GLSL.
 	std::ostringstream glsl;
 
+	/// Version of GLSL.
+	GlslVersion glslVersion;
+	//*** Support flags.
+	bool supportUniformBuffers;
+
+	/// Префикс имени uniform-переменной.
+	const char* uniformPrefix;
 	/// Префикс имени uniform-буфера.
 	const char* uniformBufferPrefix;
 	/// Префикс имени семплера.
@@ -69,7 +78,7 @@ private:
 	void PrintUniforms();
 
 public:
-	GlslGeneratorInstance(ptr<Node> rootNode, ShaderType shaderType);
+	GlslGeneratorInstance(ptr<Node> rootNode, ShaderType shaderType, GlslVersion glslVersion, bool supportUniformBuffers);
 
 	ptr<ShaderSource> Generate();
 };

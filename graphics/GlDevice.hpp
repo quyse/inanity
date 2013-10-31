@@ -55,15 +55,22 @@ private:
 #error Unknown platform
 #endif
 
-	//*** Internal capabilities.
+public:
+	//*** Supported internal capabilities.
 	struct InternalCaps
 	{
 		enum _
 		{
+			// ARB_uniform_buffer_object, core since OpenGL 3.1
 			uniformBufferObject = 1,
-			vertexAttribBinding = 2
+			// ARB_sampler_objects, core since OpenGL 3.3
+			samplerObjects = 2,
+			// ARB_vertex_attrib_binding, core since OpenGL 4.3
+			vertexAttribBinding = 4
 		};
 	};
+
+private:
 	int internalCaps;
 
 	/// Init capabilities.

@@ -26,18 +26,25 @@
 
 BEGIN_INANITY_SHADERS
 
-GlslGeneratorInstance::GlslGeneratorInstance(ptr<Node> rootNode, ShaderType shaderType)
-: rootNode(rootNode), shaderType(shaderType), tempsCount(0), fragmentTargetsCount(0)
+GlslGeneratorInstance::GlslGeneratorInstance(ptr<Node> rootNode, ShaderType shaderType, GlslVersion glslVersion, bool supportUniformBuffers) :
+	rootNode(rootNode),
+	shaderType(shaderType),
+	glslVersion(glslVersion),
+	supportUniformBuffers(supportUniformBuffers),
+	tempsCount(0),
+	fragmentTargetsCount(0)
 {
 	try
 	{
 		switch(shaderType)
 		{
 		case ShaderTypes::vertex:
+			uniformPrefix = "uv";
 			uniformBufferPrefix = "UBv";
 			samplerPrefix = "sv";
 			break;
 		case ShaderTypes::pixel:
+			uniformPrefix = "up";
 			uniformBufferPrefix = "UBp";
 			samplerPrefix = "sp";
 			break;
@@ -164,7 +171,7 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 	switch(node->GetType())
 	{
 	case Node::typeFloatConst:
-		glsl << std::fixed << std::setprecision(10) << fast_cast<FloatConstNode*>(node)->GetValue() << 'f';
+		glsl << std::fixed << std::setprecision(10) << fast_cast<FloatConstNode*>(node)->GetValue();// << 'f';
 		break;
 	case Node::typeIntConst:
 		glsl << fast_cast<IntConstNode*>(node)->GetValue();
@@ -219,7 +226,8 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 	case Node::typeSample:
 		{
 			SampleNode* sampleNode = fast_cast<SampleNode*>(node);
-			glsl << "(texture(" << samplerPrefix << sampleNode->GetSamplerNode()->GetSlot() << ", ";
+			glsl << (glslVersion == GlslVersions::webgl ? "(texture2D(" : "(texture(");
+			glsl << samplerPrefix << sampleNode->GetSamplerNode()->GetSlot() << ", ";
 			PrintNode(sampleNode->GetCoordsNode());
 			glsl << ')';
 			// в GLSL всегда возвращается 4-компонентный вектор, так что возможно, нужно получить компоненты
@@ -261,7 +269,17 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 	case Node::typeFragment:
 		{
 			FragmentNode* fragmentNode = fast_cast<FragmentNode*>(node);
-			glsl << "r" << fragmentNode->GetTarget() << " = (";
+			switch(glslVersion)
+			{
+			case GlslVersions::opengl33: glsl << 'r' << fragmentNode->GetTarget(); break;
+			case GlslVersions::webgl:
+				if(fragmentTargetsCount > 1)
+					glsl << "gl_FragData[" << fragmentNode->GetTarget() << ']';
+				else
+					glsl << "gl_FragColor";
+				break;
+			}
+			glsl << " = (";
 			PrintNode(fragmentNode->GetNode());
 			glsl << ')';
 		}
@@ -370,7 +388,7 @@ void GlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 	case OperationNode::operationScreenToTexture:
 		glsl << '(';
 		PrintNode(node->GetA());
-		glsl << ") * vec2(0.5f, 0.5f) + vec2(0.5f, 0.5f)";
+		glsl << ") * vec2(0.5, 0.5) + vec2(0.5, 0.5)";
 		break;
 	case OperationNode::operationSaturate:
 		glsl << "clamp(";
@@ -451,9 +469,11 @@ void GlslGeneratorInstance::PrintUniforms()
 		size_t j;
 		for(j = i + 1; j < uniforms.size() && uniforms[j].first == uniforms[i].first; ++j);
 
-		// вывести заголовок
 		int slot = uniforms[i].first->GetSlot();
-		glsl << "layout(std140) uniform " << uniformBufferPrefix << slot << "\n{\n";
+
+		// print header, if needed
+		if(supportUniformBuffers)
+			glsl << "layout(std140) uniform " << uniformBufferPrefix << slot << "\n{\n";
 
 		// текущее смещение от начала буфера
 		int currentOffset = 0;
@@ -492,7 +512,7 @@ void GlslGeneratorInstance::PrintUniforms()
 			glsl << '\t';
 			PrintDataType(valueType);
 			// имя переменной
-			glsl << " u" << slot << '_' << offset;
+			glsl << ' ' << uniformPrefix << slot << '_' << offset;
 
 			// размер массива
 			if(count > 1)
@@ -508,8 +528,9 @@ void GlslGeneratorInstance::PrintUniforms()
 			currentOffset += valueSize * count;
 		}
 
-		// окончание
-		glsl << "};\n";
+		// ending of buffer
+		if(supportUniformBuffers)
+			glsl << "};\n";
 
 		i = j;
 	}
@@ -521,41 +542,78 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 	RegisterNode(rootNode);
 
 	// заголовок файла
-	glsl << "#version 330\n";
+	switch(glslVersion)
+	{
+	case GlslVersions::opengl33:
+		glsl << "#version 330\n";
+		break;
+	case GlslVersions::webgl:
+		glsl <<
+			"#ifdef GL_ES\n"
+			"precision highp float;\n"
+			"#endif\n";
+		break;
+	default:
+		THROW("Unknown GLSL version");
+	}
 
 	// вывести атрибуты в качестве входных переменных, если это вершинный шейдер
 	if(shaderType == ShaderTypes::vertex)
 	{
+		const char* prefixStr;
+		switch(glslVersion)
+		{
+		case GlslVersions::opengl33: prefixStr = "in "; break;
+		case GlslVersions::webgl: prefixStr = "attribute "; break;
+		default: THROW("Unknown GLSL version");
+		}
+
 		std::sort(attributes.begin(), attributes.end());
 		attributes.resize(std::unique(attributes.begin(), attributes.end()) - attributes.begin());
 		for(size_t i = 0; i < attributes.size(); ++i)
 		{
 			ptr<AttributeNode> node = attributes[i];
-			glsl << "in ";
+			glsl << prefixStr;
 			PrintDataType(node->GetValueType());
 			glsl << " a" << node->GetElementIndex() << ";\n";
 		}
 	}
+
 	// вывести промежуточные переменные в любом случае
-	std::sort(transformed.begin(), transformed.end());
-	transformed.resize(std::unique(transformed.begin(), transformed.end()) - transformed.begin());
-	for(size_t i = 0; i < transformed.size(); ++i)
 	{
-		ptr<TransformedNode> node = transformed[i];
+		const char* prefixStr;
 		switch(shaderType)
 		{
 		case ShaderTypes::vertex:
-			glsl << "out ";
+			switch(glslVersion)
+			{
+			case GlslVersions::opengl33: prefixStr = "out "; break;
+			case GlslVersions::webgl: prefixStr = "varying "; break;
+			default: THROW("Unknown GLSL version");
+			}
 			break;
 		case ShaderTypes::pixel:
-			glsl << "in ";
+			switch(glslVersion)
+			{
+			case GlslVersions::opengl33: prefixStr = "in "; break;
+			case GlslVersions::webgl: prefixStr = "varying "; break;
+			}
 			break;
 		}
-		PrintDataType(node->GetValueType());
-		glsl << " v" << node->GetSemantic() << ";\n";
+
+		std::sort(transformed.begin(), transformed.end());
+		transformed.resize(std::unique(transformed.begin(), transformed.end()) - transformed.begin());
+		for(size_t i = 0; i < transformed.size(); ++i)
+		{
+			ptr<TransformedNode> node = transformed[i];
+			glsl << prefixStr;
+			PrintDataType(node->GetValueType());
+			glsl << " v" << node->GetSemantic() << ";\n";
+		}
 	}
-	// вывести пиксельные переменные, если это пиксельный шейдер
-	if(shaderType == ShaderTypes::pixel)
+
+	// вывести пиксельные переменные, если это пиксельный шейдер, и это нужно
+	if(shaderType == ShaderTypes::pixel && glslVersion == GlslVersions::opengl33)
 	{
 		for(int i = 0; i < fragmentTargetsCount; ++i)
 		{
@@ -652,15 +710,37 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 	// завершение шейдера
 	glsl << ";\n}\n";
 
-	// сформировать список привязок uniform-блоков
-	GlShaderBindings::Bindings uniformBlockBindings(uniforms.size());
-	for(size_t i = 0; i < uniforms.size(); ++i)
+	// make list of uniform variable bindings
+	GlShaderBindings::UniformBindings uniformBindings;
+	if(!supportUniformBuffers)
 	{
-		int slot = uniforms[i].first->GetSlot();
-		char name[16];
-		sprintf(name, "%s%d", uniformBufferPrefix, slot);
-		uniformBlockBindings[i].first = name;
-		uniformBlockBindings[i].second = slot;
+		uniformBindings.resize(uniforms.size());
+		for(size_t i = 0; i < uniforms.size(); ++i)
+		{
+			ptr<UniformNode> node = uniforms[i].second;
+			uniformBindings[i].dataType = node->GetValueType();
+			uniformBindings[i].count = node->GetCount();
+			uniformBindings[i].slot = uniforms[i].first->GetSlot();
+			uniformBindings[i].offset = node->GetOffset();
+		}
+	}
+
+	// make list of uniform block bindings
+	GlShaderBindings::Bindings uniformBlockBindings;
+	if(supportUniformBuffers)
+	{
+		uniformBlockBindings.resize(uniforms.size());
+		for(size_t i = 0; i < uniforms.size(); ++i)
+		{
+			int slot = uniforms[i].first->GetSlot();
+			char name[16];
+			sprintf(name, "%s%d", uniformBufferPrefix, slot);
+			uniformBlockBindings[i].first = name;
+			uniformBlockBindings[i].second = slot;
+		}
+		// remove duplicates
+		std::sort(uniformBlockBindings.begin(), uniformBlockBindings.end());
+		uniformBlockBindings.resize(std::unique(uniformBlockBindings.begin(), uniformBlockBindings.end()) - uniformBlockBindings.begin());
 	}
 
 	// сформировать список привязок семплеров
@@ -697,7 +777,7 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 
 	return NEW(GlslSource(
 		Strings::String2File(glsl.str()),
-		NEW(GlShaderBindings(uniformBlockBindings, samplerBindings, attributeBindings, targetBindings))
+		NEW(GlShaderBindings(uniformBindings, uniformBlockBindings, samplerBindings, attributeBindings, targetBindings))
 	));
 }
 
