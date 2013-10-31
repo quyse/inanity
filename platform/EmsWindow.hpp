@@ -22,6 +22,9 @@ private:
 	/// Callback to emscripten to execute as a main loop.
 	static void MainLoop();
 
+	void UpdateMouseLock();
+	void UpdateCursorVisible();
+
 public:
 	EmsWindow(const String& title, int width, int height);
 	~EmsWindow();

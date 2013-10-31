@@ -45,6 +45,16 @@ ptr<Graphics::Output> EmsWindow::CreateOutput()
 	return NEW(Graphics::EmsOutput());
 }
 
+void EmsWindow::UpdateMouseLock()
+{
+	// not implemented yet
+}
+
+void EmsWindow::UpdateCursorVisible()
+{
+	// not implemented yet
+}
+
 void EmsWindow::MainLoop()
 {
 	instance->activeHandler->Fire();
