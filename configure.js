@@ -166,7 +166,8 @@ var libraries = {
 			'graphics.shaders.FragmentNode',
 			'graphics.shaders.CastNode',
 			'graphics.shaders.Expression', 'graphics.shaders.Sampler',
-			'graphics.shaders.GlslGenerator', 'graphics.shaders.GlslGeneratorInstance'
+			'graphics.shaders.GlslGenerator', 'graphics.shaders.GlslGeneratorInstance',
+			'graphics.shaders.Instancer'
 		],
 		'objects-win32': ['graphics.shaders.Hlsl11Generator', 'graphics.shaders.Hlsl11GeneratorInstance']
 	},
