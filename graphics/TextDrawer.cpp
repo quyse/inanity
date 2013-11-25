@@ -39,6 +39,7 @@ struct TextDrawerHelper : public Object
 	ptr<AttributeLayout> al;
 	ptr<AttributeLayoutSlot> als;
 	ptr<AttributeLayoutElement> alePosition;
+	ptr<Instancer> instancer;
 	ptr<AttributeBinding> ab;
 
 	Value<vec4> aCorner;
@@ -71,6 +72,7 @@ struct TextDrawerHelper : public Object
 		al(NEW(AttributeLayout())),
 		als(al->AddSlot()),
 		alePosition(al->AddElement(als, vlePosition)),
+		instancer(NEW(Instancer(device, maxSymbolsCount, al))),
 		ab(device->CreateAttributeBinding(al)),
 
 		aCorner(alePosition),
@@ -106,7 +108,7 @@ struct TextDrawerHelper : public Object
 			Temp<uint> tmpInstance;
 			Temp<vec4> tmpPosition, tmpTexcoord, tmpColor;
 			vs = shaderCache->GetVertexShader((
-				tmpInstance = getInstanceID(),
+				tmpInstance = instancer->GetInstanceID(),
 
 				tmpPosition = uPositions[tmpInstance],
 				tmpTexcoord = uTexcoords[tmpInstance],
@@ -303,7 +305,7 @@ void TextDrawer::Flush()
 	helper->ugSymbols->Upload(context);
 
 	// нарисовать
-	context->DrawInstanced(queuedCharsCount);
+	helper->instancer->Draw(context, queuedCharsCount);
 
 	// сбросить количество символов
 	queuedCharsCount = 0;
