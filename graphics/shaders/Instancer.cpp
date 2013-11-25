@@ -7,7 +7,11 @@
 #include "../Device.hpp"
 #include "../Context.hpp"
 #include "../VertexBuffer.hpp"
+#include "../IndexBuffer.hpp"
 #include "../VertexLayout.hpp"
+#include "../VertexShader.hpp"
+#include "../PixelShader.hpp"
+#include "../BlendState.hpp"
 #include "../VertexLayoutElement.hpp"
 #include "../AttributeLayout.hpp"
 #include "../AttributeLayoutSlot.hpp"
@@ -18,7 +22,6 @@
 BEGIN_INANITY_SHADERS
 
 Instancer::Instancer(ptr<Device> device, int maximumInstancesCount, ptr<AttributeLayout> attributeLayout)
-: maximumInstancesCount(maximumInstancesCount)
 {
 	BEGIN_TRY();
 
@@ -77,7 +80,7 @@ void Instancer::Draw(Context* context, int instancesCount)
 		break;
 	case modeAttributeInstancing:
 		{
-			Context::LetVertexBuffer lvb(context, als, vb);
+			Context::LetVertexBuffer lvb(context, &*als, vb);
 			context->DrawInstanced(instancesCount);
 		}
 		break;

@@ -69,10 +69,10 @@ void GlslGeneratorInstance::PrintDataType(DataType dataType)
 	case DataTypes::_vec4:			name = "vec4";			break;
 	case DataTypes::_mat3x3:		name = "mat3x3";		break;
 	case DataTypes::_mat4x4:		name = "mat4x4";		break;
-	case DataTypes::_uint:			name = "uint";			break;
-	case DataTypes::_uvec2:			name = "uvec2";			break;
-	case DataTypes::_uvec3:			name = "uvec3";			break;
-	case DataTypes::_uvec4:			name = "uvec4";			break;
+	case DataTypes::_uint:			name = glslVersion == GlslVersions::webgl ? "int" : "uint"; break;
+	case DataTypes::_uvec2:			name = glslVersion == GlslVersions::webgl ? "ivec2" : "uvec2"; break;
+	case DataTypes::_uvec3:			name = glslVersion == GlslVersions::webgl ? "ivec3" : "uvec3"; break;
+	case DataTypes::_uvec4:			name = glslVersion == GlslVersions::webgl ? "ivec4" : "uvec4"; break;
 	case DataTypes::_int:				name = "int";				break;
 	case DataTypes::_ivec2:			name = "ivec2";			break;
 	case DataTypes::_ivec3:			name = "ivec3";			break;
@@ -183,7 +183,7 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 		{
 			UniformNode* uniformNode = fast_cast<UniformNode*>(node);
 			ptr<UniformGroup> uniformGroup = uniformNode->GetGroup();
-			glsl << 'u' << uniformGroup->GetSlot() << '_' << uniformNode->GetOffset();
+			glsl << uniformPrefix << uniformGroup->GetSlot() << '_' << uniformNode->GetOffset();
 		}
 		break;
 	case Node::typeSampler:
@@ -393,7 +393,7 @@ void GlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 	case OperationNode::operationSaturate:
 		glsl << "clamp(";
 		PrintNode(node->GetA());
-		glsl << ", 0, 1)";
+		glsl << ", 0.0, 1.0)";
 		break;
 	default:
 		{
@@ -509,7 +509,7 @@ void GlslGeneratorInstance::PrintUniforms()
 
 			// печатаем определение переменной
 
-			glsl << '\t';
+			glsl << (supportUniformBuffers ? "\t" : "uniform ");
 			PrintDataType(valueType);
 			// имя переменной
 			glsl << ' ' << uniformPrefix << slot << '_' << offset;
@@ -646,7 +646,7 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 		case DataTypes::_uvec2:
 		case DataTypes::_uvec3:
 		case DataTypes::_uvec4:
-			valueTypeStr = "u";
+			valueTypeStr = glslVersion == GlslVersions::webgl ? "i" : "u";
 			break;
 		case DataTypes::_int:
 		case DataTypes::_ivec2:

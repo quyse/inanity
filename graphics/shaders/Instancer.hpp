@@ -37,8 +37,6 @@ private:
 		modeFallback
 	} mode;
 
-	int maximumInstancesCount;
-
 	// For hardware instancing all is easy.
 
 	//** For attribute instancing.
