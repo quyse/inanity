@@ -221,6 +221,9 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 		// инициализировать GLEW
 		GlSystem::InitGLEW();
 
+		// init capabilities
+		InitCaps();
+
 		// очистка ошибок - обход бага GLEW, который может оставлять ошибки
 		// (тем не менее, GLEW инициализируется нормально)
 		GlSystem::ClearErrors();
@@ -359,6 +362,9 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 		GlSystem::InitGLEW();
 		GlSystem::ClearErrors();
 
+		// init capabilities
+		InitCaps();
+
 		return NEW(GlxPresenter(this, NEW(GlFrameBuffer(this, 0)), output, glxWindow));
 
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
@@ -370,6 +376,10 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 		ptr<EmsOutput> output = abstractOutput.DynamicCast<EmsOutput>();
 		if(!output)
 			THROW("Only Emscripten output allowed");
+
+		// init capabilities
+		InitCaps();
+
 		return NEW(EmsPresenter(this, NEW(GlFrameBuffer(this, 0)), output));
 
 #else
