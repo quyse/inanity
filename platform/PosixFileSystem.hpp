@@ -12,7 +12,7 @@ class PosixFileSystem : public FileSystem
 {
 private:
 	/// Full directory name.
-	/** It's absolute, and without '/' at end. */
+	/** It's absolute, and with '/' at end. */
 	String folderName;
 
 	String GetFullName(String fileName) const;

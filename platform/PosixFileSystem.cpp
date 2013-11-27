@@ -115,26 +115,31 @@ public:
 
 PosixFileSystem::PosixFileSystem(const String& userFolderName)
 {
-	//если имя абсолютное
-	if(userFolderName.length() >= 1 && userFolderName[0] == '/')
+	// if the name is absolute
+	if(userFolderName.length() && userFolderName[0] == '/')
 		folderName = userFolderName;
-	//иначе относительное
+	// else it's relative
 	else
 	{
-		//получить полное имя текущего каталога
-		char* currentDirectory = getcwd(0, 0);
-		if(!currentDirectory)
-			THROW("Can't get current directory");
+		// get full path of current directory
+		char currentDirectory[1024];
+		if(!getcwd(currentDirectory, sizeof(currentDirectory)))
+			THROW_SECONDARY("Can't get current directory", Exception::SystemError());
 		folderName = currentDirectory;
-		free(currentDirectory);
 
-		//прибавить к нему заданное имя каталога, и получить таким образом полный каталог
+		// add specified user folder name
 		if(userFolderName.length())
 		{
-			folderName += '/';
+			// add '/' to the end
+			if(!folderName.length() || folderName[folderName.length() - 1] != '/')
+				folderName += '/';
 			folderName += userFolderName;
 		}
 	}
+
+	// add '/' to the end
+	if(!folderName.length() || folderName[folderName.length() - 1] != '/')
+		folderName += '/';
 }
 
 PosixFileSystem::PosixFileSystem()
@@ -145,9 +150,14 @@ PosixFileSystem::PosixFileSystem()
 
 String PosixFileSystem::GetFullName(String fileName) const
 {
-	if(folderName.length() && fileName.length() && fileName[0] == '/')
-		fileName = fileName.substr(1);
-	return folderName.length() ? (folderName + "/" + fileName) : fileName;
+	if(folderName.length())
+	{
+		if(!fileName.length() || fileName[0] != '/')
+			THROW("File name should begin with slash");
+		return folderName + fileName.substr(1);
+	}
+	else
+		return fileName;
 }
 
 size_t PosixFileSystem::GetFileSize(const String& fileName)
