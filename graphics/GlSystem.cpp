@@ -144,6 +144,9 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, GLint& internalFormat, 
 #define F(f) PixelFormat::format##f
 #define S(s) PixelFormat::size##s
 #define C(c) PixelFormat::compression##c
+
+	bool ok = false;
+
 	switch(pixelFormat.type)
 	{
 	case T(Unknown): break;
@@ -158,16 +161,16 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, GLint& internalFormat, 
 			case F(Uint):
 				switch(pixelFormat.size)
 				{
-				case S(8bit): type = GL_UNSIGNED_BYTE; internalFormat = GL_R8; return true;
-				case S(16bit): type = GL_UNSIGNED_SHORT; internalFormat = GL_R16; return true;
+				case S(8bit): type = GL_UNSIGNED_BYTE; internalFormat = GL_R8; ok = true; break;
+				case S(16bit): type = GL_UNSIGNED_SHORT; internalFormat = GL_R16; ok = true; break;
 				default: break;
 				}
 				break;
 			case F(Float):
 				switch(pixelFormat.size)
 				{
-				case S(16bit): type = GL_FLOAT; internalFormat = GL_R16F; return true;
-				case S(32bit): type = GL_FLOAT; internalFormat = GL_R32F; return true;
+				case S(16bit): type = GL_FLOAT; internalFormat = GL_R16F; ok = true; break;
+				case S(32bit): type = GL_FLOAT; internalFormat = GL_R32F; ok = true; break;
 				default: break;
 				}
 				break;
@@ -181,16 +184,16 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, GLint& internalFormat, 
 			case F(Uint):
 				switch(pixelFormat.size)
 				{
-				case S(16bit): type = GL_UNSIGNED_BYTE; internalFormat = GL_RG8; return true;
-				case S(32bit): type = GL_UNSIGNED_SHORT; internalFormat = GL_RG16; return true;
+				case S(16bit): type = GL_UNSIGNED_BYTE; internalFormat = GL_RG8; ok = true; break;
+				case S(32bit): type = GL_UNSIGNED_SHORT; internalFormat = GL_RG16; ok = true; break;
 				default: break;
 				}
 				break;
 			case F(Float):
 				switch(pixelFormat.size)
 				{
-				case S(32bit): type = GL_FLOAT; internalFormat = GL_RG16F; return true;
-				case S(64bit): type = GL_FLOAT; internalFormat = GL_RG32F; return true;
+				case S(32bit): type = GL_FLOAT; internalFormat = GL_RG16F; ok = true; break;
+				case S(64bit): type = GL_FLOAT; internalFormat = GL_RG32F; ok = true; break;
 				default: break;
 				}
 				break;
@@ -205,8 +208,8 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, GLint& internalFormat, 
 			case F(Float):
 				switch(pixelFormat.size)
 				{
-				case S(32bit): type = GL_FLOAT; internalFormat = GL_R11F_G11F_B10F; return true;
-				case S(96bit): type = GL_FLOAT; internalFormat = GL_RGB32F; return true;
+				case S(32bit): type = GL_FLOAT; internalFormat = GL_R11F_G11F_B10F; ok = true; break;
+				case S(96bit): type = GL_FLOAT; internalFormat = GL_RGB32F; ok = true; break;
 				default: break;
 				}
 				break;
@@ -220,33 +223,45 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, GLint& internalFormat, 
 			case F(Uint):
 				switch(pixelFormat.size)
 				{
-				case S(32bit): type = GL_UNSIGNED_BYTE; internalFormat = GL_RGBA8; return true;
-				case S(64bit): type = GL_UNSIGNED_SHORT; internalFormat = GL_RGBA16; return true;
+				case S(32bit): type = GL_UNSIGNED_BYTE; internalFormat = GL_RGBA8; ok = true; break;
+				case S(64bit): type = GL_UNSIGNED_SHORT; internalFormat = GL_RGBA16; ok = true; break;
 				default: break;
 				}
 				break;
 			case F(Float):
 				switch(pixelFormat.size)
 				{
-				case S(64bit): type = GL_FLOAT; internalFormat = GL_RGBA16F; return true;
-				case S(128bit): type = GL_FLOAT; internalFormat = GL_RGBA32F; return true;
+				case S(64bit): type = GL_FLOAT; internalFormat = GL_RGBA16F; ok = true; break;
+				case S(128bit): type = GL_FLOAT; internalFormat = GL_RGBA32F; ok = true; break;
 				default: break;
 				}
 				break;
 			}
 			break;
 		}
+		break;
 	case T(Compressed):
 		switch(pixelFormat.compression)
 		{
-		case C(Dxt1): format = GL_RGB; type = GL_UNSIGNED_BYTE; internalFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT; return true;
-		case C(Dxt2): format = GL_RGBA; type = GL_UNSIGNED_BYTE; internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT; return true;
+		case C(Dxt1): format = GL_RGB; type = GL_UNSIGNED_BYTE; internalFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT; ok = true; break;
+		case C(Dxt2): format = GL_RGBA; type = GL_UNSIGNED_BYTE; internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT; ok = true; break;
 		case C(Dxt3): break;
-		case C(Dxt4): format = GL_RGBA; type = GL_UNSIGNED_BYTE; internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT; return true;
-		case C(Dxt5): format = GL_RGBA; type = GL_UNSIGNED_BYTE; internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT; return true;
+		case C(Dxt4): format = GL_RGBA; type = GL_UNSIGNED_BYTE; internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT; ok = true; break;
+		case C(Dxt5): format = GL_RGBA; type = GL_UNSIGNED_BYTE; internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT; ok = true; break;
 		}
 		break;
 	}
+
+	if(ok)
+	{
+#ifdef ___INANITY_PLATFORM_EMSCRIPTEN
+		if(format == GL_RED)
+			format = GL_RGB;
+		internalFormat = format;
+#endif
+		return true;
+	}
+
 	THROW("Pixel format is unsupported in OpenGL");
 #undef T
 #undef P

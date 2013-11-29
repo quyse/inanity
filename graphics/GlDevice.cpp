@@ -437,14 +437,6 @@ ptr<RenderBuffer> GlDevice::CreateRenderBuffer(int width, int height, PixelForma
 		if(!GlSystem::GetTextureFormat(pixelFormat, internalFormat, format, type))
 			THROW("Invalid pixel format");
 
-#ifdef ___INANITY_PLATFORM_EMSCRIPTEN
-		if(internalFormat == GL_R16F || internalFormat == GL_R32F || internalFormat == GL_R11F_G11F_B10F)
-		{
-			format = GL_RGB;
-			internalFormat = GL_RGB;
-		}
-#endif
-
 		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, (GLsizei)width, (GLsizei)height, 0, format, type, 0);
 		GlSystem::CheckErrors("Can't initialize texture");
 
@@ -846,7 +838,7 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data)
 
 		int pixelSize = PixelFormat::GetPixelSize(data->GetFormat().size);
 
-		glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 		GLenum target;
 
@@ -868,8 +860,8 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data)
 				int slicePitch = data->GetMipSlicePitch(mip);
 				if((linePitch % pixelSize) || (slicePitch % pixelSize))
 					THROW("Wrong line or slice pitch");
-				glPixelStorei(GL_PACK_ROW_LENGTH, linePitch / pixelSize);
-				glPixelStorei(GL_PACK_IMAGE_HEIGHT, slicePitch / pixelSize);
+				glPixelStorei(GL_UNPACK_ROW_LENGTH, linePitch / pixelSize);
+				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, slicePitch / pixelSize);
 				glTexImage3D(target, mip, internalFormat,
 					data->GetMipWidth(mip), data->GetMipHeight(mip), data->GetMipDepth(mip),
 					0, format, type, data->GetMipData(0, mip));
@@ -890,13 +882,13 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data)
 				int imagePitch = data->GetImageSize();
 				if(imagePitch % pixelSize)
 					THROW("Wrong image pitch");
-				glPixelStorei(GL_PACK_IMAGE_HEIGHT, imagePitch / pixelSize);
+				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, imagePitch / pixelSize);
 				for(int mip = 0; mip < mips; ++mip)
 				{
 					int linePitch = data->GetMipLinePitch(mip);
 					if(linePitch % pixelSize)
 						THROW("Wrong line pitch");
-					glPixelStorei(GL_PACK_ROW_LENGTH, linePitch / pixelSize);
+					glPixelStorei(GL_UNPACK_ROW_LENGTH, linePitch / pixelSize);
 					glTexImage3D(target, mip, internalFormat,
 						data->GetMipWidth(mip), data->GetMipHeight(mip), data->GetCount(),
 						0, format, type, data->GetMipData(0, mip));
@@ -916,7 +908,10 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data)
 					int linePitch = data->GetMipLinePitch(mip);
 					if(linePitch % pixelSize)
 						THROW("Wrong line pitch");
-					glPixelStorei(GL_PACK_ROW_LENGTH, linePitch / pixelSize);
+#ifndef ___INANITY_PLATFORM_EMSCRIPTEN
+					glPixelStorei(GL_UNPACK_ROW_LENGTH, linePitch / pixelSize);
+					GlSystem::CheckErrors("Can't set pixel store format");
+#endif
 					glTexImage2D(target, mip, internalFormat,
 						data->GetMipWidth(mip), data->GetMipHeight(mip),
 						0, format, type, data->GetMipData(0, mip));
@@ -938,7 +933,7 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data)
 				int imagePitch = data->GetImageSize();
 				if(imagePitch % pixelSize)
 					THROW("Wrong image pitch");
-				glPixelStorei(GL_PACK_ROW_LENGTH, imagePitch / pixelSize);
+				glPixelStorei(GL_UNPACK_ROW_LENGTH, imagePitch / pixelSize);
 				for(int mip = 0; mip < mips; ++mip)
 				{
 					glTexImage2D(target, mip, internalFormat,
@@ -969,7 +964,9 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data)
 		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+#ifndef ___INANITY_PLATFORM_EMSCRIPTEN
 		glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+#endif
 		GlSystem::CheckErrors("Can't set texture parameters");
 
 		return NEW(GlTexture(internalTexture));
