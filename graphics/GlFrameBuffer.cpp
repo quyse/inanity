@@ -26,7 +26,7 @@ void GlFrameBuffer::Apply()
 	BEGIN_TRY();
 
 	// bind framebuffer
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, name);
+	glBindFramebuffer(GL_FRAMEBUFFER, name);
 	GlSystem::CheckErrors("Can't bind framebuffer");
 
 	// if not dirty, all ok
@@ -54,17 +54,17 @@ void GlFrameBuffer::Apply()
 				GLuint bufferName = fast_cast<GlRenderBuffer*>(abstractRenderBuffer)->GetName();
 				if(bufferName == 0)
 					THROW("Default renderbuffer can't be bound with other buffers");
-				glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, bufferName, 0);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, bufferName, 0);
 			}
 			else if(i == 0)
 				THROW("Zero color attachment should be set");
 			else
-				glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, 0, 0);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, 0, 0);
 		}
 
 		// bind depth-stencil buffer
 		DepthStencilBuffer* abstractDepthStencilBuffer = depthStencilBuffer;
-		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D,
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D,
 			abstractDepthStencilBuffer ? fast_cast<GlDepthStencilBuffer*>(abstractDepthStencilBuffer)->GetName() : 0, 0);
 
 		GlSystem::CheckErrors("Can't bind some buffers");
