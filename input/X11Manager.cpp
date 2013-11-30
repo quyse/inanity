@@ -165,19 +165,23 @@ void X11Manager::Process(const XEvent& event)
 		break;
 	case MotionNotify:
 		{
-			Event e;
-			e.device = Event::deviceMouse;
-			e.mouse.type = Event::Mouse::typeMove;
+			Event rawEvent;
+			rawEvent.device = Event::deviceMouse;
+			rawEvent.mouse.type = Event::Mouse::typeRawMove;
+			rawEvent.mouse.rawMoveX = event.xmotion.x - mouseX;
+			rawEvent.mouse.rawMoveY = event.xmotion.y - mouseY;
+			rawEvent.mouse.rawMoveZ = 0;
+			AddEvent(rawEvent);
 
-			{
-				const State& state = internalFrame->GetCurrentState();
-				e.mouse.offsetX = event.xmotion.x - mouseX;
-				e.mouse.offsetY = event.xmotion.y - mouseY;
-				e.mouse.offsetZ = 0;
-				mouseX = event.xmotion.x;
-				mouseY = event.xmotion.y;
-			}
-			AddEvent(e);
+			Event cursorEvent;
+			cursorEvent.device = Event::deviceMouse;
+			cursorEvent.mouse.type = Event::Mouse::typeCursorMove;
+			cursorEvent.mouse.cursorMoveX = rawEvent.mouse.rawMoveX;
+			cursorEvent.mouse.cursorMoveY = rawEvent.mouse.rawMoveY;
+			AddEvent(cursorEvent);
+
+			mouseX = event.xmotion.x;
+			mouseY = event.xmotion.y;
 		}
 		break;
 	case EnterNotify:

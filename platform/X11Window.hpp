@@ -44,6 +44,9 @@ private:
 
 	bool Do(Handler* activeHandler);
 
+	void UpdateMouseLock();
+	void UpdateCursorVisible();
+
 public:
 	// методы Window
 	void SetTitle(const String& title);
