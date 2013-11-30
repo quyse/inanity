@@ -1,5 +1,4 @@
 #include "GlInternalProgramCache.hpp"
-#include "GlInternalProgram.hpp"
 #include "GlVertexShader.hpp"
 #include "GlPixelShader.hpp"
 #include "GlShaderBindings.hpp"
@@ -74,6 +73,26 @@ void GlInternalProgramCache::ApplyPostLinkBindings(GLuint programName, ptr<GlSha
 	}
 }
 
+void GlInternalProgramCache::GetNonBufferUniformBindings(
+	GLuint programName,
+	ptr<GlShaderBindings> shaderBindings,
+	GlInternalProgram::UniformBindings& uniformBindings)
+{
+	const GlShaderBindings::UniformBindings& shaderUniformBindings = shaderBindings->GetUniformBindings();
+	for(size_t i = 0; i < shaderUniformBindings.size(); ++i)
+	{
+		const GlShaderBindings::UniformBinding& a = shaderUniformBindings[i];
+		GlInternalProgram::UniformBinding b;
+		b.dataType = a.dataType;
+		b.count = a.count;
+		b.slot = a.slot;
+		b.offset = a.offset;
+		b.location = glGetUniformLocation(programName, a.name.c_str());
+		GlSystem::CheckErrors("Can't get uniform location");
+		uniformBindings.push_back(b);
+	}
+}
+
 ptr<GlInternalProgram> GlInternalProgramCache::GetProgram(GlVertexShader* vertexShader, GlPixelShader* pixelShader)
 {
 	GlInternalProgramKey key(vertexShader, pixelShader);
@@ -132,12 +151,17 @@ ptr<GlInternalProgram> GlInternalProgramCache::GetProgram(GlVertexShader* vertex
 	ApplyPostLinkBindings(programName, vertexShader->GetShaderBindings());
 	ApplyPostLinkBindings(programName, pixelShader->GetShaderBindings());
 
+	// get non-buffer uniform bindings
+	GlInternalProgram::UniformBindings uniformBindings;
+	GetNonBufferUniformBindings(programName, vertexShader->GetShaderBindings(), uniformBindings);
+	GetNonBufferUniformBindings(programName, pixelShader->GetShaderBindings(), uniformBindings);
+
 	// отвязать программу
 	glUseProgram(0);
 	GlSystem::CheckErrors("Can't unbind program");
 
 	// записать программу
-	ptr<GlInternalProgram> program = NEW(GlInternalProgram(device, programName));
+	ptr<GlInternalProgram> program = NEW(GlInternalProgram(device, programName, uniformBindings));
 	programs[key] = program;
 
 	return program;

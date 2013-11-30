@@ -39,6 +39,11 @@ void GlShaderBindings::ReadBindings(StreamReader& reader, Bindings& bindings)
 	}
 }
 
+const GlShaderBindings::UniformBindings& GlShaderBindings::GetUniformBindings() const
+{
+	return uniformBindings;
+}
+
 const GlShaderBindings::Bindings& GlShaderBindings::GetUniformBlockBindings() const
 {
 	return uniformBlockBindings;
@@ -69,6 +74,7 @@ void GlShaderBindings::Serialize(StreamWriter& writer)
 		writer.WriteShortly(ub.count);
 		writer.WriteShortly(ub.slot);
 		writer.WriteShortly(ub.offset);
+		writer.WriteString(ub.name);
 	}
 	WriteBindings(writer, uniformBlockBindings);
 	WriteBindings(writer, samplerBindings);
@@ -87,6 +93,7 @@ ptr<GlShaderBindings> GlShaderBindings::Deserialize(StreamReader& reader)
 		ub.count = reader.ReadShortly();
 		ub.slot = reader.ReadShortly();
 		ub.offset = reader.ReadShortly();
+		ub.name = reader.ReadString();
 	}
 
 	Bindings uniformBlockBindings, samplerBindings, attributeBindings, targetBindings;

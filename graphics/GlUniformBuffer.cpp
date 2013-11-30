@@ -22,4 +22,9 @@ GLuint GlUniformBuffer::GetName() const
 	return name;
 }
 
+ptr<MemoryFile> GlUniformBuffer::GetFile() const
+{
+	return file;
+}
+
 END_INANITY_GRAPHICS

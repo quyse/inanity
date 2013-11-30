@@ -1,13 +1,12 @@
 #ifndef ___INANITY_GRAPHICS_GL_INTERNAL_PROGRAM_CACHE_HPP___
 #define ___INANITY_GRAPHICS_GL_INTERNAL_PROGRAM_CACHE_HPP___
 
-#include "graphics.hpp"
+#include "GlInternalProgram.hpp"
 #include "opengl.hpp"
 #include <unordered_map>
 
 BEGIN_INANITY_GRAPHICS
 
-class GlInternalProgram;
 class GlVertexShader;
 class GlPixelShader;
 class GlShaderBindings;
@@ -46,6 +45,10 @@ private:
 
 	static void ApplyPreLinkBindings(GLuint programName, ptr<GlShaderBindings> shaderBindings);
 	static void ApplyPostLinkBindings(GLuint programName, ptr<GlShaderBindings> shaderBindings);
+	static void GetNonBufferUniformBindings(
+		GLuint programName,
+		ptr<GlShaderBindings> shaderBindings,
+		GlInternalProgram::UniformBindings& uniformBindings);
 
 public:
 	GlInternalProgramCache(ptr<GlDevice> device);

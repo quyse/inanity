@@ -29,6 +29,8 @@ public:
 		int slot;
 		/// Offset into uniform buffer.
 		int offset;
+		/// Name of the uniform.
+		String name;
 	};
 	typedef std::vector<UniformBinding> UniformBindings;
 	typedef std::vector<std::pair<String, int> > Bindings;

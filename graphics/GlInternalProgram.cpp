@@ -3,8 +3,8 @@
 
 BEGIN_INANITY_GRAPHICS
 
-GlInternalProgram::GlInternalProgram(ptr<GlDevice> device, GLuint name)
-: device(device), name(name) {}
+GlInternalProgram::GlInternalProgram(ptr<GlDevice> device, GLuint name, const UniformBindings& uniformBindings)
+: device(device), name(name), uniformBindings(uniformBindings) {}
 
 GlInternalProgram::~GlInternalProgram()
 {
@@ -14,6 +14,11 @@ GlInternalProgram::~GlInternalProgram()
 GLuint GlInternalProgram::GetName() const
 {
 	return name;
+}
+
+const GlInternalProgram::UniformBindings& GlInternalProgram::GetUniformBindings() const
+{
+	return uniformBindings;
 }
 
 END_INANITY_GRAPHICS

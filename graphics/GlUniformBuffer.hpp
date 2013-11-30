@@ -31,6 +31,7 @@ public:
 	~GlUniformBuffer();
 
 	GLuint GetName() const;
+	ptr<MemoryFile> GetFile() const;
 };
 
 END_INANITY_GRAPHICS
