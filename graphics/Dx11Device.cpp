@@ -30,7 +30,8 @@ Dx11Device::Dx11Device(ptr<Dx11System> system, ComPointer<ID3D11Device> device, 
 : system(system), device(device), deviceContext(deviceContext)
 {
 	// setup caps
-	caps.flags = Caps::attributeInstancing | Caps::drawInstancing | Caps::multipleRenderTargets;
+	caps.flags = Caps::attributeInstancing | Caps::drawInstancing;
+	caps.maxColorBuffersCount = std::min(FrameBuffer::maxColorBuffersCount, D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT);
 }
 
 ptr<System> Dx11Device::GetSystem() const

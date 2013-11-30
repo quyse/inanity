@@ -88,15 +88,17 @@ void GlDevice::InitCaps()
 	internalCaps =
 		(GLEW_ARB_uniform_buffer_object ? InternalCaps::uniformBufferObject : 0) |
 		(GLEW_ARB_sampler_objects ? InternalCaps::samplerObjects : 0) |
-		(GLEW_ARB_vertex_attrib_binding ? InternalCaps::vertexAttribBinding : 0)
+		(GLEW_ARB_vertex_attrib_binding ? InternalCaps::vertexAttribBinding : 0) |
+		(GLEW_ARB_framebuffer_object ? InternalCaps::frameBufferObject : 0);
 		;
 	caps.flags =
 		(GLEW_ARB_instanced_arrays ? Caps::attributeInstancing : 0) |
-		(GLEW_ARB_draw_instanced ? Caps::drawInstancing : 0) |
-		(GLEW_ARB_framebuffer_object ? Caps::multipleRenderTargets : 0);
+		(GLEW_ARB_draw_instanced ? Caps::drawInstancing : 0);
+	caps.maxColorBuffersCount = GlFrameBuffer::maxColorBuffersCount;
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
-	internalCaps = 0;
-	caps.flags = Caps::multipleRenderTargets;
+	internalCaps = InternalCaps::frameBufferObject;
+	caps.flags = 0;
+	caps.maxColorBuffersCount = 1;
 #else
 #error Unknown platform
 #endif

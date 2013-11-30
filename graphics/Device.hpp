@@ -54,10 +54,10 @@ public:
 		{
 			/// Multiple attribute slots allowed, divisors are supported.
 			attributeInstancing = 1,
-			drawInstancing = 2,
-			multipleRenderTargets = 4
+			drawInstancing = 2
 		};
 		int flags;
+		int maxColorBuffersCount;
 
 		Caps();
 	};
