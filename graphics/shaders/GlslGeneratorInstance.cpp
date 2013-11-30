@@ -177,7 +177,18 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 		glsl << fast_cast<IntConstNode*>(node)->GetValue();
 		break;
 	case Node::typeAttribute:
-		glsl << "a" << fast_cast<AttributeNode*>(node)->GetElementIndex();
+		{
+			// WebGL hack for integer attributes
+			// (only for case of using another hack - changing integer attributes to float)
+			bool intConversion = false;
+			if(glslVersion == GlslVersions::webgl)
+				intConversion = PrintWebGLConversionToInteger(fast_cast<AttributeNode*>(node)->GetValueType());
+
+			glsl << "a" << fast_cast<AttributeNode*>(node)->GetElementIndex();
+
+			if(intConversion)
+				glsl << ')';
+		}
 		break;
 	case Node::typeUniform:
 		{
@@ -536,6 +547,61 @@ void GlslGeneratorInstance::PrintUniforms()
 	}
 }
 
+DataType GlslGeneratorInstance::EnforceFloatDataType(DataType dataType)
+{
+	switch(dataType)
+	{
+	case DataTypes::_int:
+	case DataTypes::_uint:
+		dataType = DataTypes::_float;
+		break;
+	case DataTypes::_ivec2:
+	case DataTypes::_uvec2:
+		dataType = DataTypes::_vec2;
+		break;
+	case DataTypes::_ivec3:
+	case DataTypes::_uvec3:
+		dataType = DataTypes::_vec3;
+		break;
+	case DataTypes::_ivec4:
+	case DataTypes::_uvec4:
+		dataType = DataTypes::_vec4;
+		break;
+	default: break;
+	}
+	return dataType;
+}
+
+bool GlslGeneratorInstance::PrintWebGLConversionToInteger(DataType dataType)
+{
+	bool intConversion = false;
+	switch(dataType)
+	{
+	case DataTypes::_int:
+	case DataTypes::_uint:
+		glsl << "int(";
+		intConversion = true;
+		break;
+	case DataTypes::_ivec2:
+	case DataTypes::_uvec2:
+		glsl << "ivec2(";
+		intConversion = true;
+		break;
+	case DataTypes::_ivec3:
+	case DataTypes::_uvec3:
+		glsl << "ivec3(";
+		intConversion = true;
+		break;
+	case DataTypes::_ivec4:
+	case DataTypes::_uvec4:
+		glsl << "ivec4(";
+		intConversion = true;
+		break;
+	default: break;
+	}
+	return intConversion;
+}
+
 ptr<ShaderSource> GlslGeneratorInstance::Generate()
 {
 	// первый проход: зарегистрировать все переменные
@@ -548,6 +614,7 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 		glsl << "#version 330\n";
 		break;
 	case GlslVersions::webgl:
+		// version numbers in WebGL are not supported
 		glsl <<
 			"#ifdef GL_ES\n"
 			"precision highp float;\n"
@@ -574,7 +641,15 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 		{
 			ptr<AttributeNode> node = attributes[i];
 			glsl << prefixStr;
-			PrintDataType(node->GetValueType());
+
+			DataType valueType = node->GetValueType();
+
+			// hack for lack of supporting integer attributes in WebGL
+			// change them to float
+			if(glslVersion == GlslVersions::webgl)
+				valueType = EnforceFloatDataType(valueType);
+
+			PrintDataType(valueType);
 			glsl << " a" << node->GetElementIndex() << ";\n";
 		}
 	}
@@ -718,10 +793,14 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 		for(size_t i = 0; i < uniforms.size(); ++i)
 		{
 			ptr<UniformNode> node = uniforms[i].second;
-			uniformBindings[i].dataType = node->GetValueType();
-			uniformBindings[i].count = node->GetCount();
-			uniformBindings[i].slot = uniforms[i].first->GetSlot();
-			uniformBindings[i].offset = node->GetOffset();
+			GlShaderBindings::UniformBinding& uniformBinding = uniformBindings[i];
+			uniformBinding.dataType = node->GetValueType();
+			uniformBinding.count = node->GetCount();
+			uniformBinding.slot = uniforms[i].first->GetSlot();
+			uniformBinding.offset = node->GetOffset();
+			std::ostringstream ss;
+			ss << uniformPrefix << uniformBinding.slot << '_' << uniformBinding.offset;
+			uniformBinding.name = ss.str();
 		}
 	}
 
@@ -765,14 +844,23 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 		attributeBindings[i].second = index;
 	}
 
-	// сформировать список привязок целевых переменных
-	GlShaderBindings::Bindings targetBindings(fragmentTargetsCount);
-	for(int i = 0; i < fragmentTargetsCount; ++i)
+	// make a target variables list
+	GlShaderBindings::Bindings targetBindings;
+	switch(glslVersion)
 	{
-		char name[16];
-		sprintf(name, "r%d", i);
-		targetBindings[i].first = name;
-		targetBindings[i].second = i;
+	case GlslVersions::opengl33:
+		targetBindings.resize(fragmentTargetsCount);
+		for(int i = 0; i < fragmentTargetsCount; ++i)
+		{
+			char name[16];
+			sprintf(name, "r%d", i);
+			targetBindings[i].first = name;
+			targetBindings[i].second = i;
+		}
+		break;
+	case GlslVersions::webgl:
+		// no bindings needed, because of use of gl_FragColor/gl_FragData
+		break;
 	}
 
 	return NEW(GlslSource(
