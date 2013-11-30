@@ -33,6 +33,8 @@ void GlFrameBuffer::Apply()
 	if(!dirty)
 		return;
 
+	int maxColorBuffersCount = device->GetCaps().maxColorBuffersCount;
+
 	// check if the framebuffer is default
 	if(name == 0)
 	{

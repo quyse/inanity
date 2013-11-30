@@ -712,6 +712,12 @@ void GlDevice::GetAttributeSizeAndType(DataType dataType, GLint& size, GLenum& t
 	default:
 		THROW("Unknown attribute element type");
 	}
+
+#ifdef ___INANITY_PLATFORM_EMSCRIPTEN
+	// WebGL does not support GL_UNSIGNED_INT type
+	if(type == GL_UNSIGNED_INT)
+		type = GL_UNSIGNED_SHORT;
+#endif
 }
 
 ptr<AttributeBinding> GlDevice::CreateAttributeBinding(ptr<AttributeLayout> layout)

@@ -17,6 +17,7 @@
 #include "GlBlendState.hpp"
 #include "GlInternalTexture.hpp"
 #include "VertexLayout.hpp"
+#include "../MemoryFile.hpp"
 #include "../Exception.hpp"
 #include <memory.h>
 
@@ -67,24 +68,14 @@ void GlContext::Update()
 			Texture* abstractTexture = let ? let->texture : nullptr;
 			glBindTexture(GL_TEXTURE_2D, abstractTexture ? fast_cast<GlTexture*>(abstractTexture)->GetName() : 0);
 
+#ifndef ___INANITY_PLATFORM_EMSCRIPTEN
 			SamplerState* abstractSamplerState = let ? let->samplerState : nullptr;
 			glBindSampler(i, abstractSamplerState ? fast_cast<GlSamplerState*>(abstractSamplerState)->GetName() : 0);
+#endif
 
 			cellSamplers[i].Actual();
 		}
 	GlSystem::CheckErrors("Can't bind textures and samplers");
-
-	// uniform buffers
-	for(int i = 0; i < uniformBuffersCount; ++i)
-		if(!cellUniformBuffers[i].IsActual())
-		{
-			LetUniformBuffer* let = (LetUniformBuffer*)cellUniformBuffers[i].top;
-			UniformBuffer* abstractUniformBuffer = let ? let->uniformBuffer : nullptr;
-			glBindBufferBase(GL_UNIFORM_BUFFER, i, abstractUniformBuffer ? fast_cast<GlUniformBuffer*>(abstractUniformBuffer)->GetName() : 0);
-
-			cellUniformBuffers[i].Actual();
-		}
-	GlSystem::CheckErrors("Can't bind uniform buffers");
 
 	// vertex and pixel shaders
 	if(!cellVertexShader.IsActual() || !cellPixelShader.IsActual())
@@ -106,6 +97,99 @@ void GlContext::Update()
 
 		cellVertexShader.Actual();
 		cellPixelShader.Actual();
+	}
+
+	// uniform buffers
+	// if uniform buffer object is supported
+	if(device->GetInternalCaps() & GlDevice::InternalCaps::uniformBufferObject)
+	{
+		for(int i = 0; i < uniformBuffersCount; ++i)
+			if(!cellUniformBuffers[i].IsActual())
+			{
+				LetUniformBuffer* let = (LetUniformBuffer*)cellUniformBuffers[i].top;
+				UniformBuffer* abstractUniformBuffer = let ? let->uniformBuffer : nullptr;
+				glBindBufferBase(GL_UNIFORM_BUFFER, i, abstractUniformBuffer ? fast_cast<GlUniformBuffer*>(abstractUniformBuffer)->GetName() : 0);
+
+				cellUniformBuffers[i].Actual();
+			}
+		GlSystem::CheckErrors("Can't bind uniform buffers");
+	}
+	// else upload uniforms one by one
+	else
+	{
+		const GlInternalProgram::UniformBindings& uniformBindings = boundProgram->GetUniformBindings();
+		for(size_t i = 0; i < uniformBindings.size(); ++i)
+		{
+			const GlInternalProgram::UniformBinding& uniformBinding = uniformBindings[i];
+			LetUniformBuffer* let = (LetUniformBuffer*)cellUniformBuffers[uniformBinding.slot].top;
+			THROW_ASSERT(let);
+			GlUniformBuffer* uniformBuffer = fast_cast<GlUniformBuffer*>(&*let->uniformBuffer);
+			THROW_ASSERT(uniformBuffer);
+			MemoryFile* file = uniformBuffer->GetFile();
+			THROW_ASSERT(file);
+			const void* data = (const char*)file->GetData() + uniformBinding.offset;
+			switch(uniformBinding.dataType)
+			{
+			case DataTypes::_float:
+				glUniform1fv(uniformBinding.location, uniformBinding.count, (const GLfloat*)data);
+				break;
+			case DataTypes::_vec2:
+				glUniform2fv(uniformBinding.location, uniformBinding.count, (const GLfloat*)data);
+				break;
+			case DataTypes::_vec3:
+				glUniform3fv(uniformBinding.location, uniformBinding.count, (const GLfloat*)data);
+				break;
+			case DataTypes::_vec4:
+				glUniform4fv(uniformBinding.location, uniformBinding.count, (const GLfloat*)data);
+				break;
+			case DataTypes::_mat3x3:
+				glUniformMatrix3fv(uniformBinding.location, uniformBinding.count, GL_FALSE, (const GLfloat*)data);
+				break;
+			case DataTypes::_mat4x4:
+				glUniformMatrix4fv(uniformBinding.location, uniformBinding.count, GL_FALSE, (const GLfloat*)data);
+				break;
+#ifndef ___INANITY_PLATFORM_EMSCRIPTEN
+			case DataTypes::_uint:
+				glUniform1uiv(uniformBinding.location, uniformBinding.count, (const GLuint*)data);
+				break;
+			case DataTypes::_uvec2:
+				glUniform2uiv(uniformBinding.location, uniformBinding.count, (const GLuint*)data);
+				break;
+			case DataTypes::_uvec3:
+				glUniform3uiv(uniformBinding.location, uniformBinding.count, (const GLuint*)data);
+				break;
+			case DataTypes::_uvec4:
+				glUniform4uiv(uniformBinding.location, uniformBinding.count, (const GLuint*)data);
+				break;
+#endif
+			case DataTypes::_int:
+#ifdef ___INANITY_PLATFORM_EMSCRIPTEN
+			case DataTypes::_uint:
+#endif
+				glUniform1iv(uniformBinding.location, uniformBinding.count, (const GLint*)data);
+				break;
+			case DataTypes::_ivec2:
+#ifdef ___INANITY_PLATFORM_EMSCRIPTEN
+			case DataTypes::_uvec2:
+#endif
+				glUniform2iv(uniformBinding.location, uniformBinding.count, (const GLint*)data);
+				break;
+			case DataTypes::_ivec3:
+#ifdef ___INANITY_PLATFORM_EMSCRIPTEN
+			case DataTypes::_uvec3:
+#endif
+				glUniform3iv(uniformBinding.location, uniformBinding.count, (const GLint*)data);
+				break;
+			case DataTypes::_ivec4:
+#ifdef ___INANITY_PLATFORM_EMSCRIPTEN
+			case DataTypes::_uvec4:
+#endif
+				glUniform4iv(uniformBinding.location, uniformBinding.count, (const GLint*)data);
+				break;
+			case DataTypes::Count: break; // impossible
+			}
+			GlSystem::CheckErrors("Can't set uniform");
+		}
 	}
 
 	// if vertex buffers supported, use them
@@ -158,6 +242,8 @@ void GlContext::Update()
 
 		int maxUsedElement = 0;
 
+		const bool supportAttributeInstancing = !!(device->GetCaps().flags & Device::Caps::attributeInstancing);
+
 		for(int i = 0; i < vertexBuffersCount; ++i)
 			if(rebindAllSlots || !cellVertexBuffers[i].IsActual())
 			{
@@ -176,12 +262,19 @@ void GlContext::Update()
 						for(int j = 0; j < (int)elements.size(); ++j)
 						{
 							const GlAttributeBinding::Element& element = elements[j];
+
 							glEnableVertexAttribArray(element.index);
+
+#ifndef ___INANITY_PLATFORM_EMSCRIPTEN
 							if(element.integer)
 								glVertexAttribIPointer(element.index, element.size, element.type, stride, element.pointer);
 							else
+#endif
 								glVertexAttribPointer(element.index, element.size, element.type, element.normalized, stride, element.pointer);
-							glVertexAttribDivisor(element.index, slots[i].divisor);
+
+							if(supportAttributeInstancing)
+								glVertexAttribDivisor(element.index, slots[i].divisor);
+
 							if((int)element.index > maxUsedElement)
 								maxUsedElement = element.index;
 						}
@@ -216,6 +309,7 @@ void GlContext::Update()
 		cellIndexBuffer.Actual();
 	}
 
+#ifndef ___INANITY_PLATFORM_EMSCRIPTEN
 	if(!cellFillMode.IsActual())
 	{
 		LetFillMode* let = (LetFillMode*)cellFillMode.top;
@@ -235,6 +329,7 @@ void GlContext::Update()
 
 		cellFillMode.Actual();
 	}
+#endif
 
 	if(!cellCullMode.IsActual())
 	{
@@ -441,10 +536,13 @@ void GlContext::UploadUniformBufferData(UniformBuffer* abstractUniformBuffer, co
 	GLuint name = uniformBuffer->GetName();
 	if(name)
 		UploadBufferData(GL_UNIFORM_BUFFER, name, data, size, uniformBuffer->GetSize());
-
-	// else data is stored in memory buffer
-	// nothing has to be done, actual uploading
-	// is deferred until drawing
+	else
+	{
+		// else data is stored in memory buffer
+		// actual uploading is deferred until drawing
+		THROW_ASSERT(uniformBuffer->GetFile()->GetSize() >= (size_t)size);
+		memcpy(uniformBuffer->GetFile()->GetData(), data, size);
+	}
 }
 
 void GlContext::UploadVertexBufferData(VertexBuffer* abstractVertexBuffer, const void* data, int size)
