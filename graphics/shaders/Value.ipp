@@ -2,6 +2,8 @@
 #define ___INANITY_GRAPHICS_SHADERS_VALUE_IPP___
 
 #include "Value.hpp"
+#include "FloatConstNode.hpp"
+#include "IntConstNode.hpp"
 #include "SwizzleNode.hpp"
 #include "CastNode.hpp"
 #include "OperationNode.hpp"

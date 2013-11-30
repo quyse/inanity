@@ -4,6 +4,7 @@
 #include "Uniform.hpp"
 #include "UniformArray.hpp"
 #include "UniformNode.hpp"
+#include "Value.ipp"
 #include "../DataType.hpp"
 
 BEGIN_INANITY
