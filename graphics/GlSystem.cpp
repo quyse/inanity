@@ -93,6 +93,7 @@ void GlSystem::ClearErrors()
 
 void GlSystem::CheckErrors(const char* primaryExceptionString)
 {
+#ifdef _DEBUG
 	GLenum error = glGetError();
 	// если есть хотя бы одна ошибка
 	if(error != GL_NO_ERROR)
@@ -135,6 +136,7 @@ void GlSystem::CheckErrors(const char* primaryExceptionString)
 		else
 			THROW(errorStrings);
 	}
+#endif
 }
 
 bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, GLint& internalFormat, GLenum& format, GLenum& type)
