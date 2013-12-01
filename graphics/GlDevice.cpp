@@ -470,7 +470,7 @@ ptr<DepthStencilBuffer> GlDevice::CreateDepthStencilBuffer(int width, int height
 		glBindTexture(GL_TEXTURE_2D, textureName);
 		GlSystem::CheckErrors("Can't bind texture");
 
-		glTexImage2D(GL_TEXTURE_2D, 0, /*GL_DEPTH24_STENCIL8*/ GL_DEPTH_STENCIL, (GLsizei)width, (GLsizei)height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, 0);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_STENCIL, (GLsizei)width, (GLsizei)height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, 0);
 		GlSystem::CheckErrors("Can't initialize texture");
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
