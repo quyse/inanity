@@ -46,7 +46,7 @@ Context::Let::~Let()
 
 Context::Cell::Cell() : top(0), current(0) {}
 
-bool Context::Cell::IsActual()
+bool Context::Cell::IsActual() const
 {
 	return current == top;
 }

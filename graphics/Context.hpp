@@ -62,7 +62,7 @@ protected:
 		Cell();
 
 		/// Get if that state is actual.
-		bool IsActual();
+		bool IsActual() const;
 		/// Set that state is actual.
 		void Actual();
 		/// Reset state so it should be updated next time.
