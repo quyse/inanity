@@ -148,7 +148,7 @@ ptr<Character> BtWorld::CreateCharacter(ptr<Shape> abstractShape, const mat4x4& 
 
 void BtWorld::Simulate(float time)
 {
-	dynamicsWorld->stepSimulation(time, 10);
+	dynamicsWorld->stepSimulation(time, 100);
 }
 
 END_INANITY_PHYSICS
