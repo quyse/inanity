@@ -479,7 +479,12 @@ ptr<GlRenderBuffer> GlContext::GetDummyRenderBuffer(int width, int height)
 void GlContext::ClearColor(int colorBufferIndex, const float* color)
 {
 	UpdateFramebuffer();
+#ifdef ___INANITY_PLATFORM_EMSCRIPTEN
+	glClearColor(color[0], color[1], color[2], color[3]);
+	glClear(GL_COLOR_BUFFER_BIT);
+#else
 	glClearBufferfv(GL_COLOR, (GLint)colorBufferIndex, color);
+#endif
 	GlSystem::CheckErrors("Can't clear color buffer");
 }
 
@@ -493,7 +498,12 @@ void GlContext::ClearDepth(float depth)
 	cellDepthWrite.Reset();
 	glDepthMask(GL_TRUE);
 
+#ifdef ___INANITY_PLATFORM_EMSCRIPTEN
+	glClearDepth(depth);
+	glClear(GL_DEPTH_BUFFER_BIT);
+#else
 	glClearBufferfv(GL_DEPTH, 0, &depth);
+#endif
 	GlSystem::CheckErrors("Can't clear depth");
 }
 
@@ -501,14 +511,25 @@ void GlContext::ClearStencil(unsigned stencil)
 {
 	UpdateFramebuffer();
 	GLint s = stencil;
+#ifdef ___INANITY_PLATFORM_EMSCRIPTEN
+	glClearStencil((GLint)s);
+	glClear(GL_STENCIL_BUFFER_BIT);
+#else
 	glClearBufferiv(GL_STENCIL, 0, &s);
+#endif
 	GlSystem::CheckErrors("Can't clear stencil");
 }
 
 void GlContext::ClearDepthStencil(float depth, unsigned stencil)
 {
 	UpdateFramebuffer();
+#ifdef ___INANITY_PLATFORM_EMSCRIPTEN
+	glClearDepth(depth);
+	glClearStencil(stencil);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+#else
 	glClearBufferfi(GL_DEPTH_STENCIL, 0, depth, stencil);
+#endif
 	GlSystem::CheckErrors("Can't clear depth and stencil");
 }
 
