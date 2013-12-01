@@ -5,7 +5,7 @@
 BEGIN_INANITY_GRAPHICS
 
 GlUniformBuffer::GlUniformBuffer(ptr<GlDevice> device, GLuint name, size_t size)
-: UniformBuffer(size), device(device), name(name)
+: UniformBuffer(size), device(device), name(name), dirty(true)
 {
 	if(!name)
 		file = NEW(MemoryFile(size));
@@ -25,6 +25,16 @@ GLuint GlUniformBuffer::GetName() const
 ptr<MemoryFile> GlUniformBuffer::GetFile() const
 {
 	return file;
+}
+
+void GlUniformBuffer::SetDirty(bool dirty)
+{
+	this->dirty = dirty;
+}
+
+bool GlUniformBuffer::IsDirty() const
+{
+	return dirty;
 }
 
 END_INANITY_GRAPHICS

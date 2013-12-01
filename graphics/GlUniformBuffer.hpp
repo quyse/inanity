@@ -25,6 +25,8 @@ private:
 	GLuint name;
 	/// Memory buffer in case of emulation.
 	ptr<MemoryFile> file;
+	/// Dirty state (only in case of emulation).
+	bool dirty;
 
 public:
 	GlUniformBuffer(ptr<GlDevice> device, GLuint name, size_t size);
@@ -32,6 +34,8 @@ public:
 
 	GLuint GetName() const;
 	ptr<MemoryFile> GetFile() const;
+	void SetDirty(bool dirty);
+	bool IsDirty() const;
 };
 
 END_INANITY_GRAPHICS

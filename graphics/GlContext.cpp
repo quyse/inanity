@@ -93,6 +93,13 @@ void GlContext::Update()
 			glUseProgram(program->GetName());
 			GlSystem::CheckErrors("Can't bind program");
 			boundProgram = program;
+
+			// if uniform buffer object is unsupported, reset all uniform buffers
+			if(!(device->GetInternalCaps() & GlDevice::InternalCaps::uniformBufferObject))
+			{
+				for(int i = 0; i < uniformBuffersCount; ++i)
+					cellUniformBuffers[i].Reset();
+			}
 		}
 
 		cellVertexShader.Actual();
@@ -121,10 +128,13 @@ void GlContext::Update()
 		for(size_t i = 0; i < uniformBindings.size(); ++i)
 		{
 			const GlInternalProgram::UniformBinding& uniformBinding = uniformBindings[i];
-			LetUniformBuffer* let = (LetUniformBuffer*)cellUniformBuffers[uniformBinding.slot].top;
+			const Cell& cell = cellUniformBuffers[uniformBinding.slot];
+			LetUniformBuffer* let = (LetUniformBuffer*)cell.top;
 			THROW_ASSERT(let);
 			GlUniformBuffer* uniformBuffer = fast_cast<GlUniformBuffer*>(&*let->uniformBuffer);
 			THROW_ASSERT(uniformBuffer);
+			if(cell.IsActual() && !uniformBuffer->IsDirty())
+				continue;
 			MemoryFile* file = uniformBuffer->GetFile();
 			THROW_ASSERT(file);
 			const void* data = (const char*)file->GetData() + uniformBinding.offset;
@@ -189,6 +199,17 @@ void GlContext::Update()
 			case DataTypes::Count: break; // impossible
 			}
 			GlSystem::CheckErrors("Can't set uniform");
+		}
+
+		// make all uniform buffers actual and clean
+		for(size_t i = 0; i < uniformBindings.size(); ++i)
+		{
+			const GlInternalProgram::UniformBinding& uniformBinding = uniformBindings[i];
+			Cell& cell = cellUniformBuffers[uniformBinding.slot];
+			cell.Actual();
+			LetUniformBuffer* let = (LetUniformBuffer*)cell.top;
+			GlUniformBuffer* uniformBuffer = fast_cast<GlUniformBuffer*>(&*let->uniformBuffer);
+			uniformBuffer->SetDirty(false);
 		}
 	}
 
@@ -563,6 +584,7 @@ void GlContext::UploadUniformBufferData(UniformBuffer* abstractUniformBuffer, co
 		// actual uploading is deferred until drawing
 		THROW_ASSERT(uniformBuffer->GetFile()->GetSize() >= (size_t)size);
 		memcpy(uniformBuffer->GetFile()->GetData(), data, size);
+		uniformBuffer->SetDirty(true);
 	}
 }
 
