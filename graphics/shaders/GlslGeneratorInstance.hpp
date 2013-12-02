@@ -80,7 +80,8 @@ private:
 	/// Change value type from integer to float.
 	static DataType EnforceFloatDataType(DataType dataType);
 	/// Print WebGL-needed conversion to integer type.
-	bool PrintWebGLConversionToInteger(DataType dataType);
+	bool PrintWebGLConversionToIntegerBegin(DataType dataType);
+	void PrintWebGLConversionToIntegerEnd();
 
 public:
 	GlslGeneratorInstance(ptr<Node> rootNode, ShaderType shaderType, GlslVersion glslVersion, bool supportUniformBuffers);

@@ -182,12 +182,12 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 			// (only for case of using another hack - changing integer attributes to float)
 			bool intConversion = false;
 			if(glslVersion == GlslVersions::webgl)
-				intConversion = PrintWebGLConversionToInteger(fast_cast<AttributeNode*>(node)->GetValueType());
+				intConversion = PrintWebGLConversionToIntegerBegin(fast_cast<AttributeNode*>(node)->GetValueType());
 
 			glsl << "a" << fast_cast<AttributeNode*>(node)->GetElementIndex();
 
 			if(intConversion)
-				glsl << ')';
+				PrintWebGLConversionToIntegerEnd();
 		}
 		break;
 	case Node::typeUniform:
@@ -572,7 +572,7 @@ DataType GlslGeneratorInstance::EnforceFloatDataType(DataType dataType)
 	return dataType;
 }
 
-bool GlslGeneratorInstance::PrintWebGLConversionToInteger(DataType dataType)
+bool GlslGeneratorInstance::PrintWebGLConversionToIntegerBegin(DataType dataType)
 {
 	bool intConversion = false;
 	switch(dataType)
@@ -600,6 +600,11 @@ bool GlslGeneratorInstance::PrintWebGLConversionToInteger(DataType dataType)
 	default: break;
 	}
 	return intConversion;
+}
+
+void GlslGeneratorInstance::PrintWebGLConversionToIntegerEnd()
+{
+	glsl << ')';
 }
 
 ptr<ShaderSource> GlslGeneratorInstance::Generate()
