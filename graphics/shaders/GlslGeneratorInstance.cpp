@@ -506,17 +506,22 @@ void GlslGeneratorInstance::PrintUniforms()
 			// автоматический сдвиг
 			if(currentOffset % sizeof(vec4) + valueSize > sizeof(vec4))
 				currentOffset = (currentOffset + sizeof(vec4) - 1) & ~(sizeof(vec4) - 1);
-			// оставшийся сдвиг добиваем пустыми переменными
-			while(currentOffset < offset)
+			// оставшийся сдвиг добиваем пустыми переменными (только если uniform буферы)
+			if(supportUniformBuffers)
 			{
-				int newOffset = (currentOffset + sizeof(vec4)) & ~(sizeof(vec4) - 1);
-				if(newOffset > offset)
-					newOffset = offset;
-				int size = (newOffset - currentOffset) / sizeof(float);
-				static const char* dumpTypes[] = { "float", "vec2", "vec3", "vec4" };
-				glsl << '\t' << dumpTypes[size - 1] << " dump" << slot << '_' << currentOffset << '_' << size << ";\n";
-				currentOffset = newOffset;
+				while(currentOffset < offset)
+				{
+					int newOffset = (currentOffset + sizeof(vec4)) & ~(sizeof(vec4) - 1);
+					if(newOffset > offset)
+						newOffset = offset;
+					int size = (newOffset - currentOffset) / sizeof(float);
+					static const char* dumpTypes[] = { "float", "vec2", "vec3", "vec4" };
+					glsl << '\t' << dumpTypes[size - 1] << " dump" << slot << '_' << currentOffset << '_' << size << ";\n";
+					currentOffset = newOffset;
+				}
 			}
+			else
+				currentOffset = offset;
 
 			// печатаем определение переменной
 
