@@ -322,6 +322,12 @@ inline xvec<T, n> normalize(const xvec<T, n>& a)
 }
 
 template <typename T>
+inline xvec<T, 4> conjugate(const xvec<T, 4>& a)
+{
+	return xvec<T, 4>(-a.x, -a.y, -a.z, a.w);
+}
+
+template <typename T>
 inline xvec<T, 3> normal(const xvec<T, 3>& a, const xvec<T, 3>& b, const xvec<T, 3>& c)
 {
 	return cross(b - a, c - a);
