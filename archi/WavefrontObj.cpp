@@ -84,7 +84,7 @@ void WavefrontObj::Run(const std::vector<String>& arguments)
 	std::vector<int> positionNumbers;
 	ptr<Graphics::EditableGeometry<Vertex, unsigned> > geometry = WavefrontObj::Convert(positionNumbers);
 
-	ptr<FileSystem> fileSystem = FolderFileSystem::GetNativeFileSystem();
+	ptr<FileSystem> fileSystem = Platform::FileSystem::GetNativeFileSystem();
 
 	if(arguments.size() >= 3)
 	{
@@ -200,7 +200,7 @@ void WavefrontObj::Run(const std::vector<String>& arguments)
 	}
 }
 
-ptr<EditableGeometry<Vertex, unsigned> > WavefrontObj::Convert(std::vector<int>& positionNumbers)
+ptr<Graphics::EditableGeometry<Vertex, unsigned> > WavefrontObj::Convert(std::vector<int>& positionNumbers)
 {
 	std::vector<vec3> points;
 	std::vector<vec3> normals;
@@ -271,5 +271,5 @@ ptr<EditableGeometry<Vertex, unsigned> > WavefrontObj::Convert(std::vector<int>&
 	}
 
 	//создать модель, оптимизировать и вернуть
-	return MakePointer(NEW(EditableGeometry<Vertex, unsigned>(vertices)));
+	return MakePointer(NEW(Graphics::EditableGeometry<Vertex, unsigned>(vertices)));
 }

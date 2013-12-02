@@ -32,7 +32,7 @@ void SkeletonConverter::Run(const std::vector<String>& arguments)
 	if(!_wfreopen(Strings::UTF82Unicode(arguments[0]).c_str(), L"r", stdin))
 		THROW("Can't open source file");
 
-	StreamWriter writer(FolderFileSystem::GetNativeFileSystem()->SaveStream(arguments[1]));
+	StreamWriter writer(Platform::FileSystem::GetNativeFileSystem()->SaveStream(arguments[1]));
 
 	size_t bonesCount;
 	std::cin >> bonesCount;
@@ -42,7 +42,7 @@ void SkeletonConverter::Run(const std::vector<String>& arguments)
 	for(size_t i = 0; i < bonesCount; ++i)
 	{
 		int parent;
-		quaternion worldOrientation;
+		quat worldOrientation;
 		vec3 worldOffset;
 		std::cin >> parent
 			>> worldOrientation.x >> worldOrientation.y >> worldOrientation.z >> worldOrientation.w

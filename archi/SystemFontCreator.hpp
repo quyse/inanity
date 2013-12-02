@@ -9,8 +9,8 @@ class SystemFontCreator : public Processor
 private:
 	LOGFONT lf;
 	String textureFileName;
-	EditableFont::Charset charset;
-	EditableFont::KerningPairs kerningPairs;
+	Graphics::EditableFont::Charset charset;
+	Graphics::EditableFont::KerningPairs kerningPairs;
 	int charHeight;
 
 	void CreateImage(const String& alphabatFileName, const String& textureFileName);

@@ -25,18 +25,18 @@ void BoneAnimationConverter::Run(const std::vector<String>& arguments)
 	std::cin >> bonesCount;
 	struct Bone
 	{
-		quaternion originalWorldOrientation;
+		quat originalWorldOrientation;
 		vec3 originalWorldPosition;
 		int parent;
 		std::vector<int> children;
 
-		quaternion lastRelativeOrientation;
+		quat lastRelativeOrientation;
 	};
 	std::vector<Bone> bones(bonesCount);
 	for(int i = 0; i < bonesCount; ++i)
 	{
 		int& parent = bones[i].parent;
-		quaternion& o = bones[i].originalWorldOrientation;
+		quat& o = bones[i].originalWorldOrientation;
 		vec3& p = bones[i].originalWorldPosition;
 		std::cin >> parent
 			>> o.x >> o.y >> o.z >> o.w
@@ -73,7 +73,7 @@ void BoneAnimationConverter::Run(const std::vector<String>& arguments)
 	if(!_wfreopen(Strings::UTF82Unicode(arguments[0]).c_str(), L"r", stdin))
 		THROW("Can't open source .tba file");
 
-	StreamWriter writer(FolderFileSystem::GetNativeFileSystem()->SaveStream(arguments[2]));
+	StreamWriter writer(Platform::FileSystem::GetNativeFileSystem()->SaveStream(arguments[2]));
 
 	int bonesCountInAnimation;
 	std::cin >> bonesCountInAnimation;
@@ -88,7 +88,7 @@ void BoneAnimationConverter::Run(const std::vector<String>& arguments)
 	{
 		float time;
 		int boneNumber;
-		quaternion orientation;
+		quat orientation;
 		vec3 rootOffset;
 	};
 	std::vector<Key> keys;
@@ -96,8 +96,8 @@ void BoneAnimationConverter::Run(const std::vector<String>& arguments)
 	// считать кадры
 	struct FrameBone
 	{
-		quaternion worldOrientation;
-		quaternion relativeOrientation;
+		quat worldOrientation;
+		quat relativeOrientation;
 	};
 	std::vector<FrameBone> frameBones(bonesCount);
 	for(;;)
@@ -122,7 +122,7 @@ void BoneAnimationConverter::Run(const std::vector<String>& arguments)
 		for(int i = 0; i < bonesCount; ++i)
 		{
 			// считать мировую ориентацию кости
-			quaternion& q = frameBones[i].worldOrientation;
+			quat& q = frameBones[i].worldOrientation;
 			std::cin >> q.x >> q.y >> q.z >> q.w;
 
 			if(!i)
@@ -136,9 +136,9 @@ void BoneAnimationConverter::Run(const std::vector<String>& arguments)
 			int boneNumber = sortedBones[i];
 			frameBones[boneNumber].relativeOrientation =
 				i ?
-				(frameBones[bones[boneNumber].parent].worldOrientation.conjugate() * frameBones[boneNumber].worldOrientation).normalize()
+				normalize(conjugate(frameBones[bones[boneNumber].parent].worldOrientation) * frameBones[boneNumber].worldOrientation)
 				:
-				frameBones[boneNumber].worldOrientation.normalize();
+				normalize(frameBones[boneNumber].worldOrientation);
 			if(dot(frameBones[boneNumber].relativeOrientation, bones[boneNumber].lastRelativeOrientation) < 0)
 			{
 				frameBones[boneNumber].relativeOrientation = -frameBones[boneNumber].relativeOrientation;
@@ -148,7 +148,7 @@ void BoneAnimationConverter::Run(const std::vector<String>& arguments)
 		}
 
 		// добавить ключи
-		for(size_t i = 0; i < hasKeyBonesCount; ++i)
+		for(int i = 0; i < hasKeyBonesCount; ++i)
 		{
 			int boneNumber = hasKeyBones[i];
 			Key key;

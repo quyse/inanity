@@ -219,7 +219,7 @@ void SystemFontCreator::CreateImage(const String& alphabatFileName, const String
 		const GLYPHMETRICS& gm = metrics[i];
 		int charWidth = gm.gmBlackBoxX;
 		int charHeight = gm.gmBlackBoxY;
-		FontChar& fontChar = charset[str[i]];
+		Graphics::FontChar& fontChar = charset[str[i]];
 		fontChar.firstUV = vec2(solver.coords[i].x * pixelWidth, (solver.coords[i].y + charHeight + 2) * pixelHeight);
 		fontChar.secondUV = vec2((solver.coords[i].x + charWidth + 2) * pixelWidth, solver.coords[i].y * pixelHeight);
 		//заметим, что тут хитро - Glyph Origin указывает на положение точки отсчета для символа
@@ -258,7 +258,7 @@ void SystemFontCreator::CreateImage(const String& alphabatFileName, const String
 
 	//записать картинку BMP
 	{
-		ptr<StreamWriter> writer = NEW(StreamWriter(FolderFileSystem::GetNativeFileSystem()->SaveStream(textureFileName)));
+		ptr<StreamWriter> writer = NEW(StreamWriter(Platform::FileSystem::GetNativeFileSystem()->SaveStream(textureFileName)));
 
 		BITMAPFILEHEADER bfh;
 		bfh.bfType = 'MB';
@@ -322,5 +322,5 @@ void SystemFontCreator::Run(const std::vector<String>& arguments)
 	}
 
 	CreateImage(arguments[0], arguments[1]);
-	MakePointer(NEW(EditableFont(arguments[1], charset, kerningPairs, (float)charHeight)))->Serialize(FolderFileSystem::GetNativeFileSystem()->SaveStream(arguments[2]));
+	MakePointer(NEW(Graphics::EditableFont(arguments[1], charset, kerningPairs, (float)charHeight)))->Serialize(Platform::FileSystem::GetNativeFileSystem()->SaveStream(arguments[2]));
 }
