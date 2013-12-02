@@ -57,6 +57,7 @@ int Dx11Context::GetRasterizerStateKey()
 	FillMode fillMode = ((LetFillMode*)cellFillMode.top)->fillMode;
 	CullMode cullMode = ((LetCullMode*)cellCullMode.top)->cullMode;
 	int key = ((int)fillMode) | (((int)cullMode) << 1);
+
 	// if rasterizer state missed, create new
 	if(!rasterizerStateCache[key])
 	{
@@ -89,6 +90,57 @@ int Dx11Context::GetRasterizerStateKey()
 		if(FAILED(device->CreateRasterizerState(&desc, &rasterizerState)))
 			THROW("Can't create rasterizer state");
 		rasterizerStateCache[key] = rasterizerState;
+	}
+
+	return key;
+}
+
+int Dx11Context::GetDepthStencilStateKey()
+{
+	DepthTestFunc depthTestFunc = ((LetDepthTestFunc*)cellDepthTestFunc.top)->depthTestFunc;
+	bool depthWrite = ((LetDepthWrite*)cellDepthWrite.top)->depthWrite;
+	int key = ((int)depthTestFunc) | (((int)depthWrite) << 3);
+
+	// if depth-stencil state missed, create new
+	if(!depthStencilStateCache[key])
+	{
+		D3D11_DEPTH_STENCIL_DESC desc = CD3D11_DEPTH_STENCIL_DESC(CD3D11_DEFAULT());
+
+		switch(depthTestFunc)
+		{
+		case depthTestFuncNever:
+			desc.DepthFunc = D3D11_COMPARISON_NEVER;
+			break;
+		case depthTestFuncLess:
+			desc.DepthFunc = D3D11_COMPARISON_LESS;
+			break;
+		case depthTestFuncLessOrEqual:
+			desc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+			break;
+		case depthTestFuncEqual:
+			desc.DepthFunc = D3D11_COMPARISON_EQUAL;
+			break;
+		case depthTestFuncNonEqual:
+			desc.DepthFunc = D3D11_COMPARISON_NOT_EQUAL;
+			break;
+		case depthTestFuncGreaterOrEqual:
+			desc.DepthFunc = D3D11_COMPARISON_GREATER_EQUAL;
+			break;
+		case depthTestFuncGreater:
+			desc.DepthFunc = D3D11_COMPARISON_GREATER;
+			break;
+		case depthTestFuncAlways:
+			desc.DepthFunc = D3D11_COMPARISON_ALWAYS;
+			break;
+		}
+
+		desc.DepthEnable = depthTestFunc != depthTestFuncAlways || depthWrite;
+		desc.DepthWriteMask = depthWrite ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
+
+		ComPointer<ID3D11DepthStencilState> depthStencilState;
+		if(FAILED(device->CreateDepthStencilState(&desc, &depthStencilState)))
+			THROW("Can't create depth-stencil state");
+		depthStencilStateCache[key] = depthStencilState;
 	}
 
 	return key;
@@ -300,6 +352,16 @@ void Dx11Context::Update()
 
 		cellFillMode.Actual();
 		cellCullMode.Actual();
+	}
+
+	// depth-stencil state (depth test func & depth write)
+	if(!cellDepthTestFunc.IsActual() || !cellDepthWrite.IsActual())
+	{
+		int key = GetDepthStencilStateKey();
+		deviceContext->OMSetDepthStencilState(depthStencilStateCache[key], 0);
+
+		cellDepthTestFunc.Actual();
+		cellDepthWrite.Actual();
 	}
 
 	// viewport

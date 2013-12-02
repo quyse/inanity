@@ -58,6 +58,13 @@ private:
 	/// Кэш состояний растеризатора.
 	ComPointer<ID3D11RasterizerState> rasterizerStateCache[rasterizerStateCacheSize];
 
+	/// Encode depth-stencil state and add it to cache if missed.
+	int GetDepthStencilStateKey();
+	/// Maximum number of depth-stencil states.
+	static const int depthStencilStateCacheSize = 16;
+	/// Depth-stencil states cache.
+	ComPointer<ID3D11DepthStencilState> depthStencilStateCache[depthStencilStateCacheSize];
+
 	/// Выполнить обновление в API всех "грязных" состояний.
 	void Update();
 
