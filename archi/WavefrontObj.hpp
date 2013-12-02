@@ -24,7 +24,7 @@ struct SkinnedVertex
 	vec3 position;
 	vec3 normal;
 	vec2 texcoord;
-	uint boneNumbers[4];
+	unsigned char boneNumbers[4];
 	float boneWeights[4];
 };
 
