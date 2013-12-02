@@ -686,18 +686,22 @@ void GlDevice::GetAttributeSizeAndType(DataType dataType, LayoutDataType layoutD
 	case DataTypes::_mat4x4:
 		THROW("Matrices can't be used in attributes");
 	case DataTypes::_uint:
+	case DataTypes::_int:
 		size = 1;
 		integer = true;
 		break;
 	case DataTypes::_uvec2:
+	case DataTypes::_ivec2:
 		size = 2;
 		integer = true;
 		break;
 	case DataTypes::_uvec3:
+	case DataTypes::_ivec3:
 		size = 3;
 		integer = true;
 		break;
 	case DataTypes::_uvec4:
+	case DataTypes::_ivec4:
 		size = 4;
 		integer = true;
 		break;

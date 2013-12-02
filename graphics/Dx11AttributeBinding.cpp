@@ -25,50 +25,13 @@ void Dx11AttributeBinding::Initialize(ptr<AttributeLayout> layout)
 		switch(element.dataType)
 		{
 		case DataTypes::_float:
+		case DataTypes::_uint:
+		case DataTypes::_int:
 			switch(element.layoutDataType)
 			{
 			case LayoutDataType::Float32:
 				format = DXGI_FORMAT_R32_FLOAT;
 				break;
-			default:
-				THROW("Unsupported layout data type for float data type");
-			}
-			break;
-		case DataTypes::_vec2:
-			switch(element.layoutDataType)
-			{
-			case LayoutDataType::Float32:
-				format = DXGI_FORMAT_R32G32_FLOAT;
-				break;
-			default:
-				THROW("Unsupported layout data type for vec2 data type");
-			}
-			break;
-		case DataTypes::_vec3:
-			switch(element.layoutDataType)
-			{
-			case LayoutDataType::Float32:
-				format = DXGI_FORMAT_R32G32B32_FLOAT;
-				break;
-			default:
-				THROW("Unsupported layout data type for vec3 data type");
-			}
-			break;
-		case DataTypes::_vec4:
-			switch(element.layoutDataType)
-			{
-			case LayoutDataType::Float32:
-				format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-				break;
-			default:
-				THROW("Unsupported layout data type for vec4 data type");
-			}
-			break;
-		case DataTypes::_mat4x4:
-			THROW("Matrices can't be used in attributes");
-		case DataTypes::_uint:
-			switch(element.layoutDataType)
-			{
 			case LayoutDataType::Uint32:
 				format = DXGI_FORMAT_R32_UINT;
 				break;
@@ -78,13 +41,27 @@ void Dx11AttributeBinding::Initialize(ptr<AttributeLayout> layout)
 			case LayoutDataType::Uint8:
 				format = DXGI_FORMAT_R8_UINT;
 				break;
+			case LayoutDataTypes::Int32:
+				format = DXGI_FORMAT_R32_SINT;
+				break;
+			case LayoutDataType::Int16:
+				format = DXGI_FORMAT_R16_SINT;
+				break;
+			case LayoutDataType::Int8:
+				format = DXGI_FORMAT_R8_SINT;
+				break;
 			default:
-				THROW("Unsupported layout data type for uint data type");
+				THROW("Unsupported layout data type for scalar data type");
 			}
 			break;
+		case DataTypes::_vec2:
 		case DataTypes::_uvec2:
+		case DataTypes::_ivec2:
 			switch(element.layoutDataType)
 			{
+			case LayoutDataType::Float32:
+				format = DXGI_FORMAT_R32G32_FLOAT;
+				break;
 			case LayoutDataType::Uint32:
 				format = DXGI_FORMAT_R32G32_UINT;
 				break;
@@ -94,24 +71,46 @@ void Dx11AttributeBinding::Initialize(ptr<AttributeLayout> layout)
 			case LayoutDataType::Uint8:
 				format = DXGI_FORMAT_R8G8_UINT;
 				break;
+			case LayoutDataType::Int32:
+				format = DXGI_FORMAT_R32G32_SINT;
+				break;
+			case LayoutDataType::Int16:
+				format = DXGI_FORMAT_R16G16_SINT;
+				break;
+			case LayoutDataType::Int8:
+				format = DXGI_FORMAT_R8G8_SINT;
+				break;
 			default:
-				THROW("Unsupported layout data type for uvec2 data type");
+				THROW("Unsupported layout data type for 2-vector data type");
 			}
 			break;
+		case DataTypes::_vec3:
 		case DataTypes::_uvec3:
+		case DataTypes::_ivec3:
 			switch(element.layoutDataType)
 			{
+			case LayoutDataType::Float32:
+				format = DXGI_FORMAT_R32G32B32_FLOAT;
+				break;
 			case LayoutDataType::Uint32:
 				format = DXGI_FORMAT_R32G32B32_UINT;
 				break;
-			// there is no DXGI_FORMAT_R16G16B16_UINT or DXGI_FORMAT_R8G8B8_UINT
+			case LayoutDataType::Int32:
+				format = DXGI_FORMAT_R32G32B32_SINT;
+				break;
+			// there are no 16/8 bit three element formats
 			default:
-				THROW("Unsupported layout data type for uvec3 data type");
+				THROW("Unsupported layout data type for 3-vector data type");
 			}
 			break;
+		case DataTypes::_vec4:
 		case DataTypes::_uvec4:
+		case DataTypes::_ivec4:
 			switch(element.layoutDataType)
 			{
+			case LayoutDataType::Float32:
+				format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+				break;
 			case LayoutDataType::Uint32:
 				format = DXGI_FORMAT_R32G32B32A32_UINT;
 				break;
@@ -121,10 +120,21 @@ void Dx11AttributeBinding::Initialize(ptr<AttributeLayout> layout)
 			case LayoutDataType::Uint8:
 				format = DXGI_FORMAT_R8G8B8A8_UINT;
 				break;
+			case LayoutDataType::Int32:
+				format = DXGI_FORMAT_R32G32B32A32_SINT;
+				break;
+			case LayoutDataType::Int16:
+				format = DXGI_FORMAT_R16G16B16A16_SINT;
+				break;
+			case LayoutDataType::Int8:
+				format = DXGI_FORMAT_R8G8B8A8_SINT;
+				break;
 			default:
-				THROW("Unsupported layout data type for uvec4 data type");
+				THROW("Unsupported layout data type for 4-vector data type");
 			}
 			break;
+		case DataTypes::_mat4x4:
+			THROW("Matrices can't be used in attributes");
 		default:
 			THROW("Unknown element type");
 		}
