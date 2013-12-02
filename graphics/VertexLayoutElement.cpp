@@ -16,6 +16,11 @@ DataType VertexLayoutElement::GetDataType() const
 	return layout->GetElements()[index].dataType;
 }
 
+LayoutDataType VertexLayoutElement::GetLayoutDataType() const
+{
+	return layout->GetElements()[index].layoutDataType;
+}
+
 int VertexLayoutElement::GetOffset() const
 {
 	return layout->GetElements()[index].offset;

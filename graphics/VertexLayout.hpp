@@ -2,46 +2,44 @@
 #define ___INANITY_GRAPHICS_VERTEX_LAYOUT_HPP___
 
 #include "DataType.hpp"
+#include "LayoutDataType.hpp"
 #include <vector>
 
 BEGIN_INANITY_GRAPHICS
 
 class VertexLayoutElement;
 
-/// Класс разметки данных в вершинном буфере.
+/// Layout of vertex data in vertex buffer.
 class VertexLayout : public Object
 {
 public:
-	/// Структура элемента вершины.
 	struct Element
 	{
-		/// Тип данных элемента.
 		DataType dataType;
-		/// Смещение от начала вершины.
+		LayoutDataType layoutDataType;
 		int offset;
 
-		Element(DataType dataType, int offset);
+		Element(DataType dataType, LayoutDataType layoutDataType, int offset);
 	};
 	typedef std::vector<Element> Elements;
 
 protected:
-	/// Элементы разметки.
 	Elements elements;
-	/// Размер разметки (включающий зазор между последовательными экземплярами).
 	int stride;
 
 public:
 	VertexLayout(int stride);
 
-	/// Добавить элемент к разметке.
+	/// Add new element into layout.
+	ptr<VertexLayoutElement> AddElement(DataType dataType, LayoutDataType layoutDataType, int offset);
+	/// Add new element with default layout data type.
 	ptr<VertexLayoutElement> AddElement(DataType dataType, int offset);
-	/// Добавить член структуры как элемент.
+	/// Add struct's field as an element (helper method).
 	template <typename Struct, typename ValueType>
 	ptr<VertexLayoutElement> AddElement(ValueType Struct::*field)
 	{
 		return AddElement(DataTypeOf<ValueType>(), (int)&(((Struct*)0)->*field));
 	}
-	/// Получить внутренние элементы.
 	const Elements& GetElements() const;
 
 	int GetStride() const;

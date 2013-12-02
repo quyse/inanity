@@ -196,7 +196,6 @@ void GlContext::Update()
 #endif
 				glUniform4iv(uniformBinding.location, uniformBinding.count, (const GLint*)data);
 				break;
-			case DataTypes::Count: break; // impossible
 			}
 			GlSystem::CheckErrors("Can't set uniform");
 		}

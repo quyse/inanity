@@ -10,8 +10,8 @@ BEGIN_INANITY_GRAPHICS
 AttributeLayout::Slot::Slot(int divisor)
 : divisor(divisor) {}
 
-AttributeLayout::Element::Element(int slot, int offset, DataType dataType)
-: slot(slot), offset(offset), dataType(dataType) {}
+AttributeLayout::Element::Element(int slot, int offset, DataType dataType, LayoutDataType layoutDataType)
+: slot(slot), offset(offset), dataType(dataType), layoutDataType(layoutDataType) {}
 
 ptr<AttributeLayoutSlot> AttributeLayout::AddSlot(int divisor)
 {
@@ -31,7 +31,7 @@ ptr<AttributeLayoutElement> AttributeLayout::AddElement(ptr<AttributeLayoutSlot>
 		int slotIndex = slot->GetIndex();
 
 		int elementIndex = (int)elements.size();
-		elements.push_back(Element(slotIndex, element->GetOffset(), element->GetDataType()));
+		elements.push_back(Element(slotIndex, element->GetOffset(), element->GetDataType(), element->GetLayoutDataType()));
 		return NEW(AttributeLayoutElement(this, elementIndex));
 	}
 	catch(Exception* exception)

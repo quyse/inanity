@@ -2,14 +2,14 @@
 #define ___INANITY_GRAPHICS_VERTEX_LAYOUT_ELEMENT_HPP___
 
 #include "DataType.hpp"
+#include "LayoutDataType.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
 class VertexLayout;
 
-/// Класс элемента разметки данных вершины.
-/** Внутренне содержит просто указатель на разметку вершин и индекс
-в списке элементов разметки. */
+/// Element of vertex layout.
+/** Just pointer + index. */
 class VertexLayoutElement : public Object
 {
 private:
@@ -19,11 +19,9 @@ private:
 public:
 	VertexLayoutElement(ptr<VertexLayout> layout, int index);
 
-	/// Получить всю разметку.
 	ptr<VertexLayout> GetLayout() const;
-	/// Получить тип данных элемента.
 	DataType GetDataType() const;
-	/// Получить смещение до элемента от начала вершины.
+	LayoutDataType GetLayoutDataType() const;
 	int GetOffset() const;
 };
 

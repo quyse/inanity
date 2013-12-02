@@ -27,6 +27,7 @@
 #include "graphics/FrameBuffer.hpp"
 #include "graphics/ImageLoader.hpp"
 #include "graphics/IndexBuffer.hpp"
+#include "graphics/LayoutDataType.hpp"
 #include "graphics/Monitor.hpp"
 #include "graphics/MonitorMode.hpp"
 #include "graphics/Output.hpp"

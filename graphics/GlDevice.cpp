@@ -663,61 +663,74 @@ ptr<IndexBuffer> GlDevice::CreateStaticIndexBuffer(ptr<File> file, int indexSize
 	}
 }
 
-void GlDevice::GetAttributeSizeAndType(DataType dataType, GLint& size, GLenum& type, bool& integer)
+void GlDevice::GetAttributeSizeAndType(DataType dataType, LayoutDataType layoutDataType, GLint& size, GLenum& type, bool& integer)
 {
 	switch(dataType)
 	{
 	case DataTypes::_float:
 		size = 1;
-		type = GL_FLOAT;
 		integer = false;
 		break;
 	case DataTypes::_vec2:
 		size = 2;
-		type = GL_FLOAT;
 		integer = false;
 		break;
 	case DataTypes::_vec3:
 		size = 3;
-		type = GL_FLOAT;
 		integer = false;
 		break;
 	case DataTypes::_vec4:
 		size = 4;
-		type = GL_FLOAT;
 		integer = false;
 		break;
 	case DataTypes::_mat4x4:
 		THROW("Matrices can't be used in attributes");
 	case DataTypes::_uint:
 		size = 1;
-		type = GL_UNSIGNED_INT;
 		integer = true;
 		break;
 	case DataTypes::_uvec2:
 		size = 2;
-		type = GL_UNSIGNED_INT;
 		integer = true;
 		break;
 	case DataTypes::_uvec3:
 		size = 3;
-		type = GL_UNSIGNED_INT;
 		integer = true;
 		break;
 	case DataTypes::_uvec4:
 		size = 4;
-		type = GL_UNSIGNED_INT;
 		integer = true;
 		break;
 	default:
-		THROW("Unknown attribute element type");
+		THROW("Unknown data type");
 	}
 
-#ifdef ___INANITY_PLATFORM_EMSCRIPTEN
-	// WebGL does not support GL_UNSIGNED_INT type
-	if(type == GL_UNSIGNED_INT)
+	switch(layoutDataType)
+	{
+	case LayoutDataTypes::Float32:
+		type = GL_FLOAT;
+		break;
+	case LayoutDataTypes::Uint32:
+		type = GL_UNSIGNED_INT;
+		break;
+	case LayoutDataTypes::Uint16:
 		type = GL_UNSIGNED_SHORT;
-#endif
+		break;
+	case LayoutDataTypes::Uint8:
+		type = GL_UNSIGNED_BYTE;
+		break;
+	case LayoutDataTypes::Int32:
+		type = GL_INT;
+		break;
+	case LayoutDataTypes::Int16:
+		type = GL_SHORT;
+		break;
+	case LayoutDataTypes::Int8:
+		type = GL_BYTE;
+		break;
+	default:
+		THROW("Unknown layout data type");
+	}
 }
 
 ptr<AttributeBinding> GlDevice::CreateAttributeBinding(ptr<AttributeLayout> layout)
@@ -756,7 +769,7 @@ ptr<AttributeBinding> GlDevice::CreateAttributeBinding(ptr<AttributeLayout> layo
 				GLint size;
 				GLenum type;
 				bool integer;
-				GetAttributeSizeAndType(element.dataType, size, type, integer);
+				GetAttributeSizeAndType(element.dataType, element.layoutDataType, size, type, integer);
 
 				if(integer)
 					glVertexAttribIFormat((GLuint)i, size, type, element.offset);
@@ -807,7 +820,7 @@ ptr<AttributeBinding> GlDevice::CreateAttributeBinding(ptr<AttributeLayout> layo
 
 				GlAttributeBinding::Element bindingElement;
 				bindingElement.index = (GLuint)i;
-				GetAttributeSizeAndType(element.dataType, bindingElement.size, bindingElement.type, bindingElement.integer);
+				GetAttributeSizeAndType(element.dataType, element.layoutDataType, bindingElement.size, bindingElement.type, bindingElement.integer);
 				bindingElement.normalized = false;
 				bindingElement.pointer = (GLvoid*)element.offset;
 

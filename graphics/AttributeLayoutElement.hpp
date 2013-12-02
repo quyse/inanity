@@ -2,14 +2,14 @@
 #define ___INANITY_GRAPHICS_ATTRIBUTE_LAYOUT_ELEMENT_HPP___
 
 #include "DataType.hpp"
+#include "LayoutDataType.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
 class AttributeLayout;
 
-/// Класс элемента разметки атрибутов.
-/** Внутренне содержит просто ссылку на разметку атрибутов,
-и индекс элемента. */
+/// Element of attribute layout.
+/** Just pointer + index */
 class AttributeLayoutElement : public Object
 {
 private:
@@ -21,6 +21,7 @@ public:
 
 	int GetIndex() const;
 	DataType GetDataType() const;
+	LayoutDataType GetLayoutDataType() const;
 };
 
 END_INANITY_GRAPHICS

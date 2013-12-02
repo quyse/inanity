@@ -2,6 +2,7 @@
 #define ___INANITY_GRAPHICS_ATTRIBUTE_LAYOUT_HPP___
 
 #include "DataType.hpp"
+#include "LayoutDataType.hpp"
 #include <vector>
 
 BEGIN_INANITY_GRAPHICS
@@ -10,32 +11,29 @@ class VertexLayoutElement;
 class AttributeLayoutSlot;
 class AttributeLayoutElement;
 
-/// Класс разметки атрибутов для привязки к шейдерному конвейеру.
+/// Attribute layout class for binding to vertex pipeline.
 class AttributeLayout : public Object
 {
 public:
-	/// Структура, описывающая слот для вершинного буфера.
+	/// Slot of vertex buffer.
 	struct Slot
 	{
-		/// Шаг инстансов геометрии.
-		/** Для индексированного элемента - 0. Для per-instance-элемента - 1 и больше. */
+		/// Instancing divisor.
+		/** For indexed elements = 0. For per-instance elements >= 1. */
 		int divisor;
 
 		Slot(int divisor);
 	};
 	typedef std::vector<Slot> Slots;
 
-	/// Элемент разметки атрибутов.
 	struct Element
 	{
-		/// Слот вершинного буфера.
 		int slot;
-		/// Смещение от начала вершины.
 		int offset;
-		/// Тип данных элемента.
 		DataType dataType;
+		LayoutDataType layoutDataType;
 
-		Element(int slot, int offset, DataType dataType);
+		Element(int slot, int offset, DataType dataType, LayoutDataType layoutDataType);
 	};
 	typedef std::vector<Element> Elements;
 

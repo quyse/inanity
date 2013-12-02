@@ -23,8 +23,7 @@ struct DataTypes
 		_int,
 		_ivec2,
 		_ivec3,
-		_ivec4,
-		Count
+		_ivec4
 	};
 };
 

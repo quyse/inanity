@@ -16,4 +16,9 @@ DataType AttributeLayoutElement::GetDataType() const
 	return layout->GetElements()[index].dataType;
 }
 
+LayoutDataType AttributeLayoutElement::GetLayoutDataType() const
+{
+	return layout->GetElements()[index].layoutDataType;
+}
+
 END_INANITY_GRAPHICS

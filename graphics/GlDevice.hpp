@@ -3,6 +3,7 @@
 
 #include "Device.hpp"
 #include "DataType.hpp"
+#include "LayoutDataType.hpp"
 #include "opengl.hpp"
 #include "../String.hpp"
 
@@ -80,7 +81,7 @@ private:
 
 	/// Скомпилировать шейдер.
 	static void CompileShader(GLuint shaderName, ptr<File> file, ptr<GlShaderBindings>& shaderBindings);
-	static void GetAttributeSizeAndType(DataType dataType, GLint& size, GLenum& type, bool& integer);
+	static void GetAttributeSizeAndType(DataType dataType, LayoutDataType layoutDataType, GLint& size, GLenum& type, bool& integer);
 
 public:
 
