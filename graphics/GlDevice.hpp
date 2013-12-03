@@ -87,6 +87,8 @@ private:
 	static GLint ConvertSamplerSettingsWrap(SamplerSettings::Wrap wrap);
 	static void ConvertSamplerSettingsFilters(const SamplerSettings& samplerSettings, GLint& minFilter, GLint& magFilter);
 
+	static void SetupTextureSampling(GLenum target, const SamplerSettings& samplerSettings);
+
 public:
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
@@ -109,7 +111,7 @@ public:
 	ptr<ShaderCompiler> CreateShaderCompiler();
 	ptr<Shaders::ShaderGenerator> CreateShaderGenerator();
 	ptr<FrameBuffer> CreateFrameBuffer();
-	ptr<RenderBuffer> CreateRenderBuffer(int width, int height, PixelFormat pixelFormat);
+	ptr<RenderBuffer> CreateRenderBuffer(int width, int height, PixelFormat pixelFormat, const SamplerSettings& samplerSettings);
 	ptr<DepthStencilBuffer> CreateDepthStencilBuffer(int width, int height, bool canBeResource);
 	ptr<VertexShader> CreateVertexShader(ptr<File> file);
 	ptr<PixelShader> CreatePixelShader(ptr<File> file);
@@ -118,7 +120,7 @@ public:
 	ptr<VertexBuffer> CreateDynamicVertexBuffer(int size, ptr<VertexLayout> layout);
 	ptr<IndexBuffer> CreateStaticIndexBuffer(ptr<File> file, int indexSize);
 	ptr<AttributeBinding> CreateAttributeBinding(ptr<AttributeLayout> layout);
-	ptr<Texture> CreateStaticTexture(ptr<RawTextureData> data);
+	ptr<Texture> CreateStaticTexture(ptr<RawTextureData> data, const SamplerSettings& samplerSettings);
 	ptr<SamplerState> CreateSamplerState(const SamplerSettings& samplerSettings);
 	ptr<BlendState> CreateBlendState();
 };

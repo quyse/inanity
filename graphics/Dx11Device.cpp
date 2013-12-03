@@ -105,7 +105,7 @@ ptr<FrameBuffer> Dx11Device::CreateFrameBuffer()
 	return NEW(Dx11FrameBuffer(this));
 }
 
-ptr<RenderBuffer> Dx11Device::CreateRenderBuffer(int width, int height, PixelFormat pixelFormat)
+ptr<RenderBuffer> Dx11Device::CreateRenderBuffer(int width, int height, PixelFormat pixelFormat, const SamplerSettings& samplerSettings)
 {
 	try
 	{
@@ -136,7 +136,11 @@ ptr<RenderBuffer> Dx11Device::CreateRenderBuffer(int width, int height, PixelFor
 		if(FAILED(device->CreateShaderResourceView(buffer, 0, &shaderResourceView)))
 			THROW("Can't create shader resource view");
 
-		return NEW(Dx11RenderBuffer(renderTargetView, NEW(Dx11Texture(shaderResourceView))));
+		return NEW(Dx11RenderBuffer(
+			renderTargetView,
+			NEW(Dx11Texture(
+				shaderResourceView,
+				CreateSamplerState(samplerSettings).FastCast<Dx11SamplerState>()))));
 	}
 	catch(Exception* exception)
 	{
@@ -187,7 +191,7 @@ ptr<DepthStencilBuffer> Dx11Device::CreateDepthStencilBuffer(int width, int heig
 			desc.Texture2D.MipLevels = 1;
 			if(FAILED(device->CreateShaderResourceView(buffer, &desc, &shaderResourceView)))
 				THROW("Can't create shader resource view");
-			return NEW(Dx11DepthStencilBuffer(depthStencilView, NEW(Dx11Texture(shaderResourceView))));
+			return NEW(Dx11DepthStencilBuffer(depthStencilView, NEW(Dx11Texture(shaderResourceView, nullptr))));
 		}
 
 		return NEW(Dx11DepthStencilBuffer(depthStencilView));
@@ -356,7 +360,7 @@ ptr<AttributeBinding> Dx11Device::CreateAttributeBinding(ptr<AttributeLayout> la
 	}
 }
 
-ptr<Texture> Dx11Device::CreateStaticTexture(ptr<RawTextureData> data)
+ptr<Texture> Dx11Device::CreateStaticTexture(ptr<RawTextureData> data, const SamplerSettings& samplerSettings)
 {
 	try
 	{
@@ -510,11 +514,13 @@ ptr<Texture> Dx11Device::CreateStaticTexture(ptr<RawTextureData> data)
 			}
 		}
 
+		ptr<Dx11SamplerState> samplerState = CreateSamplerState(samplerSettings).FastCast<Dx11SamplerState>();
+
 		ComPointer<ID3D11ShaderResourceView> shaderResourceView;
 		if(FAILED(device->CreateShaderResourceView(resource, &srvDesc, &shaderResourceView)))
 			THROW("Can't create shader resource view");
 
-		return NEW(Dx11Texture(shaderResourceView));
+		return NEW(Dx11Texture(shaderResourceView, samplerState));
 	}
 	catch(Exception* exception)
 	{

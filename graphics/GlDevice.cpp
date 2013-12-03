@@ -422,7 +422,7 @@ ptr<FrameBuffer> GlDevice::CreateFrameBuffer()
 	return NEW(GlFrameBuffer(this, name));
 }
 
-ptr<RenderBuffer> GlDevice::CreateRenderBuffer(int width, int height, PixelFormat pixelFormat)
+ptr<RenderBuffer> GlDevice::CreateRenderBuffer(int width, int height, PixelFormat pixelFormat, const SamplerSettings& samplerSettings)
 {
 	try
 	{
@@ -442,14 +442,7 @@ ptr<RenderBuffer> GlDevice::CreateRenderBuffer(int width, int height, PixelForma
 		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, (GLsizei)width, (GLsizei)height, 0, format, type, 0);
 		GlSystem::CheckErrors("Can't initialize texture");
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-#ifndef ___INANITY_PLATFORM_EMSCRIPTEN
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-#endif
-		GlSystem::CheckErrors("Can't set texture parameters");
+		SetupTextureSampling(GL_TEXTURE_2D, samplerSettings);
 
 		return NEW(GlRenderBuffer(internalTexture, NEW(GlTexture(internalTexture))));
 	}
@@ -844,18 +837,32 @@ ptr<AttributeBinding> GlDevice::CreateAttributeBinding(ptr<AttributeLayout> layo
 /// Convert abstracted wrap into OpenGL enum.
 GLint GlDevice::ConvertSamplerSettingsWrap(SamplerSettings::Wrap wrap)
 {
+	GLint r;
 	switch(wrap)
 	{
 	case SamplerSettings::wrapRepeat:
-		return GL_REPEAT;
+		r = GL_REPEAT;
+		break;
 	case SamplerSettings::wrapRepeatMirror:
-		return GL_MIRRORED_REPEAT;
+		r = GL_MIRRORED_REPEAT;
+		break;
 	case SamplerSettings::wrapClamp:
-		return GL_CLAMP_TO_EDGE;
+		r = GL_CLAMP_TO_EDGE;
+		break;
 	case SamplerSettings::wrapBorder:
-		return GL_CLAMP_TO_BORDER;
+		r = GL_CLAMP_TO_BORDER;
+		break;
+	default:
+		THROW("Invalid wrap mode");
 	}
-	THROW("Invalid wrap mode");
+
+#ifdef ___INANITY_PLATFORM_EMSCRIPTEN
+	// GL_CLAMP_TO_BORDER is unsupported in WebGL
+	if(r == GL_CLAMP_TO_BORDER)
+		r = GL_CLAMP_TO_EDGE;
+#endif
+
+	return r;
 }
 
 void GlDevice::ConvertSamplerSettingsFilters(const SamplerSettings& samplerSettings, GLint& minFilter, GLint& magFilter)
@@ -926,7 +933,39 @@ void GlDevice::ConvertSamplerSettingsFilters(const SamplerSettings& samplerSetti
 		THROW("Invalid mag filter");
 }
 
-ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data)
+void GlDevice::SetupTextureSampling(GLenum target, const SamplerSettings& samplerSettings)
+{
+	GLint minFilter, magFilter;
+	ConvertSamplerSettingsFilters(samplerSettings, minFilter, magFilter);
+	// set min filter
+	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, minFilter);
+	GlSystem::CheckErrors("Can't set texture min filter");
+	// set mag filter
+	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, magFilter);
+	GlSystem::CheckErrors("Can't set texture mag filter");
+
+	// set wrapping modes
+	glTexParameteri(target, GL_TEXTURE_WRAP_S, ConvertSamplerSettingsWrap(samplerSettings.wrapU));
+	GlSystem::CheckErrors("Can't set texture wrap U");
+	glTexParameteri(target, GL_TEXTURE_WRAP_T, ConvertSamplerSettingsWrap(samplerSettings.wrapV));
+	GlSystem::CheckErrors("Can't set texture wrap V");
+#ifndef ___INANITY_PLATFORM_EMSCRIPTEN
+	glTexParameteri(target, GL_TEXTURE_WRAP_R, ConvertSamplerSettingsWrap(samplerSettings.wrapW));
+	GlSystem::CheckErrors("Can't set texture wrap W");
+
+	// set min and max LOD.
+	glTexParameterf(target, GL_TEXTURE_MIN_LOD, samplerSettings.minLOD);
+	GlSystem::CheckErrors("Can't set min LOD");
+	glTexParameterf(target, GL_TEXTURE_MAX_LOD, samplerSettings.maxLOD);
+	GlSystem::CheckErrors("Can't set max LOD");
+
+	// set border color
+	glTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, samplerSettings.borderColor.t);
+	GlSystem::CheckErrors("Can't set border color");
+#endif
+}
+
+ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data, const SamplerSettings& samplerSettings)
 {
 	try
 	{
@@ -1070,14 +1109,7 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data)
 			}
 		}
 
-		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-#ifndef ___INANITY_PLATFORM_EMSCRIPTEN
-		glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-#endif
-		GlSystem::CheckErrors("Can't set texture parameters");
+		SetupTextureSampling(target, samplerSettings);
 
 		return NEW(GlTexture(internalTexture));
 	}
@@ -1093,7 +1125,12 @@ ptr<SamplerState> GlDevice::CreateSamplerState(const SamplerSettings& samplerSet
 
 	GLuint samplerName;
 	if(!(internalCaps & InternalCaps::samplerObjects))
-		THROW("Sampler states are not supported");
+#ifdef ___INANITY_PLATFORM_EMSCRIPTEN
+		// HACK: go further quietly
+		return 0;
+#else
+		THROW("Samplers are not supported");
+#endif
 
 	glGenSamplers(1, &samplerName);
 	GlSystem::CheckErrors("Can't gen sampler");
@@ -1106,18 +1143,18 @@ ptr<SamplerState> GlDevice::CreateSamplerState(const SamplerSettings& samplerSet
 	ConvertSamplerSettingsFilters(samplerSettings, minFilter, magFilter);
 	// set min filter
 	glSamplerParameteri(samplerName, GL_TEXTURE_MIN_FILTER, minFilter);
-	GlSystem::CheckErrors("Can't set texture min filter");
+	GlSystem::CheckErrors("Can't set sampler min filter");
 	// set mag filter
 	glSamplerParameteri(samplerName, GL_TEXTURE_MAG_FILTER, magFilter);
-	GlSystem::CheckErrors("Can't set texture mag filter");
+	GlSystem::CheckErrors("Can't set sampler mag filter");
 
 	// set wrapping modes
 	glSamplerParameteri(samplerName, GL_TEXTURE_WRAP_S, ConvertSamplerSettingsWrap(samplerSettings.wrapU));
-	GlSystem::CheckErrors("Can't set texture wrap U");
+	GlSystem::CheckErrors("Can't set sampler wrap U");
 	glSamplerParameteri(samplerName, GL_TEXTURE_WRAP_T, ConvertSamplerSettingsWrap(samplerSettings.wrapV));
-	GlSystem::CheckErrors("Can't set texture wrap V");
+	GlSystem::CheckErrors("Can't set sampler wrap V");
 	glSamplerParameteri(samplerName, GL_TEXTURE_WRAP_R, ConvertSamplerSettingsWrap(samplerSettings.wrapW));
-	GlSystem::CheckErrors("Can't set texture wrap W");
+	GlSystem::CheckErrors("Can't set sampler wrap W");
 
 	// set min and max LOD.
 	glSamplerParameterf(samplerName, GL_TEXTURE_MIN_LOD, samplerSettings.minLOD);

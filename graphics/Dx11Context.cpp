@@ -185,13 +185,13 @@ void Dx11Context::Update()
 			{
 				const LetSampler* let = (LetSampler*)cellSamplers[i].top;
 				Texture* abstractTexture = let ? let->texture : 0;
-				views[i] = abstractTexture
-					? fast_cast<Dx11Texture*>(abstractTexture)->GetShaderResourceViewInterface()
-					: 0;
+				Dx11Texture* texture = fast_cast<Dx11Texture*>(abstractTexture);
+				views[i] = texture ? texture->GetShaderResourceViewInterface() : 0;
 				SamplerState* abstractSamplerState = let ? let->samplerState : 0;
-				states[i] = abstractSamplerState
-					? fast_cast<Dx11SamplerState*>(abstractSamplerState)->GetSamplerStateInterface(device)
-					: 0;
+				Dx11SamplerState* samplerState = fast_cast<Dx11SamplerState*>(abstractSamplerState);
+				if(!samplerState && texture)
+					samplerState = texture->GetSamplerState();
+				states[i] = samplerState ? samplerState->GetSamplerStateInterface(device) : 0;
 			}
 
 			// set textures

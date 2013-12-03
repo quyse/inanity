@@ -91,7 +91,7 @@ public:
 
 	/// Создать рендербуфер.
 	/** Всегда доступен для чтения GPU. */
-	virtual ptr<RenderBuffer> CreateRenderBuffer(int width, int height, PixelFormat pixelFormat) = 0;
+	virtual ptr<RenderBuffer> CreateRenderBuffer(int width, int height, PixelFormat pixelFormat, const SamplerSettings& samplerSettings) = 0;
 	/// Создать depth-stencil буфер.
 	virtual ptr<DepthStencilBuffer> CreateDepthStencilBuffer(int width, int height, bool canBeResource) = 0;
 
@@ -116,7 +116,7 @@ public:
 	virtual ptr<AttributeBinding> CreateAttributeBinding(ptr<AttributeLayout> layout) = 0;
 
 	/// Создать статическую текстуру из файла с сырыми данными.
-	virtual ptr<Texture> CreateStaticTexture(ptr<RawTextureData> data) = 0;
+	virtual ptr<Texture> CreateStaticTexture(ptr<RawTextureData> data, const SamplerSettings& samplerSettings) = 0;
 
 	/// Create sampler state from sampler settings.
 	virtual ptr<SamplerState> CreateSamplerState(const SamplerSettings& samplerSettings) = 0;

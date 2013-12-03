@@ -10,8 +10,8 @@
 
 BEGIN_INANITY_GRAPHICS
 
-TextureManager::TextureManager(ptr<FileSystem> fileSystem, ptr<Device> device)
-: ResourceManager(fileSystem), device(device)
+TextureManager::TextureManager(ptr<FileSystem> fileSystem, ptr<Device> device, const SamplerSettings& samplerSettings)
+: ResourceManager(fileSystem), device(device), samplerSettings(samplerSettings)
 {
 	imageLoaders["bmp"] = NEW(BmpImageLoader());
 	imageLoaders["png"] = NEW(PngImageLoader());
@@ -37,7 +37,7 @@ ptr<Texture> TextureManager::Load(const String& textureName)
 		ptr<RawTextureData> textureData = imageLoader->Load(fileSystem->LoadFile(textureName));
 
 		// создать текстуру
-		return device->CreateStaticTexture(textureData);
+		return device->CreateStaticTexture(textureData, samplerSettings);
 	}
 	catch(Exception* exception)
 	{

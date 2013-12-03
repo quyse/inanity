@@ -7,16 +7,20 @@
 
 BEGIN_INANITY_GRAPHICS
 
+class Dx11SamplerState;
+
 /// Класс текстуры в DirectX 11.
 class Dx11Texture : public Texture
 {
 private:
 	ComPointer<ID3D11ShaderResourceView> shaderResourceView;
+	ptr<Dx11SamplerState> samplerState;
 
 public:
-	Dx11Texture(ComPointer<ID3D11ShaderResourceView> shaderResourceView);
+	Dx11Texture(ComPointer<ID3D11ShaderResourceView> shaderResourceView, ptr<Dx11SamplerState> samplerState);
 
 	ID3D11ShaderResourceView* GetShaderResourceViewInterface();
+	ptr<Dx11SamplerState> GetSamplerState() const;
 };
 
 END_INANITY_GRAPHICS
