@@ -13,12 +13,9 @@ class Dx11SamplerState : public SamplerState
 private:
 	ComPointer<ID3D11SamplerState> samplerState;
 
-	static D3D11_TEXTURE_ADDRESS_MODE ConvertWrap(Wrap wrap);
-
-	/// Обновить настройки семплера, если они менялись.
-	void Update(ID3D11Device* deviceInterface);
-
 public:
+	Dx11SamplerState(ComPointer<ID3D11SamplerState> samplerState);
+
 	ID3D11SamplerState* GetSamplerStateInterface(ID3D11Device* deviceInterface);
 };
 

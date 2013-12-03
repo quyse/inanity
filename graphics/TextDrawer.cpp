@@ -7,6 +7,7 @@
 #include "VertexShader.hpp"
 #include "PixelShader.hpp"
 #include "BlendState.hpp"
+#include "SamplerSettings.hpp"
 #include "SamplerState.hpp"
 #include "Device.hpp"
 #include "Context.hpp"
@@ -137,11 +138,12 @@ struct TextDrawerHelper : public Object
 			bs->SetColor(BlendState::colorSourceSrcAlpha, BlendState::colorSourceInvSrcAlpha, BlendState::operationAdd);
 
 			// настройки семплирования для шрифта
-			ss = device->CreateSamplerState();
-			ss->SetFilter(SamplerState::filterLinear, SamplerState::filterLinear, SamplerState::filterLinear);
-			ss->SetWrap(SamplerState::wrapBorder, SamplerState::wrapBorder, SamplerState::wrapBorder);
-			float color[] = { 0, 0, 0, 0 };
-			ss->SetBorderColor(color);
+			{
+				SamplerSettings s;
+				s.minFilter = s.mipFilter = s.magFilter = SamplerSettings::filterLinear;
+				s.wrapU = s.wrapV = s.wrapW = SamplerSettings::wrapBorder;
+				ss = device->CreateSamplerState(s);
+			}
 		}
 		catch(Exception* exception)
 		{

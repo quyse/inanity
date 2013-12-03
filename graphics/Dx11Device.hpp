@@ -2,6 +2,7 @@
 #define ___INANITY_GRAPHICS_DX11_DEVICE_HPP___
 
 #include "Device.hpp"
+#include "SamplerSettings.hpp"
 #include "../ComPointer.hpp"
 #include "d3d11.hpp"
 
@@ -26,6 +27,8 @@ private:
 	/** Получается для output по умолчанию (нулевого). */
 	DXGI_MODE_DESC GetClosestSupportedMode(const DXGI_MODE_DESC& desc) const;
 
+	static D3D11_TEXTURE_ADDRESS_MODE ConvertSamplerSettingsWrap(SamplerSettings::Wrap wrap);
+
 public:
 	Dx11Device(ptr<Dx11System> system, ComPointer<ID3D11Device> device, ComPointer<ID3D11DeviceContext> deviceContext);
 
@@ -45,7 +48,7 @@ public:
 	ptr<IndexBuffer> CreateStaticIndexBuffer(ptr<File> file, int indexSize);
 	ptr<AttributeBinding> CreateAttributeBinding(ptr<AttributeLayout> layout);
 	ptr<Texture> CreateStaticTexture(ptr<RawTextureData> data);
-	ptr<SamplerState> CreateSamplerState();
+	ptr<SamplerState> CreateSamplerState(const SamplerSettings& samplerSettings);
 	ptr<BlendState> CreateBlendState();
 
 	/// Получить интерфейс устройства DirectX 11.

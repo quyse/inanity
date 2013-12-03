@@ -522,9 +522,77 @@ ptr<Texture> Dx11Device::CreateStaticTexture(ptr<RawTextureData> data)
 	}
 }
 
-ptr<SamplerState> Dx11Device::CreateSamplerState()
+D3D11_TEXTURE_ADDRESS_MODE Dx11Device::ConvertSamplerSettingsWrap(SamplerSettings::Wrap wrap)
 {
-	return NEW(Dx11SamplerState());
+	switch(wrap)
+	{
+	case SamplerSettings::wrapRepeat:
+		return D3D11_TEXTURE_ADDRESS_WRAP;
+	case SamplerSettings::wrapRepeatMirror:
+		return D3D11_TEXTURE_ADDRESS_MIRROR;
+	case SamplerSettings::wrapClamp:
+		return D3D11_TEXTURE_ADDRESS_CLAMP;
+	case SamplerSettings::wrapBorder:
+		return D3D11_TEXTURE_ADDRESS_BORDER;
+	}
+	THROW("Invalid wrap mode");
+}
+
+ptr<SamplerState> Dx11Device::CreateSamplerState(const SamplerSettings& samplerSettings)
+{
+	BEGIN_TRY();
+
+	D3D11_SAMPLER_DESC desc = CD3D11_SAMPLER_DESC(CD3D11_DEFAULT());
+
+	// в DirectX общий параметр для фильтрации, так что разбираемся
+
+	static bool haveFilterConversionMap = false;
+	// параметры: min, mag, mip (как в DX, и не как в Sampler)
+	static D3D11_FILTER filterConversionMap[2][2][2] =
+	{
+		{
+			{
+				D3D11_FILTER_MIN_MAG_MIP_POINT,
+				D3D11_FILTER_MIN_MAG_POINT_MIP_LINEAR
+			},
+			{
+				D3D11_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT,
+				D3D11_FILTER_MIN_POINT_MAG_MIP_LINEAR
+			}
+		},
+		{
+			{
+				D3D11_FILTER_MIN_LINEAR_MAG_MIP_POINT,
+				D3D11_FILTER_MIN_LINEAR_MAG_POINT_MIP_LINEAR
+			},
+			{
+				D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT,
+				D3D11_FILTER_MIN_MAG_MIP_LINEAR
+			}
+		}
+	};
+
+	// фильтрация
+	desc.Filter = filterConversionMap[samplerSettings.minFilter][samplerSettings.magFilter][samplerSettings.mipFilter];
+	// режимы свёртки
+	desc.AddressU = ConvertSamplerSettingsWrap(samplerSettings.wrapU);
+	desc.AddressV = ConvertSamplerSettingsWrap(samplerSettings.wrapV);
+	desc.AddressW = ConvertSamplerSettingsWrap(samplerSettings.wrapW);
+	// минимальный и максимальный LOD
+	desc.MinLOD = samplerSettings.minLOD;
+	desc.MaxLOD = samplerSettings.maxLOD;
+	// цвет границы
+	for(int i = 0; i < 4; ++i)
+		desc.BorderColor[i] = samplerSettings.borderColor(i);
+
+	// создать sampler state
+	ComPointer<ID3D11SamplerState> samplerStateInterface;
+	if(FAILED(device->CreateSamplerState(&desc, &samplerStateInterface)))
+		THROW("Can't create sampler state");
+
+	return NEW(Dx11SamplerState(samplerStateInterface));
+
+	END_TRY("Can't create DirectX 11 sampler state");
 }
 
 ptr<BlendState> Dx11Device::CreateBlendState()

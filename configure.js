@@ -115,7 +115,7 @@ var libraries = {
 			'graphics.Device', 'graphics.Context', 'graphics.Output',
 			'graphics.FrameBuffer',
 			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.IndexBuffer',
-			'graphics.SamplerState', 'graphics.BlendState',
+			'graphics.SamplerSettings', 'graphics.BlendState',
 			'graphics.VertexLayout', 'graphics.VertexLayoutElement',
 			'graphics.AttributeLayout', 'graphics.AttributeLayoutElement', 'graphics.AttributeLayoutSlot',
 			'graphics.ShaderCache',

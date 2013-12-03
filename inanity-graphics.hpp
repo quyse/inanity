@@ -38,6 +38,7 @@
 #include "graphics/RawTextureData.hpp"
 #include "graphics/RenderBuffer.hpp"
 #include "graphics/RenderStage.hpp"
+#include "graphics/SamplerSettings.hpp"
 #include "graphics/SamplerState.hpp"
 #include "graphics/ShaderCache.hpp"
 #include "graphics/ShaderCompiler.hpp"

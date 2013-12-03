@@ -39,6 +39,7 @@ class AttributeBinding;
 class Texture;
 class RawTextureData;
 class SamplerState;
+struct SamplerSettings;
 class BlendState;
 
 /// Абстрактный класс устройства вывода.
@@ -117,8 +118,8 @@ public:
 	/// Создать статическую текстуру из файла с сырыми данными.
 	virtual ptr<Texture> CreateStaticTexture(ptr<RawTextureData> data) = 0;
 
-	/// Создать объект настроек семплирования.
-	virtual ptr<SamplerState> CreateSamplerState() = 0;
+	/// Create sampler state from sampler settings.
+	virtual ptr<SamplerState> CreateSamplerState(const SamplerSettings& samplerSettings) = 0;
 
 	/// Создать объект настроек смешивания.
 	virtual ptr<BlendState> CreateBlendState() = 0;

@@ -841,6 +841,91 @@ ptr<AttributeBinding> GlDevice::CreateAttributeBinding(ptr<AttributeLayout> layo
 	}
 }
 
+/// Convert abstracted wrap into OpenGL enum.
+GLint GlDevice::ConvertSamplerSettingsWrap(SamplerSettings::Wrap wrap)
+{
+	switch(wrap)
+	{
+	case SamplerSettings::wrapRepeat:
+		return GL_REPEAT;
+	case SamplerSettings::wrapRepeatMirror:
+		return GL_MIRRORED_REPEAT;
+	case SamplerSettings::wrapClamp:
+		return GL_CLAMP_TO_EDGE;
+	case SamplerSettings::wrapBorder:
+		return GL_CLAMP_TO_BORDER;
+	}
+	THROW("Invalid wrap mode");
+}
+
+void GlDevice::ConvertSamplerSettingsFilters(const SamplerSettings& samplerSettings, GLint& minFilter, GLint& magFilter)
+{
+	// get min filter
+	minFilter = -1;
+	if(samplerSettings.mipMapping)
+		switch(samplerSettings.minFilter)
+		{
+		case SamplerSettings::filterPoint:
+			switch(samplerSettings.mipFilter)
+			{
+			case SamplerSettings::filterPoint:
+				minFilter = GL_NEAREST_MIPMAP_NEAREST;
+				break;
+			case SamplerSettings::filterLinear:
+				minFilter = GL_NEAREST_MIPMAP_LINEAR;
+				break;
+			default:
+				break;
+			}
+			break;
+		case SamplerSettings::filterLinear:
+			switch(samplerSettings.mipFilter)
+			{
+			case SamplerSettings::filterPoint:
+				minFilter = GL_LINEAR_MIPMAP_NEAREST;
+				break;
+			case SamplerSettings::filterLinear:
+				minFilter = GL_LINEAR_MIPMAP_LINEAR;
+				break;
+			default:
+				break;
+			}
+			break;
+		default:
+			break;
+		}
+	else
+		switch(samplerSettings.minFilter)
+		{
+		case SamplerSettings::filterPoint:
+			minFilter = GL_NEAREST;
+			break;
+		case SamplerSettings::filterLinear:
+			minFilter = GL_LINEAR;
+			break;
+		default:
+			break;
+		}
+	if(minFilter == -1)
+		THROW("Invalid min or mip filter");
+
+	// get mag filter
+	magFilter = -1;
+	switch(samplerSettings.magFilter)
+	{
+	case SamplerSettings::filterPoint:
+		magFilter = GL_NEAREST;
+		break;
+	case SamplerSettings::filterLinear:
+		magFilter = GL_LINEAR;
+		break;
+	default:
+		break;
+	}
+	if(magFilter == -1)
+		THROW("Invalid mag filter");
+}
+
 ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data)
 {
 	try
@@ -1002,25 +1087,51 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data)
 	}
 }
 
-ptr<SamplerState> GlDevice::CreateSamplerState()
+ptr<SamplerState> GlDevice::CreateSamplerState(const SamplerSettings& samplerSettings)
 {
-	try
-	{
-		GLuint samplerName;
-		if(internalCaps & InternalCaps::samplerObjects)
-		{
-			glGenSamplers(1, &samplerName);
-			GlSystem::CheckErrors("Can't gen sampler");
-		}
-		else
-			samplerName = 0;
+	BEGIN_TRY();
 
-		return NEW(GlSamplerState(this, samplerName));
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY("Can't create OpenGL sampler state", exception);
-	}
+	GLuint samplerName;
+	if(!(internalCaps & InternalCaps::samplerObjects))
+		THROW("Sampler states are not supported");
+
+	glGenSamplers(1, &samplerName);
+	GlSystem::CheckErrors("Can't gen sampler");
+
+	ptr<SamplerState> samplerState = NEW(GlSamplerState(this, samplerName));
+
+	// setup sampler
+
+	GLint minFilter, magFilter;
+	ConvertSamplerSettingsFilters(samplerSettings, minFilter, magFilter);
+	// set min filter
+	glSamplerParameteri(samplerName, GL_TEXTURE_MIN_FILTER, minFilter);
+	GlSystem::CheckErrors("Can't set texture min filter");
+	// set mag filter
+	glSamplerParameteri(samplerName, GL_TEXTURE_MAG_FILTER, magFilter);
+	GlSystem::CheckErrors("Can't set texture mag filter");
+
+	// set wrapping modes
+	glSamplerParameteri(samplerName, GL_TEXTURE_WRAP_S, ConvertSamplerSettingsWrap(samplerSettings.wrapU));
+	GlSystem::CheckErrors("Can't set texture wrap U");
+	glSamplerParameteri(samplerName, GL_TEXTURE_WRAP_T, ConvertSamplerSettingsWrap(samplerSettings.wrapV));
+	GlSystem::CheckErrors("Can't set texture wrap V");
+	glSamplerParameteri(samplerName, GL_TEXTURE_WRAP_R, ConvertSamplerSettingsWrap(samplerSettings.wrapW));
+	GlSystem::CheckErrors("Can't set texture wrap W");
+
+	// set min and max LOD.
+	glSamplerParameterf(samplerName, GL_TEXTURE_MIN_LOD, samplerSettings.minLOD);
+	GlSystem::CheckErrors("Can't set min LOD");
+	glSamplerParameterf(samplerName, GL_TEXTURE_MAX_LOD, samplerSettings.maxLOD);
+	GlSystem::CheckErrors("Can't set max LOD");
+
+	// set border color
+	glSamplerParameterfv(samplerName, GL_TEXTURE_BORDER_COLOR, samplerSettings.borderColor.t);
+	GlSystem::CheckErrors("Can't set border color");
+
+	return samplerState;
+
+	END_TRY("Can't create OpenGL sampler state");
 }
 
 ptr<BlendState> GlDevice::CreateBlendState()

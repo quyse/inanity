@@ -4,6 +4,7 @@
 #include "Device.hpp"
 #include "DataType.hpp"
 #include "LayoutDataType.hpp"
+#include "SamplerSettings.hpp"
 #include "opengl.hpp"
 #include "../String.hpp"
 
@@ -83,6 +84,9 @@ private:
 	static void CompileShader(GLuint shaderName, ptr<File> file, ptr<GlShaderBindings>& shaderBindings);
 	static void GetAttributeSizeAndType(DataType dataType, LayoutDataType layoutDataType, GLint& size, GLenum& type, bool& integer);
 
+	static GLint ConvertSamplerSettingsWrap(SamplerSettings::Wrap wrap);
+	static void ConvertSamplerSettingsFilters(const SamplerSettings& samplerSettings, GLint& minFilter, GLint& magFilter);
+
 public:
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
@@ -115,7 +119,7 @@ public:
 	ptr<IndexBuffer> CreateStaticIndexBuffer(ptr<File> file, int indexSize);
 	ptr<AttributeBinding> CreateAttributeBinding(ptr<AttributeLayout> layout);
 	ptr<Texture> CreateStaticTexture(ptr<RawTextureData> data);
-	ptr<SamplerState> CreateSamplerState();
+	ptr<SamplerState> CreateSamplerState(const SamplerSettings& samplerSettings);
 	ptr<BlendState> CreateBlendState();
 };
 
