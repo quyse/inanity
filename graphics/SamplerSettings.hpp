@@ -51,6 +51,12 @@ struct SamplerSettings
 	vec4 borderColor;
 
 	SamplerSettings();
+
+	void SetFilter(Filter minFilter, Filter mipFilter, Filter mapFilter);
+	void SetFilter(Filter allFilter);
+
+	void SetWrap(Wrap wrapU, Wrap wrapV, Wrap wrapW);
+	void SetWrap(Wrap wrapAll);
 };
 
 END_INANITY_GRAPHICS
