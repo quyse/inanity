@@ -23,8 +23,8 @@ public:
 
 	void Draw(Visualizer* visualizer, Position offset);
 
-	void EventMouseDown(Position position, MouseButton button);
-	void EventMouseUp(Position position, MouseButton button);
+	void EventMouseDown(Position position, MouseEvent::Button button);
+	void EventMouseUp(Position position, MouseEvent::Button button);
 	void EventMouseLeave();
 };
 

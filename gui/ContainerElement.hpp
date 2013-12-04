@@ -34,8 +34,8 @@ public:
 	virtual ptr<Element> GetElementByPosition(Position position) const = 0;
 
 	void EventMouseMove(Position position);
-	void EventMouseDown(Position position, MouseButton button);
-	void EventMouseUp(Position position, MouseButton button);
+	void EventMouseDown(Position position, MouseEvent::Button button);
+	void EventMouseUp(Position position, MouseEvent::Button button);
 	void EventMouseLeave();
 	void EventSetFocus();
 	void EventLostFocus();

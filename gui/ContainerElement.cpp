@@ -57,14 +57,14 @@ void ContainerElement::EventMouseMove(Position position)
 		mousedElement->EventMouseMove(position - mousedElement->GetPosition());
 }
 
-void ContainerElement::EventMouseDown(Position position, MouseButton button)
+void ContainerElement::EventMouseDown(Position position, MouseEvent::Button button)
 {
 	ptr<Element> element = GetElementByPosition(position);
 	if(element)
 		element->EventMouseDown(position - element->GetPosition(), button);
 }
 
-void ContainerElement::EventMouseUp(Position position, MouseButton button)
+void ContainerElement::EventMouseUp(Position position, MouseEvent::Button button)
 {
 	ptr<Element> element = GetElementByPosition(position);
 	if(element)

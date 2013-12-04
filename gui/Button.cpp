@@ -24,13 +24,13 @@ void Button::Draw(Visualizer* visualizer, Position offset)
 	visualizer->DrawRectText(pressed ? VisualFonts::ButtonPressed : moused ? VisualFonts::ButtonHighlighted : VisualFonts::Button, text, offset.x, offset.y, offset.x + size.x, offset.y + size.y);
 }
 
-void Button::EventMouseDown(Position position, MouseButton button)
+void Button::EventMouseDown(Position position, MouseEvent::Button button)
 {
 	Element::EventMouseDown(position, button);
 	pressed = true;
 }
 
-void Button::EventMouseUp(Position position, MouseButton button)
+void Button::EventMouseUp(Position position, MouseEvent::Button button)
 {
 	Element::EventMouseUp(position, button);
 	pressed = false;

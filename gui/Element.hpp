@@ -65,13 +65,13 @@ public:
 	\param position Положение мыши относительно элемента.
 	\param button Нажатая кнопка мыши.
 	*/
-	virtual void EventMouseDown(Position position, MouseButton button);
+	virtual void EventMouseDown(Position position, MouseEvent::Button button);
 	/// На элементе отжата мышь.
 	/**
 	\param position Положение мыши относительно элемента.
 	\param button Отжатая кнопка мыши.
 	*/
-	virtual void EventMouseUp(Position position, MouseButton button);
+	virtual void EventMouseUp(Position position, MouseEvent::Button button);
 	/// В пространство элемента вошла мышь.
 	virtual void EventMouseEnter();
 	/// Мышь вышла из пространства элемента.

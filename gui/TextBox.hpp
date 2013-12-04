@@ -27,7 +27,7 @@ public:
 
 	void Draw(Visualizer* visualizer, Position offset);
 
-	void EventMouseDown(Position position, MouseButton button);
+	void EventMouseDown(Position position, MouseEvent::Button button);
 	void EventKeyDown(Key key);
 	void EventKeyUp(Key key);
 	void EventKeyPress(wchar_t key);

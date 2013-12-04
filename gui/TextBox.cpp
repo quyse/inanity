@@ -48,7 +48,7 @@ void TextBox::Draw(Visualizer* visualizer, Position offset)
 	}
 }
 
-void TextBox::EventMouseDown(Position position, MouseButton button)
+void TextBox::EventMouseDown(Position position, MouseEvent::Button button)
 {
 	Element::EventMouseDown(position, button);
 

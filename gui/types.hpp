@@ -3,22 +3,25 @@
 
 #include "gui.hpp"
 #include "../inanity-math.hpp"
+#include "../input/Key.hpp"
+#include "../input/Event.hpp"
 
 BEGIN_INANITY_GUI
 
-/// Тип, используемый для указания позиции.
+/// GUI position type.
 typedef Math::vec2 Position;
-/// Тип, используемый для указания размера.
+/// GUI size type.
 typedef Math::vec2 Size;
 
-/// Кнопки мыши.
-enum MouseButton
-{
-	Left, Right, Middle
-};
+/// Input mouse event type.
+/** Contains:
+enum Type
+enum Button
+*/
+typedef Input::Event::Mouse MouseEvent;
 
-/// Тип для клавиш клавиатуры.
-typedef unsigned int Key;
+/// Keyboard key type.
+typedef Input::Key Key;
 
 END_INANITY_GUI
 

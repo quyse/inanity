@@ -72,11 +72,11 @@ void Element::EventMouseMove(Position position)
 {
 }
 
-void Element::EventMouseDown(Position position, MouseButton button)
+void Element::EventMouseDown(Position position, MouseEvent::Button button)
 {
 }
 
-void Element::EventMouseUp(Position position, MouseButton button)
+void Element::EventMouseUp(Position position, MouseEvent::Button button)
 {
 }
 
