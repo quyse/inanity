@@ -8,6 +8,7 @@ BEGIN_INANITY_GUI
 
 class Visualizer;
 class ContainerElement;
+
 /// Класс элемента пользовательского интерфейса.
 /** Класс, служащий базовым для всех элементов
 интерфейса. Предоставляет заготовки для всех событий
@@ -16,8 +17,6 @@ class ContainerElement;
 class Element : public Object
 {
 protected:
-	/// Визуализатор.
-	ptr<Visualizer> visualizer;
 	/// Родительский элемент.
 	ContainerElement* parent;
 	/// Положение элемента (относительно родительского элемента).
@@ -33,8 +32,7 @@ protected:
 	void Notify(int code);
 
 public:
-	/// Создать элемент.
-	Element(ptr<Visualizer> visualizer);
+	Element();
 
 	/// Получить родительский элемент.
 	ContainerElement* GetParent() const;

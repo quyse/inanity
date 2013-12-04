@@ -6,9 +6,8 @@
 
 BEGIN_INANITY_GUI
 
-TextBox::TextBox(ptr<Visualizer> visualizer) : Element(visualizer), selectionBegin(0), selectionEnd(0), shiftPressed(false)
-{
-}
+TextBox::TextBox() : selectionBegin(0), selectionEnd(0), shiftPressed(false)
+{}
 
 const String& TextBox::GetText() const
 {

@@ -5,10 +5,6 @@
 
 BEGIN_INANITY_GUI
 
-FreeContainer::FreeContainer(ptr<Visualizer> visualizer) : ContainerElement(visualizer)
-{
-}
-
 void FreeContainer::AddElement(ptr<Element> element)
 {
 	elements.push_back(element);

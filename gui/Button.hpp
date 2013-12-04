@@ -6,8 +6,6 @@
 
 BEGIN_INANITY_GUI
 
-class Visualizer;
-
 /// Класс кнопки UI.
 class Button : public Element
 {
@@ -18,7 +16,7 @@ private:
 	bool pressed;
 
 public:
-	Button(ptr<Visualizer> visualizer);
+	Button();
 
 	const String& GetText() const;
 	void SetText(const String& text);

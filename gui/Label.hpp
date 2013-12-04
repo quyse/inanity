@@ -6,8 +6,6 @@
 
 BEGIN_INANITY_GUI
 
-class Visualizer;
-
 /// Класс метки.
 class Label : public Element
 {
@@ -16,8 +14,6 @@ private:
 	String text;
 
 public:
-	Label(ptr<Visualizer> visualizer);
-
 	const String& GetText() const;
 	void SetText(const String& text);
 

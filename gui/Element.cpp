@@ -1,13 +1,11 @@
 #include "Element.hpp"
-#include "Visualizer.hpp"
 #include "ContainerElement.hpp"
 
 BEGIN_INANITY_GUI
 
-Element::Element(ptr<Visualizer> visualizer)
-	: visualizer(visualizer), parent(0), position(0, 0), size(1, 1), focused(false), moused(false)
-{
-}
+Element::Element() :
+	parent(0), position(0, 0), size(1, 1), focused(false), moused(false)
+{}
 
 void Element::Notify(int code)
 {

@@ -5,7 +5,6 @@
 
 BEGIN_INANITY_GUI
 
-class Visualizer;
 class Notificator;
 
 /// Базовый класс контейнерного элемента.
@@ -22,8 +21,6 @@ private:
 	ptr<Notificator> notificator;
 
 public:
-	ContainerElement(ptr<Visualizer> visualizer);
-
 	/// Указать приёмник уведомлений.
 	void SetNotificator(ptr<Notificator> notificator);
 	/// Запросить фокус элемента.

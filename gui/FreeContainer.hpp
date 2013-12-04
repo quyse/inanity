@@ -6,8 +6,6 @@
 
 BEGIN_INANITY_GUI
 
-class Visualizer;
-
 /// Класс "свободного" контейнера элементов.
 /** Позволяет размещать на себе элементы свободно, без всяких ограничений. */
 class FreeContainer : public ContainerElement
@@ -17,8 +15,6 @@ private:
 	std::vector<ptr<Element> > elements;
 
 public:
-	FreeContainer(ptr<Visualizer> visualizer);
-
 	/// Добавить элемент.
 	void AddElement(ptr<Element> element);
 	/// Удалить элемент.

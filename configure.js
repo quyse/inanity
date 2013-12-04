@@ -200,7 +200,9 @@ var libraries = {
 	// ******* подсистема GUI
 	'libinanity-gui': {
 		objects: [
-			'gui.Element', 'gui.ContainerElement', 'gui.FreeContainer', 'gui.Label', 'gui.Button', 'gui.TextBox']
+			'gui.Element', 'gui.ContainerElement', 'gui.FreeContainer',
+			'gui.Label', 'gui.Button', 'gui.TextBox'
+		]
 	}
 };
 

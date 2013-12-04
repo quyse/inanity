@@ -5,10 +5,6 @@
 
 BEGIN_INANITY_GUI
 
-Label::Label(ptr<Visualizer> visualizer) : Element(visualizer)
-{
-}
-
 const String& Label::GetText() const
 {
 	return text;

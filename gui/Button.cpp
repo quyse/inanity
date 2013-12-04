@@ -5,9 +5,7 @@
 
 BEGIN_INANITY_GUI
 
-Button::Button(ptr<Visualizer> visualizer) : Element(visualizer), pressed(false)
-{
-}
+Button::Button() : pressed(false) {}
 
 const String& Button::GetText() const
 {

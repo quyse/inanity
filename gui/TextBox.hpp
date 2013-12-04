@@ -6,9 +6,7 @@
 
 BEGIN_INANITY_GUI
 
-class Visualizer;
-
-/// Класс текстового поля UI.
+/// Text box class.
 class TextBox : public Element
 {
 private:
@@ -22,7 +20,7 @@ private:
 	bool shiftPressed;
 
 public:
-	TextBox(ptr<Visualizer> visualizer);
+	TextBox();
 
 	const String& GetText() const;
 	void SetText(const String& text);
