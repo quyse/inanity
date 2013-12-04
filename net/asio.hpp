@@ -4,6 +4,7 @@
 #include "net.hpp"
 
 #ifdef ___INANITY_PLATFORM_WINDOWS
+#define WIN32_LEAN_AND_MEAN
 #include "../platform/windows.hpp"
 #endif
 
