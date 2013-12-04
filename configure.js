@@ -250,13 +250,13 @@ var executables = {
 	// TEST
 	, nettesttcp: {
 		objects: ['net.test-chat-tcp'],
-		staticLibraries: ['libinanity-base', 'libinanity-asio'],
+		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-platform'],
 		dynamicLibraries: []
 	}
 	// TEST
 	, nettestudp: {
 		objects: ['net.test-chat-udp'],
-		staticLibraries: ['libinanity-base', 'libinanity-asio'],
+		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-platform'],
 		dynamicLibraries: []
 	}
 	// TEST
