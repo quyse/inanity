@@ -4,3 +4,6 @@
 [submodule "deps/v8/repo"]
 	path = deps/v8/repo
 	url = git://github.com/v8/v8.git
+[submodule "deps/freetype/repo"]
+	path = deps/freetype/repo
+	url = git://git.sv.nongnu.org/freetype/freetype2.git

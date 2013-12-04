@@ -17,3 +17,4 @@ utf8 (http://utfcpp.sourceforge.net/) - own license (in /deps/utf8.h heading com
 libogg (http://xiph.org/ogg/) - BSD-style license (see /deps/libogg/COPYING)
 libvorbis (http://xiph.org/vorbis/) - BSD-style license (see /deps/libvorbis/COPYING)
 v8 (https://developers.google.com/v8/) - New BSD license (see /deps/v8/repo/LICENSE)
+freetype (http://freetype.org/) - Freetype license (see /deps/freetype/repo/docs/FTL.TXT)
