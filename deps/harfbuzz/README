@@ -1,0 +1,1 @@
+harfbuzz added as a git submodule, but several source files need to be generated. Such files were get from harfbuzz's release tarball and placed to 'generated' directory.
