@@ -7,3 +7,6 @@
 [submodule "deps/freetype/repo"]
 	path = deps/freetype/repo
 	url = git://git.sv.nongnu.org/freetype/freetype2.git
+[submodule "deps/harfbuzz/repo"]
+	path = deps/harfbuzz/repo
+	url = git://github.com/behdad/harfbuzz.git
