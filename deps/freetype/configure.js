@@ -16,7 +16,7 @@ exports.configureCompiler = function(objectFile, compiler) {
 
 var modules = {
 	autofit: "autofit",
-	base: "ftbase",
+	base: "ftbase ftinit ftsystem ftbitmap",
 	bdf: "bdf",
 	bzip2: "ftbzip2",
 	cache: "ftcache",
@@ -24,7 +24,7 @@ var modules = {
 	cid: "type1cid",
 	gxvalid: "gxvalid",
 	gzip: "ftgzip",
-	// lzw is dropped
+	lzw: "ftlzw",
 	otvalid: "otvalid",
 	pcf: "pcf",
 	pfr: "pfr",
@@ -37,7 +37,7 @@ var modules = {
 	truetype: "truetype",
 	type1: "type1",
 	type42: "type42",
-	// winfonts is dropped
+	winfonts: "winfnt"
 };
 
 exports.configureComposer = function(libraryFile, composer) {
