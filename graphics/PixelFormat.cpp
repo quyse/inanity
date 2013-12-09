@@ -70,6 +70,25 @@ int PixelFormat::GetPixelSize(Size size)
 	}
 }
 
+bool operator==(const PixelFormat& a, const PixelFormat& b)
+{
+	if(a.type != b.type)
+		return false;
+	switch(a.type)
+	{
+	case PixelFormat::typeUnknown:
+		return false;
+	case PixelFormat::typeUncompressed:
+		return
+			a.pixel == b.pixel &&
+			a.format == b.format &&
+			a.size == b.size;
+	case PixelFormat::typeCompressed:
+		return a.compression == b.compression;
+	}
+	return false;
+}
+
 PixelFormat PixelFormats::uintRGBA32(
 	PixelFormat::pixelRGBA,
 	PixelFormat::formatUint,

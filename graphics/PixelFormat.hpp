@@ -81,6 +81,8 @@ struct PixelFormat
 	static int GetPixelSize(Size size);
 };
 
+bool operator==(const PixelFormat& a, const PixelFormat& b);
+
 struct PixelFormats
 {
 	static PixelFormat uintRGBA32;
