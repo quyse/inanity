@@ -88,6 +88,9 @@ public:
 	int GetMipBufferWidth(int mip = 0) const;
 	int GetMipBufferHeight(int mip = 0) const;
 
+	/// Get pixel size (only for uncompressed formats).
+	int GetPixelSize() const;
+
 	/// Get data of one mip.
 	void* GetMipData(int image = 0, int mip = 0) const;
 	/// Get line pitch into data of one image.
@@ -99,6 +102,18 @@ public:
 	void Serialize(ptr<OutputStream> stream);
 	/// Load texture from stream.
 	static ptr<RawTextureData> Deserialize(ptr<InputStream> stream);
+
+	/// Blit another 2D image on this image.
+	/** Clip if isn't in bounds. */
+	void Blit(RawTextureData* image, int destX, int destY, int sourceX, int sourceY, int width, int height);
+
+	/// Union several 2D images into one.
+	/** Images packed in rows, with specified result width. */
+	static ptr<RawTextureData> ShelfUnion(
+		const std::vector<ptr<RawTextureData> >& images,
+		int resultWidth,
+		std::vector<std::pair<int, int> >& outPositions
+	);
 };
 
 END_INANITY_GRAPHICS

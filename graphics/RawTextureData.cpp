@@ -141,6 +141,20 @@ int RawTextureData::GetMipBufferHeight(int mip) const
 	return height;
 }
 
+int RawTextureData::GetPixelSize() const
+{
+	int pixelSize;
+	switch(format.type)
+	{
+	case PixelFormat::typeUncompressed:
+		pixelSize = PixelFormat::GetPixelSize(format.size);
+		break;
+	default:
+		pixelSize = 0;
+	}
+	return pixelSize;
+}
+
 void* RawTextureData::GetMipData(int image, int mip) const
 {
 	return (char*)pixels->GetData() + image * arrayPitch + mipOffsets[mip];
@@ -152,21 +166,7 @@ int RawTextureData::GetMipLinePitch(int mip) const
 	switch(format.type)
 	{
 	case PixelFormat::typeUncompressed:
-		{
-			int pixelSize = 0;
-			switch(format.size)
-			{
-			case PixelFormat::size8bit: pixelSize = 1; break;
-			case PixelFormat::size16bit: pixelSize = 2; break;
-			case PixelFormat::size24bit: pixelSize = 3; break;
-			case PixelFormat::size32bit: pixelSize = 4; break;
-			case PixelFormat::size64bit: pixelSize = 8; break;
-			case PixelFormat::size96bit: pixelSize = 12; break;
-			case PixelFormat::size128bit: pixelSize = 16; break;
-			}
-			return width * pixelSize;
-		}
-		break;
+		return width * PixelFormat::GetPixelSize(format.size);
 	case PixelFormat::typeCompressed:
 		{
 			int blockSize = 0;
@@ -180,7 +180,6 @@ int RawTextureData::GetMipLinePitch(int mip) const
 			}
 			return width / 4 * blockSize;
 		}
-		break;
 	default:
 		return 0;
 	}
@@ -280,6 +279,157 @@ ptr<RawTextureData> RawTextureData::Deserialize(ptr<InputStream> stream)
 	{
 		THROW_SECONDARY("Can't deserialize raw texture data", exception);
 	}
+}
+
+void RawTextureData::Blit(RawTextureData* image, int destX, int destY, int sourceX, int sourceY, int width, int height)
+{
+	BEGIN_TRY();
+
+	if(!(format == image->format))
+		THROW("Format should be the same");
+	if(!(
+		width > 0 &&
+		height > 0 &&
+		depth == 0))
+		THROW("Wrong destination image type");
+	if(!(
+		image->width > 0 &&
+		image->height > 0 &&
+		image->depth == 0))
+		THROW("Wrong source image type");
+
+	if(destX < 0)
+	{
+		sourceX -= destX;
+		width += destX;
+		destX = 0;
+	}
+	if(destY < 0)
+	{
+		sourceY -= destY;
+		height += destY;
+		destY = 0;
+	}
+
+	width = std::min(sourceX + width, image->width) - sourceX;
+	width = std::min(destX + width, this->width) - destX;
+	if(width <= 0)
+		return;
+
+	height = std::min(sourceY + height, image->height) - sourceY;
+	height = std::min(destY + height, this->height) - destY;
+	if(height <= 0)
+		return;
+
+	char* destData = (char*)GetMipData();
+	char* sourceData = (char*)image->GetMipData();
+	int destPitch = GetMipLinePitch();
+	int sourcePitch = image->GetMipLinePitch();
+	int pixelSize = GetPixelSize();
+	int copySize = width * pixelSize;
+
+	for(int i = 0; i < height; ++i)
+		memcpy(
+			destData + (i + destY) * destPitch + destX * pixelSize,
+			sourceData + (i + sourceY) * sourcePitch + sourceX * pixelSize,
+			copySize);
+
+	END_TRY("Can't blit raw texture data");
+}
+
+ptr<RawTextureData> RawTextureData::ShelfUnion(
+	const std::vector<ptr<RawTextureData> >& images,
+	int resultWidth,
+	std::vector<std::pair<int, int> >& outPositions
+)
+{
+	BEGIN_TRY();
+
+	// check types of images
+	for(size_t i = 0; i < images.size(); ++i)
+	{
+		RawTextureData* image = images[i];
+		if(!(
+			image->width > 0 &&
+			image->height > 0 &&
+			image->depth == 0 &&
+			image->mips == 1 &&
+			image->count == 0))
+			THROW("Wrong image type");
+	}
+
+	// first pass: determine result height
+	int resultHeight = 0;
+	{
+		int currentX = 0, currentRowHeight = 0;
+		for(size_t i = 0; i < images.size(); ++i)
+		{
+			ptr<RawTextureData> image = images[i];
+			int width = image->GetMipWidth();
+			if(currentX + width > resultWidth)
+			{
+				// move to the next row
+				resultHeight += currentRowHeight;
+				currentRowHeight = 0;
+				currentX = 0;
+			}
+			currentX += width;
+			currentRowHeight = std::max(currentRowHeight, image->GetMipHeight());
+		}
+		resultHeight += currentRowHeight;
+	}
+
+	// second pass: combine images
+	outPositions.resize(images.size());
+	ptr<MemoryFile> pixelsFile = NEW(MemoryFile(resultWidth * resultHeight));
+	char* pixelsData = (char*)pixelsFile->GetData();
+	memset(pixelsData, 128, pixelsFile->GetSize());
+	{
+		int currentX = 0, currentRowY = 0, currentRowHeight = 0;
+		for(size_t i = 0; i < images.size(); ++i)
+		{
+			ptr<RawTextureData> image = images[i];
+			int width = image->GetMipWidth();
+			if(currentX + width > resultWidth)
+			{
+				// move to the next row
+				currentRowY += currentRowHeight;
+				currentRowHeight = 0;
+				currentX = 0;
+			}
+
+			// place image
+			int height = image->GetMipHeight();
+			const char* data = (const char*)image->GetMipData();
+			for(int y = 0; y < height; ++y)
+				memcpy(
+					pixelsData + (currentRowY + y) * resultWidth + currentX,
+					data + y * width,
+					width);
+
+			// output a position
+			outPositions[i].first = currentX;
+			outPositions[i].second = currentRowY;
+
+			currentX += width;
+			currentRowHeight = std::max(currentRowHeight, height);
+		}
+	}
+
+	return NEW(RawTextureData(
+		pixelsFile,
+		PixelFormat(
+			PixelFormat::pixelR,
+			PixelFormat::formatUint,
+			PixelFormat::size8bit),
+		resultWidth,
+		resultHeight,
+		0, // depth
+		1, // mips
+		0 // count
+		));
+
+	END_TRY("Can't union 2D raw images");
 }
 
 END_INANITY_GRAPHICS
