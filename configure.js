@@ -18,6 +18,8 @@ exports.configureCompiler = function(objectFile, compiler) {
 	compiler.addIncludeDir('deps/bullet/repo/src');
 	compiler.addIncludeDir('deps/libogg/include');
 	compiler.addIncludeDir('deps/libvorbis/include');
+	compiler.addIncludeDir('deps/freetype/repo/include');
+	compiler.addIncludeDir('deps/harfbuzz/generated');
 };
 
 /**
@@ -201,7 +203,16 @@ var libraries = {
 	'libinanity-gui': {
 		objects: [
 			'gui.Element', 'gui.ContainerElement', 'gui.FreeContainer',
-			'gui.Label', 'gui.Button', 'gui.TextBox'
+			'gui.Label', 'gui.Button', 'gui.TextBox',
+			'gui.Font',
+			// software
+			'gui.SwCanvas', 'gui.SwFontGlyphs',
+			// graphics
+			'gui.GrCanvas', 'gui.GrFontGlyphs',
+			// freetype
+			'gui.FtEngine', 'gui.FtFontFace',
+			// harfbuzz
+			'gui.HbFontShape'
 		]
 	}
 };
