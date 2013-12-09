@@ -278,6 +278,20 @@ var executables = {
 		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-http'],
 		dynamicLibraries: []
 	}
+	// TEST
+	, testft: {
+		objects: ['gui.testft'],
+		staticLibraries: [
+			'libinanity-base',
+			'libinanity-graphics',
+			'libinanity-gui',
+			'libinanity-platform',
+			'libinanity-compress',
+			'deps/freetype//libfreetype',
+			'deps/harfbuzz//libharfbuzz',
+			],
+		dynamicLibraries: []
+	}
 };
 
 exports.configureComposer = function(libraryFile, composer) {
