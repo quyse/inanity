@@ -67,6 +67,7 @@ public:
 	void Close();
 	void Run(ptr<Handler> activeHandler);
 	ptr<Graphics::Output> CreateOutput();
+	void PlaceCursor(int x, int y);
 
 	/// Создать окно для DirectX.
 	static ptr<Win32Window> CreateForDirectX(const String& title,

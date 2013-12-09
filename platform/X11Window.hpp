@@ -53,6 +53,7 @@ public:
 	void Close();
 	void Run(ptr<Handler> activeHandler);
 	ptr<Graphics::Output> CreateOutput();
+	void PlaceCursor(int x, int y);
 
 	ptr<X11Display> GetDisplay() const;
 	xcb_window_t GetHandle() const;

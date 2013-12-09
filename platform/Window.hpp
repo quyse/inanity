@@ -34,6 +34,9 @@ public:
 	void SetMouseLock(bool mouseLock);
 	/// Set hardware (OS) mouse cursor visibility.
 	void SetCursorVisible(bool cursorVisible);
+	/// Set position of hardware mouse cursor.
+	/** Coordinates are relative to window. */
+	virtual void PlaceCursor(int x, int y) = 0;
 
 protected:
 	/// Mouse lock state.

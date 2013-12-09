@@ -45,6 +45,11 @@ ptr<Graphics::Output> EmsWindow::CreateOutput()
 	return NEW(Graphics::EmsOutput());
 }
 
+void EmsWindow::PlaceCursor(int x, int y)
+{
+	// not implemented yet
+}
+
 void EmsWindow::UpdateMouseLock()
 {
 	// not implemented yet

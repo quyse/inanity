@@ -34,6 +34,7 @@ public:
 	void Close();
 	void Run(ptr<Handler> activeHandler);
 	ptr<Graphics::Output> CreateOutput();
+	void PlaceCursor(int x, int y);
 };
 
 END_INANITY_PLATFORM

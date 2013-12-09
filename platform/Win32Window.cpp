@@ -56,6 +56,13 @@ ptr<Graphics::Output> Win32Window::CreateOutput()
 	return NEW(Graphics::Win32Output(this));
 }
 
+void Win32Window::PlaceCursor(int x, int y)
+{
+	POINT pt = { x, y };
+	ClientToScreen(hWnd, &pt);
+	SetCursorPos(pt.x, pt.y);
+}
+
 ptr<Win32Window> Win32Window::CreateForDirectX(const String& title, int left, int top, int width, int height)
 {
 	static ATOM windowClass = NULL;

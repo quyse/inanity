@@ -54,6 +54,11 @@ ptr<Graphics::Output> X11Window::CreateOutput()
 	return NEW(Graphics::X11Output(this));
 }
 
+void X11Window::PlaceCursor(int x, int y)
+{
+	// not implemented yet
+}
+
 ptr<X11Display> X11Window::GetDisplay() const
 {
 	return display;
