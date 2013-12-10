@@ -21,14 +21,10 @@ public:
 	Offset coords: (0, 0) is left-bottom. */
 	struct Glyph
 	{
-		/// Left-bottom UV coordinates.
-		Graphics::vec2 uvLeftBottom;
-		/// Right-top UV coordinates.
-		Graphics::vec2 uvRightTop;
-		/// Offset from pen point to left-bottom corner, in pixels.
-		Graphics::vec2 offsetLeftBottom;
-		/// Offset from pen point to right-top corner, in pixels.
-		Graphics::vec2 offsetRightTop;
+		/// Left-bottom + right-top UV coordinates.
+		Graphics::vec4 uv;
+		/// Offset from pen point to left-bottom + right-top corner, in pixels.
+		Graphics::vec4 offset;
 	};
 
 	typedef std::vector<Glyph> Glyphs;
