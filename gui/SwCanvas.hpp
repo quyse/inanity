@@ -20,7 +20,7 @@ public:
 		ptr<Graphics::RawTextureData> image,
 		const FontGlyphs::GlyphInfos& glyphInfos
 	);
-	void DrawGlyph(FontGlyphs* glyphs, int glyphIndex, const Graphics::vec2& penPoint);
+	void DrawGlyph(FontGlyphs* glyphs, int glyphIndex, const Graphics::vec2& penPoint, const Graphics::vec4& color);
 };
 
 END_INANITY_GUI
