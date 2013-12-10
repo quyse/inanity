@@ -399,7 +399,7 @@ ptr<RawTextureData> RawTextureData::ShelfUnion(
 	outPositions.resize(imagesCount);
 	ptr<MemoryFile> pixelsFile = NEW(MemoryFile(resultWidth * resultHeight));
 	char* pixelsData = (char*)pixelsFile->GetData();
-	memset(pixelsData, 128, pixelsFile->GetSize());
+	memset(pixelsData, 0, pixelsFile->GetSize());
 	{
 		int currentX = border, currentRowY = border, currentRowHeight = 0;
 		for(int i = 0; i < imagesCount; ++i)
