@@ -387,7 +387,7 @@ ptr<RawTextureData> RawTextureData::ShelfUnion(
 				// move to the next row
 				resultHeight += currentRowHeight;
 				currentRowHeight = 0;
-				currentX = 0;
+				currentX = border;
 			}
 			currentX += width + border;
 			currentRowHeight = std::max(currentRowHeight, image->GetMipHeight() + border);
@@ -411,7 +411,7 @@ ptr<RawTextureData> RawTextureData::ShelfUnion(
 				// move to the next row
 				currentRowY += currentRowHeight;
 				currentRowHeight = 0;
-				currentX = 0;
+				currentX = border;
 			}
 
 			// place image
