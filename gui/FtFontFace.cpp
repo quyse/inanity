@@ -83,8 +83,10 @@ ptr<FontGlyphs> FtFontFace::CreateGlyphs(Canvas* canvas, int size)
 		else
 		{
 			// empty glyph
+			ptr<File> pixelsFile = NEW(MemoryFile(1));
+			*(unsigned char*)pixelsFile->GetData() = 0;
 			glyphImage = NEW(RawTextureData(
-				NEW(MemoryFile(1)),
+				pixelsFile,
 				PixelFormat(
 					PixelFormat::pixelR,
 					PixelFormat::formatUint,
