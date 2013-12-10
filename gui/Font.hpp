@@ -24,7 +24,7 @@ public:
 	ptr<FontShape> GetShape() const;
 	ptr<FontGlyphs> GetGlyphs() const;
 
-	void DrawString(Canvas* canvas, const String& text, const Graphics::vec2& position);
+	void DrawString(Canvas* canvas, const String& text, const Graphics::vec2& position, const Graphics::vec4& color);
 };
 
 END_INANITY_GUI

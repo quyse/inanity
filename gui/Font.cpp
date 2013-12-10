@@ -17,13 +17,13 @@ ptr<FontGlyphs> Font::GetGlyphs() const
 	return glyphs;
 }
 
-void Font::DrawString(Canvas* canvas, const String& text, const Graphics::vec2& position)
+void Font::DrawString(Canvas* canvas, const String& text, const Graphics::vec2& position, const Graphics::vec4& color)
 {
 	outGlyphs.clear();
 	shape->Shape(text, nullptr, &outGlyphs);
 
 	for(size_t i = 0; i < outGlyphs.size(); ++i)
-		canvas->DrawGlyph(glyphs, outGlyphs[i].number, position + outGlyphs[i].position);
+		canvas->DrawGlyph(glyphs, outGlyphs[i].number, position + outGlyphs[i].position, color);
 }
 
 END_INANITY_GUI

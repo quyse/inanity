@@ -23,7 +23,7 @@ public:
 		const FontGlyphs::GlyphInfos& glyphInfos
 		) = 0;
 	/// Draw glyph.
-	virtual void DrawGlyph(FontGlyphs* glyphs, int glyphIndex, const Graphics::vec2& penPoint) = 0;
+	virtual void DrawGlyph(FontGlyphs* glyphs, int glyphIndex, const Graphics::vec2& penPoint, const Graphics::vec4& color) = 0;
 };
 
 END_INANITY_GUI
