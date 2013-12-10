@@ -108,7 +108,7 @@ ptr<FontGlyphs> FtFontFace::CreateGlyphs(Canvas* canvas, int size)
 
 	// unite glyph images
 	std::vector<std::pair<int, int> > glyphPositions;
-	ptr<RawTextureData> glyphsImage = RawTextureData::ShelfUnion(glyphImages, 1024, glyphPositions);
+	ptr<RawTextureData> glyphsImage = RawTextureData::ShelfUnion(glyphImages, 1024, 1, glyphPositions);
 
 	// set glyph positions
 	for(FT_Long i = 0; i < glyphsCount; ++i)

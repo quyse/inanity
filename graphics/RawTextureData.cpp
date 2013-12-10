@@ -340,6 +340,7 @@ void RawTextureData::Blit(RawTextureData* image, int destX, int destY, int sourc
 ptr<RawTextureData> RawTextureData::ShelfUnion(
 	const std::vector<ptr<RawTextureData> >& images,
 	int resultWidth,
+	int border,
 	std::vector<std::pair<int, int> >& outPositions
 )
 {
@@ -374,22 +375,22 @@ ptr<RawTextureData> RawTextureData::ShelfUnion(
 	std::sort(sortedImages.begin(), sortedImages.end(), Sorter());
 
 	// second pass: determine result height
-	int resultHeight = 0;
+	int resultHeight = border;
 	{
-		int currentX = 0, currentRowHeight = 0;
+		int currentX = border, currentRowHeight = 0;
 		for(int i = 0; i < imagesCount; ++i)
 		{
 			RawTextureData* image = sortedImages[i].first;
 			int width = image->GetMipWidth();
-			if(currentX + width > resultWidth)
+			if(currentX + width + border > resultWidth)
 			{
 				// move to the next row
 				resultHeight += currentRowHeight;
 				currentRowHeight = 0;
 				currentX = 0;
 			}
-			currentX += width;
-			currentRowHeight = std::max(currentRowHeight, image->GetMipHeight());
+			currentX += width + border;
+			currentRowHeight = std::max(currentRowHeight, image->GetMipHeight() + border);
 		}
 		resultHeight += currentRowHeight;
 	}
@@ -400,12 +401,12 @@ ptr<RawTextureData> RawTextureData::ShelfUnion(
 	char* pixelsData = (char*)pixelsFile->GetData();
 	memset(pixelsData, 128, pixelsFile->GetSize());
 	{
-		int currentX = 0, currentRowY = 0, currentRowHeight = 0;
+		int currentX = border, currentRowY = border, currentRowHeight = 0;
 		for(int i = 0; i < imagesCount; ++i)
 		{
 			RawTextureData* image = sortedImages[i].first;
 			int width = image->GetMipWidth();
-			if(currentX + width > resultWidth)
+			if(currentX + width + border > resultWidth)
 			{
 				// move to the next row
 				currentRowY += currentRowHeight;
@@ -426,8 +427,8 @@ ptr<RawTextureData> RawTextureData::ShelfUnion(
 			outPositions[sortedImages[i].second].first = currentX;
 			outPositions[sortedImages[i].second].second = currentRowY;
 
-			currentX += width;
-			currentRowHeight = std::max(currentRowHeight, height);
+			currentX += width + border;
+			currentRowHeight = std::max(currentRowHeight, height + border);
 		}
 	}
 

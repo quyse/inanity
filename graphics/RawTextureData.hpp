@@ -112,6 +112,7 @@ public:
 	static ptr<RawTextureData> ShelfUnion(
 		const std::vector<ptr<RawTextureData> >& images,
 		int resultWidth,
+		int border,
 		std::vector<std::pair<int, int> >& outPositions
 	);
 };
