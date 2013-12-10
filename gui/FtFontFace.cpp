@@ -46,7 +46,7 @@ ptr<FontGlyphs> FtFontFace::CreateGlyphs(Canvas* canvas, int size)
 
 	for(FT_Long i = 0; i < glyphsCount; ++i)
 	{
-		if(FT_Load_Glyph(ftFace, i, 0))
+		if(FT_Load_Glyph(ftFace, i, FT_LOAD_NO_HINTING))
 			THROW("Can't load glyph");
 
 		if(FT_Render_Glyph(ftFace->glyph, FT_RENDER_MODE_NORMAL))
