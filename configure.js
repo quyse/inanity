@@ -204,7 +204,7 @@ var libraries = {
 		objects: [
 			'gui.Element', 'gui.ContainerElement', 'gui.FreeContainer',
 			'gui.Label', 'gui.Button', 'gui.TextBox',
-			'gui.Font',
+			'gui.Font', 'gui.Canvas',
 			// software
 			'gui.SwCanvas', 'gui.SwFontGlyphs',
 			// graphics

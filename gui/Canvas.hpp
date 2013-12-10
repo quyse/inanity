@@ -24,6 +24,9 @@ public:
 		) = 0;
 	/// Draw glyph.
 	virtual void DrawGlyph(FontGlyphs* glyphs, int glyphIndex, const Graphics::vec2& penPoint, const Graphics::vec4& color) = 0;
+	/// Flush pending draws.
+	/** Default implementation do nothing. */
+	virtual void Flush();
 };
 
 END_INANITY_GUI
