@@ -345,8 +345,10 @@ ptr<RawTextureData> RawTextureData::ShelfUnion(
 {
 	BEGIN_TRY();
 
+	int imagesCount = (int)images.size();
+
 	// check types of images
-	for(size_t i = 0; i < images.size(); ++i)
+	for(int i = 0; i < imagesCount; ++i)
 	{
 		RawTextureData* image = images[i];
 		if(!(
@@ -358,13 +360,26 @@ ptr<RawTextureData> RawTextureData::ShelfUnion(
 			THROW("Wrong image type");
 	}
 
-	// first pass: determine result height
+	// first pass: sort images by height
+	struct Sorter
+	{
+		bool operator()(const std::pair<RawTextureData*, int>& a, const std::pair<RawTextureData*, int>& b) const
+		{
+			return a.first->GetImageHeight() > b.first->GetImageHeight();
+		}
+	};
+	std::vector<std::pair<RawTextureData*, int> > sortedImages(imagesCount);
+	for(int i = 0; i < imagesCount; ++i)
+		sortedImages[i] = std::pair<RawTextureData*, size_t>(images[i], i);
+	std::sort(sortedImages.begin(), sortedImages.end(), Sorter());
+
+	// second pass: determine result height
 	int resultHeight = 0;
 	{
 		int currentX = 0, currentRowHeight = 0;
-		for(size_t i = 0; i < images.size(); ++i)
+		for(int i = 0; i < imagesCount; ++i)
 		{
-			ptr<RawTextureData> image = images[i];
+			RawTextureData* image = sortedImages[i].first;
 			int width = image->GetMipWidth();
 			if(currentX + width > resultWidth)
 			{
@@ -379,16 +394,16 @@ ptr<RawTextureData> RawTextureData::ShelfUnion(
 		resultHeight += currentRowHeight;
 	}
 
-	// second pass: combine images
-	outPositions.resize(images.size());
+	// third pass: combine images
+	outPositions.resize(imagesCount);
 	ptr<MemoryFile> pixelsFile = NEW(MemoryFile(resultWidth * resultHeight));
 	char* pixelsData = (char*)pixelsFile->GetData();
 	memset(pixelsData, 128, pixelsFile->GetSize());
 	{
 		int currentX = 0, currentRowY = 0, currentRowHeight = 0;
-		for(size_t i = 0; i < images.size(); ++i)
+		for(int i = 0; i < imagesCount; ++i)
 		{
-			ptr<RawTextureData> image = images[i];
+			RawTextureData* image = sortedImages[i].first;
 			int width = image->GetMipWidth();
 			if(currentX + width > resultWidth)
 			{
@@ -408,8 +423,8 @@ ptr<RawTextureData> RawTextureData::ShelfUnion(
 					width);
 
 			// output a position
-			outPositions[i].first = currentX;
-			outPositions[i].second = currentRowY;
+			outPositions[sortedImages[i].second].first = currentX;
+			outPositions[sortedImages[i].second].second = currentRowY;
 
 			currentX += width;
 			currentRowHeight = std::max(currentRowHeight, height);
