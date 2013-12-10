@@ -268,6 +268,10 @@ protected:
 	Context();
 
 public:
+	//******* Informational methods.
+	int GetViewportWidth() const;
+	int GetViewportHeight() const;
+
 	//******* Methods to clean color/depth/stencil buffers of bound framebuffer.
 	/* These are immediate methods. */
 	/// Clear color buffer.

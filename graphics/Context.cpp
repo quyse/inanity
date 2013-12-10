@@ -320,4 +320,14 @@ Context::Context() :
 	letDefaultBlendState(this, 0)
 {}
 
+int Context::GetViewportWidth() const
+{
+	return ((LetViewport*)cellViewport.top)->viewportWidth;
+}
+
+int Context::GetViewportHeight() const
+{
+	return ((LetViewport*)cellViewport.top)->viewportHeight;
+}
+
 END_INANITY_GRAPHICS
