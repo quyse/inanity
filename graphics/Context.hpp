@@ -87,10 +87,10 @@ public:
 		ptr<Texture> texture;
 		ptr<SamplerState> samplerState;
 		LetSampler();
-		LetSampler(Context* context, int i, ptr<Texture> texture, ptr<SamplerState> samplerState);
-		LetSampler(Context* context, const Shaders::SamplerBase& sampler, ptr<Texture> texture, ptr<SamplerState> samplerState);
-		void operator()(Context* context, int i, ptr<Texture> texture, ptr<SamplerState> samplerState);
-		void operator()(Context* context, const Shaders::SamplerBase& sampler, ptr<Texture> texture, ptr<SamplerState> samplerState);
+		LetSampler(Context* context, int i, ptr<Texture> texture, ptr<SamplerState> samplerState = 0);
+		LetSampler(Context* context, const Shaders::SamplerBase& sampler, ptr<Texture> texture, ptr<SamplerState> samplerState = 0);
+		void operator()(Context* context, int i, ptr<Texture> texture, ptr<SamplerState> samplerState = 0);
+		void operator()(Context* context, const Shaders::SamplerBase& sampler, ptr<Texture> texture, ptr<SamplerState> samplerState = 0);
 	};
 
 	/// Uniform buffer element.
