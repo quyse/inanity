@@ -29,7 +29,7 @@
 #ifndef HB_BUFFER_DESERIALIZE_TEXT_HH
 #define HB_BUFFER_DESERIALIZE_TEXT_HH
 
-#include "hb-private.hh"
+#include "../repo/src/hb-private.hh"
 
 
 #line 36 "hb-buffer-deserialize-text.hh.tmp"

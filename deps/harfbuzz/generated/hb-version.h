@@ -31,7 +31,7 @@
 #ifndef HB_VERSION_H
 #define HB_VERSION_H
 
-#include "hb-common.h"
+#include "../repo/src/hb-common.h"
 
 HB_BEGIN_DECLS
 

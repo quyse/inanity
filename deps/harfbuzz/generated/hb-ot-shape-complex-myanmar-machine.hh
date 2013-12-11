@@ -29,7 +29,7 @@
 #ifndef HB_OT_SHAPE_COMPLEX_MYANMAR_MACHINE_HH
 #define HB_OT_SHAPE_COMPLEX_MYANMAR_MACHINE_HH
 
-#include "hb-private.hh"
+#include "../repo/src/hb-private.hh"
 
 
 #line 36 "hb-ot-shape-complex-myanmar-machine.hh.tmp"

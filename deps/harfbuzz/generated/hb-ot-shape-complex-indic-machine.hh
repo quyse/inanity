@@ -29,7 +29,7 @@
 #ifndef HB_OT_SHAPE_COMPLEX_INDIC_MACHINE_HH
 #define HB_OT_SHAPE_COMPLEX_INDIC_MACHINE_HH
 
-#include "hb-private.hh"
+#include "../repo/src/hb-private.hh"
 
 
 #line 36 "../../src/hb-ot-shape-complex-indic-machine.hh.tmp"
