@@ -21,11 +21,11 @@ void FreeContainer::RemoveElement(ptr<Element> element)
 	}
 }
 
-void FreeContainer::Draw(Position offset)
+void FreeContainer::Draw(Visualizer* visualizer, Position offset)
 {
 	offset += position;
 	for(size_t i = 0; i < elements.size(); ++i)
-		elements[i]->Draw(offset);
+		elements[i]->Draw(visualizer, offset);
 }
 
 bool FreeContainer::IsPositionInto(Position position) const

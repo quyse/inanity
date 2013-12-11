@@ -20,7 +20,7 @@ public:
 	/// Удалить элемент.
 	void RemoveElement(ptr<Element> element);
 
-	void Draw(Position offset);
+	void Draw(Visualizer* visualizer, Position offset);
 
 	bool IsPositionInto(Position position) const;
 

@@ -56,7 +56,7 @@ public:
 	virtual bool IsPositionInto(Position position) const;
 
 	/// Нарисовать элемент.
-	virtual void Draw(Position offset = Position(0, 0)) = 0;
+	virtual void Draw(Visualizer* visualizer, Position offset = Position(0, 0)) = 0;
 
 	/// Над элементом пролетает мышь.
 	virtual void EventMouseMove(Position position);
