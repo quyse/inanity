@@ -63,7 +63,7 @@ RawTextureData::RawTextureData(ptr<File> pixels, PixelFormat format, int width, 
 		// check the size of file (or create it if doesn't created yet)
 		if(pixels)
 		{
-			if(pixels->GetSize() != arrayPitch * (count ? count : 1))
+			if((int)pixels->GetSize() != arrayPitch * (count ? count : 1))
 				THROW("Wrong file size");
 		}
 		else

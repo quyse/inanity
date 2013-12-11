@@ -95,8 +95,6 @@ static bool ConvertButton(unsigned button, Event::Mouse::Button& outButton)
 
 void X11Manager::UpdateKeyboardMapping(int first, int count)
 {
-	int keySymsPerKeycode;
-
 	xcb_get_keyboard_mapping_cookie_t cookie = xcb_get_keyboard_mapping(display->GetConnection(), first, count);
 	xcb_generic_error_t* error;
 	xcb_get_keyboard_mapping_reply_t* reply = xcb_get_keyboard_mapping_reply(display->GetConnection(), cookie, &error);

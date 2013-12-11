@@ -330,7 +330,7 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 			{ 3, 2 }
 		};
 		// loop trying to create some version
-		for(int i = 0; i < sizeof(versions) / sizeof(versions[0]); ++i)
+		for(int i = 0; i < int(sizeof(versions) / sizeof(versions[0])); ++i)
 		{
 			attribs[1] = versions[i][0];
 			attribs[3] = versions[i][1];

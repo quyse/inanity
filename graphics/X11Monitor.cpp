@@ -7,7 +7,7 @@
 BEGIN_INANITY_GRAPHICS
 
 X11Monitor::X11Monitor(ptr<Platform::X11Display> display, const String& displayName, int screenNumber)
-: display(display), screenNumber(screenNumber), screen(screen), modesInitialized(false)
+: display(display), screenNumber(screenNumber), screen(nullptr), modesInitialized(false)
 {
 	BEGIN_TRY();
 
