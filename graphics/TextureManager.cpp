@@ -1,7 +1,7 @@
 #include "TextureManager.hpp"
 #include "Device.hpp"
 #include "Texture.hpp"
-#include "BmpImageLoader.hpp"
+#include "BmpImage.hpp"
 #include "PngImageLoader.hpp"
 #include "RawTextureData.hpp"
 #include "../ResourceManager.ipp"
@@ -13,7 +13,7 @@ BEGIN_INANITY_GRAPHICS
 TextureManager::TextureManager(ptr<FileSystem> fileSystem, ptr<Device> device, const SamplerSettings& samplerSettings)
 : ResourceManager(fileSystem), device(device), samplerSettings(samplerSettings)
 {
-	imageLoaders["bmp"] = NEW(BmpImageLoader());
+	imageLoaders["bmp"] = BmpImage::CreateLoader();
 	imageLoaders["png"] = NEW(PngImageLoader());
 }
 

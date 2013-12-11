@@ -13,7 +13,7 @@
 #include "graphics/AttributeLayoutElement.hpp"
 #include "graphics/AttributeLayoutSlot.hpp"
 #include "graphics/BlendState.hpp"
-#include "graphics/BmpImageLoader.hpp"
+#include "graphics/BmpImage.hpp"
 #include "graphics/Context.hpp"
 #include "graphics/DataType.hpp"
 #include "graphics/DepthStencilBuffer.hpp"

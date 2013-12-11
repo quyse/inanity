@@ -123,7 +123,7 @@ var libraries = {
 			'graphics.ShaderCache',
 			'graphics.PixelFormat', 'graphics.RawTextureData', 'graphics.TextureManager',
 			'graphics.EditableFont', 'graphics.Font', 'graphics.FontManager', 'graphics.TextDrawer',
-			'graphics.BmpImageLoader', 'graphics.PngImageLoader'
+			'graphics.BmpImage', 'graphics.PngImageLoader'
 		]
 	},
 	// ******* подсистема DirectX 11
