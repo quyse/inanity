@@ -222,7 +222,7 @@ void PosixFileSystem::SaveFile(ptr<File> file, const String& fileName)
 	String name = GetFullName(fileName);
 	try
 	{
-		int fd = open(fileName.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0644);
+		int fd = open(name.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0644);
 		if(fd < 0)
 			THROW_SECONDARY("Can't open file", Exception::SystemError());
 
@@ -270,7 +270,7 @@ ptr<OutputStream> PosixFileSystem::SaveStream(const String& fileName)
 	String name = GetFullName(fileName);
 	try
 	{
-		int fd = open(fileName.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0644);
+		int fd = open(name.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0644);
 		if(fd < 0)
 			THROW_SECONDARY("Can't open file", Exception::SystemError());
 		return NEW(PosixOutputStream(fd));
