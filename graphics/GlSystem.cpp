@@ -139,7 +139,7 @@ void GlSystem::CheckErrors(const char* primaryExceptionString)
 #endif
 }
 
-bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, GLint& internalFormat, GLenum& format, GLenum& type)
+bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, bool renderbuffer, GLint& internalFormat, GLenum& format, GLenum& type)
 {
 #define T(t) PixelFormat::type##t
 #define P(p) PixelFormat::pixel##p
@@ -258,7 +258,7 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, GLint& internalFormat, 
 	{
 #ifdef ___INANITY_PLATFORM_EMSCRIPTEN
 		if(format == GL_RED)
-			format = GL_RGB;
+			format = renderbuffer ? GL_RGB : GL_LUMINANCE;
 		internalFormat = format;
 #endif
 		return true;

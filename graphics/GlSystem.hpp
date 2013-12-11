@@ -37,7 +37,7 @@ public:
 	static void CheckErrors(const char* primaryExceptionString = 0);
 
 	/// Получить формат текстуры для OpenGL.
-	static bool GetTextureFormat(PixelFormat pixelFormat, GLint& internalFormat, GLenum& format, GLenum& type);
+	static bool GetTextureFormat(PixelFormat pixelFormat, bool renderbuffer, GLint& internalFormat, GLenum& format, GLenum& type);
 
 	/// Перевести имя аттрибута в спецификацию.
 	static int AttributeNameToSemantic(const String& name);

@@ -436,7 +436,7 @@ ptr<RenderBuffer> GlDevice::CreateRenderBuffer(int width, int height, PixelForma
 		GLint internalFormat;
 		GLenum format;
 		GLenum type;
-		if(!GlSystem::GetTextureFormat(pixelFormat, internalFormat, format, type))
+		if(!GlSystem::GetTextureFormat(pixelFormat, true, internalFormat, format, type))
 			THROW("Invalid pixel format");
 
 		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, (GLsizei)width, (GLsizei)height, 0, format, type, 0);
@@ -982,7 +982,7 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data, const Sampl
 		GLint internalFormat;
 		GLenum format;
 		GLenum type;
-		if(!GlSystem::GetTextureFormat(data->GetFormat(), internalFormat, format, type))
+		if(!GlSystem::GetTextureFormat(data->GetFormat(), false, internalFormat, format, type))
 			THROW("Invalid pixel format");
 
 		int pixelSize = PixelFormat::GetPixelSize(data->GetFormat().size);
