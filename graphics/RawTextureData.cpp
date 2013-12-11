@@ -339,9 +339,10 @@ void RawTextureData::Blit(RawTextureData* image, int destX, int destY, int sourc
 
 ptr<RawTextureData> RawTextureData::ShelfUnion(
 	const std::vector<ptr<RawTextureData> >& images,
+	std::vector<std::pair<int, int> >& outPositions,
 	int resultWidth,
 	int border,
-	std::vector<std::pair<int, int> >& outPositions
+	bool heightPowerOfTwo
 )
 {
 	BEGIN_TRY();
@@ -393,6 +394,13 @@ ptr<RawTextureData> RawTextureData::ShelfUnion(
 			currentRowHeight = std::max(currentRowHeight, image->GetMipHeight() + border);
 		}
 		resultHeight += currentRowHeight;
+	}
+
+	if(heightPowerOfTwo)
+	{
+		int h;
+		for(h = 1; h < resultHeight; h <<= 1);
+		resultHeight = h;
 	}
 
 	// third pass: combine images

@@ -111,9 +111,10 @@ public:
 	/** Images packed in rows, with specified result width. */
 	static ptr<RawTextureData> ShelfUnion(
 		const std::vector<ptr<RawTextureData> >& images,
+		std::vector<std::pair<int, int> >& outPositions,
 		int resultWidth,
-		int border,
-		std::vector<std::pair<int, int> >& outPositions
+		int border = 0,
+		bool heightPowerOfTwo = false
 	);
 };
 
