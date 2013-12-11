@@ -54,7 +54,6 @@ struct GrCanvas::Helper : public Object
 	UniformArray<vec4> uColors;
 
 	Sampler<float, 2> uFontSampler;
-	ptr<SamplerState> ss;
 
 	ptr<VertexBuffer> vb;
 	ptr<VertexShader> vs;
@@ -130,14 +129,6 @@ struct GrCanvas::Helper : public Object
 		// blending
 		bs = device->CreateBlendState();
 		bs->SetColor(BlendState::colorSourceSrcAlpha, BlendState::colorSourceInvSrcAlpha, BlendState::operationAdd);
-
-		// sampling
-		{
-			SamplerSettings s;
-			s.minFilter = s.mipFilter = s.magFilter = SamplerSettings::filterLinear;
-			s.wrapU = s.wrapV = s.wrapW = SamplerSettings::wrapClamp;
-			ss = device->CreateSamplerState(s);
-		}
 
 		END_TRY("Can't create GrCanvas helper");
 	}
@@ -240,7 +231,7 @@ void GrCanvas::Flush()
 	Context::LetDepthTestFunc ldtf(context, Context::depthTestFuncAlways);
 	Context::LetDepthWrite ldw(context, false);
 	Context::LetUniformBuffer lub(context, helper->ugSymbols);
-	Context::LetSampler ls(context, helper->uFontSampler, currentFontTexture, helper->ss);
+	Context::LetSampler ls(context, helper->uFontSampler, currentFontTexture);
 
 	helper->ugSymbols->Upload(context);
 
