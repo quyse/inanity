@@ -11,9 +11,9 @@ int MetaTable_index(lua_State* state)
 	// в стеке лежит: сначала userdata, затем индекс
 	// а в замыкании лежит таблица методов
 
-	// проверить, что объект не отозван
-	ObjectUserData* userData = (ObjectUserData*)lua_touserdata(state, -2);
-	if(!userData->object)
+	// проверить, что объект не отозван (только для объектов)
+	UserData* userData = (UserData*)lua_touserdata(state, -2);
+	if(userData->type == UserData::typeObject && !((ObjectUserData*)userData)->object)
 	{
 		// вернуть понятную ошибку
 		lua_pushliteral(state, "Object reclaimed");
@@ -462,7 +462,7 @@ void DescribeValue(lua_State* state, int index, std::ostream& stream)
 		}
 		break;
 	case LUA_TFUNCTION:
-		stream << "<function>";
+		stream << (lua_iscfunction(state, index) ? "<C function>" : "<Lua function>");
 		break;
 	case LUA_TUSERDATA:
 		{
