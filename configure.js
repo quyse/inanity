@@ -282,13 +282,13 @@ var executables = {
 	, testft: {
 		objects: ['gui.testft'],
 		staticLibraries: [
-			'libinanity-base',
 			'libinanity-graphics',
 			'libinanity-gui',
 			'libinanity-platform',
-			'libinanity-compress',
 			'deps/freetype//libfreetype',
 			'deps/harfbuzz//libharfbuzz',
+			'libinanity-compress',
+			'libinanity-base',
 			],
 		dynamicLibraries: []
 	}
