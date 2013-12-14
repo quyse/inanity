@@ -17,9 +17,12 @@ class Canvas;
 для позиционирования элементов. */
 class Visualizer : public Object
 {
+private:
+	Distance metrics[VisualMetrics::Count];
+
 public:
-	/// Получить заданную визуальную метрику.
-	virtual float GetVisualMetric(VisualMetric metric) const = 0;
+	Distance GetMetric(VisualMetric metric) const;
+
 	/// Нарисовать визуальный элемент.
 	virtual void DrawVisualElement(Canvas* canvas, VisualElement element, float x1, float y1, float x2, float y2) = 0;
 	/// Получить размеры текста.

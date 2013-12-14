@@ -9,13 +9,12 @@ BEGIN_INANITY_GUI
 /** Child is stretched over all client area. */
 class ContentContainer : public ContainerElement
 {
-private:
+protected:
 	ptr<Element> contentElement;
 
-	virtual void DoLayout();
-
-protected:
 	ContentContainer(ptr<Visualizer> visualizer);
+
+	virtual void DoLayout();
 
 public:
 	void SetContent(ptr<Element> contentElement);

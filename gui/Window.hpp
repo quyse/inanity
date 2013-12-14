@@ -12,6 +12,10 @@ class Window : public ContentContainer
 private:
 	String title;
 
+protected:
+	//*** ContentContainer's protected methods.
+	void DoLayout();
+
 public:
 	Window(ptr<Visualizer> visualizer, const String& title);
 

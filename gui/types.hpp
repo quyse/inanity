@@ -24,6 +24,7 @@ typedef Input::Event::Mouse MouseEvent;
 
 /// Keyboard key type.
 typedef Input::Key Key;
+typedef Input::Keys Keys;
 
 END_INANITY_GUI
 

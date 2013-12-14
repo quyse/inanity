@@ -51,6 +51,10 @@ struct VisualMetrics
 		SliderWidthHalf,
 		SliderHeightHalf,
 		ProgressBarX,
+		WindowClientLeft,
+		WindowClientTop,
+		WindowClientRight,
+		WindowClientBottom,
 		Count
 	};
 };
