@@ -1,8 +1,8 @@
 #include "TextBox.hpp"
 #include "Visualizer.hpp"
 #include "Visuals.hpp"
-// FIXME: зависимость от винды для макросов клавиш VK_*
-#include "../platform/windows.hpp"
+#include "../deps/utf8.h"
+#include <iterator>
 
 BEGIN_INANITY_GUI
 
@@ -28,7 +28,7 @@ void TextBox::Draw(Canvas* canvas, Position offset)
 	visualizer->DrawVisualElement(canvas, moused || focused ? VisualElements::TextBoxHighlighted : VisualElements::TextBox, offset.x, offset.y, offset.x + size.x, offset.y + size.y);
 
 	//сдвинуть все на величину сдвига текста, потому что все далее будет рисоваться с этим сдвигом
-//	offset.x += visualizer->GetVisualMetric(VisualMetrics::TextBoxTextX);
+//	offset.x += visualizer->GetMetric(VisualMetrics::TextBoxTextX);
 
 	//нарисовать выделение
 	if(selectionBegin != selectionEnd)
@@ -60,32 +60,33 @@ void TextBox::EventKeyDown(Key key)
 {
 	switch(key)
 	{
-	case VK_SHIFT:
+	case Keys::ShiftL:
+	case Keys::ShiftR:
 		shiftPressed = true;
 		break;
-	case VK_LEFT:
+	case Keys::Left:
 		if(selectionBegin > 0)
 			selectionBegin--;
 		if(!shiftPressed)
 			selectionEnd = selectionBegin;
 		break;
-	case VK_RIGHT:
+	case Keys::Right:
 		if(selectionBegin < text.length())
 			selectionBegin++;
 		if(!shiftPressed)
 			selectionEnd = selectionBegin;
 		break;
-	case VK_HOME:
+	case Keys::Home:
 		selectionBegin = 0;
 		if(!shiftPressed)
 			selectionEnd = selectionBegin;
 		break;
-	case VK_END:
+	case Keys::End:
 		selectionBegin = text.length();
 		if(!shiftPressed)
 			selectionEnd = selectionBegin;
 		break;
-	case VK_BACK:
+	case Keys::BackSpace:
 		if(selectionEnd != selectionBegin)
 		{
 			text.erase(text.begin() + std::min(selectionBegin, selectionEnd), text.begin() + std::max(selectionBegin, selectionEnd));
@@ -95,7 +96,7 @@ void TextBox::EventKeyDown(Key key)
 			text.erase(text.begin() + (--selectionBegin));
 		selectionEnd = selectionBegin;
 		break;
-	case VK_DELETE:
+	case Keys::Delete:
 		if(selectionEnd != selectionBegin)
 		{
 			text.erase(text.begin() + std::min(selectionBegin, selectionEnd), text.begin() + std::max(selectionBegin, selectionEnd));
@@ -112,7 +113,8 @@ void TextBox::EventKeyUp(Key key)
 {
 	switch(key)
 	{
-	case VK_SHIFT:
+	case Keys::ShiftL:
+	case Keys::ShiftR:
 		shiftPressed = false;
 		break;
 	}
@@ -120,11 +122,13 @@ void TextBox::EventKeyUp(Key key)
 
 void TextBox::EventKeyPress(wchar_t key)
 {
-	if(key == VK_BACK)
+	if(key == Keys::BackSpace)
 		return;
 	text.erase(text.begin() + std::min(selectionBegin, selectionEnd), text.begin() + std::max(selectionBegin, selectionEnd));
 	selectionBegin = std::min(selectionBegin, selectionEnd);
-	text.insert(text.begin() + (selectionBegin++), key);
+	size_t initialLength = text.length();
+	utf8::unchecked::append(key, std::inserter(text, text.begin() + selectionBegin));
+	selectionBegin += text.length() - initialLength;
 	selectionEnd = selectionBegin;
 }
 
