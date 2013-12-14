@@ -8,10 +8,12 @@
 
 BEGIN_INANITY_GUI
 
+/// GUI distance type.
+typedef float Distance;
 /// GUI position type.
-typedef Math::vec2 Position;
+typedef Math::xvec<Distance, 2> Position;
 /// GUI size type.
-typedef Math::vec2 Size;
+typedef Math::xvec<Distance, 2> Size;
 
 /// Input mouse event type.
 /** Contains:
