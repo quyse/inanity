@@ -6,25 +6,77 @@
 
 BEGIN_INANITY_GUI
 
-/// Класс "свободного" контейнера элементов.
-/** Позволяет размещать на себе элементы свободно, без всяких ограничений. */
+/// Free container element.
+/** Elements are placed with explicit position and size. */
 class FreeContainer : public ContainerElement
 {
+public:
+	/// Place of the element.
+	struct Place
+	{
+		enum HorizontalAnchor
+		{
+			anchorLeft,
+			anchorRight,
+			anchorHorizontalStretch
+		};
+		union
+		{
+			HorizontalAnchor anchor;
+			struct
+			{
+				Distance left, width;
+			} left;
+			struct
+			{
+				Distance width, right;
+			} right;
+			struct
+			{
+				Distance left, right;
+			} stretch;
+		} horizontal;
+
+		enum VerticalAnchor
+		{
+			anchorTop,
+			anchorBottom,
+			anchorVerticalStretch
+		};
+		union
+		{
+			VerticalAnchor anchor;
+			struct
+			{
+				Distance top, height;
+			} top;
+			struct
+			{
+				Distance height, bottom;
+			} bottom;
+			struct
+			{
+				Distance top, bottom;
+			} stretch;
+		} vertical;
+	};
+
 private:
-	/// Список элементов.
-	std::vector<ptr<Element> > elements;
+	std::vector<std::pair<Place, ptr<Element> > > elements;
+
+	void DoLayout(size_t number);
 
 public:
-	/// Добавить элемент.
-	void AddElement(ptr<Element> element);
-	/// Удалить элемент.
+	void AddElement(const Place& place, ptr<Element> element);
 	void RemoveElement(ptr<Element> element);
 
-	void Draw(Visualizer* visualizer, Position offset);
+	//*** ContainerElement's methods.
+	ptr<Element> TryGetElementByPosition(Position position) const;
 
+	//*** Element's methods.
+	void SetSize(Size size);
 	bool IsPositionInto(Position position) const;
-
-	ptr<Element> GetElementByPosition(Position position) const;
+	void Draw(Visualizer* visualizer, Position offset);
 };
 
 END_INANITY_GUI
