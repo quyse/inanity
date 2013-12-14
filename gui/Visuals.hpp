@@ -45,20 +45,12 @@ typedef VisualFonts::_ VisualFont;
 /// Структура с перечислением визуальных метрик.
 struct VisualMetrics
 {
-	enum _
-	{
-		TextBoxTextX,
-		SliderWidthHalf,
-		SliderHeightHalf,
-		ProgressBarX,
-		WindowClientLeft,
-		WindowClientTop,
-		WindowClientRight,
-		WindowClientBottom,
-		Count
-	};
+	Distance textBoxTextX;
+	Size sliderHalf;
+	Distance progressBarX;
+	Position windowClientLeftTop;
+	Position windowClientRightBottom;
 };
-typedef VisualMetrics::_ VisualMetric;
 
 END_INANITY_GUI
 

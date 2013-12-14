@@ -11,12 +11,10 @@ void Window::DoLayout()
 {
 	if(contentElement)
 	{
-		Distance left = visualizer->GetMetric(VisualMetrics::WindowClientLeft);
-		Distance top = visualizer->GetMetric(VisualMetrics::WindowClientTop);
-		Distance right = visualizer->GetMetric(VisualMetrics::WindowClientRight);
-		Distance bottom = visualizer->GetMetric(VisualMetrics::WindowClientBottom);
-		contentElement->SetPosition(Position(left, top));
-		contentElement->SetSize(Size(size.x - left - right, size.y - top - bottom));
+		Position leftTop = visualizer->GetMetrics().windowClientLeftTop;
+		Position rightBottom = visualizer->GetMetrics().windowClientRightBottom;
+		contentElement->SetPosition(leftTop);
+		contentElement->SetSize(size - leftTop - rightBottom);
 	}
 }
 

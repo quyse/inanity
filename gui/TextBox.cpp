@@ -27,9 +27,6 @@ void TextBox::Draw(Canvas* canvas, Position offset)
 	//нарисовать рамку
 	visualizer->DrawVisualElement(canvas, moused || focused ? VisualElements::TextBoxHighlighted : VisualElements::TextBox, offset.x, offset.y, offset.x + size.x, offset.y + size.y);
 
-	//сдвинуть все на величину сдвига текста, потому что все далее будет рисоваться с этим сдвигом
-//	offset.x += visualizer->GetMetric(VisualMetrics::TextBoxTextX);
-
 	//нарисовать выделение
 	if(selectionBegin != selectionEnd)
 	{

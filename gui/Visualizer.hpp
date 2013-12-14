@@ -18,10 +18,10 @@ class Canvas;
 class Visualizer : public Object
 {
 private:
-	Distance metrics[VisualMetrics::Count];
+	VisualMetrics metrics;
 
 public:
-	Distance GetMetric(VisualMetric metric) const;
+	const VisualMetrics& GetMetrics() const;
 
 	/// Нарисовать визуальный элемент.
 	virtual void DrawVisualElement(Canvas* canvas, VisualElement element, float x1, float y1, float x2, float y2) = 0;

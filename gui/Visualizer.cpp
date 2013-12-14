@@ -2,9 +2,9 @@
 
 BEGIN_INANITY_GUI
 
-Distance Visualizer::GetMetric(VisualMetric metric)
+const VisualMetrics& Visualizer::GetMetrics() const
 {
-	return metrics[metric];
+	return metrics;
 }
 
 END_INANITY_GUI
