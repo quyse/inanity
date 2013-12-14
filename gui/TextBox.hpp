@@ -10,22 +10,22 @@ BEGIN_INANITY_GUI
 class TextBox : public Element
 {
 private:
-	/// Текст в текстовом поле.
+	/// Text in the field, in UTF-8.
 	String text;
-	/// Начало выделения.
+	/// Position of selection begin, in UTF-8 bytes.
 	size_t selectionBegin;
-	/// Конец выделения.
+	/// Position of selection end, in UTF-8 bytes.
 	size_t selectionEnd;
-	/// Нажатость Shift.
+	/// Is shift key pressed.
 	bool shiftPressed;
 
 public:
-	TextBox();
+	TextBox(ptr<Visualizer> visualizer);
 
 	const String& GetText() const;
 	void SetText(const String& text);
 
-	void Draw(Visualizer* visualizer, Position offset);
+	void Draw(Canvas* canvas, Position offset);
 
 	void EventMouseDown(Position position, MouseEvent::Button button);
 	void EventKeyDown(Key key);

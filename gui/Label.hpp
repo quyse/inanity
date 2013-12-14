@@ -14,10 +14,12 @@ private:
 	String text;
 
 public:
+	Label(ptr<Visualizer> visualizer);
+
 	const String& GetText() const;
 	void SetText(const String& text);
 
-	void Draw(Visualizer* visualizer, Position offset);
+	void Draw(Canvas* canvas, Position offset);
 };
 
 END_INANITY_GUI

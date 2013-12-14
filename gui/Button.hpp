@@ -16,12 +16,12 @@ private:
 	bool pressed;
 
 public:
-	Button();
+	Button(ptr<Visualizer> visualizer);
 
 	const String& GetText() const;
 	void SetText(const String& text);
 
-	void Draw(Visualizer* visualizer, Position offset);
+	void Draw(Canvas* canvas, Position offset);
 
 	void EventMouseDown(Position position, MouseEvent::Button button);
 	void EventMouseUp(Position position, MouseEvent::Button button);

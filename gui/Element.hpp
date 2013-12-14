@@ -8,11 +8,14 @@ BEGIN_INANITY_GUI
 
 class Visualizer;
 class ContainerElement;
+class Canvas;
 
 /// Base class of GUI element.
 class Element : public Object
 {
 protected:
+	/// Visualizer.
+	ptr<Visualizer> visualizer;
 	/// Parent element.
 	ContainerElement* parent;
 	/// Current position relative to parent.
@@ -28,7 +31,7 @@ protected:
 	void Notify(int code);
 
 public:
-	Element();
+	Element(ptr<Visualizer> visualizer);
 
 	ContainerElement* GetParent() const;
 	void SetParent(ContainerElement* parent);
@@ -47,7 +50,7 @@ public:
 
 	virtual bool IsPositionInto(Position position) const;
 
-	virtual void Draw(Visualizer* visualizer, Position offset = Position(0, 0)) = 0;
+	virtual void Draw(Canvas* canvas, Position offset = Position(0, 0)) = 0;
 
 	//*** Event methods.
 	virtual void EventMouseMove(Position position);

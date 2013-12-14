@@ -6,7 +6,8 @@
 
 BEGIN_INANITY_GUI
 
-TextBox::TextBox() : selectionBegin(0), selectionEnd(0), shiftPressed(false)
+TextBox::TextBox(ptr<Visualizer> visualizer)
+: Element(visualizer), selectionBegin(0), selectionEnd(0), shiftPressed(false)
 {}
 
 const String& TextBox::GetText() const
@@ -19,12 +20,12 @@ void TextBox::SetText(const String& text)
 	this->text = text;
 }
 
-void TextBox::Draw(Visualizer* visualizer, Position offset)
+void TextBox::Draw(Canvas* canvas, Position offset)
 {
 	offset += position;
 
 	//нарисовать рамку
-	visualizer->DrawVisualElement(moused || focused ? VisualElements::TextBoxHighlighted : VisualElements::TextBox, offset.x, offset.y, offset.x + size.x, offset.y + size.y);
+	visualizer->DrawVisualElement(canvas, moused || focused ? VisualElements::TextBoxHighlighted : VisualElements::TextBox, offset.x, offset.y, offset.x + size.x, offset.y + size.y);
 
 	//сдвинуть все на величину сдвига текста, потому что все далее будет рисоваться с этим сдвигом
 //	offset.x += visualizer->GetVisualMetric(VisualMetrics::TextBoxTextX);
@@ -34,17 +35,17 @@ void TextBox::Draw(Visualizer* visualizer, Position offset)
 	{
 		float selectionBeginX = visualizer->GetTextSize(VisualFonts::UserText, text.substr(0, std::min(selectionBegin, selectionEnd))).x;
 		float selectionEndX = visualizer->GetTextSize(VisualFonts::UserText, text.substr(0, std::max(selectionBegin, selectionEnd))).x;
-		visualizer->DrawVisualElement(VisualElements::Selection, offset.x + selectionBeginX, offset.y, offset.x + selectionEndX, offset.y + size.y);
+		visualizer->DrawVisualElement(canvas, VisualElements::Selection, offset.x + selectionBeginX, offset.y, offset.x + selectionEndX, offset.y + size.y);
 	}
 
 	//напечатать текст
-	visualizer->DrawRectText(VisualFonts::UserText, text, offset.x, offset.y, offset.x + size.x, offset.y + size.y);
+	visualizer->DrawRectText(canvas, VisualFonts::UserText, text, offset.x, offset.y, offset.x + size.x, offset.y + size.y);
 
 	//нарисовать курсор
 	if(focused)
 	{
 		float caretX = visualizer->GetTextSize(VisualFonts::UserText, text.substr(0, selectionBegin)).x;
-		visualizer->DrawVisualElement(VisualElements::Caret, offset.x + caretX, offset.y, offset.x + caretX, offset.y + size.y);
+		visualizer->DrawVisualElement(canvas, VisualElements::Caret, offset.x + caretX, offset.y, offset.x + caretX, offset.y + size.y);
 	}
 }
 

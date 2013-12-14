@@ -18,6 +18,9 @@ private:
 	ptr<Element> mousedElement;
 	ptr<Notificator> notificator;
 
+protected:
+	ContainerElement(ptr<Visualizer> visualizer);
+
 public:
 	void SetNotificator(ptr<Notificator> notificator);
 	/// Query focus for child element.

@@ -67,6 +67,8 @@ private:
 	void DoLayout(size_t number);
 
 public:
+	FreeContainer(ptr<Visualizer> visualizer);
+
 	void AddElement(const Place& place, ptr<Element> element);
 	void RemoveElement(ptr<Element> element);
 
@@ -76,7 +78,7 @@ public:
 	//*** Element's methods.
 	void SetSize(Size size);
 	bool IsPositionInto(Position position) const;
-	void Draw(Visualizer* visualizer, Position offset);
+	void Draw(Canvas* canvas, Position offset);
 };
 
 END_INANITY_GUI

@@ -5,6 +5,9 @@
 
 BEGIN_INANITY_GUI
 
+FreeContainer::FreeContainer(ptr<Visualizer> visualizer)
+: ContainerElement(visualizer) {}
+
 void FreeContainer::DoLayout(size_t number)
 {
 	const Place& place = elements[number].first;
@@ -92,11 +95,11 @@ bool FreeContainer::IsPositionInto(Position position) const
 	return ContainerElement::IsPositionInto(position) && TryGetElementByPosition(position);
 }
 
-void FreeContainer::Draw(Visualizer* visualizer, Position offset)
+void FreeContainer::Draw(Canvas* canvas, Position offset)
 {
 	offset += position;
 	for(size_t i = 0; i < elements.size(); ++i)
-		elements[i].second->Draw(visualizer, offset);
+		elements[i].second->Draw(canvas, offset);
 }
 
 END_INANITY_GUI

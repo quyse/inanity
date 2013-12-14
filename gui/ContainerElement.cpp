@@ -4,6 +4,9 @@
 
 BEGIN_INANITY_GUI
 
+ContainerElement::ContainerElement(ptr<Visualizer> visualizer)
+: Element(visualizer) {}
+
 void ContainerElement::SetNotificator(ptr<Notificator> notificator)
 {
 	this->notificator = notificator;
