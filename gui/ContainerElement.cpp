@@ -44,7 +44,7 @@ void ContainerElement::Notify(ptr<Element> element, int code)
 
 void ContainerElement::EventMouseMove(Position position)
 {
-	ptr<Element> newMousedElement = GetElementByPosition(position);
+	ptr<Element> newMousedElement = TryGetElementByPosition(position);
 	if(newMousedElement != mousedElement)
 	{
 		if(mousedElement)
@@ -59,14 +59,14 @@ void ContainerElement::EventMouseMove(Position position)
 
 void ContainerElement::EventMouseDown(Position position, MouseEvent::Button button)
 {
-	ptr<Element> element = GetElementByPosition(position);
+	ptr<Element> element = TryGetElementByPosition(position);
 	if(element)
 		element->EventMouseDown(position - element->GetPosition(), button);
 }
 
 void ContainerElement::EventMouseUp(Position position, MouseEvent::Button button)
 {
-	ptr<Element> element = GetElementByPosition(position);
+	ptr<Element> element = TryGetElementByPosition(position);
 	if(element)
 		element->EventMouseUp(position - element->GetPosition(), button);
 }
@@ -83,7 +83,6 @@ void ContainerElement::EventMouseLeave()
 void ContainerElement::EventSetFocus()
 {
 	Element::EventSetFocus();
-	//если у нас есть элемент в фокусе, передать ему событие
 	if(focusedElement)
 		focusedElement->EventSetFocus();
 }
@@ -91,7 +90,6 @@ void ContainerElement::EventSetFocus()
 void ContainerElement::EventLostFocus()
 {
 	Element::EventLostFocus();
-	//если у нас есть элемент в фокусе, передать ему событие
 	if(focusedElement)
 		focusedElement->EventLostFocus();
 }
@@ -99,7 +97,6 @@ void ContainerElement::EventLostFocus()
 void ContainerElement::EventKeyDown(Key key)
 {
 	Element::EventKeyDown(key);
-	//если есть элемент в фокусе, передать событие ему
 	if(focusedElement)
 		focusedElement->EventKeyDown(key);
 }
@@ -107,7 +104,6 @@ void ContainerElement::EventKeyDown(Key key)
 void ContainerElement::EventKeyUp(Key key)
 {
 	Element::EventKeyUp(key);
-	//если есть элемент в фокусе, передать событие ему
 	if(focusedElement)
 		focusedElement->EventKeyUp(key);
 }
@@ -115,7 +111,6 @@ void ContainerElement::EventKeyUp(Key key)
 void ContainerElement::EventKeyPress(wchar_t key)
 {
 	Element::EventKeyPress(key);
-	//если есть элемент в фокусе, передать событие ему
 	if(focusedElement)
 		focusedElement->EventKeyPress(key);
 }

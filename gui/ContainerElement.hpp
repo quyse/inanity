@@ -7,32 +7,27 @@ BEGIN_INANITY_GUI
 
 class Notificator;
 
-/// Базовый класс контейнерного элемента.
+/// Base class of GUI element which could be parent.
 class ContainerElement : public Element
 {
 private:
-	/// Элемент, находящийся в фокусе.
-	/** Значение null зависит от реализации конкретного контейнерного элемента,
-	и может обозначать фокус самого контейнера. */
+	/// Element in focus.
+	/** Could be null if no element in focus. */
 	ptr<Element> focusedElement;
-	/// Элемент, над которым находится мышь.
+	/// Element with mouse over it.
 	ptr<Element> mousedElement;
-	/// Приёмник уведомлений.
 	ptr<Notificator> notificator;
 
 public:
-	/// Указать приёмник уведомлений.
 	void SetNotificator(ptr<Notificator> notificator);
-	/// Запросить фокус элемента.
-	/** Обычно элементы запрашивают фокус для себя, после щелчка мышью, к примеру. */
+	/// Query focus for child element.
 	void QueryFocus(ptr<Element> element);
-	/// Принять уведомление от дочернего элемента.
+	/// Receive notification from child element.
 	void Notify(ptr<Element> element, int code);
 
-	/// Получить дочерний элемент по точке.
-	/** Если элемента нет, должен возвращаться 0. */
-	virtual ptr<Element> GetElementByPosition(Position position) const = 0;
+	virtual ptr<Element> TryGetElementByPosition(Position position) const = 0;
 
+	/// Element's methods.
 	void EventMouseMove(Position position);
 	void EventMouseDown(Position position, MouseEvent::Button button);
 	void EventMouseUp(Position position, MouseEvent::Button button);

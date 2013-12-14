@@ -9,82 +9,57 @@ BEGIN_INANITY_GUI
 class Visualizer;
 class ContainerElement;
 
-/// Класс элемента пользовательского интерфейса.
-/** Класс, служащий базовым для всех элементов
-интерфейса. Предоставляет заготовки для всех событий
-элемента GUI.
-*/
+/// Base class of GUI element.
 class Element : public Object
 {
 protected:
-	/// Родительский элемент.
+	/// Parent element.
 	ContainerElement* parent;
-	/// Положение элемента (относительно родительского элемента).
+	/// Current position relative to parent.
 	Position position;
-	/// Размеры элемента.
+	/// Current size.
 	Size size;
-	/// Находится ли элемент в фокусе.
+	/// Is element in focus.
 	bool focused;
-	/// Находится ли мышь над элементом.
+	/// Is mouse over element.
 	bool moused;
 
-	/// Отправить уведомление.
+	/// Send notification.
 	void Notify(int code);
 
 public:
 	Element();
 
-	/// Получить родительский элемент.
 	ContainerElement* GetParent() const;
-	/// Указать родительский элемент.
 	void SetParent(ContainerElement* parent);
 
-	/// Получить положение элемента.
+	/// Get current position (relative to parent).
 	Position GetPosition() const;
-	/// Указать положение элемента.
-	void SetPosition(Position position);
-	/// Получить размеры элемента.
+	/// Get current size (relative to parent).
 	Size GetSize() const;
-	/// Указать размеры элемента.
-	void SetSize(Size size);
-	/// Получить, находится ли элемент в фокусе.
+
+	//*** Layout methods. Should not be called explicitly.
+	virtual void SetPosition(Position position);
+	virtual void SetSize(Size size);
+
 	bool IsFocused() const;
-	/// Установить фокус на элемент.
 	void SetFocus();
 
-	/// Проверить, принадлежит ли точка элементу.
 	virtual bool IsPositionInto(Position position) const;
 
-	/// Нарисовать элемент.
 	virtual void Draw(Visualizer* visualizer, Position offset = Position(0, 0)) = 0;
 
-	/// Над элементом пролетает мышь.
+	//*** Event methods.
 	virtual void EventMouseMove(Position position);
-	/// На элементе нажата мышь.
-	/**
-	\param position Положение мыши относительно элемента.
-	\param button Нажатая кнопка мыши.
-	*/
 	virtual void EventMouseDown(Position position, MouseEvent::Button button);
-	/// На элементе отжата мышь.
-	/**
-	\param position Положение мыши относительно элемента.
-	\param button Отжатая кнопка мыши.
-	*/
 	virtual void EventMouseUp(Position position, MouseEvent::Button button);
-	/// В пространство элемента вошла мышь.
 	virtual void EventMouseEnter();
-	/// Мышь вышла из пространства элемента.
 	virtual void EventMouseLeave();
-	/// Элемент получил фокус.
+	virtual void EventMouseWheel(Distance wheel);
 	virtual void EventSetFocus();
-	/// Элемент потерял фокус.
 	virtual void EventLostFocus();
-	/// Нажата клавиша клавиатуры.
 	virtual void EventKeyDown(Key key);
-	/// Отжата клавиша клавиатуры.
 	virtual void EventKeyUp(Key key);
-	/// Нажата клавиша клавиатуры (в смысле для печати).
 	virtual void EventKeyPress(wchar_t key);
 };
 

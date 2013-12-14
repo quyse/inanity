@@ -4,7 +4,11 @@
 BEGIN_INANITY_GUI
 
 Element::Element() :
-	parent(0), position(0, 0), size(1, 1), focused(false), moused(false)
+	parent(0),
+	position(0, 0),
+	size(1, 1),
+	focused(false),
+	moused(false)
 {}
 
 void Element::Notify(int code)
@@ -28,14 +32,14 @@ Position Element::GetPosition() const
 	return position;
 }
 
-void Element::SetPosition(Position position)
-{
-	this->position = position;
-}
-
 Size Element::GetSize() const
 {
 	return size;
+}
+
+void Element::SetPosition(Position position)
+{
+	this->position = position;
 }
 
 void Element::SetSize(Size size)
@@ -68,17 +72,11 @@ bool Element::IsPositionInto(Position position) const
 	return position.x >= 0 && position.y >= 0 && position.x < size.x && position.y < size.y;
 }
 
-void Element::EventMouseMove(Position position)
-{
-}
+void Element::EventMouseMove(Position position) {}
 
-void Element::EventMouseDown(Position position, MouseEvent::Button button)
-{
-}
+void Element::EventMouseDown(Position position, MouseEvent::Button button) {}
 
-void Element::EventMouseUp(Position position, MouseEvent::Button button)
-{
-}
+void Element::EventMouseUp(Position position, MouseEvent::Button button) {}
 
 void Element::EventMouseEnter()
 {
@@ -90,6 +88,8 @@ void Element::EventMouseLeave()
 	moused = false;
 }
 
+void Element::EventMouseWheel(Distance wheel) {}
+
 void Element::EventSetFocus()
 {
 	focused = true;
@@ -100,16 +100,10 @@ void Element::EventLostFocus()
 	focused = false;
 }
 
-void Element::EventKeyDown(Key key)
-{
-}
+void Element::EventKeyDown(Key key) {}
 
-void Element::EventKeyUp(Key key)
-{
-}
+void Element::EventKeyUp(Key key) {}
 
-void Element::EventKeyPress(wchar_t key)
-{
-}
+void Element::EventKeyPress(wchar_t key) {}
 
 END_INANITY_GUI
