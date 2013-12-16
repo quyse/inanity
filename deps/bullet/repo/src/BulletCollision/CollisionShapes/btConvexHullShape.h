@@ -74,6 +74,7 @@ public:
 	
 
 	virtual void project(const btTransform& trans, const btVector3& dir, btScalar& minProj, btScalar& maxProj, btVector3& witnesPtMin,btVector3& witnesPtMax) const;
+	using btPolyhedralConvexAabbCachingShape::project;
 
 
 	//debugging

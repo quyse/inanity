@@ -334,8 +334,7 @@ inline __m128 operator * (const __m128 A, const __m128 B)
 #else//BT_USE_NEON
 
 	#ifndef BT_INFINITY
-	static  int btInfinityMask = 0x7F800000;
-	#define BT_INFINITY (*(float*)&btInfinityMask)
+	#define BT_INFINITY INFINITY
 	#endif
 #endif//BT_USE_NEON
 
