@@ -43,8 +43,11 @@ class btConeTwistConstraint;
 class btGeneric6DofConstraint;
 class btGeneric6DofSpringConstraint;
 class btSliderConstraint;
+class btGearConstraint;
 struct btContactSolverInfo;
 struct btTypedConstraintData;
+struct btTypedConstraintFloatData;
+struct btTypedConstraintDoubleData;
 
 struct btRigidBodyDoubleData;
 struct btRigidBodyFloatData;
@@ -100,7 +103,10 @@ protected:
 	char*	duplicateName(const char* name);
 
 	btCollisionShape* convertCollisionShape(  btCollisionShapeData* shapeData  );
-	void	convertConstraint(btTypedConstraintData* constraintData, btRigidBody* rbA, btRigidBody* rbB, bool isDoublePrecisionData, int fileVersion);
+	
+	void	convertConstraintBackwardsCompatible281(btTypedConstraintData* constraintData, btRigidBody* rbA, btRigidBody* rbB, int fileVersion);
+	void	convertConstraintFloat(btTypedConstraintFloatData* constraintData, btRigidBody* rbA, btRigidBody* rbB, int fileVersion);
+	void	convertConstraintDouble(btTypedConstraintDoubleData* constraintData, btRigidBody* rbA, btRigidBody* rbB, int fileVersion);
 	void	convertRigidBodyFloat(btRigidBodyFloatData* colObjData);
 	void	convertRigidBodyDouble( btRigidBodyDoubleData* colObjData);
 
@@ -162,6 +168,9 @@ public:
 	virtual btCollisionShape* createCylinderShapeX(btScalar radius,btScalar height);
 	virtual btCollisionShape* createCylinderShapeY(btScalar radius,btScalar height);
 	virtual btCollisionShape* createCylinderShapeZ(btScalar radius,btScalar height);
+	virtual btCollisionShape* createConeShapeX(btScalar radius,btScalar height);
+	virtual btCollisionShape* createConeShapeY(btScalar radius,btScalar height);
+	virtual btCollisionShape* createConeShapeZ(btScalar radius,btScalar height);
 	virtual class btTriangleIndexVertexArray*	createTriangleMeshContainer();
 	virtual	btBvhTriangleMeshShape* createBvhTriangleMeshShape(btStridingMeshInterface* trimesh, btOptimizedBvh* bvh);
 	virtual btCollisionShape* createConvexTriangleMeshShape(btStridingMeshInterface* trimesh);
@@ -192,6 +201,8 @@ public:
 	virtual btGeneric6DofSpringConstraint* createGeneric6DofSpringConstraint(btRigidBody& rbA, btRigidBody& rbB, const btTransform& frameInA, const btTransform& frameInB ,bool useLinearReferenceFrameA);
 	virtual btSliderConstraint* createSliderConstraint(btRigidBody& rbA, btRigidBody& rbB, const btTransform& frameInA, const btTransform& frameInB ,bool useLinearReferenceFrameA);
     virtual btSliderConstraint* createSliderConstraint(btRigidBody& rbB, const btTransform& frameInB, bool useLinearReferenceFrameA);
+	virtual btGearConstraint* createGearConstraint(btRigidBody& rbA, btRigidBody& rbB, const btVector3& axisInA,const btVector3& axisInB, btScalar ratio);
+	
 
 
 

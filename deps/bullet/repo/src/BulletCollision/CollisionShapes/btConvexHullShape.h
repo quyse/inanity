@@ -36,7 +36,7 @@ public:
 	///btConvexHullShape make an internal copy of the points.
 	btConvexHullShape(const btScalar* points=0,int numPoints=0, int stride=sizeof(btVector3));
 
-	void addPoint(const btVector3& point);
+	void addPoint(const btVector3& point, bool recalculateLocalAabb = true);
 
 	
 	btVector3* getUnscaledPoints()
@@ -74,7 +74,6 @@ public:
 	
 
 	virtual void project(const btTransform& trans, const btVector3& dir, btScalar& minProj, btScalar& maxProj, btVector3& witnesPtMin,btVector3& witnesPtMax) const;
-	using btPolyhedralConvexAabbCachingShape::project;
 
 
 	//debugging

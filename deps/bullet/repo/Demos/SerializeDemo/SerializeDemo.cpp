@@ -765,7 +765,7 @@ void	SerializeDemo::initPhysics()
 	
 
 
-	if (!m_fileLoader->loadFile("testFile.bullet"))
+	if (!m_fileLoader->loadFile("testFile.bullet", "testFileSwappedEndianness.bullet"))
 //	if (!m_fileLoader->loadFile("../SoftDemo/testFile.bullet"))
 	{
 		///create a few basic rigid bodies and save them to testFile.bullet
@@ -898,9 +898,17 @@ void	SerializeDemo::exitPhysics()
 {
 
 	//cleanup in the reverse order of creation/initialization
+	//removed/delete constraints
+	int i;
+	for (i=m_dynamicsWorld->getNumConstraints()-1; i>=0 ;i--)
+	{
+		btTypedConstraint* constraint = m_dynamicsWorld->getConstraint(i);
+		m_dynamicsWorld->removeConstraint(constraint);
+		delete constraint;
+	}
 
 	//remove the rigidbodies from the dynamics world and delete them
-	int i;
+
 	for (i=m_dynamicsWorld->getNumCollisionObjects()-1; i>=0 ;i--)
 	{
 		btCollisionObject* obj = m_dynamicsWorld->getCollisionObjectArray()[i];

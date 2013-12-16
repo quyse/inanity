@@ -28,7 +28,8 @@ subject to the following restrictions:
 #include "LinearMath/btIDebugDraw.h"
 #include "LinearMath/btGeometryUtil.h"
 #include "BulletCollision/CollisionShapes/btShapeHull.h"
-
+#include "GLDebugDrawer.h"
+GLDebugDrawer	gDebugDrawer;
 //#define TEST_SERIALIZATION
 //#define NO_OBJ_TO_BULLET
 
@@ -45,9 +46,12 @@ subject to the following restrictions:
 #include "../../Extras/BulletMultiThreaded/SpuNarrowPhaseCollisionTask/SpuGatheringCollisionTask.h"
 #endif//USE_PARALLEL_DISPATCHER
 
+#include "BulletCollision/CollisionDispatch/btCompoundCollisionAlgorithm.h"//for the callback
 
-
-
+bool MyCompoundChildShapeCallback(const btCollisionShape* pShape0, const btCollisionShape* pShape1)
+{
+	return true;
+}
 
 #include "GLDebugFont.h"
 #include <stdio.h> //printf debugging
@@ -69,11 +73,14 @@ btVector3   convexDecompositionObjectOffset(10,0,0);
 
 unsigned int tcount = 0;
 
+//sEnableSAT creates the data structures required for performing SAT tests between convex polyhedra, as alternative to GJK
+bool sEnableSAT = false;
 
 void ConvexDecompositionDemo::initPhysics()
 {
 	initPhysics("file.obj");
 }
+
 
 
 
@@ -110,6 +117,7 @@ void ConvexDecompositionDemo::setupEmptyDynamicsWorld()
 {
 m_collisionConfiguration = new btDefaultCollisionConfiguration();
 
+
 #ifdef USE_PARALLEL_DISPATCHER
 #ifdef USE_WIN32_THREADING
 
@@ -132,6 +140,7 @@ m_collisionConfiguration = new btDefaultCollisionConfiguration();
 	m_dispatcher = new	btCollisionDispatcher(m_collisionConfiguration);
 #endif//USE_PARALLEL_DISPATCHER
 
+	gCompoundChildShapePairCallback = MyCompoundChildShapeCallback;
 
 	convexDecompositionObjectOffset.setValue(10,0,0);
 
@@ -153,10 +162,11 @@ m_collisionConfiguration = new btDefaultCollisionConfiguration();
 void ConvexDecompositionDemo::initPhysics(const char* filename)
 {
 
-
 	gContactAddedCallback = &MyContactCallback;
 
 	setupEmptyDynamicsWorld();
+
+	getDynamicsWorld()->setDebugDrawer(&gDebugDrawer);
 
 	setTexturing(true);
 	setShadows(true);
@@ -327,7 +337,8 @@ void ConvexDecompositionDemo::initPhysics(const char* filename)
 					
 					btConvexHullShape* convexShape = new btConvexHullShape(&(vertices[0].getX()),vertices.size());
 #endif 
-
+					if (sEnableSAT)
+						convexShape->initializePolyhedralFeatures();
 					convexShape->setMargin(0.01f);
 					m_convexShapes.push_back(convexShape);
 					m_convexCentroids.push_back(centroid);
@@ -390,11 +401,16 @@ void ConvexDecompositionDemo::initPhysics(const char* filename)
 		printf("new numVertices = %d\n", hull->numVertices ());
 		
 		btConvexHullShape* convexShape = new btConvexHullShape();
+		bool updateLocalAabb = false;
+
 		for (i=0;i<hull->numVertices();i++)
 		{
-			convexShape->addPoint(hull->getVertexPointer()[i]);	
+			convexShape->addPoint(hull->getVertexPointer()[i],updateLocalAabb);	
 		}
+		convexShape->recalcLocalAabb();
 
+		if (sEnableSAT)
+			convexShape->initializePolyhedralFeatures();
 		delete tmpConvexShape;
 		delete hull;
 
@@ -737,5 +753,27 @@ void	ConvexDecompositionDemo::exitPhysics()
 }
 
 
+void	ConvexDecompositionDemo::clientResetScene()
+{
+	exitPhysics();
+	initPhysics("file.obj");
+}
 
+void ConvexDecompositionDemo::keyboardCallback(unsigned char key, int x, int y)
+{
+	if (key=='S')
+	{
+		sEnableSAT= !sEnableSAT;
+		if (sEnableSAT)
+		{
+			printf("SAT enabled after the next restart of the demo\n");
+		} else
+		{	
+			printf("SAT disabled after the next restart of the demo\n");
+		}
+	} else
+	{
+		PlatformDemoApplication::keyboardCallback(key,x,y);
+	}
 
+}

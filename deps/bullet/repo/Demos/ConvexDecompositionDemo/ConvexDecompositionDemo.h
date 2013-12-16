@@ -64,6 +64,8 @@ public:
 
 	void	exitPhysics();
 
+	virtual void	clientResetScene();
+
 	virtual	~ConvexDecompositionDemo()
 	{
 		exitPhysics();
@@ -72,6 +74,8 @@ public:
 	virtual void clientMoveAndDisplay();
 
 	virtual void displayCallback();
+
+	virtual void keyboardCallback(unsigned char key, int x, int y);
 
 	static DemoApplication* Create()
 	{

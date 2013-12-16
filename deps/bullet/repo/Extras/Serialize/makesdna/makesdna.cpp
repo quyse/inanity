@@ -133,6 +133,7 @@ typedef unsigned long uintptr_t;
 #include "BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h"
 #include "BulletCollision/CollisionShapes/btCompoundShape.h"
 #include "BulletCollision/CollisionShapes/btCylinderShape.h"
+#include "BulletCollision/CollisionShapes/btConeShape.h"
 #include "BulletCollision/CollisionShapes/btCapsuleShape.h"
 #include "BulletCollision/CollisionShapes/btTriangleInfoMap.h"
 #include "BulletCollision/Gimpact/btGImpactShape.h"
@@ -144,6 +145,7 @@ typedef unsigned long uintptr_t;
 #include "BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h"
 #include "BulletDynamics/ConstraintSolver/btGeneric6DofSpringConstraint.h"
 #include "BulletDynamics/ConstraintSolver/btSliderConstraint.h"
+#include "BulletDynamics/ConstraintSolver/btGearConstraint.h"
 #include "BulletDynamics/ConstraintSolver/btContactSolverInfo.h"
 #include "BulletDynamics/Dynamics/btDynamicsWorld.h"
 
@@ -176,6 +178,7 @@ char *includefiles[] = {
 	"../../../src/BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h",
 	"../../../src/BulletCollision/CollisionShapes/btCompoundShape.h",
 	"../../../src/BulletCollision/CollisionShapes/btCylinderShape.h",
+	"../../../src/BulletCollision/CollisionShapes/btConeShape.h",
 	"../../../src/BulletCollision/CollisionShapes/btCapsuleShape.h",
 	"../../../src/BulletCollision/CollisionShapes/btTriangleInfoMap.h",
 	"../../../src/BulletCollision/Gimpact/btGImpactShape.h",
@@ -190,6 +193,7 @@ char *includefiles[] = {
 	"../../../src/BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h",
 	"../../../src/BulletDynamics/ConstraintSolver/btGeneric6DofSpringConstraint.h",
 	"../../../src/BulletDynamics/ConstraintSolver/btSliderConstraint.h",
+	"../../../src/BulletDynamics/ConstraintSolver/btGearConstraint.h",
 	"../../../src/BulletDynamics/ConstraintSolver/btContactSolverInfo.h",
 	"../../../src/BulletSoftBody/btSoftBodyData.h",	
 	// empty string to indicate end of includefiles

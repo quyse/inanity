@@ -51,11 +51,20 @@ solution "0BulletSolution"
   
 	configurations {"Release", "Debug"}
 	configuration "Release"
-		flags { "Optimize", "StaticRuntime", "NoMinimalRebuild", "FloatFast"}
+		flags { "Optimize", "EnableSSE", "StaticRuntime", "NoMinimalRebuild", "FloatFast"}
 	configuration "Debug"
 		flags { "Symbols", "StaticRuntime" , "NoMinimalRebuild", "NoEditAndContinue" ,"FloatFast"}
 		
-	platforms {"x32", "x64"}
+ if os.is("Linux") then
+                if os.is64bit() then
+                        platforms {"x64"}
+                else
+                        platforms {"x32"}
+                end
+        else
+                platforms {"x32", "x64"}
+        end
+
 	--platforms {"x32"}
 
   configuration {"Windows"}
@@ -85,6 +94,7 @@ solution "0BulletSolution"
 			xcodebuildsettings
 			{
 				'ARCHS = "$(ARCHS_STANDARD_32_BIT) $(ARCHS_STANDARD_64_BIT)"',
+				'CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x"',
 				'VALID_ARCHS = "x86_64 i386"',
 			}
 		end

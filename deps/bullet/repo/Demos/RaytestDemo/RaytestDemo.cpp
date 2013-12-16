@@ -20,6 +20,7 @@ subject to the following restrictions:
 ///btBulletDynamicsCommon.h is the main Bullet include file, contains most common include files.
 #include "btBulletDynamicsCommon.h"
 #include "BulletCollision/NarrowPhaseCollision/btRaycastCallback.h"
+#include "BulletCollision/Gimpact/btGImpactShape.h"
 
 #include <stdio.h> //printf debugging
 #include "GLDebugDrawer.h"
@@ -67,6 +68,9 @@ void RaytestDemo::castRays()
 			sDebugDraw.drawLine(from,to,btVector4(0,0,0,1));
 			btCollisionWorld::AllHitsRayResultCallback allResults(from,to);
 			allResults.m_flags |= btTriangleRaycastCallback::kF_KeepUnflippedNormal;
+			//kF_UseGjkConvexRaytest flag is now enabled by default, use the faster but more approximate algorithm
+			allResults.m_flags |= btTriangleRaycastCallback::kF_UseSubSimplexConvexCastRaytest;
+			
 			m_dynamicsWorld->rayTest(from,to,allResults);
 
 			for (int i=0;i<allResults.m_hitFractions.size();i++)
@@ -220,7 +224,10 @@ void	RaytestDemo::initPhysics()
 		mesh->addTriangle(quad[0],quad[1],quad[2],true);
 		mesh->addTriangle(quad[0],quad[2],quad[3],true);
 
-		btBvhTriangleMeshShape* trimesh = new btBvhTriangleMeshShape(mesh,true,true);
+		//btBvhTriangleMeshShape* trimesh = new btBvhTriangleMeshShape(mesh,true,true);
+		btGImpactMeshShape * trimesh = new btGImpactMeshShape(mesh);
+		trimesh->updateBound();
+		
 
 #define NUM_SHAPES 6
 			btCollisionShape* colShapes[NUM_SHAPES] = {
