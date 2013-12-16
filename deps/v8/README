@@ -20,7 +20,7 @@ windows-build-fixes.patch (for Windows):
 On Windows you should run something like that (in compiler's command line environment):
 
 cd deps\v8\repo
-svn co http://gyp.googlecode.com/svn/trunk build/gyp
+svn co http://gyp.googlecode.com/svn/trunk build/gyp --revision 1685
 svn co http://src.chromium.org/svn/trunk/deps/third_party/cygwin@66844 third_party/cygwin
 set GYP_MSVS_VERSION=2013
 python build\gyp_v8
