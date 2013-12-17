@@ -1,7 +1,10 @@
 #include "EmsWindow.hpp"
+#include "Sdl.hpp"
 #include "../graphics/EmsOutput.hpp"
+#include "../input/Manager.hpp"
 #include "../Exception.hpp"
 #include <emscripten/emscripten.h>
+#include <SDL.h>
 
 BEGIN_INANITY_PLATFORM
 
@@ -15,6 +18,11 @@ EmsWindow::EmsWindow(const String& title, int width, int height)
 
 	instance = this;
 
+	// in emscripten all simplified
+	// this is needed to initialize mouse input events
+	sdl = Sdl::Get();
+	SDL_SetVideoMode(0, 0, 0, SDL_OPENGL);
+
 	// init canvas
 	emscripten_set_canvas_size(width, height);
 }
@@ -22,6 +30,11 @@ EmsWindow::EmsWindow(const String& title, int width, int height)
 EmsWindow::~EmsWindow()
 {
 	instance = 0;
+}
+
+void EmsWindow::SetInputManager(ptr<Input::Manager> inputManager)
+{
+	this->inputManager = inputManager;
 }
 
 void EmsWindow::SetTitle(const String& title)
@@ -62,6 +75,8 @@ void EmsWindow::UpdateCursorVisible()
 
 void EmsWindow::MainLoop()
 {
+	if(instance->inputManager)
+		instance->inputManager->Update();
 	instance->activeHandler->Fire();
 }
 

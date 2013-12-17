@@ -10,7 +10,8 @@
 #include "X11Display.hpp"
 #include "../input/X11Manager.hpp"
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
-#include "../input/EmsManager.hpp"
+#include "EmsWindow.hpp"
+#include "../input/SdlManager.hpp"
 #else
 #error Unknown platform
 #endif
@@ -44,7 +45,10 @@ ptr<Input::Manager> Game::CreateInputManager(ptr<Window> window)
 	x11Window->SetInputManager(inputManager);
 	return inputManager;
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
-	return NEW(Input::EmsManager());
+	ptr<Platform::EmsWindow> emsWindow = window.DynamicCast<Platform::EmsWindow>();
+	ptr<Input::Manager> inputManager = NEW(Input::SdlManager());
+	emsWindow->SetInputManager(inputManager);
+	return inputManager;
 #else
 #error Unknown platform
 #endif

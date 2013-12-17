@@ -89,7 +89,7 @@ var libraries = {
 		objects: ['input.Event', 'input.Frame', 'input.Manager', 'input.Mux', 'input.Processor'],
 		'objects-win32': ['input.Win32Manager', 'input.Win32RawManager'],
 		'objects-linux': ['input.X11Manager'],
-		'objects-emscripten': ['input.EmsManager']
+		'objects-emscripten': ['input.SdlManager', 'platform.Sdl']
 	},
 	// ******* general platform subsystem
 	'libinanity-platform': {

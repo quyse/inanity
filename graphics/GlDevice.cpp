@@ -371,10 +371,6 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 
-		EM_ASM(
-			window.Browser.createContext(window.Module.canvas, true, true);
-		);
-
 		ptr<EmsOutput> output = abstractOutput.DynamicCast<EmsOutput>();
 		if(!output)
 			THROW("Only Emscripten output allowed");
