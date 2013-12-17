@@ -103,6 +103,8 @@ void TextBox::EventKeyDown(Key key)
 			text.erase(text.begin() + selectionBegin);
 		selectionEnd = selectionBegin;
 		break;
+	default:
+		break;
 	}
 }
 
@@ -113,6 +115,8 @@ void TextBox::EventKeyUp(Key key)
 	case Keys::ShiftL:
 	case Keys::ShiftR:
 		shiftPressed = false;
+		break;
+	default:
 		break;
 	}
 }
