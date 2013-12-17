@@ -1,12 +1,11 @@
-#ifndef ___INANITY_COMPOSITE_FILE_SYSTEM_H___
-#define ___INANITY_COMPOSITE_FILE_SYSTEM_H___
+#ifndef ___INANITY_DATA_COMPOSITE_FILE_SYSTEM_H___
+#define ___INANITY_DATA_COMPOSITE_FILE_SYSTEM_H___
 
-#include "FileSystem.hpp"
+#include "data.hpp"
+#include "../FileSystem.hpp"
 #include <vector>
 
-BEGIN_INANITY
-
-class File;
+BEGIN_INANITY_DATA
 
 /// Класс составной файловой системы.
 /** Позволяет объединять несколько файловых систем.
@@ -36,6 +35,6 @@ public:
 	void SaveFile(ptr<File> file, const String& fileName);
 };
 
-END_INANITY
+END_INANITY_DATA
 
 #endif

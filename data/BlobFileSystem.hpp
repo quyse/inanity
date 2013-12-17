@@ -1,11 +1,12 @@
-#ifndef ___INANITY_BLOB_FILE_SYSTEM_HPP___
-#define ___INANITY_BLOB_FILE_SYSTEM_HPP___
+#ifndef ___INANITY_DATA_BLOB_FILE_SYSTEM_HPP___
+#define ___INANITY_DATA_BLOB_FILE_SYSTEM_HPP___
 
-#include "FileSystem.hpp"
-#include "meta/decl.hpp"
+#include "data.hpp"
+#include "../FileSystem.hpp"
+#include "../meta/decl.hpp"
 #include <unordered_map>
 
-BEGIN_INANITY
+BEGIN_INANITY_DATA
 
 /// Класс blob-файловой системы
 /** То есть системы, хранящей архив в одном файле.
@@ -46,6 +47,6 @@ public:
 	META_DECLARE_CLASS(BlobFileSystem);
 };
 
-END_INANITY
+END_INANITY_DATA
 
 #endif

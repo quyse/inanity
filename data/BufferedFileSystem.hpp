@@ -1,9 +1,9 @@
-#ifndef ___INANITY_BUFFERED_FILE_SYSTEM_HPP___
-#define ___INANITY_BUFFERED_FILE_SYSTEM_HPP___
+#ifndef ___INANITY_DATA_BUFFERED_FILE_SYSTEM_HPP___
+#define ___INANITY_DATA_BUFFERED_FILE_SYSTEM_HPP___
 
 #include "FilterFileSystem.hpp"
 
-BEGIN_INANITY
+BEGIN_INANITY_DATA
 
 /// Класс буферизованной файловой системы.
 /** Оборачивает потоки файловой системы буферизирующими потоками.
@@ -19,6 +19,6 @@ public:
 	ptr<OutputStream> SaveStream(const String& fileName);
 };
 
-END_INANITY
+END_INANITY_DATA
 
 #endif

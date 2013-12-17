@@ -1,7 +1,7 @@
 ﻿#include "TempFileSystem.hpp"
-#include "File.hpp"
+#include "../File.hpp"
 
-BEGIN_INANITY
+BEGIN_INANITY_DATA
 
 ptr<File> TempFileSystem::TryLoadFile(const String& fileName)
 {
@@ -14,4 +14,4 @@ void TempFileSystem::SaveFile(ptr<File> file, const String& fileName)
 	files[fileName] = file;
 }
 
-END_INANITY
+END_INANITY_DATA

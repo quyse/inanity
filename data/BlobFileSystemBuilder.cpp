@@ -1,15 +1,15 @@
 #include "BlobFileSystemBuilder.hpp"
 #include "BlobFileSystem.hpp"
-#include "InputStream.hpp"
-#include "OutputStream.hpp"
-#include "MemoryStream.hpp"
-#include "StreamWriter.hpp"
-#include "FileInputStream.hpp"
-#include "File.hpp"
-#include "Exception.hpp"
+#include "../InputStream.hpp"
+#include "../OutputStream.hpp"
+#include "../MemoryStream.hpp"
+#include "../StreamWriter.hpp"
+#include "../FileInputStream.hpp"
+#include "../File.hpp"
+#include "../Exception.hpp"
 #include <cstring>
 
-BEGIN_INANITY
+BEGIN_INANITY_DATA
 
 BlobFileSystemBuilder::BlobFileSystemBuilder(ptr<OutputStream> outputStream)
 {
@@ -81,4 +81,4 @@ void BlobFileSystemBuilder::Finalize()
 	}
 }
 
-END_INANITY
+END_INANITY_DATA

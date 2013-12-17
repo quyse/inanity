@@ -1,9 +1,10 @@
-#ifndef ___INANITY_FILTER_FILE_SYSTEM_HPP___
-#define ___INANITY_FILTER_FILE_SYSTEM_HPP___
+#ifndef ___INANITY_DATA_FILTER_FILE_SYSTEM_HPP___
+#define ___INANITY_DATA_FILTER_FILE_SYSTEM_HPP___
 
-#include "FileSystem.hpp"
+#include "data.hpp"
+#include "../FileSystem.hpp"
 
-BEGIN_INANITY
+BEGIN_INANITY_DATA
 
 /// Класс фильтрующей файловой системы.
 /** Просто переадресует все запросы подлежащей файловой системе.
@@ -26,6 +27,6 @@ public:
 	void GetAllDirectoryEntries(const String& directoryName, std::vector<String>& entries) const;
 };
 
-END_INANITY
+END_INANITY_DATA
 
 #endif

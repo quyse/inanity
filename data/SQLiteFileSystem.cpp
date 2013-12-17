@@ -1,10 +1,10 @@
 #include "SQLiteFileSystem.hpp"
-#include "MemoryFile.hpp"
-#include "CriticalCode.hpp"
-#include "Exception.hpp"
+#include "../MemoryFile.hpp"
+#include "../CriticalCode.hpp"
+#include "../Exception.hpp"
 #include <memory.h>
 
-BEGIN_INANITY
+BEGIN_INANITY_DATA
 
 /* Реализация в базе SQLite файловой системы.
 Структура базы описана в конструкторе.
@@ -305,4 +305,4 @@ void SQLiteFileSystem::GetAllDirectoryEntries(const String& directoryName, std::
 	GetEntries(directoryName, entries, true);
 }
 
-END_INANITY
+END_INANITY_DATA

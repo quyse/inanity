@@ -1,9 +1,10 @@
-#ifndef ___INANITY_BASE64_OUTPUT_STREAM_HPP___
-#define ___INANITY_BASE64_OUTPUT_STREAM_HPP___
+#ifndef ___INANITY_DATA_BASE64_OUTPUT_STREAM_HPP___
+#define ___INANITY_DATA_BASE64_OUTPUT_STREAM_HPP___
 
-#include "OutputStream.hpp"
+#include "data.hpp"
+#include "../OutputStream.hpp"
 
-BEGIN_INANITY
+BEGIN_INANITY_DATA
 
 /// Поток, кодирующий/декодирующий поступающие данные в Base64.
 class Base64OutputStream : public OutputStream
@@ -36,6 +37,6 @@ public:
 	void Flush();
 };
 
-END_INANITY
+END_INANITY_DATA
 
 #endif

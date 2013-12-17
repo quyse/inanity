@@ -1,12 +1,12 @@
 #include "DecompressStream.hpp"
-#include "MemoryFile.hpp"
-#include "FileInputStream.hpp"
-#include "MemoryStream.hpp"
-#include "Exception.hpp"
+#include "../MemoryFile.hpp"
+#include "../FileInputStream.hpp"
+#include "../MemoryStream.hpp"
+#include "../Exception.hpp"
 #include <memory.h>
 #include <algorithm>
 
-BEGIN_INANITY
+BEGIN_INANITY_DATA
 
 DecompressStream::DecompressStream(ptr<InputStream> inputStream)
 : inputFile(NEW(MemoryFile(inputBufferSize))), inputStream(inputStream), finished(false)
@@ -150,4 +150,4 @@ ptr<File> DecompressStream::DecompressFile(ptr<File> file)
 	}
 }
 
-END_INANITY
+END_INANITY_DATA

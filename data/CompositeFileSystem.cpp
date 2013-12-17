@@ -1,8 +1,8 @@
 #include "CompositeFileSystem.hpp"
-#include "File.hpp"
-#include "Exception.hpp"
+#include "../File.hpp"
+#include "../Exception.hpp"
 
-BEGIN_INANITY
+BEGIN_INANITY_DATA
 
 ptr<FileSystem> CompositeFileSystem::GetFileSystemForPath(String& path)
 {
@@ -91,4 +91,4 @@ void CompositeFileSystem::SaveFile(ptr<File> file, const String& fileName)
 	}
 }
 
-END_INANITY
+END_INANITY_DATA

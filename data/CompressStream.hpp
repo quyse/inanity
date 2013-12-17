@@ -1,9 +1,10 @@
-#ifndef ___INANITY_COMPRESS_STREAM_HPP___
-#define ___INANITY_COMPRESS_STREAM_HPP___
+#ifndef ___INANITY_DATA_COMPRESS_STREAM_HPP___
+#define ___INANITY_DATA_COMPRESS_STREAM_HPP___
 
-#include "OutputStream.hpp"
-#include "meta/decl.hpp"
-#include "zlib.hpp"
+#include "data.hpp"
+#include "../OutputStream.hpp"
+#include "../meta/decl.hpp"
+#include "../zlib.hpp"
 
 /*
 Файл содержит класс потока для сжатия данных.
@@ -12,6 +13,11 @@
 BEGIN_INANITY
 
 class File;
+
+END_INANITY
+
+BEGIN_INANITY_DATA
+
 class CompressStream : public OutputStream
 {
 public:
@@ -58,6 +64,6 @@ public:
 	META_DECLARE_CLASS(CompressStream);
 };
 
-END_INANITY
+END_INANITY_DATA
 
 #endif

@@ -1,12 +1,11 @@
-﻿#ifndef ___INANITY_TEMP_FILE_SYSTEM_HPP___
-#define ___INANITY_TEMP_FILE_SYSTEM_HPP___
+﻿#ifndef ___INANITY_DATA_TEMP_FILE_SYSTEM_HPP___
+#define ___INANITY_DATA_TEMP_FILE_SYSTEM_HPP___
 
-#include "FileSystem.hpp"
+#include "data.hpp"
+#include "../FileSystem.hpp"
 #include <unordered_map>
 
-BEGIN_INANITY
-
-class ResourceLoader;
+BEGIN_INANITY_DATA
 
 /// Класс временной файловой системы.
 /** Просто хеш с файлами. Позволяет добавлять файлы во время работы. */
@@ -20,6 +19,6 @@ public:
 	void SaveFile(ptr<File> file, const String& fileName);
 };
 
-END_INANITY
+END_INANITY_DATA
 
 #endif

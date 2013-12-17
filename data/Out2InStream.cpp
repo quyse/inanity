@@ -1,10 +1,10 @@
 #include "Out2InStream.hpp"
-#include "File.hpp"
-#include "CriticalCode.hpp"
-#include "Exception.hpp"
+#include "../File.hpp"
+#include "../CriticalCode.hpp"
+#include "../Exception.hpp"
 #include <cstring>
 
-BEGIN_INANITY
+BEGIN_INANITY_DATA
 
 Out2InStream::Reader::Reader(ptr<Out2InStream> stream)
 	: stream(stream), firstOffset(0)
@@ -109,4 +109,4 @@ ptr<InputStream> Out2InStream::CreateInputStream()
 	return reader;
 }
 
-END_INANITY
+END_INANITY_DATA

@@ -22,31 +22,30 @@ exports.configureCompiler = function(objectFile, compiler) {
 	compiler.addIncludeDir('deps/harfbuzz/generated');
 };
 
-/**
- * структура проекта
- */
 var libraries = {
-	// ****** базовая библиотека
+	// ****** base
 	'libinanity-base': {
 		objects: [
-		// совсем общее
 		'Object', 'ManagedHeap', 'Strings', 'StringTraveler', 'Exception',
-		// выделение памяти
 		'MemoryPool', 'ChunkPool', 'PoolObject',
-		// время
 		'Time', 'Ticker',
-		// профилирование
 		'Profiling',
-		// синхронизация и потоки выполнения
 		'Thread', 'CriticalSection', 'CriticalCode', 'Semaphore',
-		// общее: файлы и потоки
-		'EmptyFile', 'PartFile', 'MemoryFile', 'InputStream', 'OutputStream', 'FileInputStream', 'StreamReader', 'StreamWriter', 'BufferedInputStream', 'BufferedOutputStream', 'MemoryStream',
-		// преобразующие потоки
-		'Base64OutputStream', 'Out2InStream',
-		// файловые системы
-		'FileSystem',
-		'BlobFileSystem', 'BlobFileSystemBuilder', 'CompositeFileSystem', 'TempFileSystem',
-		'FilterFileSystem', 'BufferedFileSystem'
+		'EmptyFile', 'PartFile', 'MemoryFile',
+		'InputStream', 'OutputStream', 'FileInputStream', 'MemoryStream',
+		'StreamReader', 'StreamWriter',
+		'FileSystem'
+		]
+	},
+	// ******* data
+	'libinanity-data': {
+		objects: [
+		'data.FilterFileSystem',
+		'data.TempFileSystem',
+		'data.CompositeFileSystem',
+		'data.BlobFileSystem', 'data.BlobFileSystemBuilder',
+		'data.Base64OutputStream', 'data.Out2InStream',
+		'data.BufferedFileSystem', 'data.BufferedInputStream', 'data.BufferedOutputStream'
 		]
 	},
 	// ******* сжатие
@@ -55,7 +54,7 @@ var libraries = {
 		// зависимость - zlib
 		'deps.zlib.adler32.c', 'deps.zlib.compress.c', 'deps.zlib.crc32.c', 'deps.zlib.deflate.c', /*'deps.zlib.gzclose.c', 'deps.zlib.gzlib.c', 'deps.zlib.gzread.c', 'deps.zlib.gzwrite.c',*/ 'deps.zlib.infback.c', 'deps.zlib.inflate.c', 'deps.zlib.inftrees.c', 'deps.zlib.inffast.c', 'deps.zlib.trees.c', 'deps.zlib.uncompr.c', 'deps.zlib.zutil.c',
 		// потоки для сжатия
-		'CompressStream', 'DecompressStream']
+		'data.CompressStream', 'data.DecompressStream']
 	},
 	// ******* сетевая библиотека ASIO
 	'libinanity-asio': {
@@ -69,7 +68,7 @@ var libraries = {
 	},
 	// ******* файловая система на SQLite
 	'libinanity-sqlitefs': {
-		objects: ['SQLiteFileSystem']
+		objects: ['data.SQLiteFileSystem']
 	},
 	// ******* скрипты на lua
 	'libinanity-lua': {

@@ -1,11 +1,16 @@
-#ifndef ___INANITY_BUFFERED_OUTPUT_STREAM_HPP___
-#define ___INANITY_BUFFERED_OUTPUT_STREAM_HPP___
+#ifndef ___INANITY_DATA_BUFFERED_OUTPUT_STREAM_HPP___
+#define ___INANITY_DATA_BUFFERED_OUTPUT_STREAM_HPP___
 
-#include "OutputStream.hpp"
+#include "data.hpp"
+#include "../OutputStream.hpp"
 
 BEGIN_INANITY
 
 class File;
+
+END_INANITY
+
+BEGIN_INANITY_DATA
 
 /// Класс выходного потока, буферизующий вывод.
 /** Предназначен для снижения нагрузки при записи в потоки, которые
@@ -32,6 +37,6 @@ public:
 	void Flush();
 };
 
-END_INANITY
+END_INANITY_DATA
 
 #endif

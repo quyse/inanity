@@ -1,15 +1,14 @@
-#ifndef ___INANITY_SQLITEFILESYSTEM_HPP___
-#define ___INANITY_SQLITEFILESYSTEM_HPP___
+#ifndef ___INANITY_DATA_SQLITEFILESYSTEM_HPP___
+#define ___INANITY_DATA_SQLITEFILESYSTEM_HPP___
 
-#include "FileSystem.hpp"
-#include "String.hpp"
-#include "CriticalSection.hpp"
-#include "deps/sqlite/sqlite3.h"
+#include "data.hpp"
+#include "../FileSystem.hpp"
+#include "../String.hpp"
+#include "../CriticalSection.hpp"
+#include "../deps/sqlite/sqlite3.h"
 #include <unordered_map>
 
-BEGIN_INANITY
-
-class File;
+BEGIN_INANITY_DATA
 
 /// Класс файловой системы, основанной на SQLite.
 /** Эта файловая система не полностью интегрирована
@@ -100,6 +99,6 @@ public:
 	void GetAllDirectoryEntries(const String& directoryName, std::vector<String>& entries) const;
 };
 
-END_INANITY
+END_INANITY_DATA
 
 #endif

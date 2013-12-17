@@ -1,9 +1,10 @@
-#ifndef ___INANITY_DECOMPRESS_STREAM_HPP___
-#define ___INANITY_DECOMPRESS_STREAM_HPP___
+#ifndef ___INANITY_DATA_DECOMPRESS_STREAM_HPP___
+#define ___INANITY_DATA_DECOMPRESS_STREAM_HPP___
 
-#include "InputStream.hpp"
-#include "meta/decl.hpp"
-#include "zlib.hpp"
+#include "data.hpp"
+#include "../InputStream.hpp"
+#include "../meta/decl.hpp"
+#include "../zlib.hpp"
 
 /*
 Файл содержит класс потока для распаковки данных.
@@ -12,6 +13,11 @@
 BEGIN_INANITY
 
 class File;
+
+END_INANITY
+
+BEGIN_INANITY_DATA
+
 class DecompressStream : public InputStream
 {
 private:
@@ -44,6 +50,6 @@ public:
 	META_DECLARE_CLASS(DecompressStream);
 };
 
-END_INANITY
+END_INANITY_DATA
 
 #endif

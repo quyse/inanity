@@ -1,9 +1,9 @@
 #include "BufferedFileSystem.hpp"
 #include "BufferedInputStream.hpp"
 #include "BufferedOutputStream.hpp"
-#include "Exception.hpp"
+#include "../Exception.hpp"
 
-BEGIN_INANITY
+BEGIN_INANITY_DATA
 
 BufferedFileSystem::BufferedFileSystem(ptr<FileSystem> fileSystem)
 : FilterFileSystem(fileSystem) {}
@@ -32,4 +32,4 @@ ptr<OutputStream> BufferedFileSystem::SaveStream(const String& fileName)
 	}
 }
 
-END_INANITY
+END_INANITY_DATA

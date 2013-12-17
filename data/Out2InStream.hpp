@@ -1,14 +1,15 @@
-#ifndef ___INANITY_OUT2IN_STREAM_HPP___
-#define ___INANITY_OUT2IN_STREAM_HPP___
+#ifndef ___INANITY_DATA_OUT2IN_STREAM_HPP___
+#define ___INANITY_DATA_OUT2IN_STREAM_HPP___
 
-#include "OutputStream.hpp"
-#include "InputStream.hpp"
-#include "CriticalSection.hpp"
-#include "Semaphore.hpp"
+#include "data.hpp"
+#include "../OutputStream.hpp"
+#include "../InputStream.hpp"
+#include "../CriticalSection.hpp"
+#include "../Semaphore.hpp"
 #include <queue>
 #include <list>
 
-BEGIN_INANITY
+BEGIN_INANITY_DATA
 
 /// Поток выход-типа-вход.
 /** Специальный класс, который преобразует поток активных
@@ -75,6 +76,6 @@ public:
 	ptr<InputStream> CreateInputStream();
 };
 
-END_INANITY
+END_INANITY_DATA
 
 #endif

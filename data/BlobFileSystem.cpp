@@ -1,11 +1,11 @@
 #include "BlobFileSystem.hpp"
-#include "PartFile.hpp"
-#include "FileInputStream.hpp"
-#include "StreamReader.hpp"
-#include "Exception.hpp"
+#include "../PartFile.hpp"
+#include "../FileInputStream.hpp"
+#include "../StreamReader.hpp"
+#include "../Exception.hpp"
 #include <string.h>
 
-BEGIN_INANITY
+BEGIN_INANITY_DATA
 
 const char BlobFileSystem::Terminator::magicValue[4] = { 'B', 'L', 'O', 'B' };
 
@@ -82,4 +82,4 @@ bool BlobFileSystem::IsFileExists(const String& fileName) const
 	return files.find(fileName) != files.end();
 }
 
-END_INANITY
+END_INANITY_DATA

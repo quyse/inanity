@@ -1,11 +1,11 @@
 #include "CompressStream.hpp"
-#include "MemoryFile.hpp"
-#include "MemoryStream.hpp"
-#include "Exception.hpp"
+#include "../MemoryFile.hpp"
+#include "../MemoryStream.hpp"
+#include "../Exception.hpp"
 #include <memory.h>
 #include <algorithm>
 
-BEGIN_INANITY
+BEGIN_INANITY_DATA
 
 CompressStream::CompressStream(ptr<OutputStream> outputStream, CompressionLevel compressionLevel)
 : inputFile(NEW(MemoryFile(inputBufferSize))), outputStream(outputStream), finalized(false)
@@ -200,4 +200,4 @@ ptr<CompressStream> CompressStream::CreateMax(ptr<OutputStream> outputStream)
 	return NEW(CompressStream(outputStream, compressionMax));
 }
 
-END_INANITY
+END_INANITY_DATA

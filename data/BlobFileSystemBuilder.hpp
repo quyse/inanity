@@ -1,8 +1,9 @@
-#ifndef ___INANITY_BLOB_FILE_SYSTEM_BUILDER_HPP___
-#define ___INANITY_BLOB_FILE_SYSTEM_BUILDER_HPP___
+#ifndef ___INANITY_DATA_BLOB_FILE_SYSTEM_BUILDER_HPP___
+#define ___INANITY_DATA_BLOB_FILE_SYSTEM_BUILDER_HPP___
 
-#include "String.hpp"
-#include "meta/decl.hpp"
+#include "data.hpp"
+#include "../String.hpp"
+#include "../meta/decl.hpp"
 
 BEGIN_INANITY
 
@@ -11,6 +12,10 @@ class MemoryStream;
 class InputStream;
 class StreamWriter;
 class File;
+
+END_INANITY
+
+BEGIN_INANITY_DATA
 
 /// Класс построителя файловой системы.
 class BlobFileSystemBuilder : public Object
@@ -45,6 +50,6 @@ public:
 	META_DECLARE_CLASS(BlobFileSystemBuilder);
 };
 
-END_INANITY
+END_INANITY_DATA
 
 #endif
