@@ -1,4 +1,4 @@
-#include "DecompressStream.hpp"
+#include "InflateStream.hpp"
 #include "../MemoryFile.hpp"
 #include "../FileInputStream.hpp"
 #include "../MemoryStream.hpp"
@@ -8,7 +8,7 @@
 
 BEGIN_INANITY_DATA
 
-DecompressStream::DecompressStream(ptr<InputStream> inputStream)
+InflateStream::InflateStream(ptr<InputStream> inputStream)
 : inputFile(NEW(MemoryFile(inputBufferSize))), inputStream(inputStream), finished(false)
 {
 	try
@@ -42,7 +42,7 @@ DecompressStream::DecompressStream(ptr<InputStream> inputStream)
 	}
 }
 
-DecompressStream::~DecompressStream()
+InflateStream::~InflateStream()
 {
 	inflateEnd(&zstream);
 }
@@ -58,7 +58,7 @@ next_out - конец этих данных
 avail_out - размер оставшегося места в буфере (то есть без данных)
 outputData - начало этих данных (то есть еще не считанных)
 */
-size_t DecompressStream::Read(void* data, size_t size)
+size_t InflateStream::Read(void* data, size_t size)
 {
 	try
 	{
@@ -126,12 +126,12 @@ size_t DecompressStream::Read(void* data, size_t size)
 	}
 }
 
-ptr<File> DecompressStream::DecompressFile(ptr<File> file)
+ptr<File> InflateStream::DecompressFile(ptr<File> file)
 {
 	try
 	{
 		//создать поток для распаковки
-		ptr<InputStream> stream = NEW(DecompressStream(NEW(FileInputStream(file))));
+		ptr<InputStream> stream = NEW(InflateStream(NEW(FileInputStream(file))));
 		//создать выходной поток
 		ptr<MemoryStream> outputStream = NEW(MemoryStream);
 

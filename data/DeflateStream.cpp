@@ -1,4 +1,4 @@
-#include "CompressStream.hpp"
+#include "DeflateStream.hpp"
 #include "../MemoryFile.hpp"
 #include "../MemoryStream.hpp"
 #include "../Exception.hpp"
@@ -7,7 +7,7 @@
 
 BEGIN_INANITY_DATA
 
-CompressStream::CompressStream(ptr<OutputStream> outputStream, CompressionLevel compressionLevel)
+DeflateStream::DeflateStream(ptr<OutputStream> outputStream, CompressionLevel compressionLevel)
 : inputFile(NEW(MemoryFile(inputBufferSize))), outputStream(outputStream), finalized(false)
 {
 	try
@@ -42,7 +42,7 @@ CompressStream::CompressStream(ptr<OutputStream> outputStream, CompressionLevel 
 	}
 }
 
-CompressStream::~CompressStream()
+DeflateStream::~DeflateStream()
 {
 	//освободить ресурсы; мы не сбрасываем текущие данные из буфера,
 	//так как это может вызвать исключение
@@ -51,7 +51,7 @@ CompressStream::~CompressStream()
 		deflateEnd(&zstream);
 }
 
-void CompressStream::WriteOutput(void* data, size_t size)
+void DeflateStream::WriteOutput(void* data, size_t size)
 {
 	//записать данные в выходной поток
 	outputStream->Write(data, size);
@@ -67,7 +67,7 @@ avail_in - размер этих данных
 next_out - начало выходного буфера
 avail_out - размер выходного буфера
 */
-void CompressStream::Write(const void* data, size_t size)
+void DeflateStream::Write(const void* data, size_t size)
 {
 	try
 	{
@@ -123,7 +123,7 @@ void CompressStream::Write(const void* data, size_t size)
 /*
 Во время и после Flush указанный для Write инвариант не выполняется.
 */
-void CompressStream::Flush()
+void DeflateStream::Flush()
 {
 	try
 	{
@@ -174,14 +174,14 @@ void CompressStream::Flush()
 	}
 }
 
-ptr<File> CompressStream::CompressFile(ptr<File> file, CompressionLevel compressionLevel)
+ptr<File> DeflateStream::CompressFile(ptr<File> file, CompressionLevel compressionLevel)
 {
 	try
 	{
 		//создать выходной поток
 		ptr<MemoryStream> outputStream = NEW(MemoryStream);
 		//создать поток для сжатия
-		ptr<CompressStream> stream = NEW(CompressStream(&*outputStream, compressionLevel));
+		ptr<DeflateStream> stream = NEW(DeflateStream(&*outputStream, compressionLevel));
 
 		//сжать данные
 		stream->Write(file->GetData(), file->GetSize());
@@ -195,9 +195,9 @@ ptr<File> CompressStream::CompressFile(ptr<File> file, CompressionLevel compress
 	}
 }
 
-ptr<CompressStream> CompressStream::CreateMax(ptr<OutputStream> outputStream)
+ptr<DeflateStream> DeflateStream::CreateMax(ptr<OutputStream> outputStream)
 {
-	return NEW(CompressStream(outputStream, compressionMax));
+	return NEW(DeflateStream(outputStream, compressionMax));
 }
 
 END_INANITY_DATA

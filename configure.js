@@ -49,12 +49,8 @@ var libraries = {
 		]
 	},
 	// ******* сжатие
-	'libinanity-compress': {
-		objects: [
-		// зависимость - zlib
-		'deps.zlib.adler32.c', 'deps.zlib.compress.c', 'deps.zlib.crc32.c', 'deps.zlib.deflate.c', /*'deps.zlib.gzclose.c', 'deps.zlib.gzlib.c', 'deps.zlib.gzread.c', 'deps.zlib.gzwrite.c',*/ 'deps.zlib.infback.c', 'deps.zlib.inflate.c', 'deps.zlib.inftrees.c', 'deps.zlib.inffast.c', 'deps.zlib.trees.c', 'deps.zlib.uncompr.c', 'deps.zlib.zutil.c',
-		// потоки для сжатия
-		'data.CompressStream', 'data.DecompressStream']
+	'libinanity-deflate': {
+		objects: ['data.DeflateStream', 'data.InflateStream']
 	},
 	// ******* сетевая библиотека ASIO
 	'libinanity-asio': {
