@@ -72,11 +72,11 @@ ManagedHeap::~ManagedHeap()
 
 #ifdef ___INANITY_TRACE_PTR
 
-	std::cout << "======= PTR REPORT =======\n";
-	if(disableTracePtr)
-		std::cout << "TRACE PTR DISABLED\n";
-	else
+	if(!disableTracePtr)
+	{
+		std::cout << "======= TRACE PTR REPORT =======\n";
 		PrintPtrs(std::cout);
+	}
 
 #endif
 
