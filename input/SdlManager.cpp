@@ -105,10 +105,10 @@ void SdlManager::Update()
 				Event e;
 				e.device = Event::deviceMouse;
 				e.mouse.type = event.type == SDL_MOUSEBUTTONDOWN ? Event::Mouse::typeButtonDown : Event::Mouse::typeButtonUp;
+				bool ok = true;
 				switch(event.button.button)
 				{
 				case SDL_BUTTON_LEFT:
-				default:
 					e.mouse.button = Event::Mouse::buttonLeft;
 					break;
 				case SDL_BUTTON_MIDDLE:
@@ -117,8 +117,12 @@ void SdlManager::Update()
 				case SDL_BUTTON_RIGHT:
 					e.mouse.button = Event::Mouse::buttonRight;
 					break;
+				default:
+					ok = false;
+					break;
 				}
-				AddEvent(e);
+				if(ok)
+					AddEvent(e);
 			}
 			break;
 		}
