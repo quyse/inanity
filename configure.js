@@ -62,6 +62,10 @@ var libraries = {
 		objects: [
 		'net.HttpStream', 'net.HttpClient', 'deps.http-parser.http_parser.c']
 	},
+	// ******* SQLite поддержка
+	'libinanity-sqlite': {
+		objects: ['data.sqlite']
+	},
 	// ******* файловая система на SQLite
 	'libinanity-sqlitefs': {
 		objects: ['data.SQLiteFileSystem']

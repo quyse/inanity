@@ -5,10 +5,12 @@
 #include "../FileSystem.hpp"
 #include "../String.hpp"
 #include "../CriticalSection.hpp"
-#include "../deps/sqlite/sqlite3.h"
 #include <unordered_map>
 
 BEGIN_INANITY_DATA
+
+class SqliteDb;
+class SqliteStatement;
 
 /// Класс файловой системы, основанной на SQLite.
 /** Эта файловая система не полностью интегрирована
@@ -17,55 +19,16 @@ BEGIN_INANITY_DATA
 class SQLiteFileSystem : public FileSystem
 {
 private:
-	/// Класс, инкапсулирующий объект sqlite3.
-	class Db : public Object
-	{
-	private:
-		sqlite3* db;
-
-	public:
-		Db(sqlite3* db);
-		~Db();
-
-		operator sqlite3*() const;
-	};
-
-	/// Класс, инкапсулирующий объект sqlite3_stmt.
-	class Statement : public Object
-	{
-	private:
-		ptr<Db> db;
-		sqlite3_stmt* stmt;
-
-	public:
-		Statement(ptr<Db> db, sqlite3_stmt* stmt);
-		~Statement();
-
-		void Reset();
-		operator sqlite3_stmt*() const;
-	};
-
-	/// Класс, выполняющий сброс объекта sqlite3_stmt в деструкторе.
-	class QueryHandle
-	{
-	private:
-		ptr<Statement> statement;
-
-	public:
-		QueryHandle(ptr<Statement> statement);
-		~QueryHandle();
-	};
-
 	/// Открытая база данных.
-	ptr<Db> db;
+	ptr<SqliteDb> db;
 	/// Statement для загрузки файла.
-	mutable ptr<Statement> loadFileStmt;
+	mutable ptr<SqliteStatement> loadFileStmt;
 	/// Statement для сохранения файла.
-	mutable ptr<Statement> saveFileStmt;
+	mutable ptr<SqliteStatement> saveFileStmt;
 	/// Statement для получения файлов в каталоге.
-	mutable ptr<Statement> entriesStmt;
+	mutable ptr<SqliteStatement> entriesStmt;
 	/// Statement для получения всех файлов.
-	mutable ptr<Statement> allEntriesStmt;
+	mutable ptr<SqliteStatement> allEntriesStmt;
 
 	/// Выбросить исключение SQLite.
 	void Throw(const char* message) const;

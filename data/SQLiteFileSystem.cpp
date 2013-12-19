@@ -1,4 +1,5 @@
 #include "SQLiteFileSystem.hpp"
+#include "sqlite.hpp"
 #include "../MemoryFile.hpp"
 #include "../CriticalCode.hpp"
 #include "../Exception.hpp"
@@ -17,37 +18,6 @@ BEGIN_INANITY_DATA
 std::unordered_multimap<void*, ptr<File> > SQLiteFileSystem::files;
 CriticalSection SQLiteFileSystem::filesCriticalSection;
 
-SQLiteFileSystem::Db::Db(sqlite3* db) : db(db) {}
-SQLiteFileSystem::Db::~Db()
-{
-	sqlite3_close(db);
-}
-SQLiteFileSystem::Db::operator sqlite3*() const
-{
-	return db;
-}
-
-SQLiteFileSystem::Statement::Statement(ptr<Db> db, sqlite3_stmt* stmt) : db(db), stmt(stmt) {}
-SQLiteFileSystem::Statement::~Statement()
-{
-	sqlite3_finalize(stmt);
-}
-void SQLiteFileSystem::Statement::Reset()
-{
-	sqlite3_reset(stmt);
-	sqlite3_clear_bindings(stmt);
-}
-SQLiteFileSystem::Statement::operator sqlite3_stmt*() const
-{
-	return stmt;
-}
-
-SQLiteFileSystem::QueryHandle::QueryHandle(ptr<Statement> statement) : statement(statement) {}
-SQLiteFileSystem::QueryHandle::~QueryHandle()
-{
-	statement->Reset();
-}
-
 SQLiteFileSystem::SQLiteFileSystem(const String& fileName)
 {
 	try
@@ -60,7 +30,7 @@ SQLiteFileSystem::SQLiteFileSystem(const String& fileName)
 					sqlite3_close(dbPtr);
 				THROW("Can't open db");
 			}
-			db = NEW(Db(dbPtr));
+			db = NEW(SqliteDb(dbPtr));
 		}
 
 		if(sqlite3_exec(*db,
@@ -89,7 +59,7 @@ void SQLiteFileSystem::ensureLoadFileStmt() const
 		sqlite3_stmt* stmtPtr;
 		if(sqlite3_prepare_v2(*db, "SELECT data FROM files WHERE name = ?1", -1, &stmtPtr, 0) != SQLITE_OK)
 			Throw("Can't create load file statement");
-		loadFileStmt = NEW(Statement(db, stmtPtr));
+		loadFileStmt = NEW(SqliteStatement(db, stmtPtr));
 	}
 }
 
@@ -100,7 +70,7 @@ void SQLiteFileSystem::ensureSaveFileStmt() const
 		sqlite3_stmt* stmtPtr;
 		if(sqlite3_prepare_v2(*db, "INSERT OR REPLACE INTO files (name, data) VALUES (?1, ?2)", -1, &stmtPtr, 0) != SQLITE_OK)
 			Throw("Can't create save file statement");
-		saveFileStmt = NEW(Statement(db, stmtPtr));
+		saveFileStmt = NEW(SqliteStatement(db, stmtPtr));
 	}
 }
 
@@ -111,7 +81,7 @@ void SQLiteFileSystem::ensureEntriesStmt() const
 		sqlite3_stmt* stmtPtr;
 		if(sqlite3_prepare_v2(*db, "SELECT name FROM files WHERE name LIKE ?1 ORDER BY name ASC", -1, &stmtPtr, 0) != SQLITE_OK)
 			Throw("Can't create entries file statement");
-		entriesStmt = NEW(Statement(db, stmtPtr));
+		entriesStmt = NEW(SqliteStatement(db, stmtPtr));
 	}
 }
 
@@ -122,7 +92,7 @@ void SQLiteFileSystem::ensureAllEntriesStmt() const
 		sqlite3_stmt* stmtPtr;
 		if(sqlite3_prepare_v2(*db, "SELECT name FROM files ORDER BY name ASC", -1, &stmtPtr, 0) != SQLITE_OK)
 			Throw("Can't create all entries file statement");
-		allEntriesStmt = NEW(Statement(db, stmtPtr));
+		allEntriesStmt = NEW(SqliteStatement(db, stmtPtr));
 	}
 }
 
@@ -147,7 +117,7 @@ ptr<File> SQLiteFileSystem::TryLoadFile(const String& fileName)
 	{
 		ensureLoadFileStmt();
 
-		QueryHandle query(loadFileStmt);
+		SqliteQuery query(loadFileStmt);
 		// установить имя файла в запросе
 		if(sqlite3_bind_text(*loadFileStmt, 1, fileName.c_str(), -1, SQLITE_TRANSIENT) != SQLITE_OK)
 		{
@@ -190,7 +160,7 @@ void SQLiteFileSystem::SaveFile(ptr<File> file, const String& fileName)
 	{
 		ensureSaveFileStmt();
 
-		QueryHandle query(saveFileStmt);
+		SqliteQuery query(saveFileStmt);
 		// установить имя файла и данные в запросе
 		if(sqlite3_bind_text(*saveFileStmt, 1, fileName.c_str(), -1, SQLITE_TRANSIENT) != SQLITE_OK)
 			Throw("Can't bind name parameter");
@@ -217,7 +187,7 @@ void SQLiteFileSystem::GetEntries(const String& directoryName, std::vector<Strin
 	{
 		ensureEntriesStmt();
 
-		QueryHandle query(entriesStmt);
+		SqliteQuery query(entriesStmt);
 
 		// установить имя каталога в запросе
 		if(sqlite3_bind_text(*entriesStmt, 1, (directoryName + "%").c_str(), -1, SQLITE_TRANSIENT) != SQLITE_OK)
@@ -274,7 +244,7 @@ void SQLiteFileSystem::GetFileNames(std::vector<String>& fileNames) const
 	{
 		ensureAllEntriesStmt();
 
-		QueryHandle query(allEntriesStmt);
+		SqliteQuery query(allEntriesStmt);
 
 		// выполнять запрос, пока возвращаются результаты
 		for(;;)
