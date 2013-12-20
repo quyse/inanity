@@ -7,6 +7,7 @@
 #include "../PartFile.hpp"
 #include "../Strings.hpp"
 #include "../Exception.hpp"
+#include <algorithm>
 
 BEGIN_INANITY_PLATFORM
 
@@ -40,10 +41,23 @@ class Win32InputStream : public InputStream
 {
 private:
 	ptr<Win32Handle> handle;
+	mutable bigsize_t fileSize;
+
+	bigsize_t GetFileSize() const
+	{
+		if(fileSize == (bigsize_t)-1)
+		{
+			LARGE_INTEGER size;
+			if(!GetFileSizeEx(*handle, &size))
+				THROW("Error getting file size");
+			fileSize = (bigsize_t)size.QuadPart;
+		}
+		return fileSize;
+	}
 
 public:
 	Win32InputStream(ptr<Win32Handle> handle)
-	: handle(handle) {}
+	: handle(handle), fileSize(-1) {}
 
 	size_t Read(void* data, size_t size)
 	{
@@ -54,15 +68,28 @@ public:
 		return read;
 	}
 
-	size_t GetSize() const
+	bigsize_t Skip(bigsize_t size)
 	{
-		LARGE_INTEGER size;
-		if(!GetFileSizeEx(*handle, &size))
-			THROW("Error getting size");
-		size_t returnSize = (size_t)size.QuadPart;
-		if(returnSize != size.QuadPart)
-			THROW("File is too big");
-		return returnSize;
+		LARGE_INTEGER distance, oldFilePointer, newFilePointer;
+
+		// determine current file pointer
+		distance.QuadPart = (LONGLONG)0;
+		if(!SetFilePointerEx(*handle, distance, &oldFilePointer, FILE_CURRENT))
+			THROW("Can't determine current file pointer");
+
+		// get file size
+		bigsize_t fileSize = GetFileSize();
+
+		// fix distance to move (because Windows allows
+		// setting file pointer beyond the end of file)
+		size = std::min((bigsize_t)oldFilePointer.QuadPart + size, fileSize) - (bigsize_t)oldFilePointer.QuadPart;
+
+		// move
+		distance.QuadPart = (LONGLONG)size;
+		if(!SetFilePointerEx(*handle, distance, &newFilePointer, FILE_CURRENT))
+			THROW("Can't move file pointer");
+
+		return size;
 	}
 };
 
