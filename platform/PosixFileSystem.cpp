@@ -315,7 +315,7 @@ void PosixFileSystem::GetDirectoryEntries(const String& directoryName, std::vect
 			// добавить слеш в конец
 			fileTitle += '/';
 		// добавить файл/каталог в результат
-		entries.push_back(directoryName + fileTitle);
+		entries.push_back(fileTitle);
 	}
 
 	closedir(dir);

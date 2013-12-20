@@ -300,7 +300,7 @@ void Win32FileSystem::GetDirectoryEntries(const String& directoryName, std::vect
 			continue;
 		if(find.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 			fileTitle += '/';
-		entries.push_back(directoryName + fileTitle + "/");
+		entries.push_back(fileTitle);
 	}
 	while(FindNextFile(hFind, &find));
 	FindClose(hFind);
