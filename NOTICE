@@ -19,3 +19,4 @@ libvorbis (http://xiph.org/vorbis/) - BSD-style license (see /deps/libvorbis/COP
 v8 (https://developers.google.com/v8/) - New BSD license (see /deps/v8/repo/LICENSE)
 freetype (http://freetype.org/) - Freetype license (see /deps/freetype/repo/docs/FTL.TXT)
 harfbuzz (http://harfbuzz.org/) - "Old MIT" license (see /deps/harfbuzz/repo/COPYING)
+lz4 (https://code.google.com/p/lz4/) - BSD license
