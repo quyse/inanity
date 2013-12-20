@@ -13,6 +13,7 @@ class WhirlpoolStream : public HashStream
 {
 public:
 	static const size_t hashSize;
+	static const char* algorithmName;
 
 private:
 	unsigned char bitLength[32]; /* global number of hashed bits (256-bit counter) */

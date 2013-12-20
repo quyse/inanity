@@ -1178,6 +1178,7 @@ void WhirlpoolStream::End()
 }
 
 const size_t WhirlpoolStream::hashSize = 64;
+const char* WhirlpoolStream::algorithmName = "WHIRLPOOL";
 
 WhirlpoolStream::WhirlpoolStream()
 {

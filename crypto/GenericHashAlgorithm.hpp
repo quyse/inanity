@@ -12,6 +12,11 @@ template <typename AlgorithmHashStream>
 class GenericHashAlgorithm : public HashAlgorithm
 {
 public:
+	String GetName() const
+	{
+		return AlgorithmHashStream::algorithmName;
+	}
+
 	size_t GetHashSize() const
 	{
 		return AlgorithmHashStream::hashSize;
