@@ -69,6 +69,7 @@ public:
 	void Bind(int number, const char* value);
 	void Bind(int number, const String& value);
 	void Bind(int number, int value);
+	void Bind(int number, const void* data, size_t size);
 	void Bind(int number, ptr<File> value);
 	void BindNull(int number);
 

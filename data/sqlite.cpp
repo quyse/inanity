@@ -104,11 +104,17 @@ void SqliteStatement::Bind(int number, int value)
 		THROW_SECONDARY("Can't bind int to SQLite statement", db->Error());
 }
 
+void SqliteStatement::Bind(int number, const void* data, size_t size)
+{
+	if(sqlite3_bind_blob(stmt, number, data, (int)size, SQLITE_TRANSIENT) != SQLITE_OK)
+		THROW_SECONDARY("Can't bind blob data to SqliteStatement", db->Error());
+}
+
 void SqliteStatement::Bind(int number, ptr<File> value)
 {
 	SqliteDb::AcquireFile(value);
 	if(sqlite3_bind_blob(stmt, number, value->GetData(), (int)value->GetSize(), &SqliteDb::FreeFile) != SQLITE_OK)
-		THROW_SECONDARY("Can't bind blob to SQLite statement", db->Error());
+		THROW_SECONDARY("Can't bind blob file to SQLite statement", db->Error());
 }
 
 void SqliteStatement::BindNull(int number)
