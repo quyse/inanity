@@ -12,9 +12,9 @@ END_INANITY
 
 BEGIN_INANITY_DATA
 
-/// Класс входного потока, буферизующий ввод.
-/** Предназначен для снижения нагрузки при чтении из потоков, которые
-плохо относятся к множественным операциям. */
+/// Input stream buffers input data.
+/** It's good to use that with streams which has
+bad performance with multiple (small) reads. */
 class BufferedInputStream : public InputStream
 {
 public:
@@ -24,12 +24,17 @@ private:
 	ptr<InputStream> stream;
 	ptr<File> bufferFile;
 	size_t bufferSize, dataBegin, dataEnd;
+	/// Is source stream exhausted.
+	bool sourceExhausted;
+
+	size_t ReadSource(void* data, size_t size);
+	bigsize_t SkipSource(bigsize_t size);
 
 public:
-	/// Создать буферизированный поток с заданным размером буфера.
 	BufferedInputStream(ptr<InputStream> stream, size_t bufferSize = defaultBufferSize);
 
 	size_t Read(void* data, size_t size);
+	bigsize_t Skip(bigsize_t size);
 };
 
 END_INANITY_DATA
