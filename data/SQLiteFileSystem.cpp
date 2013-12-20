@@ -1,7 +1,6 @@
 #include "SQLiteFileSystem.hpp"
 #include "sqlite.hpp"
 #include "../MemoryFile.hpp"
-#include "../CriticalCode.hpp"
 #include "../Exception.hpp"
 #include <memory.h>
 
@@ -15,23 +14,11 @@ BEGIN_INANITY_DATA
 Вызвано это тем, что в базе не хранятся каталоги, они получаются неявно.
 */
 
-std::unordered_multimap<void*, ptr<File> > SQLiteFileSystem::files;
-CriticalSection SQLiteFileSystem::filesCriticalSection;
-
 SQLiteFileSystem::SQLiteFileSystem(const String& fileName)
 {
 	try
 	{
-		{
-			sqlite3* dbPtr;
-			if(sqlite3_open(fileName.c_str(), &dbPtr) != SQLITE_OK)
-			{
-				if(dbPtr)
-					sqlite3_close(dbPtr);
-				THROW("Can't open db");
-			}
-			db = NEW(SqliteDb(dbPtr));
-		}
+		db = SqliteDb::Open(fileName.c_str());
 
 		if(sqlite3_exec(*db,
 			"CREATE TABLE IF NOT EXISTS files ("
@@ -49,66 +36,31 @@ SQLiteFileSystem::SQLiteFileSystem(const String& fileName)
 
 void SQLiteFileSystem::Throw(const char* message) const
 {
-	THROW_SECONDARY(message, NEW(Exception(sqlite3_errmsg(*db))));
+	THROW_SECONDARY(message, db->Error());
 }
 
 void SQLiteFileSystem::ensureLoadFileStmt() const
 {
 	if(!loadFileStmt)
-	{
-		sqlite3_stmt* stmtPtr;
-		if(sqlite3_prepare_v2(*db, "SELECT data FROM files WHERE name = ?1", -1, &stmtPtr, 0) != SQLITE_OK)
-			Throw("Can't create load file statement");
-		loadFileStmt = NEW(SqliteStatement(db, stmtPtr));
-	}
+		loadFileStmt = db->CreateStatement("SELECT data FROM files WHERE name = ?1");
 }
 
 void SQLiteFileSystem::ensureSaveFileStmt() const
 {
 	if(!saveFileStmt)
-	{
-		sqlite3_stmt* stmtPtr;
-		if(sqlite3_prepare_v2(*db, "INSERT OR REPLACE INTO files (name, data) VALUES (?1, ?2)", -1, &stmtPtr, 0) != SQLITE_OK)
-			Throw("Can't create save file statement");
-		saveFileStmt = NEW(SqliteStatement(db, stmtPtr));
-	}
+		saveFileStmt = db->CreateStatement("INSERT OR REPLACE INTO files (name, data) VALUES (?1, ?2)");
 }
 
 void SQLiteFileSystem::ensureEntriesStmt() const
 {
 	if(!entriesStmt)
-	{
-		sqlite3_stmt* stmtPtr;
-		if(sqlite3_prepare_v2(*db, "SELECT name FROM files WHERE name LIKE ?1 ORDER BY name ASC", -1, &stmtPtr, 0) != SQLITE_OK)
-			Throw("Can't create entries file statement");
-		entriesStmt = NEW(SqliteStatement(db, stmtPtr));
-	}
+		entriesStmt = db->CreateStatement("SELECT name FROM files WHERE name LIKE ?1 ORDER BY name ASC");
 }
 
 void SQLiteFileSystem::ensureAllEntriesStmt() const
 {
 	if(!allEntriesStmt)
-	{
-		sqlite3_stmt* stmtPtr;
-		if(sqlite3_prepare_v2(*db, "SELECT name FROM files ORDER BY name ASC", -1, &stmtPtr, 0) != SQLITE_OK)
-			Throw("Can't create all entries file statement");
-		allEntriesStmt = NEW(SqliteStatement(db, stmtPtr));
-	}
-}
-
-void SQLiteFileSystem::AcquireFile(ptr<File> file)
-{
-	CriticalCode code(filesCriticalSection);
-	files.insert(std::make_pair(file->GetData(), file));
-}
-
-void SQLiteFileSystem::FreeFile(void* data)
-{
-	CriticalCode code(filesCriticalSection);
-	std::unordered_multimap<void*, ptr<File> >::iterator i = files.find(data);
-	if(i == files.end())
-		THROW("Invalid call of SQLiteFileSystem::FreeFile");
-	files.erase(i);
+		allEntriesStmt = db->CreateStatement("SELECT name FROM files ORDER BY name ASC");
 }
 
 ptr<File> SQLiteFileSystem::TryLoadFile(const String& fileName)
@@ -119,28 +71,13 @@ ptr<File> SQLiteFileSystem::TryLoadFile(const String& fileName)
 
 		SqliteQuery query(loadFileStmt);
 		// установить имя файла в запросе
-		if(sqlite3_bind_text(*loadFileStmt, 1, fileName.c_str(), -1, SQLITE_TRANSIENT) != SQLITE_OK)
-		{
-			Throw("Can't bind name parameter");
-			return 0;
-		}
+		loadFileStmt->Bind(1, fileName);
 
 		// выполнить запрос
-		switch(sqlite3_step(*loadFileStmt))
+		switch(loadFileStmt->Step())
 		{
 		case SQLITE_ROW: // файл найден
-			{
-				// получить указатель на данные
-				const void* fileData = sqlite3_column_blob(*loadFileStmt, 0);
-				if(!fileData)
-					Throw("Can't get file data");
-				size_t fileSize = sqlite3_column_bytes(*loadFileStmt, 0);
-				// скопировать данные в память
-				ptr<MemoryFile> file = NEW(MemoryFile(fileSize));
-				memcpy(file->GetData(), fileData, fileSize);
-				// и вернуть файл
-				return file;
-			}
+			return loadFileStmt->ColumnBlob(0);
 		case SQLITE_DONE: // файл не найден
 			return nullptr;
 		default:
@@ -162,14 +99,11 @@ void SQLiteFileSystem::SaveFile(ptr<File> file, const String& fileName)
 
 		SqliteQuery query(saveFileStmt);
 		// установить имя файла и данные в запросе
-		if(sqlite3_bind_text(*saveFileStmt, 1, fileName.c_str(), -1, SQLITE_TRANSIENT) != SQLITE_OK)
-			Throw("Can't bind name parameter");
-		AcquireFile(file);
-		if(sqlite3_bind_blob(*saveFileStmt, 2, file->GetData(), file->GetSize(), FreeFile) != SQLITE_OK)
-			Throw("Can't bind data parameter");
+		saveFileStmt->Bind(1, fileName);
+		saveFileStmt->Bind(2, file);
 
 		// выполнить запрос
-		int result = sqlite3_step(*saveFileStmt);
+		int result = saveFileStmt->Step();
 
 		// если была ошибка
 		if(result != SQLITE_DONE)
@@ -190,8 +124,7 @@ void SQLiteFileSystem::GetEntries(const String& directoryName, std::vector<Strin
 		SqliteQuery query(entriesStmt);
 
 		// установить имя каталога в запросе
-		if(sqlite3_bind_text(*entriesStmt, 1, (directoryName + "%").c_str(), -1, SQLITE_TRANSIENT) != SQLITE_OK)
-			Throw("Can't bind name parameter");
+		entriesStmt->Bind(1, directoryName + "%");
 
 		// запомнить границу, с которой начались наши результаты
 		size_t size1 = entries.size();
@@ -199,13 +132,13 @@ void SQLiteFileSystem::GetEntries(const String& directoryName, std::vector<Strin
 		// выполнять запрос, пока возвращаются результаты
 		for(;;)
 		{
-			int result = sqlite3_step(*entriesStmt);
+			int result = entriesStmt->Step();
 			if(result == SQLITE_DONE)
 				break;
 			if(result == SQLITE_ROW)
 			{
 				// получить имя файла
-				String fileName = (const char*)sqlite3_column_text(*entriesStmt, 0);
+				String fileName = entriesStmt->ColumnText(0);
 #ifdef _DEBUG
 				// проверить, что оно начинается с имени каталога
 				if(fileName.length() < directoryName.length() || memcmp(fileName.c_str(), directoryName.c_str(), directoryName.length()) != 0)
@@ -249,12 +182,12 @@ void SQLiteFileSystem::GetFileNames(std::vector<String>& fileNames) const
 		// выполнять запрос, пока возвращаются результаты
 		for(;;)
 		{
-			int result = sqlite3_step(*allEntriesStmt);
+			int result = allEntriesStmt->Step();
 			if(result == SQLITE_DONE)
 				break;
 			if(result == SQLITE_ROW)
 				// получить имя файла и добавить в список
-				fileNames.push_back((const char*)sqlite3_column_text(*entriesStmt, 0));
+				fileNames.push_back(allEntriesStmt->ColumnText(0));
 			else
 				Throw("Can't execute statement");
 		}

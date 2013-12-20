@@ -4,7 +4,6 @@
 #include "data.hpp"
 #include "../FileSystem.hpp"
 #include "../String.hpp"
-#include "../CriticalSection.hpp"
 #include <unordered_map>
 
 BEGIN_INANITY_DATA
@@ -37,17 +36,6 @@ private:
 	void ensureSaveFileStmt() const;
 	void ensureEntriesStmt() const;
 	void ensureAllEntriesStmt() const;
-
-	/// Хеш использованных файлов по их данным.
-	/** Используется для передачи данных файлов в SQLite,
-	и их последующего корректного освобождения. */
-	static std::unordered_multimap<void*, ptr<File> > files;
-	/// Критическая секция для синхронизации хеша файлов.
-	static CriticalSection filesCriticalSection;
-	/// Захватить файл, чтобы он не освобождался (пока его не освободит SQLite).
-	static void AcquireFile(ptr<File> file);
-	/// Освободить файл по данным.
-	static void FreeFile(void* data);
 
 	void GetEntries(const String& directoryName, std::vector<String>& entries, bool recursive) const;
 
