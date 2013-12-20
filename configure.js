@@ -48,9 +48,13 @@ var libraries = {
 		'data.BufferedFileSystem', 'data.BufferedInputStream', 'data.BufferedOutputStream'
 		]
 	},
-	// ******* сжатие
+	// ******* deflate compression
 	'libinanity-deflate': {
 		objects: ['data.DeflateStream', 'data.InflateStream']
+	},
+	// ******* lz4 compression
+	'libinanity-lz4': {
+		objects: ['data.Lz4CompressStream', 'data.Lz4DecompressStream']
 	},
 	// ******* сетевая библиотека ASIO
 	'libinanity-asio': {
