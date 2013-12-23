@@ -1,6 +1,3 @@
-[submodule "deps/http-parser"]
-	path = deps/http-parser
-	url = git://github.com/joyent/http-parser.git
 [submodule "deps/v8/repo"]
 	path = deps/v8/repo
 	url = git://github.com/v8/v8.git
@@ -10,3 +7,6 @@
 [submodule "deps/harfbuzz/repo"]
 	path = deps/harfbuzz/repo
 	url = git://github.com/behdad/harfbuzz.git
+[submodule "deps/http-parser/repo"]
+	path = deps/http-parser/repo
+	url = git://github.com/joyent/http-parser.git
