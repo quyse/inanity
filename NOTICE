@@ -20,3 +20,9 @@ v8 (https://developers.google.com/v8/) - New BSD license (see /deps/v8/repo/LICE
 freetype (http://freetype.org/) - Freetype license (see /deps/freetype/repo/docs/FTL.TXT)
 harfbuzz (http://harfbuzz.org/) - "Old MIT" license (see /deps/harfbuzz/repo/COPYING)
 lz4 (https://code.google.com/p/lz4/) - BSD license
+
+Other software which is not placed in repository, but could be used by various parts of the engine:
+
+Boost (http://www.boost.org/) - Boost license (http://www.boost.org/LICENSE_1_0.txt)
+SDL2 (http://www.libsdl.org/) - zlib license (http://www.gzip.org/zlib/zlib_license.html)
+Emscripten (https://github.com/kripken/emscripten) - MIT license
