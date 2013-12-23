@@ -25,6 +25,8 @@ public:
 	virtual int GetWidth() const = 0;
 	/// Get height of output in pixels.
 	virtual int GetHeight() const = 0;
+	/// Notify output about resized output region.
+	virtual void Resize(int width, int height) = 0;
 };
 
 END_INANITY_GRAPHICS

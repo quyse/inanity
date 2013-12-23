@@ -34,17 +34,17 @@ int X11Output::GetHeight() const
 	return height;
 }
 
-ptr<Platform::X11Window> X11Output::GetWindow() const
-{
-	return window;
-}
-
 void X11Output::Resize(int width, int height)
 {
 	this->width = width;
 	this->height = height;
 	if(presenter)
 		presenter->Resize(width, height);
+}
+
+ptr<Platform::X11Window> X11Output::GetWindow() const
+{
+	return window;
 }
 
 END_INANITY_GRAPHICS

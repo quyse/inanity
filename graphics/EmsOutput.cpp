@@ -19,4 +19,9 @@ int EmsOutput::GetHeight() const
 	return height;
 }
 
+void EmsOutput::Resize(int width, int height)
+{
+	// do nothing
+}
+
 END_INANITY_GRAPHICS

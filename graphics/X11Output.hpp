@@ -26,9 +26,9 @@ public:
 	// Output's methods.
 	int GetWidth() const;
 	int GetHeight() const;
+	void Resize(int width, int height);
 
 	ptr<Platform::X11Window> GetWindow() const;
-	void Resize(int width, int height);
 };
 
 END_INANITY_GRAPHICS

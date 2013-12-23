@@ -24,6 +24,12 @@ int Win32Output::GetHeight() const
 	return window->GetClientHeight();
 }
 
+void Win32Output::Resize(int width, int height)
+{
+	if(presenter)
+		presenter->Resize(width, height);
+}
+
 ptr<Platform::Win32Window> Win32Output::GetWindow() const
 {
 	return window;
@@ -32,12 +38,6 @@ ptr<Platform::Win32Window> Win32Output::GetWindow() const
 HWND Win32Output::GetHWND() const
 {
 	return window->GetHWND();
-}
-
-void Win32Output::Resize(int width, int height)
-{
-	if(presenter)
-		presenter->Resize(width, height);
 }
 
 END_INANITY_GRAPHICS
