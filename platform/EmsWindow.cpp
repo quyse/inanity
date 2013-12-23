@@ -1,10 +1,10 @@
 #include "EmsWindow.hpp"
 #include "Sdl.hpp"
 #include "../graphics/EmsOutput.hpp"
-#include "../input/Manager.hpp"
+#include "../input/SdlManager.hpp"
 #include "../Exception.hpp"
 #include <emscripten/emscripten.h>
-#include <SDL.h>
+#include <SDL/SDL_video.h>
 
 BEGIN_INANITY_PLATFORM
 
@@ -32,7 +32,7 @@ EmsWindow::~EmsWindow()
 	instance = 0;
 }
 
-void EmsWindow::SetInputManager(ptr<Input::Manager> inputManager)
+void EmsWindow::SetInputManager(ptr<Input::SdlManager> inputManager)
 {
 	this->inputManager = inputManager;
 }
@@ -75,8 +75,15 @@ void EmsWindow::UpdateCursorVisible()
 
 void EmsWindow::MainLoop()
 {
-	if(instance->inputManager)
-		instance->inputManager->Update();
+	ptr<Input::SdlManager> inputManager = instance->inputManager;
+
+	SDL_Event event;
+	while(SDL_PollEvent(&event))
+		if(inputManager)
+			inputManager->ProcessEvent(event);
+
+	if(inputManager)
+		inputManager->Update();
 	instance->activeHandler->Fire();
 }
 

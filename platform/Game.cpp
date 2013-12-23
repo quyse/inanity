@@ -10,6 +10,7 @@
 #include "../input/SdlManager.hpp"
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 #include "EmsWindow.hpp"
+#include "Sdl.hpp"
 #include "../input/SdlManager.hpp"
 #else
 #error Unknown platform
@@ -45,7 +46,7 @@ ptr<Input::Manager> Game::CreateInputManager(ptr<Window> window)
 	return inputManager;
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	ptr<Platform::EmsWindow> emsWindow = window.DynamicCast<Platform::EmsWindow>();
-	ptr<Input::Manager> inputManager = NEW(Input::SdlManager());
+	ptr<Input::SdlManager> inputManager = NEW(Input::SdlManager());
 	emsWindow->SetInputManager(inputManager);
 	return inputManager;
 #else

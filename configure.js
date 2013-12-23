@@ -110,7 +110,7 @@ var libraries = {
 		],
 		'objects-emscripten': [
 			'platform.PosixFileSystem',
-			'platform.EmsWindow', 'graphics.EmsOutput',
+			'platform.Sdl', 'platform.EmsWindow', 'graphics.EmsOutput',
 			'graphics.EmsAdapter', 'graphics.EmsMonitor'
 		]
 	},

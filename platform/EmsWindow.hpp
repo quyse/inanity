@@ -10,7 +10,7 @@
 
 BEGIN_INANITY_INPUT
 
-class Manager;
+class SdlManager;
 
 END_INANITY_INPUT
 
@@ -25,7 +25,7 @@ private:
 	ptr<Sdl> sdl;
 	String title;
 	ptr<Handler> activeHandler;
-	ptr<Input::Manager> inputManager;
+	ptr<Input::SdlManager> inputManager;
 
 	/// Emscripten window can be only one.
 	static EmsWindow* instance;
@@ -40,7 +40,7 @@ public:
 	EmsWindow(const String& title, int width, int height);
 	~EmsWindow();
 
-	void SetInputManager(ptr<Input::Manager> inputManager);
+	void SetInputManager(ptr<Input::SdlManager> inputManager);
 
 	//*** Window's methods.
 	void SetTitle(const String& title);

@@ -2,7 +2,13 @@
 #define ___INANITY_PLATFORM_SDL_HPP___
 
 #include "platform.hpp"
+
+#ifdef ___INANITY_PLATFORM_EMSCRIPTEN
+// workaround for emscripten
+#include <SDL/SDL.h>
+#else
 #include <SDL2/SDL.h>
+#endif
 
 BEGIN_INANITY
 
