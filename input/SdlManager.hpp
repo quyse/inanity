@@ -3,6 +3,7 @@
 
 #include "Manager.hpp"
 #include "../platform/platform.hpp"
+#include <SDL2/SDL_events.h>
 
 BEGIN_INANITY_PLATFORM
 
@@ -19,9 +20,8 @@ private:
 
 public:
 	SdlManager();
-	~SdlManager();
 
-	void Update();
+	void ProcessEvent(const SDL_Event& event);
 };
 
 END_INANITY_INPUT
