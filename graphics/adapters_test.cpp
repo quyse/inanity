@@ -1,6 +1,8 @@
 #include "../inanity-graphics.hpp"
-#include "../inanity-dx11.hpp"
-#include "../inanity-gl.hpp"
+#ifdef ___INANITY_PLATFORM_WINDOWS
+#include "Dx11System.hpp"
+#endif
+#include "GlSystem.hpp"
 using namespace Inanity;
 using namespace Inanity::Graphics;
 
@@ -10,14 +12,16 @@ int main(int argc, char** argv)
 	String systemStr;
 	if(argc >= 2)
 		systemStr = argv[1];
-	if(systemStr == "dx11")
-	{
-		system = NEW(Dx11System());
-	}
-	else if(systemStr == "gl")
+	if(systemStr == "gl")
 	{
 		system = NEW(GlSystem());
 	}
+#ifdef ___INANITY_PLATFORM_WINDOWS
+	else if(systemStr == "dx11")
+	{
+		system = NEW(Dx11System());
+	}
+#endif
 	if(!system)
 	{
 		std::cout << "Usage: adapterstest <system>\nSupported systems: dx11, gl.\n";
