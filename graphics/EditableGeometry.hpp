@@ -2,6 +2,8 @@
 #define ___INANITY_GRAPHICS_EDITABLE_GEOMETRY_H___
 
 #include "graphics.hpp"
+#include "../StreamWriter.hpp"
+#include "../MemoryFile.hpp"
 #include <vector>
 #include <map>
 #include <set>
