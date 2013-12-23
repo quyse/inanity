@@ -242,7 +242,7 @@ var executables = {
 			'libinanity-input',
 			'libinanity-base',
 			'deps/glew//libglew'],
-		dynamicLibraries: ['user32.lib', 'gdi32.lib', 'dxgi.lib', 'd3d11.lib', 'd3dx11.lib', 'd3dx10.lib', 'opengl32.lib'], // win32
+		dynamicLibraries: ['user32.lib', 'gdi32.lib', 'dxgi.lib', 'd3d11.lib', 'opengl32.lib'], // win32
 		//dynamicLibraries: ['GL', 'SDL2'], // linux
 	}
 	// TEST
