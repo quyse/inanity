@@ -30,10 +30,10 @@
 #include "Win32Output.hpp"
 #include "Win32MonitorMode.hpp"
 #elif defined(___INANITY_PLATFORM_LINUX)
-#include "GlxPresenter.hpp"
-#include "X11Output.hpp"
-#include "../platform/X11Window.hpp"
-#include "../platform/X11Display.hpp"
+#include "SdlPresenter.hpp"
+#include "WindowOutput.hpp"
+#include "../platform/Sdl.hpp"
+#include "../platform/SdlWindow.hpp"
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 #include "EmsPresenter.hpp"
 #include "EmsOutput.hpp"
@@ -58,15 +58,12 @@ GlDevice::~GlDevice()
 #elif defined(___INANITY_PLATFORM_LINUX)
 
 GlDevice::GlDevice(ptr<GlSystem> system)
-: system(system), glxContext(0) {}
+: system(system), glContext(0) {}
 
 GlDevice::~GlDevice()
 {
-	if(display && glxContext)
-	{
-		glXMakeCurrent(display->GetDisplay(), None, 0);
-		glXDestroyContext(display->GetDisplay(), glxContext);
-	}
+	if(glContext)
+		SDL_GL_DeleteContext(glContext);
 }
 
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
@@ -235,131 +232,16 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 
 #elif defined(___INANITY_PLATFORM_LINUX)
 
-		// only X11Output allowed
-		ptr<X11Output> output = abstractOutput.DynamicCast<X11Output>();
+		ptr<WindowOutput> output = abstractOutput.DynamicCast<WindowOutput>();
 		if(!output)
-			THROW("Only X11 output is allowed");
+			THROW("Only WindowOutput allowed");
+		ptr<Platform::SdlWindow> window = output->GetWindow().DynamicCast<Platform::SdlWindow>();
+		if(!window)
+			THROW("Only SDL window allowed");
 
-		ptr<Platform::X11Window> window = output->GetWindow();
-
-		display = window->GetDisplay();
-
-		::Display* xDisplay = display->GetDisplay();
-
-		static const int fbAttribs[] =
-		{
-			GLX_X_RENDERABLE, True,
-			GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
-			GLX_RENDER_TYPE, GLX_RGBA_BIT,
-			GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR,
-			GLX_RED_SIZE, 8,
-			GLX_GREEN_SIZE, 8,
-			GLX_BLUE_SIZE, 8,
-			GLX_ALPHA_SIZE, 8,
-			GLX_DEPTH_SIZE, 24,
-			GLX_STENCIL_SIZE, 8,
-			GLX_DOUBLEBUFFER, True,
-			0, 0
-		};
-
-#define GETPROC(fnType, fn) \
-		fnType fn = (fnType)glXGetProcAddress((const GLubyte*)#fn); \
-		if(!fn) THROW("Can't get " #fn)
-
-		GETPROC(PFNGLXCHOOSEFBCONFIGPROC, glXChooseFBConfig);
-		GETPROC(PFNGLXGETFBCONFIGATTRIBPROC, glXGetFBConfigAttrib);
-		GETPROC(PFNGLXGETVISUALFROMFBCONFIGPROC, glXGetVisualFromFBConfig);
-
-		// get FB configs
-		int fbConfigsCount;
-		GLXFBConfig* fbConfigs = glXChooseFBConfig(
-			xDisplay,
-			DefaultScreen(xDisplay),
-			fbAttribs,
-			&fbConfigsCount
-		);
-		if(!fbConfigs || !fbConfigsCount)
-			THROW("Can't get FB configs");
-
-		// select first config
-		GLXFBConfig fbConfig = fbConfigs[0];
-		XFree(fbConfigs);
-		int visualId;
-		if(glXGetFBConfigAttrib(xDisplay, fbConfig, GLX_VISUAL_ID, &visualId))
-			THROW("Can't get visual id of FB config");
-		XVisualInfo* xVisualInfo = glXGetVisualFromFBConfig(xDisplay, fbConfig);
-		if(!xVisualInfo)
-			THROW("Can't get visual from FB config");
-
-		// create temp old-style context
-		GLXContext tempGlxContext = glXCreateContext(xDisplay, xVisualInfo, 0, True);
-		if(!tempGlxContext)
-			THROW("Can't create temp context");
-		// make it current
-		glXMakeCurrent(xDisplay, window->GetHandle(), tempGlxContext);
-
-		GETPROC(PFNGLXCREATECONTEXTATTRIBSARBPROC, glXCreateContextAttribsARB);
-
-		// reset and delete temp context
-		glXMakeCurrent(xDisplay, None, 0);
-		glXDestroyContext(xDisplay, tempGlxContext);
-
-		// now create real context
-
-		// attributes for context
-		int attribs[] =
-		{
-			GLX_CONTEXT_MAJOR_VERSION_ARB, 0,
-			GLX_CONTEXT_MINOR_VERSION_ARB, 0,
-			GLX_CONTEXT_FLAGS_ARB, 0
-#ifdef _DEBUG
-				| GLX_CONTEXT_DEBUG_BIT_ARB
-#endif
-			,
-			GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
-			0, 0
-		};
-		// versions for tryings
-		static const int versions[][2] =
-		{
-			{ 4, 3 },
-			{ 4, 2 },
-			{ 4, 1 },
-			{ 4, 0 },
-			{ 3, 3 },
-			{ 3, 2 }
-		};
-		// loop trying to create some version
-		for(int i = 0; i < int(sizeof(versions) / sizeof(versions[0])); ++i)
-		{
-			attribs[1] = versions[i][0];
-			attribs[3] = versions[i][1];
-			glxContext = glXCreateContextAttribsARB(xDisplay, fbConfig, 0, True, attribs);
-			if(glxContext)
-				break;
-		}
-
-		// if no version of OpenGL supported, this is end
-		if(!glxContext)
-			THROW("Can't create OpenGL context");
-
-		GETPROC(PFNGLXCREATEWINDOWPROC, glXCreateWindow);
-		GETPROC(PFNGLXMAKECONTEXTCURRENTPROC, glXMakeContextCurrent);
-
-		// create glx window
-		GLXWindow glxWindow = glXCreateWindow(xDisplay, fbConfig, window->GetHandle(), 0);
-		if(!glxWindow)
-		{
-			glXDestroyContext(xDisplay, glxContext);
-			THROW("Can't create GLX window");
-		}
-
-		// make OpenGL context current
-		if(!glXMakeContextCurrent(xDisplay, glxWindow, glxWindow, glxContext))
-		{
-			glXDestroyContext(xDisplay, glxContext);
-			THROW("Can't make context current");
-		}
+		glContext = SDL_GL_CreateContext(window->GetHandle());
+		if(!glContext)
+			THROW_SECONDARY("Can't create OpenGL context", Platform::Sdl::Error());
 
 		GlSystem::InitGLEW();
 		GlSystem::ClearErrors();
@@ -367,7 +249,7 @@ ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<Monitor
 		// init capabilities
 		InitCaps();
 
-		return NEW(GlxPresenter(this, NEW(GlFrameBuffer(this, 0)), output, glxWindow));
+		return NEW(SdlPresenter(this, NEW(GlFrameBuffer(this, 0)), window));
 
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 

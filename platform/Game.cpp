@@ -6,9 +6,8 @@
 #include "../graphics/Dx11System.hpp"
 #include "../input/Win32RawManager.hpp"
 #elif defined(___INANITY_PLATFORM_LINUX)
-#include "X11Window.hpp"
-#include "X11Display.hpp"
-#include "../input/X11Manager.hpp"
+#include "SdlWindow.hpp"
+#include "../input/SdlManager.hpp"
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 #include "EmsWindow.hpp"
 #include "../input/SdlManager.hpp"
@@ -40,9 +39,9 @@ ptr<Input::Manager> Game::CreateInputManager(ptr<Window> window)
 	win32Window->SetInputManager(inputManager);
 	return inputManager;
 #elif defined(___INANITY_PLATFORM_LINUX)
-	ptr<Platform::X11Window> x11Window = window.DynamicCast<Platform::X11Window>();
-	ptr<Input::X11Manager> inputManager = NEW(Input::X11Manager(x11Window->GetDisplay()));
-	x11Window->SetInputManager(inputManager);
+	ptr<Platform::SdlWindow> sdlWindow = window.DynamicCast<Platform::SdlWindow>();
+	ptr<Input::SdlManager> inputManager = NEW(Input::SdlManager());
+	sdlWindow->SetInputManager(inputManager);
 	return inputManager;
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	ptr<Platform::EmsWindow> emsWindow = window.DynamicCast<Platform::EmsWindow>();

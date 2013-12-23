@@ -91,8 +91,8 @@ var libraries = {
 	'libinanity-input': {
 		objects: ['input.Event', 'input.Frame', 'input.Manager', 'input.Mux', 'input.Processor'],
 		'objects-win32': ['input.Win32Manager', 'input.Win32RawManager'],
-		'objects-linux': ['input.X11Manager'],
-		'objects-emscripten': ['input.SdlManager', 'platform.Sdl']
+		'objects-linux': ['input.SdlManager'],
+		'objects-emscripten': ['input.SdlManager']
 	},
 	// ******* general platform subsystem
 	'libinanity-platform': {
@@ -105,8 +105,8 @@ var libraries = {
 		],
 		'objects-linux': [
 			'platform.PosixFileSystem',
-			'platform.X11Window', 'platform.X11Display', 'graphics.X11Output',
-			'graphics.X11Adapter', 'graphics.X11Monitor', 'graphics.X11MonitorMode'
+			'platform.Sdl', 'platform.SdlWindow',
+			'graphics.SdlAdapter', 'graphics.SdlMonitor', 'graphics.SdlMonitorMode'
 		],
 		'objects-emscripten': [
 			'platform.PosixFileSystem',
@@ -118,6 +118,7 @@ var libraries = {
 	'libinanity-graphics': {
 		objects: [
 			'graphics.Device', 'graphics.Context', 'graphics.Output',
+			'graphics.WindowOutput',
 			'graphics.FrameBuffer',
 			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.IndexBuffer',
 			'graphics.SamplerSettings', 'graphics.BlendState',
@@ -156,7 +157,7 @@ var libraries = {
 			'graphics.GlShaderCompiler', 'graphics.GlslSource', 'graphics.GlShaderBindings'
 		],
 		'objects-win32': ['graphics.WglPresenter'],
-		'objects-linux': ['graphics.GlxPresenter'],
+		'objects-linux': ['graphics.SdlPresenter'],
 		'objects-emscripten': ['graphics.EmsPresenter']
 	},
 	// ******* подсистема шейдеров

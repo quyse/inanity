@@ -11,13 +11,7 @@
 #ifdef ___INANITY_PLATFORM_LINUX
 
 #include "../platform/platform.hpp"
-#include "../platform/x11.hpp"
-
-BEGIN_INANITY_PLATFORM
-
-class X11Display;
-
-END_INANITY_PLATFORM
+#include <SDL2/SDL_video.h>
 
 #endif // ___INANITY_PLATFORM_LINUX
 
@@ -46,11 +40,9 @@ private:
 	Является общим для всех Presenter'ов. */
 	HGLRC hglrc;
 #elif defined(___INANITY_PLATFORM_LINUX)
-	ptr<Platform::X11Display> display;
-	/// Контекст рендеринга OpenGL.
-	/** Создаётся при первом создании Presenter'а.
-	Является общим для всех Presenter'ов. */
-	GLXContext glxContext;
+
+	SDL_GLContext glContext;
+
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	// nothing needed
 #else

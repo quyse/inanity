@@ -6,9 +6,7 @@
 #include "../platform/Win32Window.hpp"
 #include "../Strings.hpp"
 #elif defined(___INANITY_PLATFORM_LINUX)
-#include "X11Adapter.hpp"
-#include "../platform/X11Window.hpp"
-#include "../platform/X11Display.hpp"
+#include "SdlAdapter.hpp"
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 #include "EmsAdapter.hpp"
 #include "../platform/EmsWindow.hpp"
@@ -28,7 +26,7 @@ const std::vector<ptr<Adapter> >& GlSystem::GetAdapters()
 #if defined(___INANITY_PLATFORM_WINDOWS)
 		Win32Adapter::GetAdapters(adapters);
 #elif defined(___INANITY_PLATFORM_LINUX)
-		X11Adapter::GetAdapters(adapters);
+		SdlAdapter::GetAdapters(adapters);
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 		EmsAdapter::GetAdapters(adapters);
 #else
