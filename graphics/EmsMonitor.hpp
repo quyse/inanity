@@ -13,7 +13,7 @@ BEGIN_INANITY_GRAPHICS
 class EmsMonitor : public Monitor
 {
 private:
-	std::vector<ptr<MonitorMode> > modes;
+	MonitorModes modes;
 
 public:
 	EmsMonitor();
@@ -21,7 +21,7 @@ public:
 	//*** Monitor's methods.
 	String GetId() const;
 	String GetName() const;
-	const std::vector<ptr<MonitorMode> >& GetModes();
+	const MonitorModes& GetModes();
 	ptr<MonitorMode> TryCreateMode(int width, int height);
 	ptr<Platform::Window> CreateDefaultWindow(const String& title, int width, int height);
 };

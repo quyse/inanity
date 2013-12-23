@@ -33,7 +33,7 @@ String DxgiMonitor::GetName() const
 	return Strings::Unicode2UTF8(desc.DeviceName);
 }
 
-const std::vector<ptr<MonitorMode> >& DxgiMonitor::GetModes()
+const Monitor::MonitorModes& DxgiMonitor::GetModes()
 {
 	if(!modesInitialized)
 		try

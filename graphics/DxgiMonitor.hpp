@@ -13,7 +13,7 @@ class DxgiMonitor : public Monitor
 private:
 	ComPointer<IDXGIOutput> output;
 	DXGI_OUTPUT_DESC desc;
-	std::vector<ptr<MonitorMode> > modes;
+	MonitorModes modes;
 	bool modesInitialized;
 
 public:
@@ -22,7 +22,7 @@ public:
 	//*** методы Monitor
 	String GetId() const;
 	String GetName() const;
-	const std::vector<ptr<MonitorMode> >& GetModes();
+	const MonitorModes& GetModes();
 	ptr<MonitorMode> TryCreateMode(int width, int height);
 	RECT GetRect() const;
 	ptr<Platform::Window> CreateDefaultWindow(const String& title, int width, int height);

@@ -21,7 +21,7 @@ String Win32Adapter::GetName() const
 	return deviceString;
 }
 
-const std::vector<ptr<Monitor> >& Win32Adapter::GetMonitors()
+const Adapter::Monitors& Win32Adapter::GetMonitors()
 {
 	if(!monitorsInitialized)
 	{
@@ -40,7 +40,7 @@ const std::vector<ptr<Monitor> >& Win32Adapter::GetMonitors()
 	return monitors;
 }
 
-void Win32Adapter::GetAdapters(std::vector<ptr<Adapter> >& adapters)
+void Win32Adapter::GetAdapters(Adapters& adapters)
 {
 	for(int i = 0; ; ++i)
 	{

@@ -13,7 +13,7 @@ BEGIN_INANITY_GRAPHICS
 class EmsAdapter : public Adapter
 {
 private:
-	std::vector<ptr<Monitor> > monitors;
+	Monitors monitors;
 
 public:
 	EmsAdapter();
@@ -21,9 +21,9 @@ public:
 	//*** Adapter's methods.
 	String GetId() const;
 	String GetName() const;
-	const std::vector<ptr<Monitor> >& GetMonitors();
+	const Monitors& GetMonitors();
 
-	static void GetAdapters(std::vector<ptr<Adapter> >& adapters);
+	static void GetAdapters(Adapters& adapters);
 };
 
 END_INANITY_GRAPHICS

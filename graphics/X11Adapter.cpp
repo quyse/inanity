@@ -18,7 +18,7 @@ String X11Adapter::GetName() const
 	return displayName;
 }
 
-const std::vector<ptr<Monitor> >& X11Adapter::GetMonitors()
+const Adapter::Monitors& X11Adapter::GetMonitors()
 {
 	BEGIN_TRY();
 
@@ -40,7 +40,7 @@ ptr<Platform::X11Display> X11Adapter::GetDisplay() const
 	return display;
 }
 
-void X11Adapter::GetAdapters(std::vector<ptr<Adapter> >& adapters)
+void X11Adapter::GetAdapters(Adapters& adapters)
 {
 	BEGIN_TRY();
 

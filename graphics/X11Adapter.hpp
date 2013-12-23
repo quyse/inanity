@@ -19,7 +19,7 @@ class X11Adapter : public Adapter
 private:
 	String displayName;
 	ptr<Platform::X11Display> display;
-	std::vector<ptr<Monitor> > monitors;
+	Monitors monitors;
 	bool monitorsInitialized;
 
 public:
@@ -28,11 +28,11 @@ public:
 	/// Adapter's methods
 	String GetId() const;
 	String GetName() const;
-	const std::vector<ptr<Monitor> >& GetMonitors();
+	const Monitors& GetMonitors();
 
 	ptr<Platform::X11Display> GetDisplay() const;
 
-	static void GetAdapters(std::vector<ptr<Adapter> >& adapters);
+	static void GetAdapters(Adapters& adapters);
 };
 
 END_INANITY_GRAPHICS

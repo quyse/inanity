@@ -13,7 +13,7 @@ class DxgiAdapter : public Adapter
 private:
 	ComPointer<IDXGIAdapter> adapter;
 	DXGI_ADAPTER_DESC desc;
-	std::vector<ptr<Monitor> > monitors;
+	Monitors monitors;
 	bool monitorsInitialized;
 
 public:
@@ -22,7 +22,7 @@ public:
 	//*** методы Adapter
 	String GetId() const;
 	String GetName() const;
-	const std::vector<ptr<Monitor> >& GetMonitors();
+	const Monitors& GetMonitors();
 
 	IDXGIAdapter* GetInterface() const;
 };

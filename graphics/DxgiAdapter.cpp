@@ -32,7 +32,7 @@ String DxgiAdapter::GetName() const
 	return Strings::Unicode2UTF8(desc.Description);
 }
 
-const std::vector<ptr<Monitor> >& DxgiAdapter::GetMonitors()
+const Adapter::Monitors& DxgiAdapter::GetMonitors()
 {
 	if(!monitorsInitialized)
 		try

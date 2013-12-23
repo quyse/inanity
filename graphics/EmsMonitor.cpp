@@ -16,7 +16,7 @@ String EmsMonitor::GetName() const
 	return GetId();
 }
 
-const std::vector<ptr<MonitorMode> >& EmsMonitor::GetModes()
+const Monitor::MonitorModes& EmsMonitor::GetModes()
 {
 	return modes;
 }

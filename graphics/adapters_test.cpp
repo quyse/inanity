@@ -24,17 +24,17 @@ int main(int argc, char** argv)
 		return 0;
 	}
 
-	const std::vector<ptr<Adapter> >& adapters = system->GetAdapters();
+	const Adapter::Adapters& adapters = system->GetAdapters();
 	for(size_t i = 0; i < adapters.size(); ++i)
 	{
 		ptr<Adapter> adapter = adapters[i];
 		std::cout << "Adapter\n  ID=" << adapter->GetId() << "\n  Name=" << adapter->GetName() << "\n";
-		const std::vector<ptr<Monitor> >& monitors = adapter->GetMonitors();
+		const Adapter::Monitors& monitors = adapter->GetMonitors();
 		for(size_t j = 0; j < monitors.size(); ++j)
 		{
 			ptr<Monitor> monitor = monitors[i];
 			std::cout << "  Monitor\n    ID=" << monitor->GetId() << "\n    Name=" << monitor->GetName() << "\n";
-			const std::vector<ptr<MonitorMode> >& modes = monitor->GetModes();
+			const Monitor::MonitorModes& modes = monitor->GetModes();
 			for(size_t k = 0; k < modes.size(); ++k)
 			{
 				ptr<MonitorMode> mode = modes[k];

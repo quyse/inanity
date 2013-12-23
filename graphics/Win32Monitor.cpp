@@ -23,7 +23,7 @@ String Win32Monitor::GetName() const
 	return deviceString;
 }
 
-const std::vector<ptr<MonitorMode> >& Win32Monitor::GetModes()
+const Monitor::MonitorModes& Win32Monitor::GetModes()
 {
 	if(!modesInitialized)
 	{

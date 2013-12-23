@@ -15,12 +15,12 @@ String EmsAdapter::GetName() const
 	return GetId();
 }
 
-const std::vector<ptr<Monitor> >& EmsAdapter::GetMonitors()
+const Adapter::Monitors& EmsAdapter::GetMonitors()
 {
 	return monitors;
 }
 
-void EmsAdapter::GetAdapters(std::vector<ptr<Adapter> >& adapters)
+void EmsAdapter::GetAdapters(Adapters& adapters)
 {
 	adapters.push_back(NEW(EmsAdapter()));
 }

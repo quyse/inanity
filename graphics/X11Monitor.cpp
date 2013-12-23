@@ -38,7 +38,7 @@ String X11Monitor::GetName() const
 	return id;
 }
 
-const std::vector<ptr<MonitorMode> >& X11Monitor::GetModes()
+const Monitor::MonitorModes& X11Monitor::GetModes()
 {
 	if(!modesInitialized)
 	{

@@ -15,12 +15,16 @@ class Monitor;
 class Adapter : public Object
 {
 public:
+	typedef std::vector<ptr<Adapter> > Adapters;
+	typedef std::vector<ptr<Monitor> > Monitors;
+
+public:
 	/// Получить уникальный идентификатор адаптера.
 	virtual String GetId() const = 0;
 	/// Человекопонятное имя адаптера.
 	virtual String GetName() const = 0;
 	/// Получить мониторы.
-	virtual const std::vector<ptr<Monitor> >& GetMonitors() = 0;
+	virtual const Monitors& GetMonitors() = 0;
 };
 
 END_INANITY_GRAPHICS

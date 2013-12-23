@@ -20,7 +20,7 @@ private:
 	int screenNumber;
 	::Screen* screen;
 	String id, name;
-	std::vector<ptr<MonitorMode> > modes;
+	MonitorModes modes;
 	bool modesInitialized;
 
 public:
@@ -30,7 +30,7 @@ public:
 	// Monitor's methods.
 	String GetId() const;
 	String GetName() const;
-	const std::vector<ptr<MonitorMode> >& GetModes();
+	const MonitorModes& GetModes();
 	ptr<MonitorMode> TryCreateMode(int width, int height);
 	ptr<Platform::Window> CreateDefaultWindow(const String& title, int width, int height);
 };

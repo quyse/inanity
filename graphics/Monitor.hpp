@@ -23,12 +23,15 @@ class MonitorMode;
 class Monitor : public Object
 {
 public:
+	typedef std::vector<ptr<MonitorMode> > MonitorModes;
+
+public:
 	/// Получить идентификатор монитора.
 	virtual String GetId() const = 0;
 	/// Получить имя монитора.
 	virtual String GetName() const = 0;
 	/// Получить режимы, поддерживаемые монитором.
-	virtual const std::vector<ptr<MonitorMode> >& GetModes() = 0;
+	virtual const MonitorModes& GetModes() = 0;
 	/// Создать свой режим.
 	/** Монитор может подкорректировать его, чтобы он был поддерживаемым.
 	Может быть возвращён 0, если никак нельзя создать поддерживаемый режим. */
