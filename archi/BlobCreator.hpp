@@ -8,7 +8,7 @@ class BlobCreator : public Processor
 {
 private:
 	ptr<FileSystem> fileSystem;
-	ptr<BlobFileSystemBuilder> builder;
+	ptr<Data::BlobFileSystemBuilder> builder;
 
 	void AddDirectory(const String& rootDirectory, const String& namePrefix = "");
 

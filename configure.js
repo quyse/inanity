@@ -227,7 +227,7 @@ var executables = {
 		objects: ['archi.main', 'archi.BlobCreator', /*'archi.FontCreator',*/ /*'archi.SimpleGeometryCreator',*/
 			'archi.SystemFontCreator', 'archi.WavefrontObj', /*'archi.XafConverter'*/ 'archi.SkeletonConverter',
 			'archi.BoneAnimationConverter'],
-		staticLibraries: ['libinanity-base', 'libinanity-graphics', 'libinanity-platform'],
+		staticLibraries: ['libinanity-base', 'libinanity-data', 'libinanity-graphics', 'libinanity-platform'],
 		dynamicLibraries: ['user32.lib', 'gdi32.lib', 'comdlg32.lib']
 	}
 	, adapterstest: {

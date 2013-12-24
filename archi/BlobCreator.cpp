@@ -18,7 +18,7 @@ void BlobCreator::Run(const std::vector<String>& arguments)
 		THROW("Must be at least 2 arguments for command");
 
 	fileSystem = Platform::FileSystem::GetNativeFileSystem();
-	builder = NEW(BlobFileSystemBuilder(fileSystem->SaveStream(arguments[0])));
+	builder = NEW(Data::BlobFileSystemBuilder(fileSystem->SaveStream(arguments[0])));
 
 	for(size_t i = 1; i < arguments.size(); ++i)
 		AddDirectory(arguments[i]);
