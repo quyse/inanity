@@ -20,6 +20,7 @@ v8 (https://developers.google.com/v8/) - New BSD license (see /deps/v8/repo/LICE
 freetype (http://freetype.org/) - Freetype license (see /deps/freetype/repo/docs/FTL.TXT)
 harfbuzz (http://harfbuzz.org/) - "Old MIT" license (see /deps/harfbuzz/repo/COPYING)
 lz4 (https://code.google.com/p/lz4/) - BSD license
+npapi (https://code.google.com/p/npapi-sdk/) - Mozilla Public License 1.1
 
 Other software which is not placed in repository, but could be used by various parts of the engine:
 
