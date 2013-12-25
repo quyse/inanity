@@ -2,7 +2,7 @@
 #define ___INANITY_NET_HTTP_RESPONSE_STREAM_HPP___
 
 #include "net.hpp"
-#include "../deps/http-parser/http_parser.h"
+#include "../deps/http-parser/repo/http_parser.h"
 #include "../Handler.hpp"
 #include "../OutputStream.hpp"
 #include "../String.hpp"
@@ -31,7 +31,7 @@ private:
 
 	static int OnMessageBegin(http_parser* parser);
 	static int OnUrl(http_parser* parser, const char* data, size_t size);
-	static int OnStatusComplete(http_parser* parser);
+	static int OnStatus(http_parser* parser, const char* data, size_t size);
 	static int OnHeaderField(http_parser* parser, const char* data, size_t size);
 	static int OnHeaderValue(http_parser* parser, const char* data, size_t size);
 	static int OnHeadersComplete(http_parser* parser);

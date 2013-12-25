@@ -68,7 +68,7 @@ var libraries = {
 	// ******* библиотека HTTP
 	'libinanity-http': {
 		objects: [
-		'net.HttpStream', 'net.HttpClient', 'deps.http-parser.http_parser.c']
+		'net.HttpStream', 'net.HttpClient']
 	},
 	// ******* SQLite поддержка
 	'libinanity-sqlite': {

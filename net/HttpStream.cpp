@@ -5,7 +5,7 @@ BEGIN_INANITY_NET
 http_parser_settings HttpStream::settings = {
 	HttpStream::OnMessageBegin,
 	HttpStream::OnUrl,
-	HttpStream::OnStatusComplete,
+	HttpStream::OnStatus,
 	HttpStream::OnHeaderField,
 	HttpStream::OnHeaderValue,
 	HttpStream::OnHeadersComplete,
@@ -60,7 +60,7 @@ int HttpStream::OnUrl(http_parser* parser, const char* data, size_t size)
 	return 0;
 }
 
-int HttpStream::OnStatusComplete(http_parser* parser)
+int HttpStream::OnStatus(http_parser* parser, const char* data, size_t size)
 {
 	return 0;
 }
