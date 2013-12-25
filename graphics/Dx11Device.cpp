@@ -109,47 +109,54 @@ ptr<FrameBuffer> Dx11Device::CreateFrameBuffer()
 	return NEW(Dx11FrameBuffer(this));
 }
 
+ptr<Dx11RenderBuffer> Dx11Device::InternalCreateRenderBuffer(int width, int height, PixelFormat pixelFormat, const SamplerSettings& samplerSettings, bool gdiCompatible)
+{
+	BEGIN_TRY();
+
+	ComPointer<ID3D11Texture2D> buffer;
+	{
+		D3D11_TEXTURE2D_DESC desc;
+		desc.Width = width;
+		desc.Height = height;
+		desc.MipLevels = 1;
+		desc.ArraySize = 1;
+		desc.Format = Dx11System::GetDXGIFormat(pixelFormat);
+		desc.SampleDesc.Count = 1;
+		desc.SampleDesc.Quality = 0;
+		desc.Usage = D3D11_USAGE_DEFAULT;
+		desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+		desc.CPUAccessFlags = 0;
+		desc.MiscFlags = gdiCompatible ? D3D11_RESOURCE_MISC_GDI_COMPATIBLE : 0;
+		HRESULT hr;
+		if(FAILED(hr = device->CreateTexture2D(&desc, 0, &buffer)))
+			THROW("Can't create buffer");
+	}
+
+	ComPointer<ID3D11RenderTargetView> renderTargetView;
+	if(FAILED(device->CreateRenderTargetView(buffer, 0, &renderTargetView)))
+		THROW("Can't create render target view");
+
+	ComPointer<ID3D11ShaderResourceView> shaderResourceView;
+	if(FAILED(device->CreateShaderResourceView(buffer, 0, &shaderResourceView)))
+		THROW("Can't create shader resource view");
+
+	return NEW(Dx11RenderBuffer(
+		renderTargetView,
+		NEW(Dx11Texture(
+			shaderResourceView,
+			CreateSamplerState(samplerSettings).FastCast<Dx11SamplerState>()))));
+
+	END_TRY("Can't create DirectX 11 render buffer");
+}
+
 ptr<RenderBuffer> Dx11Device::CreateRenderBuffer(int width, int height, PixelFormat pixelFormat, const SamplerSettings& samplerSettings)
 {
-	try
-	{
-		ComPointer<ID3D11Texture2D> buffer;
-		{
-			D3D11_TEXTURE2D_DESC desc;
-			desc.Width = width;
-			desc.Height = height;
-			desc.MipLevels = 1;
-			desc.ArraySize = 1;
-			desc.Format = Dx11System::GetDXGIFormat(pixelFormat);
-			desc.SampleDesc.Count = 1;
-			desc.SampleDesc.Quality = 0;
-			desc.Usage = D3D11_USAGE_DEFAULT;
-			desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-			desc.CPUAccessFlags = 0;
-			desc.MiscFlags = 0;
-			HRESULT hr;
-			if(FAILED(hr = device->CreateTexture2D(&desc, 0, &buffer)))
-				THROW("Can't create buffer");
-		}
+	return InternalCreateRenderBuffer(width, height, pixelFormat, samplerSettings, false);
+}
 
-		ComPointer<ID3D11RenderTargetView> renderTargetView;
-		if(FAILED(device->CreateRenderTargetView(buffer, 0, &renderTargetView)))
-			THROW("Can't create render target view");
-
-		ComPointer<ID3D11ShaderResourceView> shaderResourceView;
-		if(FAILED(device->CreateShaderResourceView(buffer, 0, &shaderResourceView)))
-			THROW("Can't create shader resource view");
-
-		return NEW(Dx11RenderBuffer(
-			renderTargetView,
-			NEW(Dx11Texture(
-				shaderResourceView,
-				CreateSamplerState(samplerSettings).FastCast<Dx11SamplerState>()))));
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY("Can't create render buffer", exception);
-	}
+ptr<Dx11RenderBuffer> Dx11Device::CreateRenderBufferGdiCompatible(int width, int height, PixelFormat pixelFormat, const SamplerSettings& samplerSettings)
+{
+	return InternalCreateRenderBuffer(width, height, pixelFormat, samplerSettings, true);
 }
 
 ptr<DepthStencilBuffer> Dx11Device::CreateDepthStencilBuffer(int width, int height, bool canBeResource)

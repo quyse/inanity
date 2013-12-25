@@ -39,6 +39,13 @@ private:
 
 	static D3D11_TEXTURE_ADDRESS_MODE ConvertSamplerSettingsWrap(SamplerSettings::Wrap wrap);
 
+	ptr<Dx11RenderBuffer> InternalCreateRenderBuffer(
+		int width,
+		int height,
+		PixelFormat pixelFormat,
+		const SamplerSettings& samplerSettings,
+		bool gdiCompatible);
+
 public:
 	Dx11Device(ptr<Dx11System> system, ComPointer<ID3D11Device> device, ComPointer<ID3D11DeviceContext> deviceContext);
 
@@ -68,6 +75,9 @@ public:
 	ID3D11Device* GetDeviceInterface() const;
 	/// Получить интерфейс контекста устройства DirectX 11.
 	ID3D11DeviceContext* GetDeviceContextInterface() const;
+
+	/// Create RenderBuffer with possibility of getting HDC.
+	ptr<Dx11RenderBuffer> CreateRenderBufferGdiCompatible(int width, int height, PixelFormat pixelFormat, const SamplerSettings& samplerSettings);
 };
 
 END_INANITY_GRAPHICS
