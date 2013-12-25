@@ -11,13 +11,11 @@ BEGIN_INANITY_INPUT
 class Win32Manager : public Manager
 {
 protected:
-	/// Bound window.
-	HWND hWnd;
 	/// Last cursor position.
 	int cursorX, cursorY;
 
 protected:
-	Win32Manager(HWND hWnd);
+	Win32Manager();
 
 	static Key ConvertKey(USHORT key);
 

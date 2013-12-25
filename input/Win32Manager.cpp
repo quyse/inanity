@@ -103,8 +103,7 @@ Key Win32Manager::ConvertKey(USHORT key)
 	}
 }
 
-Win32Manager::Win32Manager(HWND hWnd)
-: hWnd(hWnd), cursorX(0), cursorY(0) {}
+Win32Manager::Win32Manager() : cursorX(0), cursorY(0) {}
 
 bool Win32Manager::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 {
