@@ -2,7 +2,16 @@
 
 BEGIN_INANITY_PLATFORM
 
-Window::Window() : mouseLock(false), cursorVisible(true) {}
+Window::Window() :
+	presenter(nullptr),
+	mouseLock(false),
+	cursorVisible(true)
+{}
+
+void Window::SetPresenter(Graphics::Presenter* presenter)
+{
+	this->presenter = presenter;
+}
 
 void Window::SetMouseLock(bool mouseLock)
 {

@@ -1,8 +1,7 @@
 #include "Dx11Device.hpp"
 #include "Dx11System.hpp"
 #include "Dx11Texture.hpp"
-#include "Win32Output.hpp"
-#include "Dx11Presenter.hpp"
+#include "Dx11SwapChainPresenter.hpp"
 #include "Dx11ShaderCompiler.hpp"
 #include "shaders/Hlsl11Generator.hpp"
 #include "Dx11FrameBuffer.hpp"
@@ -20,6 +19,7 @@
 #include "RawTextureData.hpp"
 #include "Dx11SamplerState.hpp"
 #include "Dx11BlendState.hpp"
+#include "../platform/Win32Window.hpp"
 #include "../File.hpp"
 #include "../FileInputStream.hpp"
 #include "../Exception.hpp"
@@ -39,55 +39,59 @@ ptr<System> Dx11Device::GetSystem() const
 	return system;
 }
 
-ptr<Presenter> Dx11Device::CreatePresenter(ptr<Output> abstractOutput, ptr<MonitorMode> abstractMode)
+ptr<Presenter> Dx11Device::CreateWindowPresenter(ptr<Platform::Window> abstractWindow, ptr<MonitorMode> abstractMode)
 {
-	try
-	{
-		// область вывода - только Win32
-		ptr<Win32Output> output = abstractOutput.DynamicCast<Win32Output>();
-		if(!output)
-			THROW("Only Win32 output allowed");
-		// режим, если есть - только DXGI
-		ptr<DxgiMonitorMode> mode = abstractMode.DynamicCast<DxgiMonitorMode>();
-		if(!mode && abstractMode)
-			THROW("Only DXGI monitor mode allowed");
+	BEGIN_TRY();
 
-		// сформировать структуру настроек swap chain
-		DXGI_SWAP_CHAIN_DESC desc;
-		ZeroMemory(&desc, sizeof(desc));
+	ptr<Platform::Win32Window> window = abstractWindow.DynamicCast<Platform::Win32Window>();
+	if(!window)
+		THROW("Only Win32 window is allowed");
+	ptr<DxgiMonitorMode> mode = abstractMode.DynamicCast<DxgiMonitorMode>();
+	if(!mode && abstractMode)
+		THROW("Only DXGI monitor mode allowed");
 
-		desc.BufferDesc = Dx11System::GetModeDesc(mode, output);
+	return CreatePresenter(window, mode);
 
-		// мультисемплинга пока нет
-		desc.SampleDesc.Count = 1;
-		desc.SampleDesc.Quality = 0;
-		desc.BufferUsage = DXGI_USAGE_BACK_BUFFER | DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		desc.BufferCount = 2;
-		desc.OutputWindow = output->GetHWND();
-		// согласно рекомендации SDK, даже в случае полного экрана, лучше
-		// создавать в оконном режиме, а потом переключать
-		desc.Windowed = TRUE;
-		desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-		desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+	END_TRY("Can't create DirectX 11 window presenter");
+}
 
-		// создать swap chain
-		ComPointer<IDXGISwapChain> swapChain;
-		if(FAILED(system->GetDXGIFactory()->CreateSwapChain(device, &desc, &swapChain)))
-			THROW("Can't create swap chain");
+ptr<Dx11SwapChainPresenter> Dx11Device::CreatePresenter(ptr<Platform::Win32Window> window, ptr<DxgiMonitorMode> mode)
+{
+	BEGIN_TRY();
 
-		// создать Presenter
-		ptr<Presenter> presenter = NEW(Dx11Presenter(this, output, swapChain));
+	// сформировать структуру настроек swap chain
+	DXGI_SWAP_CHAIN_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
 
-		// переключить режим
-		presenter->SetMode(mode);
+	desc.BufferDesc = Dx11System::GetModeDesc(mode, window->GetClientWidth(), window->GetClientHeight());
 
-		// всё
-		return presenter;
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY("Can't create presenter for DX device", exception);
-	}
+	// мультисемплинга пока нет
+	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Quality = 0;
+	desc.BufferUsage = DXGI_USAGE_BACK_BUFFER | DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	desc.BufferCount = 2;
+	desc.OutputWindow = window->GetHWND();
+	// согласно рекомендации SDK, даже в случае полного экрана, лучше
+	// создавать в оконном режиме, а потом переключать
+	desc.Windowed = TRUE;
+	desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+	desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+
+	// создать swap chain
+	ComPointer<IDXGISwapChain> swapChain;
+	if(FAILED(system->GetDXGIFactory()->CreateSwapChain(device, &desc, &swapChain)))
+		THROW("Can't create swap chain");
+
+	// создать Presenter
+	ptr<Dx11SwapChainPresenter> presenter = NEW(Dx11SwapChainPresenter(this, window, swapChain));
+
+	// переключить режим
+	presenter->SetMode(mode);
+
+	// всё
+	return presenter;
+
+	END_TRY("Can't create DirectX 11 swap chain presenter");
 }
 
 ptr<ShaderCompiler> Dx11Device::CreateShaderCompiler()

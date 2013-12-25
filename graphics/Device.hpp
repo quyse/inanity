@@ -4,6 +4,7 @@
 #include "graphics.hpp"
 #include "shaders/shaders.hpp"
 #include "PixelFormat.hpp"
+#include "../platform/platform.hpp"
 
 BEGIN_INANITY
 
@@ -17,12 +18,17 @@ class ShaderGenerator;
 
 END_INANITY_SHADERS
 
+BEGIN_INANITY_PLATFORM
+
+class Window;
+
+END_INANITY_PLATFORM
+
 BEGIN_INANITY_GRAPHICS
 
 class System;
 class Presenter;
 class ShaderCompiler;
-class Output;
 class MonitorMode;
 struct PresentMode;
 class FrameBuffer;
@@ -75,9 +81,8 @@ public:
 	/// Получить графическую систему.
 	virtual ptr<System> GetSystem() const = 0;
 
-	/// Создать выходное устройство.
-	/** \param mode Режим экрана, в случае, если режим должен быть полноэкранным. */
-	virtual ptr<Presenter> CreatePresenter(ptr<Output> output, ptr<MonitorMode> mode) = 0;
+	/// Create presenter for window.
+	virtual ptr<Presenter> CreateWindowPresenter(ptr<Platform::Window> window, ptr<MonitorMode> mode) = 0;
 
 	/// Создать компилятор шейдеров.
 	virtual ptr<ShaderCompiler> CreateShaderCompiler() = 0;

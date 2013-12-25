@@ -25,6 +25,7 @@ private:
 
 public:
 	SdlPresenter(ptr<GlDevice> device, ptr<GlFrameBuffer> frameBuffer, ptr<Platform::SdlWindow> window);
+	~SdlPresenter();
 
 	//*** Presenter's methods.
 	ptr<Device> GetDevice() const;

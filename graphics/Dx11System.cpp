@@ -3,7 +3,6 @@
 #include "Dx11Context.hpp"
 #include "DxgiAdapter.hpp"
 #include "DxgiMonitorMode.hpp"
-#include "Output.hpp"
 #include "../platform/DllFunction.ipp"
 #include "../Exception.hpp"
 
@@ -167,14 +166,14 @@ DXGI_FORMAT Dx11System::GetDXGIFormat(PixelFormat format)
 #undef X
 }
 
-DXGI_MODE_DESC Dx11System::GetModeDesc(ptr<DxgiMonitorMode> mode, ptr<Output> output)
+DXGI_MODE_DESC Dx11System::GetModeDesc(ptr<DxgiMonitorMode> mode, int width, int height)
 {
 	if(mode)
 		return mode->GetDesc();
 	DXGI_MODE_DESC modeDesc;
 	ZeroMemory(&modeDesc, sizeof(modeDesc));
-	modeDesc.Width = (UINT)output->GetWidth();
-	modeDesc.Height = (UINT)output->GetHeight();
+	modeDesc.Width = (UINT)width;
+	modeDesc.Height = (UINT)height;
 	modeDesc.RefreshRate.Numerator = 0;
 	modeDesc.RefreshRate.Denominator = 0;
 	modeDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;

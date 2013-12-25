@@ -103,7 +103,7 @@ var libraries = {
 		objects: ['platform.Window', 'platform.Game'],
 		'objects-win32': [
 			'platform.Win32Handle', 'platform.Win32FileSystem',
-			'platform.Win32Window', 'graphics.Win32Output',
+			'platform.Win32Window',
 			'graphics.Win32Adapter', 'graphics.Win32Monitor', 'graphics.Win32MonitorMode',
 			'platform.DllCache'
 		],
@@ -114,15 +114,14 @@ var libraries = {
 		],
 		'objects-emscripten': [
 			'platform.PosixFileSystem',
-			'platform.Sdl', 'platform.EmsWindow', 'graphics.EmsOutput',
+			'platform.Sdl', 'platform.EmsWindow',
 			'graphics.EmsAdapter', 'graphics.EmsMonitor'
 		]
 	},
 	// ******* общая графика
 	'libinanity-graphics': {
 		objects: [
-			'graphics.Device', 'graphics.Context', 'graphics.Output',
-			'graphics.WindowOutput',
+			'graphics.Device', 'graphics.Context',
 			'graphics.FrameBuffer',
 			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.IndexBuffer',
 			'graphics.SamplerSettings', 'graphics.BlendState',
@@ -137,7 +136,8 @@ var libraries = {
 	// ******* подсистема DirectX 11
 	'libinanity-dx11': {
 		objects: [
-			'graphics.Dx11System', 'graphics.Dx11Device', 'graphics.Dx11Presenter', 'graphics.Dx11Context',
+			'graphics.Dx11System', 'graphics.Dx11Device', 'graphics.Dx11Context',
+			'graphics.Dx11Presenter', 'graphics.Dx11SwapChainPresenter',
 			'graphics.Dx11FrameBuffer',
 			'graphics.Dx11RenderBuffer', 'graphics.Dx11DepthStencilBuffer', 'graphics.Dx11Texture', 'graphics.Dx11UniformBuffer',
 			'graphics.Dx11VertexBuffer', 'graphics.Dx11IndexBuffer', 'graphics.Dx11AttributeBinding',

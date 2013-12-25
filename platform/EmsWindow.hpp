@@ -26,12 +26,14 @@ private:
 	String title;
 	ptr<Handler> activeHandler;
 	ptr<Input::SdlManager> inputManager;
+	int width, height;
 
 	/// Emscripten window can be only one.
 	static EmsWindow* instance;
 
 	/// Callback to emscripten to execute as a main loop.
-	static void MainLoop();
+	static void StaticMainLoop();
+	void MainLoop();
 
 	void UpdateMouseLock();
 	void UpdateCursorVisible();
@@ -42,11 +44,13 @@ public:
 
 	void SetInputManager(ptr<Input::SdlManager> inputManager);
 
+	int GetWidth() const;
+	int GetHeight() const;
+
 	//*** Window's methods.
 	void SetTitle(const String& title);
 	void Close();
 	void Run(ptr<Handler> activeHandler);
-	ptr<Graphics::Output> CreateOutput();
 	void PlaceCursor(int x, int y);
 };
 

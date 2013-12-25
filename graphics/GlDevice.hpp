@@ -6,14 +6,30 @@
 #include "LayoutDataType.hpp"
 #include "SamplerSettings.hpp"
 #include "opengl.hpp"
+#include "../platform/platform.hpp"
 #include "../String.hpp"
 
 #ifdef ___INANITY_PLATFORM_LINUX
 
-#include "../platform/platform.hpp"
 #include <SDL2/SDL_video.h>
 
 #endif // ___INANITY_PLATFORM_LINUX
+
+
+
+BEGIN_INANITY_PLATFORM
+
+#if defined(___INANITY_PLATFORM_WINDOWS)
+class Win32Window;
+#elif defined(___INANITY_PLATFORM_LINUX)
+class SdlWindow;
+#elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
+class EmsWindow;
+#else
+#error Unknown platform
+#endif
+
+END_INANITY_PLATFORM
 
 
 
@@ -21,6 +37,20 @@ BEGIN_INANITY_GRAPHICS
 
 class GlSystem;
 class GlShaderBindings;
+
+#if defined(___INANITY_PLATFORM_WINDOWS)
+class WglPresenter;
+class Win32MonitorMode;
+#elif defined(___INANITY_PLATFORM_LINUX)
+class SdlPresenter;
+class SdlMonitorMode;
+#elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
+class EmsPresenter;
+#else
+#error Unknown platform
+#endif
+
+
 
 /// Класс графического устройства OpenGL.
 /** Текущие ограничения:
@@ -99,7 +129,7 @@ public:
 
 	// методы Device
 	ptr<System> GetSystem() const;
-	ptr<Presenter> CreatePresenter(ptr<Output> output, ptr<MonitorMode> mode);
+	ptr<Presenter> CreateWindowPresenter(ptr<Platform::Window> window, ptr<MonitorMode> mode);
 	ptr<ShaderCompiler> CreateShaderCompiler();
 	ptr<Shaders::ShaderGenerator> CreateShaderGenerator();
 	ptr<FrameBuffer> CreateFrameBuffer();
@@ -115,6 +145,17 @@ public:
 	ptr<Texture> CreateStaticTexture(ptr<RawTextureData> data, const SamplerSettings& samplerSettings);
 	ptr<SamplerState> CreateSamplerState(const SamplerSettings& samplerSettings);
 	ptr<BlendState> CreateBlendState();
+
+	/// Create presenter routine.
+#if defined(___INANITY_PLATFORM_WINDOWS)
+	ptr<WglPresenter> CreatePresenter(ptr<Platform::Win32Window> window, ptr<Win32MonitorMode> mode);
+#elif defined(___INANITY_PLATFORM_LINUX)
+	ptr<SdlPresenter> CreatePresenter(ptr<Platform::SdlWindow> window, ptr<SdlMonitorMode> mode);
+#elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
+	ptr<EmsPresenter> CreatePresenter(ptr<Platform::EmsWindow> window, ptr<MonitorMode> mode);
+#else
+#error Unknown platform
+#endif
 };
 
 END_INANITY_GRAPHICS

@@ -2,7 +2,14 @@
 #define ___INANITY_GRAPHICS_WGL_PRESENTER_HPP___
 
 #include "Presenter.hpp"
+#include "../platform/platform.hpp"
 #include "../platform/windows.hpp"
+
+BEGIN_INANITY_PLATFORM
+
+class Win32Window;
+
+END_INANITY_PLATFORM
 
 BEGIN_INANITY_GRAPHICS
 
@@ -16,12 +23,17 @@ private:
 	ptr<GlDevice> device;
 	ptr<GlFrameBuffer> frameBuffer;
 	HDC hdc;
+	ptr<Platform::Win32Window> window;
+	int width, height;
 
 public:
-	WglPresenter(ptr<GlDevice> device, ptr<GlFrameBuffer> frameBuffer, HDC hdc);
+	WglPresenter(ptr<GlDevice> device, ptr<GlFrameBuffer> frameBuffer, HDC hdc, ptr<Platform::Win32Window> window);
+	~WglPresenter();
 
 	// Presenter's methods.
 	ptr<Device> GetDevice() const;
+	int GetWidth() const;
+	int GetHeight() const;
 	ptr<FrameBuffer> GetFrameBuffer() const;
 	void SetMode(ptr<MonitorMode> mode);
 	void Present();

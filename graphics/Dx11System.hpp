@@ -10,7 +10,6 @@
 BEGIN_INANITY_GRAPHICS
 
 class DxgiMonitorMode;
-class Output;
 
 /// Графическая система, основанная на DirectX 11.
 class Dx11System : public System
@@ -26,7 +25,7 @@ public:
 	/// Преобразовать формат пикселей из общего перечисления в DXGI.
 	static DXGI_FORMAT GetDXGIFormat(PixelFormat format);
 	/// Создать структуру режима экрана DXGI.
-	static DXGI_MODE_DESC GetModeDesc(ptr<DxgiMonitorMode> mode, ptr<Output> output);
+	static DXGI_MODE_DESC GetModeDesc(ptr<DxgiMonitorMode> mode, int width, int height);
 	/// Преобразовать номер сематники атрибута в строку.
 	static String GetSemanticString(int semantic);
 

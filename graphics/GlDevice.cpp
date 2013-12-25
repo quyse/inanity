@@ -27,16 +27,17 @@
 #include "../Strings.hpp"
 #if defined(___INANITY_PLATFORM_WINDOWS)
 #include "WglPresenter.hpp"
-#include "Win32Output.hpp"
 #include "Win32MonitorMode.hpp"
+#include "../platform/Win32Window.hpp"
 #elif defined(___INANITY_PLATFORM_LINUX)
 #include "SdlPresenter.hpp"
-#include "WindowOutput.hpp"
+#include "SdlMonitorMode.hpp"
 #include "../platform/Sdl.hpp"
 #include "../platform/SdlWindow.hpp"
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 #include "EmsPresenter.hpp"
-#include "EmsOutput.hpp"
+#include "MonitorMode.hpp"
+#include "../platform/EmsWindow.hpp"
 #include <emscripten/emscripten.h>
 #else
 #error Unknown platform
@@ -111,169 +112,196 @@ ptr<System> GlDevice::GetSystem() const
 	return system;
 }
 
-ptr<Presenter> GlDevice::CreatePresenter(ptr<Output> abstractOutput, ptr<MonitorMode> abstractMode)
+ptr<Presenter> GlDevice::CreateWindowPresenter(ptr<Platform::Window> abstractWindow, ptr<MonitorMode> abstractMode)
 {
-	try
-	{
+	BEGIN_TRY();
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
 
-		// область вывода - только Win32
-		ptr<Win32Output> output = abstractOutput.DynamicCast<Win32Output>();
-		if(!output)
-			THROW("Only Win32 output allowed");
-		// режим экрана - только Win32
-		ptr<Win32MonitorMode> mode = abstractMode.DynamicCast<Win32MonitorMode>();
-		if(!mode && abstractMode)
-			THROW("Only Win32 monitor mode allowed");
-
-		// если режим полноэкранный, переключить его
-		if(mode)
-		{
-			// получить монитор окна
-			HMONITOR monitor = MonitorFromWindow(output->GetHWND(), MONITOR_DEFAULTTOPRIMARY);
-			if(!monitor)
-				THROW("Can't get window monitor");
-			MONITORINFOEX monitorInfo;
-			monitorInfo.cbSize = sizeof(monitorInfo);
-			if(!GetMonitorInfo(monitor, &monitorInfo))
-				THROW("Can't get monitor info");
-			DEVMODE modeInfo = mode->GetInfo();
-			if(ChangeDisplaySettingsEx(monitorInfo.szDevice, &modeInfo, NULL, CDS_FULLSCREEN, NULL) != DISP_CHANGE_SUCCESSFUL)
-				THROW("Can't change display settings");
-		}
-
-		// получить дескриптор окна
-		HDC hdc = GetDC(output->GetHWND());
-		if(!hdc)
-			THROW("Can't get hdc");
-
-		// подобрать формат пикселов
-		PIXELFORMATDESCRIPTOR pfd;
-		ZeroMemory(&pfd, sizeof(pfd));
-		pfd.nSize = sizeof(pfd);
-		pfd.nVersion = 1;
-		pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-		pfd.iPixelType = PFD_TYPE_RGBA;
-		pfd.cColorBits = 24;
-		pfd.cDepthBits = 0; // не используем глубину для первичного буфера
-		pfd.iLayerType = PFD_MAIN_PLANE;
-		int pixelFormat = ChoosePixelFormat(hdc, &pfd);
-		if(!pixelFormat)
-			THROW("Can't choose pixel format");
-		// и установить этот формат
-		if(!SetPixelFormat(hdc, pixelFormat, &pfd))
-			THROW("Can't set pixel format");
-
-		// создать временный контекст
-		HGLRC hglrcTemp = wglCreateContext(hdc);
-		// сделать его текущим
-		if(!wglMakeCurrent(hdc, hglrcTemp))
-			THROW_SECONDARY("Can't make temp OpenGL context current", Exception::SystemError());
-
-		// создать настоящий контекст
-		int attribs[] =
-		{
-			WGL_CONTEXT_MAJOR_VERSION_ARB, 0,
-			WGL_CONTEXT_MINOR_VERSION_ARB, 0,
-			WGL_CONTEXT_FLAGS_ARB, 0
-#ifdef _DEBUG
-				| WGL_CONTEXT_DEBUG_BIT_ARB
-#endif
-			,
-			WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-			0, 0
-		};
-		// версии для попыток создания
-		static const int versions[][2] =
-		{
-			{ 4, 3 },
-			{ 4, 2 },
-			{ 4, 1 },
-			{ 4, 0 },
-			{ 3, 3 },
-			{ 3, 2 }
-		};
-		PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
-		if(!wglCreateContextAttribsARB)
-			THROW("Can't get wglCreateContextAttribsARB");
-		// цикл по попыткам создать контекст для какой-нибудь версии
-		for(int i = 0; i < sizeof(versions) / sizeof(versions[0]); ++i)
-		{
-			attribs[1] = versions[i][0];
-			attribs[3] = versions[i][1];
-			hglrc = wglCreateContextAttribsARB(hdc, 0, attribs);
-			if(hglrc)
-				break;
-		}
-		// если никакая версия OpenGL не поддерживается, то жопа
-		if(!hglrc)
-			THROW("Can't create OpenGL window context");
-
-		// сделать новый контекст текущим
-		if(!wglMakeCurrent(hdc, hglrc))
-			THROW_SECONDARY("Can't make OpenGL context current", Exception::SystemError());
-
-		// удалить временный контекст
-		wglDeleteContext(hglrcTemp);
-
-		// инициализировать GLEW
-		GlSystem::InitGLEW();
-
-		// init capabilities
-		InitCaps();
-
-		// очистка ошибок - обход бага GLEW, который может оставлять ошибки
-		// (тем не менее, GLEW инициализируется нормально)
-		GlSystem::ClearErrors();
-
-		// создать и вернуть Presenter
-		return NEW(WglPresenter(this, NEW(GlFrameBuffer(this, 0)), hdc));
+	ptr<Platform::Win32Window> window = abstractWindow.DynamicCast<Platform::Win32Window>();
+	if(!window)
+		THROW("Only Win32 window is allowed");
+	ptr<Win32MonitorMode> mode = abstractMode.DynamicCast<Win32MonitorMode>();
+	if(!mode && abstractMode)
+		THROW("Only Win32 monitor mode allowed");
 
 #elif defined(___INANITY_PLATFORM_LINUX)
 
-		ptr<WindowOutput> output = abstractOutput.DynamicCast<WindowOutput>();
-		if(!output)
-			THROW("Only WindowOutput allowed");
-		ptr<Platform::SdlWindow> window = output->GetWindow().DynamicCast<Platform::SdlWindow>();
-		if(!window)
-			THROW("Only SDL window allowed");
-
-		glContext = SDL_GL_CreateContext(window->GetHandle());
-		if(!glContext)
-			THROW_SECONDARY("Can't create OpenGL context", Platform::Sdl::Error());
-
-		GlSystem::InitGLEW();
-		GlSystem::ClearErrors();
-
-		// init capabilities
-		InitCaps();
-
-		return NEW(SdlPresenter(this, NEW(GlFrameBuffer(this, 0)), window));
+	ptr<Platform::SdlWindow> window = abstractWindow.DynamicCast<Platform::SdlWindow>();
+	if(!window)
+		THROW("Only SDL window is allowed");
+	ptr<SdlMonitorMode> mode = abstractMode.DynamicCast<SdlMonitorMode>();
+	if(!mode && abstractMode)
+		THROW("Only SDL monitor mode is allowed");
 
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 
-		ptr<EmsOutput> output = abstractOutput.DynamicCast<EmsOutput>();
-		if(!output)
-			THROW("Only Emscripten output allowed");
+	ptr<Platform::EmsWindow> window = abstractWindow.DynamicCast<Platform::EmsWindow>();
+	if(!window)
+		THROW("Only Emscripten window is allowed");
+	ptr<MonitorMode> mode = abstractMode;
 
-		// init capabilities
-		InitCaps();
+#else
+#error Unknown platform
+#endif
 
-		return NEW(EmsPresenter(this, NEW(GlFrameBuffer(this, 0)), output));
+	return CreatePresenter(window, mode);
+
+	END_TRY("Can't create OpenGL window presenter");
+}
+
+#if defined(___INANITY_PLATFORM_WINDOWS)
+
+ptr<WglPresenter> GlDevice::CreatePresenter(ptr<Platform::Win32Window> window, ptr<Win32MonitorMode> mode)
+{
+	BEGIN_TRY();
+
+	// если режим полноэкранный, переключить его
+	if(mode)
+	{
+		// получить монитор окна
+		HMONITOR monitor = MonitorFromWindow(window->GetHWND(), MONITOR_DEFAULTTOPRIMARY);
+		if(!monitor)
+			THROW("Can't get window monitor");
+		MONITORINFOEX monitorInfo;
+		monitorInfo.cbSize = sizeof(monitorInfo);
+		if(!GetMonitorInfo(monitor, &monitorInfo))
+			THROW("Can't get monitor info");
+		DEVMODE modeInfo = mode->GetInfo();
+		if(ChangeDisplaySettingsEx(monitorInfo.szDevice, &modeInfo, NULL, CDS_FULLSCREEN, NULL) != DISP_CHANGE_SUCCESSFUL)
+			THROW("Can't change display settings");
+	}
+
+	// получить дескриптор окна
+	HDC hdc = GetDC(window->GetHWND());
+	if(!hdc)
+		THROW("Can't get hdc");
+
+	// подобрать формат пикселов
+	PIXELFORMATDESCRIPTOR pfd;
+	ZeroMemory(&pfd, sizeof(pfd));
+	pfd.nSize = sizeof(pfd);
+	pfd.nVersion = 1;
+	pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+	pfd.iPixelType = PFD_TYPE_RGBA;
+	pfd.cColorBits = 24;
+	pfd.cDepthBits = 0; // не используем глубину для первичного буфера
+	pfd.iLayerType = PFD_MAIN_PLANE;
+	int pixelFormat = ChoosePixelFormat(hdc, &pfd);
+	if(!pixelFormat)
+		THROW("Can't choose pixel format");
+	// и установить этот формат
+	if(!SetPixelFormat(hdc, pixelFormat, &pfd))
+		THROW("Can't set pixel format");
+
+	// создать временный контекст
+	HGLRC hglrcTemp = wglCreateContext(hdc);
+	// сделать его текущим
+	if(!wglMakeCurrent(hdc, hglrcTemp))
+		THROW_SECONDARY("Can't make temp OpenGL context current", Exception::SystemError());
+
+	// создать настоящий контекст
+	int attribs[] =
+	{
+		WGL_CONTEXT_MAJOR_VERSION_ARB, 0,
+		WGL_CONTEXT_MINOR_VERSION_ARB, 0,
+		WGL_CONTEXT_FLAGS_ARB, 0
+#ifdef _DEBUG
+			| WGL_CONTEXT_DEBUG_BIT_ARB
+#endif
+		,
+		WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+		0, 0
+	};
+	// версии для попыток создания
+	static const int versions[][2] =
+	{
+		{ 4, 3 },
+		{ 4, 2 },
+		{ 4, 1 },
+		{ 4, 0 },
+		{ 3, 3 },
+		{ 3, 2 }
+	};
+	PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
+	if(!wglCreateContextAttribsARB)
+		THROW("Can't get wglCreateContextAttribsARB");
+	// цикл по попыткам создать контекст для какой-нибудь версии
+	for(int i = 0; i < sizeof(versions) / sizeof(versions[0]); ++i)
+	{
+		attribs[1] = versions[i][0];
+		attribs[3] = versions[i][1];
+		hglrc = wglCreateContextAttribsARB(hdc, 0, attribs);
+		if(hglrc)
+			break;
+	}
+	// если никакая версия OpenGL не поддерживается, то жопа
+	if(!hglrc)
+		THROW("Can't create OpenGL window context");
+
+	// сделать новый контекст текущим
+	if(!wglMakeCurrent(hdc, hglrc))
+		THROW_SECONDARY("Can't make OpenGL context current", Exception::SystemError());
+
+	// удалить временный контекст
+	wglDeleteContext(hglrcTemp);
+
+	// инициализировать GLEW
+	GlSystem::InitGLEW();
+
+	// init capabilities
+	InitCaps();
+
+	// очистка ошибок - обход бага GLEW, который может оставлять ошибки
+	// (тем не менее, GLEW инициализируется нормально)
+	GlSystem::ClearErrors();
+
+	// создать и вернуть Presenter
+	return NEW(WglPresenter(this, NEW(GlFrameBuffer(this, 0)), hdc, window));
+
+	END_TRY("Can't create Windows OpenGL presenter");
+}
+
+#elif defined(___INANITY_PLATFORM_LINUX)
+
+ptr<SdlPresenter> GlDevice::CreatePresenter(ptr<Platform::SdlWindow> window, ptr<SdlMonitorMode> mode)
+{
+	BEGIN_TRY();
+
+	glContext = SDL_GL_CreateContext(window->GetHandle());
+	if(!glContext)
+		THROW_SECONDARY("Can't create OpenGL context", Platform::Sdl::Error());
+
+	GlSystem::InitGLEW();
+	GlSystem::ClearErrors();
+
+	// init capabilities
+	InitCaps();
+
+	return NEW(SdlPresenter(this, NEW(GlFrameBuffer(this, 0)), window));
+
+	END_TRY("Can't create SDL OpenGL presenter");
+}
+
+#elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
+
+ptr<EmsPresenter> GlDevice::CreatePresenter(ptr<Platform::EmsWindow> window, ptr<MonitorMode> mode)
+{
+	BEGIN_TRY();
+
+	// init capabilities
+	InitCaps();
+
+	return NEW(EmsPresenter(this, NEW(GlFrameBuffer(this, 0)), window));
+
+	END_TRY("Can't create Emscripten presenter");
+}
 
 #else
 
 #error Unknown platform
 
 #endif
-
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY("Can't create presenter for GL device", exception);
-	}
-}
 
 ptr<ShaderCompiler> GlDevice::CreateShaderCompiler()
 {

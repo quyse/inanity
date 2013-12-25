@@ -12,12 +12,6 @@
 
 #include "windows.hpp"
 
-BEGIN_INANITY_GRAPHICS
-
-class Win32Output;
-
-END_INANITY_GRAPHICS
-
 BEGIN_INANITY_INPUT
 
 class Win32Manager;
@@ -36,8 +30,6 @@ private:
 	/// Клиентские размеры окна.
 	int clientWidth, clientHeight;
 
-	/// Graphics output for window.
-	Graphics::Win32Output* output;
 	ptr<Input::Win32Manager> inputManager;
 
 	/// Is cursor was hided.
@@ -66,7 +58,6 @@ public:
 	void SetTitle(const String& title);
 	void Close();
 	void Run(ptr<Handler> activeHandler);
-	ptr<Graphics::Output> CreateOutput();
 	void PlaceCursor(int x, int y);
 
 	/// Создать окно для DirectX.
@@ -85,8 +76,6 @@ public:
 	/// Получить клиентскую высоту окна.
 	int GetClientHeight() const;
 
-	/// Set output for notifications.
-	void SetOutput(Graphics::Win32Output* output);
 	/// Установить менеджер ввода.
 	void SetInputManager(ptr<Input::Win32Manager> inputManager);
 };

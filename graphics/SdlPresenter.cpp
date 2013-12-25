@@ -7,7 +7,15 @@
 BEGIN_INANITY_GRAPHICS
 
 SdlPresenter::SdlPresenter(ptr<GlDevice> device, ptr<GlFrameBuffer> frameBuffer, ptr<Platform::SdlWindow> window)
-: device(device), frameBuffer(frameBuffer), window(window) {}
+: device(device), frameBuffer(frameBuffer), window(window)
+{
+	window->SetPresenter(this);
+}
+
+SdlPresenter::~SdlPresenter()
+{
+	window->SetPresenter(nullptr);
+}
 
 ptr<Device> SdlPresenter::GetDevice() const
 {

@@ -16,6 +16,11 @@ public:
 	/// Получить устройство, создавшее Presenter.
 	virtual ptr<Device> GetDevice() const = 0;
 
+	/// Get screen width.
+	virtual int GetWidth() const = 0;
+	/// Get screen height.
+	virtual int GetHeight() const = 0;
+
 	/// Get a default framebuffer.
 	virtual ptr<FrameBuffer> GetFrameBuffer() const = 0;
 

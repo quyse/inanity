@@ -3,14 +3,24 @@
 
 #include "Device.hpp"
 #include "SamplerSettings.hpp"
+#include "../platform/platform.hpp"
 #include "../ComPointer.hpp"
 #include "d3d11.hpp"
+
+BEGIN_INANITY_PLATFORM
+
+class Win32Window;
+
+END_INANITY_PLATFORM
 
 BEGIN_INANITY_GRAPHICS
 
 class Dx11System;
+class Dx11SwapChainPresenter;
+class DxgiMonitorMode;
 class Dx11VertexShader;
 class Dx11InternalInputLayout;
+class Dx11RenderBuffer;
 
 /// Класс графического устройства DirectX 11.
 class Dx11Device : public Device
@@ -34,7 +44,7 @@ public:
 
 	// методы Device
 	ptr<System> GetSystem() const;
-	ptr<Presenter> CreatePresenter(ptr<Output> output, ptr<MonitorMode> mode);
+	ptr<Presenter> CreateWindowPresenter(ptr<Platform::Window> window, ptr<MonitorMode> mode);
 	ptr<ShaderCompiler> CreateShaderCompiler();
 	ptr<Shaders::ShaderGenerator> CreateShaderGenerator();
 	ptr<FrameBuffer> CreateFrameBuffer();
@@ -50,6 +60,9 @@ public:
 	ptr<Texture> CreateStaticTexture(ptr<RawTextureData> data, const SamplerSettings& samplerSettings);
 	ptr<SamplerState> CreateSamplerState(const SamplerSettings& samplerSettings);
 	ptr<BlendState> CreateBlendState();
+
+	/// Create presenter for Win32Window.
+	ptr<Dx11SwapChainPresenter> CreatePresenter(ptr<Platform::Win32Window> window, ptr<DxgiMonitorMode> mode);
 
 	/// Получить интерфейс устройства DirectX 11.
 	ID3D11Device* GetDeviceInterface() const;

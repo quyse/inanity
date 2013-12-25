@@ -30,7 +30,6 @@
 #include "graphics/LayoutDataType.hpp"
 #include "graphics/Monitor.hpp"
 #include "graphics/MonitorMode.hpp"
-#include "graphics/Output.hpp"
 #include "graphics/PixelFormat.hpp"
 #include "graphics/PixelShader.hpp"
 #include "graphics/PngImageLoader.hpp"

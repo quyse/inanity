@@ -8,7 +8,7 @@
 
 BEGIN_INANITY_GRAPHICS
 
-class Output;
+class Presenter;
 
 END_INANITY_GRAPHICS
 
@@ -27,9 +27,7 @@ public:
 	/** Цикл завершается, когда окно закрывается. */
 	virtual void Run(ptr<Handler> activeHandler) = 0;
 
-	/// Создать область вывода, покрывающую всё окно.
-	virtual ptr<Graphics::Output> CreateOutput() = 0;
-
+	void SetPresenter(Graphics::Presenter* presenter);
 	/// Set mouse lock state.
 	void SetMouseLock(bool mouseLock);
 	/// Set hardware (OS) mouse cursor visibility.
@@ -39,6 +37,8 @@ public:
 	virtual void PlaceCursor(int x, int y) = 0;
 
 protected:
+	/// Presenter for notifications.
+	Graphics::Presenter* presenter;
 	/// Mouse lock state.
 	/** When mouse lock is enabled, cursor can't get out
 	from window. */

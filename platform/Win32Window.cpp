@@ -1,8 +1,8 @@
 #include "Win32Window.hpp"
+#include "../graphics/Presenter.hpp"
 #include "../input/Win32Manager.hpp"
 #include "../Strings.hpp"
 #include "../Exception.hpp"
-#include "../graphics/Win32Output.hpp"
 #include <windowsx.h>
 
 BEGIN_INANITY_PLATFORM
@@ -11,7 +11,7 @@ Win32Window* Win32Window::singleWindow = 0;
 
 Win32Window::Win32Window(ATOM windowClass, const String& title,
 	int left, int top, int width, int height)
-: active(true), output(0), clientWidth(0), clientHeight(0), cursorHidden(false)
+: active(true), clientWidth(0), clientHeight(0), cursorHidden(false)
 {
 	try
 	{
@@ -49,11 +49,6 @@ Win32Window::~Win32Window()
 void Win32Window::SetTitle(const String& title)
 {
 	SetWindowText(hWnd, Strings::UTF82Unicode(title).c_str());
-}
-
-ptr<Graphics::Output> Win32Window::CreateOutput()
-{
-	return NEW(Graphics::Win32Output(this));
 }
 
 void Win32Window::PlaceCursor(int x, int y)
@@ -156,8 +151,8 @@ LRESULT CALLBACK Win32Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 		{
 			singleWindow->clientWidth = LOWORD(lParam);
 			singleWindow->clientHeight = HIWORD(lParam);
-			if(singleWindow->output)
-				singleWindow->output->Resize(singleWindow->clientWidth, singleWindow->clientHeight);
+			if(singleWindow->presenter)
+				singleWindow->presenter->Resize(singleWindow->clientWidth, singleWindow->clientHeight);
 			singleWindow->UpdateMouseLock();
 		}
 		return 0;
@@ -170,11 +165,6 @@ LRESULT CALLBACK Win32Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 		return 0;
 	}
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
-}
-
-void Win32Window::SetOutput(Graphics::Win32Output* output)
-{
-	this->output = output;
 }
 
 void Win32Window::SetInputManager(ptr<Input::Win32Manager> inputManager)
