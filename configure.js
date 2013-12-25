@@ -56,6 +56,10 @@ var libraries = {
 	'libinanity-lz4': {
 		objects: ['data.Lz4CompressStream', 'data.Lz4DecompressStream']
 	},
+	// ******* OIL
+	'libinanity-oil': {
+		objects: ['data.oil.KeyValueStore']
+	},
 	// ******* сетевая библиотека ASIO
 	'libinanity-asio': {
 		objects: [
@@ -244,6 +248,21 @@ var executables = {
 			'deps/glew//libglew'],
 		dynamicLibraries: ['user32.lib', 'gdi32.lib', 'dxgi.lib', 'd3d11.lib', 'opengl32.lib'], // win32
 		//dynamicLibraries: ['GL', 'SDL2'], // linux
+	}
+	, oilfaucet: {
+		objects: ['data.oil.faucet'],
+		staticLibraries: [
+			'libinanity-base',
+			'libinanity-data',
+			'libinanity-platform',
+			'libinanity-lz4',
+			'libinanity-sqlite',
+			'libinanity-oil',
+			'libinanity-crypto',
+			'deps/sqlite//libsqlite',
+			'deps/lz4//liblz4',
+		],
+		dynamicLibraries: []
 	}
 	// TEST
 	, shaderstest: {
