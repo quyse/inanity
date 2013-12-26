@@ -24,11 +24,11 @@ const State& Frame::GetCurrentState() const
 
 bool Frame::NextEvent()
 {
-	// if next event is present
-	if(nextEvent < events.size())
+	// search for event which changes something
+	while(nextEvent < events.size())
 	{
 		// process next event in state
-		const Event& e = events[nextEvent];
+		const Event& e = events[nextEvent++];
 
 		switch(e.device)
 		{
@@ -36,21 +36,34 @@ bool Frame::NextEvent()
 			switch(e.keyboard.type)
 			{
 			case Event::Keyboard::typeKeyDown:
+				// if key already pressed, skip
+				if(state.keyboard[e.keyboard.key])
+					continue;
 				state.keyboard[e.keyboard.key] = 1;
 				break;
 			case Event::Keyboard::typeKeyUp:
+				// if key already released, skip
+				if(!state.keyboard[e.keyboard.key])
+					continue;
 				state.keyboard[e.keyboard.key] = 0;
 				break;
-			default: break;
+			case Event::Keyboard::typeCharacter:
+				break;
 			}
 			break;
 		case Event::deviceMouse:
 			switch(e.mouse.type)
 			{
 			case Event::Mouse::typeButtonDown:
+				// if mouse button is already pressed, skip
+				if(state.mouseButtons[e.mouse.button])
+					continue;
 				state.mouseButtons[e.mouse.button] = true;
 				break;
 			case Event::Mouse::typeButtonUp:
+				// if mouse button is already released, skip
+				if(!state.mouseButtons[e.mouse.button])
+					continue;
 				state.mouseButtons[e.mouse.button] = false;
 				break;
 			case Event::Mouse::typeRawMove:
@@ -63,10 +76,13 @@ bool Frame::NextEvent()
 			}
 			break;
 		}
+
+		// if we are here, event changes something
+		return true;
 	}
 
-	// make the next event current
-	return nextEvent++ < events.size();
+	// if we are here, there are no events more
+	return false;
 }
 
 void Frame::ForwardEvents()
