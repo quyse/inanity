@@ -7,23 +7,18 @@
 
 BEGIN_INANITY_PLATFORM
 
-Win32Window* Win32Window::singleWindow = 0;
-
 Win32Window::Win32Window(ATOM windowClass, const String& title,
 	int left, int top, int width, int height)
 : active(true), clientWidth(0), clientHeight(0), cursorHidden(false)
 {
 	try
 	{
-		if(singleWindow)
-			THROW("Can't create second game window");
-
 		//создать окно
-		hWnd = CreateWindow(
+		HWND hWnd = CreateWindow(
 			(LPCTSTR)windowClass, Strings::UTF82Unicode(title).c_str(),
 			WS_OVERLAPPEDWINDOW | WS_VISIBLE /*WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS*/,
 			left, top, width, height,
-			NULL, NULL, GetModuleHandle(NULL), NULL);
+			NULL, NULL, GetModuleHandle(NULL), this);
 		if(!hWnd)
 			THROW("Can't create window");
 
@@ -31,8 +26,6 @@ Win32Window::Win32Window(ATOM windowClass, const String& title,
 		GetClientRect(hWnd, &rect);
 		clientWidth = rect.right - rect.left;
 		clientHeight = rect.bottom - rect.top;
-
-		singleWindow = this;
 	}
 	catch(Exception* exception)
 	{
@@ -43,7 +36,6 @@ Win32Window::Win32Window(ATOM windowClass, const String& title,
 Win32Window::~Win32Window()
 {
 	if(hWnd) DestroyWindow(hWnd);
-	singleWindow = 0;
 }
 
 void Win32Window::SetTitle(const String& title)
@@ -70,7 +62,7 @@ ptr<Win32Window> Win32Window::CreateForDirectX(const String& title, int left, in
 		wndClass.hbrBackground = GetStockBrush(BLACK_BRUSH);
 		wndClass.lpszClassName = TEXT("Win32DirectXWindow");
 		wndClass.hInstance = GetModuleHandle(NULL);
-		wndClass.lpfnWndProc = WndProc;
+		wndClass.lpfnWndProc = StaticWndProc;
 		windowClass = RegisterClass(&wndClass);
 		if(!windowClass)
 			THROW("Can't register window class for DirectX");
@@ -91,7 +83,7 @@ ptr<Win32Window> Win32Window::CreateForOpenGL(const String& title, int left, int
 		wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
 		wndClass.lpszClassName = TEXT("Win32OpenGLWindow");
 		wndClass.hInstance = GetModuleHandle(NULL);
-		wndClass.lpfnWndProc = WndProc;
+		wndClass.lpfnWndProc = StaticWndProc;
 		windowClass = RegisterClass(&wndClass);
 		if(!windowClass)
 			THROW("Can't register window class for OpenGL");
@@ -120,47 +112,60 @@ int Win32Window::GetClientHeight() const
 	return clientHeight;
 }
 
-LRESULT CALLBACK Win32Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK Win32Window::StaticWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	if(singleWindow && singleWindow->inputManager)
-		if(singleWindow->inputManager->ProcessWindowMessage(uMsg, wParam, lParam))
-			return 0;
+	Win32Window* window = (Win32Window*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+	if(window)
+		return window->WndProc(uMsg, wParam, lParam);
+
+	switch(uMsg)
+	{
+	case WM_CREATE:
+		{
+			Win32Window* window = (Win32Window*)((CREATESTRUCT*)lParam)->lpCreateParams;
+			window->hWnd = hWnd;
+			SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)window);
+		}
+		return 0;
+	default:
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);
+	}
+}
+
+LRESULT Win32Window::WndProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	if(inputManager && inputManager->ProcessWindowMessage(uMsg, wParam, lParam))
+		return 0;
+
 	switch(uMsg)
 	{
 	case WM_ACTIVATE:
 		{
 			unsigned state = LOWORD(wParam);
 			bool active = (state == WA_ACTIVE || state == WA_CLICKACTIVE);
-			if(singleWindow)
-			{
-				// update activity flag
-				singleWindow->active = active;
-				// update mouse lock
-				singleWindow->UpdateMouseLock();
-				// update cursor visibility
-				singleWindow->UpdateCursorVisible();
-			}
+			// update activity flag
+			active = active;
+			// update mouse lock
+			UpdateMouseLock();
+			// update cursor visibility
+			UpdateCursorVisible();
 		}
 		return 0;
 	case WM_MOVE:
-		if(singleWindow)
-			singleWindow->UpdateMouseLock();
+		UpdateMouseLock();
 		return 0;
 	case WM_SIZE:
-		if(singleWindow)
-		{
-			singleWindow->clientWidth = LOWORD(lParam);
-			singleWindow->clientHeight = HIWORD(lParam);
-			if(singleWindow->presenter)
-				singleWindow->presenter->Resize(singleWindow->clientWidth, singleWindow->clientHeight);
-			singleWindow->UpdateMouseLock();
-		}
+		clientWidth = LOWORD(lParam);
+		clientHeight = HIWORD(lParam);
+		if(presenter)
+			presenter->Resize(clientWidth, clientHeight);
+		UpdateMouseLock();
 		return 0;
 	case WM_CLOSE:
-		singleWindow->Close();
+		Close();
 		return 0;
 	case WM_DESTROY:
-		singleWindow->hWnd = 0;
+		hWnd = 0;
 		PostQuitMessage(0);
 		return 0;
 	}

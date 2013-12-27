@@ -37,11 +37,8 @@ private:
 	ShowCursor() works like a counter. */
 	bool cursorHidden;
 
-	/// Единственный экземпляр главного окна.
-	/** больше одного не разрешается, для ускорения обработки сообщений */
-	static Win32Window* singleWindow;
-
-	static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	static LRESULT CALLBACK StaticWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	LRESULT WndProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 	/// Выполнить одну итерацию оконного цикла.
 	bool Do(Handler* activeHandler);
