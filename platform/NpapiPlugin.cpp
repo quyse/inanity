@@ -1,4 +1,6 @@
 #include "NpapiPlugin.hpp"
+#include "NpapiPluginInstance.hpp"
+#include "../Exception.hpp"
 
 //*** global functions
 
@@ -56,7 +58,7 @@ void NpapiPlugin::GetPluginFuncs(NPPluginFuncs* pluginFuncs)
 	pluginFuncs->getvalue = &NPP_GetValue;
 }
 
-NpapiPlugin::Instance* NpapiPlugin::GetInstance(NPP instance, NPError& error)
+NpapiPluginInstance* NpapiPlugin::GetInstance(NPP instance, NPError& error)
 {
 	if(!instance)
 	{
@@ -68,7 +70,7 @@ NpapiPlugin::Instance* NpapiPlugin::GetInstance(NPP instance, NPError& error)
 		error = NPERR_GENERIC_ERROR;
 		return nullptr;
 	}
-	return (NpapiPlugin::Instance*)instance->pdata;
+	return (NpapiPluginInstance*)instance->pdata;
 }
 
 NPError NpapiPlugin::NPP_New(
@@ -80,20 +82,26 @@ NPError NpapiPlugin::NPP_New(
 	char* argv[],
 	NPSavedData* saved)
 {
-	ptr<Instance> instance = CreateInstance();
-	instance->Reference();
-	npp->pdata = (Instance*)instance;
+	try
+	{
+		ptr<NpapiPluginInstance> instance = CreateInstance(argc, argn, argv);
+		instance->Reference();
+		npp->pdata = (NpapiPluginInstance*)instance;
 
-	browserFuncs.setvalue(npp, NPPVpluginWindowBool, (void*)!instance->windowless);
-	browserFuncs.setvalue(npp, NPPVpluginTransparentBool, (void*)instance->transparent);
-	browserFuncs.setvalue(npp, NPPVpluginUsesDOMForCursorBool, (void*)1);
+		instance->Init(npp);
 
-	return NPERR_NO_ERROR;
+		return NPERR_NO_ERROR;
+	}
+	catch(Exception* exception)
+	{
+		MakePointer(exception);
+		return NPERR_GENERIC_ERROR;
+	}
 }
 
 #define GET_INSTANCE() \
 	NPError error; \
-	Instance* instance = GetInstance(npp, error); \
+	NpapiPluginInstance* instance = GetInstance(npp, error); \
 	if(!instance) \
 		return error
 
@@ -126,63 +134,6 @@ NPError NpapiPlugin::NPP_GetValue(NPP npp, NPPVariable variable, void* retValue)
 	GET_INSTANCE();
 
 	return instance->GetValue(variable, retValue);
-}
-
-//*** NpapiPlugin::Instance
-
-NpapiPlugin::Instance::Instance() :
-	name("Inanity NPAPI Plugin"),
-	description("Inanity NPAPI Plugin"),
-	windowless(true),
-	transparent(false)
-{}
-
-NPError NpapiPlugin::Instance::SetWindow(NPWindow* window)
-{
-#ifdef ___INANITY_PLATFORM_WINDOWS
-
-	hWnd = 0;
-	hdc = 0;
-	switch(window->type)
-	{
-	case NPWindowTypeWindow:
-		hWnd = (HWND)window->window;
-		break;
-	case NPWindowTypeDrawable:
-		hdc = (HDC)window->window;
-		break;
-	default:
-		return NPERR_INVALID_PARAM;
-	}
-
-#else
-#error Unknown platform
-#endif
-
-	return NPERR_NO_ERROR;
-}
-
-NPError NpapiPlugin::Instance::GetValue(NPPVariable variable, void* retValue)
-{
-	switch(variable)
-	{
-	case NPPVpluginNameString:
-		*(const char**)retValue = name;
-		break;
-	case NPPVpluginDescriptionString:
-		*(const char**)retValue = description;
-		break;
-	case NPPVpluginWindowBool:
-		*(bool*)retValue = !windowless;
-		break;
-	case NPPVpluginTransparentBool:
-		*(bool*)retValue = transparent;
-		break;
-	default:
-		return NPERR_INVALID_PARAM;
-	}
-
-	return NPERR_NO_ERROR;
 }
 
 END_INANITY_PLATFORM

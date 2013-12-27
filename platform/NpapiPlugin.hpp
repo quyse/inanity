@@ -1,50 +1,18 @@
 #ifndef ___INANITY_PLATFORM_NPAPI_PLUGIN_HPP___
 #define ___INANITY_PLATFORM_NPAPI_PLUGIN_HPP___
 
-#include "platform.hpp"
-#ifdef ___INANITY_PLATFORM_WINDOWS
-#include "windows.hpp"
-#endif
-#include "../deps/npapi/npfunctions.h"
+#include "npapi.hpp"
 
 BEGIN_INANITY_PLATFORM
+
+class NpapiPluginInstance;
 
 /// Class which handles all global information for plugin,
 /// and works as an instance of a plugin.
 class NpapiPlugin
 {
-public:
-	/// Base class of instance of the plugin.
-	class Instance : public Object
-	{
-		friend class NpapiPlugin;
-	protected:
-		//*** Settings, should be set in derived class' constructor.
-		/// Plugin name.
-		const char* name;
-		/// Plugin description.
-		const char* description;
-		/// Windowless mode.
-		bool windowless;
-		/// Transparent mode.
-		bool transparent;
-
-#ifdef ___INANITY_PLATFORM_WINDOWS
-		// Either hWnd of hdc is not-null, depending on windowless mode.
-		HWND hWnd;
-		HDC hdc;
-#endif
-
-		Instance();
-
-	public:
-		NPError SetWindow(NPWindow* window);
-		virtual int16_t HandleEvent(void* event) = 0;
-		NPError GetValue(NPPVariable variable, void* retValue);
-	};
-
 private:
-	static Instance* GetInstance(NPP npp, NPError& error);
+	static NpapiPluginInstance* GetInstance(NPP npp, NPError& error);
 
 	//*** Plugin functions.
 	static NPError NPP_New(
@@ -66,8 +34,8 @@ public:
 	/// Create instance of plugin.
 	/** This function is not defined. It should be defined once
 	per executable (DLL) and should return new instance
-	of a class derived from Instance. */
-	static ptr<Instance> CreateInstance();
+	of a class derived from NpapiPluginInstance. */
+	static ptr<NpapiPluginInstance> CreateInstance(int argc, char* argn[], char* argv[]);
 
 	/// Fill provided structure with pointers to plugin functions.
 	static void GetPluginFuncs(NPPluginFuncs* pluginFuncs);

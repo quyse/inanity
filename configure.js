@@ -207,6 +207,10 @@ var libraries = {
 			'physics.BtWorld', 'physics.BtShape', 'physics.BtRigidBody', 'physics.BtCharacter'
 		]
 	},
+	// ******* NPAPI plugin
+	'libinanity-npapi': {
+		objects: ['platform.NpapiPlugin', 'platform.NpapiPluginInstance']
+	},
 	// ******* подсистема GUI
 	'libinanity-gui': {
 		objects: [
