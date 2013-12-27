@@ -25,6 +25,8 @@ class Win32Window : public Window
 private:
 	/// Дескриптор окна.
 	HWND hWnd;
+	/// Destroy window in destructor.
+	bool own;
 	/// Активность окна.
 	bool active;
 	/// Клиентские размеры окна.
@@ -40,6 +42,9 @@ private:
 	static LRESULT CALLBACK StaticWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	LRESULT WndProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
+	static ptr<Win32Window> Create(ATOM windowClass, const String& title,
+		int left = 0, int top = 0, int width = 1, int height = 1);
+
 	/// Выполнить одну итерацию оконного цикла.
 	bool Do(Handler* activeHandler);
 
@@ -47,8 +52,7 @@ private:
 	void UpdateCursorVisible();
 
 public:
-	Win32Window(ATOM windowClass, const String& title,
-		int left = 0, int top = 0, int width = 1, int height = 1);
+	Win32Window(HWND hWnd, bool own = true);
 	~Win32Window();
 
 	//*** методы Window
@@ -63,6 +67,8 @@ public:
 	/// Создать окно для OpenGL.
 	static ptr<Win32Window> CreateForOpenGL(const String& title,
 		int left, int top, int width, int height);
+	/// Capture existing window.
+	static ptr<Win32Window> CreateExisting(HWND hWnd, bool own);
 
 	/// Получить хендл окна.
 	HWND GetHWND() const;

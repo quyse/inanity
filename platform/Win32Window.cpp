@@ -7,35 +7,26 @@
 
 BEGIN_INANITY_PLATFORM
 
-Win32Window::Win32Window(ATOM windowClass, const String& title,
-	int left, int top, int width, int height)
-: active(true), clientWidth(0), clientHeight(0), cursorHidden(false)
+Win32Window::Win32Window(HWND hWnd, bool own)
+: hWnd(hWnd), own(own), active(true), clientWidth(0), clientHeight(0), cursorHidden(false)
 {
-	try
-	{
-		//создать окно
-		HWND hWnd = CreateWindow(
-			(LPCTSTR)windowClass, Strings::UTF82Unicode(title).c_str(),
-			WS_OVERLAPPEDWINDOW | WS_VISIBLE /*WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS*/,
-			left, top, width, height,
-			NULL, NULL, GetModuleHandle(NULL), this);
-		if(!hWnd)
-			THROW("Can't create window");
+	SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)this);
 
-		RECT rect;
-		GetClientRect(hWnd, &rect);
-		clientWidth = rect.right - rect.left;
-		clientHeight = rect.bottom - rect.top;
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY("Can't create game window", exception);
-	}
+	RECT rect;
+	GetClientRect(hWnd, &rect);
+	clientWidth = rect.right - rect.left;
+	clientHeight = rect.bottom - rect.top;
 }
 
 Win32Window::~Win32Window()
 {
-	if(hWnd) DestroyWindow(hWnd);
+	if(hWnd)
+	{
+		if(own)
+			DestroyWindow(hWnd);
+		else
+			SetWindowLongPtr(hWnd, GWLP_USERDATA, 0);
+	}
 }
 
 void Win32Window::SetTitle(const String& title)
@@ -48,6 +39,25 @@ void Win32Window::PlaceCursor(int x, int y)
 	POINT pt = { x, y };
 	ClientToScreen(hWnd, &pt);
 	SetCursorPos(pt.x, pt.y);
+}
+
+ptr<Win32Window> Win32Window::Create(ATOM windowClass, const String& title,
+	int left, int top, int width, int height)
+{
+	BEGIN_TRY();
+
+	//создать окно
+	HWND hWnd = CreateWindow(
+		(LPCTSTR)windowClass, Strings::UTF82Unicode(title).c_str(),
+		WS_OVERLAPPEDWINDOW | WS_VISIBLE /*WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS*/,
+		left, top, width, height,
+		NULL, NULL, GetModuleHandle(NULL), NULL);
+	if(!hWnd)
+		THROW("Can't create window");
+
+	return NEW(Win32Window(hWnd));
+
+	END_TRY("Can't create game window");
 }
 
 ptr<Win32Window> Win32Window::CreateForDirectX(const String& title, int left, int top, int width, int height)
@@ -68,7 +78,7 @@ ptr<Win32Window> Win32Window::CreateForDirectX(const String& title, int left, in
 			THROW("Can't register window class for DirectX");
 	}
 
-	return NEW(Win32Window(windowClass, title, left, top, width, height));
+	return Create(windowClass, title, left, top, width, height);
 }
 
 ptr<Win32Window> Win32Window::CreateForOpenGL(const String& title, int left, int top, int width, int height)
@@ -89,7 +99,13 @@ ptr<Win32Window> Win32Window::CreateForOpenGL(const String& title, int left, int
 			THROW("Can't register window class for OpenGL");
 	}
 
-	return NEW(Win32Window(windowClass, title, left, top, width, height));
+	return Create(windowClass, title, left, top, width, height);
+}
+
+ptr<Win32Window> Win32Window::CreateExisting(HWND hWnd, bool own)
+{
+	SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)&StaticWndProc);
+	return NEW(Win32Window(hWnd, own));
 }
 
 HWND Win32Window::GetHWND() const
@@ -118,18 +134,7 @@ LRESULT CALLBACK Win32Window::StaticWndProc(HWND hWnd, UINT uMsg, WPARAM wParam,
 	if(window)
 		return window->WndProc(uMsg, wParam, lParam);
 
-	switch(uMsg)
-	{
-	case WM_CREATE:
-		{
-			Win32Window* window = (Win32Window*)((CREATESTRUCT*)lParam)->lpCreateParams;
-			window->hWnd = hWnd;
-			SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)window);
-		}
-		return 0;
-	default:
-		return DefWindowProc(hWnd, uMsg, wParam, lParam);
-	}
+	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
 LRESULT Win32Window::WndProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -166,6 +171,7 @@ LRESULT Win32Window::WndProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		return 0;
 	case WM_DESTROY:
 		hWnd = 0;
+		ClipCursor(NULL);
 		PostQuitMessage(0);
 		return 0;
 	}
