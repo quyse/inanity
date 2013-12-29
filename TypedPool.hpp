@@ -12,13 +12,16 @@ class TypedPool : public ChunkPool
 public:
 	TypedPool() : ChunkPool(sizeof(T)) {}
 
-	T* Allocate()
+	template <typename... Args>
+	T* New(Args... args)
 	{
-		return (T*)ChunkPool::Allocate();
+		void* chunk = ChunkPool::Allocate();
+		return new (chunk) T(args...);
 	}
 
-	void Free(T* t)
+	void Delete(T* t)
 	{
+		t->~T();
 		ChunkPool::Free(t);
 	}
 };
