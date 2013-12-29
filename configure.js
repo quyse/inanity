@@ -86,6 +86,10 @@ var libraries = {
 	'libinanity-v8': {
 		objects: ['script.v8.Any', 'script.v8.Function', 'script.v8.State']
 	},
+	// ******* скрипты на NPAPI
+	'libinanity-np': {
+		objects: ['script.np.Any', 'script.np.State', 'script.np.wrappers']
+	},
 	// ******* криптография
 	'libinanity-crypto': {
 		objects: ['crypto.HashStream', 'crypto.LamportSignatureAlgorithm', 'crypto.WhirlpoolStream', 'crypto.StreamHasher', 'crypto.StreamSigner'],
