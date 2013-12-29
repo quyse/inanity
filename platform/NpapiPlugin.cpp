@@ -86,7 +86,6 @@ NPError NpapiPlugin::NPP_New(
 	{
 		ptr<NpapiPluginInstance> instance = CreateInstance(argc, argn, argv);
 		instance->Reference();
-		npp->pdata = (NpapiPluginInstance*)instance;
 
 		instance->Init(npp);
 

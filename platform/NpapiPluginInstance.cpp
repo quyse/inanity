@@ -1,6 +1,7 @@
 #include "NpapiPluginInstance.hpp"
 #include "NpapiPlugin.hpp"
 #include "../input/Frame.hpp"
+#include "../script/np/State.hpp"
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
 #include "Win32Window.hpp"
@@ -11,7 +12,7 @@
 
 BEGIN_INANITY_PLATFORM
 
-NpapiPluginInstance::NpapiPluginInstance() :
+NpapiPluginInstance::NpapiPluginInstance(bool needInputManager, bool needScriptState) :
 	name("Inanity NPAPI Plugin"),
 	description("Inanity NPAPI Plugin"),
 	windowless(true),
@@ -19,15 +20,44 @@ NpapiPluginInstance::NpapiPluginInstance() :
 	npp(nullptr)
 {
 #if defined(___INANITY_PLATFORM_WINDOWS)
-	inputManager = NEW(Input::Win32WmManager());
+	if(needInputManager)
+		inputManager = NEW(Input::Win32WmManager());
 #else
 #error Unknown platform
 #endif
+
+	if(needScriptState)
+		scriptState = NEW(Script::Np::State(this));
+}
+
+#ifdef ___INANITY_PLATFORM_WINDOWS
+
+void NpapiPluginInstance::Paint(HDC hdc)
+{
+	// do nothing by default
+}
+
+#endif
+
+NPP NpapiPluginInstance::GetNpp() const
+{
+	return npp;
+}
+
+NpapiPluginInstance* NpapiPluginInstance::FromNpp(NPP npp)
+{
+	return (NpapiPluginInstance*)npp->pdata;
+}
+
+ptr<Script::Np::State> NpapiPluginInstance::GetScriptState() const
+{
+	return scriptState;
 }
 
 void NpapiPluginInstance::Init(NPP npp)
 {
 	this->npp = npp;
+	npp->pdata = this;
 
 	NpapiPlugin::browserFuncs.setvalue(npp, NPPVpluginWindowBool, (void*)!windowless);
 	NpapiPlugin::browserFuncs.setvalue(npp, NPPVpluginTransparentBool, (void*)transparent);
@@ -43,8 +73,11 @@ NPError NpapiPluginInstance::SetWindow(NPWindow* npWindow)
 	case NPWindowTypeWindow:
 		{
 			HWND hNewWnd = (HWND)npWindow->window;
-			if(window && window->GetHWND() != hNewWnd)
+			if(!window || window->GetHWND() != hNewWnd)
+			{
 				window = Win32Window::CreateExisting(hNewWnd, false);
+				window->SetInputManager(inputManager);
+			}
 			hdc = 0;
 		}
 		break;
@@ -72,8 +105,7 @@ int16_t NpapiPluginInstance::HandleEvent(void* e)
 	NPEvent* event = (NPEvent*)e;
 
 	// process input events
-	Input::Win32WmManager* inputManager = fast_cast<Input::Win32WmManager*>(&*this->inputManager);
-	if(inputManager->ProcessWindowMessage(event->event, event->wParam, event->lParam))
+	if(inputManager && inputManager->ProcessWindowMessage(event->event, event->wParam, event->lParam))
 		return 1;
 
 	switch(event->event)
@@ -103,15 +135,6 @@ int16_t NpapiPluginInstance::HandleEvent(void* e)
 #error Unknown platform
 #endif
 }
-
-#ifdef ___INANITY_PLATFORM_WINDOWS
-
-void NpapiPluginInstance::Paint(HDC hdc)
-{
-	// do nothing by default
-}
-
-#endif
 
 NPError NpapiPluginInstance::GetValue(NPPVariable variable, void* retValue)
 {

@@ -3,17 +3,30 @@
 
 #include "npapi.hpp"
 #include "../input/input.hpp"
+#include "../script/np/np.hpp"
 
 BEGIN_INANITY_INPUT
 
-class Manager;
+#if defined(___INANITY_PLATFORM_WINDOWS)
+class Win32WmManager;
+#else
+#error Unknown platform
+#endif
 
 END_INANITY_INPUT
 
+BEGIN_INANITY_NP
+
+class State;
+
+END_INANITY_NP
+
 BEGIN_INANITY_PLATFORM
 
-#ifdef ___INANITY_PLATFORM_WINDOWS
+#if defined(___INANITY_PLATFORM_WINDOWS)
 class Win32Window;
+#else
+#error Unknown platform
 #endif
 
 /// Base class of instance of the NPAPI plugin.
@@ -33,24 +46,32 @@ protected:
 	/// Plugin instance handle.
 	NPP npp;
 
-	ptr<Input::Manager> inputManager;
+	NpapiPluginInstance(bool needInputManager, bool needScriptState);
 
-#ifdef ___INANITY_PLATFORM_WINDOWS
-	// Either window of hdc is not-null, depending on windowless mode.
+#if defined(___INANITY_PLATFORM_WINDOWS)
+
+	ptr<Input::Win32WmManager> inputManager;
+	// Either window or hdc is not-null, depending on windowless mode.
 	ptr<Win32Window> window;
 	HDC hdc;
 
 	/// Paint (in case of windowless window).
 	virtual void Paint(HDC hdc);
-#endif
-
-	NpapiPluginInstance();
 
 public:
-
-#ifdef ___INANITY_PLATFORM_WINDOWS
 	ptr<Win32Window> GetWindow() const;
+
+#else
+#error Unknown platform.
 #endif
+
+	ptr<Script::Np::State> scriptState;
+
+public:
+	NPP GetNpp() const;
+	static NpapiPluginInstance* FromNpp(NPP npp);
+
+	ptr<Script::Np::State> GetScriptState() const;
 
 	//*** Internal methods.
 	void Init(NPP npp);
