@@ -69,6 +69,15 @@ const typename ClassBase<Traits>::StaticMethods& ClassBase<Traits>::GetStaticMet
 	return staticMethods;
 }
 
+template <typename Traits>
+bool ClassBase<Traits>::CanCastTo(ClassBase* targetClass) const
+{
+	for(const ClassBase* cls = this; cls; cls = cls->parent)
+		if(cls == targetClass)
+			return true;
+	return false;
+}
+
 END_INANITY_META
 
 #endif

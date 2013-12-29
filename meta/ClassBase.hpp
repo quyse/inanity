@@ -52,6 +52,10 @@ public:
 	ConstructorBase* GetConstructor() const;
 	const Methods& GetMethods() const;
 	const StaticMethods& GetStaticMethods() const;
+
+	/// Check that object of this class could be
+	/// casted to target class.
+	bool CanCastTo(ClassBase* targetClass) const;
 };
 
 /// Metainformation of class.
