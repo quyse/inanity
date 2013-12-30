@@ -59,7 +59,6 @@ public:
 	ptr<Script::Any> NewString(const String& string);
 	ptr<Script::Any> NewArray(int length = 0);
 	ptr<Script::Any> NewDict();
-	ptr<Script::Any> WrapObject(ptr<RefCounted> object);
 
 	bool CheckClass(NPClass* npClass) const;
 	NPObjectWrapper* CreateNPObjectWrapper();

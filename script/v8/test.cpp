@@ -49,7 +49,6 @@ public:
 		print->Call(globalState->NewArray());
 		print->Call(globalState->NewDict());
 		print->Call(globalState->ConvertValue(Math::vec3(1.0f, 2.0f, 3.0f)));
-		print->Call(globalState->WrapObject(globalState));
 	}
 
 	ptr<TestClass> work(const String& a, int b, double c)

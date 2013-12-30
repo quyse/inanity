@@ -413,10 +413,4 @@ ptr<Script::Any> State::NewDict()
 	return CreateAny(v8::Object::New());
 }
 
-ptr<Script::Any> State::WrapObject(ptr<RefCounted> object)
-{
-	Scope scope(this);
-	return CreateAny(Value<ptr<RefCounted> >::To(object));
-}
-
 END_INANITY_V8

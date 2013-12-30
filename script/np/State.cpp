@@ -85,11 +85,6 @@ ptr<Script::Any> State::NewDict()
 	THROW("Not implemented");
 }
 
-ptr<Script::Any> State::WrapObject(ptr<RefCounted> object)
-{
-	return CreateAny(Value<ptr<RefCounted> >::To(object));
-}
-
 bool State::CheckClass(NPClass* npClass) const
 {
 	return classes.find(npClass) != classes.end();

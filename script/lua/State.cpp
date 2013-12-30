@@ -162,10 +162,4 @@ ptr<Script::Any> State::NewDict()
 	return NewArray(0);
 }
 
-ptr<Script::Any> State::WrapObject(ptr<RefCounted> object)
-{
-	Value<ptr<RefCounted> >::Push(state, object);
-	return CreateAny();
-}
-
 END_INANITY_LUA
