@@ -17,7 +17,7 @@ END_INANITY_INPUT
 
 BEGIN_INANITY_NP
 
-class State;
+class Any;
 
 END_INANITY_NP
 
@@ -46,7 +46,7 @@ protected:
 	/// Plugin instance handle.
 	NPP npp;
 
-	NpapiPluginInstance(bool needInputManager, bool needScriptState);
+	NpapiPluginInstance(bool needInputManager);
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
 
@@ -58,20 +58,21 @@ protected:
 	/// Paint (in case of windowless window).
 	virtual void Paint(HDC hdc);
 
-public:
-	ptr<Win32Window> GetWindow() const;
-
 #else
 #error Unknown platform.
 #endif
 
-	ptr<Script::Np::State> scriptState;
+	/// Redefine in derived class to perform initialization.
+	virtual void PostInit();
+
+	ptr<Script::Np::Any> scriptObject;
 
 public:
 	NPP GetNpp() const;
 	static NpapiPluginInstance* FromNpp(NPP npp);
 
-	ptr<Script::Np::State> GetScriptState() const;
+	ptr<Script::Np::Any> GetWindowDomObject() const;
+	ptr<Script::Np::Any> GetPluginDomObject() const;
 
 	//*** Internal methods.
 	void Init(NPP npp);

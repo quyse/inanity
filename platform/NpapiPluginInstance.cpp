@@ -2,6 +2,7 @@
 #include "NpapiPlugin.hpp"
 #include "../input/Frame.hpp"
 #include "../script/np/State.hpp"
+#include "../script/np/Any.hpp"
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
 #include "Win32Window.hpp"
@@ -12,7 +13,7 @@
 
 BEGIN_INANITY_PLATFORM
 
-NpapiPluginInstance::NpapiPluginInstance(bool needInputManager, bool needScriptState) :
+NpapiPluginInstance::NpapiPluginInstance(bool needInputManager) :
 	name("Inanity NPAPI Plugin"),
 	description("Inanity NPAPI Plugin"),
 	windowless(true),
@@ -25,9 +26,6 @@ NpapiPluginInstance::NpapiPluginInstance(bool needInputManager, bool needScriptS
 #else
 #error Unknown platform
 #endif
-
-	if(needScriptState)
-		scriptState = NEW(Script::Np::State(this));
 }
 
 #ifdef ___INANITY_PLATFORM_WINDOWS
@@ -39,6 +37,11 @@ void NpapiPluginInstance::Paint(HDC hdc)
 
 #endif
 
+void NpapiPluginInstance::PostInit()
+{
+	// redefine in derived class
+}
+
 NPP NpapiPluginInstance::GetNpp() const
 {
 	return npp;
@@ -49,9 +52,29 @@ NpapiPluginInstance* NpapiPluginInstance::FromNpp(NPP npp)
 	return (NpapiPluginInstance*)npp->pdata;
 }
 
-ptr<Script::Np::State> NpapiPluginInstance::GetScriptState() const
+ptr<Script::Np::Any> NpapiPluginInstance::GetWindowDomObject() const
 {
-	return scriptState;
+	NPObject* npObject;
+	NPVariant variant;
+	NPError err = NpapiPlugin::browserFuncs.getvalue(npp, NPNVWindowNPObject, &npObject);
+	if(err == NPERR_NO_ERROR)
+		OBJECT_TO_NPVARIANT(npObject, variant);
+	else
+		NULL_TO_NPVARIANT(variant);
+
+	return Script::Np::State::GetCurrent()->CreateAny(variant);
+}
+
+ptr<Script::Np::Any> NpapiPluginInstance::GetPluginDomObject() const
+{
+	NPObject* npObject;
+	NPVariant variant;
+	if(NpapiPlugin::browserFuncs.getvalue(npp, NPNVPluginElementNPObject, &npObject) == NPERR_NO_ERROR)
+		OBJECT_TO_NPVARIANT(npObject, variant);
+	else
+		NULL_TO_NPVARIANT(variant);
+
+	return Script::Np::State::GetCurrent()->CreateAny(variant);
 }
 
 void NpapiPluginInstance::Init(NPP npp)
@@ -62,6 +85,8 @@ void NpapiPluginInstance::Init(NPP npp)
 	NpapiPlugin::browserFuncs.setvalue(npp, NPPVpluginWindowBool, (void*)!windowless);
 	NpapiPlugin::browserFuncs.setvalue(npp, NPPVpluginTransparentBool, (void*)transparent);
 	NpapiPlugin::browserFuncs.setvalue(npp, NPPVpluginUsesDOMForCursorBool, (void*)1);
+
+	PostInit();
 }
 
 NPError NpapiPluginInstance::SetWindow(NPWindow* npWindow)
@@ -151,6 +176,12 @@ NPError NpapiPluginInstance::GetValue(NPPVariable variable, void* retValue)
 		break;
 	case NPPVpluginTransparentBool:
 		*(bool*)retValue = transparent;
+		break;
+	case NPPVpluginScriptableNPObject:
+		if(scriptObject)
+			*(NPObject**)retValue = NPVARIANT_TO_OBJECT(scriptObject->GetVariant());
+		else
+			return NPERR_INVALID_PARAM;
 		break;
 	default:
 		return NPERR_INVALID_PARAM;
