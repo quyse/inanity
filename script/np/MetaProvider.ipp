@@ -30,12 +30,14 @@ MetaProvider::MethodRoutine MetaProvider::Method<MethodType, method>::GetThunk()
 class MetaProvider::ClassBase : public Meta::ClassBase<Traits>
 {
 public:
-	typedef std::unordered_map<NPIdentifier, int> MethodsByIdentifier;
+	typedef std::unordered_map<NPIdentifier, int> IdentifierMap;
 
 protected:
 	NPClassWrapper npClassWrapper;
 	/// Map of method indices by NP identifiers.
-	MethodsByIdentifier methodsByIdentifier;
+	IdentifierMap methodsByIdentifier;
+	/// Map of static method indices by NP identifiers.
+	IdentifierMap staticMethodsByIdentifier;
 
 public:
 	ClassBase(const char* name, const char* fullName) :
@@ -53,14 +55,29 @@ public:
 		Meta::ClassBase<Traits>::AddMethod(method);
 	}
 
+	void AddStaticMethod(FunctionBase* staticMethod)
+	{
+		staticMethodsByIdentifier.insert(
+			std::make_pair(
+				Platform::NpapiPlugin::browserFuncs.getstringidentifier(
+					staticMethod->GetName()),
+				(int)staticMethods.size()));
+		Meta::ClassBase<Traits>::AddStaticMethod(staticMethod);
+	}
+
 	NPClassWrapper* GetClassWrapper()
 	{
 		return &npClassWrapper;
 	}
 
-	const MethodsByIdentifier& GetMethodsByIdentifier() const
+	const IdentifierMap& GetMethodsByIdentifier() const
 	{
 		return methodsByIdentifier;
+	}
+
+	const IdentifierMap& GetStaticMethodsByIdentifier() const
+	{
+		return staticMethodsByIdentifier;
 	}
 };
 

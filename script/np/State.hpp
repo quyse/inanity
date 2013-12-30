@@ -20,7 +20,9 @@ END_INANITY_PLATFORM
 BEGIN_INANITY_NP
 
 class Any;
+class Namespace;
 struct NPObjectWrapper;
+struct NPObjectNamespace;
 
 class State : public Script::State
 {
@@ -38,9 +40,14 @@ private:
 
 	/// Pool of object wrappers.
 	ptr<TypedPool<NPObjectWrapper> > npObjectWrapperPool;
+	/// Pool of namespace wrappers.
+	ptr<TypedPool<NPObjectNamespace> > npObjectNamespacePool;
 
 	/// Pool of script values.
 	ptr<ObjectPool<Any> > anyPool;
+
+	/// Root namespace.
+	ptr<Namespace> rootNamespace;
 
 public:
 	State(Platform::NpapiPluginInstance* pluginInstance);
@@ -61,10 +68,26 @@ public:
 	ptr<Script::Any> NewArray(int length = 0);
 	ptr<Script::Any> NewDict();
 
+	/// Register class.
+	void Register(MetaProvider::ClassBase* classMeta);
+	template <typename ClassType>
+	void Register()
+	{
+		Register(Meta::MetaOf<MetaProvider, ClassType>());
+	}
+
+	/// Check that this is Inanity's class.
 	bool CheckClass(NPClass* npClass) const;
+
 	NPObjectWrapper* CreateNPObjectWrapper();
 	void InvalidateNPObjectWrapper(NPObjectWrapper* wrapper);
 	void DeleteNPObjectWrapper(NPObjectWrapper* wrapper);
+
+	NPObjectNamespace* CreateNPObjectNamespace();
+	void DeleteNPObjectNamespace(NPObjectNamespace* wrapper);
+
+	ptr<Any> GetRootNamespace();
+
 	ptr<Any> CreateAny(NPVariant variant);
 	NPVariant ConvertObject(MetaProvider::ClassBase* classMeta, RefCounted* object);
 	template <typename T>

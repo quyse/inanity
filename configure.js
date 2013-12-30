@@ -88,7 +88,7 @@ var libraries = {
 	},
 	// ******* скрипты на NPAPI
 	'libinanity-np': {
-		objects: ['script.np.Any', 'script.np.State', 'script.np.wrappers']
+		objects: ['script.np.Any', 'script.np.State', 'script.np.wrappers', 'script.np.Namespace']
 	},
 	// ******* криптография
 	'libinanity-crypto': {

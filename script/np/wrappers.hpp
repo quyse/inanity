@@ -39,6 +39,40 @@ struct NPClassWrapper : public NPClass
 	NPClassWrapper(MetaProvider::ClassBase* classMeta);
 };
 
+class Namespace;
+
+struct NPClassNamespace;
+
+struct NPObjectNamespace : public NPObject
+{
+	ptr<State> state;
+	Namespace* object;
+
+	NPObjectNamespace(ptr<State> state);
+};
+
+struct NPClassNamespace : public NPClass
+{
+	// Functions needed in NPClass struct.
+	static NPObject* npAllocate(NPP npp, NPClass *aClass);
+	static void npDeallocate(NPObject *npobj);
+	static void npInvalidate(NPObject *npobj);
+	static bool npHasMethod(NPObject *npobj, NPIdentifier name);
+	static bool npInvoke(NPObject *npobj, NPIdentifier name, const NPVariant *args, uint32_t argCount, NPVariant *result);
+	static bool npInvokeDefault(NPObject *npobj, const NPVariant *args, uint32_t argCount, NPVariant *result);
+	static bool npHasProperty(NPObject *npobj, NPIdentifier name);
+	static bool npGetProperty(NPObject *npobj, NPIdentifier name, NPVariant *result);
+	static bool npSetProperty(NPObject *npobj, NPIdentifier name, const NPVariant *value);
+	static bool npRemoveProperty(NPObject *npobj, NPIdentifier name);
+	static bool npEnumerate(NPObject *npobj, NPIdentifier **value, uint32_t *count);
+	static bool npConstruct(NPObject *npobj, const NPVariant *args, uint32_t argCount, NPVariant *result);
+
+	NPClassNamespace();
+
+	/// Only instance of the struct.
+	static NPClassNamespace instance;
+};
+
 END_INANITY_NP
 
 #endif

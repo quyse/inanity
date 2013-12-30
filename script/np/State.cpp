@@ -2,6 +2,7 @@
 #include "values.ipp"
 #include "wrappers.hpp"
 #include "MetaProvider.ipp"
+#include "Namespace.hpp"
 #include "../../platform/NpapiPluginInstance.hpp"
 #include "../../File.hpp"
 #include "../../Exception.hpp"
@@ -18,7 +19,10 @@ State::State(Platform::NpapiPluginInstance* pluginInstance)
 
 	// create pools
 	npObjectWrapperPool = NEW(TypedPool<NPObjectWrapper>());
+	npObjectNamespacePool = NEW(TypedPool<NPObjectNamespace>());
 	anyPool = NEW(ObjectPool<Any>());
+
+	rootNamespace = NEW(Namespace(""));
 }
 
 State::~State()
@@ -85,6 +89,34 @@ ptr<Script::Any> State::NewDict()
 	THROW("Not implemented");
 }
 
+void State::Register(MetaProvider::ClassBase* classMeta)
+{
+	const char* name = classMeta->GetFullName();
+	// loop for namespaces
+	ptr<Namespace> nm = rootNamespace;
+	for(;;)
+	{
+		// get next word
+		int i;
+		for(i = 0; name[i] && name[i] != '.'; ++i);
+		String word(name, i);
+
+		// open namespace
+		nm = nm->OpenNamespace(word);
+
+		// if it's the end
+		if(!name[i])
+		{
+			// set class there
+			nm->SetClassMeta(classMeta);
+			break;
+		}
+
+		// else it's not the end
+		name += i + 1;
+	}
+}
+
 bool State::CheckClass(NPClass* npClass) const
 {
 	return classes.find(npClass) != classes.end();
@@ -110,6 +142,25 @@ void State::InvalidateNPObjectWrapper(NPObjectWrapper* wrapper)
 void State::DeleteNPObjectWrapper(NPObjectWrapper* wrapper)
 {
 	npObjectWrapperPool->Delete(wrapper);
+}
+
+NPObjectNamespace* State::CreateNPObjectNamespace()
+{
+	return npObjectNamespacePool->New(this);
+}
+
+void State::DeleteNPObjectNamespace(NPObjectNamespace* wrapper)
+{
+	npObjectNamespacePool->Delete(wrapper);
+}
+
+ptr<Any> State::GetRootNamespace()
+{
+	NPObjectNamespace* wrapper = rootNamespace->GetWrapper();
+	Platform::NpapiPlugin::browserFuncs.retainobject(wrapper);
+	NPVariant variant;
+	OBJECT_TO_NPVARIANT(wrapper, variant);
+	return CreateAny(variant);
 }
 
 ptr<Any> State::CreateAny(NPVariant variant)
