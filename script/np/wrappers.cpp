@@ -37,19 +37,33 @@ void NPClassWrapper::npInvalidate(NPObject *npobj)
 bool NPClassWrapper::npHasMethod(NPObject *npobj, NPIdentifier name)
 {
 	MetaProvider::ClassBase* classMeta = static_cast<NPObjectWrapper*>(npobj)->GetClassWrapper()->classMeta;
-	const MetaProvider::ClassBase::MethodsByIdentifier& methodsByIdentifier = classMeta->GetMethodsByIdentifier();
-	return methodsByIdentifier.find(name) != methodsByIdentifier.end();
+
+	// upcasting loop
+	for(MetaProvider::ClassBase* cls = classMeta; cls; cls = cls->GetParent())
+	{
+		const MetaProvider::ClassBase::MethodsByIdentifier& methodsByIdentifier = cls->GetMethodsByIdentifier();
+		if(methodsByIdentifier.find(name) != methodsByIdentifier.end())
+			return true;
+	}
+
+	return false;
 }
 
 bool NPClassWrapper::npInvoke(NPObject *npobj, NPIdentifier name, const NPVariant *args, uint32_t argCount, NPVariant *result)
 {
 	NPObjectWrapper* objectWrapper = static_cast<NPObjectWrapper*>(npobj);
 	MetaProvider::ClassBase* classMeta = objectWrapper->GetClassWrapper()->classMeta;
-	const MetaProvider::ClassBase::MethodsByIdentifier& methodsByIdentifier = classMeta->GetMethodsByIdentifier();
-	MetaProvider::ClassBase::MethodsByIdentifier::const_iterator it = methodsByIdentifier.find(name);
-	if(it != methodsByIdentifier.end())
-		return false;
-	return classMeta->GetMethods()[it->second]->GetThunk()(objectWrapper, args, (int)argCount, result);
+
+	// upcasting loop
+	for(MetaProvider::ClassBase* cls = classMeta; cls; cls = cls->GetParent())
+	{
+		const MetaProvider::ClassBase::MethodsByIdentifier& methodsByIdentifier = cls->GetMethodsByIdentifier();
+		MetaProvider::ClassBase::MethodsByIdentifier::const_iterator it = methodsByIdentifier.find(name);
+		if(it != methodsByIdentifier.end())
+			return cls->GetMethods()[it->second]->GetThunk()(objectWrapper, args, (int)argCount, result);
+	}
+
+	return false;
 }
 
 bool NPClassWrapper::npInvokeDefault(NPObject *npobj, const NPVariant *args, uint32_t argCount, NPVariant *result)
