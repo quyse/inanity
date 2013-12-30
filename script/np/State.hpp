@@ -3,6 +3,7 @@
 
 #include "MetaProvider.hpp"
 #include "../State.hpp"
+#include "../../meta/ClassBase.hpp"
 #include "../../TypedPool.hpp"
 #include "../../ObjectPool.hpp"
 #include "../../platform/platform.hpp"
@@ -66,6 +67,11 @@ public:
 	void DeleteNPObjectWrapper(NPObjectWrapper* wrapper);
 	ptr<Any> CreateAny(NPVariant variant);
 	NPVariant ConvertObject(MetaProvider::ClassBase* classMeta, RefCounted* object);
+	template <typename T>
+	ptr<Any> WrapObject(ptr<T> object)
+	{
+		return CreateAny(ConvertObject(Meta::MetaOf<MetaProvider, T>(), object));
+	}
 };
 
 END_INANITY_NP

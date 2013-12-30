@@ -119,6 +119,15 @@ ptr<Any> State::CreateAny(NPVariant variant)
 
 NPVariant State::ConvertObject(MetaProvider::ClassBase* classMeta, RefCounted* object)
 {
+	// if object is null
+	if(!object)
+	{
+		// return null
+		NPVariant variant;
+		NULL_TO_NPVARIANT(variant);
+		return variant;
+	}
+
 	// check if the object is already in cache
 	std::pair<Instances::const_iterator, Instances::const_iterator> range = instances.equal_range(object);
 	// find an object with right meta
