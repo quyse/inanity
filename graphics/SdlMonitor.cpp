@@ -85,7 +85,7 @@ ptr<Platform::Window> SdlMonitor::CreateDefaultWindow(const String& title, int w
 		SDL_WINDOWPOS_CENTERED, // y
 		width,
 		height,
-		SDL_WINDOW_OPENGL);
+		SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 	if(!handle)
 		THROW_SECONDARY("Can't create SDL default window", Platform::Sdl::Error());
 
