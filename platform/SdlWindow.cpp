@@ -1,12 +1,15 @@
 #include "SdlWindow.hpp"
 #include "Sdl.hpp"
+#include "../graphics/Presenter.hpp"
 #include "../input/SdlManager.hpp"
-#include "../graphics/WindowOutput.hpp"
 
 BEGIN_INANITY_PLATFORM
 
 SdlWindow::SdlWindow(SDL_Window* handle)
-: sdl(Sdl::Get()), handle(handle), quit(false) {}
+: sdl(Sdl::Get()), handle(handle), quit(false)
+{
+	SDL_GetWindowSize(handle, &clientWidth, &clientHeight);
+}
 
 SdlWindow::~SdlWindow()
 {
@@ -18,14 +21,19 @@ SDL_Window* SdlWindow::GetHandle() const
 	return handle;
 }
 
-void SdlWindow::SetOutput(ptr<Graphics::Output> output)
-{
-	this->output = output;
-}
-
 void SdlWindow::SetInputManager(ptr<Input::SdlManager> inputManager)
 {
 	this->inputManager = inputManager;
+}
+
+int SdlWindow::GetClientWidth() const
+{
+	return clientWidth;
+}
+
+int SdlWindow::GetClientHeight() const
+{
+	return clientHeight;
 }
 
 void SdlWindow::SetTitle(const String& title)
@@ -58,8 +66,10 @@ void SdlWindow::Run(ptr<Handler> activeHandler)
 				switch(event.window.event)
 				{
 				case SDL_WINDOWEVENT_RESIZED:
-					if(output)
-						output->Resize(event.window.data1, event.window.data2);
+					clientWidth = event.window.data1;
+					clientHeight = event.window.data2;
+					if(presenter)
+						presenter->Resize(clientWidth, clientHeight);
 					break;
 				case SDL_WINDOWEVENT_CLOSE:
 					Close();
@@ -72,14 +82,6 @@ void SdlWindow::Run(ptr<Handler> activeHandler)
 			inputManager->Update();
 		activeHandler->Fire();
 	}
-}
-
-ptr<Graphics::Output> SdlWindow::CreateOutput()
-{
-	// get client size of the window
-	int width, height;
-	SDL_GetWindowSize(handle, &width, &height);
-	return NEW(Graphics::WindowOutput(this, width, height));
 }
 
 void SdlWindow::PlaceCursor(int x, int y)

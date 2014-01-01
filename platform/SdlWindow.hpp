@@ -21,9 +21,9 @@ class SdlWindow : public Window
 private:
 	ptr<Sdl> sdl;
 	SDL_Window* handle;
-	ptr<Graphics::Output> output;
 	ptr<Input::SdlManager> inputManager;
 	bool quit;
+	int clientWidth, clientHeight;
 
 protected:
 	void UpdateMouseLock();
@@ -35,14 +35,15 @@ public:
 
 	SDL_Window* GetHandle() const;
 
-	void SetOutput(ptr<Graphics::Output> output);
 	void SetInputManager(ptr<Input::SdlManager> inputManager);
+
+	int GetClientWidth() const;
+	int GetClientHeight() const;
 
 	//*** Window's methods.
 	void SetTitle(const String& title);
 	void Close();
 	void Run(ptr<Handler> activeHandler);
-	ptr<Graphics::Output> CreateOutput();
 	void PlaceCursor(int x, int y);
 };
 

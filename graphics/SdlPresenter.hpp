@@ -22,6 +22,8 @@ private:
 	ptr<GlDevice> device;
 	ptr<GlFrameBuffer> frameBuffer;
 	ptr<Platform::SdlWindow> window;
+	/// Size of back buffer.
+	int width, height;
 
 public:
 	SdlPresenter(ptr<GlDevice> device, ptr<GlFrameBuffer> frameBuffer, ptr<Platform::SdlWindow> window);
@@ -30,6 +32,8 @@ public:
 	//*** Presenter's methods.
 	ptr<Device> GetDevice() const;
 	ptr<FrameBuffer> GetFrameBuffer() const;
+	int GetWidth() const;
+	int GetHeight() const;
 	void SetMode(ptr<MonitorMode> mode);
 	void Present();
 	void Resize(int width, int height);
