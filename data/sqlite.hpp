@@ -50,6 +50,8 @@ public:
 
 	ptr<SqliteStatement> CreateStatement(const char* query);
 
+	long long LastInsertRowId() const;
+
 	/// Get exception corresponding to SQLite error.
 	ptr<Exception> Error() const;
 };
@@ -69,6 +71,7 @@ public:
 	void Bind(int number, const char* value);
 	void Bind(int number, const String& value);
 	void Bind(int number, int value);
+	void Bind(int number, long long value);
 	void Bind(int number, const void* data, size_t size);
 	void Bind(int number, ptr<File> value);
 	void BindNull(int number);

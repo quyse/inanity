@@ -72,6 +72,11 @@ ptr<SqliteStatement> SqliteDb::CreateStatement(const char* query)
 	return NEW(SqliteStatement(this, stmt));
 }
 
+long long SqliteDb::LastInsertRowId() const
+{
+	return sqlite3_last_insert_rowid(db);
+}
+
 ptr<Exception> SqliteDb::Error() const
 {
 	return NEW(Exception(sqlite3_errmsg(db)));
@@ -102,6 +107,12 @@ void SqliteStatement::Bind(int number, int value)
 {
 	if(sqlite3_bind_int(stmt, number, value) != SQLITE_OK)
 		THROW_SECONDARY("Can't bind int to SQLite statement", db->Error());
+}
+
+void SqliteStatement::Bind(int number, long long value)
+{
+	if(sqlite3_bind_int64(stmt, number, value) != SQLITE_OK)
+		THROW_SECONDARY("Can't bind int64 to SQLite statement", db->Error());
 }
 
 void SqliteStatement::Bind(int number, const void* data, size_t size)
