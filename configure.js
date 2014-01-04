@@ -65,6 +65,10 @@ var libraries = {
 		objects: [
 		'net.asio', 'net.AsioService', 'net.AsioTcpListener', 'net.AsioTcpSocket', 'net.AsioInternalUdpSocket', 'net.AsioUdpListener', 'net.AsioUdpSocket']
 	},
+	// ******* FCGI support
+	'libinanity-fcgi': {
+		objects: ['net.Fcgi']
+	},
 	// ******* библиотека HTTP
 	'libinanity-http': {
 		objects: [
