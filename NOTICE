@@ -21,6 +21,7 @@ freetype (http://freetype.org/) - Freetype license (see /deps/freetype/repo/docs
 harfbuzz (http://harfbuzz.org/) - "Old MIT" license (see /deps/harfbuzz/repo/COPYING)
 lz4 (https://code.google.com/p/lz4/) - BSD license
 npapi (https://code.google.com/p/npapi-sdk/) - Mozilla Public License 1.1
+fcgi (http://www.fastcgi.com) - BSD-style license (see /deps/fcgi/LICENSE.TERMS)
 
 Other software which is not placed in repository, but could be used by various parts of the engine:
 

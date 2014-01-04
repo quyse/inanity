@@ -1,0 +1,4 @@
+fcgi library from http://fastcgi.com, version 2.4.1.
+Added configure.js for building with inanity.
+Manually changed fcgi_config.h.
+DLLAPI macros was made always empty for static linking.
