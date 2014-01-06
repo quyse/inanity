@@ -122,6 +122,13 @@ void StreamReader::ReadGap(size_t alignment)
 	}
 }
 
+void StreamReader::ReadEnd()
+{
+	char c;
+	if(stream->Read(&c, 1) != 0)
+		THROW("Expected end of stream");
+}
+
 bigsize_t StreamReader::Skip(bigsize_t size)
 {
 	bigsize_t skipped = stream->Skip(size);

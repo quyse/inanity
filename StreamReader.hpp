@@ -63,6 +63,10 @@ public:
 	Сами байты не считываются. */
 	void ReadGap(size_t alignment);
 
+	/// Check that end of stream reached.
+	/** Throw if not. */
+	void ReadEnd();
+
 	/// Пропустить заданное количество байт.
 	bigsize_t Skip(bigsize_t size);
 };
