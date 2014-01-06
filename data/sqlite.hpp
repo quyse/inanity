@@ -33,9 +33,9 @@ private:
 	static Files files;
 	static CriticalSection csFiles;
 
-	sqlite3_stmt* stmtBeginTransaction;
-	sqlite3_stmt* stmtCommitTransaction;
-	sqlite3_stmt* stmtRollbackTransaction;
+	sqlite3_stmt* stmtSavepoint;
+	sqlite3_stmt* stmtRelease;
+	sqlite3_stmt* stmtRollbackTo;
 
 public:
 	SqliteDb(sqlite3* db);
@@ -100,6 +100,9 @@ public:
 	~SqliteQuery();
 };
 
+/// SQLite transaction wrapper.
+/** Automatically rollbacks transaction
+if isn't commited explicitly. May be nested. */
 class SqliteTransaction
 {
 private:

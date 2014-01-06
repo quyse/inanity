@@ -13,19 +13,19 @@ CriticalSection SqliteDb::csFiles;
 
 SqliteDb::SqliteDb(sqlite3* db) :
 	db(db),
-	stmtBeginTransaction(nullptr),
-	stmtCommitTransaction(nullptr),
-	stmtRollbackTransaction(nullptr)
+	stmtSavepoint(nullptr),
+	stmtRelease(nullptr),
+	stmtRollbackTo(nullptr)
 {}
 
 SqliteDb::~SqliteDb()
 {
-	if(stmtBeginTransaction)
-		sqlite3_finalize(stmtBeginTransaction);
-	if(stmtCommitTransaction)
-		sqlite3_finalize(stmtCommitTransaction);
-	if(stmtRollbackTransaction)
-		sqlite3_finalize(stmtRollbackTransaction);
+	if(stmtSavepoint)
+		sqlite3_finalize(stmtSavepoint);
+	if(stmtRelease)
+		sqlite3_finalize(stmtRelease);
+	if(stmtRollbackTo)
+		sqlite3_finalize(stmtRollbackTo);
 
 	sqlite3_close(db);
 }
@@ -193,19 +193,19 @@ SqliteQuery::~SqliteQuery()
 SqliteTransaction::SqliteTransaction(ptr<SqliteDb> db)
 : db(db), finished(false)
 {
-	if(!db->stmtBeginTransaction)
+	if(!db->stmtSavepoint)
 	{
-		if(sqlite3_prepare_v2(*db, "BEGIN TRANSACTION", -1, &db->stmtBeginTransaction, nullptr) != SQLITE_OK)
-			THROW_SECONDARY("Can't create SQLite begin transaction statement", db->Error());
-		if(sqlite3_prepare_v2(*db, "COMMIT TRANSACTION", -1, &db->stmtCommitTransaction, nullptr) != SQLITE_OK)
-			THROW_SECONDARY("Can't create SQLite commit transaction statement", db->Error());
-		if(sqlite3_prepare_v2(*db, "ROLLBACK TRANSACTION", -1, &db->stmtRollbackTransaction, nullptr) != SQLITE_OK)
-			THROW_SECONDARY("Can't create SQLite rollback transaction statement", db->Error());
+		if(sqlite3_prepare_v2(*db, "SAVEPOINT T", -1, &db->stmtSavepoint, nullptr) != SQLITE_OK)
+			THROW_SECONDARY("Can't create SQLite SAVEPOINT statement", db->Error());
+		if(sqlite3_prepare_v2(*db, "RELEASE T", -1, &db->stmtRelease, nullptr) != SQLITE_OK)
+			THROW_SECONDARY("Can't create SQLite RELEASE statement", db->Error());
+		if(sqlite3_prepare_v2(*db, "ROLLBACK TO T", -1, &db->stmtRollbackTo, nullptr) != SQLITE_OK)
+			THROW_SECONDARY("Can't create SQLite ROLLBACK TO statement", db->Error());
 	}
 
-	sqlite3_reset(db->stmtBeginTransaction);
-	if(sqlite3_step(db->stmtBeginTransaction) != SQLITE_DONE)
-		THROW_SECONDARY("Can't begin SQLite transaction", db->Error());
+	sqlite3_reset(db->stmtSavepoint);
+	if(sqlite3_step(db->stmtSavepoint) != SQLITE_DONE)
+		THROW_SECONDARY("Can't make SQLite savepoint", db->Error());
 }
 
 SqliteTransaction::~SqliteTransaction()
@@ -213,8 +213,8 @@ SqliteTransaction::~SqliteTransaction()
 	if(finished)
 		return;
 
-	sqlite3_reset(db->stmtRollbackTransaction);
-	sqlite3_step(db->stmtRollbackTransaction);
+	sqlite3_reset(db->stmtRollbackTo);
+	sqlite3_step(db->stmtRollbackTo);
 }
 
 void SqliteTransaction::Commit()
@@ -222,9 +222,9 @@ void SqliteTransaction::Commit()
 	if(finished)
 		THROW("Can't commit finished transaction");
 
-	sqlite3_reset(db->stmtCommitTransaction);
-	if(sqlite3_step(db->stmtCommitTransaction) != SQLITE_DONE)
-		THROW_SECONDARY("Can't commit SQLite transaction", db->Error());
+	sqlite3_reset(db->stmtRelease);
+	if(sqlite3_step(db->stmtRelease) != SQLITE_DONE)
+		THROW_SECONDARY("Can't release savepoint", db->Error());
 
 	finished = true;
 }
