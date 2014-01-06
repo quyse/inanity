@@ -35,6 +35,11 @@ public:
 	char** GetEnv() const;
 	const char* GetParam(const char* name) const;
 
+	void OutputHeader(const char* header, const char* value);
+	void OutputStatus(const char* status);
+	void OutputContentType(const char* contentType);
+	void OutputBeginResponse();
+
 	/// Get input stream of the request.
 	/** Object is the same for every request. */
 	ptr<InputStream> GetInputStream() const;

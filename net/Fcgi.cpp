@@ -85,6 +85,26 @@ const char* Fcgi::GetParam(const char* name) const
 	return FCGX_GetParam(name, request.envp);
 }
 
+void Fcgi::OutputHeader(const char* header, const char* value)
+{
+	FCGX_FPrintF(request.out, "%s: %s\r\n", header, value);
+}
+
+void Fcgi::OutputStatus(const char* status)
+{
+	OutputHeader("Status", status);
+}
+
+void Fcgi::OutputContentType(const char* contentType)
+{
+	OutputHeader("ContentType", contentType);
+}
+
+void Fcgi::OutputBeginResponse()
+{
+	FCGX_PutS("\r\n", request.out);
+}
+
 ptr<InputStream> Fcgi::GetInputStream() const
 {
 	return inputStream;
