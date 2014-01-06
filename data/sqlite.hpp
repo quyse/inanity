@@ -79,7 +79,9 @@ public:
 	// Columns numeration starts from zero.
 	String ColumnText(int number) const;
 	int ColumnInt(int number) const;
+	long long ColumnInt64(int number) const;
 	ptr<File> ColumnBlob(int number) const;
+	size_t ColumnBlobSize(int number) const;
 
 	int Step();
 

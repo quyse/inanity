@@ -144,12 +144,22 @@ int SqliteStatement::ColumnInt(int number) const
 	return sqlite3_column_int(stmt, number);
 }
 
+long long SqliteStatement::ColumnInt64(int number) const
+{
+	return sqlite3_column_int64(stmt, number);
+}
+
 ptr<File> SqliteStatement::ColumnBlob(int number) const
 {
 	int size = sqlite3_column_bytes(stmt, number);
 	ptr<MemoryFile> file = NEW(MemoryFile(size));
 	memcpy(file->GetData(), sqlite3_column_blob(stmt, number), size);
 	return file;
+}
+
+size_t SqliteStatement::ColumnBlobSize(int number) const
+{
+	return sqlite3_column_bytes(stmt, number);
 }
 
 int SqliteStatement::Step()
