@@ -215,6 +215,8 @@ SqliteTransaction::~SqliteTransaction()
 
 	sqlite3_reset(db->stmtRollbackTo);
 	sqlite3_step(db->stmtRollbackTo);
+	sqlite3_reset(db->stmtRelease);
+	sqlite3_step(db->stmtRelease);
 }
 
 void SqliteTransaction::Commit()
