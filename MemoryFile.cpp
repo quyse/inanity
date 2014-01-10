@@ -25,6 +25,11 @@ ptr<MemoryFile> MemoryFile::CreateViaCopy(const void* data, size_t size)
 	return file;
 }
 
+ptr<MemoryFile> MemoryFile::CreateViaCopy(ptr<File> file)
+{
+	return CreateViaCopy(file->GetData(), file->GetSize());
+}
+
 void* MemoryFile::GetData() const
 {
 	return data;

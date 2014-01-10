@@ -36,6 +36,7 @@ public:
 	~MemoryFile();
 
 	static ptr<MemoryFile> CreateViaCopy(const void* data, size_t size);
+	static ptr<MemoryFile> CreateViaCopy(ptr<File> file);
 
 	void* GetData() const;
 	size_t GetSize() const;
