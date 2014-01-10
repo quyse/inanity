@@ -118,21 +118,21 @@ NPError NpapiPlugin::NPP_SetWindow(NPP npp, NPWindow* window)
 {
 	GET_INSTANCE();
 
-	return instance->SetWindow(window);
+	return instance->NppSetWindow(window);
 }
 
 int16_t NpapiPlugin::NPP_HandleEvent(NPP npp, void* e)
 {
 	GET_INSTANCE();
 
-	return instance->HandleEvent(e);
+	return instance->NppHandleEvent(e);
 }
 
 NPError NpapiPlugin::NPP_GetValue(NPP npp, NPPVariable variable, void* retValue)
 {
 	GET_INSTANCE();
 
-	return instance->GetValue(variable, retValue);
+	return instance->NppGetValue(variable, retValue);
 }
 
 END_INANITY_PLATFORM

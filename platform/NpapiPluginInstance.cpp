@@ -89,7 +89,7 @@ void NpapiPluginInstance::Init(NPP npp)
 	PostInit();
 }
 
-NPError NpapiPluginInstance::SetWindow(NPWindow* npWindow)
+NPError NpapiPluginInstance::NppSetWindow(NPWindow* npWindow)
 {
 #if defined(___INANITY_PLATFORM_WINDOWS)
 
@@ -110,6 +110,8 @@ NPError NpapiPluginInstance::SetWindow(NPWindow* npWindow)
 		{
 			hdc = (HDC)npWindow->window;
 			window = 0;
+			width = npWindow->width;
+			height = npWindow->height;
 		}
 		break;
 	default:
@@ -123,7 +125,7 @@ NPError NpapiPluginInstance::SetWindow(NPWindow* npWindow)
 	return NPERR_NO_ERROR;
 }
 
-int16_t NpapiPluginInstance::HandleEvent(void* e)
+int16_t NpapiPluginInstance::NppHandleEvent(void* e)
 {
 #if defined(___INANITY_PLATFORM_WINDOWS)
 
@@ -161,7 +163,7 @@ int16_t NpapiPluginInstance::HandleEvent(void* e)
 #endif
 }
 
-NPError NpapiPluginInstance::GetValue(NPPVariable variable, void* retValue)
+NPError NpapiPluginInstance::NppGetValue(NPPVariable variable, void* retValue)
 {
 	switch(variable)
 	{

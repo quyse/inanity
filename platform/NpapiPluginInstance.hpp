@@ -46,6 +46,9 @@ protected:
 	/// Plugin instance handle.
 	NPP npp;
 
+	/// Size of client area.
+	int width, height;
+
 	NpapiPluginInstance(bool needInputManager);
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
@@ -76,9 +79,9 @@ public:
 
 	//*** Internal methods.
 	void Init(NPP npp);
-	NPError SetWindow(NPWindow* window);
-	int16_t HandleEvent(void* event);
-	NPError GetValue(NPPVariable variable, void* retValue);
+	NPError NppSetWindow(NPWindow* window);
+	int16_t NppHandleEvent(void* event);
+	NPError NppGetValue(NPPVariable variable, void* retValue);
 };
 
 END_INANITY_PLATFORM
