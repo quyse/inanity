@@ -157,7 +157,6 @@ void State::DeleteNPObjectNamespace(NPObjectNamespace* wrapper)
 ptr<Any> State::GetRootNamespace()
 {
 	NPObjectNamespace* wrapper = rootNamespace->GetWrapper();
-	Platform::NpapiPlugin::browserFuncs.retainobject(wrapper);
 	NPVariant variant;
 	OBJECT_TO_NPVARIANT(wrapper, variant);
 	return CreateAny(variant);
@@ -186,7 +185,6 @@ NPVariant State::ConvertObject(MetaProvider::ClassBase* classMeta, RefCounted* o
 		if(i->second->GetClassWrapper()->classMeta == classMeta)
 		{
 			// found an object
-			Platform::NpapiPlugin::browserFuncs.retainobject(i->second);
 			NPVariant variant;
 			OBJECT_TO_NPVARIANT(i->second, variant);
 			return variant;
