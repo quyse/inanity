@@ -3,6 +3,8 @@
 #include "../input/Frame.hpp"
 #include "../script/np/State.hpp"
 #include "../script/np/Any.hpp"
+#include "../MemoryStream.hpp"
+#include "../File.hpp"
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
 #include "Win32Window.hpp"
@@ -12,6 +14,15 @@
 #endif
 
 BEGIN_INANITY_PLATFORM
+
+struct NpapiPluginInstance::UrlStream : public Object
+{
+	ptr<ReceiveHandler> receiveHandler;
+	ptr<MemoryStream> stream;
+
+	UrlStream(ptr<ReceiveHandler> receiveHandler)
+	: receiveHandler(receiveHandler) {}
+};
 
 NpapiPluginInstance::NpapiPluginInstance(bool needInputManager) :
 	name("Inanity NPAPI Plugin"),
@@ -77,6 +88,31 @@ ptr<Script::Np::Any> NpapiPluginInstance::GetPluginDomObject() const
 	return Script::Np::State::GetCurrent()->CreateAny(variant);
 }
 
+void NpapiPluginInstance::GetUrl(const String& url, ptr<ReceiveHandler> receiveHandler)
+{
+	ptr<UrlStream> urlStream = NEW(UrlStream(receiveHandler));
+	urlStream->Reference();
+	NpapiPlugin::browserFuncs.geturlnotify(
+		npp,
+		url.c_str(),
+		nullptr, // target
+		&*urlStream);
+}
+
+void NpapiPluginInstance::PostUrl(const String& url, ptr<File> postData, ptr<ReceiveHandler> receiveHandler)
+{
+	ptr<UrlStream> urlStream = NEW(UrlStream(receiveHandler));
+	urlStream->Reference();
+	NpapiPlugin::browserFuncs.posturlnotify(
+		npp,
+		url.c_str(),
+		nullptr, // target
+		(uint32_t)postData->GetSize(),
+		(const char*)postData->GetData(),
+		false, // is file
+		&*urlStream);
+}
+
 void NpapiPluginInstance::Init(NPP npp)
 {
 	this->npp = npp;
@@ -125,6 +161,64 @@ NPError NpapiPluginInstance::NppSetWindow(NPWindow* npWindow)
 	return NPERR_NO_ERROR;
 }
 
+NPError NpapiPluginInstance::NppNewStream(NPMIMEType type, NPStream* stream, NPBool seekable, uint16_t* stype)
+{
+	UrlStream* urlStream = (UrlStream*)stream->notifyData;
+	urlStream->stream = NEW(MemoryStream());
+	urlStream->Reference();
+	*stype = NP_NORMAL;
+	return NPERR_NO_ERROR;
+}
+
+NPError NpapiPluginInstance::NppDestroyStream(NPStream* stream, NPReason reason)
+{
+	UrlStream* urlStream = (UrlStream*)stream->notifyData;
+
+	NPError error = NPERR_NO_ERROR;
+
+	try
+	{
+		// finalize with data or error
+		if(reason == NPRES_DONE)
+			urlStream->receiveHandler->FireData(urlStream->stream->ToFile());
+		else
+			urlStream->receiveHandler->FireError(NEW(Exception("Abnormal end of URL stream")));
+	}
+	catch(Exception* exception)
+	{
+		MakePointer(exception);
+		error = NPERR_GENERIC_ERROR;
+	}
+
+	// clear references
+	urlStream->stream = nullptr;
+	urlStream->receiveHandler = nullptr;
+	urlStream->Dereference();
+
+	return error;
+}
+
+int32_t NpapiPluginInstance::NppWriteReady(NPStream* stream)
+{
+	return 0x10000;
+}
+
+int32_t NpapiPluginInstance::NppWrite(NPStream* stream, int32_t offset, int32_t len, void* buffer)
+{
+	UrlStream* urlStream = (UrlStream*)stream->notifyData;
+
+	try
+	{
+		urlStream->stream->Write(buffer, len);
+		return len;
+	}
+	catch(Exception* exception)
+	{
+		MakePointer(exception);
+		return -1;
+	}
+}
+
 int16_t NpapiPluginInstance::NppHandleEvent(void* e)
 {
 #if defined(___INANITY_PLATFORM_WINDOWS)
@@ -161,6 +255,21 @@ int16_t NpapiPluginInstance::NppHandleEvent(void* e)
 #else
 #error Unknown platform
 #endif
+}
+
+void NpapiPluginInstance::NppURLNotify(const char* url, NPReason reason, void* notifyData)
+{
+	UrlStream* urlStream = (UrlStream*)notifyData;
+
+	if(urlStream->receiveHandler)
+	{
+		if(reason != NPRES_DONE)
+			urlStream->receiveHandler->FireError(NEW(Exception("Failed getting URL stream")));
+
+		urlStream->receiveHandler = nullptr;
+	}
+
+	urlStream->Dereference();
 }
 
 NPError NpapiPluginInstance::NppGetValue(NPPVariable variable, void* retValue)

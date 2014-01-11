@@ -25,7 +25,12 @@ private:
 		NPSavedData* saved);
 	static NPError NPP_Destroy(NPP npp, NPSavedData** save);
 	static NPError NPP_SetWindow(NPP npp, NPWindow* window);
+	static NPError NPP_NewStream(NPP npp, NPMIMEType type, NPStream* stream, NPBool seekable, uint16_t* stype);
+	static NPError NPP_DestroyStream(NPP npp, NPStream* stream, NPReason reason);
+	static int32_t NPP_WriteReady(NPP npp, NPStream* stream);
+	static int32_t NPP_Write(NPP npp, NPStream* stream, int32_t offset, int32_t len, void* buffer);
 	static int16_t NPP_HandleEvent(NPP npp, void* event);
+	static void NPP_URLNotify(NPP npp, const char* url, NPReason reason, void* notifyData);
 	static NPError NPP_GetValue(NPP npp, NPPVariable variable, void* retValue);
 
 public:

@@ -54,7 +54,12 @@ void NpapiPlugin::GetPluginFuncs(NPPluginFuncs* pluginFuncs)
 	pluginFuncs->newp = &NPP_New;
 	pluginFuncs->destroy = &NPP_Destroy;
 	pluginFuncs->setwindow = &NPP_SetWindow;
+	pluginFuncs->newstream = &NPP_NewStream;
+	pluginFuncs->destroystream = &NPP_DestroyStream;
+	pluginFuncs->writeready = &NPP_WriteReady;
+	pluginFuncs->write = &NPP_Write;
 	pluginFuncs->event = &NPP_HandleEvent;
+	pluginFuncs->urlnotify = &NPP_URLNotify;
 	pluginFuncs->getvalue = &NPP_GetValue;
 }
 
@@ -103,6 +108,11 @@ NPError NpapiPlugin::NPP_New(
 	NpapiPluginInstance* instance = GetInstance(npp, error); \
 	if(!instance) \
 		return error
+#define GET_INSTANCE_NO_ERROR() \
+	NPError error; \
+	NpapiPluginInstance* instance = GetInstance(npp, error); \
+	if(!instance) \
+		return
 
 NPError NpapiPlugin::NPP_Destroy(NPP npp, NPSavedData** save)
 {
@@ -121,11 +131,46 @@ NPError NpapiPlugin::NPP_SetWindow(NPP npp, NPWindow* window)
 	return instance->NppSetWindow(window);
 }
 
+NPError NpapiPlugin::NPP_NewStream(NPP npp, NPMIMEType type, NPStream* stream, NPBool seekable, uint16_t* stype)
+{
+	GET_INSTANCE();
+
+	return instance->NppNewStream(type, stream, seekable, stype);
+}
+
+NPError NpapiPlugin::NPP_DestroyStream(NPP npp, NPStream* stream, NPReason reason)
+{
+	GET_INSTANCE();
+
+	return instance->NppDestroyStream(stream, reason);
+}
+
+int32_t NpapiPlugin::NPP_WriteReady(NPP npp, NPStream* stream)
+{
+	GET_INSTANCE();
+
+	return instance->NppWriteReady(stream);
+}
+
+int32_t NpapiPlugin::NPP_Write(NPP npp, NPStream* stream, int32_t offset, int32_t len, void* buffer)
+{
+	GET_INSTANCE();
+
+	return instance->NppWrite(stream, offset, len, buffer);
+}
+
 int16_t NpapiPlugin::NPP_HandleEvent(NPP npp, void* e)
 {
 	GET_INSTANCE();
 
 	return instance->NppHandleEvent(e);
+}
+
+void NpapiPlugin::NPP_URLNotify(NPP npp, const char* url, NPReason reason, void* notifyData)
+{
+	GET_INSTANCE_NO_ERROR();
+
+	return instance->NppURLNotify(url, reason, notifyData);
 }
 
 NPError NpapiPlugin::NPP_GetValue(NPP npp, NPPVariable variable, void* retValue)

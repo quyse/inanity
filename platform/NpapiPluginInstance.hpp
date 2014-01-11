@@ -4,6 +4,13 @@
 #include "npapi.hpp"
 #include "../input/input.hpp"
 #include "../script/np/np.hpp"
+#include "../Handler.hpp"
+
+BEGIN_INANITY
+
+class File;
+
+END_INANITY
 
 BEGIN_INANITY_INPUT
 
@@ -32,6 +39,9 @@ class Win32Window;
 /// Base class of instance of the NPAPI plugin.
 class NpapiPluginInstance : public Object
 {
+public:
+	typedef DataHandler<ptr<File> > ReceiveHandler;
+
 protected:
 	//*** Settings, should be set in derived class' constructor.
 	/// Plugin name.
@@ -70,6 +80,8 @@ protected:
 
 	ptr<Script::Np::Any> scriptObject;
 
+	struct UrlStream;
+
 public:
 	NPP GetNpp() const;
 	static NpapiPluginInstance* FromNpp(NPP npp);
@@ -77,10 +89,20 @@ public:
 	ptr<Script::Np::Any> GetWindowDomObject() const;
 	ptr<Script::Np::Any> GetPluginDomObject() const;
 
+	/// Make HTTP GET request.
+	void GetUrl(const String& url, ptr<ReceiveHandler> receiveHandler);
+	/// Make HTTP POST request.
+	void PostUrl(const String& url, ptr<File> postData, ptr<ReceiveHandler> receiveHandler);
+
 	//*** Internal methods.
 	void Init(NPP npp);
 	NPError NppSetWindow(NPWindow* window);
+	NPError NppNewStream(NPMIMEType type, NPStream* stream, NPBool seekable, uint16_t* stype);
+	NPError NppDestroyStream(NPStream* stream, NPReason reason);
+	int32_t NppWriteReady(NPStream* stream);
+	int32_t NppWrite(NPStream* stream, int32_t offset, int32_t len, void* buffer);
 	int16_t NppHandleEvent(void* event);
+	void NppURLNotify(const char* url, NPReason reason, void* notifyData);
 	NPError NppGetValue(NPPVariable variable, void* retValue);
 };
 
