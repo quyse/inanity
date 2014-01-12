@@ -32,6 +32,8 @@ private:
 	/// Клиентские размеры окна.
 	int clientWidth, clientHeight;
 
+	WNDPROC prevWndProc;
+
 	ptr<Input::Win32Manager> inputManager;
 
 	/// Is cursor was hided.
@@ -52,7 +54,7 @@ private:
 	void UpdateCursorVisible();
 
 public:
-	Win32Window(HWND hWnd, bool own = true);
+	Win32Window(HWND hWnd, bool own = true, WNDPROC prevWndProc = nullptr);
 	~Win32Window();
 
 	//*** методы Window

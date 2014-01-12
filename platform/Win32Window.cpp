@@ -7,8 +7,8 @@
 
 BEGIN_INANITY_PLATFORM
 
-Win32Window::Win32Window(HWND hWnd, bool own)
-: hWnd(hWnd), own(own), active(true), clientWidth(0), clientHeight(0), cursorHidden(false)
+Win32Window::Win32Window(HWND hWnd, bool own, WNDPROC prevWndProc)
+: hWnd(hWnd), own(own), active(true), clientWidth(0), clientHeight(0), prevWndProc(prevWndProc), cursorHidden(false)
 {
 	SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)this);
 
@@ -104,8 +104,8 @@ ptr<Win32Window> Win32Window::CreateForOpenGL(const String& title, int left, int
 
 ptr<Win32Window> Win32Window::CreateExisting(HWND hWnd, bool own)
 {
-	SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)&StaticWndProc);
-	return NEW(Win32Window(hWnd, own));
+	WNDPROC prevWndProc = (WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)&StaticWndProc);
+	return NEW(Win32Window(hWnd, own, prevWndProc));
 }
 
 HWND Win32Window::GetHWND() const
@@ -172,9 +172,13 @@ LRESULT Win32Window::WndProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 		hWnd = 0;
 		ClipCursor(NULL);
-		PostQuitMessage(0);
+		if(own)
+			PostQuitMessage(0);
 		return 0;
 	}
+
+	if(prevWndProc)
+		return CallWindowProc(prevWndProc, hWnd, uMsg, wParam, lParam);
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
