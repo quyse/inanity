@@ -20,6 +20,11 @@ private:
 	void InternalSet(NPIdentifier identifier, ptr<Script::Any> value);
 
 public:
+	/// Create any value from NPVariant.
+	/** If variant represents object, its reference count
+	increases by one. If variant represents string,
+	it doesn't copy, but in dtor it's freed, so it should
+	be allocated with NPAPI allocation functions. */
 	Any(ptr<State> state, NPVariant variant);
 	~Any();
 

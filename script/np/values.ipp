@@ -230,6 +230,14 @@ struct Value<ptr<Script::Any> >
 
 	static inline ptr<Script::Any> From(NPVariant value)
 	{
+		if(NPVARIANT_IS_STRING(value))
+		{
+			// copy string
+			NPString string = NPVARIANT_TO_STRING(value);
+			char* mem = (char*)Platform::NpapiPlugin::browserFuncs.memalloc(string.UTF8Length);
+			memcpy(mem, string.UTF8Characters, string.UTF8Length);
+			STRINGN_TO_NPVARIANT(mem, string.UTF8Length, value);
+		}
 		return State::GetCurrent()->CreateAny(value);
 	}
 
