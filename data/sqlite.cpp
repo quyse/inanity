@@ -3,6 +3,7 @@
 #include "../CriticalCode.hpp"
 #include "../MemoryFile.hpp"
 #include "../Exception.hpp"
+#include <cstring>
 
 BEGIN_INANITY_DATA
 
