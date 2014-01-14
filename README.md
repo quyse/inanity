@@ -10,8 +10,8 @@ The whole engine is work-in-progress, it is far from finished state. There are a
 
 [Wiki pages on GitHub](https://github.com/quyse/inanity/wiki/Start)
 
-## License
+## Licensing
 
 All the code is mine (Copyright (c) Alexander Bich aka Quyse Lert) except third-party code in `deps` directory. All my code was written from scratch.
-* My code is licensed under MIT. See LICENSE file.
-* All third-party code allows permissive licensing in some way. See NOTICE file for the full list of libraries and licenses.
+* My code is licensed under MIT. See `LICENSE` file.
+* All third-party code allows permissive licensing in some way. See `NOTICE.md` file for the full list of libraries and licenses.
