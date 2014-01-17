@@ -264,7 +264,15 @@ void NpapiPluginInstance::NppURLNotify(const char* url, NPReason reason, void* n
 	if(urlStream->receiveHandler)
 	{
 		if(reason != NPRES_DONE)
-			urlStream->receiveHandler->FireError(NEW(Exception("Failed getting URL stream")));
+			// ignore exceptions from handler
+			try
+			{
+				urlStream->receiveHandler->FireError(NEW(Exception("Failed getting URL stream")));
+			}
+			catch(Exception* exception)
+			{
+				MakePointer(exception);
+			}
 
 		urlStream->receiveHandler = nullptr;
 	}
