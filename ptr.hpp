@@ -68,12 +68,19 @@ public:
 #endif
 	}
 
+	/* Assignment operators should reference new
+	object before, dereference old object after.
+	In case of self-assigning (which is considered rare),
+	object would not disappear with heap corruption.
+	*/
+
 	/// Assign operator.
 	inline void operator = (const ptr<T>& p)
 	{
-		if(object) object->Dereference();
+		T* previousObject = object;
 		object = p.object;
 		if(object) object->Reference();
+		if(previousObject) previousObject->Dereference();
 #ifdef ___INANITY_TRACE_PTR
 		ManagedHeapTracePtr(this, object);
 #endif
@@ -82,9 +89,10 @@ public:
 	template <typename TT>
 	inline void operator = (const ptr<TT>& p)
 	{
-		if(object) object->Dereference();
+		T* previousObject = object;
 		object = static_cast<TT*>(p);
 		if(object) object->Reference();
+		if(previousObject) previousObject->Dereference();
 #ifdef ___INANITY_TRACE_PTR
 		ManagedHeapTracePtr(this, object);
 #endif
