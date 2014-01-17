@@ -113,6 +113,22 @@ void NpapiPluginInstance::PostUrl(const String& url, ptr<File> postData, ptr<Rec
 		&*urlStream);
 }
 
+void NpapiPluginInstance::AsyncCallRoutine(void* data)
+{
+	Handler* handler = (Handler*)data;
+	handler->Fire();
+	handler->Dereference();
+}
+
+void NpapiPluginInstance::AsyncCall(ptr<Handler> handler)
+{
+	handler->Reference();
+	NpapiPlugin::browserFuncs.pluginthreadasynccall(
+		npp,
+		&AsyncCallRoutine,
+		&*handler);
+}
+
 void NpapiPluginInstance::Init(NPP npp)
 {
 	this->npp = npp;

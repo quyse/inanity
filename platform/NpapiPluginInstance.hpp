@@ -82,6 +82,8 @@ protected:
 
 	struct UrlStream;
 
+	static void AsyncCallRoutine(void* data);
+
 public:
 	NPP GetNpp() const;
 	static NpapiPluginInstance* FromNpp(NPP npp);
@@ -93,6 +95,9 @@ public:
 	void GetUrl(const String& url, ptr<ReceiveHandler> receiveHandler);
 	/// Make HTTP POST request.
 	void PostUrl(const String& url, ptr<File> postData, ptr<ReceiveHandler> receiveHandler);
+
+	/// Make async call.
+	void AsyncCall(ptr<Handler> handler);
 
 	//*** Internal methods.
 	void Init(NPP npp);
