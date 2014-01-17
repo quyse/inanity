@@ -4,6 +4,8 @@
 
 BEGIN_INANITY_NET
 
+// class Fcgi::InStream
+
 class Fcgi::InStream : public InputStream
 {
 private:
@@ -23,13 +25,15 @@ public:
 	}
 };
 
+// class Fcgi::OutStream
+
 class Fcgi::OutStream : public OutputStream
 {
 private:
 	FCGX_Stream* stream;
 
 public:
-	OutStream() : stream(stream) {}
+	OutStream() : stream(nullptr) {}
 
 	void SetStream(FCGX_Stream* stream)
 	{
@@ -38,81 +42,102 @@ public:
 
 	void Write(const void* data, size_t size)
 	{
-		FCGX_PutStr((const char*)data, (int)size, stream);
+		if(FCGX_PutStr((const char*)data, (int)size, stream) != (int)size)
+			THROW("Can't write to FCGI stream");
 	}
 };
 
-Fcgi::Fcgi()
+// class Fcgi::Request
+
+Fcgi::Request::Request(int fd)
 {
+	if(FCGX_InitRequest(&request, fd, 0) != 0)
+		THROW("Can't init request");
+
 	inputStream = NEW(InStream());
 	outputStream = NEW(OutStream());
 }
 
-Fcgi::~Fcgi() {}
-
-void Fcgi::Run(const char* socketName, int backlogSize, ptr<Handler> handler)
+Fcgi::Request::~Request()
 {
-	BEGIN_TRY();
-
-	FCGX_Init();
-
-	int s = FCGX_OpenSocket(socketName, backlogSize);
-	if(s < 0)
-		THROW("Can't open socket");
-
-	if(FCGX_InitRequest(&request, s, 0) != 0)
-		THROW("Can't init request");
-
-	while(FCGX_Accept_r(&request) >= 0)
-	{
-		inputStream->SetStream(request.in);
-		outputStream->SetStream(request.out);
-		handler->Fire();
-	}
-
 	FCGX_Free(&request, 1);
-
-	END_TRY("Error running FCGI");
 }
 
-char** Fcgi::GetEnv() const
-{
-	return request.envp;
-}
-
-const char* Fcgi::GetParam(const char* name) const
-{
-	return FCGX_GetParam(name, request.envp);
-}
-
-void Fcgi::OutputHeader(const char* header, const char* value)
-{
-	FCGX_FPrintF(request.out, "%s: %s\r\n", header, value);
-}
-
-void Fcgi::OutputStatus(const char* status)
-{
-	OutputHeader("Status", status);
-}
-
-void Fcgi::OutputContentType(const char* contentType)
-{
-	OutputHeader("ContentType", contentType);
-}
-
-void Fcgi::OutputBeginResponse()
-{
-	FCGX_PutS("\r\n", request.out);
-}
-
-ptr<InputStream> Fcgi::GetInputStream() const
+ptr<InputStream> Fcgi::Request::GetInputStream() const
 {
 	return inputStream;
 }
 
-ptr<OutputStream> Fcgi::GetOutputStream() const
+ptr<OutputStream> Fcgi::Request::GetOutputStream() const
 {
 	return outputStream;
+}
+
+char** Fcgi::Request::GetEnv() const
+{
+	return request.envp;
+}
+
+const char* Fcgi::Request::GetParam(const char* name) const
+{
+	return FCGX_GetParam(name, request.envp);
+}
+
+void Fcgi::Request::OutputHeader(const char* header, const char* value)
+{
+	FCGX_FPrintF(request.out, "%s: %s\r\n", header, value);
+}
+
+void Fcgi::Request::OutputStatus(const char* status)
+{
+	OutputHeader("Status", status);
+}
+
+void Fcgi::Request::OutputContentType(const char* contentType)
+{
+	OutputHeader("ContentType", contentType);
+}
+
+void Fcgi::Request::OutputBeginResponse()
+{
+	FCGX_PutS("\r\n", request.out);
+}
+
+void Fcgi::Request::End()
+{
+	FCGX_Finish_r(&request);
+}
+
+bool Fcgi::Request::Accept()
+{
+	if(FCGX_Accept_r(&request) < 0)
+		return false;
+
+	inputStream->SetStream(request.in);
+	outputStream->SetStream(request.out);
+
+	return true;
+}
+
+// class Fcgi
+
+Fcgi::Fcgi(const char* socketName, int backlogSize)
+{
+	FCGX_Init();
+
+	fd = FCGX_OpenSocket(socketName, backlogSize);
+	if(fd < 0)
+		THROW("Can't open socket");
+}
+
+ptr<Fcgi::Request> Fcgi::Accept()
+{
+	ptr<Request> request = NEW(Request(fd));
+
+	if(!request->Accept())
+		return nullptr;
+
+	return request;
 }
 
 END_INANITY_NET

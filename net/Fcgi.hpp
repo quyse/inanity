@@ -15,37 +15,47 @@ END_INANITY
 BEGIN_INANITY_NET
 
 /// Simple class for single-threaded FCGI handler.
-class Fcgi : public Object
+class Fcgi
 {
 private:
 	class InStream;
 	class OutStream;
 
-	FCGX_Request request;
-
-	ptr<InStream> inputStream;
-	ptr<OutStream> outputStream;
+	int fd;
 
 public:
-	Fcgi();
-	~Fcgi();
+	class Request : public Object
+	{
+	private:
+		FCGX_Request request;
+		ptr<InStream> inputStream;
+		ptr<OutStream> outputStream;
 
-	void Run(const char* socketName, int backlogSize, ptr<Handler> handler);
+	public:
+		Request(int fd);
+		~Request();
 
-	char** GetEnv() const;
-	const char* GetParam(const char* name) const;
+		ptr<InputStream> GetInputStream() const;
+		ptr<OutputStream> GetOutputStream() const;
 
-	void OutputHeader(const char* header, const char* value);
-	void OutputStatus(const char* status);
-	void OutputContentType(const char* contentType);
-	void OutputBeginResponse();
+		char** GetEnv() const;
+		const char* GetParam(const char* name) const;
 
-	/// Get input stream of the request.
-	/** Object is the same for every request. */
-	ptr<InputStream> GetInputStream() const;
-	/// Get output stream of the request.
-	/** Object is the same for every request. */
-	ptr<OutputStream> GetOutputStream() const;
+		void OutputHeader(const char* header, const char* value);
+		void OutputStatus(const char* status);
+		void OutputContentType(const char* contentType);
+		void OutputBeginResponse();
+		/// End response and finalize request.
+		void End();
+
+		//*** Don't call explicitly.
+		bool Accept();
+	};
+
+public:
+	Fcgi(const char* socketName, int backlogSize);
+
+	ptr<Request> Accept();
 };
 
 END_INANITY_NET
