@@ -144,6 +144,7 @@ struct ConstructorThunk
 			stream << " instance constructor failed:\n";
 			MakePointer(exception)->PrintStack(stream);
 			Platform::NpapiPlugin::browserFuncs.setexception(nullptr, stream.str().c_str());
+			return false;
 		}
 	}
 };
