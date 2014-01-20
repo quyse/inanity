@@ -2,6 +2,7 @@
 #define ___PART_FILE_H___
 
 #include "File.hpp"
+#include "meta/decl.hpp"
 
 BEGIN_INANITY
 
@@ -27,9 +28,12 @@ public:
 	\param size Размер буфера памяти в байтах.
 	*/
 	PartFile(ptr<File> file, void* data, size_t size);
+	PartFile(ptr<File> file, size_t offset, size_t size);
 
 	void* GetData() const;
 	size_t GetSize() const;
+
+	META_DECLARE_CLASS(PartFile);
 };
 
 END_INANITY

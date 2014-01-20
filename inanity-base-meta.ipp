@@ -10,6 +10,12 @@ META_CLASS(Inanity::File, Inanity.File);
 	META_METHOD(GetSize);
 META_CLASS_END();
 
+#include "PartFile.hpp"
+META_CLASS(Inanity::PartFile, Inanity.PartFile);
+	META_CLASS_PARENT(Inanity::File);
+	META_CONSTRUCTOR(ptr<Inanity::File>, size_t, size_t);
+META_CLASS_END();
+
 #include "FileSystem.hpp"
 META_CLASS(Inanity::FileSystem, Inanity.FileSystem);
 	META_METHOD(LoadFile);
