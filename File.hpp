@@ -26,6 +26,9 @@ public:
 	*/
 	virtual size_t GetSize() const = 0;
 
+	/// Returns a part of the file.
+	ptr<File> Slice(size_t offset, size_t size);
+
 	META_DECLARE_CLASS(File);
 };
 

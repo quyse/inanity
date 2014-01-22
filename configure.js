@@ -31,7 +31,7 @@ var libraries = {
 		'Time', 'Ticker',
 		'Profiling',
 		'Thread', 'CriticalSection', 'CriticalCode', 'Semaphore',
-		'EmptyFile', 'PartFile', 'MemoryFile',
+		'File', 'EmptyFile', 'PartFile', 'MemoryFile',
 		'InputStream', 'OutputStream', 'FileInputStream', 'MemoryStream',
 		'StreamReader', 'StreamWriter',
 		'FileSystem'

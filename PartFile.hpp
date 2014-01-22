@@ -2,7 +2,6 @@
 #define ___PART_FILE_H___
 
 #include "File.hpp"
-#include "meta/decl.hpp"
 
 BEGIN_INANITY
 
@@ -32,8 +31,6 @@ public:
 
 	void* GetData() const;
 	size_t GetSize() const;
-
-	META_DECLARE_CLASS(PartFile);
 };
 
 END_INANITY
