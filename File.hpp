@@ -6,28 +6,27 @@
 
 BEGIN_INANITY
 
-/// Абстрактный класс файла.
-/** Данный класс предоставляет абстракцию файла - области памяти
-в адресном пространстве процесса. */
+/// Abstract file class.
+/** File represents a continious region of address space. */
 class File : public Object
 {
 public:
-	/// Получает указатель на данные файла.
-	/** Возвращаемый указатель действителен, пока сам объект File
-	существует.
-	\return Указатель на начало области в адресном пространстве.
-	*/
-	virtual void* GetData() const = 0;
+	/// Comparer for STL classes.
+	struct Comparer
+	{
+		bool operator()(File* a, File* b) const;
+	};
 
-	/// Получает размер файла.
-	/** Размер файла не может меняться за все время существования
-	файла.
-	\return Размер файла в байтах.
-	*/
+public:
+	virtual void* GetData() const = 0;
 	virtual size_t GetSize() const = 0;
 
 	/// Returns a part of the file.
 	ptr<File> Slice(size_t offset, size_t size);
+	ptr<File> SliceAt(size_t offset);
+
+	/// Concatenate files.
+	ptr<File> Concat(ptr<File> other);
 
 	META_DECLARE_CLASS(File);
 };
