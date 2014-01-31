@@ -5,7 +5,7 @@
 #include "Win32Adapter.hpp"
 #include "../platform/Win32Window.hpp"
 #include "../Strings.hpp"
-#elif defined(___INANITY_PLATFORM_LINUX)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
 #include "SdlAdapter.hpp"
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 #include "EmsAdapter.hpp"
@@ -25,7 +25,7 @@ const std::vector<ptr<Adapter> >& GlSystem::GetAdapters()
 	{
 #if defined(___INANITY_PLATFORM_WINDOWS)
 		Win32Adapter::GetAdapters(adapters);
-#elif defined(___INANITY_PLATFORM_LINUX)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
 		SdlAdapter::GetAdapters(adapters);
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 		EmsAdapter::GetAdapters(adapters);
@@ -48,7 +48,7 @@ ptr<Device> GlSystem::CreateDevice(ptr<Adapter> abstractAdapter)
 	if(!adapter)
 		THROW("Wrong adapter type");
 	return NEW(GlDevice(this, adapter->GetId()));
-#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_EMSCRIPTEN)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	return NEW(GlDevice(this));
 #else
 #error Unknown platform

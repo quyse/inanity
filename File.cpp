@@ -1,6 +1,7 @@
 #include "File.hpp"
 #include "MemoryFile.hpp"
 #include "PartFile.hpp"
+#include <string.h>
 
 BEGIN_INANITY
 

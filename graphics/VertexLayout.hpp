@@ -38,7 +38,7 @@ public:
 	template <typename Struct, typename ValueType>
 	ptr<VertexLayoutElement> AddElement(ValueType Struct::*field)
 	{
-		return AddElement(DataTypeOf<ValueType>(), (int)&(((Struct*)0)->*field));
+		return AddElement(DataTypeOf<ValueType>(), (int)(size_t)&(((Struct*)0)->*field));
 	}
 	const Elements& GetElements() const;
 

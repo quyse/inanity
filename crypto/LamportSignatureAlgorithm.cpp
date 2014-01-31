@@ -3,8 +3,10 @@
 #include "HashStream.hpp"
 #include "RandomAlgorithm.hpp"
 #include <cstring>
-#ifdef ___INANITY_PLATFORM_POSIX
+#if defined(___INANITY_PLATFORM_LINUX)
 #include <alloca.h>
+#elif defined(___INANITY_PLATFORM_FREEBSD)
+#include <stdlib.h>
 #endif
 
 BEGIN_INANITY_CRYPTO

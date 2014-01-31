@@ -104,6 +104,7 @@ var libraries = {
 		objects: ['input.Event', 'input.Frame', 'input.Manager', 'input.Mux', 'input.Processor'],
 		'objects-win32': ['input.Win32Manager', 'input.Win32WmManager', 'input.Win32RawManager'],
 		'objects-linux': ['input.SdlManager'],
+		'objects-freebsd': ['input.SdlManager'],
 		'objects-emscripten': ['input.SdlManager']
 	},
 	// ******* general platform subsystem
@@ -116,6 +117,11 @@ var libraries = {
 			'platform.DllCache'
 		],
 		'objects-linux': [
+			'platform.PosixFileSystem',
+			'platform.Sdl', 'platform.SdlWindow',
+			'graphics.SdlAdapter', 'graphics.SdlMonitor', 'graphics.SdlMonitorMode'
+		],
+		'objects-freebsd': [
 			'platform.PosixFileSystem',
 			'platform.Sdl', 'platform.SdlWindow',
 			'graphics.SdlAdapter', 'graphics.SdlMonitor', 'graphics.SdlMonitorMode'
@@ -170,6 +176,7 @@ var libraries = {
 		],
 		'objects-win32': ['graphics.WglPresenter'],
 		'objects-linux': ['graphics.SdlPresenter'],
+		'objects-freebsd': ['graphics.SdlPresenter'],
 		'objects-emscripten': ['graphics.EmsPresenter']
 	},
 	// ******* подсистема шейдеров

@@ -4,6 +4,11 @@
 #include "../MemoryFile.hpp"
 #include "../Exception.hpp"
 #include <cstring>
+#if defined(___INANITY_PLATFORM_LINUX)
+#include <alloca.h>
+#elif defined(___INANITY_PLATFORM_FREEBSD)
+#include <stdlib.h>
+#endif
 
 BEGIN_INANITY_CRYPTO
 

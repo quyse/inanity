@@ -5,7 +5,8 @@
 #include "Win32Window.hpp"
 #include "../graphics/Dx11System.hpp"
 #include "../input/Win32RawManager.hpp"
-#elif defined(___INANITY_PLATFORM_LINUX)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
+#include "Sdl.hpp"
 #include "SdlWindow.hpp"
 #include "../input/SdlManager.hpp"
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
@@ -39,7 +40,7 @@ ptr<Input::Manager> Game::CreateInputManager(ptr<Window> window)
 	ptr<Input::Win32Manager> inputManager = NEW(Input::Win32RawManager(win32Window->GetHWND()));
 	win32Window->SetInputManager(inputManager);
 	return inputManager;
-#elif defined(___INANITY_PLATFORM_LINUX)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
 	ptr<Platform::SdlWindow> sdlWindow = window.DynamicCast<Platform::SdlWindow>();
 	ptr<Input::SdlManager> inputManager = NEW(Input::SdlManager());
 	sdlWindow->SetInputManager(inputManager);

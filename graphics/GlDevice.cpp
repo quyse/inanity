@@ -29,7 +29,7 @@
 #include "WglPresenter.hpp"
 #include "Win32MonitorMode.hpp"
 #include "../platform/Win32Window.hpp"
-#elif defined(___INANITY_PLATFORM_LINUX)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
 #include "SdlPresenter.hpp"
 #include "SdlMonitorMode.hpp"
 #include "../platform/Sdl.hpp"
@@ -56,7 +56,7 @@ GlDevice::~GlDevice()
 		wglDeleteContext(hglrc);
 }
 
-#elif defined(___INANITY_PLATFORM_LINUX)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
 
 GlDevice::GlDevice(ptr<GlSystem> system)
 : system(system), glContext(0) {}
@@ -82,7 +82,7 @@ GlDevice::~GlDevice() {}
 
 void GlDevice::InitCaps()
 {
-#if defined(___INANITY_PLATFORM_WINDOWS) || defined(___INANITY_PLATFORM_LINUX)
+#if defined(___INANITY_PLATFORM_WINDOWS) || defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
 	internalCaps =
 		(GLEW_ARB_uniform_buffer_object ? InternalCaps::uniformBufferObject : 0) |
 		(GLEW_ARB_sampler_objects ? InternalCaps::samplerObjects : 0) |
@@ -125,7 +125,7 @@ ptr<Presenter> GlDevice::CreateWindowPresenter(ptr<Platform::Window> abstractWin
 	if(!mode && abstractMode)
 		THROW("Only Win32 monitor mode allowed");
 
-#elif defined(___INANITY_PLATFORM_LINUX)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
 
 	ptr<Platform::SdlWindow> window = abstractWindow.DynamicCast<Platform::SdlWindow>();
 	if(!window)
@@ -262,7 +262,7 @@ ptr<WglPresenter> GlDevice::CreatePresenter(ptr<Platform::Win32Window> window, p
 	END_TRY("Can't create Windows OpenGL presenter");
 }
 
-#elif defined(___INANITY_PLATFORM_LINUX)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
 
 ptr<SdlPresenter> GlDevice::CreatePresenter(ptr<Platform::SdlWindow> window, ptr<SdlMonitorMode> mode)
 {
@@ -725,7 +725,7 @@ ptr<AttributeBinding> GlDevice::CreateAttributeBinding(ptr<AttributeLayout> layo
 				bindingElement.index = (GLuint)i;
 				GetAttributeSizeAndType(element.dataType, element.layoutDataType, bindingElement.size, bindingElement.type, bindingElement.integer);
 				bindingElement.normalized = false;
-				bindingElement.pointer = (GLvoid*)element.offset;
+				bindingElement.pointer = (GLvoid*)(size_t)element.offset;
 
 				bindingSlot.elements.push_back(bindingElement);
 			}

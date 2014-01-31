@@ -8,7 +8,6 @@ BEGIN_INANITY_GRAPHICS
 
 SdlAdapter::SdlAdapter(int videoDriverIndex) :
 	sdl(Platform::Sdl::Get(SDL_INIT_VIDEO)),
-	videoDriverIndex(videoDriverIndex),
 	monitorsInitialized(false)
 {
 	BEGIN_TRY();

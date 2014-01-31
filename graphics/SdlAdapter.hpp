@@ -17,7 +17,6 @@ class SdlAdapter : public Adapter
 {
 private:
 	ptr<Platform::Sdl> sdl;
-	int videoDriverIndex;
 	String name;
 	Monitors monitors;
 	bool monitorsInitialized;

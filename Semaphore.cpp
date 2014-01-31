@@ -1,5 +1,8 @@
 #include "Semaphore.hpp"
 #include "Exception.hpp"
+#ifdef ___INANITY_PLATFORM_POSIX
+#include <errno.h>
+#endif
 
 BEGIN_INANITY
 

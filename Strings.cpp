@@ -2,6 +2,7 @@
 #include "MemoryFile.hpp"
 #include "deps/utf8.h"
 #include <cstring>
+#include <cstdio>
 
 BEGIN_INANITY
 

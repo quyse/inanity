@@ -11,7 +11,7 @@
 #include "../platform/windows.hpp"
 #include "../deps/glew/include/GL/wglew.h"
 
-#elif defined(___INANITY_PLATFORM_LINUX)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
 
 #include "../deps/glew/include/GL/glew.h"
 #include "../deps/glew/include/GL/glxew.h"
