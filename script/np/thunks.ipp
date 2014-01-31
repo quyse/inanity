@@ -2,9 +2,9 @@
 #define ___INANITY_SCRIPT_NP_THUNKS_IPP___
 
 #include "thunks.hpp"
-#include "values.ipp"
+#include "values.hpp"
 #include "../../meta/Tuple.hpp"
-#include "../../meta/Callable.ipp"
+#include "../../meta/Callable.hpp"
 #include "../../platform/NpapiPlugin.hpp"
 #include "../../Exception.hpp"
 

@@ -7,6 +7,7 @@
 BEGIN_INANITY_NP
 
 class State;
+class ClassBase;
 
 class MetaProvider
 {
@@ -26,20 +27,15 @@ public:
 		const char* name;
 
 	public:
-		NamedCallableBase(const char* name)
-		: name(name) {}
+		NamedCallableBase(const char* name);
 
-		const char* GetName() const
-		{
-			return name;
-		}
+		const char* GetName() const;
 	};
 
 	class FunctionBase : public NamedCallableBase
 	{
 	public:
-		FunctionBase(const char* name)
-		: NamedCallableBase(name) {}
+		FunctionBase(const char* name);
 
 		virtual FunctionRoutine GetThunk() const = 0;
 	};
@@ -47,8 +43,7 @@ public:
 	class MethodBase : public NamedCallableBase
 	{
 	public:
-		MethodBase(const char* name)
-		: NamedCallableBase(name) {}
+		MethodBase(const char* name);
 
 		virtual MethodRoutine GetThunk() const = 0;
 	};
@@ -64,8 +59,7 @@ public:
 	class Function : public FunctionBase
 	{
 	public:
-		Function(const char* name)
-		: FunctionBase(name) {}
+		Function(const char* name);
 
 		FunctionRoutine GetThunk() const;
 	};
@@ -74,13 +68,12 @@ public:
 	class Method : public MethodBase
 	{
 	public:
-		Method(const char* name)
-		: MethodBase(name) {}
+		Method(const char* name);
 
 		MethodRoutine GetThunk() const;
 	};
 
-	class ClassBase;
+	typedef Np::ClassBase ClassBase;
 
 	struct Traits
 	{
