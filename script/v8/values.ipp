@@ -32,10 +32,26 @@ struct Value<int>
 
 	static inline int From(v8::Local<v8::Value> value)
 	{
-		return value->Int32Value();
+		return (int)value->IntegerValue();
 	}
 
 	static inline v8::Local<v8::Value> To(int value)
+	{
+		return v8::Number::New((double)value);
+	}
+};
+
+template <>
+struct Value<long>
+{
+	typedef long ValueType;
+
+	static inline long From(v8::Local<v8::Value> value)
+	{
+		return (long)value->IntegerValue();
+	}
+
+	static inline v8::Local<v8::Value> To(long value)
 	{
 		return v8::Number::New((double)value);
 	}
@@ -80,10 +96,26 @@ struct Value<unsigned int>
 
 	static inline unsigned int From(v8::Local<v8::Value> value)
 	{
-		return value->Uint32Value();
+		return (unsigned int)value->IntegerValue();
 	}
 
 	static inline v8::Local<v8::Value> To(unsigned int value)
+	{
+		return v8::Number::New((double)value);
+	}
+};
+
+template <>
+struct Value<unsigned long>
+{
+	typedef unsigned long ValueType;
+
+	static inline unsigned long From(v8::Local<v8::Value> value)
+	{
+		return (unsigned long)value->IntegerValue();
+	}
+
+	static inline v8::Local<v8::Value> To(unsigned long value)
 	{
 		return v8::Number::New((double)value);
 	}

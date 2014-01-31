@@ -125,8 +125,8 @@ ptr<Script::Any> Any::ApplyWith(ptr<Script::Any> thisValue, ptr<Script::Any> arg
 
 	v8::TryCatch tryCatch;
 
-	static const int maxArgs = 8;
 #ifdef _DEBUG
+	static const int maxArgs = 8;
 	if(count > maxArgs)
 		THROW("To many arguments for V8 function call");
 #endif

@@ -49,6 +49,26 @@ struct Value<int>
 };
 
 template <>
+struct Value<long>
+{
+	typedef long ValueType;
+
+	static inline long Get(lua_State* state, int index)
+	{
+		int isnum;
+		lua_Integer res = lua_tointegerx(state, index, &isnum);
+		if(!isnum)
+			THROW("Expected an integer for argument");
+		return (long)res;
+	}
+
+	static inline void Push(lua_State* state, long value)
+	{
+		lua_pushinteger(state, (lua_Integer)value);
+	}
+};
+
+template <>
 struct Value<double>
 {
 	typedef double ValueType;
@@ -103,6 +123,26 @@ struct Value<unsigned int>
 	}
 
 	static inline void Push(lua_State* state, unsigned int value)
+	{
+		lua_pushinteger(state, (lua_Integer)value);
+	}
+};
+
+template <>
+struct Value<unsigned long>
+{
+	typedef unsigned long ValueType;
+
+	static inline unsigned long Get(lua_State* state, int index)
+	{
+		int isnum;
+		lua_Integer res = lua_tointegerx(state, index, &isnum);
+		if(!isnum)
+			THROW("Expected an integer for argument");
+		return (unsigned long)res;
+	}
+
+	static inline void Push(lua_State* state, unsigned long value)
 	{
 		lua_pushinteger(state, (lua_Integer)value);
 	}

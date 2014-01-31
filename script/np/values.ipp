@@ -71,6 +71,30 @@ struct Value<int>
 };
 
 template <>
+struct Value<long>
+{
+	typedef long ValueType;
+
+	static inline long From(NPVariant value)
+	{
+		if(NPVARIANT_IS_BOOLEAN(value))
+			return (long)NPVARIANT_TO_BOOLEAN(value);
+		if(NPVARIANT_IS_INT32(value))
+			return (long)NPVARIANT_TO_INT32(value);
+		if(NPVARIANT_IS_DOUBLE(value))
+			return (long)NPVARIANT_TO_DOUBLE(value);
+		return 0;
+	}
+
+	static inline NPVariant To(long value)
+	{
+		NPVariant variant;
+		INT32_TO_NPVARIANT(value, variant);
+		return variant;
+	}
+};
+
+template <>
 struct Value<double>
 {
 	typedef double ValueType;
@@ -129,6 +153,22 @@ struct Value<unsigned int>
 	}
 
 	static inline NPVariant To(unsigned int value)
+	{
+		return Value<double>::To((double)value);
+	}
+};
+
+template <>
+struct Value<unsigned long>
+{
+	typedef unsigned long ValueType;
+
+	static inline unsigned long From(NPVariant value)
+	{
+		return (unsigned long)Value<double>::From(value);
+	}
+
+	static inline NPVariant To(unsigned long value)
 	{
 		return Value<double>::To((double)value);
 	}
