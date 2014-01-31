@@ -36,6 +36,8 @@ void ReclaimObject(lua_State* state, RefCounted* object);
 /// Push object metatable in stack.
 void PushObjectMetaTable(lua_State* state, MetaProvider::ClassBase* cls);
 
+/// Throw Lua error.
+void ThrowError(lua_State* state, ptr<Exception> exception);
 /// Converts Lua error to exception.
 /** Pops an error out from stack. */
 ptr<Exception> ErrorToException(lua_State* state);

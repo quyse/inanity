@@ -3,6 +3,7 @@
 
 #include "thunks.hpp"
 #include "values.hpp"
+#include "stuff.hpp"
 #include "lualib.hpp"
 #include "../../meta/Tuple.hpp"
 #include "../../meta/Callable.hpp"
@@ -138,11 +139,9 @@ struct CalleeThunk
 		}
 		catch(Exception* exception)
 		{
-			// положить в стек исключение
-			Value<ptr<Exception> >::Push(luaState, exception);
-			// и выбросить ошибку
-			lua_error(luaState);
-			// lua_error не возвращает управления, это только для компилятора
+			// выбросить ошибку Lua
+			ThrowError(luaState, exception);
+			// управление не возвращается, это только для компилятора
 			return 0;
 		}
 	}
@@ -180,11 +179,9 @@ struct ConstructorThunk
 		}
 		catch(Exception* exception)
 		{
-			// положить в стек исключение
-			Value<ptr<Exception> >::Push(luaState, exception);
-			// и выбросить ошибку
-			lua_error(luaState);
-			// lua_error не возвращает управления, это только для компилятора
+			// выбросить ошибку Lua
+			ThrowError(luaState, exception);
+			// управление не возвращается, это только для компилятора
 			return 0;
 		}
 	}

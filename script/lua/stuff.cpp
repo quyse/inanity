@@ -263,6 +263,14 @@ void PushObjectMetaTable(lua_State* state, MetaProvider::ClassBase* cls)
 	}
 }
 
+void ThrowError(lua_State* state, ptr<Exception> exception)
+{
+	// положить в стек исключение
+	Value<ptr<Exception> >::Push(state, exception);
+	// и выбросить ошибку
+	lua_error(state);
+}
+
 ptr<Exception> ErrorToException(lua_State* state)
 {
 	ptr<Exception> exception;

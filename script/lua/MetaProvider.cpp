@@ -13,8 +13,8 @@ const char* MetaProvider::NamedCallableBase::GetName() const
 	return name;
 }
 
+END_INANITY_LUA
+
 // Ensure we have all methods of Meta::ClassBase for linking.
 
-template Meta::ClassBase<MetaProvider::Traits>;
-
-END_INANITY_LUA
+template class Inanity::Meta::ClassBase<Inanity::Script::Lua::MetaProvider::Traits>;
