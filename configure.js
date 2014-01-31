@@ -84,7 +84,7 @@ var libraries = {
 	},
 	// ******* скрипты на lua
 	'libinanity-lua': {
-		objects: ['script.lua.Any', 'script.lua.Function', 'script.lua.State', 'script.lua.stuff']
+		objects: ['script.lua.Any', 'script.lua.Function', 'script.lua.MetaProvider', 'script.lua.State', 'script.lua.stuff']
 	},
 	// ******* скрипты на v8
 	'libinanity-v8': {

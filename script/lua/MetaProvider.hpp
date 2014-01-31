@@ -22,13 +22,9 @@ private:
 		const char* name;
 
 	public:
-		NamedCallableBase(const char* name)
-		: name(name) {}
+		NamedCallableBase(const char* name);
 
-		const char* GetName() const
-		{
-			return name;
-		}
+		const char* GetName() const;
 	};
 
 public:
@@ -47,8 +43,7 @@ public:
 	class Function : public FunctionBase
 	{
 	public:
-		Function(const char* name)
-		: FunctionBase(name) {}
+		Function(const char* name);
 
 		void PushThunk(lua_State* luaState);
 	};
@@ -57,8 +52,7 @@ public:
 	class Method : public MethodBase
 	{
 	public:
-		Method(const char* name)
-		: MethodBase(name) {}
+		Method(const char* name);
 
 		void PushThunk(lua_State* luaState);
 	};
@@ -77,8 +71,7 @@ public:
 	class Class : public ClassBase
 	{
 	public:
-		Class(const char* name, const char* fullName)
-		: ClassBase(name, fullName) {}
+		Class(const char* name, const char* fullName);
 	};
 };
 
