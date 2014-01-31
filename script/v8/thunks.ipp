@@ -2,11 +2,11 @@
 #define ___INANITY_SCRIPT_V8_THUNKS_IPP___
 
 #include "thunks.hpp"
-#include "values.ipp"
+#include "values.hpp"
 #include "State.hpp"
 #include "v8lib.hpp"
 #include "../../meta/Tuple.hpp"
-#include "../../meta/Callable.ipp"
+#include "../../meta/Callable.hpp"
 #include "../../Exception.hpp"
 #include <sstream>
 

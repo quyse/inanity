@@ -2,10 +2,10 @@
 #define ___INANITY_SCRIPT_LUA_THUNKS_IPP___
 
 #include "thunks.hpp"
-#include "values.ipp"
+#include "values.hpp"
 #include "lualib.hpp"
 #include "../../meta/Tuple.hpp"
-#include "../../meta/Callable.ipp"
+#include "../../meta/Callable.hpp"
 #include "../../Exception.hpp"
 
 BEGIN_INANITY_LUA

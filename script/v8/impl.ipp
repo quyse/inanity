@@ -7,5 +7,7 @@
 #include "../impl.hpp"
 #include "MetaProvider.ipp"
 #include "thunks.ipp"
+#include "values.ipp"
+#include "../../meta/Callable.ipp"
 
 #endif
