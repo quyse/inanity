@@ -133,14 +133,14 @@ ptr<Script::Any> Any::ApplyWith(ptr<Script::Any> thisValue, ptr<Script::Any> arg
 
 	v8::Isolate* isolate = state->GetIsolate();
 
-	v8::Handle<v8::Value> args[8];
+	v8::Local<v8::Value> args[8];
 	for(int i = 0; i < count; ++i)
-		args[i] = v8::Handle<v8::Value>::New(isolate, fast_cast<Any*>(&*arguments[i])->value);
+		args[i] = v8::Local<v8::Value>::New(isolate, fast_cast<Any*>(&*arguments[i])->value);
 
 	v8::Local<v8::Value> value = v8::Local<v8::Value>::New(isolate, this->value);
 	v8::Local<v8::Value> v8ThisValue = thisValue
-		? v8::Handle<v8::Value>::New(isolate, fast_cast<Any*>(&*thisValue)->value)
-		: v8::Handle<v8::Value>(v8::Undefined());
+		? v8::Local<v8::Value>::New(isolate, fast_cast<Any*>(&*thisValue)->value)
+		: v8::Local<v8::Value>(v8::Undefined(isolate));
 
 	v8::Local<v8::Value> returnValue = v8::Function::Cast(*value)->Call(v8ThisValue, count, args);
 

@@ -69,9 +69,10 @@ struct CalleeThunk
 		{
 			std::ostringstream stream;
 			MakePointer(exception)->PrintStack(stream);
-			v8::ThrowException(
+			v8::Isolate* isolate = info.GetIsolate();
+			isolate->ThrowException(
 				v8::Exception::Error(
-					v8::String::New(stream.str().c_str())));
+					v8::String::NewFromUtf8(isolate, stream.str().c_str())));
 		}
 	}
 };
@@ -81,7 +82,8 @@ template <typename ClassType>
 void DummyConstructorThunk(const v8::FunctionCallbackInfo<v8::Value>& info)
 {
 	v8::Local<v8::Object> instance = info.This();
-	State* state = State::GetFromIsolate(info.GetIsolate());
+	v8::Isolate* isolate = info.GetIsolate();
+	State* state = State::GetFromIsolate(isolate);
 
 	// check if the constructor called from NewInstance()
 	{
@@ -104,9 +106,9 @@ void DummyConstructorThunk(const v8::FunctionCallbackInfo<v8::Value>& info)
 	}
 
 	// if we are there, constructor was called from javascript
-	v8::ThrowException(
+	isolate->ThrowException(
 		v8::Exception::Error(
-			v8::String::New("Class have no constructor")));
+			v8::String::NewFromUtf8(isolate, "Class have no constructor")));
 }
 
 template <typename CalleeType>
@@ -123,7 +125,8 @@ struct ConstructorThunk
 		// to wrap C++ object into javascript object.
 
 		v8::Local<v8::Object> instance = info.This();
-		State* state = State::GetFromIsolate(info.GetIsolate());
+		v8::Isolate* isolate = info.GetIsolate();
+		State* state = State::GetFromIsolate(isolate);
 
 		// check if the constructor called from NewInstance()
 		{
@@ -150,9 +153,9 @@ struct ConstructorThunk
 		// check that function is called with 'new'
 		if(!info.IsConstructCall())
 		{
-			v8::ThrowException(
+			isolate->ThrowException(
 				v8::Exception::Error(
-					v8::String::New("Class constructor should be called with 'new'")));
+					v8::String::NewFromUtf8(isolate, "Class constructor should be called with 'new'")));
 			return;
 		}
 
@@ -163,7 +166,7 @@ struct ConstructorThunk
 			ReturnType object = Meta::CallableConstructor<CalleeType>::Call(Args(argGettingState));
 
 			// store a pointer to the object
-			instance->SetInternalField(0, v8::External::New(object));
+			instance->SetInternalField(0, v8::External::New(isolate, object));
 
 			// register instance in state
 			state->InternalRegisterInstance(
@@ -178,9 +181,9 @@ struct ConstructorThunk
 			stream << Meta::MetaOf<MetaProvider, ClassType>()->GetFullName();
 			stream << " instance constructor failed:\n";
 			MakePointer(exception)->PrintStack(stream);
-			v8::ThrowException(
+			isolate->ThrowException(
 				v8::Exception::Error(
-					v8::String::New(stream.str().c_str())));
+					v8::String::NewFromUtf8(isolate, stream.str().c_str())));
 		}
 	}
 };

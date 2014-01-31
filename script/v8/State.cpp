@@ -12,7 +12,7 @@ State::State()
 {
 	// create isolate
 	isolate = v8::Isolate::New();
-	isolate->SetData(this);
+	isolate->SetData(0, this);
 
 	v8::Isolate::Scope isolateScope(isolate);
 
@@ -46,7 +46,7 @@ State::~State()
 		instances.clear();
 	}
 
-	context.Dispose();
+	context.Reset();
 	isolate->Dispose();
 }
 
@@ -76,10 +76,10 @@ v8::Local<v8::FunctionTemplate> State::GetClassTemplate(MetaProvider::ClassBase*
 	// register class
 
 	// create template for global class object
-	v8::Local<v8::FunctionTemplate> classTemplate = v8::FunctionTemplate::New();
+	v8::Local<v8::FunctionTemplate> classTemplate = v8::FunctionTemplate::New(isolate);
 
 	// set a name of the class
-	classTemplate->SetClassName(v8::String::New(classMeta->GetFullName()));
+	classTemplate->SetClassName(v8::String::NewFromUtf8(isolate, classMeta->GetFullName()));
 
 	// inherit from parent class
 	MetaProvider::ClassBase* parentClassMeta = classMeta->GetParent();
@@ -108,8 +108,8 @@ v8::Local<v8::FunctionTemplate> State::GetClassTemplate(MetaProvider::ClassBase*
 		MetaProvider::FunctionBase* function = staticMethods[i];
 
 		classTemplate->Set(
-			v8::String::New(function->GetName()),
-			v8::FunctionTemplate::New(function->GetThunk())
+			v8::String::NewFromUtf8(isolate, function->GetName()),
+			v8::FunctionTemplate::New(isolate, function->GetThunk())
 		);
 	}
 
@@ -121,8 +121,8 @@ v8::Local<v8::FunctionTemplate> State::GetClassTemplate(MetaProvider::ClassBase*
 		MetaProvider::MethodBase* method = methods[i];
 
 		prototypeTemplate->Set(
-			v8::String::New(method->GetName()),
-			v8::FunctionTemplate::New(method->GetThunk())
+			v8::String::NewFromUtf8(isolate, method->GetName()),
+			v8::FunctionTemplate::New(isolate, method->GetThunk())
 		);
 	}
 
@@ -144,7 +144,11 @@ v8::Local<v8::FunctionTemplate> State::GetClassTemplate(MetaProvider::ClassBase*
 			for(j = i + 1; fullName[j] && fullName[j] != '.'; ++j);
 
 			// get a part of the name
-			v8::Local<v8::String> pathPart = v8::String::New(fullName + i, j - i);
+			v8::Local<v8::String> pathPart = v8::String::NewFromUtf8(
+				isolate,
+				fullName + i,
+				v8::String::kNormalString,
+				j - i);
 
 			// if this is a last part
 			if(!fullName[j])
@@ -161,7 +165,7 @@ v8::Local<v8::FunctionTemplate> State::GetClassTemplate(MetaProvider::ClassBase*
 				v8::Local<v8::Value> nextContainer = container->Get(pathPart);
 				if(nextContainer->IsUndefined())
 				{
-					nextContainer = v8::Object::New();
+					nextContainer = v8::Object::New(isolate);
 					container->Set(pathPart, nextContainer);
 				}
 
@@ -225,7 +229,7 @@ void State::InternalReclaimInstance(Instances::iterator i)
 {
 	// clear reference to it from script
 	v8::Local<v8::Object> instance = v8::Local<v8::Object>::New(isolate, *i->second.second);
-	instance->SetInternalField(0, v8::External::New(0));
+	instance->SetInternalField(0, v8::External::New(isolate, 0));
 
 	// destroy persistent handle
 	i->second.second->Reset();
@@ -316,7 +320,7 @@ v8::Local<v8::Object> State::ConvertObject(MetaProvider::ClassBase* classMeta, R
 	v8::Local<v8::FunctionTemplate> classTemplate = GetClassTemplate(classMeta);
 
 	// wrap object into external
-	v8::Local<v8::Value> external = v8::External::New(object);
+	v8::Local<v8::Value> external = v8::External::New(isolate, object);
 
 	// create an instance of the class
 	// constructor thunk is called
@@ -337,7 +341,7 @@ State* State::GetCurrent()
 
 State* State::GetFromIsolate(v8::Isolate* isolate)
 {
-	return (State*)isolate->GetData();
+	return (State*)isolate->GetData(0);
 }
 
 ptr<Script::Function> State::LoadScript(ptr<File> file)
@@ -347,8 +351,10 @@ ptr<Script::Function> State::LoadScript(ptr<File> file)
 	v8::TryCatch tryCatch;
 
 	v8::Local<v8::Script> script = v8::Script::Compile(
-		v8::String::New(
+		v8::String::NewFromUtf8(
+			isolate,
 			(const char*)file->GetData(),
+			v8::String::kNormalString,
 			file->GetSize()));
 
 	ProcessErrors(tryCatch);
@@ -404,13 +410,13 @@ ptr<Script::Any> State::NewString(const String& string)
 ptr<Script::Any> State::NewArray(int length)
 {
 	Scope scope(this);
-	return CreateAny(v8::Array::New(length));
+	return CreateAny(v8::Array::New(isolate, length));
 }
 
 ptr<Script::Any> State::NewDict()
 {
 	Scope scope(this);
-	return CreateAny(v8::Object::New());
+	return CreateAny(v8::Object::New(isolate));
 }
 
 END_INANITY_V8

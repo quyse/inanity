@@ -21,7 +21,7 @@ struct Value<bool>
 
 	static inline v8::Local<v8::Value> To(bool value)
 	{
-		return v8::Boolean::New(value);
+		return v8::Boolean::New(State::GetCurrent()->GetIsolate(), value);
 	}
 };
 
@@ -37,7 +37,7 @@ struct Value<int>
 
 	static inline v8::Local<v8::Value> To(int value)
 	{
-		return v8::Number::New((double)value);
+		return v8::Number::New(State::GetCurrent()->GetIsolate(), (double)value);
 	}
 };
 
@@ -53,7 +53,7 @@ struct Value<long>
 
 	static inline v8::Local<v8::Value> To(long value)
 	{
-		return v8::Number::New((double)value);
+		return v8::Number::New(State::GetCurrent()->GetIsolate(), (double)value);
 	}
 };
 
@@ -69,7 +69,7 @@ struct Value<double>
 
 	static inline v8::Local<v8::Value> To(double value)
 	{
-		return v8::Number::New(value);
+		return v8::Number::New(State::GetCurrent()->GetIsolate(), value);
 	}
 };
 
@@ -85,7 +85,7 @@ struct Value<float>
 
 	static inline v8::Local<v8::Value> To(float value)
 	{
-		return v8::Number::New((double)value);
+		return v8::Number::New(State::GetCurrent()->GetIsolate(), (double)value);
 	}
 };
 
@@ -101,7 +101,7 @@ struct Value<unsigned int>
 
 	static inline v8::Local<v8::Value> To(unsigned int value)
 	{
-		return v8::Number::New((double)value);
+		return v8::Number::New(State::GetCurrent()->GetIsolate(), (double)value);
 	}
 };
 
@@ -117,7 +117,7 @@ struct Value<unsigned long>
 
 	static inline v8::Local<v8::Value> To(unsigned long value)
 	{
-		return v8::Number::New((double)value);
+		return v8::Number::New(State::GetCurrent()->GetIsolate(), (double)value);
 	}
 };
 
@@ -133,7 +133,7 @@ struct Value<long long>
 
 	static inline v8::Local<v8::Value> To(long long value)
 	{
-		return v8::Number::New((double)value);
+		return v8::Number::New(State::GetCurrent()->GetIsolate(), (double)value);
 	}
 };
 
@@ -149,7 +149,7 @@ struct Value<unsigned long long>
 
 	static inline v8::Local<v8::Value> To(unsigned long long value)
 	{
-		return v8::Number::New((double)value);
+		return v8::Number::New(State::GetCurrent()->GetIsolate(), (double)value);
 	}
 };
 
@@ -166,7 +166,7 @@ struct Value<const char*>
 
 	static inline v8::Local<v8::Value> To(const char* value)
 	{
-		return v8::String::New(value);
+		return v8::String::NewFromUtf8(State::GetCurrent()->GetIsolate(), value);
 	}
 };
 
@@ -183,7 +183,11 @@ struct Value<String>
 
 	static inline v8::Local<v8::Value> To(const String& value)
 	{
-		return v8::String::New(value.c_str(), (int)value.length());
+		return v8::String::NewFromUtf8(
+			State::GetCurrent()->GetIsolate(),
+			value.c_str(),
+			v8::String::kNormalString,
+			(int)value.length());
 	}
 };
 
@@ -264,7 +268,7 @@ struct Value<ptr<ObjectType> >
 		if(value)
 			return State::GetCurrent()->ConvertObject(Meta::MetaOf<MetaProvider, ObjectType>(), static_cast<RefCounted*>(&*value));
 		else
-			return v8::Null();
+			return v8::Null(State::GetCurrent()->GetIsolate());
 	}
 };
 
