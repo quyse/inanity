@@ -18,7 +18,7 @@ const char* MetaProvider::NamedCallableBase::GetName() const
 MetaProvider::ClassBase::ClassBase(const char* name, const char* fullName)
 : Meta::ClassBase<Traits>(name, fullName) {}
 
-// Instantiate all methods of base class.
+// Ensure we have all methods of Meta::ClassBase for linking.
 
 template Meta::ClassBase<MetaProvider::Traits>;
 
