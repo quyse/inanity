@@ -6,5 +6,6 @@
 #include "../../meta/impl.hpp"
 #include "../impl.hpp"
 #include "MetaProvider.ipp"
+#include "thunks.ipp"
 
 #endif

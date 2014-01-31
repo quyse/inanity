@@ -78,7 +78,7 @@ struct CalleeThunk
 
 /// Thunk for classes without constructor.
 template <typename ClassType>
-inline void DummyConstructorThunk(const v8::FunctionCallbackInfo<v8::Value>& info)
+void DummyConstructorThunk(const v8::FunctionCallbackInfo<v8::Value>& info)
 {
 	v8::Local<v8::Object> instance = info.This();
 	State* state = State::GetFromIsolate(info.GetIsolate());

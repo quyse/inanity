@@ -8,6 +8,9 @@ BEGIN_INANITY_V8
 template <typename CalleeType, CalleeType callee>
 struct CalleeThunk;
 
+template <typename ClassType>
+void DummyConstructorThunk(const v8::FunctionCallbackInfo<v8::Value>& info);
+
 template <typename CalleeType>
 struct ConstructorThunk;
 
