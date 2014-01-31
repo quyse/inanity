@@ -18,8 +18,8 @@ const char* MetaProvider::NamedCallableBase::GetName() const
 MetaProvider::ClassBase::ClassBase(const char* name, const char* fullName)
 : Meta::ClassBase<Traits>(name, fullName) {}
 
+END_INANITY_V8
+
 // Ensure we have all methods of Meta::ClassBase for linking.
 
-template Meta::ClassBase<MetaProvider::Traits>;
-
-END_INANITY_V8
+template class Inanity::Meta::ClassBase<Inanity::Script::V8::MetaProvider::Traits>;
