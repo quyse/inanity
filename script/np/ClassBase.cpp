@@ -43,8 +43,8 @@ const ClassBase::IdentifierMap& ClassBase::GetStaticMethodsByIdentifier() const
 	return staticMethodsByIdentifier;
 }
 
+END_INANITY_NP
+
 // Instantiate all methods of base class.
 
-template Meta::ClassBase<MetaProvider::Traits>;
-
-END_INANITY_NP
+template class Inanity::Meta::ClassBase<Inanity::Script::Np::MetaProvider::Traits>;
