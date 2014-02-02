@@ -20,6 +20,11 @@ Any::~Any()
 	Platform::NpapiPlugin::browserFuncs.releasevariantvalue(&variant);
 }
 
+ptr<State> Any::GetState() const
+{
+	return state;
+}
+
 NPVariant Any::GetVariant() const
 {
 	if(NPVARIANT_IS_OBJECT(variant))

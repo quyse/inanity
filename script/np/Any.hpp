@@ -28,6 +28,7 @@ public:
 	Any(ptr<State> state, NPVariant variant);
 	~Any();
 
+	ptr<State> GetState() const;
 	NPVariant GetVariant() const;
 
 	//*** Script::Any's methods.
