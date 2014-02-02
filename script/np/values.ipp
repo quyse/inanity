@@ -361,6 +361,22 @@ struct Value
 	}
 };
 
+template <typename T>
+struct Value<const T&>
+{
+	typedef T ValueType;
+
+	static inline T From(NPVariant value)
+	{
+		return ConvertFromScript<T>(State::GetCurrent()->CreateAny(value));
+	}
+
+	static inline NPVariant To(const T& value)
+	{
+		return fast_cast<Any*>(&*ConvertToScript<T>(State::GetCurrent(), value))->GetVariant();
+	}
+};
+
 END_INANITY_NP
 
 #endif
