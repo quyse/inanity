@@ -9,11 +9,7 @@
 BEGIN_INANITY_NP
 
 Any::Any(ptr<State> state, NPVariant variant)
-: state(state), variant(variant)
-{
-	if(NPVARIANT_IS_OBJECT(variant))
-		Platform::NpapiPlugin::browserFuncs.retainobject(NPVARIANT_TO_OBJECT(variant));
-}
+: state(state), variant(variant) {}
 
 Any::~Any()
 {

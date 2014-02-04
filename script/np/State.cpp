@@ -159,12 +159,32 @@ ptr<Any> State::GetRootNamespace()
 	NPObjectNamespace* wrapper = rootNamespace->GetWrapper();
 	NPVariant variant;
 	OBJECT_TO_NPVARIANT(wrapper, variant);
-	return CreateAny(variant);
+	return CreateAnyViaCopy(variant);
+}
+
+void State::DuplicateVariant(NPVariant& variant)
+{
+	if(NPVARIANT_IS_OBJECT(variant))
+		Platform::NpapiPlugin::browserFuncs.retainobject(NPVARIANT_TO_OBJECT(variant));
+	else if(NPVARIANT_IS_STRING(variant))
+	{
+		// copy string
+		NPString string = NPVARIANT_TO_STRING(variant);
+		NPUTF8* stringCopy = (NPUTF8*)Platform::NpapiPlugin::browserFuncs.memalloc(string.UTF8Length);
+		memcpy(stringCopy, string.UTF8Characters, string.UTF8Length);
+		STRINGN_TO_NPVARIANT(stringCopy, string.UTF8Length, variant);
+	}
 }
 
 ptr<Any> State::CreateAny(NPVariant variant)
 {
 	return anyPool->New(this, variant);
+}
+
+ptr<Any> State::CreateAnyViaCopy(NPVariant variant)
+{
+	DuplicateVariant(variant);
+	return CreateAny(variant);
 }
 
 NPVariant State::ConvertObject(MetaProvider::ClassBase* classMeta, RefCounted* object)
@@ -187,6 +207,7 @@ NPVariant State::ConvertObject(MetaProvider::ClassBase* classMeta, RefCounted* o
 			// found an object
 			NPVariant variant;
 			OBJECT_TO_NPVARIANT(i->second, variant);
+			DuplicateVariant(variant);
 			return variant;
 		}
 

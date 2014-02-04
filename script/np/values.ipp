@@ -270,20 +270,14 @@ struct Value<ptr<Script::Any> >
 
 	static inline ptr<Script::Any> From(NPVariant value)
 	{
-		if(NPVARIANT_IS_STRING(value))
-		{
-			// copy string
-			NPString string = NPVARIANT_TO_STRING(value);
-			char* mem = (char*)Platform::NpapiPlugin::browserFuncs.memalloc(string.UTF8Length);
-			memcpy(mem, string.UTF8Characters, string.UTF8Length);
-			STRINGN_TO_NPVARIANT(mem, string.UTF8Length, value);
-		}
-		return State::GetCurrent()->CreateAny(value);
+		return State::GetCurrent()->CreateAnyViaCopy(value);
 	}
 
 	static inline NPVariant To(ptr<Script::Any> value)
 	{
-		return fast_cast<Any*>(&*value)->GetVariant();
+		NPVariant variant = fast_cast<Any*>(&*value)->GetVariant();
+		State::DuplicateVariant(variant);
+		return variant;
 	}
 };
 
@@ -352,12 +346,14 @@ struct Value
 
 	static inline T From(NPVariant value)
 	{
-		return ConvertFromScript<T>(State::GetCurrent()->CreateAny(value));
+		return ConvertFromScript<T>(State::GetCurrent()->CreateAnyViaCopy(value));
 	}
 
 	static inline NPVariant To(const T& value)
 	{
-		return fast_cast<Any*>(&*ConvertToScript<T>(State::GetCurrent(), value))->GetVariant();
+		NPVariant variant = fast_cast<Any*>(&*ConvertToScript<T>(State::GetCurrent(), value))->GetVariant();
+		State::DuplicateVariant(variant);
+		return variant;
 	}
 };
 
@@ -368,12 +364,14 @@ struct Value<const T&>
 
 	static inline T From(NPVariant value)
 	{
-		return ConvertFromScript<T>(State::GetCurrent()->CreateAny(value));
+		return ConvertFromScript<T>(State::GetCurrent()->CreateAnyViaCopy(value));
 	}
 
 	static inline NPVariant To(const T& value)
 	{
-		return fast_cast<Any*>(&*ConvertToScript<T>(State::GetCurrent(), value))->GetVariant();
+		NPVariant variant = fast_cast<Any*>(&*ConvertToScript<T>(State::GetCurrent(), value))->GetVariant();
+		State::DuplicateVariant(variant);
+		return variant;
 	}
 };
 

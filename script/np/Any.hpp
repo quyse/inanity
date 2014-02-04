@@ -21,10 +21,8 @@ private:
 
 public:
 	/// Create any value from NPVariant.
-	/** If variant represents object, its reference count
-	increases by one. If variant represents string,
-	it doesn't copy, but in dtor it's freed, so it should
-	be allocated with NPAPI allocation functions. */
+	/** Any onws value it got, and will free it in its dtor.
+	No reference increment is performed in ctor. */
 	Any(ptr<State> state, NPVariant variant);
 	~Any();
 

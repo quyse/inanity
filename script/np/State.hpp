@@ -88,7 +88,15 @@ public:
 
 	ptr<Any> GetRootNamespace();
 
+	static void DuplicateVariant(NPVariant& variant);
+
+	/// Create any from specified NPVariant.
+	/** No extra references will be made. */
 	ptr<Any> CreateAny(NPVariant variant);
+	/// Create any from specified NPVariant.
+	/** Extra reference will be made for object,
+	string will be copied. */
+	ptr<Any> CreateAnyViaCopy(NPVariant variant);
 	NPVariant ConvertObject(MetaProvider::ClassBase* classMeta, RefCounted* object);
 	template <typename T>
 	ptr<Any> WrapObject(ptr<T> object)
