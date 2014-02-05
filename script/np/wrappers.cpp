@@ -219,9 +219,8 @@ bool NPClassNamespace::npGetProperty(NPObject *npobj, NPIdentifier name, NPVaria
 	Namespace::Namespaces::const_iterator i = namespaces.find(name);
 	if(i != namespaces.end())
 	{
-		NPObjectNamespace* propertyWrapper = i->second->GetWrapper();
-		Platform::NpapiPlugin::browserFuncs.retainobject(propertyWrapper);
-		OBJECT_TO_NPVARIANT(propertyWrapper, *result);
+		OBJECT_TO_NPVARIANT(i->second->GetWrapper(), *result);
+		State::DuplicateVariant(*result);
 		return true;
 	}
 	return false;
