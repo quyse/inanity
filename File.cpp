@@ -18,7 +18,7 @@ ptr<File> File::Slice(size_t offset, size_t size)
 	return NEW(PartFile(this, offset, size));
 }
 
-ptr<File> File::SliceAt(size_t offset)
+ptr<File> File::SliceFrom(size_t offset)
 {
 	return Slice(offset, GetSize() - offset);
 }

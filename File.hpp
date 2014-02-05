@@ -23,7 +23,7 @@ public:
 
 	/// Returns a part of the file.
 	ptr<File> Slice(size_t offset, size_t size);
-	ptr<File> SliceAt(size_t offset);
+	ptr<File> SliceFrom(size_t offset);
 
 	/// Concatenate files.
 	ptr<File> Concat(ptr<File> other);

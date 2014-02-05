@@ -9,6 +9,7 @@ META_CLASS_END();
 META_CLASS(Inanity::File, Inanity.File);
 	META_METHOD(GetSize);
 	META_METHOD(Slice);
+	META_METHOD(SliceFrom);
 META_CLASS_END();
 
 #include "FileSystem.hpp"
