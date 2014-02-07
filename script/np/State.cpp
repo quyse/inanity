@@ -129,14 +129,19 @@ NPObjectWrapper* State::CreateNPObjectWrapper()
 
 void State::InvalidateNPObjectWrapper(NPObjectWrapper* wrapper)
 {
+	if(!wrapper->object)
+		return;
+
 	std::pair<Instances::iterator, Instances::iterator> range = instances.equal_range(wrapper->object);
 	for(Instances::iterator i = range.first; i != range.second; ++i)
 		if(i->second == wrapper)
 		{
 			instances.erase(i);
 			wrapper->object = nullptr;
-			break;
+			return;
 		}
+
+	THROW("No NPObject to invalidate");
 }
 
 void State::DeleteNPObjectWrapper(NPObjectWrapper* wrapper)

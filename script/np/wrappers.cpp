@@ -26,6 +26,7 @@ NPObject* NPClassWrapper::npAllocate(NPP npp, NPClass *aClass)
 void NPClassWrapper::npDeallocate(NPObject *npobj)
 {
 	NPObjectWrapper* wrapper = static_cast<NPObjectWrapper*>(npobj);
+	wrapper->state->InvalidateNPObjectWrapper(wrapper);
 	wrapper->state->DeleteNPObjectWrapper(wrapper);
 }
 
