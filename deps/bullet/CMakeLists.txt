@@ -1,0 +1,11 @@
+set(BUILD_CPU_DEMOS OFF CACHE BOOL "")
+set(BUILD_DEMOS OFF CACHE BOOL "")
+set(BUILD_EXTRAS OFF CACHE BOOL "")
+set(BUILD_MINICL_OPENCL_DEMOS OFF CACHE BOOL "")
+set(BUILD_MULTITHREADING OFF CACHE BOOL "")
+
+add_subdirectory(repo dep-bullet)
+add_library(inanity-dep-bullet-linearmath ALIAS LinearMath)
+add_library(inanity-dep-bullet-collision ALIAS BulletCollision)
+add_library(inanity-dep-bullet-dynamics ALIAS BulletDynamics)
+add_library(inanity-dep-bullet-softbody ALIAS BulletSoftBody)
