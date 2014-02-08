@@ -202,6 +202,7 @@ IF(MSVC)
 	
 	ENDIF (NOT USE_MSVC_INCREMENTAL_LINKING)
 
+	IF(0)
 	IF (NOT USE_MSVC_RUNTIME_LIBRARY_DLL)
 		#We statically link to reduce dependancies
 		FOREACH(flag_var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
@@ -213,6 +214,7 @@ IF(MSVC)
 			ENDIF(${flag_var} MATCHES "/MDd")
 		ENDFOREACH(flag_var)
 	ENDIF (NOT USE_MSVC_RUNTIME_LIBRARY_DLL)
+	ENDIF(0)
 
 	IF (CMAKE_CL_64)
 	  ADD_DEFINITIONS(-D_WIN64)
@@ -429,7 +431,7 @@ list (APPEND BULLET_LIBRARIES BulletCollisions)
 list (APPEND BULLET_LIBRARIES BulletDynamics)
 list (APPEND BULLET_LIBRARIES BulletSoftBody)
 set (BULLET_USE_FILE ${CMAKE_INSTALL_PREFIX}/${BULLET_CONFIG_CMAKE_PATH}/UseBullet.cmake)
-configure_file ( ${CMAKE_SOURCE_DIR}/BulletConfig.cmake.in
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/BulletConfig.cmake.in
                  ${CMAKE_CURRENT_BINARY_DIR}/BulletConfig.cmake
                  @ONLY ESCAPE_QUOTES
                )
