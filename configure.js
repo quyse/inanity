@@ -29,6 +29,7 @@ var libraries = {
 		'Object', 'ManagedHeap', 'Strings', 'StringTraveler', 'Exception',
 		'MemoryPool', 'ChunkPool', 'PoolObject',
 		'Time', 'Ticker',
+		'Log',
 		'Profiling',
 		'Thread', 'CriticalSection', 'CriticalCode', 'Semaphore',
 		'File', 'EmptyFile', 'PartFile', 'MemoryFile',
