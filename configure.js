@@ -145,7 +145,7 @@ var libraries = {
 			'graphics.ShaderCache',
 			'graphics.PixelFormat', 'graphics.RawTextureData', 'graphics.TextureManager',
 			'graphics.EditableFont', 'graphics.Font', 'graphics.FontManager', 'graphics.TextDrawer',
-			'graphics.BmpImage', 'graphics.PngImageLoader'
+			'graphics.BmpImage', 'graphics.PngImageLoader', 'graphics.TgaImageLoader'
 		]
 	},
 	// ******* подсистема DirectX 11

@@ -3,6 +3,7 @@
 #include "Texture.hpp"
 #include "BmpImage.hpp"
 #include "PngImageLoader.hpp"
+#include "TgaImageLoader.hpp"
 #include "RawTextureData.hpp"
 #include "../ResourceManager.ipp"
 #include "../File.hpp"
@@ -15,6 +16,7 @@ TextureManager::TextureManager(ptr<FileSystem> fileSystem, ptr<Device> device, c
 {
 	imageLoaders["bmp"] = BmpImage::CreateLoader();
 	imageLoaders["png"] = NEW(PngImageLoader());
+	imageLoaders["tga"] = NEW(TgaImageLoader());
 }
 
 ptr<Texture> TextureManager::Load(const String& textureName)
