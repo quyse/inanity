@@ -248,10 +248,10 @@ var libraries = {
 
 var executables = {
 	archi: {
-		objects: ['archi.main', 'archi.BlobCreator', /*'archi.FontCreator',*/ /*'archi.SimpleGeometryCreator',*/
+		objects: ['archi.main', 'archi.Vertex', 'archi.BlobCreator', /*'archi.FontCreator',*/ /*'archi.SimpleGeometryCreator',*/
 			'archi.SystemFontCreator', 'archi.WavefrontObj', /*'archi.XafConverter'*/ 'archi.SkeletonConverter',
-			'archi.BoneAnimationConverter'],
-		staticLibraries: ['libinanity-base', 'libinanity-data', 'libinanity-graphics', 'libinanity-platform'],
+			'archi.BoneAnimationConverter', 'archi.AssimpConvertor'],
+		staticLibraries: ['libinanity-base', 'libinanity-data', 'libinanity-graphics', 'libinanity-platform', 'deps/assimp//libassimp', 'deps/zlib//libz'],
 		dynamicLibraries: ['user32.lib', 'gdi32.lib', 'comdlg32.lib']
 	}
 	, adapterstest: {

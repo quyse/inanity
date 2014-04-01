@@ -6,6 +6,7 @@
 //#include "XafConverter.hpp"
 #include "SkeletonConverter.hpp"
 #include "BoneAnimationConverter.hpp"
+#include "AssimpConvertor.hpp"
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -35,7 +36,8 @@ int wmain(int argc, const wchar_t** argv)
 //		NEW(SimpleGeometryCreator()),
 		NEW(SystemFontCreator()),
 		NEW(SkeletonConverter()),
-		NEW(BoneAnimationConverter())
+		NEW(BoneAnimationConverter()),
+		NEW(AssimpConvertor())
 	};
 	const size_t processorsCount = sizeof(processors) / sizeof(processors[0]);
 
