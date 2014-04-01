@@ -24,6 +24,7 @@ All third-party software are placed under `/deps` directory.
 * [lz4](https://code.google.com/p/lz4/) - BSD license
 * [npapi](https://code.google.com/p/npapi-sdk/) - Mozilla Public License 1.1
 * [fcgi](http://www.fastcgi.com) - BSD-style license (see `/deps/fcgi/LICENSE.TERMS`)
+* [assimp](http://assimp.sourceforge.net/) - BSD license (see `/deps/assimp/repo/LICENSE`)
 
 ## Other used third-party software
 

@@ -10,3 +10,6 @@
 [submodule "deps/http-parser/repo"]
 	path = deps/http-parser/repo
 	url = git://github.com/joyent/http-parser.git
+[submodule "deps/assimp/repo"]
+	path = deps/assimp/repo
+	url = git://github.com/assimp/assimp.git
