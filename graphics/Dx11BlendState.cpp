@@ -34,6 +34,14 @@ D3D11_BLEND Dx11BlendState::ConvertColorSource(ColorSource colorSource)
 		r = D3D11_BLEND_DEST_ALPHA; break;
 	case colorSourceInvDestAlpha:
 		r = D3D11_BLEND_INV_DEST_ALPHA; break;
+	case colorSourceSecondSrc:
+		r = D3D11_BLEND_SRC1_COLOR; break;
+	case colorSourceInvSecondSrc:
+		r = D3D11_BLEND_INV_SRC1_COLOR; break;
+	case colorSourceSecondSrcAlpha:
+		r = D3D11_BLEND_SRC1_ALPHA; break;
+	case colorSourceInvSecondSrcAlpha:
+		r = D3D11_BLEND_INV_SRC1_ALPHA; break;
 	default:
 		THROW("Unknown color source");
 	}
@@ -57,6 +65,10 @@ D3D11_BLEND Dx11BlendState::ConvertAlphaSource(AlphaSource alphaSource)
 		r = D3D11_BLEND_DEST_ALPHA; break;
 	case alphaSourceInvDest:
 		r = D3D11_BLEND_INV_DEST_ALPHA; break;
+	case alphaSourceSecondSrc:
+		r = D3D11_BLEND_SRC1_ALPHA; break;
+	case alphaSourceInvSecondSrc:
+		r = D3D11_BLEND_INV_SRC1_ALPHA; break;
 	default:
 		THROW("Unknown alpha source");
 	}

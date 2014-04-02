@@ -27,7 +27,11 @@ public:
 		colorSourceDest,
 		colorSourceInvDest,
 		colorSourceDestAlpha,
-		colorSourceInvDestAlpha
+		colorSourceInvDestAlpha,
+		colorSourceSecondSrc,
+		colorSourceInvSecondSrc,
+		colorSourceSecondSrcAlpha,
+		colorSourceInvSecondSrcAlpha
 	};
 
 	/// Источник альфа-значения.
@@ -38,7 +42,9 @@ public:
 		alphaSourceSrc,
 		alphaSourceInvSrc,
 		alphaSourceDest,
-		alphaSourceInvDest
+		alphaSourceInvDest,
+		alphaSourceSecondSrc,
+		alphaSourceInvSecondSrc
 	};
 
 	/// Операция.

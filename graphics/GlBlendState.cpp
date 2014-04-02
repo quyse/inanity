@@ -20,6 +20,10 @@ GLenum GlBlendState::ConvertColorSource(ColorSource colorSource)
 	case colorSourceInvDest: cs = GL_ONE_MINUS_DST_COLOR; break;
 	case colorSourceDestAlpha: cs = GL_DST_ALPHA; break;
 	case colorSourceInvDestAlpha: cs = GL_ONE_MINUS_DST_ALPHA; break;
+	case colorSourceSecondSrc: cs = GL_SRC1_COLOR; break;
+	case colorSourceInvSecondSrc: cs = GL_ONE_MINUS_SRC1_COLOR; break;
+	case colorSourceSecondSrcAlpha: cs = GL_SRC1_ALPHA; break;
+	case colorSourceInvSecondSrcAlpha: cs = GL_ONE_MINUS_SRC1_ALPHA; break;
 	default:
 		THROW("Unknown blend state color source");
 	}
@@ -37,6 +41,8 @@ GLenum GlBlendState::ConvertAlphaSource(AlphaSource alphaSource)
 	case alphaSourceInvSrc: as = GL_ONE_MINUS_SRC_ALPHA; break;
 	case alphaSourceDest: as = GL_DST_ALPHA; break;
 	case alphaSourceInvDest: as = GL_ONE_MINUS_DST_ALPHA; break;
+	case alphaSourceSecondSrc: as = GL_SRC1_ALPHA; break;
+	case alphaSourceInvSecondSrc: as = GL_ONE_MINUS_SRC1_ALPHA; break;
 	default:
 		THROW("Unknown blend state alpha source");
 	}
