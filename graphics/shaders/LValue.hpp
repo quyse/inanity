@@ -16,6 +16,10 @@ public:
 	/// Оператор присваивания.
 	Value<ValueType> operator=(LValue<ValueType> a);
 	Value<ValueType> operator=(Value<ValueType> a);
+
+	/// Перестановка компонент (для вектора).
+	template <int n>
+	LValue<typename SwizzleHelper<ValueType, n>::Type> operator[](const char (&map)[n]);
 };
 
 END_INANITY_SHADERS

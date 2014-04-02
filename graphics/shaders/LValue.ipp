@@ -22,6 +22,13 @@ Value<ValueType> LValue<ValueType>::operator=(Value<ValueType> a)
 	return Value<ValueType>(NEW(OperationNode(OperationNode::operationAssign, this->GetNode(), a.GetNode())));
 }
 
+template <typename ValueType>
+template <int n>
+inline LValue<typename SwizzleHelper<ValueType, n>::Type> LValue<ValueType>::operator[](const char (&map)[n])
+{
+	return LValue<typename SwizzleHelper<ValueType, n>::Type>(NEW(SwizzleNode(node, map)));
+}
+
 END_INANITY_SHADERS
 
 #endif
