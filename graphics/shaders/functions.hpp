@@ -57,6 +57,14 @@ inline Value<T> length(Value<xvec<T, n> > a) { return OP1(Length); }
 template <typename T, int n>
 inline Value<xvec<T, n> > normalize(Value<xvec<T, n> > a) { return OP1(Normalize); }
 
+// lerp
+template <typename T, int n>
+inline Value<xvec<T, n> > lerp(Value<xvec<T, n> > a, Value<xvec<T, n> > b, Value<xvec<T, n> > c) { return OP3(Lerp); }
+template <typename T, int n>
+inline Value<xvec<T, n> > lerp(Value<xvec<T, n> > a, Value<xvec<T, n> > b, Value<T> c) { return OP3(Lerp); }
+template <typename T>
+inline Value<T> lerp(Value<T> a, Value<T> b, Value<T> c) { return OP3(Lerp); }
+
 // pow
 template <typename T>
 inline Value<T> pow(Value<T> a, Value<T> b) { return OP2(Pow); }
