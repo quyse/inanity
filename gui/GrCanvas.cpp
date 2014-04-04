@@ -181,7 +181,7 @@ ptr<FontGlyphs> GrCanvas::CreateGlyphs(
 			);
 	}
 
-	return NEW(GrFontGlyphs(texture, glyphs));
+	return NEW(GrFontGlyphs(glyphInfos, texture, glyphs));
 
 	END_TRY("Can't create graphics font glyphs");
 }

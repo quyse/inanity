@@ -16,13 +16,11 @@ class SwFontGlyphs : public FontGlyphs
 {
 private:
 	ptr<Graphics::RawTextureData> image;
-	GlyphInfos glyphInfos;
 
 public:
-	SwFontGlyphs(ptr<Graphics::RawTextureData> image, const GlyphInfos& glyphInfos);
+	SwFontGlyphs(const GlyphInfos& glyphInfos, ptr<Graphics::RawTextureData> image);
 
 	ptr<Graphics::RawTextureData> GetImage() const;
-	const GlyphInfos& GetGlyphInfos() const;
 };
 
 END_INANITY_GUI

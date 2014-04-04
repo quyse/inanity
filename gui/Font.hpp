@@ -13,6 +13,22 @@ class Canvas;
 /// Class combines FontShape and FontGlyphs.
 class Font : public Object
 {
+public:
+	enum TextOriginFlags
+	{
+		textOriginHorizontalMask = 0x03,
+		textOriginPen = 0x00,
+		textOriginLeft = 0x01,
+		textOriginCenter = 0x02,
+		textOriginRight = 0x03,
+
+		textOriginVerticalMask = 0x0C,
+		textOriginBaseline = 0x00,
+		textOriginTop = 0x04,
+		textOriginMiddle = 0x08,
+		textOriginBottom = 0x0C
+	};
+
 private:
 	ptr<FontShape> shape;
 	ptr<FontGlyphs> glyphs;
@@ -24,7 +40,12 @@ public:
 	ptr<FontShape> GetShape() const;
 	ptr<FontGlyphs> GetGlyphs() const;
 
-	void DrawString(Canvas* canvas, const String& text, const Graphics::vec2& position, const Graphics::vec4& color);
+	void DrawString(
+		Canvas* canvas,
+		const String& text,
+		const Graphics::vec2& position,
+		const Graphics::vec4& color,
+		int textOriginFlags = textOriginPen | textOriginBaseline);
 };
 
 END_INANITY_GUI

@@ -13,7 +13,7 @@ HbFontShape::~HbFontShape()
 	hb_font_destroy(font);
 }
 
-void HbFontShape::Shape(const String& text, vec2* outSize, std::vector<OutGlyph>* outGlyphs)
+void HbFontShape::Shape(const String& text, vec2* outAdvance, std::vector<OutGlyph>* outGlyphs)
 {
 	// shape text, and get glyph numbers and offsets
 	hb_buffer_t* buffer = hb_buffer_create();
@@ -46,25 +46,13 @@ void HbFontShape::Shape(const String& text, vec2* outSize, std::vector<OutGlyph>
 			outGlyphs->push_back(outGlyph);
 		}
 
-		// calculate bounds
-		if(i)
-		{
-			minBounds = std::min(minBounds, glyphPosition);
-			maxBounds = std::max(maxBounds, glyphPosition);
-		}
-		else
-		{
-			minBounds = glyphPosition;
-			maxBounds = glyphPosition;
-		}
-
 		// advance to next glyph
 		position.x += float(glyphPositions[i].x_advance) / 64;
 		position.y += float(glyphPositions[i].y_advance) / 64;
 	}
 
-	if(outSize)
-		*outSize = maxBounds - minBounds;
+	if(outAdvance)
+		*outAdvance = position;
 
 	// cleanup
 	hb_buffer_destroy(buffer);

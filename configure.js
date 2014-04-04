@@ -232,7 +232,7 @@ var libraries = {
 			'gui.Element', 'gui.ContainerElement', 'gui.FreeContainer', 'gui.ContentContainer',
 			'gui.Window', 'gui.Label', 'gui.Button', 'gui.TextBox',
 			'gui.Visualizer',
-			'gui.Font', 'gui.Canvas',
+			'gui.Font', 'gui.Canvas', 'gui.FontGlyphs',
 			// software
 			'gui.SwCanvas', 'gui.SwFontGlyphs',
 			// graphics
