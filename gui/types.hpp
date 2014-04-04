@@ -15,6 +15,9 @@ typedef Math::xvec<Distance, 2> Position;
 /// GUI size type.
 typedef Math::xvec<Distance, 2> Size;
 
+/// GUI color type.
+typedef Math::vec4 Color;
+
 /// Input mouse event type.
 /** Contains:
 enum Type

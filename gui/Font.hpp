@@ -33,6 +33,10 @@ private:
 	ptr<FontShape> shape;
 	ptr<FontGlyphs> glyphs;
 	std::vector<FontShape::OutGlyph> outGlyphs;
+	/// Bounds of shaped glyphs.
+	float left, top, right, bottom;
+
+	void InternalShape(const String& text);
 
 public:
 	Font(ptr<FontShape> shape, ptr<FontGlyphs> glyphs);
@@ -46,6 +50,8 @@ public:
 		const Graphics::vec2& position,
 		const Graphics::vec4& color,
 		int textOriginFlags = textOriginPen | textOriginBaseline);
+
+	Graphics::vec2 GetStringSize(const String& text);
 };
 
 END_INANITY_GUI
