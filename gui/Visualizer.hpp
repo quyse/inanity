@@ -3,7 +3,6 @@
 
 #include "types.hpp"
 #include "Visuals.hpp"
-#include "../graphics/FontAlignment.hpp"
 #include "../String.hpp"
 
 BEGIN_INANITY_GUI
