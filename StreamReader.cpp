@@ -52,10 +52,10 @@ size_t StreamReader::ReadShortly()
 
 bigsize_t StreamReader::ReadShortlyBig()
 {
-	//считать первый байт
-	bigsize_t first = Read<unsigned char>();
-	//определить длину дополнительной части числа
-	size_t length;
+	// read first byte
+	unsigned char first = Read<unsigned char>();
+	// determine additional length
+	int length;
 	if(!(first & 0x80))
 		//дополнительной части нет, можно сразу вернуть ответ
 		return first;
@@ -99,11 +99,17 @@ bigsize_t StreamReader::ReadShortlyBig()
 		length = 8;
 		first &= ~0xFF;
 	}
-	//считать дополнительную часть числа
-	bigsize_t a = 0;
-	Read(&a, length);
-	//вернуть результат
-	return a | (first << (length * 8));
+
+	// read additional bytes
+	unsigned char bytes[8];
+	Read(bytes, length);
+
+	// calculate result
+	bigsize_t result = ((bigsize_t)first) << (length * 8);
+	for(int i = 0; i < length; ++i)
+		result |= ((bigsize_t)bytes[i]) << ((length - 1 - i) * 8);
+
+	return result;
 }
 
 void StreamReader::ReadGap(size_t alignment)
