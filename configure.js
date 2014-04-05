@@ -108,27 +108,39 @@ var libraries = {
 		'objects-freebsd': ['input.SdlManager'],
 		'objects-emscripten': ['input.SdlManager']
 	},
+	// ******* filesystem platform
+	'libinanity-platform-filesystem': {
+		objects: [],
+		'objects-win32': [
+			'platform.Win32Handle', 'platform.Win32FileSystem'
+		],
+		'objects-linux': [
+			'platform.PosixFileSystem'
+		],
+		'objects-freebsd': [
+			'platform.PosixFileSystem'
+		],
+		'objects-emscripten': [
+			'platform.PosixFileSystem'
+		]
+	},
 	// ******* general platform subsystem
 	'libinanity-platform': {
 		objects: ['platform.Window', 'platform.Game'],
 		'objects-win32': [
-			'platform.Win32Handle', 'platform.Win32FileSystem',
 			'platform.Win32Window',
 			'graphics.Win32Adapter', 'graphics.Win32Monitor', 'graphics.Win32MonitorMode',
 			'platform.DllCache'
 		],
 		'objects-linux': [
-			'platform.PosixFileSystem',
 			'platform.Sdl', 'platform.SdlWindow',
 			'graphics.SdlAdapter', 'graphics.SdlMonitor', 'graphics.SdlMonitorMode'
 		],
 		'objects-freebsd': [
-			'platform.PosixFileSystem',
 			'platform.Sdl', 'platform.SdlWindow',
 			'graphics.SdlAdapter', 'graphics.SdlMonitor', 'graphics.SdlMonitorMode'
 		],
 		'objects-emscripten': [
-			'platform.PosixFileSystem',
 			'platform.Sdl', 'platform.EmsWindow',
 			'graphics.EmsAdapter', 'graphics.EmsMonitor'
 		]
