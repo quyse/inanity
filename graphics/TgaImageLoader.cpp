@@ -42,10 +42,6 @@ ptr<RawTextureData> TgaImageLoader::Load(ptr<File> file)
 	if(header->imageType != 2)
 		THROW("Unsupported image type");
 
-	// check bits per pixel
-	if(header->bitsPerPixel != 24)
-		THROW("Unsupported bits per pixel value");
-
 	// check size of pixel data
 	int width = (int)header->width;
 	int height = (int)header->height;
@@ -68,13 +64,30 @@ ptr<RawTextureData> TgaImageLoader::Load(ptr<File> file)
 	// read and copy data
 	int resultPitch = textureData->GetMipLinePitch(0);
 	uint8_t* resultData = (uint8_t*)textureData->GetMipData(0, 0);
-	for(int i = 0; i < height; ++i)
-		for(int j = 0; j < width; ++j)
-		{
-			for(int k = 0; k < 3; ++k)
-				resultData[i * resultPitch + j * 4 + k] = pixelData[(height - i - 1) * pitch + j * 3 + 2 - k];
-			resultData[i * resultPitch + j * 4 + 3] = 255; // alpha
-		}
+
+	switch(header->bitsPerPixel)
+	{
+	case 24:
+		for(int i = 0; i < height; ++i)
+			for(int j = 0; j < width; ++j)
+			{
+				for(int k = 0; k < 3; ++k)
+					resultData[i * resultPitch + j * 4 + k] = pixelData[(height - i - 1) * pitch + j * 3 + 2 - k];
+				resultData[i * resultPitch + j * 4 + 3] = 255; // alpha
+			}
+		break;
+	case 32:
+		for(int i = 0; i < height; ++i)
+			for(int j = 0; j < width; ++j)
+			{
+				for(int k = 0; k < 3; ++k)
+					resultData[i * resultPitch + j * 4 + k] = pixelData[(height - i - 1) * pitch + j * 4 + 2 - k];
+				resultData[i * resultPitch + j * 4 + 3] = pixelData[(height - i - 1) * pitch + j * 4 + 3];
+			}
+		break;
+	default:
+		THROW("Unsupported bits per pixel value");
+	}
 
 	return textureData;
 
