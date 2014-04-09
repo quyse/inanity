@@ -71,12 +71,6 @@ inline Value<ValueType>::Value(ptr<AttributeLayoutElement> element)
 : Expression(NEW(AttributeNode(element))) {}
 
 template <typename ValueType>
-inline void Value<ValueType>::operator=(Value<ValueType> a)
-{
-	// реализация не требуется, оператор здесь для запрета присваивания
-}
-
-template <typename ValueType>
 template <int n>
 inline Value<typename SwizzleHelper<ValueType, n>::Type> Value<ValueType>::operator[](const char (&map)[n])
 {

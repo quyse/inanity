@@ -14,8 +14,8 @@ public:
 	LValue(ptr<Node> node);
 
 	/// Оператор присваивания.
-	Value<ValueType> operator=(LValue<ValueType> a);
-	Value<ValueType> operator=(Value<ValueType> a);
+	LValue& operator=(const LValue<ValueType>&) = delete;
+	Value<ValueType> operator=(const Value<ValueType>& a);
 
 	/// Перестановка компонент (для вектора).
 	template <int n>

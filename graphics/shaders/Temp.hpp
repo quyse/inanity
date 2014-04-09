@@ -13,7 +13,8 @@ public:
 	Temp();
 
 	/// Явный оператор присваивания.
-	Value<ValueType> operator=(Value<ValueType> a);
+	Value<ValueType> operator=(const Temp& a);
+	Value<ValueType> operator=(const Value<ValueType>& a);
 };
 
 END_INANITY_SHADERS
