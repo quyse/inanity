@@ -43,37 +43,36 @@ void StreamWriter::WriteShortly(size_t data)
 11111110 - длина равна 8 байтам.
 11111111 - длина равна 9 байтам.
 При этом в первом байте записывается старший байт числа, а в последующих -
-оставшиеся байты числа, в порядке x86. То есть весь формат выглядит, как
-low-endian, с переставленным на первое место старшим байтом.
-Максимальное представимое число - 64-битное, но оно обрезается но размера size_t.
+оставшиеся байты числа, в порядке big-endian.
+Максимальное представимое число - 64-битное.
 */
 
 void StreamWriter::WriteShortlyBig(bigsize_t data)
 {
-	//длина числа (без первого байта)
-	size_t length;
-	//первый байт
-	unsigned char first;
+	// additional length
+	int length;
+	// bytes
+	unsigned char bytes[9];
 
 	if(data < 0x80)
 	{
 		length = 0;
-		first = 0x00;
+		bytes[0] = 0x00;
 	}
 	else if(data < 0x4000)
 	{
 		length = 1;
-		first = 0x80;
+		bytes[0] = 0x80;
 	}
 	else if(data < 0x200000)
 	{
 		length = 2;
-		first = 0xC0;
+		bytes[0] = 0xC0;
 	}
 	else if(data < 0x10000000)
 	{
 		length = 3;
-		first = 0xE0;
+		bytes[0] = 0xE0;
 	}
 	// eliminate warnings about always-true comparison
 	// in case of small bigsize_t
@@ -81,40 +80,44 @@ void StreamWriter::WriteShortlyBig(bigsize_t data)
 	else if(data < 0x800000000ULL)
 	{
 		length = 4;
-		first = 0xF0;
+		bytes[0] = 0xF0;
 	}
 	else if(data < 0x40000000000ULL)
 	{
 		length = 5;
-		first = 0xF8;
+		bytes[0] = 0xF8;
 	}
 	else if(data < 0x2000000000000ULL)
 	{
 		length = 6;
-		first = 0xFC;
+		bytes[0] = 0xFC;
 	}
 	else if(data < 0x1000000000000ULL)
 	{
 		length = 7;
-		first = 0xFE;
+		bytes[0] = 0xFE;
 	}
 	else
 	{
 		length = 8;
-		first = 0xFF;
+		bytes[0] = 0xFF;
 	}
 #else
 	else
 	{
 		length = 4;
-		first = 0xF0;
+		bytes[0] = 0xF0;
 	}
 #endif
 
-	//добавить в первый байт старший байт числа, и записать первый байт
-	Write<unsigned char>((unsigned char)(first | (data >> (length * 8))));
-	//записать остальное число
-	Write(&data, length);
+	// prepare first byte
+	bytes[0] |= (unsigned char)(data >> (length * 8));
+	// prepare additional bytes
+	for(int i = 0; i < length; ++i)
+		bytes[1 + i] = (unsigned char)(data >> ((length - 1 - i) * 8));
+
+	// write
+	Write(bytes, length + 1);
 }
 
 void StreamWriter::WriteString(const String& data)

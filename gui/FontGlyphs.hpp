@@ -24,6 +24,14 @@ public:
 	};
 
 	typedef std::vector<GlyphInfo> GlyphInfos;
+
+protected:
+	GlyphInfos glyphInfos;
+
+	FontGlyphs(const GlyphInfos& glyphInfos);
+
+public:
+	const GlyphInfos& GetGlyphInfos() const;
 };
 
 END_INANITY_GUI

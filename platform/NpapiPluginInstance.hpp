@@ -60,6 +60,7 @@ protected:
 	int width, height;
 
 	NpapiPluginInstance(bool needInputManager);
+	~NpapiPluginInstance();
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
 
@@ -78,6 +79,7 @@ protected:
 	/// Redefine in derived class to perform initialization.
 	virtual void PostInit();
 
+	/// Script object which will be returned to javascript.
 	ptr<Script::Np::Any> scriptObject;
 
 	struct UrlStream;
@@ -98,6 +100,8 @@ public:
 
 	/// Make async call.
 	void AsyncCall(ptr<Handler> handler);
+	/// Invalidate visual representation.
+	void Invalidate();
 
 	//*** Internal methods.
 	void Init(NPP npp);

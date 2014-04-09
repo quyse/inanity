@@ -105,5 +105,9 @@ PixelFormat PixelFormats::floatRGB32(
 	PixelFormat::pixelRGB,
 	PixelFormat::formatFloat,
 	PixelFormat::size32bit);
+PixelFormat PixelFormats::floatRGBA64(
+	PixelFormat::pixelRGBA,
+	PixelFormat::formatFloat,
+	PixelFormat::size64bit);
 
 END_INANITY_GRAPHICS

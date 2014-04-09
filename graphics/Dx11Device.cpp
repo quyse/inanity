@@ -120,7 +120,8 @@ ptr<Dx11RenderBuffer> Dx11Device::InternalCreateRenderBuffer(int width, int heig
 		desc.Height = height;
 		desc.MipLevels = 1;
 		desc.ArraySize = 1;
-		desc.Format = Dx11System::GetDXGIFormat(pixelFormat);
+		// GDI compatibility requires B8G8R8A8 format
+		desc.Format = gdiCompatible ? DXGI_FORMAT_B8G8R8A8_UNORM : Dx11System::GetDXGIFormat(pixelFormat);
 		desc.SampleDesc.Count = 1;
 		desc.SampleDesc.Quality = 0;
 		desc.Usage = D3D11_USAGE_DEFAULT;
@@ -154,9 +155,9 @@ ptr<RenderBuffer> Dx11Device::CreateRenderBuffer(int width, int height, PixelFor
 	return InternalCreateRenderBuffer(width, height, pixelFormat, samplerSettings, false);
 }
 
-ptr<Dx11RenderBuffer> Dx11Device::CreateRenderBufferGdiCompatible(int width, int height, PixelFormat pixelFormat, const SamplerSettings& samplerSettings)
+ptr<Dx11RenderBuffer> Dx11Device::CreateRenderBufferGdiCompatible(int width, int height, const SamplerSettings& samplerSettings)
 {
-	return InternalCreateRenderBuffer(width, height, pixelFormat, samplerSettings, true);
+	return InternalCreateRenderBuffer(width, height, PixelFormats::uintRGBA32, samplerSettings, true);
 }
 
 ptr<DepthStencilBuffer> Dx11Device::CreateDepthStencilBuffer(int width, int height, bool canBeResource)

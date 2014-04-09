@@ -14,8 +14,12 @@ public:
 	LValue(ptr<Node> node);
 
 	/// Оператор присваивания.
-	Value<ValueType> operator=(LValue<ValueType> a);
-	Value<ValueType> operator=(Value<ValueType> a);
+	LValue& operator=(const LValue<ValueType>&) = delete;
+	Value<ValueType> operator=(const Value<ValueType>& a);
+
+	/// Перестановка компонент (для вектора).
+	template <int n>
+	LValue<typename SwizzleHelper<ValueType, n>::Type> operator[](const char (&map)[n]);
 };
 
 END_INANITY_SHADERS

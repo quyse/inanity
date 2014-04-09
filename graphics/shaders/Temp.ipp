@@ -12,7 +12,13 @@ Temp<ValueType>::Temp()
 {}
 
 template <typename ValueType>
-Value<ValueType> Temp<ValueType>::operator=(Value<ValueType> a)
+Value<ValueType> Temp<ValueType>::operator=(const Temp<ValueType>& a)
+{
+	return LValue<ValueType>::operator=(static_cast<const Value<ValueType>&>(a));
+}
+
+template <typename ValueType>
+Value<ValueType> Temp<ValueType>::operator=(const Value<ValueType>& a)
 {
 	return LValue<ValueType>::operator=(a);
 }

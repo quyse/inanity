@@ -39,6 +39,12 @@ NpapiPluginInstance::NpapiPluginInstance(bool needInputManager) :
 #endif
 }
 
+NpapiPluginInstance::~NpapiPluginInstance()
+{
+	if(scriptObject)
+		scriptObject->GetState()->ReclaimInstance(scriptObject);
+}
+
 #ifdef ___INANITY_PLATFORM_WINDOWS
 
 void NpapiPluginInstance::Paint(HDC hdc)
@@ -127,6 +133,16 @@ void NpapiPluginInstance::AsyncCall(ptr<Handler> handler)
 		npp,
 		&AsyncCallRoutine,
 		&*handler);
+}
+
+void NpapiPluginInstance::Invalidate()
+{
+	NPRect rect;
+	rect.top = 0;
+	rect.left = 0;
+	rect.bottom = height;
+	rect.right = width;
+	NpapiPlugin::browserFuncs.invalidaterect(npp, &rect);
 }
 
 void NpapiPluginInstance::Init(NPP npp)

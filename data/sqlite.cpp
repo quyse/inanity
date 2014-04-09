@@ -3,6 +3,7 @@
 #include "../CriticalCode.hpp"
 #include "../MemoryFile.hpp"
 #include "../Exception.hpp"
+#include <sstream>
 #include <cstring>
 
 BEGIN_INANITY_DATA
@@ -80,7 +81,9 @@ long long SqliteDb::LastInsertRowId() const
 
 ptr<Exception> SqliteDb::Error() const
 {
-	return NEW(Exception(sqlite3_errmsg(db)));
+	std::ostringstream ss;
+	ss << "SQLite error #" << sqlite3_errcode(db) << ": " << sqlite3_errmsg(db);
+	return NEW(Exception(ss.str()));
 }
 
 //*** SqliteStatement

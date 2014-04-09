@@ -77,7 +77,7 @@ public:
 	ID3D11DeviceContext* GetDeviceContextInterface() const;
 
 	/// Create RenderBuffer with possibility of getting HDC.
-	ptr<Dx11RenderBuffer> CreateRenderBufferGdiCompatible(int width, int height, PixelFormat pixelFormat, const SamplerSettings& samplerSettings);
+	ptr<Dx11RenderBuffer> CreateRenderBufferGdiCompatible(int width, int height, const SamplerSettings& samplerSettings);
 };
 
 END_INANITY_GRAPHICS

@@ -19,7 +19,7 @@ ptr<FontGlyphs> SwCanvas::CreateGlyphs(
 	const FontGlyphs::GlyphInfos& glyphInfos
 )
 {
-	return NEW(SwFontGlyphs(image, glyphInfos));
+	return NEW(SwFontGlyphs(glyphInfos, image));
 }
 
 void SwCanvas::DrawGlyph(FontGlyphs* abstractGlyphs, int glyphIndex, const vec2& penPoint, const vec4& color)

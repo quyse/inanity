@@ -39,6 +39,7 @@ public:
 		operationMul,
 		operationLength,
 		operationNormalize,
+		operationLerp,
 		operationPow,
 		operationMin,
 		operationMax,

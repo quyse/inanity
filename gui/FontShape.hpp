@@ -22,7 +22,7 @@ public:
 	};
 
 public:
-	virtual void Shape(const String& text, Graphics::vec2* outSize, std::vector<OutGlyph>* outGlyphs) = 0;
+	virtual void Shape(const String& text, Graphics::vec2* outAdvance, std::vector<OutGlyph>* outGlyphs) = 0;
 };
 
 END_INANITY_GUI

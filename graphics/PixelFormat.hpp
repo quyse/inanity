@@ -89,6 +89,7 @@ struct PixelFormats
 	static PixelFormat floatR16;
 	static PixelFormat floatR32;
 	static PixelFormat floatRGB32;
+	static PixelFormat floatRGBA64;
 };
 
 END_INANITY_GRAPHICS

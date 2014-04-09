@@ -3,17 +3,12 @@
 
 BEGIN_INANITY_GUI
 
-SwFontGlyphs::SwFontGlyphs(ptr<Graphics::RawTextureData> image, const GlyphInfos& glyphInfos)
-: image(image), glyphInfos(glyphInfos) {}
+SwFontGlyphs::SwFontGlyphs(const GlyphInfos& glyphInfos, ptr<Graphics::RawTextureData> image)
+: FontGlyphs(glyphInfos), image(image) {}
 
 ptr<Graphics::RawTextureData> SwFontGlyphs::GetImage() const
 {
 	return image;
-}
-
-const SwFontGlyphs::GlyphInfos& SwFontGlyphs::GetGlyphInfos() const
-{
-	return glyphInfos;
 }
 
 END_INANITY_GUI

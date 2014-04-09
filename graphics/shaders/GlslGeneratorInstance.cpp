@@ -423,6 +423,7 @@ void GlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 				OP(Mul, mul);
 				OP(Length, length);
 				OP(Normalize, normalize);
+				OP(Lerp, mix);
 				OP(Pow, pow);
 				OP(Min, min);
 				OP(Max, max);

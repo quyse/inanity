@@ -23,14 +23,13 @@ class SwizzleHelper;
 template <typename ValueType>
 class Value : public Expression
 {
-private:
-	/// Оператор присваивания запрещён (приватный).
-	void operator=(Value a);
-
 public:
 	Value(ptr<Node> node);
 	Value(ValueType constValue);
 	Value(ptr<AttributeLayoutElement> element);
+
+	/// Delete assignment operator.
+	Value& operator=(const Value&) = delete;
 
 	/// Преобразовать тип.
 	template <typename CastValueType>
