@@ -21,6 +21,7 @@ add_library(inanity-base STATIC
 	PoolObject.cpp
 	Time.cpp
 	Ticker.cpp
+	Log.cpp
 	Profiling.cpp
 	Thread.cpp
 	CriticalSection.cpp
@@ -126,12 +127,9 @@ add_library(inanity-graphics STATIC
 	graphics/PixelFormat.cpp
 	graphics/RawTextureData.cpp
 	graphics/TextureManager.cpp
-	graphics/EditableFont.cpp
-	graphics/Font.cpp
-	graphics/FontManager.cpp
-	graphics/TextDrawer.cpp
 	graphics/BmpImage.cpp
 	graphics/PngImageLoader.cpp
+	graphics/TgaImageLoader.cpp
 )
 
 add_library(inanity-dx11 STATIC
@@ -237,6 +235,7 @@ add_library(inanity-gui STATIC
 	gui/Visualizer.cpp
 	gui/Font.cpp
 	gui/Canvas.cpp
+	gui/FontGlyphs.cpp
 	# software
 	gui/SwCanvas.cpp
 	gui/SwFontGlyphs.cpp
