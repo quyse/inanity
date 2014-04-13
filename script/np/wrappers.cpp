@@ -62,7 +62,10 @@ bool NPClassWrapper::npInvoke(NPObject *npobj, NPIdentifier name, const NPVarian
 		const MetaProvider::ClassBase::IdentifierMap& methods = cls->GetMethodsByIdentifier();
 		MetaProvider::ClassBase::IdentifierMap::const_iterator i = methods.find(name);
 		if(i != methods.end())
+		{
+			State::Scope scope(objectWrapper->state);
 			return cls->GetMethods()[i->second]->GetThunk()(objectWrapper, args, (int)argCount, result);
+		}
 	}
 
 	return false;
@@ -184,7 +187,8 @@ bool NPClassNamespace::npHasMethod(NPObject *npobj, NPIdentifier name)
 
 bool NPClassNamespace::npInvoke(NPObject *npobj, NPIdentifier name, const NPVariant *args, uint32_t argCount, NPVariant *result)
 {
-	MetaProvider::ClassBase* classMeta = static_cast<NPObjectNamespace*>(npobj)->object->GetClassMeta();
+	NPObjectNamespace* npObjectNamespace = static_cast<NPObjectNamespace*>(npobj);
+	MetaProvider::ClassBase* classMeta = npObjectNamespace->object->GetClassMeta();
 	if(!classMeta)
 		return false;
 
@@ -194,7 +198,10 @@ bool NPClassNamespace::npInvoke(NPObject *npobj, NPIdentifier name, const NPVari
 		const MetaProvider::ClassBase::IdentifierMap& staticMethods = cls->GetStaticMethodsByIdentifier();
 		MetaProvider::ClassBase::IdentifierMap::const_iterator i = staticMethods.find(name);
 		if(i != staticMethods.end())
+		{
+			State::Scope scope(npObjectNamespace->state);
 			return cls->GetStaticMethods()[i->second]->GetThunk()(args, (int)argCount, result);
+		}
 	}
 
 	return false;
@@ -269,7 +276,8 @@ bool NPClassNamespace::npEnumerate(NPObject *npobj, NPIdentifier **value, uint32
 
 bool NPClassNamespace::npConstruct(NPObject *npobj, const NPVariant *args, uint32_t argCount, NPVariant *result)
 {
-	MetaProvider::ClassBase* classMeta = static_cast<NPObjectNamespace*>(npobj)->object->GetClassMeta();
+	NPObjectNamespace* npObjectNamespace = static_cast<NPObjectNamespace*>(npobj);
+	MetaProvider::ClassBase* classMeta = npObjectNamespace->object->GetClassMeta();
 	if(!classMeta)
 		return false;
 
@@ -277,6 +285,7 @@ bool NPClassNamespace::npConstruct(NPObject *npobj, const NPVariant *args, uint3
 	if(!constructor)
 		return false;
 
+	State::Scope scope(npObjectNamespace->state);
 	return constructor->GetThunk()(args, argCount, result);
 }
 

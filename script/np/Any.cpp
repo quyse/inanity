@@ -98,6 +98,8 @@ String Any::AsString() const
 
 ptr<Script::Any> Any::CallWith(ptr<Script::Any> arguments[], int count)
 {
+	State::Scope scope(state);
+
 	// convert args
 	NPVariant* args = (NPVariant*)alloca(sizeof(NPVariant) * count);
 	for(int i = 0; i < count; ++i)

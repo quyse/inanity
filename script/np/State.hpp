@@ -29,9 +29,6 @@ class State : public Script::State
 private:
 	Platform::NpapiPluginInstance* pluginInstance;
 
-	/// One static instance of state.
-	static State* current;
-
 	typedef std::unordered_set<NPClass*> Classes;
 	Classes classes;
 
@@ -50,8 +47,15 @@ private:
 	ptr<Namespace> rootNamespace;
 
 public:
+	class Scope
+	{
+	public:
+		Scope(State* state);
+		~Scope();
+	};
+
+public:
 	State(Platform::NpapiPluginInstance* pluginInstance);
-	~State();
 
 	static State* GetCurrent();
 
@@ -101,6 +105,7 @@ public:
 	template <typename T>
 	ptr<Any> WrapObject(ptr<T> object)
 	{
+		Scope scope(this);
 		return CreateAny(ConvertObject(Meta::MetaOf<MetaProvider, T>(), object));
 	}
 };

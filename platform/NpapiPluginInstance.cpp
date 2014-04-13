@@ -79,7 +79,7 @@ ptr<Script::Np::Any> NpapiPluginInstance::GetWindowDomObject() const
 	else
 		NULL_TO_NPVARIANT(variant);
 
-	return Script::Np::State::GetCurrent()->CreateAny(variant);
+	return scriptObject->GetState()->CreateAny(variant);
 }
 
 ptr<Script::Np::Any> NpapiPluginInstance::GetPluginDomObject() const
@@ -91,7 +91,7 @@ ptr<Script::Np::Any> NpapiPluginInstance::GetPluginDomObject() const
 	else
 		NULL_TO_NPVARIANT(variant);
 
-	return Script::Np::State::GetCurrent()->CreateAny(variant);
+	return scriptObject->GetState()->CreateAny(variant);
 }
 
 void NpapiPluginInstance::GetUrl(const String& url, ptr<ReceiveHandler> receiveHandler)

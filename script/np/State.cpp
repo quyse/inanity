@@ -9,31 +9,51 @@
 
 BEGIN_INANITY_NP
 
-State* State::current = nullptr;
+#ifdef _MSC_VER
+__declspec(thread) State* currentState = nullptr;
+__declspec(thread) int currentStateCounter = 0;
+#else
+thread_local State* currentState = nullptr;
+thread_local int currentStateCounter = 0;
+#endif
+
+State::Scope::Scope(State* state)
+{
+	if(currentStateCounter)
+	{
+		if(currentState != state)
+			THROW("Current NPAPI script state already set");
+	}
+	else
+		currentState = state;
+	++currentStateCounter;
+}
+
+State::Scope::~Scope()
+{
+	if(!--currentStateCounter)
+		currentState = nullptr;
+}
 
 State::State(Platform::NpapiPluginInstance* pluginInstance)
 : pluginInstance(pluginInstance)
 {
-	if(!current)
-		current = this;
-
 	// create pools
 	npObjectWrapperPool = NEW(TypedPool<NPObjectWrapper>());
 	npObjectNamespacePool = NEW(TypedPool<NPObjectNamespace>());
 	anyPool = NEW(ObjectPool<Any>());
 
+	Scope scope(this);
 	rootNamespace = NEW(Namespace(""));
-}
-
-State::~State()
-{
-	if(current == this)
-		current = nullptr;
 }
 
 State* State::GetCurrent()
 {
-	return current;
+#ifdef _DEBUG
+	if(!currentState)
+		THROW("No current NPAPI script state");
+#endif
+	return currentState;
 }
 
 Platform::NpapiPluginInstance* State::GetPluginInstance() const
@@ -91,6 +111,8 @@ ptr<Script::Any> State::NewDict()
 
 void State::Register(MetaProvider::ClassBase* classMeta)
 {
+	Scope scope(this);
+
 	const char* name = classMeta->GetFullName();
 	// loop for namespaces
 	ptr<Namespace> nm = rootNamespace;
