@@ -1,9 +1,10 @@
 #include "ManagedHeap.hpp"
 #ifdef ___INANITY_TRACE_HEAP
 #include "CriticalCode.hpp"
+#include "Log.hpp"
 #endif
 #include <map>
-#include <iostream>
+#include <sstream>
 #include <algorithm>
 
 BEGIN_INANITY
@@ -49,38 +50,37 @@ ManagedHeap::~ManagedHeap()
 {
 #ifdef ___INANITY_PLATFORM_WINDOWS
 
-	//удалить кучу
+	// free all heap's memory
 	HeapDestroy(heap);
 
 #endif
 
 #ifdef ___INANITY_TRACE_HEAP
 
-	//выдать отчет по памяти
-	std::cout << "======= INANITY MANAGED HEAP REPORT =======\n";
-	std::cout << "Allocations count: " << totalAllocationsCount <<  "\nAllocations size: " << totalAllocationsSize << "\n";
+	// create memory report
+	Log::Message("======= INANITY MANAGED HEAP REPORT =======");
+	Log::Message("allocations: ", totalAllocationsCount, ", total size: ", totalAllocationsSize);
 	if(allocations.size())
 	{
-#ifdef ___INANITY_PLATFORM_WINDOWS
-		Beep(750, 300);
-#endif
-		std::cout << "ATTENTION! SOME LEAKS DETECTED!\n";
-		PrintAllocations(std::cout);
+		std::ostringstream stream;
+		PrintAllocations(stream);
+		Log::Warning("ATTENTION! SOME LEAKS DETECTED!\n", stream.str());
 	}
 	else
-		std::cout << "NO LEAKS DETECTED\n";
+		Log::Message("NO LEAKS DETECTED");
 
 #ifdef ___INANITY_TRACE_PTR
 
 	if(!disableTracePtr)
 	{
-		std::cout << "======= TRACE PTR REPORT =======\n";
-		PrintPtrs(std::cout);
+		std::ostringstream stream;
+		PrintPtrs(stream);
+		Log::Message("======= TRACE PTR REPORT =======\n", stream.str());
 	}
 
 #endif
 
-	std::cout << "======= END REPORT =======\n";
+	Log::Message("======= END REPORT =======");
 
 #endif
 }
