@@ -144,7 +144,7 @@ NPClassWrapper::NPClassWrapper(MetaProvider::ClassBase* classMeta)
 
 //*** struct NPObjectNamespace
 
-NPObjectNamespace::NPObjectNamespace(ptr<State> state)
+NPObjectNamespace::NPObjectNamespace(State* state)
 : state(state) {}
 
 //*** struct NPClassNamespace

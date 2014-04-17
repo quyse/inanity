@@ -45,10 +45,10 @@ struct NPClassNamespace;
 
 struct NPObjectNamespace : public NPObject
 {
-	ptr<State> state;
+	State* state;
 	Namespace* object;
 
-	NPObjectNamespace(ptr<State> state);
+	NPObjectNamespace(State* state);
 };
 
 struct NPClassNamespace : public NPClass
