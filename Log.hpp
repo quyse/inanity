@@ -2,6 +2,7 @@
 #define ___INANITY_LOG_HPP___
 
 #include "String.hpp"
+#include <ostream>
 
 BEGIN_INANITY
 
@@ -35,13 +36,17 @@ public:
 	static void Error(ptr<Exception> exception);
 };
 
-/// Class logs to std::cerr.
+/// Class logs to standard stream.
 class StandardLog : public Log
 {
 public:
-	static StandardLog instance;
+	std::ostream& stream;
+	/// Instance which logs into std::cerr.
+	static StandardLog cerrInstance;
 
 public:
+	StandardLog(std::ostream& stream);
+
 	//*** Log's methods.
 	void Write(Severity severity, const String& string);
 };

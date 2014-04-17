@@ -10,7 +10,7 @@ BEGIN_INANITY
 
 //*** class Log
 
-Log* Log::instance = &StandardLog::instance;
+Log* Log::instance = &StandardLog::cerrInstance;
 
 void Log::SetInstance(Log* log)
 {
@@ -41,7 +41,10 @@ void Log::Error(ptr<Exception> exception)
 
 //*** class StandardLog
 
-StandardLog StandardLog::instance;
+StandardLog StandardLog::cerrInstance(std::cerr);
+
+StandardLog::StandardLog(std::ostream& stream)
+: stream(stream) {}
 
 void StandardLog::Write(Severity severity, const String& string)
 {
@@ -55,7 +58,7 @@ void StandardLog::Write(Severity severity, const String& string)
 		OutputDebugStringA((severities[severity] + string + "\n").c_str());
 	else
 #endif
-	std::cerr << severities[severity] << string << '\n';
+	stream << severities[severity] << string << '\n';
 }
 
 END_INANITY
