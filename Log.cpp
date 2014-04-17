@@ -1,7 +1,6 @@
 #include "Log.hpp"
 #include "Exception.hpp"
 #include <iostream>
-#include <sstream>
 #ifdef ___INANITY_PLATFORM_WINDOWS
 #include "platform/windows.hpp"
 #endif
@@ -30,13 +29,6 @@ void Log::Warning(const String& string)
 void Log::Error(const String& string)
 {
 	instance->Write(severityError, string);
-}
-
-void Log::Error(ptr<Exception> exception)
-{
-	std::ostringstream stream;
-	exception->PrintStack(stream);
-	Error(stream.str());
 }
 
 //*** class StandardLog
