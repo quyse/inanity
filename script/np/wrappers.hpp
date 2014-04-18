@@ -41,8 +41,6 @@ struct NPClassWrapper : public NPClass
 
 class Namespace;
 
-struct NPClassNamespace;
-
 struct NPObjectNamespace : public NPObject
 {
 	State* state;
