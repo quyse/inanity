@@ -21,6 +21,9 @@ public:
 
 	void Delete(T* t)
 	{
+		// hold a pointer to itself (in case ~T releases last reference)
+		ptr<TypedPool> This = this;
+
 		t->~T();
 		ChunkPool::Free(t);
 	}
