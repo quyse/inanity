@@ -107,7 +107,7 @@ public:
 		if((DWORD)size != size)
 			THROW("So big write size is not supported");
 		DWORD written;
-		if(!::WriteFile(*handle, data, (DWORD)size, &written, NULL) || written != size)
+		if(!WriteFile(*handle, data, (DWORD)size, &written, NULL) || written != size)
 			THROW("Disk write error");
 	}
 };

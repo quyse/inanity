@@ -7,10 +7,10 @@ BEGIN_INANITY
 
 void OutputStream::Write(const void* data, size_t size)
 {
-	WriteFile(MemoryFile::CreateViaCopy(data, size));
+	Write(MemoryFile::CreateViaCopy(data, size));
 }
 
-void OutputStream::WriteFile(ptr<File> file)
+void OutputStream::Write(ptr<File> file)
 {
 	Write(file->GetData(), file->GetSize());
 }

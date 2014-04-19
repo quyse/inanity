@@ -15,7 +15,7 @@ void GlslSource::Serialize(ptr<OutputStream> outputStream)
 
 	// записать код
 	writer.WriteShortly(code->GetSize());
-	writer.WriteFile(code);
+	writer.Write(code);
 	// записать привязки
 	shaderBindings->Serialize(writer);
 }

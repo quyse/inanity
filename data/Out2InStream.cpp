@@ -77,7 +77,7 @@ Out2InStream::Out2InStream() : flushed(false)
 {
 }
 
-void Out2InStream::WriteFile(ptr<File> file)
+void Out2InStream::Write(ptr<File> file)
 {
 	// просто передать файл всем читателям
 	CriticalCode code(criticalSection);

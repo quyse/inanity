@@ -155,7 +155,7 @@ void KeyValueStore::Set(ptr<File> key, ptr<File> value)
 void KeyValueStore::Checkpoint()
 {
 	writer->WriteShortly(0);
-	writer->WriteFile(streamHash);
+	writer->Write(streamHash);
 }
 
 void KeyValueStore::Consume(ptr<InputStream> inputStream)

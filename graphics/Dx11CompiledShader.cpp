@@ -23,7 +23,7 @@ void Dx11CompiledShader::Serialize(ptr<OutputStream> outputStream)
 	StreamWriter writer(outputStream);
 
 	writer.WriteShortly(code->GetSize());
-	writer.WriteFile(code);
+	writer.Write(code);
 
 	resources.Serialize(writer);
 }

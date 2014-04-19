@@ -9,38 +9,27 @@ BEGIN_INANITY
 class File;
 class InputStream;
 
-/// Абстрактный класс потока вывода.
-/** Предназначен для потокового вывода в различные выходные объекты.
-Необходимо перегружать хотя бы один из методов Write.
-Метод Flush убран из класса. Теперь поток, который имеет необходимость
-в указании, когда нужно сбрасывать буфер или кэш, просто объявляет себе
-Flush сам. Flush не должен (и больше не может) рекурсивно вызываться
-потоками-фильтрами. По соглашению поток должен вызывать Flush себе
-в деструкторе.
-*/
+/// Abstract output stream class.
+/** Derived class should redefine at least on of `Write` methods. */
 class OutputStream : public Object
 {
 public:
-	/// Записать данные в поток.
-	/** Поток обязан записывать столько данных, сколько дают.
-		Если достигается конец потока (или поток по другой причине
-		не может записать все данные), должно генерироваться исключение.
-		Реализация по умолчанию копирует данные в файл в памяти, и вызывает
-		следующий метод.
-		\param data Указатель на буфер с записываемыми данными.
-		\param size Размер буфера для записи, в байтах.
-		Реализация по умолчанию создаёт файл в памяти, и вызывает WriteFile.
+	/// Write data to the stream.
+	/** Stream should always write all given data.
+	If it cannot (because of end of stream or for another reason),
+	exception will be thrown.
+	Default implementation copies data into memory file,
+	and calls Write(file).
 	*/
 	virtual void Write(const void* data, size_t size);
 
-	/// Записать файл данных.
-	/** Реализация потока может делать запись более эффективно,
-	используя тот факт, что файл не должен меняться после передачи.
-	Реализация по умолчанию делает это через Write. */
-	virtual void WriteFile(ptr<File> file);
+	/// Write file with data to stream.
+	/** It may be more effective to use this method.
+	Default implementation just calls Write(data, size). */
+	virtual void Write(ptr<File> file);
 
-	/// Считать весь входной поток в себя.
-	/** Так как такая задача часто встречается. */
+	/// Read all data from input stream to itself.
+	/** Just convenient method. */
 	bigsize_t ReadAllFromStream(ptr<InputStream> inputStream);
 
 	META_DECLARE_CLASS(OutputStream);

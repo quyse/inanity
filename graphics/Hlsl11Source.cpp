@@ -34,7 +34,7 @@ void Hlsl11Source::Serialize(ptr<OutputStream> outputStream)
 
 	writer.WriteString(functionName);
 	writer.WriteString(profile);
-	outputStream->WriteFile(code);
+	outputStream->Write(code);
 	resources.Serialize(writer);
 }
 

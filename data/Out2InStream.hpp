@@ -63,7 +63,7 @@ public:
 	Out2InStream();
 
 	/// Записать файл с данными.
-	void WriteFile(ptr<File> file);
+	void Write(ptr<File> file);
 	/// Отметить конец данных.
 	void End();
 

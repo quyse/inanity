@@ -86,7 +86,7 @@ private:
 
 			if(data)
 				// пришли данные
-				outputStream->WriteFile(data);
+				outputStream->Write(data);
 			else
 			{
 				// корректный конец данных
