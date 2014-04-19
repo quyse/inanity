@@ -49,9 +49,21 @@
 		AddMethod(&m); \
 	}
 
+#define META_METHOD_FULL(methodName, methodType, methodScriptAlias) \
+	{ \
+		static Provider::Method<methodType, &ClassType::methodName> m(#methodScriptAlias); \
+		AddMethod(&m); \
+	}
+
 #define META_STATIC_METHOD(methodName) \
 	{ \
 		static Provider::Function<decltype(&ClassType::methodName), &ClassType::methodName> f(#methodName); \
+		AddStaticMethod(&f); \
+	}
+
+#define META_STATIC_METHOD_FULL(methodName, methodType, methodScriptAlias) \
+	{ \
+		static Provider::Function<methodScriptAlias, &ClassType::methodName> f(#methodScriptAlias); \
 		AddStaticMethod(&f); \
 	}
 
