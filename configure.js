@@ -322,19 +322,19 @@ var executables = {
 	// TEST
 	, v8test: {
 		objects: ['script.v8.test'],
-		staticLibraries: ['libinanity-base', 'libinanity-platform', 'libinanity-v8', 'deps/v8//libv8_base', 'deps/v8//libv8_snapshot'],
+		staticLibraries: ['libinanity-base', 'libinanity-platform-filesystem', 'libinanity-v8', 'deps/v8//libv8_base', 'deps/v8//libv8_snapshot'],
 		dynamicLibraries: ['ws2_32.lib', 'winmm.lib']
 	}
 	// TEST
 	, nettesttcp: {
 		objects: ['net.test-chat-tcp'],
-		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-platform'],
+		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-platform-filesystem'],
 		dynamicLibraries: []
 	}
 	// TEST
 	, nettestudp: {
 		objects: ['net.test-chat-udp'],
-		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-platform'],
+		staticLibraries: ['libinanity-base', 'libinanity-asio', 'libinanity-platform-filesystem'],
 		dynamicLibraries: []
 	}
 	// TEST
