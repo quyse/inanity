@@ -26,7 +26,9 @@ public:
 	/// Получить значение счётчика записываемых данных.
 	size_t GetWrittenSize() const;
 
-	/// Записать произвольные данные.
+	// Prevent hiding `Write` methods from base class.
+	using OutputStream::Write;
+	/// Write any data.
 	void Write(const void* data, size_t size);
 
 	/// Записать простое данное в поток вывода.

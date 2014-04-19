@@ -31,7 +31,9 @@ public:
 	/// Получить значение счётчика считываемых данных.
 	bigsize_t GetReadSize() const;
 
-	/// Прочитать произвольные данные.
+	// Prevent hiding `Read` methods from base class.
+	using InputStream::Read;
+	/// Read any data.
 	size_t Read(void* data, size_t size);
 
 	/// Прочитать простое данное из потока ввода.
