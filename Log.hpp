@@ -18,20 +18,6 @@ private:
 protected:
 	template <typename... T>
 	struct ArgWriter;
-	template <typename First, typename... Rest>
-	struct ArgWriter<First, Rest...>
-	{
-		static void Write(std::ostringstream& stream, First first, Rest... rest)
-		{
-			stream << first;
-			ArgWriter<Rest...>::Write(stream, rest...);
-		}
-	};
-	template <>
-	struct ArgWriter<>
-	{
-		static void Write(std::ostringstream&) {}
-	};
 
 public:
 	enum Severity
@@ -75,6 +61,21 @@ public:
 	{
 		instance->Write(severityError, args...);
 	}
+};
+
+template <typename First, typename... Rest>
+struct Log::ArgWriter<First, Rest...>
+{
+	static void Write(std::ostringstream& stream, First first, Rest... rest)
+	{
+		stream << first;
+		ArgWriter<Rest...>::Write(stream, rest...);
+	}
+};
+template <>
+struct Log::ArgWriter<>
+{
+	static void Write(std::ostringstream&) {}
 };
 
 /// Class logs to standard stream.
