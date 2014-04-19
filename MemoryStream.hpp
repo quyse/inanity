@@ -26,7 +26,7 @@ private:
 	void Compact();
 
 public:
-	MemoryStream();
+	MemoryStream(size_t initialSize = 0x1000);
 
 	void Write(const void* data, size_t size);
 

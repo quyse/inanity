@@ -6,9 +6,9 @@
 
 BEGIN_INANITY
 
-MemoryStream::MemoryStream() : dataSize(0), lastDataSize(0), files(1)
+MemoryStream::MemoryStream(size_t initialSize) : dataSize(0), lastDataSize(0), files(1)
 {
-	files[0] = NEW(MemoryFile(0x1000));
+	files[0] = NEW(MemoryFile(initialSize));
 }
 
 void MemoryStream::Write(const void* data, size_t size)
