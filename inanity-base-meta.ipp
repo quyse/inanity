@@ -27,6 +27,7 @@ META_CLASS_END();
 
 #include "InputStream.hpp"
 META_CLASS(Inanity::InputStream, Inanity.InputStream);
+	META_METHOD_FULL(Read, ptr<File> (InputStream::*)(size_t), Read);
 META_CLASS_END();
 
 #include "OutputStream.hpp"

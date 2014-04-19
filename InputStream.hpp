@@ -6,6 +6,8 @@
 
 BEGIN_INANITY
 
+class File;
+
 /// Абстрактный класс потока ввода.
 /** Предназначен для считывания потоковых данных из различных источников. */
 class InputStream : public Object
@@ -28,6 +30,9 @@ public:
 	Поток может эффективно реализовывать этот метод.
 	Реализация по умолчанию просто читает данные в никуда. */
 	virtual bigsize_t Skip(bigsize_t size);
+
+	/// Read some data into memory file.
+	ptr<File> Read(size_t size);
 
 	META_DECLARE_CLASS(InputStream);
 };
