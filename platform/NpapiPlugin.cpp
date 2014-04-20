@@ -118,6 +118,7 @@ NPError NpapiPlugin::NPP_Destroy(NPP npp, NPSavedData** save)
 {
 	GET_INSTANCE();
 
+	instance->Destroy();
 	instance->Dereference();
 	npp->pdata = nullptr;
 

@@ -105,6 +105,7 @@ public:
 
 	//*** Internal methods.
 	void Init(NPP npp);
+	virtual void Destroy();
 	NPError NppSetWindow(NPWindow* window);
 	NPError NppNewStream(NPMIMEType type, NPStream* stream, NPBool seekable, uint16_t* stype);
 	NPError NppDestroyStream(NPStream* stream, NPReason reason);

@@ -157,6 +157,8 @@ void NpapiPluginInstance::Init(NPP npp)
 	PostInit();
 }
 
+void NpapiPluginInstance::Destroy() {}
+
 NPError NpapiPluginInstance::NppSetWindow(NPWindow* npWindow)
 {
 #if defined(___INANITY_PLATFORM_WINDOWS)
