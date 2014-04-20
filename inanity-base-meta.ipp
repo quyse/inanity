@@ -33,6 +33,7 @@ META_CLASS_END();
 #include "OutputStream.hpp"
 META_CLASS(Inanity::OutputStream, Inanity.OutputStream);
 	META_METHOD_FULL(Write, void (OutputStream::*)(ptr<File>), Write);
+	META_METHOD(ReadAllFromStream);
 META_CLASS_END();
 
 #include "Strings.hpp"
