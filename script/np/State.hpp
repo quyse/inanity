@@ -27,7 +27,7 @@ struct NPObjectNamespace;
 class State : public Script::State
 {
 private:
-	Platform::NpapiPluginInstance* pluginInstance;
+	ptr<Platform::NpapiPluginInstance> pluginInstance;
 
 	typedef std::unordered_set<NPClass*> Classes;
 	Classes classes;
@@ -55,7 +55,7 @@ public:
 	};
 
 public:
-	State(Platform::NpapiPluginInstance* pluginInstance);
+	State(ptr<Platform::NpapiPluginInstance> pluginInstance);
 
 	static State* GetCurrent();
 

@@ -35,7 +35,7 @@ State::Scope::~Scope()
 		currentState = nullptr;
 }
 
-State::State(Platform::NpapiPluginInstance* pluginInstance)
+State::State(ptr<Platform::NpapiPluginInstance> pluginInstance)
 : pluginInstance(pluginInstance)
 {
 	// create pools
