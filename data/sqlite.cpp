@@ -86,6 +86,34 @@ ptr<Exception> SqliteDb::Error() const
 	return NEW(Exception(ss.str()));
 }
 
+void SqliteDb::Vacuum()
+{
+	if(sqlite3_exec(db, "VACUUM", 0, 0, 0) != SQLITE_OK)
+		THROW_SECONDARY("Can't perform VACUUM", Error());
+}
+
+void SqliteDb::IntegrityCheck(std::ostream& stream)
+{
+	ptr<SqliteStatement> stmt = CreateStatement("PRAGMA integrity_check");
+	SqliteQuery query(stmt);
+
+	bool done = false;
+	while(!done)
+	{
+		switch(stmt->Step())
+		{
+		case SQLITE_ROW:
+			stream << stmt->ColumnText(0) << '\n';
+			break;
+		case SQLITE_DONE:
+			done = true;
+			break;
+		default:
+			THROW_SECONDARY("Can't perform PRAGMA integrity_check", Error());
+		}
+	}
+}
+
 //*** SqliteStatement
 
 SqliteStatement::SqliteStatement(ptr<SqliteDb> db, sqlite3_stmt* stmt)

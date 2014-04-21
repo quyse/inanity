@@ -6,6 +6,7 @@
 #include "../CriticalSection.hpp"
 #include "../String.hpp"
 #include <unordered_map>
+#include <iostream>
 
 BEGIN_INANITY
 
@@ -54,6 +55,11 @@ public:
 
 	/// Get exception corresponding to SQLite error.
 	ptr<Exception> Error() const;
+
+	/// Perform VACUUM.
+	void Vacuum();
+	/// Perform PRAGMA integrity_check.
+	void IntegrityCheck(std::ostream& stream);
 };
 
 /// Class incapsulating sqlite3_stmt.
