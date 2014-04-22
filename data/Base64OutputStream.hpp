@@ -4,6 +4,12 @@
 #include "data.hpp"
 #include "../OutputStream.hpp"
 
+BEGIN_INANITY
+
+class File;
+
+END_INANITY
+
 BEGIN_INANITY_DATA
 
 /// Поток, кодирующий/декодирующий поступающие данные в Base64.
@@ -35,6 +41,8 @@ public:
 	void Write(const void* data, size_t size);
 
 	void Flush();
+
+	static ptr<File> EncodeFile(ptr<File> file);
 };
 
 END_INANITY_DATA

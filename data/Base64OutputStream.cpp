@@ -1,4 +1,6 @@
 #include "Base64OutputStream.hpp"
+#include "../MemoryStream.hpp"
+#include "../File.hpp"
 #include "../Exception.hpp"
 
 BEGIN_INANITY_DATA
@@ -138,6 +140,16 @@ void Base64OutputStream::Flush()
 		ProcessEncodeBuffer();
 	else
 		ProcessDecodeBuffer();
+}
+
+ptr<File> Base64OutputStream::EncodeFile(ptr<File> file)
+{
+	size_t size = file->GetSize();
+	ptr<MemoryStream> resultStream = NEW(MemoryStream((size + 2) / 3 * 4));
+	ptr<Base64OutputStream> stream = NEW(Base64OutputStream(true, resultStream));
+	stream->Write(file->GetData(), size);
+	stream->Flush();
+	return resultStream->ToFile();
 }
 
 END_INANITY_DATA
