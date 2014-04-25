@@ -1,7 +1,7 @@
 #include "BmpImage.hpp"
 #include "RawTextureData.hpp"
 #include "ImageLoader.hpp"
-#include "../File.hpp"
+#include "../MemoryFile.hpp"
 #include "../OutputStream.hpp"
 #include "../Exception.hpp"
 
@@ -88,7 +88,7 @@ ptr<RawTextureData> BmpImage::Load(ptr<File> file)
 			for(int j = 0; j < width; ++j)
 			{
 				for(int k = 0; k < 3; ++k)
-					resultDataLine[j * 4 + k] = lineData[j * 3 + k];
+					resultDataLine[j * 4 + k] = lineData[j * 3 + 2 - k];
 				resultDataLine[j * 4 + 3] = 255;
 			}
 			lineData += lineStep;
@@ -98,7 +98,12 @@ ptr<RawTextureData> BmpImage::Load(ptr<File> file)
 	case 32:
 		for(int i = 0; i < height; ++i)
 		{
-			memcpy(resultDataLine, lineData, resultPitch);
+			for(int j = 0; j < width; ++j)
+			{
+				for(int k = 0; k < 3; ++k)
+					resultDataLine[j * 4 + k] = lineData[j * 4 + 2 - k];
+				resultDataLine[j * 4 + 3] = lineData[j * 4 + 3];
+			}
 			lineData += lineStep;
 			resultDataLine += resultPitch;
 		}
@@ -114,6 +119,8 @@ ptr<RawTextureData> BmpImage::Load(ptr<File> file)
 
 void BmpImage::Save(ptr<RawTextureData> rawTextureData, ptr<OutputStream> outputStream)
 {
+	BEGIN_TRY();
+
 	int width = rawTextureData->GetMipWidth();
 	int height = rawTextureData->GetMipHeight();
 	int sourcePitch = rawTextureData->GetMipLinePitch();
@@ -146,9 +153,55 @@ void BmpImage::Save(ptr<RawTextureData> rawTextureData, ptr<OutputStream> output
 		outputStream->Write(palette, sizeof(palette));
 	}
 
-	const char* data = (const char*)rawTextureData->GetMipData();
-	for(int i = height - 1; i >= 0; --i)
-		outputStream->Write(data + i * sourcePitch, pitch);
+	const char* sourceLine = (const char*)rawTextureData->GetMipData() + (height - 1) * sourcePitch;
+
+	switch(pixelSize)
+	{
+	case 1:
+		for(int i = 0; i < height; ++i)
+		{
+			outputStream->Write(sourceLine, pitch);
+			sourceLine -= sourcePitch;
+		}
+		break;
+	case 3:
+		{
+			ptr<MemoryFile> destLineFile = NEW(MemoryFile(pitch));
+			char* destLine = (char*)destLineFile->GetData();
+
+			for(int i = 0; i < height; ++i)
+			{
+				for(int j = 0; j < width; ++j)
+					for(int k = 0; k < 3; ++k)
+						destLine[j * 3 + k] = sourceLine[j * 3 + 2 - k];
+				outputStream->Write(destLine, pitch);
+				sourceLine -= sourcePitch;
+			}
+		}
+		break;
+	case 4:
+		{
+			ptr<MemoryFile> destLineFile = NEW(MemoryFile(pitch));
+			char* destLine = (char*)destLineFile->GetData();
+
+			for(int i = 0; i < height; ++i)
+			{
+				for(int j = 0; j < width; ++j)
+				{
+					for(int k = 0; k < 3; ++k)
+						destLine[j * 4 + k] = sourceLine[j * 4 + 2 - k];
+					destLine[j * 4 + 3] = sourceLine[j * 4 + 3];
+				}
+				outputStream->Write(destLine, pitch);
+				sourceLine -= sourcePitch;
+			}
+		}
+		break;
+	default:
+		THROW("Unsupported pixel size");
+	}
+
+	END_TRY("Can't save BMP image");
 }
 
 ptr<ImageLoader> BmpImage::CreateLoader()
