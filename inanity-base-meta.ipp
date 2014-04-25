@@ -42,4 +42,18 @@ META_CLASS(Inanity::Strings, Inanity.Strings);
 	META_STATIC_METHOD(File2String);
 META_CLASS_END();
 
+#include "MemoryFile.hpp"
+META_CLASS(Inanity::MemoryFile, Inanity.MemoryFile);
+	META_CLASS_PARENT(Inanity::File);
+	META_CONSTRUCTOR(size_t);
+	META_STATIC_METHOD_FULL(CreateViaCopy, ptr<MemoryFile> (*)(ptr<File>), CreateViaCopy);
+META_CLASS_END();
+
+#include "MemoryStream.hpp"
+META_CLASS(Inanity::MemoryStream, Inanity.MemoryStream);
+	META_CLASS_PARENT(Inanity::OutputStream);
+	META_CONSTRUCTOR();
+	META_METHOD(ToFile);
+META_CLASS_END();
+
 #endif
