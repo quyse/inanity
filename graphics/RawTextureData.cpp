@@ -281,7 +281,7 @@ ptr<RawTextureData> RawTextureData::Deserialize(ptr<InputStream> stream)
 	}
 }
 
-void RawTextureData::Blit(RawTextureData* image, int destX, int destY, int sourceX, int sourceY, int width, int height)
+void RawTextureData::Blit(ptr<RawTextureData> image, int destX, int destY, int sourceX, int sourceY, int width, int height)
 {
 	BEGIN_TRY();
 

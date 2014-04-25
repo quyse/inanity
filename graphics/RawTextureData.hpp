@@ -105,7 +105,7 @@ public:
 
 	/// Blit another 2D image on this image.
 	/** Clip if isn't in bounds. */
-	void Blit(RawTextureData* image, int destX, int destY, int sourceX, int sourceY, int width, int height);
+	void Blit(ptr<RawTextureData> image, int destX, int destY, int sourceX, int sourceY, int width, int height);
 
 	/// Union several 2D images into one.
 	/** Images packed in rows, with specified result width. */
