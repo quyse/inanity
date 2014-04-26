@@ -268,7 +268,6 @@ var executables = {
 	, adapterstest: {
 		objects: ['graphics.adapters_test'],
 		staticLibraries: [
-			'libinanity-dx11',
 			'libinanity-platform',
 			'libinanity-gl',
 			'libinanity-graphics',
@@ -277,8 +276,9 @@ var executables = {
 			'libinanity-input',
 			'libinanity-base',
 			'deps/glew//libglew'],
-		dynamicLibraries: ['user32.lib', 'gdi32.lib', 'dxgi.lib', 'd3d11.lib', 'opengl32.lib'], // win32
-		//dynamicLibraries: ['GL', 'SDL2'], // linux
+		'staticLibraries-win32': 'libinanity-dx11',
+		'dynamicLibraries-win32': ['user32.lib', 'gdi32.lib', 'dxgi.lib', 'd3d11.lib', 'opengl32.lib'],
+		'dynamicLibraries-linux': ['GL', 'SDL2'],
 	}
 	, oilfaucet: {
 		objects: ['data.oil.faucet'],
@@ -316,14 +316,15 @@ var executables = {
 	// TEST
 	, luatest: {
 		objects: ['script.lua.test'],
-		staticLibraries: ['libinanity-base', 'libinanity-platform-filesystem', 'libinanity-lua', 'deps/lua//liblua'],
+		staticLibraries: ['libinanity-platform-filesystem', 'libinanity-lua', 'libinanity-base', 'deps/lua//liblua'],
 		dynamicLibraries: []
 	}
 	// TEST
 	, v8test: {
 		objects: ['script.v8.test'],
-		staticLibraries: ['libinanity-base', 'libinanity-platform-filesystem', 'libinanity-v8', 'deps/v8//libv8_base', 'deps/v8//libv8_snapshot'],
-		dynamicLibraries: ['ws2_32.lib', 'winmm.lib']
+		staticLibraries: ['libinanity-platform-filesystem', 'libinanity-v8', 'libinanity-base', 'deps/v8//libv8_base', 'deps/v8//libv8_snapshot'],
+		'dynamicLibraries-win32': ['ws2_32.lib', 'winmm.lib'],
+		'dynamicLibraries-linux': ['pthread'],
 	}
 	// TEST
 	, nettesttcp: {
@@ -359,17 +360,19 @@ var executables = {
 	}
 };
 
+var platformed = function(object, field, platform) {
+	return (object[field] || []).concat(object[field + '-' + platform] || []);
+};
+
 exports.configureComposer = function(libraryFile, composer) {
 	// файлы библиотек: <conf>/library
 	var a = /^(([^\/]+)\/)([^\/]+)$/.exec(libraryFile);
 	var confDir = a[1];
 	composer.configuration = a[2];
 	var library = libraries[a[3]];
-	for ( var i = 0; i < library.objects.length; ++i)
-		composer.addObjectFile(confDir + library.objects[i]);
-	var platformObjects = library['objects-' + composer.platform] || [];
-	for(var i = 0; i < platformObjects.length; ++i)
-		composer.addObjectFile(confDir + platformObjects[i]);
+	var objects = platformed(library, 'objects', composer.platform);
+	for ( var i = 0; i < objects.length; ++i)
+		composer.addObjectFile(confDir + objects[i]);
 };
 
 exports.configureLinker = function(executableFile, linker) {
@@ -377,11 +380,16 @@ exports.configureLinker = function(executableFile, linker) {
 	var a = /^(([^\/]+)\/)([^\/]+)$/.exec(executableFile);
 	var confDir = a[1];
 	linker.configuration = a[2];
+
 	var executable = executables[a[3]];
-	for ( var i = 0; i < executable.objects.length; ++i)
-		linker.addObjectFile(confDir + executable.objects[i]);
-	for ( var i = 0; i < executable.staticLibraries.length; ++i) {
-		var staticLibrary = executable.staticLibraries[i];
+
+	var objects = platformed(executable, 'objects', linker.platform);
+	for ( var i = 0; i < objects.length; ++i)
+		linker.addObjectFile(confDir + objects[i]);
+
+	var staticLibraries = platformed(executable, 'staticLibraries', linker.platform);
+	for ( var i = 0; i < staticLibraries.length; ++i) {
+		var staticLibrary = staticLibraries[i];
 		var confPos = staticLibrary.indexOf('//');
 		if(confPos >= 0)
 			staticLibrary = staticLibrary.replace('//', '/' + confDir);
@@ -389,6 +397,8 @@ exports.configureLinker = function(executableFile, linker) {
 			staticLibrary = confDir + staticLibrary;
 		linker.addStaticLibrary(staticLibrary);
 	}
-	for ( var i = 0; i < executable.dynamicLibraries.length; ++i)
-		linker.addDynamicLibrary(executable.dynamicLibraries[i]);
+
+	var dynamicLibraries = platformed(executable, 'dynamicLibraries', linker.platform);
+	for ( var i = 0; i < dynamicLibraries.length; ++i)
+		linker.addDynamicLibrary(dynamicLibraries[i]);
 };
