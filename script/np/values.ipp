@@ -4,8 +4,12 @@
 #include "values.hpp"
 #include "Any.hpp"
 #include "State.hpp"
+#include "MetaProvider.hpp"
+#include "ClassBase.hpp"
+#include "wrappers.hpp"
 #include "../../platform/NpapiPlugin.hpp"
 #include "../../Exception.hpp"
+#include <cstring>
 
 BEGIN_INANITY_NP
 

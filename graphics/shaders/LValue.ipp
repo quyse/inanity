@@ -2,6 +2,7 @@
 #define ___INANITY_GRAPHICS_SHADERS_LVALUE_IPP___
 
 #include "LValue.hpp"
+#include "Value.ipp"
 #include "OperationNode.hpp"
 
 BEGIN_INANITY_SHADERS
@@ -20,7 +21,7 @@ template <typename ValueType>
 template <int n>
 inline LValue<typename SwizzleHelper<ValueType, n>::Type> LValue<ValueType>::operator[](const char (&map)[n])
 {
-	return LValue<typename SwizzleHelper<ValueType, n>::Type>(NEW(SwizzleNode(node, map)));
+	return LValue<typename SwizzleHelper<ValueType, n>::Type>(NEW(SwizzleNode(this->GetNode(), map)));
 }
 
 END_INANITY_SHADERS

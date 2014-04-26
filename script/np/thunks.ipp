@@ -7,6 +7,7 @@
 #include "../../meta/Callable.hpp"
 #include "../../platform/NpapiPlugin.hpp"
 #include "../../Exception.hpp"
+#include <sstream>
 
 BEGIN_INANITY_NP
 

@@ -71,7 +71,7 @@ inline Value<T> pow(Value<T> a, Value<T> b) { return OP2(Pow); }
 template <typename T, int n>
 inline Value<xvec<T, n> > pow(Value<xvec<T, n> > a, Value<T> b1)
 {
-	Value<xvec<T, n> > b = b1.Cast<xvec<T, n> >();
+	Value<xvec<T, n> > b = b1.template Cast<xvec<T, n> >();
 	return OP2(Pow);
 }
 template <typename T, int n>
