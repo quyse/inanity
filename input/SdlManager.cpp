@@ -51,6 +51,17 @@ static Key ConvertKey(SDL_Scancode code)
 		C(Y, Y);
 		C(Z, Z);
 
+		C(UP, Up);
+		C(DOWN, Down);
+		C(LEFT, Left);
+		C(RIGHT, Right);
+		C(ESCAPE, Escape);
+		C(SPACE, Space);
+		C(HOME, Home);
+		C(END, End);
+		C(PAGEUP, PageUp);
+		C(PAGEDOWN, PageDown);
+
 #undef C
 
 	default:
