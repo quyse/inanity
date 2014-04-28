@@ -36,6 +36,9 @@ private:
 public:
 	static NPNetscapeFuncs browserFuncs;
 
+	static NPIdentifier applyIdentifier;
+	static NPIdentifier callIdentifier;
+
 	/// Create instance of plugin.
 	/** This function is not defined. It should be defined once
 	per executable (DLL) and should return new instance

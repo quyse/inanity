@@ -118,7 +118,24 @@ ptr<Script::Any> Any::CallWith(ptr<Script::Any> arguments[], int count)
 
 ptr<Script::Any> Any::ApplyWith(ptr<Script::Any> thisValue, ptr<Script::Any> arguments[], int count)
 {
-	THROW("Np::Any doesn't support applying to");
+	State::Scope scope(state);
+
+	// convert args
+	NPVariant* args = (NPVariant*)alloca(sizeof(NPVariant) * (count + 1));
+	args[0] = fast_cast<Any*>(&*thisValue)->variant;
+	for(int i = 0; i < count; ++i)
+		args[i + 1] = fast_cast<Any*>(&*arguments[i])->variant;
+
+	// make a call
+	NPVariant result;
+	if(!Platform::NpapiPlugin::browserFuncs.invoke(
+		state->GetPluginInstance()->GetNpp(),
+		NPVARIANT_TO_OBJECT(variant),
+		Platform::NpapiPlugin::callIdentifier,
+		args, count + 1, &result))
+		THROW("Can't apply Np::Any as a function");
+
+	return state->CreateAny(result);
 }
 
 ptr<Any> Any::InternalGet(NPIdentifier identifier) const

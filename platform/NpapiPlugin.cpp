@@ -31,6 +31,16 @@ NP_EXPORT(NPError) NP_Initialize(NPNetscapeFuncs* browserFuncs, NPPluginFuncs* p
 	Inanity::Platform::NpapiPlugin::GetPluginFuncs(pluginFuncs);
 #endif
 
+	// get special identifiers
+#define I(name) \
+	Inanity::Platform::NpapiPlugin::name##Identifier \
+	= Inanity::Platform::NpapiPlugin::browserFuncs.getstringidentifier(#name)
+
+	I(apply);
+	I(call);
+
+#undef I
+
 	return NPERR_NO_ERROR;
 }
 
@@ -48,6 +58,9 @@ BEGIN_INANITY_PLATFORM
 //*** NpapiPlugin
 
 NPNetscapeFuncs NpapiPlugin::browserFuncs;
+
+NPIdentifier NpapiPlugin::applyIdentifier;
+NPIdentifier NpapiPlugin::callIdentifier;
 
 void NpapiPlugin::GetPluginFuncs(NPPluginFuncs* pluginFuncs)
 {
