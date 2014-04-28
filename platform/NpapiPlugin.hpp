@@ -38,6 +38,7 @@ public:
 
 	static NPIdentifier applyIdentifier;
 	static NPIdentifier callIdentifier;
+	static NPIdentifier __reclaimIdentifier;
 
 	/// Create instance of plugin.
 	/** This function is not defined. It should be defined once

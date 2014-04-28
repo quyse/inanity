@@ -48,6 +48,10 @@ bool NPClassWrapper::npHasMethod(NPObject *npobj, NPIdentifier name)
 			return true;
 	}
 
+	// special methods
+	if(name == Platform::NpapiPlugin::__reclaimIdentifier)
+		return true;
+
 	return false;
 }
 
@@ -66,6 +70,13 @@ bool NPClassWrapper::npInvoke(NPObject *npobj, NPIdentifier name, const NPVarian
 			State::Scope scope(objectWrapper->state);
 			return cls->GetMethods()[i->second]->GetThunk()(objectWrapper, args, (int)argCount, result);
 		}
+	}
+
+	// special methods
+	if(name == Platform::NpapiPlugin::__reclaimIdentifier)
+	{
+		objectWrapper->state->ReclaimInstance(objectWrapper->object);
+		return true;
 	}
 
 	return false;

@@ -38,6 +38,7 @@ NP_EXPORT(NPError) NP_Initialize(NPNetscapeFuncs* browserFuncs, NPPluginFuncs* p
 
 	I(apply);
 	I(call);
+	I(__reclaim);
 
 #undef I
 
@@ -61,6 +62,7 @@ NPNetscapeFuncs NpapiPlugin::browserFuncs;
 
 NPIdentifier NpapiPlugin::applyIdentifier;
 NPIdentifier NpapiPlugin::callIdentifier;
+NPIdentifier NpapiPlugin::__reclaimIdentifier;
 
 void NpapiPlugin::GetPluginFuncs(NPPluginFuncs* pluginFuncs)
 {
