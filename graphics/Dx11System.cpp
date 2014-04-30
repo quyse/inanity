@@ -46,6 +46,10 @@ DXGI_FORMAT Dx11System::GetDXGIFormat(PixelFormat format)
 	case T(Unknown):
 		return X(UNKNOWN);
 	case T(Uncompressed):
+		// if sRGB, check first that format is supported (DX11 supports only one)
+		if(format.srgb && (format.pixel != P(RGBA) || format.format != F(Uint) || format.size != S(32bit)))
+			break;
+
 		switch(format.pixel)
 		{
 		case P(R):
@@ -131,7 +135,7 @@ DXGI_FORMAT Dx11System::GetDXGIFormat(PixelFormat format)
 			case F(Uint):
 				switch(format.size)
 				{
-				case S(32bit): return X(R8G8B8A8_UNORM);
+				case S(32bit): return format.srgb ? X(R8G8B8A8_UNORM_SRGB) : X(R8G8B8A8_UNORM);
 				case S(64bit): return X(R16G16B16A16_UNORM);
 				}
 				break;
@@ -149,14 +153,10 @@ DXGI_FORMAT Dx11System::GetDXGIFormat(PixelFormat format)
 	case T(Compressed):
 		switch(format.compression)
 		{
-		case C(Bc1): return X(BC1_UNORM);
+		case C(Bc1): return format.srgb ? X(BC1_UNORM_SRGB) : X(BC1_UNORM);
 		case C(Bc1Alpha): break;
-		case C(Bc1Srgb): return X(BC1_UNORM_SRGB);
-		case C(Bc1SrgbAlpha): break;
-		case C(Bc2): return X(BC2_UNORM);
-		case C(Bc2Srgb): return X(BC2_UNORM_SRGB);
-		case C(Bc3): return X(BC3_UNORM);
-		case C(Bc3Srgb): return X(BC3_UNORM_SRGB);
+		case C(Bc2): return format.srgb ? X(BC2_UNORM_SRGB) : X(BC2_UNORM);
+		case C(Bc3): return format.srgb ? X(BC3_UNORM_SRGB) : X(BC3_UNORM);
 		case C(Bc4): return X(BC4_UNORM);
 		case C(Bc4Signed): return X(BC4_SNORM);
 		case C(Bc5): return X(BC5_UNORM);

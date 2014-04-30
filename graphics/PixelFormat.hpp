@@ -80,12 +80,16 @@ struct PixelFormat
 		};
 	};
 
+	/// Is color data is in sRGB space.
+	/** Valid only for type != typeUnknown. */
+	bool srgb;
+
 	/// Unknown format constructor.
 	PixelFormat();
 	/// Uncompressed format constructor.
-	PixelFormat(Pixel pixel, Format format, Size size);
+	PixelFormat(Pixel pixel, Format format, Size size, bool srgb = false);
 	/// Compressed format constructor.
-	PixelFormat(Compression compression);
+	PixelFormat(Compression compression, bool srgb = false);
 
 	void Serialize(StreamWriter& writer);
 	static PixelFormat Deserialize(StreamReader& reader);

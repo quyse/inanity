@@ -152,6 +152,10 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, bool renderbuffer, bool
 	{
 	case T(Unknown): break;
 	case T(Uncompressed):
+		// sRGB is only allowed for RGBA with 8-bit components
+		if(pixelFormat.srgb && (pixelFormat.pixel != P(RGBA) || pixelFormat.format != F(Uint) || pixelFormat.size != S(32bit)))
+			break;
+
 		switch(pixelFormat.pixel)
 		{
 		case P(R):
@@ -224,7 +228,7 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, bool renderbuffer, bool
 			case F(Uint):
 				switch(pixelFormat.size)
 				{
-				case S(32bit): type = GL_UNSIGNED_BYTE; internalFormat = GL_RGBA8; ok = true; break;
+				case S(32bit): type = GL_UNSIGNED_BYTE; internalFormat = pixelFormat.srgb ? GL_SRGB8_ALPHA8 : GL_RGBA8; ok = true; break;
 				case S(64bit): type = GL_UNSIGNED_SHORT; internalFormat = GL_RGBA16; ok = true; break;
 				default: break;
 				}
@@ -246,35 +250,19 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, bool renderbuffer, bool
 		switch(pixelFormat.compression)
 		{
 		case C(Bc1):
-			internalFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+			internalFormat = pixelFormat.srgb ? GL_COMPRESSED_SRGB_S3TC_DXT1_EXT : GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
 			ok = true;
 			break;
 		case C(Bc1Alpha):
-			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-			ok = true;
-			break;
-		case C(Bc1Srgb):
-			internalFormat = GL_COMPRESSED_SRGB_S3TC_DXT1_EXT;
-			ok = true;
-			break;
-		case C(Bc1SrgbAlpha):
-			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
+			internalFormat = pixelFormat.srgb ? GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT : GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
 			ok = true;
 			break;
 		case C(Bc2):
-			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-			ok = true;
-			break;
-		case C(Bc2Srgb):
-			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
+			internalFormat = pixelFormat.srgb ? GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT : GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
 			ok = true;
 			break;
 		case C(Bc3):
-			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-			ok = true;
-			break;
-		case C(Bc3Srgb):
-			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
+			internalFormat = pixelFormat.srgb ? GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT : GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 			ok = true;
 			break;
 		case C(Bc4):

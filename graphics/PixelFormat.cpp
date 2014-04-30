@@ -6,10 +6,44 @@
 BEGIN_INANITY_GRAPHICS
 
 PixelFormat::PixelFormat() : type(typeUnknown) {}
-PixelFormat::PixelFormat(Pixel pixel, Format format, Size size) :
-	type(typeUncompressed), pixel(pixel), format(format), size(size) {}
-PixelFormat::PixelFormat(Compression compression) :
-	type(typeCompressed), compression(compression) {}
+PixelFormat::PixelFormat(Pixel pixel, Format format, Size size, bool srgb) :
+	type(typeUncompressed), pixel(pixel), format(format), size(size), srgb(srgb)
+{
+	switch(pixel)
+	{
+	case pixelR:
+	case pixelRG:
+		if(srgb)
+			THROW("Wrong pixel type for sRGB");
+		break;
+	case pixelRGB:
+	case pixelRGBA:
+		break;
+	default:
+		THROW("Wrong pixel type");
+	}
+}
+PixelFormat::PixelFormat(Compression compression, bool srgb) :
+	type(typeCompressed), compression(compression), srgb(srgb)
+{
+	switch(compression)
+	{
+	case compressionBc1:
+	case compressionBc1Alpha:
+	case compressionBc2:
+	case compressionBc3:
+		break;
+	case compressionBc4:
+	case compressionBc4Signed:
+	case compressionBc5:
+	case compressionBc5Signed:
+		if(srgb)
+			THROW("Wrong compression format for sRGB");
+		break;
+	default:
+		THROW("Wrong compression format");
+	}
+}
 
 void PixelFormat::Serialize(StreamWriter& writer)
 {
@@ -22,9 +56,11 @@ void PixelFormat::Serialize(StreamWriter& writer)
 		writer.WriteShortly(pixel);
 		writer.WriteShortly(format);
 		writer.WriteShortly(size);
+		writer.WriteShortly((size_t)srgb);
 		break;
 	case typeCompressed:
 		writer.WriteShortly(compression);
+		writer.WriteShortly((size_t)srgb);
 		break;
 	default:
 		THROW("Unsupported type");
@@ -43,12 +79,14 @@ PixelFormat PixelFormat::Deserialize(StreamReader& reader)
 			Pixel pixel = (Pixel)reader.ReadShortly();
 			Format format = (Format)reader.ReadShortly();
 			Size size = (Size)reader.ReadShortly();
-			return PixelFormat(pixel, format, size);
+			bool srgb = !!reader.ReadShortly();
+			return PixelFormat(pixel, format, size, srgb);
 		}
 	case typeCompressed:
 		{
 			Compression compression = (Compression)reader.ReadShortly();
-			return PixelFormat(compression);
+			bool srgb = !!reader.ReadShortly();
+			return PixelFormat(compression, srgb);
 		}
 	default:
 		THROW("Unsupported type");
@@ -82,9 +120,12 @@ bool operator==(const PixelFormat& a, const PixelFormat& b)
 		return
 			a.pixel == b.pixel &&
 			a.format == b.format &&
-			a.size == b.size;
+			a.size == b.size &&
+			a.srgb == b.srgb;
 	case PixelFormat::typeCompressed:
-		return a.compression == b.compression;
+		return
+			a.compression == b.compression &&
+			a.srgb == b.srgb;
 	}
 	return false;
 }
