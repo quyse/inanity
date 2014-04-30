@@ -37,7 +37,7 @@ RawTextureData::RawTextureData(ptr<File> pixels, PixelFormat format, int width, 
 
 		// calculate mip offsets
 		// we use a floor-scheme, as it used in OpenGL
-		mipOffsets.resize(mips);
+		mipOffsets.resize(mips + 1);
 		int mipOffset = 0;
 		for(int i = 0; i < mips; ++i)
 		{
@@ -56,6 +56,7 @@ RawTextureData::RawTextureData(ptr<File> pixels, PixelFormat format, int width, 
 			// max dimension of next mip
 			maxDimension /= 2;
 		}
+		mipOffsets[mips] = mipOffset;
 
 		// store the size of one image
 		arrayPitch = mipOffset;
@@ -160,6 +161,11 @@ void* RawTextureData::GetMipData(int image, int mip) const
 	return (char*)pixels->GetData() + image * arrayPitch + mipOffsets[mip];
 }
 
+int RawTextureData::GetMipSize(int mip) const
+{
+	return mipOffsets[mip + 1] - mipOffsets[mip];
+}
+
 int RawTextureData::GetMipLinePitch(int mip) const
 {
 	int width = GetMipBufferWidth(mip);
@@ -172,11 +178,30 @@ int RawTextureData::GetMipLinePitch(int mip) const
 			int blockSize = 0;
 			switch(format.compression)
 			{
-			case PixelFormat::compressionDxt1: blockSize = 8; break;
-			case PixelFormat::compressionDxt2: blockSize = 16; break;
-			case PixelFormat::compressionDxt3: blockSize = 16; break;
-			case PixelFormat::compressionDxt4: blockSize = 16; break;
-			case PixelFormat::compressionDxt5: blockSize = 16; break;
+			case PixelFormat::compressionBc1:
+			case PixelFormat::compressionBc1Alpha:
+			case PixelFormat::compressionBc1Srgb:
+			case PixelFormat::compressionBc1SrgbAlpha:
+				blockSize = 8;
+				break;
+			case PixelFormat::compressionBc2:
+			case PixelFormat::compressionBc2Srgb:
+				blockSize = 16;
+				break;
+			case PixelFormat::compressionBc3:
+			case PixelFormat::compressionBc3Srgb:
+				blockSize = 16;
+				break;
+			case PixelFormat::compressionBc4:
+			case PixelFormat::compressionBc4Signed:
+				blockSize = 8;
+				break;
+			case PixelFormat::compressionBc5:
+			case PixelFormat::compressionBc5Signed:
+				blockSize = 16;
+				break;
+			default:
+				return 0;
 			}
 			return width / 4 * blockSize;
 		}

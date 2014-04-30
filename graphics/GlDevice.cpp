@@ -339,11 +339,15 @@ ptr<RenderBuffer> GlDevice::CreateRenderBuffer(int width, int height, PixelForma
 		glBindTexture(GL_TEXTURE_2D, textureName);
 		GlSystem::CheckErrors("Can't bind texture");
 
+		bool compressed;
 		GLint internalFormat;
 		GLenum format;
 		GLenum type;
-		if(!GlSystem::GetTextureFormat(pixelFormat, true, internalFormat, format, type))
+		if(!GlSystem::GetTextureFormat(pixelFormat, true, compressed, internalFormat, format, type))
 			THROW("Invalid pixel format");
+
+		if(compressed)
+			THROW("Compressed format can't be used for render buffer");
 
 		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, (GLsizei)width, (GLsizei)height, 0, format, type, 0);
 		GlSystem::CheckErrors("Can't initialize texture");
@@ -885,10 +889,11 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data, const Sampl
 		if(realCount == 0)
 			realCount = 1;
 
+		bool compressed;
 		GLint internalFormat;
 		GLenum format;
 		GLenum type;
-		if(!GlSystem::GetTextureFormat(data->GetFormat(), false, internalFormat, format, type))
+		if(!GlSystem::GetTextureFormat(data->GetFormat(), false, compressed, internalFormat, format, type))
 			THROW("Invalid pixel format");
 
 		int pixelSize = PixelFormat::GetPixelSize(data->GetFormat().size);
@@ -917,9 +922,20 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data, const Sampl
 					THROW("Wrong line or slice pitch");
 				glPixelStorei(GL_UNPACK_ROW_LENGTH, linePitch / pixelSize);
 				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, slicePitch / pixelSize);
-				glTexImage3D(target, mip, internalFormat,
-					data->GetMipWidth(mip), data->GetMipHeight(mip), data->GetMipDepth(mip),
-					0, format, type, data->GetMipData(0, mip));
+
+				if(compressed)
+				{
+					glCompressedTexImage3D(target, mip, internalFormat,
+						data->GetMipWidth(mip), data->GetMipHeight(mip), data->GetMipDepth(mip),
+						0, data->GetMipSize(mip), data->GetMipData(0, mip));
+				}
+				else
+				{
+					glTexImage3D(target, mip, internalFormat,
+						data->GetMipWidth(mip), data->GetMipHeight(mip), data->GetMipDepth(mip),
+						0, format, type, data->GetMipData(0, mip));
+				}
+
 				GlSystem::CheckErrors("Can't set 3D texture data");
 			}
 		}
@@ -944,9 +960,20 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data, const Sampl
 					if(linePitch % pixelSize)
 						THROW("Wrong line pitch");
 					glPixelStorei(GL_UNPACK_ROW_LENGTH, linePitch / pixelSize);
-					glTexImage3D(target, mip, internalFormat,
-						data->GetMipWidth(mip), data->GetMipHeight(mip), data->GetCount(),
-						0, format, type, data->GetMipData(0, mip));
+
+					if(compressed)
+					{
+						glCompressedTexImage3D(target, mip, internalFormat,
+							data->GetMipWidth(mip), data->GetMipHeight(mip), data->GetCount(),
+							0, data->GetMipSize(mip), data->GetMipData(0, mip));
+					}
+					else
+					{
+						glTexImage3D(target, mip, internalFormat,
+							data->GetMipWidth(mip), data->GetMipHeight(mip), data->GetCount(),
+							0, format, type, data->GetMipData(0, mip));
+					}
+
 					GlSystem::CheckErrors("Can't set 2D array texture data");
 				}
 			}
@@ -967,9 +994,20 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data, const Sampl
 					glPixelStorei(GL_UNPACK_ROW_LENGTH, linePitch / pixelSize);
 					GlSystem::CheckErrors("Can't set pixel store format");
 #endif
-					glTexImage2D(target, mip, internalFormat,
-						data->GetMipWidth(mip), data->GetMipHeight(mip),
-						0, format, type, data->GetMipData(0, mip));
+
+					if(compressed)
+					{
+						glCompressedTexImage2D(target, mip, internalFormat,
+							data->GetMipWidth(mip), data->GetMipHeight(mip),
+							0, data->GetMipSize(mip), data->GetMipData(0, mip));
+					}
+					else
+					{
+						glTexImage2D(target, mip, internalFormat,
+							data->GetMipWidth(mip), data->GetMipHeight(mip),
+							0, format, type, data->GetMipData(0, mip));
+					}
+
 					GlSystem::CheckErrors("Can't set 2D texture data");
 				}
 			}
@@ -991,9 +1029,19 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data, const Sampl
 				glPixelStorei(GL_UNPACK_ROW_LENGTH, imagePitch / pixelSize);
 				for(int mip = 0; mip < mips; ++mip)
 				{
-					glTexImage2D(target, mip, internalFormat,
-						data->GetMipWidth(mip), data->GetCount(),
-						0, format, type, data->GetMipData(0, mip));
+					if(compressed)
+					{
+						glCompressedTexImage2D(target, mip, internalFormat,
+							data->GetMipWidth(mip), data->GetCount(),
+							0, data->GetMipSize(mip), data->GetMipData(0, mip));
+					}
+					else
+					{
+						glTexImage2D(target, mip, internalFormat,
+							data->GetMipWidth(mip), data->GetCount(),
+							0, format, type, data->GetMipData(0, mip));
+					}
+
 					GlSystem::CheckErrors("Can't set 1D array texture data");
 				}
 			}
@@ -1007,9 +1055,19 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data, const Sampl
 
 				for(int mip = 0; mip < mips; ++mip)
 				{
-					glTexImage1D(target, mip, internalFormat,
-						data->GetMipWidth(mip),
-						0, format, type, data->GetMipData(0, mip));
+					if(compressed)
+					{
+						glCompressedTexImage1D(target, mip, internalFormat,
+							data->GetMipWidth(mip),
+							0, data->GetMipSize(mip), data->GetMipData(0, mip));
+					}
+					else
+					{
+						glTexImage1D(target, mip, internalFormat,
+							data->GetMipWidth(mip),
+							0, format, type, data->GetMipData(0, mip));
+					}
+
 					GlSystem::CheckErrors("Can't set 1D texture data");
 				}
 			}

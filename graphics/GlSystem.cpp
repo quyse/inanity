@@ -137,7 +137,7 @@ void GlSystem::CheckErrors(const char* primaryExceptionString)
 #endif
 }
 
-bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, bool renderbuffer, GLint& internalFormat, GLenum& format, GLenum& type)
+bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, bool renderbuffer, bool& compressed, GLint& internalFormat, GLenum& format, GLenum& type)
 {
 #define T(t) PixelFormat::type##t
 #define P(p) PixelFormat::pixel##p
@@ -146,6 +146,7 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, bool renderbuffer, GLin
 #define C(c) PixelFormat::compression##c
 
 	bool ok = false;
+	compressed = false;
 
 	switch(pixelFormat.type)
 	{
@@ -241,13 +242,57 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, bool renderbuffer, GLin
 		}
 		break;
 	case T(Compressed):
+		compressed = true;
 		switch(pixelFormat.compression)
 		{
-		case C(Dxt1): format = GL_RGB; type = GL_UNSIGNED_BYTE; internalFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT; ok = true; break;
-		case C(Dxt2): format = GL_RGBA; type = GL_UNSIGNED_BYTE; internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT; ok = true; break;
-		case C(Dxt3): break;
-		case C(Dxt4): format = GL_RGBA; type = GL_UNSIGNED_BYTE; internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT; ok = true; break;
-		case C(Dxt5): format = GL_RGBA; type = GL_UNSIGNED_BYTE; internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT; ok = true; break;
+		case C(Bc1):
+			internalFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+			ok = true;
+			break;
+		case C(Bc1Alpha):
+			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+			ok = true;
+			break;
+		case C(Bc1Srgb):
+			internalFormat = GL_COMPRESSED_SRGB_S3TC_DXT1_EXT;
+			ok = true;
+			break;
+		case C(Bc1SrgbAlpha):
+			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
+			ok = true;
+			break;
+		case C(Bc2):
+			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+			ok = true;
+			break;
+		case C(Bc2Srgb):
+			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
+			ok = true;
+			break;
+		case C(Bc3):
+			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+			ok = true;
+			break;
+		case C(Bc3Srgb):
+			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
+			ok = true;
+			break;
+		case C(Bc4):
+			internalFormat = GL_COMPRESSED_RED_RGTC1;
+			ok = true;
+			break;
+		case C(Bc4Signed):
+			internalFormat = GL_COMPRESSED_SIGNED_RED_RGTC1;
+			ok = true;
+			break;
+		case C(Bc5):
+			internalFormat = GL_COMPRESSED_RG_RGTC2;
+			ok = true;
+			break;
+		case C(Bc5Signed):
+			internalFormat = GL_COMPRESSED_SIGNED_RG_RGTC2;
+			ok = true;
+			break;
 		}
 		break;
 	}
@@ -255,9 +300,12 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, bool renderbuffer, GLin
 	if(ok)
 	{
 #ifdef ___INANITY_PLATFORM_EMSCRIPTEN
-		if(format == GL_RED)
-			format = renderbuffer ? GL_RGB : GL_LUMINANCE;
-		internalFormat = format;
+		if(!compressed)
+		{
+			if(format == GL_RED)
+				format = renderbuffer ? GL_RGB : GL_LUMINANCE;
+			internalFormat = format;
+		}
 #endif
 		return true;
 	}

@@ -149,11 +149,18 @@ DXGI_FORMAT Dx11System::GetDXGIFormat(PixelFormat format)
 	case T(Compressed):
 		switch(format.compression)
 		{
-		case C(Dxt1): return X(BC1_UNORM);
-		case C(Dxt2): return X(BC2_UNORM);
-		case C(Dxt3): return X(BC3_UNORM);
-		case C(Dxt4): return X(BC4_UNORM);
-		case C(Dxt5): return X(BC5_UNORM);
+		case C(Bc1): return X(BC1_UNORM);
+		case C(Bc1Alpha): break;
+		case C(Bc1Srgb): return X(BC1_UNORM_SRGB);
+		case C(Bc1SrgbAlpha): break;
+		case C(Bc2): return X(BC2_UNORM);
+		case C(Bc2Srgb): return X(BC2_UNORM_SRGB);
+		case C(Bc3): return X(BC3_UNORM);
+		case C(Bc3Srgb): return X(BC3_UNORM_SRGB);
+		case C(Bc4): return X(BC4_UNORM);
+		case C(Bc4Signed): return X(BC4_SNORM);
+		case C(Bc5): return X(BC5_UNORM);
+		case C(Bc5Signed): return X(BC5_SNORM);
 		}
 		break;
 	}

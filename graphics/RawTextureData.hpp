@@ -61,6 +61,7 @@ private:
 	/// Size of one image in array (with all mips).
 	int arrayPitch;
 	/// Offsets to the mips in data of one image.
+	/** Number of offsets is (mips + 1). */
 	std::vector<int> mipOffsets;
 
 public:
@@ -93,6 +94,8 @@ public:
 
 	/// Get data of one mip.
 	void* GetMipData(int image = 0, int mip = 0) const;
+	/// Get data size of one mip.
+	int GetMipSize(int mip = 0) const;
 	/// Get line pitch into data of one image.
 	int GetMipLinePitch(int mip = 0) const;
 	/// Get slice pitch into data of one image.
