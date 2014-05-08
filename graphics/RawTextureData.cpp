@@ -180,16 +180,12 @@ int RawTextureData::GetMipLinePitch(int mip) const
 			{
 			case PixelFormat::compressionBc1:
 			case PixelFormat::compressionBc1Alpha:
-			case PixelFormat::compressionBc1Srgb:
-			case PixelFormat::compressionBc1SrgbAlpha:
 				blockSize = 8;
 				break;
 			case PixelFormat::compressionBc2:
-			case PixelFormat::compressionBc2Srgb:
 				blockSize = 16;
 				break;
 			case PixelFormat::compressionBc3:
-			case PixelFormat::compressionBc3Srgb:
 				blockSize = 16;
 				break;
 			case PixelFormat::compressionBc4:

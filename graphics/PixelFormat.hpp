@@ -48,14 +48,10 @@ struct PixelFormat
 		// BC1, or DXT1: RGB, size of 4x4 = 8 bytes
 		compressionBc1,
 		compressionBc1Alpha,
-		compressionBc1Srgb,
-		compressionBc1SrgbAlpha,
 		// BC2, or DXT3: RGBA, size of 4x4 = 16 bytes (low cogerency of color and alpha)
 		compressionBc2,
-		compressionBc2Srgb,
 		// BC3, or DXT5: RGBA, size of 4x4 = 16 bytes (high cogerency of color data)
 		compressionBc3,
-		compressionBc3Srgb,
 		// BC4, or ATI1: R, size of 4x4 = 8 bytes
 		compressionBc4,
 		compressionBc4Signed,
