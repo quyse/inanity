@@ -432,7 +432,7 @@ void Hlsl11GeneratorInstance::PrintUniforms()
 
 			// регистр и положение в нём переменной
 			hlsl << " : packoffset(c" << (offset / sizeof(vec4));
-			// если переменная не начинается ровно на границе регистра, нужно дописать ещё компоненты регистра
+			// если переменная не начинается ровно на границе регистра, нужно дописать ещё первую компоненту регистра
 			int registerOffset = offset % sizeof(vec4);
 			if(registerOffset)
 			{
@@ -441,12 +441,9 @@ void Hlsl11GeneratorInstance::PrintUniforms()
 				// переменная не должна пересекать границу регистра
 				if(registerOffset + variableSize > sizeof(vec4))
 					THROW("Variable should not intersect a register boundary");
-				// выложить столько буков, сколько нужно
+				// выложить нужную букву
 				registerOffset /= sizeof(float);
-				int endRegisterOffset = registerOffset + variableSize / sizeof(float);
-				hlsl << '.';
-				for(int j = registerOffset; j < endRegisterOffset; ++j)
-					hlsl << "xyzw"[j];
+				hlsl << '.' << "xyzw"[registerOffset];
 			}
 			// конец упаковки
 			hlsl << ")";
