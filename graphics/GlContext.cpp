@@ -496,14 +496,14 @@ ptr<GlRenderBuffer> GlContext::GetDummyRenderBuffer(int width, int height)
 	}
 }
 
-void GlContext::ClearColor(int colorBufferIndex, const float* color)
+void GlContext::ClearColor(int colorBufferIndex, const vec4& color)
 {
 	UpdateFramebuffer();
 #ifdef ___INANITY_PLATFORM_EMSCRIPTEN
-	glClearColor(color[0], color[1], color[2], color[3]);
+	glClearColor(color.x, color.y, color.z, color.w);
 	glClear(GL_COLOR_BUFFER_BIT);
 #else
-	glClearBufferfv(GL_COLOR, (GLint)colorBufferIndex, color);
+	glClearBufferfv(GL_COLOR, (GLint)colorBufferIndex, color.t);
 #endif
 	GlSystem::CheckErrors("Can't clear color buffer");
 }

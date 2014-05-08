@@ -395,7 +395,7 @@ void Dx11Context::Update()
 	}
 }
 
-void Dx11Context::ClearColor(int colorBufferIndex, const float* color)
+void Dx11Context::ClearColor(int colorBufferIndex, const vec4& color)
 {
 	LetFrameBuffer* let = (LetFrameBuffer*)cellFrameBuffer.top;
 	THROW_ASSERT(let);
@@ -404,7 +404,7 @@ void Dx11Context::ClearColor(int colorBufferIndex, const float* color)
 		fast_cast<Dx11FrameBuffer*>((FrameBuffer*)let->frameBuffer)
 			->GetColorBuffer(colorBufferIndex)
 				->GetRenderTargetViewInterface(),
-		color);
+		color.t);
 }
 
 void Dx11Context::ClearDepth(float depth)

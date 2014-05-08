@@ -49,7 +49,7 @@ public:
 
 	// методы Context
 
-	void ClearColor(int colorBufferIndex, const float* color);
+	void ClearColor(int colorBufferIndex, const vec4& color);
 	void ClearDepth(float depth);
 	void ClearStencil(unsigned stencil);
 	void ClearDepthStencil(float depth, unsigned stencil);

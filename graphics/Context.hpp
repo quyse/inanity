@@ -275,7 +275,7 @@ public:
 	//******* Methods to clean color/depth/stencil buffers of bound framebuffer.
 	/* These are immediate methods. */
 	/// Clear color buffer.
-	virtual void ClearColor(int colorBufferIndex, const float* color) = 0;
+	virtual void ClearColor(int colorBufferIndex, const vec4& color) = 0;
 	/// Clear depth in depth-stencil buffer.
 	virtual void ClearDepth(float depth) = 0;
 	/// Clear stencil in depth-stencil buffer.
