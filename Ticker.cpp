@@ -16,13 +16,13 @@ void Ticker::Pause()
 		return;
 
 	// remember pause time
-	pauseTick = Time::GetTicks();
+	pauseTick = Time::GetTick();
 }
 
 float Ticker::Tick()
 {
 	// get current time
-	Time::Tick currentTick = Time::GetTicks();
+	Time::Tick currentTick = Time::GetTick();
 
 	// calculate amount of ticks from last tick
 	Time::Tick ticks = 0;

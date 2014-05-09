@@ -17,7 +17,7 @@ long long Time::GetUnixTime()
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
 
-long long Time::GetTicks()
+long long Time::GetTick()
 {
 	LARGE_INTEGER li;
 	QueryPerformanceCounter(&li);
@@ -33,7 +33,7 @@ long long Time::GetTicksPerSecond()
 
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 
-Time::Tick Time::GetTicks()
+Time::Tick Time::GetTick()
 {
 	return emscripten_get_now();
 }
@@ -45,7 +45,7 @@ Time::Tick Time::GetTicksPerSecond()
 
 #elif defined(___INANITY_PLATFORM_POSIX)
 
-long long Time::GetTicks()
+long long Time::GetTick()
 {
 	struct timespec t;
 	clock_gettime(CLOCK_MONOTONIC, &t);

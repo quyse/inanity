@@ -88,7 +88,7 @@ namespace Profiling
 	{
 		if(profiling && recordsCount < PROFILE_MAXIMUM_RECORDS_COUNT)
 		{
-			recordTimes[recordsCount] = Inanity::Time::GetTicks();
+			recordTimes[recordsCount] = Inanity::Time::GetTick();
 			recordTypes[recordsCount] = recordType;
 			recordPositions[recordsCount] = position;
 			++recordsCount;
