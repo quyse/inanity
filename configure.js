@@ -156,7 +156,7 @@ var libraries = {
 			'graphics.AttributeLayout', 'graphics.AttributeLayoutElement', 'graphics.AttributeLayoutSlot',
 			'graphics.ShaderCache',
 			'graphics.PixelFormat', 'graphics.RawTextureData', 'graphics.TextureManager',
-			'graphics.BmpImage', 'graphics.PngImageLoader', 'graphics.TgaImageLoader'
+			'graphics.BmpImage', 'graphics.PngImageLoader', 'graphics.TgaImageLoader', 'graphics.UniversalImageLoader'
 		]
 	},
 	// ******* подсистема DirectX 11
