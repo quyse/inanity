@@ -436,6 +436,9 @@ void GlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 				OP(Ddx, ddx);
 				OP(Ddy, ddy);
 				OP(Clip, clip);
+				OP(Floor, floor);
+				OP(Ceil, ceil);
+				OP(Mod, mod);
 #undef OP
 			default:
 				THROW("Unknown operation type");

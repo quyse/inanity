@@ -52,7 +52,10 @@ public:
 		operationSaturate,
 		operationDdx,
 		operationDdy,
-		operationClip
+		operationClip,
+		operationFloor,
+		operationCeil,
+		operationMod
 	};
 
 private:

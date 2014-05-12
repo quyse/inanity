@@ -355,6 +355,9 @@ void Hlsl11GeneratorInstance::PrintOperationNode(OperationNode* node)
 				OP(Ddx, ddx);
 				OP(Ddy, ddy);
 				OP(Clip, clip);
+				OP(Floor, floor);
+				OP(Ceil, ceil);
+				OP(Mod, fmod);
 #undef OP
 			default:
 				THROW("Unknown operation type");

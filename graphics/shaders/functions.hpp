@@ -116,6 +116,19 @@ inline Value<xvec<T, n> > ddy(Value<xvec<T, n> > a) { return OP1(Ddy); }
 // clip
 inline Expression clip(Value<float> a) { return OP1(Clip); }
 
+// floor
+template <typename T>
+inline Value<T> floor(Value<T> a) { return OP1(Floor); }
+template <typename T, int n>
+inline Value<xvec<T, n> > floor(Value<xvec<T, n> > a) { return OP1(Floor); }
+// ceil
+template <typename T>
+inline Value<float> ceil(Value<float> a) { return OP1(Ceil); }
+template <typename T, int n>
+inline Value<xvec<T, n> > ceil(Value<xvec<T, n> > a) { return OP1(Ceil); }
+// mod
+inline Value<float> mod(Value<float> a, Value<float> b) { return OP2(Mod); }
+
 #undef OP2
 
 END_INANITY_SHADERS
