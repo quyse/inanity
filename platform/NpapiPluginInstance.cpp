@@ -5,6 +5,9 @@
 #include "../script/np/Any.hpp"
 #include "../MemoryStream.hpp"
 #include "../File.hpp"
+#include "../Exception.hpp"
+#include "../Log.hpp"
+#include <sstream>
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
 #include "Win32Window.hpp"
@@ -121,9 +124,18 @@ void NpapiPluginInstance::PostUrl(const String& url, ptr<File> postData, ptr<Rec
 
 void NpapiPluginInstance::AsyncCallRoutine(void* data)
 {
-	Handler* handler = (Handler*)data;
-	handler->Fire();
-	handler->Dereference();
+	try
+	{
+		Handler* handler = (Handler*)data;
+		handler->Fire();
+		handler->Dereference();
+	}
+	catch(Exception* exception)
+	{
+		std::ostringstream ss;
+		MakePointer(exception)->PrintStack(ss);
+		Log::Error("Async call exception: " + ss.str());
+	}
 }
 
 void NpapiPluginInstance::AsyncCall(ptr<Handler> handler)
