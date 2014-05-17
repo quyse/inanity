@@ -121,8 +121,28 @@ void Hlsl11GeneratorInstance::RegisterNode(Node* node)
 	case Node::typeSample:
 		{
 			SampleNode* sampleNode = fast_cast<SampleNode*>(node);
+
 			RegisterNode(sampleNode->GetSamplerNode());
 			RegisterNode(sampleNode->GetCoordsNode());
+
+			ptr<Node> lodNode = sampleNode->GetLodNode();
+			if(lodNode)
+				RegisterNode(lodNode);
+
+			ptr<Node> biasNode = sampleNode->GetBiasNode();
+			if(biasNode)
+				RegisterNode(biasNode);
+
+			ptr<Node> gradXNode = sampleNode->GetGradXNode();
+			if(gradXNode)
+				RegisterNode(gradXNode);
+			ptr<Node> gradYNode = sampleNode->GetGradYNode();
+			if(gradYNode)
+				RegisterNode(gradYNode);
+
+			ptr<Node> offsetNode = sampleNode->GetOffsetNode();
+			if(offsetNode)
+				RegisterNode(offsetNode);
 		}
 		break;
 	case Node::typeFragment:
@@ -204,9 +224,53 @@ void Hlsl11GeneratorInstance::PrintNode(Node* node)
 	case Node::typeSample:
 		{
 			SampleNode* sampleNode = fast_cast<SampleNode*>(node);
+
 			int slot = sampleNode->GetSamplerNode()->GetSlot();
-			hlsl << 't' << slot << ".Sample(s" << slot << ", ";
-			PrintNode(sampleNode->GetCoordsNode());
+			hlsl << 't' << slot;
+
+			ptr<Node> coordsNode = sampleNode->GetCoordsNode();
+			ptr<Node> offsetNode = sampleNode->GetOffsetNode();
+			ptr<Node> lodNode = sampleNode->GetLodNode();
+			ptr<Node> biasNode = sampleNode->GetBiasNode();
+			ptr<Node> gradXNode = sampleNode->GetGradXNode();
+			ptr<Node> gradYNode = sampleNode->GetGradYNode();
+
+			if(lodNode)
+			{
+				hlsl << ".SampleLevel(s" << slot << ", ";
+				PrintNode(coordsNode);
+				hlsl << ", ";
+				PrintNode(lodNode);
+			}
+			else if(biasNode)
+			{
+				hlsl << ".SampleBias(s" << slot << ", ";
+				PrintNode(coordsNode);
+				hlsl << ", ";
+				PrintNode(biasNode);
+			}
+			else if(gradXNode && gradYNode)
+			{
+				hlsl << ".SampleGrad(s" << slot << ", ";
+				PrintNode(coordsNode);
+				hlsl << ", ";
+				PrintNode(gradXNode);
+				hlsl << ", ";
+				PrintNode(gradYNode);
+			}
+			else
+			{
+				hlsl << ".Sample(s" << slot << ", ";
+				PrintNode(coordsNode);
+			}
+
+			// add offset if needed
+			if(offsetNode)
+			{
+				hlsl << ", ";
+				PrintNode(offsetNode);
+			}
+
 			hlsl << ')';
 		}
 		break;

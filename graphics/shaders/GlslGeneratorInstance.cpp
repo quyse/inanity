@@ -143,8 +143,28 @@ void GlslGeneratorInstance::RegisterNode(Node* node)
 	case Node::typeSample:
 		{
 			SampleNode* sampleNode = fast_cast<SampleNode*>(node);
+
 			RegisterNode(sampleNode->GetSamplerNode());
 			RegisterNode(sampleNode->GetCoordsNode());
+
+			ptr<Node> lodNode = sampleNode->GetLodNode();
+			if(lodNode)
+				RegisterNode(lodNode);
+
+			ptr<Node> biasNode = sampleNode->GetBiasNode();
+			if(biasNode)
+				RegisterNode(biasNode);
+
+			ptr<Node> gradXNode = sampleNode->GetGradXNode();
+			if(gradXNode)
+				RegisterNode(gradXNode);
+			ptr<Node> gradYNode = sampleNode->GetGradYNode();
+			if(gradYNode)
+				RegisterNode(gradYNode);
+
+			ptr<Node> offsetNode = sampleNode->GetOffsetNode();
+			if(offsetNode)
+				RegisterNode(offsetNode);
 		}
 		break;
 	case Node::typeFragment:
@@ -237,11 +257,82 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 	case Node::typeSample:
 		{
 			SampleNode* sampleNode = fast_cast<SampleNode*>(node);
-			glsl << (glslVersion == GlslVersions::webgl ? "(texture2D(" : "(texture(");
-			glsl << samplerPrefix << sampleNode->GetSamplerNode()->GetSlot() << ", ";
-			PrintNode(sampleNode->GetCoordsNode());
+
+			int slot = sampleNode->GetSamplerNode()->GetSlot();
+
+			ptr<Node> coordsNode = sampleNode->GetCoordsNode();
+			ptr<Node> offsetNode = sampleNode->GetOffsetNode();
+			ptr<Node> lodNode = sampleNode->GetLodNode();
+			ptr<Node> biasNode = sampleNode->GetBiasNode();
+			ptr<Node> gradXNode = sampleNode->GetGradXNode();
+			ptr<Node> gradYNode = sampleNode->GetGradYNode();
+
+			// bracket for possible swizzle
+			glsl << '(';
+
+			if(lodNode)
+			{
+				glsl << "textureLod";
+				if(offsetNode)
+					glsl << "Offset";
+				glsl << '(' << samplerPrefix << slot << ", ";
+				PrintNode(coordsNode);
+				if(offsetNode)
+				{
+					glsl << ", ";
+					PrintNode(offsetNode);
+				}
+			}
+			else if(biasNode)
+			{
+				glsl << "texture";
+				if(offsetNode)
+					glsl << "Offset";
+				glsl << '(' << samplerPrefix << slot << ", ";
+				PrintNode(coordsNode);
+				if(offsetNode)
+				{
+					glsl << ", ";
+					PrintNode(offsetNode);
+				}
+				glsl << ", ";
+				PrintNode(biasNode);
+			}
+			else if(gradXNode && gradYNode)
+			{
+				glsl << "textureGrad";
+				if(offsetNode)
+					glsl << "Offset";
+				glsl << '(' << samplerPrefix << slot << ", ";
+				PrintNode(coordsNode);
+				glsl << ", ";
+				PrintNode(gradXNode);
+				glsl << ", ";
+				PrintNode(gradYNode);
+				if(offsetNode)
+				{
+					glsl << ", ";
+					PrintNode(offsetNode);
+				}
+			}
+			else
+			{
+				glsl << (glslVersion == GlslVersions::webgl ? "texture2D" : "texture");
+				if(offsetNode)
+					glsl << "Offset";
+				glsl << '(' << samplerPrefix << slot << ", ";
+				PrintNode(coordsNode);
+				if(offsetNode)
+				{
+					glsl << ", ";
+					PrintNode(offsetNode);
+				}
+			}
+
+			// close sample call
 			glsl << ')';
-			// в GLSL всегда возвращается 4-компонентный вектор, так что возможно, нужно получить компоненты
+
+			// sample always returns four-component vector, so make some swizzle if needed
 			int valueSize;
 			switch(sampleNode->GetSamplerNode()->GetValueType())
 			{
