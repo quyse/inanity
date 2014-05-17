@@ -10,69 +10,66 @@ BEGIN_INANITY_GRAPHICS
 RawTextureData::RawTextureData(ptr<File> pixels, PixelFormat format, int width, int height, int depth, int mips, int count)
 : pixels(pixels), format(format), width(width), height(height), depth(depth), mips(mips), count(count)
 {
-	try
+	BEGIN_TRY();
+
+	// check params
+	if(width <= 0)
+		THROW("Width should be > 0");
+	if(height < 0)
+		THROW("Height should be >= 0");
+	if(height == 0)
 	{
-		// check params
-		if(width <= 0)
-			THROW("Width should be > 0");
-		if(height < 0)
-			THROW("Height should be >= 0");
-		if(height == 0)
-		{
-			if(depth != 0)
-				THROW("Depth != 0, but height == 0");
-		}
-		else
-		{
-			if(depth < 0)
-				THROW("Depth should be >= 0");
-		}
-		if(mips <= 0)
-			THROW("Mips should be > 0");
-		if(count < 0)
-			THROW("Count should be >= 0");
-
-		// get a maximum dimension of image
-		int maxDimension = std::max(std::max(width, height), depth);
-
-		// calculate mip offsets
-		// we use a floor-scheme, as it used in OpenGL
-		mipOffsets.resize(mips);
-		int mipOffset = 0;
-		for(int i = 0; i < mips; ++i)
-		{
-			// if we reach the zero dimension, mips was too big
-			if(maxDimension == 0)
-				THROW("Too much mips");
-
-			// store current offset
-			mipOffsets[i] = mipOffset;
-
-			// calculate size of the current mip
-			int mipSize = GetMipSize(i);
-			// advance offset by current mip size
-			mipOffset += mipSize;
-
-			// max dimension of next mip
-			maxDimension /= 2;
-		}
-
-		// store the size of one image
-		arrayPitch = mipOffset;
-
-		// check the size of file (or create it if doesn't created yet)
-		if(pixels)
-		{
-			if((int)pixels->GetSize() != arrayPitch * (count ? count : 1))
-				THROW("Wrong file size");
-		}
-		else
-			this->pixels = NEW(MemoryFile(arrayPitch * (count ? count : 1)));
+		if(depth != 0)
+			THROW("Depth != 0, but height == 0");
 	}
-	catch(Exception* exception)
+	else
 	{
-		THROW_SECONDARY("Can't create raw texture data", exception);
+		if(depth < 0)
+			THROW("Depth should be >= 0");
 	}
+	if(mips <= 0)
+		THROW("Mips should be > 0");
+	if(count < 0)
+		THROW("Count should be >= 0");
+
+	// get a maximum dimension of image
+	int maxDimension = std::max(std::max(width, height), depth);
+
+	// calculate mip offsets
+	// we use a floor-scheme, as it used in OpenGL
+	mipOffsets.resize(mips);
+	int mipOffset = 0;
+	for(int i = 0; i < mips; ++i)
+	{
+		// if we reach the zero dimension, mips was too big
+		if(maxDimension == 0)
+			THROW("Too much mips");
+
+		// store current offset
+		mipOffsets[i] = mipOffset;
+
+		// calculate size of the current mip
+		int mipSize = GetMipSize(i);
+		// advance offset by current mip size
+		mipOffset += mipSize;
+
+		// max dimension of next mip
+		maxDimension /= 2;
+	}
+
+	// store the size of one image
+	arrayPitch = mipOffset;
+
+	// check the size of file (or create it if doesn't created yet)
+	if(pixels)
+	{
+		if((int)pixels->GetSize() != arrayPitch * (count ? count : 1))
+			THROW("Wrong file size");
+	}
+	else
+		this->pixels = NEW(MemoryFile(arrayPitch * (count ? count : 1)));
+
+	END_TRY("Can't create raw texture data");
 }
 
 PixelFormat RawTextureData::GetFormat() const
@@ -215,90 +212,82 @@ int RawTextureData::GetMipSlicePitch(int mip) const
 
 void RawTextureData::Serialize(ptr<OutputStream> stream)
 {
-	try
-	{
-		StreamWriter writer(stream);
+	BEGIN_TRY();
 
-		format.Serialize(writer);
-		writer.WriteShortly(width);
-		writer.WriteShortly(height);
-		writer.WriteShortly(depth);
-		writer.WriteShortly(mips);
-		writer.WriteShortly(count);
+	StreamWriter writer(stream);
 
-		int realCount = count > 0 ? count : 1;
-		int realMips = mips > 0 ? mips : 1;
+	format.Serialize(writer);
+	writer.WriteShortly(width);
+	writer.WriteShortly(height);
+	writer.WriteShortly(depth);
+	writer.WriteShortly(mips);
+	writer.WriteShortly(count);
 
-		for(int image = 0; image < realCount; ++image)
-			for(int mip = 0; mip < realMips; ++mip)
+	int realCount = count > 0 ? count : 1;
+
+	for(int image = 0; image < realCount; ++image)
+		for(int mip = 0; mip < mips; ++mip)
+		{
+			const char* sliceData = (const char*)GetMipData(image, mip);
+			int mipDepth = GetMipDepth(mip);
+			int mipHeight = GetMipHeight(mip);
+			int mipLinePitch = GetMipLinePitch(mip);
+			int mipSlicePitch = GetMipSlicePitch(mip);
+			for(int slice = 0; slice < mipDepth; ++slice)
 			{
-				const char* sliceData = (const char*)GetMipData(image, mip);
-				int mipDepth = GetMipDepth(mip);
-				int mipHeight = GetMipHeight(mip);
-				int mipLinePitch = GetMipLinePitch(mip);
-				int mipSlicePitch = GetMipSlicePitch(mip);
-				for(int slice = 0; slice < mipDepth; ++slice)
+				const char* lineData = sliceData;
+				for(int line = 0; line < mipHeight; ++line)
 				{
-					const char* lineData = sliceData;
-					for(int line = 0; line < mipHeight; ++line)
-					{
-						writer.Write(lineData, mipLinePitch);
-						lineData += mipLinePitch;
-					}
-					sliceData += mipSlicePitch;
+					writer.Write(lineData, mipLinePitch);
+					lineData += mipLinePitch;
 				}
+				sliceData += mipSlicePitch;
 			}
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY("Can't serialize raw texture data", exception);
-	}
+		}
+
+	END_TRY("Can't serialize raw texture data");
 }
 
 ptr<RawTextureData> RawTextureData::Deserialize(ptr<InputStream> stream)
 {
-	try
-	{
-		StreamReader reader(stream);
+	BEGIN_TRY();
 
-		PixelFormat format = PixelFormat::Deserialize(reader);
-		int width = (int)reader.ReadShortly();
-		int height = (int)reader.ReadShortly();
-		int depth = (int)reader.ReadShortly();
-		int mips = (int)reader.ReadShortly();
-		int count = (int)reader.ReadShortly();
+	StreamReader reader(stream);
 
-		ptr<RawTextureData> data = NEW(RawTextureData(0, format, width, height, depth, mips, count));
+	PixelFormat format = PixelFormat::Deserialize(reader);
+	int width = (int)reader.ReadShortly();
+	int height = (int)reader.ReadShortly();
+	int depth = (int)reader.ReadShortly();
+	int mips = (int)reader.ReadShortly();
+	int count = (int)reader.ReadShortly();
 
-		int realCount = count > 0 ? count : 1;
-		int realMips = mips > 0 ? mips : 1;
+	ptr<RawTextureData> data = NEW(RawTextureData(0, format, width, height, depth, mips, count));
 
-		for(int image = 0; image < realCount; ++image)
-			for(int mip = 0; mip < realMips; ++mip)
+	int realCount = count > 0 ? count : 1;
+
+	for(int image = 0; image < realCount; ++image)
+		for(int mip = 0; mip < mips; ++mip)
+		{
+			char* sliceData = (char*)data->GetMipData(image, mip);
+			int mipDepth = data->GetMipDepth(mip);
+			int mipHeight = data->GetMipHeight(mip);
+			int mipLinePitch = data->GetMipLinePitch(mip);
+			int mipSlicePitch = data->GetMipSlicePitch(mip);
+			for(int slice = 0; slice < mipDepth; ++slice)
 			{
-				char* sliceData = (char*)data->GetMipData(image, mip);
-				int mipDepth = data->GetMipDepth(mip);
-				int mipHeight = data->GetMipHeight(mip);
-				int mipLinePitch = data->GetMipLinePitch(mip);
-				int mipSlicePitch = data->GetMipSlicePitch(mip);
-				for(int slice = 0; slice < mipDepth; ++slice)
+				char* lineData = sliceData;
+				for(int line = 0; line < mipHeight; ++line)
 				{
-					char* lineData = sliceData;
-					for(int line = 0; line < mipHeight; ++line)
-					{
-						reader.Read(lineData, mipLinePitch);
-						lineData += mipLinePitch;
-					}
-					sliceData += mipSlicePitch;
+					reader.Read(lineData, mipLinePitch);
+					lineData += mipLinePitch;
 				}
+				sliceData += mipSlicePitch;
 			}
+		}
 
-		return data;
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY("Can't deserialize raw texture data", exception);
-	}
+	return data;
+
+	END_TRY("Can't deserialize raw texture data");
 }
 
 void RawTextureData::Blit(ptr<RawTextureData> image, int destX, int destY, int sourceX, int sourceY, int width, int height)
