@@ -346,6 +346,74 @@ void RawTextureData::Blit(ptr<RawTextureData> image, int destX, int destY, int s
 	END_TRY("Can't blit raw texture data");
 }
 
+ptr<RawTextureData> RawTextureData::GenerateMips(int newMips) const
+{
+	BEGIN_TRY();
+
+	// calculate full number of mips if not set
+	if(!newMips)
+	{
+		int lastMip;
+		for(lastMip = 0; GetMipWidth(lastMip) > 1 || GetMipHeight(lastMip) > 1 || GetMipDepth(lastMip) > 1; ++lastMip);
+		newMips = lastMip + 1;
+	}
+
+	// calculate new mip offsets and size of new pixels
+	size_t newMipOffset = 0;
+	std::vector<int> newMipOffsets(newMips);
+	for(int i = 0; i < newMips; ++i)
+	{
+		newMipOffsets[i] = newMipOffset;
+		newMipOffset += GetMipSize(i);
+	}
+	int newImageSize = newMipOffset;
+	int realCount = count ? count : 1;
+	ptr<File> newPixels = NEW(MemoryFile(newImageSize * realCount));
+	char* newPixelsData = (char*)newPixels->GetData();
+
+	// scale down the image
+	// TEST: simple nearest neighbour algorithm
+	int pixelSize = GetPixelSize();
+
+	for(int image = 0; image < realCount; ++image)
+	{
+		const char* sourceData = (const char*)GetMipData(image, 0);
+		int sourceWidth = GetMipWidth(0);
+		int sourceHeight = GetMipHeight(0);
+		int sourceDepth = GetMipDepth(0);
+		int sourceSlicePitch = GetMipSlicePitch(0);
+		int sourceLinePitch = GetMipLinePitch(0);
+
+		for(int mip = 0; mip < newMips; ++mip)
+		{
+			char* newMipData = (char*)newPixelsData + image * newImageSize + newMipOffsets[mip];
+
+			int newMipDepth = GetMipDepth(mip);
+			int newMipHeight = GetMipHeight(mip);
+			int newMipWidth = GetMipWidth(mip);
+
+			for(int z = 0; z < newMipDepth; ++z)
+			{
+				int slice = (z * sourceDepth / newMipDepth) * sourceSlicePitch;
+				for(int y = 0; y < newMipHeight; ++y)
+				{
+					int line = slice + (y * sourceHeight / newMipHeight) * sourceLinePitch;
+					for(int x = 0; x < newMipWidth; ++x)
+					{
+						int pixel = line + (x * sourceWidth / newMipWidth) * pixelSize;
+						for(int p = 0; p < pixelSize; ++p)
+							*newMipData++ = sourceData[pixel + p];
+					}
+				}
+			}
+		}
+	}
+
+	return NEW(RawTextureData(newPixels, format, width, height, depth, newMips, count));
+
+	END_TRY("Can't generate mips for raw texture data");
+}
+
 ptr<RawTextureData> RawTextureData::ShelfUnion(
 	const std::vector<ptr<RawTextureData> >& images,
 	std::vector<std::pair<int, int> >& outPositions,

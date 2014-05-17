@@ -24,6 +24,7 @@ META_CLASS(Inanity::Graphics::RawTextureData, Inanity.Graphics.RawTextureData);
 	META_METHOD(Serialize);
 	META_STATIC_METHOD(Deserialize);
 	META_METHOD(Blit);
+	META_METHOD(GenerateMips);
 META_CLASS_END();
 
 #include "graphics/ImageLoader.hpp"
