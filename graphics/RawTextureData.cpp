@@ -37,7 +37,7 @@ RawTextureData::RawTextureData(ptr<File> pixels, PixelFormat format, int width, 
 
 		// calculate mip offsets
 		// we use a floor-scheme, as it used in OpenGL
-		mipOffsets.resize(mips + 1);
+		mipOffsets.resize(mips);
 		int mipOffset = 0;
 		for(int i = 0; i < mips; ++i)
 		{
@@ -49,14 +49,13 @@ RawTextureData::RawTextureData(ptr<File> pixels, PixelFormat format, int width, 
 			mipOffsets[i] = mipOffset;
 
 			// calculate size of the current mip
-			int mipSize = GetMipSlicePitch(i) * GetMipDepth(i);
+			int mipSize = GetMipSize(i);
 			// advance offset by current mip size
 			mipOffset += mipSize;
 
 			// max dimension of next mip
 			maxDimension /= 2;
 		}
-		mipOffsets[mips] = mipOffset;
 
 		// store the size of one image
 		arrayPitch = mipOffset;
@@ -163,7 +162,7 @@ void* RawTextureData::GetMipData(int image, int mip) const
 
 int RawTextureData::GetMipSize(int mip) const
 {
-	return mipOffsets[mip + 1] - mipOffsets[mip];
+	return GetMipSlicePitch(mip) * GetMipDepth(mip);
 }
 
 int RawTextureData::GetMipLinePitch(int mip) const

@@ -61,7 +61,6 @@ private:
 	/// Size of one image in array (with all mips).
 	int arrayPitch;
 	/// Offsets to the mips in data of one image.
-	/** Number of offsets is (mips + 1). */
 	std::vector<int> mipOffsets;
 
 public:
