@@ -46,7 +46,7 @@ inline Eigen::Matrix<T, n, m> toEigen(const xmat<T, n, m>& a)
 }
 
 template <typename T>
-inline Eigen::Quaternion<T> toEigenQuat(const xvec<T, 4>& a)
+inline Eigen::Quaternion<T> toEigenQuat(const xquat<T>& a)
 {
 	return Eigen::Quaternion<T>(a.w, a.x, a.y, a.z);
 }
@@ -71,9 +71,9 @@ inline xmat<T, n, m> fromEigen(const Eigen::Matrix<T, n, m>& a)
 }
 
 template <typename T>
-inline xvec<T, 4> fromEigen(const Eigen::Quaternion<T>& a)
+inline xquat<T> fromEigen(const Eigen::Quaternion<T>& a)
 {
-	return xvec<T, 4>(a.x(), a.y(), a.z(), a.w());
+	return xquat<T>(a.x(), a.y(), a.z(), a.w());
 }
 
 END_INANITY_MATH
