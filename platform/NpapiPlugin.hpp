@@ -40,14 +40,26 @@ public:
 	static NPIdentifier callIdentifier;
 	static NPIdentifier __reclaimIdentifier;
 
-	/// Create instance of plugin.
-	/** This function is not defined. It should be defined once
-	per executable (DLL) and should return new instance
-	of a class derived from NpapiPluginInstance. */
-	static ptr<NpapiPluginInstance> CreateInstance(int argc, char* argn[], char* argv[]);
-
 	/// Fill provided structure with pointers to plugin functions.
 	static void GetPluginFuncs(NPPluginFuncs* pluginFuncs);
+
+public:
+	//*** These functions are not defined. They should be defined once
+	// per executable (DLL).
+
+	/// Get info of a plugin.
+	struct Info
+	{
+		const char* version;
+		const char* mime;
+		const char* name;
+		const char* description;
+	};
+	static const Info& GetInfo();
+
+	/// Create instance of plugin.
+	/** Should return new instance of a class derived from NpapiPluginInstance. */
+	static ptr<NpapiPluginInstance> CreateInstance(int argc, char* argn[], char* argv[]);
 };
 
 END_INANITY_PLATFORM

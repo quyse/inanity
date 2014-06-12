@@ -12,6 +12,7 @@
 #if defined(___INANITY_PLATFORM_WINDOWS)
 #include "Win32Window.hpp"
 #include "../input/Win32WmManager.hpp"
+#elif defined(___INANITY_PLATFORM_LINUX)
 #else
 #error Unknown platform
 #endif
@@ -37,6 +38,7 @@ NpapiPluginInstance::NpapiPluginInstance(bool needInputManager) :
 #if defined(___INANITY_PLATFORM_WINDOWS)
 	if(needInputManager)
 		inputManager = NEW(Input::Win32WmManager());
+#elif defined(___INANITY_PLATFORM_LINUX)
 #else
 #error Unknown platform
 #endif
@@ -51,6 +53,15 @@ NpapiPluginInstance::~NpapiPluginInstance()
 #ifdef ___INANITY_PLATFORM_WINDOWS
 
 void NpapiPluginInstance::Paint(HDC hdc)
+{
+	// do nothing by default
+}
+
+#endif
+
+#ifdef ___INANITY_PLATFORM_LINUX
+
+void NpapiPluginInstance::Paint(const XGraphicsExposeEvent& event)
 {
 	// do nothing by default
 }
@@ -200,6 +211,8 @@ NPError NpapiPluginInstance::NppSetWindow(NPWindow* npWindow)
 		return NPERR_INVALID_PARAM;
 	}
 
+#elif defined(___INANITY_PLATFORM_LINUX)
+
 #else
 #error Unknown platform
 #endif
@@ -297,6 +310,10 @@ int16_t NpapiPluginInstance::NppHandleEvent(void* e)
 	default:
 		return 0;
 	}
+
+#elif defined(___INANITY_PLATFORM_LINUX)
+
+	return 0;
 
 #else
 #error Unknown platform

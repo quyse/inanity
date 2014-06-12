@@ -6,6 +6,10 @@
 #include "../script/np/np.hpp"
 #include "../Handler.hpp"
 
+#if defined(___INANITY_PLATFORM_LINUX)
+struct XGraphicsExposeEvent;
+#endif
+
 BEGIN_INANITY
 
 class File;
@@ -16,6 +20,7 @@ BEGIN_INANITY_INPUT
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
 class Win32WmManager;
+#elif defined(___INANITY_PLATFORM_LINUX)
 #else
 #error Unknown platform
 #endif
@@ -32,6 +37,7 @@ BEGIN_INANITY_PLATFORM
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
 class Win32Window;
+#elif defined(___INANITY_PLATFORM_LINUX)
 #else
 #error Unknown platform
 #endif
@@ -71,6 +77,11 @@ protected:
 
 	/// Paint (in case of windowless window).
 	virtual void Paint(HDC hdc);
+
+#elif defined(___INANITY_PLATFORM_LINUX)
+
+	/// Paint (in case of windowless window).
+	virtual void Paint(const XGraphicsExposeEvent& event);
 
 #else
 #error Unknown platform.

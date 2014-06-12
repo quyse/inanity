@@ -54,6 +54,36 @@ NPError OSCALL NP_Shutdown(void)
 	return NPERR_NO_ERROR;
 }
 
+#ifdef XP_UNIX
+
+NP_EXPORT(char*) NP_GetPluginVersion(void)
+{
+	return (char*)Inanity::Platform::NpapiPlugin::GetInfo().version;
+}
+
+NP_EXPORT(const char*) NP_GetMIMEDescription(void)
+{
+	return Inanity::Platform::NpapiPlugin::GetInfo().mime;
+}
+
+NP_EXPORT(NPError) NP_GetValue(void* future, NPPVariable aVariable, void* aValue)
+{
+	switch(aVariable)
+	{
+	case NPPVpluginNameString:
+		*(const char**)aValue = Inanity::Platform::NpapiPlugin::GetInfo().name;
+		break;
+	case NPPVpluginDescriptionString:
+		*(const char**)aValue = Inanity::Platform::NpapiPlugin::GetInfo().description;
+		break;
+	default:
+		return NPERR_INVALID_PARAM;
+	}
+	return NPERR_NO_ERROR;
+}
+
+#endif
+
 BEGIN_INANITY_PLATFORM
 
 //*** NpapiPlugin
