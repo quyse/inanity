@@ -23,7 +23,7 @@ SampleNode::SampleNode(
 {
 	BEGIN_TRY();
 
-	if(lodNode && biasNode || lodNode && gradXNode || biasNode && gradXNode)
+	if((lodNode && biasNode) || (lodNode && gradXNode) || (biasNode && gradXNode))
 		THROW("lod, bias and grad are mutually exclusive");
 	if(!!gradXNode != !!gradYNode)
 		THROW("gradX and gradY should be set or not set together");

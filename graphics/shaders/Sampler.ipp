@@ -143,7 +143,15 @@ SamplerCube<ValueType>::SamplerCube(int slot)
 template <typename ValueType>
 Value<ValueType> SamplerCube<ValueType>::Sample(Value<vec3> coords)
 {
-	return Value<ValueType>(NEW(SampleNode(node.FastCast<SamplerNode>(), coords.GetNode())));
+	return Value<ValueType>(NEW(SampleNode(
+		node.FastCast<SamplerNode>(),
+		coords.GetNode(),
+		nullptr, // offset
+		nullptr, // lod
+		nullptr, // bias
+		nullptr, // gradX
+		nullptr // gradY
+	)));
 }
 
 END_INANITY_SHADERS
