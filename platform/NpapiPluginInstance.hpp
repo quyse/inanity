@@ -2,19 +2,23 @@
 #define ___INANITY_PLATFORM_NPAPI_PLUGIN_INSTANCE_HPP___
 
 #include "npapi.hpp"
+#include "../graphics/graphics.hpp"
 #include "../input/input.hpp"
 #include "../script/np/np.hpp"
 #include "../Handler.hpp"
-
-#if defined(___INANITY_PLATFORM_LINUX)
-struct XGraphicsExposeEvent;
-#endif
 
 BEGIN_INANITY
 
 class File;
 
 END_INANITY
+
+BEGIN_INANITY_GRAPHICS
+
+class Device;
+class Presenter;
+
+END_INANITY_GRAPHICS
 
 BEGIN_INANITY_INPUT
 
@@ -34,6 +38,8 @@ class Any;
 END_INANITY_NP
 
 BEGIN_INANITY_PLATFORM
+
+class NpapiPresenter;
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
 class Win32Window;
@@ -62,11 +68,19 @@ protected:
 	/// Plugin instance handle.
 	NPP npp;
 
+	/// Left-top corner of client area.
+	int left, top;
 	/// Size of client area.
 	int width, height;
 
 	NpapiPluginInstance(bool needInputManager);
 	~NpapiPluginInstance();
+
+private:
+	/// Graphics presenter.
+	ptr<NpapiPresenter> presenter;
+
+	bool DoDraw();
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
 
@@ -75,20 +89,24 @@ protected:
 	ptr<Win32Window> window;
 	HDC hdc;
 
-	/// Paint (in case of windowless window).
-	virtual void Paint(HDC hdc);
-
 #elif defined(___INANITY_PLATFORM_LINUX)
-
-	/// Paint (in case of windowless window).
-	virtual void Paint(const XGraphicsExposeEvent& event);
 
 #else
 #error Unknown platform.
 #endif
 
+protected:
 	/// Redefine in derived class to perform initialization.
 	virtual void PostInit();
+
+	/// Get graphics device for rendering.
+	/** Redefine in derived class. Default implementation
+	returns nullptr to skip drawing. */
+	virtual ptr<Graphics::Device> GetGraphicsDevice() const;
+	/// Perform actual drawing.
+	/** Redefine in derived class. Default implementation
+	does nothing. */
+	virtual void Draw();
 
 	/// Script object which will be returned to javascript.
 	ptr<Script::Np::Any> scriptObject;
@@ -113,6 +131,10 @@ public:
 	void AsyncCall(ptr<Handler> handler);
 	/// Invalidate visual representation.
 	void Invalidate();
+
+	/// Get presenter to draw into.
+	/** Valid only in Draw(). */
+	ptr<Graphics::Presenter> GetPresenter() const;
 
 	//*** Internal methods.
 	void Init(NPP npp);

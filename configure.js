@@ -236,7 +236,11 @@ var libraries = {
 	},
 	// ******* NPAPI plugin
 	'libinanity-npapi': {
-		objects: ['platform.NpapiPlugin', 'platform.NpapiPluginInstance']
+		objects: [
+			'platform.NpapiPlugin',
+			'platform.NpapiPluginInstance',
+			'platform.NpapiPresenter'
+		],
 	},
 	// ******* подсистема GUI
 	'libinanity-gui': {

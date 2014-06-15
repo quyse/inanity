@@ -1,5 +1,7 @@
 #include "NpapiPluginInstance.hpp"
 #include "NpapiPlugin.hpp"
+#include "NpapiPresenter.hpp"
+#include "../graphics/Device.hpp"
 #include "../input/Frame.hpp"
 #include "../script/np/State.hpp"
 #include "../script/np/Any.hpp"
@@ -12,7 +14,7 @@
 #if defined(___INANITY_PLATFORM_WINDOWS)
 #include "Win32Window.hpp"
 #include "../input/Win32WmManager.hpp"
-#elif defined(___INANITY_PLATFORM_LINUX)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
 #else
 #error Unknown platform
 #endif
@@ -33,12 +35,13 @@ NpapiPluginInstance::NpapiPluginInstance(bool needInputManager) :
 	description("Inanity NPAPI Plugin"),
 	windowless(true),
 	transparent(false),
-	npp(nullptr)
+	npp(nullptr),
+	left(0), top(0), width(0), height(0)
 {
 #if defined(___INANITY_PLATFORM_WINDOWS)
 	if(needInputManager)
 		inputManager = NEW(Input::Win32WmManager());
-#elif defined(___INANITY_PLATFORM_LINUX)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
 #else
 #error Unknown platform
 #endif
@@ -50,25 +53,38 @@ NpapiPluginInstance::~NpapiPluginInstance()
 		scriptObject->GetState()->ReclaimInstance(scriptObject);
 }
 
-#ifdef ___INANITY_PLATFORM_WINDOWS
-
-void NpapiPluginInstance::Paint(HDC hdc)
+bool NpapiPluginInstance::DoDraw()
 {
-	// do nothing by default
+	// create presenter if needed
+	if(!presenter)
+	{
+		ptr<Graphics::Device> device = GetGraphicsDevice();
+		if(!device)
+			return false;
+		presenter = NEW(Platform::NpapiPresenter(device));
+	}
+
+	// notify about size
+	presenter->Resize(width, height);
+
+	// perform actual drawing
+	Draw();
+
+	return true;
 }
-
-#endif
-
-#ifdef ___INANITY_PLATFORM_LINUX
-
-void NpapiPluginInstance::Paint(const XGraphicsExposeEvent& event)
-{
-	// do nothing by default
-}
-
-#endif
 
 void NpapiPluginInstance::PostInit()
+{
+	// redefine in derived class
+}
+
+ptr<Graphics::Device> NpapiPluginInstance::GetGraphicsDevice() const
+{
+	// redefine in derived class
+	return nullptr;
+}
+
+void NpapiPluginInstance::Draw()
 {
 	// redefine in derived class
 }
@@ -168,6 +184,11 @@ void NpapiPluginInstance::Invalidate()
 	NpapiPlugin::browserFuncs.invalidaterect(npp, &rect);
 }
 
+ptr<Graphics::Presenter> NpapiPluginInstance::GetPresenter() const
+{
+	return presenter;
+}
+
 void NpapiPluginInstance::Init(NPP npp)
 {
 	this->npp = npp;
@@ -200,18 +221,33 @@ NPError NpapiPluginInstance::NppSetWindow(NPWindow* npWindow)
 		}
 		break;
 	case NPWindowTypeDrawable:
-		{
-			hdc = (HDC)npWindow->window;
-			window = 0;
-			width = npWindow->width;
-			height = npWindow->height;
-		}
+		hdc = (HDC)npWindow->window;
+		window = 0;
+		left = npWindow->x;
+		top = npWindow->y;
+		width = npWindow->width;
+		height = npWindow->height;
 		break;
 	default:
 		return NPERR_INVALID_PARAM;
 	}
 
-#elif defined(___INANITY_PLATFORM_LINUX)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
+
+	switch(npWindow->type)
+	{
+		case NPWindowTypeWindow:
+			// not supported yet
+			return NPERR_INVALID_PARAM;
+		case NPWindowTypeDrawable:
+			left = npWindow->x;
+			top = npWindow->y;
+			width = npWindow->width;
+			height = npWindow->height;
+			break;
+		default:
+			return NPERR_INVALID_PARAM;
+	}
 
 #else
 #error Unknown platform
@@ -280,44 +316,66 @@ int32_t NpapiPluginInstance::NppWrite(NPStream* stream, int32_t offset, int32_t 
 
 int16_t NpapiPluginInstance::NppHandleEvent(void* e)
 {
+	try
+	{
+
 #if defined(___INANITY_PLATFORM_WINDOWS)
 
-	NPEvent* event = (NPEvent*)e;
+		NPEvent* event = (NPEvent*)e;
 
-	// process input events
-	if(inputManager && inputManager->ProcessWindowMessage(event->event, event->wParam, event->lParam))
-		return 1;
+		// process input events
+		if(inputManager && inputManager->ProcessWindowMessage(event->event, event->wParam, event->lParam))
+			return 1;
 
-	switch(event->event)
-	{
-	case WM_PAINT:
+		switch(event->event)
 		{
-			// get hdc to paint
-			HDC hdc = this->hdc;
-			PAINTSTRUCT ps;
-			if(window)
-				hdc = BeginPaint(window->GetHWND(), &ps);
-			if(!hdc)
-				return 0;
+		case WM_PAINT:
+			{
+				// get hdc to paint
+				HDC hdc = this->hdc;
+				PAINTSTRUCT ps;
+				if(window)
+					hdc = BeginPaint(window->GetHWND(), &ps);
+				if(!hdc)
+					return 0;
 
-			// do painting
-			Paint(hdc);
+				if(DoDraw())
+					presenter->PresentOnHdc(hdc);
 
-			if(window)
-				EndPaint(window->GetHWND(), &ps);
+				if(window)
+					EndPaint(window->GetHWND(), &ps);
+			}
+			return 1;
+		default:
+			return 0;
 		}
-		return 1;
-	default:
+
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
+
+		XEvent* event = (XEvent*)e;
+
+		switch(event->type)
+		{
+		case GraphicsExpose:
+			if(DoDraw())
+				presenter->PresentOnXGraphicsExposeEvent(event->xgraphicsexpose, left, top);
+			return 1;
+		default:
+			return 0;
+		}
+
 		return 0;
-	}
-
-#elif defined(___INANITY_PLATFORM_LINUX)
-
-	return 0;
 
 #else
 #error Unknown platform
 #endif
+
+	}
+	catch(Exception* exception)
+	{
+		Log::Error("Error processing NPAPI event: ", exception);
+		return 1;
+	}
 }
 
 void NpapiPluginInstance::NppURLNotify(const char* url, NPReason reason, void* notifyData)
