@@ -2,11 +2,10 @@
 #define ___INANITY_LOG_HPP___
 
 #include "String.hpp"
+#include "Exception.hpp"
 #include <sstream>
 
 BEGIN_INANITY
-
-class Exception;
 
 /// Global log.
 /** Simplified log service for debugging and reporting errors. */
@@ -18,6 +17,9 @@ private:
 protected:
 	template <typename... T>
 	struct ArgWriter;
+
+	template <typename T>
+	struct ThingWriter;
 
 public:
 	enum Severity
@@ -68,7 +70,7 @@ struct Log::ArgWriter<First, Rest...>
 {
 	static void Write(std::ostringstream& stream, First first, Rest... rest)
 	{
-		stream << first;
+		ThingWriter<First>::Write(stream, first);
 		ArgWriter<Rest...>::Write(stream, rest...);
 	}
 };
@@ -76,6 +78,31 @@ template <>
 struct Log::ArgWriter<>
 {
 	static void Write(std::ostringstream&) {}
+};
+
+template <typename T>
+struct Log::ThingWriter
+{
+	static void Write(std::ostream& stream, T t)
+	{
+		stream << t;
+	}
+};
+template <>
+struct Log::ThingWriter<ptr<Exception> >
+{
+	static void Write(std::ostream& stream, ptr<Exception> exception)
+	{
+		exception->PrintStack(stream);
+	}
+};
+template <>
+struct Log::ThingWriter<Exception*>
+{
+	static void Write(std::ostream& stream, Exception* exception)
+	{
+		ThingWriter<ptr<Exception> >::Write(stream, exception);
+	}
 };
 
 /// Class logs to standard stream.

@@ -1,5 +1,4 @@
 #include "Log.hpp"
-#include "Exception.hpp"
 #include <iostream>
 #ifdef ___INANITY_PLATFORM_WINDOWS
 #include "platform/windows.hpp"
