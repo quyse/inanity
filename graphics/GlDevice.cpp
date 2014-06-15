@@ -59,7 +59,7 @@ GlDevice::~GlDevice()
 #elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
 
 GlDevice::GlDevice(ptr<GlSystem> system)
-: system(system), sdlContext(0), glxContext(0), boundPresenter(nullptr)
+: system(system), sdlContext(0), boundPresenter(nullptr)
 {
 	BEGIN_TRY();
 
@@ -87,9 +87,6 @@ GlDevice::GlDevice(ptr<GlSystem> system)
 
 	// init capabilities
 	InitCaps();
-
-	// get current context
-	glxContext = glXGetCurrentContext();
 
 	END_TRY("Can't create OpenGL device");
 }

@@ -65,7 +65,6 @@ private:
 #elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
 
 	SDL_GLContext sdlContext;
-	GLXContext glxContext;
 	ptr<Platform::SdlWindow> tempWindow;
 	/// Currently bound presenter.
 	/** Need for default framebuffers. */
