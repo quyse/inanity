@@ -277,6 +277,8 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 					glsl << "Offset";
 				glsl << '(' << samplerPrefix << slot << ", ";
 				PrintNode(coordsNode);
+				glsl << ", ";
+				PrintNode(lodNode);
 				if(offsetNode)
 				{
 					glsl << ", ";
