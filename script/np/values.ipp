@@ -355,7 +355,8 @@ struct Value
 
 	static inline NPVariant To(const T& value)
 	{
-		NPVariant variant = fast_cast<Any*>(&*ConvertToScript<T>(State::GetCurrent(), value))->GetVariant();
+		ptr<Any> any = ConvertToScript<T>(State::GetCurrent(), value).template FastCast<Any>();
+		NPVariant variant = any->GetVariant();
 		State::DuplicateVariant(variant);
 		return variant;
 	}
@@ -373,7 +374,8 @@ struct Value<const T&>
 
 	static inline NPVariant To(const T& value)
 	{
-		NPVariant variant = fast_cast<Any*>(&*ConvertToScript<T>(State::GetCurrent(), value))->GetVariant();
+		ptr<Any> any = ConvertToScript<T>(State::GetCurrent(), value).template FastCast<Any>();
+		NPVariant variant = any->GetVariant();
 		State::DuplicateVariant(variant);
 		return variant;
 	}
