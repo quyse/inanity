@@ -44,6 +44,7 @@ class Win32MonitorMode;
 #elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
 class SdlPresenter;
 class SdlMonitorMode;
+class SdlWindow;
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 class EmsPresenter;
 #else
@@ -52,26 +53,23 @@ class EmsPresenter;
 
 
 
-/// Класс графического устройства OpenGL.
-/** Текущие ограничения:
-- только один возможный Presenter.
-*/
+/// OpenGL graphics device.
 class GlDevice : public Device
 {
 private:
-	/// Графическая система.
 	ptr<GlSystem> system;
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
-	/// Имя графического устройства.
 	String deviceName;
-	/// Контекст рендеринга OpenGL.
-	/** Создаётся при первом создании Presenter'а.
-	Является общим для всех Presenter'ов. */
 	HGLRC hglrc;
 #elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
 
-	SDL_GLContext glContext;
+	SDL_GLContext sdlContext;
+	GLXContext glxContext;
+	ptr<Platform::SdlWindow> tempWindow;
+	/// Currently bound presenter.
+	/** Need for default framebuffers. */
+	Presenter* boundPresenter;
 
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	// nothing needed
@@ -102,7 +100,6 @@ private:
 	/// Init capabilities.
 	void InitCaps();
 
-	/// Скомпилировать шейдер.
 	static void CompileShader(GLuint shaderName, ptr<File> file, ptr<GlShaderBindings>& shaderBindings);
 	static void GetAttributeSizeAndType(DataType dataType, LayoutDataType layoutDataType, GLint& size, GLenum& type, bool& integer);
 
@@ -127,7 +124,12 @@ public:
 
 	int GetInternalCaps() const;
 
-	// методы Device
+	/// Binds presenter if not already bound.
+	void BindPresenter(Presenter* presenter);
+	/// Unbind presenter if bound.
+	void UnbindPresenter(Presenter* presenter);
+
+	// Device's methods.
 	ptr<System> GetSystem() const;
 	ptr<Presenter> CreateWindowPresenter(ptr<Platform::Window> window, ptr<MonitorMode> mode);
 	ptr<ShaderCompiler> CreateShaderCompiler();

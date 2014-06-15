@@ -2,13 +2,7 @@
 #define ___INANITY_GRAPHICS_SDL_PRESENTER_HPP___
 
 #include "Presenter.hpp"
-#include "../platform/platform.hpp"
-
-BEGIN_INANITY_PLATFORM
-
-class SdlWindow;
-
-END_INANITY_PLATFORM
+#include "../platform/SdlWindow.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
@@ -28,6 +22,8 @@ private:
 public:
 	SdlPresenter(ptr<GlDevice> device, ptr<GlFrameBuffer> frameBuffer, ptr<Platform::SdlWindow> window);
 	~SdlPresenter();
+
+	void Bind(SDL_GLContext sdlContext);
 
 	//*** Presenter's methods.
 	ptr<Device> GetDevice() const;

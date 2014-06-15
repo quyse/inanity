@@ -8,7 +8,7 @@
 BEGIN_INANITY_GRAPHICS
 
 GlFrameBuffer::GlFrameBuffer(ptr<GlDevice> device, GLuint name)
-: device(device), name(name) {}
+: device(device), name(name), presenter(nullptr) {}
 
 GlFrameBuffer::~GlFrameBuffer()
 {
@@ -21,9 +21,17 @@ GLuint GlFrameBuffer::GetName() const
 	return name;
 }
 
+void GlFrameBuffer::SetPresenter(Presenter* presenter)
+{
+	this->presenter = presenter;
+}
+
 void GlFrameBuffer::Apply()
 {
 	BEGIN_TRY();
+
+	if(presenter)
+		device->BindPresenter(presenter);
 
 	// bind framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, name);

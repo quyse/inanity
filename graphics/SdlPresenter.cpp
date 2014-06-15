@@ -1,8 +1,6 @@
 #include "SdlPresenter.hpp"
 #include "GlDevice.hpp"
 #include "GlFrameBuffer.hpp"
-#include "../platform/SdlWindow.hpp"
-#include <SDL2/SDL_video.h>
 
 BEGIN_INANITY_GRAPHICS
 
@@ -17,6 +15,12 @@ SdlPresenter::SdlPresenter(ptr<GlDevice> device, ptr<GlFrameBuffer> frameBuffer,
 SdlPresenter::~SdlPresenter()
 {
 	window->SetPresenter(nullptr);
+	device->UnbindPresenter(this);
+}
+
+void SdlPresenter::Bind(SDL_GLContext sdlContext)
+{
+	SDL_GL_MakeCurrent(window->GetHandle(), sdlContext);
 }
 
 ptr<Device> SdlPresenter::GetDevice() const

@@ -59,12 +59,45 @@ GlDevice::~GlDevice()
 #elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
 
 GlDevice::GlDevice(ptr<GlSystem> system)
-: system(system), glContext(0) {}
+: system(system), sdlContext(0), glxContext(0), boundPresenter(nullptr)
+{
+	BEGIN_TRY();
+
+	// create hidden temporary window
+	{
+		SDL_Window* handle = SDL_CreateWindow("Inanity OpenGL Temp Window",
+			SDL_WINDOWPOS_CENTERED, // x
+			SDL_WINDOWPOS_CENTERED, // y
+			1,
+			1,
+			SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | SDL_WINDOW_HIDDEN);
+		if(!handle)
+			THROW("Can't create temp window");
+		tempWindow = NEW(Platform::SdlWindow(handle));
+	}
+
+	// create OpenGL context for temporary window
+	sdlContext = SDL_GL_CreateContext(tempWindow->GetHandle());
+	if(!sdlContext)
+		THROW_SECONDARY("Can't create OpenGL context", Platform::Sdl::Error());
+
+	// initialize extensions
+	GlSystem::InitGLEW();
+	GlSystem::ClearErrors();
+
+	// init capabilities
+	InitCaps();
+
+	// get current context
+	glxContext = glXGetCurrentContext();
+
+	END_TRY("Can't create OpenGL device");
+}
 
 GlDevice::~GlDevice()
 {
-	if(glContext)
-		SDL_GL_DeleteContext(glContext);
+	if(sdlContext)
+		SDL_GL_DeleteContext(sdlContext);
 }
 
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
@@ -105,6 +138,40 @@ void GlDevice::InitCaps()
 int GlDevice::GetInternalCaps() const
 {
 	return internalCaps;
+}
+
+void GlDevice::BindPresenter(Presenter* presenter)
+{
+	if(boundPresenter != presenter)
+	{
+		BEGIN_TRY();
+
+		if(presenter)
+		{
+			// switch by type of presenter
+			SdlPresenter* sdlPresenter = dynamic_cast<SdlPresenter*>(presenter);
+			if(sdlPresenter)
+				sdlPresenter->Bind(sdlContext);
+			else
+				THROW("Unsupported type of presenter");
+		}
+		else
+		{
+			// bind temporary window
+			if(SDL_GL_MakeCurrent(tempWindow->GetHandle(), sdlContext) != 0)
+				THROW("Can't bind temporary window");
+		}
+
+		boundPresenter = presenter;
+
+		END_TRY("Can't bind presenter to OpenGL context");
+	}
+}
+
+void GlDevice::UnbindPresenter(Presenter* presenter)
+{
+	if(boundPresenter == presenter)
+		BindPresenter(nullptr);
 }
 
 ptr<System> GlDevice::GetSystem() const
@@ -266,21 +333,10 @@ ptr<WglPresenter> GlDevice::CreatePresenter(ptr<Platform::Win32Window> window, p
 
 ptr<SdlPresenter> GlDevice::CreatePresenter(ptr<Platform::SdlWindow> window, ptr<SdlMonitorMode> mode)
 {
-	BEGIN_TRY();
-
-	glContext = SDL_GL_CreateContext(window->GetHandle());
-	if(!glContext)
-		THROW_SECONDARY("Can't create OpenGL context", Platform::Sdl::Error());
-
-	GlSystem::InitGLEW();
-	GlSystem::ClearErrors();
-
-	// init capabilities
-	InitCaps();
-
-	return NEW(SdlPresenter(this, NEW(GlFrameBuffer(this, 0)), window));
-
-	END_TRY("Can't create SDL OpenGL presenter");
+	ptr<GlFrameBuffer> frameBuffer = NEW(GlFrameBuffer(this, 0));
+	ptr<SdlPresenter> presenter = NEW(SdlPresenter(this, frameBuffer, window));
+	frameBuffer->SetPresenter(presenter);
+	return presenter;
 }
 
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
