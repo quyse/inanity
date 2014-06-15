@@ -44,7 +44,13 @@ private:
 	int width;
 	int height;
 
-#if defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
+#if defined(___INANITY_PLATFORM_WINDOWS)
+
+	mutable BITMAPINFOHEADER bfh;
+	mutable ptr<MemoryFile> imageFile;
+
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
+
 	mutable XImage image;
 	mutable ptr<MemoryFile> imageFile;
 
@@ -64,7 +70,7 @@ public:
 	void Resize(int width, int height);
 
 #ifdef ___INANITY_PLATFORM_WINDOWS
-	void PresentOnHdc(HDC hdc);
+	void PresentOnHdc(HDC hdc, int left, int top);
 #endif
 #if defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
 	void PresentOnXGraphicsExposeEvent(const XGraphicsExposeEvent& e, int left, int top);

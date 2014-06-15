@@ -8,7 +8,7 @@
 BEGIN_INANITY_PLATFORM
 
 Win32Window::Win32Window(HWND hWnd, bool own, WNDPROC prevWndProc)
-: hWnd(hWnd), own(own), active(true), clientWidth(0), clientHeight(0), prevWndProc(prevWndProc), cursorHidden(false)
+: hWnd(hWnd), hdc(0), own(own), active(true), clientWidth(0), clientHeight(0), prevWndProc(prevWndProc), cursorHidden(false)
 {
 	SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)this);
 
@@ -22,6 +22,8 @@ Win32Window::~Win32Window()
 {
 	if(hWnd)
 	{
+		if(hdc)
+			ReleaseDC(hWnd, hdc);
 		if(own)
 			DestroyWindow(hWnd);
 		else
@@ -42,14 +44,14 @@ void Win32Window::PlaceCursor(int x, int y)
 }
 
 ptr<Win32Window> Win32Window::Create(ATOM windowClass, const String& title,
-	int left, int top, int width, int height)
+	int left, int top, int width, int height, bool visible)
 {
 	BEGIN_TRY();
 
 	//создать окно
 	HWND hWnd = CreateWindow(
 		(LPCTSTR)windowClass, Strings::UTF82Unicode(title).c_str(),
-		WS_OVERLAPPEDWINDOW | WS_VISIBLE /*WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS*/,
+		WS_OVERLAPPEDWINDOW | (visible ? WS_VISIBLE : 0),
 		left, top, width, height,
 		NULL, NULL, GetModuleHandle(NULL), NULL);
 	if(!hWnd)
@@ -60,7 +62,7 @@ ptr<Win32Window> Win32Window::Create(ATOM windowClass, const String& title,
 	END_TRY("Can't create game window");
 }
 
-ptr<Win32Window> Win32Window::CreateForDirectX(const String& title, int left, int top, int width, int height)
+ptr<Win32Window> Win32Window::CreateForDirectX(const String& title, int left, int top, int width, int height, bool visible)
 {
 	static ATOM windowClass = NULL;
 	//зарегистрировать класс окна, если еще не сделано
@@ -78,11 +80,13 @@ ptr<Win32Window> Win32Window::CreateForDirectX(const String& title, int left, in
 			THROW("Can't register window class for DirectX");
 	}
 
-	return Create(windowClass, title, left, top, width, height);
+	return Create(windowClass, title, left, top, width, height, visible);
 }
 
-ptr<Win32Window> Win32Window::CreateForOpenGL(const String& title, int left, int top, int width, int height)
+ptr<Win32Window> Win32Window::CreateForOpenGL(const String& title, int left, int top, int width, int height, bool visible)
 {
+	BEGIN_TRY();
+
 	static ATOM windowClass = NULL;
 	//зарегистрировать класс окна, если еще не сделано
 	if(!windowClass)
@@ -96,10 +100,37 @@ ptr<Win32Window> Win32Window::CreateForOpenGL(const String& title, int left, int
 		wndClass.lpfnWndProc = StaticWndProc;
 		windowClass = RegisterClass(&wndClass);
 		if(!windowClass)
-			THROW("Can't register window class for OpenGL");
+			THROW("Can't register window class");
 	}
 
-	return Create(windowClass, title, left, top, width, height);
+	ptr<Win32Window> window = Create(windowClass, title, left, top, width, height, visible);
+
+	// get window's persistent HDC
+	HDC hdc = GetDC(window->GetHWND());
+	if(!hdc)
+		THROW_SECONDARY("Can't get window's HDC", Exception::SystemError());
+	// store it to window
+	window->hdc = hdc;
+
+	// choose & set pixel format
+	PIXELFORMATDESCRIPTOR pfd;
+	ZeroMemory(&pfd, sizeof(pfd));
+	pfd.nSize = sizeof(pfd);
+	pfd.nVersion = 1;
+	pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+	pfd.iPixelType = PFD_TYPE_RGBA;
+	pfd.cColorBits = 24;
+	pfd.cDepthBits = 0;
+	pfd.iLayerType = PFD_MAIN_PLANE;
+	int pixelFormat = ChoosePixelFormat(hdc, &pfd);
+	if(!pixelFormat)
+		THROW("Can't choose pixel format");
+	if(!SetPixelFormat(hdc, pixelFormat, &pfd))
+		THROW("Can't set pixel format");
+
+	return window;
+
+	END_TRY("Can't create window for OpenGL");
 }
 
 ptr<Win32Window> Win32Window::CreateExisting(HWND hWnd, bool own)
@@ -111,6 +142,11 @@ ptr<Win32Window> Win32Window::CreateExisting(HWND hWnd, bool own)
 HWND Win32Window::GetHWND() const
 {
 	return hWnd;
+}
+
+HDC Win32Window::GetHDC() const
+{
+	return hdc;
 }
 
 bool Win32Window::IsActive() const

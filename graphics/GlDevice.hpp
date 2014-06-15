@@ -58,17 +58,20 @@ class GlDevice : public Device
 {
 private:
 	ptr<GlSystem> system;
-
-#if defined(___INANITY_PLATFORM_WINDOWS)
-	String deviceName;
-	HGLRC hglrc;
-#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
-
-	SDL_GLContext sdlContext;
-	ptr<Platform::SdlWindow> tempWindow;
 	/// Currently bound presenter.
 	/** Need for default framebuffers. */
 	Presenter* boundPresenter;
+
+#if defined(___INANITY_PLATFORM_WINDOWS)
+
+	String deviceName;
+	HGLRC hglrc;
+	ptr<Platform::Win32Window> hiddenWindow;
+
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
+
+	SDL_GLContext sdlContext;
+	ptr<Platform::SdlWindow> hiddenWindow;
 
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	// nothing needed

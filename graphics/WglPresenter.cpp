@@ -19,6 +19,12 @@ WglPresenter::~WglPresenter()
 	window->SetPresenter(nullptr);
 }
 
+void WglPresenter::Bind(HGLRC hglrc)
+{
+	if(!wglMakeCurrent(hdc, hglrc))
+		THROW_SECONDARY("Can't bind WGL presenter", Exception::SystemError());
+}
+
 ptr<Device> WglPresenter::GetDevice() const
 {
 	return device;
@@ -41,7 +47,30 @@ ptr<FrameBuffer> WglPresenter::GetFrameBuffer() const
 
 void WglPresenter::SetMode(ptr<MonitorMode> abstractMode)
 {
-	// TODO.
+	BEGIN_TRY();
+
+	// if mode is not fullscreen, nothing to do
+	// restoring to first mode is not supported yet
+	if(!abstractMode)
+		return;
+
+	ptr<Win32MonitorMode> mode = abstractMode.DynamicCast<Win32MonitorMode>();
+	if(!mode && abstractMode)
+		THROW("Only Win32 monitor mode allowed");
+
+	// get monitor for window
+	HMONITOR monitor = MonitorFromWindow(window->GetHWND(), MONITOR_DEFAULTTOPRIMARY);
+	if(!monitor)
+		THROW("Can't get window monitor");
+	MONITORINFOEX monitorInfo;
+	monitorInfo.cbSize = sizeof(monitorInfo);
+	if(!GetMonitorInfo(monitor, &monitorInfo))
+		THROW("Can't get monitor info");
+	DEVMODE modeInfo = mode->GetInfo();
+	if(ChangeDisplaySettingsEx(monitorInfo.szDevice, &modeInfo, NULL, CDS_FULLSCREEN, NULL) != DISP_CHANGE_SUCCESSFUL)
+		THROW("Can't change display settings");
+
+	END_TRY("Can't set mode for WGL presenter");
 }
 
 void WglPresenter::Present()

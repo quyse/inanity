@@ -1,13 +1,14 @@
 #include "NpapiPresenter.hpp"
 #ifdef ___INANITY_PLATFORM_WINDOWS
 #include "../graphics/Dx11Device.hpp"
-#include "../inanity/graphics/Dx11RenderBuffer.hpp"
-#include "../inanity/graphics/Dx11Texture.hpp"
+#include "../graphics/Dx11RenderBuffer.hpp"
+#include "../graphics/Dx11Texture.hpp"
 #endif
 #include "../graphics/GlSystem.hpp"
 #include "../graphics/GlDevice.hpp"
 #include "../graphics/RenderBuffer.hpp"
 #include "../graphics/FrameBuffer.hpp"
+#include "../graphics/MonitorMode.hpp"
 #include "../MemoryFile.hpp"
 #include "../Exception.hpp"
 
@@ -24,7 +25,18 @@ NpapiPresenter::NpapiPresenter(ptr<Device> device) :
 
 	frameBuffer = device->CreateFrameBuffer();
 
-#if defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
+#if defined(___INANITY_PLATFORM_WINDOWS)
+
+	// init image header
+	ZeroMemory(&bfh, sizeof(bfh));
+	bfh.biSize = sizeof(bfh);
+	bfh.biWidth = 0;
+	bfh.biHeight = 0;
+	bfh.biBitCount = 32;
+	bfh.biPlanes = 1;
+
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
+
 	// init image
 	image.width = 0;
 	image.height = 0;
@@ -42,6 +54,7 @@ NpapiPresenter::NpapiPresenter(ptr<Device> device) :
 	image.green_mask = 0xff00;
 	image.blue_mask = 0xff0000;
 	image.obdata = nullptr;
+
 #endif
 
 	END_TRY("Can't create NPAPI presenter");
@@ -83,16 +96,6 @@ ptr<FrameBuffer> NpapiPresenter::GetFrameBuffer() const
 
 		frameBuffer->SetColorBuffer(0, renderBuffer);
 
-#if defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
-		// resize image
-		image.width = width;
-		image.height = height;
-		image.bytes_per_line = width * 4;
-		imageFile = NEW(MemoryFile(image.bytes_per_line * height));
-		image.data = (char*)imageFile->GetData();
-		XInitImage(&image);
-#endif
-
 		// save new size
 		renderBufferWidth = width;
 		renderBufferHeight = height;
@@ -119,7 +122,7 @@ void NpapiPresenter::Resize(int width, int height)
 }
 
 #ifdef ___INANITY_PLATFORM_WINDOWS
-void NpapiPresenter::PresentOnHdc(HDC hdc)
+void NpapiPresenter::PresentOnHdc(HDC hdc, int left, int top)
 {
 	// try to use effective DirectX 11 method
 	ptr<Dx11Device> dx11Device = device.DynamicCast<Dx11Device>();
@@ -141,7 +144,7 @@ void NpapiPresenter::PresentOnHdc(HDC hdc)
 		if(FAILED(surface->GetDC(FALSE, &dxHdc)))
 			THROW("Can't get render buffer's DC");
 
-		BitBlt(hdc, 0, 0, width, height, dxHdc, 0, 0, SRCCOPY);
+		BitBlt(hdc, left, top, width, height, dxHdc, 0, 0, SRCCOPY);
 
 		RECT nullRect = { 0, 0, 0, 0 };
 		if(FAILED(surface->ReleaseDC(&nullRect)))
@@ -151,10 +154,25 @@ void NpapiPresenter::PresentOnHdc(HDC hdc)
 	else
 	{
 		ptr<GlDevice> glDevice = device.DynamicCast<GlDevice>();
-		if(glDevice)
+		if(!glDevice)
+			THROW("Unsupported graphics device");
+
+		// if image size is wrong, resize image
+		if(bfh.biWidth != width || bfh.biHeight != -height)
 		{
-			// TODO: presenting with OpenGL on Windows
+			bfh.biWidth = width;
+			bfh.biHeight = -height;
+			imageFile = NEW(MemoryFile(width * 4 * height));
 		}
+
+		// get image from framebuffer
+		void* imageData = imageFile->GetData();
+		glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, imageData);
+		GlSystem::CheckErrors();
+
+		// render image onto surface
+		if(StretchDIBits(hdc, left, top, width, height, 0, 0, width, height, imageData, (const BITMAPINFO*)&bfh, 0, SRCCOPY) == 0)
+			THROW("Can't rasterize image into hdc");
 	}
 }
 #endif
@@ -162,9 +180,22 @@ void NpapiPresenter::PresentOnHdc(HDC hdc)
 #if defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
 void NpapiPresenter::PresentOnXGraphicsExposeEvent(const XGraphicsExposeEvent& e, int left, int top)
 {
+	// if image size is wrong, resize image
+	if(image.width != width || image.height != height)
+	{
+		image.width = width;
+		image.height = height;
+		image.bytes_per_line = width * 4;
+		imageFile = NEW(MemoryFile(image.bytes_per_line * height));
+		image.data = (char*)imageFile->GetData();
+		XInitImage(&image);
+	}
+
+	// get image from framebuffer
 	glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, image.data);
 	GlSystem::CheckErrors();
 
+	// render image into X
 	XPutImage(
 		e.display,
 		e.drawable,

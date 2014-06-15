@@ -340,7 +340,7 @@ int16_t NpapiPluginInstance::NppHandleEvent(void* e)
 					return 0;
 
 				if(DoDraw())
-					presenter->PresentOnHdc(hdc);
+					presenter->PresentOnHdc(hdc, left, top);
 
 				if(window)
 					EndPaint(window->GetHWND(), &ps);

@@ -30,6 +30,8 @@ public:
 	WglPresenter(ptr<GlDevice> device, ptr<GlFrameBuffer> frameBuffer, HDC hdc, ptr<Platform::Win32Window> window);
 	~WglPresenter();
 
+	void Bind(HGLRC hglrc);
+
 	// Presenter's methods.
 	ptr<Device> GetDevice() const;
 	int GetWidth() const;

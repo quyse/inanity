@@ -25,6 +25,8 @@ class Win32Window : public Window
 private:
 	/// Дескриптор окна.
 	HWND hWnd;
+	/// Persistent HDC.
+	HDC hdc;
 	/// Destroy window in destructor.
 	bool own;
 	/// Активность окна.
@@ -45,7 +47,7 @@ private:
 	LRESULT WndProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 	static ptr<Win32Window> Create(ATOM windowClass, const String& title,
-		int left = 0, int top = 0, int width = 1, int height = 1);
+		int left, int top, int width, int height, bool visible);
 
 	/// Выполнить одну итерацию оконного цикла.
 	bool Do(Handler* activeHandler);
@@ -65,15 +67,17 @@ public:
 
 	/// Создать окно для DirectX.
 	static ptr<Win32Window> CreateForDirectX(const String& title,
-		int left, int top, int width, int height);
+		int left, int top, int width, int height, bool visible = true);
 	/// Создать окно для OpenGL.
 	static ptr<Win32Window> CreateForOpenGL(const String& title,
-		int left, int top, int width, int height);
+		int left, int top, int width, int height, bool visible = true);
 	/// Capture existing window.
 	static ptr<Win32Window> CreateExisting(HWND hWnd, bool own);
 
 	/// Получить хендл окна.
 	HWND GetHWND() const;
+	/// Get a window's persistent HDC.
+	HDC GetHDC() const;
 	/// Получить активность окна.
 	bool IsActive() const;
 	/// Получить клиентскую ширину окна.
