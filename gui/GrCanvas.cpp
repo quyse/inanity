@@ -36,10 +36,10 @@ struct GrCanvas::Helper : public Object
 	static const int maxGlyphsCount = 64;
 
 	ptr<VertexLayout> vl;
-	ptr<VertexLayoutElement> vlePosition;
+	ptr<VertexLayoutElement> vleCorner;
 	ptr<AttributeLayout> al;
 	ptr<AttributeLayoutSlot> als;
-	ptr<AttributeLayoutElement> alePosition;
+	ptr<AttributeLayoutElement> aleCorner;
 	ptr<Instancer> instancer;
 	ptr<AttributeBinding> ab;
 
@@ -62,14 +62,14 @@ struct GrCanvas::Helper : public Object
 
 	Helper(ptr<Device> device, ptr<ShaderCache> shaderCache) :
 		vl(NEW(VertexLayout(sizeof(vec4)))),
-		vlePosition(vl->AddElement(DataTypes::_vec4, 0)),
+		vleCorner(vl->AddElement(DataTypes::_vec4, 0)),
 		al(NEW(AttributeLayout())),
 		als(al->AddSlot()),
-		alePosition(al->AddElement(als, vlePosition)),
+		aleCorner(al->AddElement(als, vleCorner)),
 		instancer(NEW(Instancer(device, maxGlyphsCount, al))),
 		ab(device->CreateAttributeBinding(al)),
 
-		aCorner(alePosition),
+		aCorner(aleCorner),
 
 		iTexcoord(1),
 		iColor(2),
