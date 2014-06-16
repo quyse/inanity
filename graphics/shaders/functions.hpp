@@ -1,7 +1,7 @@
 #ifndef ___INANITY_GRAPHICS_SHADERS_FUNCTIONS_HPP___
 #define ___INANITY_GRAPHICS_SHADERS_FUNCTIONS_HPP___
 
-#include "Value.hpp"
+#include "Value.ipp"
 #include "OperationNode.hpp"
 #include "FragmentNode.hpp"
 
@@ -19,6 +19,12 @@ inline Value<vec3> newvec3(Value<float> a, Value<float> b, Value<float> c) { ret
 inline Value<vec4> newvec4(Value<float> a, Value<float> b, Value<float> c, Value<float> d) { return OP4(Float1111to4); }
 inline Value<vec4> newvec4(Value<vec3> a, Value<float> b) { return OP2(Float31to4); }
 inline Value<vec4> newvec4(Value<vec2> a, Value<float> b, Value<float> c) { return OP3(Float211to4); }
+
+// constants
+inline Value<float> val(float a) { return Value<float>(a); }
+inline Value<vec2> val(const vec2& a) { return newvec2(a.x, a.y); }
+inline Value<vec3> val(const vec3& a) { return newvec3(a.x, a.y, a.z); }
+inline Value<vec4> val(const vec4& a) { return newvec4(a.x, a.y, a.z, a.w); }
 
 // setPosition
 inline Expression setPosition(Value<vec4> a) { return OP1(SetPosition); }
@@ -129,7 +135,11 @@ inline Value<xvec<T, n> > ceil(Value<xvec<T, n> > a) { return OP1(Ceil); }
 // mod
 inline Value<float> mod(Value<float> a, Value<float> b) { return OP2(Mod); }
 
+#undef OP0
+#undef OP1
 #undef OP2
+#undef OP3
+#undef OP4
 
 END_INANITY_SHADERS
 
