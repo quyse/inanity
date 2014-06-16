@@ -158,10 +158,10 @@ void NpapiPresenter::PresentOnHdc(HDC hdc, int left, int top)
 			THROW("Unsupported graphics device");
 
 		// if image size is wrong, resize image
-		if(bfh.biWidth != width || bfh.biHeight != -height)
+		if(bfh.biWidth != width || bfh.biHeight != height)
 		{
 			bfh.biWidth = width;
-			bfh.biHeight = -height;
+			bfh.biHeight = height;
 			imageFile = NEW(MemoryFile(width * 4 * height));
 		}
 
@@ -186,7 +186,8 @@ void NpapiPresenter::PresentOnXGraphicsExposeEvent(const XGraphicsExposeEvent& e
 		image.width = width;
 		image.height = height;
 		image.bytes_per_line = width * 4;
-		imageFile = NEW(MemoryFile(image.bytes_per_line * height));
+		// allocate memory for image + one additional line for reversing lines
+		imageFile = NEW(MemoryFile(image.bytes_per_line * (height + 1)));
 		image.data = (char*)imageFile->GetData();
 		XInitImage(&image);
 	}
@@ -194,6 +195,17 @@ void NpapiPresenter::PresentOnXGraphicsExposeEvent(const XGraphicsExposeEvent& e
 	// get image from framebuffer
 	glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, image.data);
 	GlSystem::CheckErrors();
+
+	// reverse order of lines
+	void* buf = image.data + image.bytes_per_line * height;
+	for(int i = 0; i * 2 < height; ++i)
+	{
+		char* b1 = image.data + i * image.bytes_per_line;
+		char* b2 = image.data + (height - i - 1) * image.bytes_per_line;
+		memcpy(buf, b1, image.bytes_per_line);
+		memcpy(b1, b2, image.bytes_per_line);
+		memcpy(b2, buf, image.bytes_per_line);
+	}
 
 	// render image into X
 	XPutImage(
