@@ -78,6 +78,39 @@ xvec<T, 4> axis_rotation(const xvec<T, 3>& axis, T angle)
 		angleCos);
 }
 
+template <typename T>
+xmat<T, 4, 4> QuaternionToMatrix(const xquat<T>& q)
+{
+	xmat<T, 4, 4> r;
+	T ww = q.w * q.w;
+	T xx = q.x * q.x;
+	T yy = q.y * q.y;
+	T zz = q.z * q.z;
+	T wx2 = q.w * q.x * 2.0f;
+	T wy2 = q.w * q.y * 2.0f;
+	T wz2 = q.w * q.z * 2.0f;
+	T xy2 = q.x * q.y * 2.0f;
+	T xz2 = q.x * q.z * 2.0f;
+	T yz2 = q.y * q.z * 2.0f;
+	r(0, 0) = ww + xx - yy - zz;
+	r(0, 1) = xy2 - wz2;
+	r(0, 2) = xz2 + wy2;
+	r(0, 3) = 0;
+	r(1, 0) = xy2 + wz2;
+	r(1, 1) = ww - xx + yy - zz;
+	r(1, 2) = yz2 - wx2;
+	r(1, 3) = 0;
+	r(2, 0) = xz2 - wy2;
+	r(2, 1) = yz2 + wx2;
+	r(2, 2) = ww - xx - yy + zz;
+	r(2, 3) = 0;
+	r(3, 0) = 0;
+	r(3, 1) = 0;
+	r(3, 2) = 0;
+	r(3, 3) = 1;
+	return r;
+}
+
 END_INANITY_MATH
 
 #endif
