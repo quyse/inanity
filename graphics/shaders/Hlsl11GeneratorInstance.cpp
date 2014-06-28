@@ -1,17 +1,19 @@
 #include "Hlsl11GeneratorInstance.hpp"
-#include "Node.hpp"
 #include "AttributeNode.hpp"
 #include "FloatConstNode.hpp"
 #include "IntConstNode.hpp"
 #include "OperationNode.hpp"
+#include "ActionNode.hpp"
 #include "SampleNode.hpp"
 #include "SamplerNode.hpp"
 #include "SequenceNode.hpp"
 #include "SwizzleNode.hpp"
 #include "UniformGroup.hpp"
 #include "UniformNode.hpp"
-#include "TempNode.hpp"
+#include "ReadUniformNode.hpp"
+#include "IndexUniformArrayNode.hpp"
 #include "TransformedNode.hpp"
+#include "InterpolateNode.hpp"
 #include "FragmentNode.hpp"
 #include "CastNode.hpp"
 #include "../Hlsl11Source.hpp"
@@ -26,11 +28,8 @@
 BEGIN_INANITY_SHADERS
 
 Hlsl11GeneratorInstance::Hlsl11GeneratorInstance(ptr<Node> rootNode, ShaderType shaderType) :
-	rootNode(rootNode),
-	shaderType(shaderType),
-	tempsCount(0),
-	needInstanceID(false),
-	fragmentTargetsCount(0)
+	SlGeneratorInstance(rootNode, shaderType),
+	needInstanceID(false)
 {}
 
 void Hlsl11GeneratorInstance::PrintDataType(DataType dataType)
@@ -52,244 +51,174 @@ void Hlsl11GeneratorInstance::PrintDataType(DataType dataType)
 	case DataTypes::_ivec2:		name = "int2";			break;
 	case DataTypes::_ivec3:		name = "int3";			break;
 	case DataTypes::_ivec4:		name = "int4";			break;
+	case DataTypes::_bool:		name = "bool";			break;
+	case DataTypes::_bvec2:		name = "bool2";			break;
+	case DataTypes::_bvec3:		name = "bool3";			break;
+	case DataTypes::_bvec4:		name = "bool4";			break;
 	default:
 		THROW("Unknown data type");
 	}
-	hlsl << name;
+	text << name;
 }
 
-void Hlsl11GeneratorInstance::RegisterNode(Node* node)
+void Hlsl11GeneratorInstance::PrintUniform(UniformNode* uniformNode)
 {
+	text << 'u' << uniformNode->GetGroup()->GetSlot() << '_' << uniformNode->GetOffset();
+}
+
+void Hlsl11GeneratorInstance::PrintNodeInit(int nodeIndex)
+{
+	Node* node = nodeInits[nodeIndex];
+
 	switch(node->GetType())
 	{
 	case Node::typeFloatConst:
+		PrintNodeInitBegin(nodeIndex);
+		text << std::fixed << std::setprecision(10) << fast_cast<FloatConstNode*>(node)->GetValue() << 'f';
+		PrintNodeInitEnd();
+		break;
 	case Node::typeIntConst:
+		PrintNodeInitBegin(nodeIndex);
+		text << fast_cast<IntConstNode*>(node)->GetValue();
+		PrintNodeInitEnd();
 		break;
 	case Node::typeAttribute:
-		{
-			// атрибуты допустимы только в вершинном шейдере
-			if(shaderType != ShaderTypes::vertex)
-				THROW("Only vertex shader can have attribute nodes");
-
-			ptr<AttributeNode> attributeNode = fast_cast<AttributeNode*>(node);
-			// просто добавляем, дубликаты удалим потом
-			attributes.push_back(attributeNode);
-		}
+		PrintNodeInitBegin(nodeIndex);
+		text << "a.a" << fast_cast<AttributeNode*>(node)->GetElementIndex();
+		PrintNodeInitEnd();
 		break;
 	case Node::typeUniform:
-		{
-			UniformNode* uniformNode = fast_cast<UniformNode*>(node);
-			// просто добавляем, дубликаты удалим потом
-			uniforms.push_back(std::make_pair(uniformNode->GetGroup(), uniformNode));
-		}
+		// uniform doesn't have initialization
 		break;
 	case Node::typeSampler:
-		// просто добавляем, дубликаты удалим потом
-		samplers.push_back(fast_cast<SamplerNode*>(node));
+		// sampler doesn't have initialization
 		break;
-	case Node::typeTemp:
+	case Node::typeReadUniform:
 		{
-			TempNode* tempNode = fast_cast<TempNode*>(node);
-			if(temps.find(tempNode) == temps.end())
-				temps[tempNode] = tempsCount++;
+			PrintNodeInitBegin(nodeIndex);
+			ReadUniformNode* readUniformNode = fast_cast<ReadUniformNode*>(node);
+			PrintUniform(readUniformNode->GetUniformNode());
+			PrintNodeInitEnd();
+		}
+		break;
+	case Node::typeIndexUniformArray:
+		{
+			PrintNodeInitBegin(nodeIndex);
+			IndexUniformArrayNode* indexUniformArrayNode = fast_cast<IndexUniformArrayNode*>(node);
+			PrintUniform(indexUniformArrayNode->GetUniformNode());
+			text << '[';
+			PrintNode(indexUniformArrayNode->GetIndexNode());
+			text << ']';
+			PrintNodeInitEnd();
 		}
 		break;
 	case Node::typeTransformed:
-		transformed.push_back(fast_cast<TransformedNode*>(node));
+		PrintNodeInitBegin(nodeIndex);
+		text << "v.v" << fast_cast<TransformedNode*>(node)->GetSemantic();
+		PrintNodeInitEnd();
+		break;
+	case Node::typeInterpolate:
+		{
+			InterpolateNode* interpolateNode = fast_cast<InterpolateNode*>(node);
+			text << "\tv.v" << interpolateNode->GetSemantic() << " = ";
+			PrintNode(interpolateNode->GetNode());
+			PrintNodeInitEnd();
+		}
 		break;
 	case Node::typeSequence:
-		{
-			SequenceNode* sequenceNode = fast_cast<SequenceNode*>(node);
-			RegisterNode(sequenceNode->GetA());
-			RegisterNode(sequenceNode->GetB());
-		}
-		break;
-	case Node::typeSwizzle:
-		RegisterNode(fast_cast<SwizzleNode*>(node)->GetA());
-		break;
-	case Node::typeOperation:
-		{
-			OperationNode* operationNode = fast_cast<OperationNode*>(node);
-			int argumentsCount = operationNode->GetArgumentsCount();
-			for(int i = 0; i < argumentsCount; ++i)
-				RegisterNode(operationNode->GetArgument(i));
-
-			if(operationNode->GetOperation() == OperationNode::operationGetInstanceID)
-				needInstanceID = true;
-		}
-		break;
-	case Node::typeSample:
-		{
-			SampleNode* sampleNode = fast_cast<SampleNode*>(node);
-
-			RegisterNode(sampleNode->GetSamplerNode());
-			RegisterNode(sampleNode->GetCoordsNode());
-
-			ptr<Node> lodNode = sampleNode->GetLodNode();
-			if(lodNode)
-				RegisterNode(lodNode);
-
-			ptr<Node> biasNode = sampleNode->GetBiasNode();
-			if(biasNode)
-				RegisterNode(biasNode);
-
-			ptr<Node> gradXNode = sampleNode->GetGradXNode();
-			if(gradXNode)
-				RegisterNode(gradXNode);
-			ptr<Node> gradYNode = sampleNode->GetGradYNode();
-			if(gradYNode)
-				RegisterNode(gradYNode);
-
-			ptr<Node> offsetNode = sampleNode->GetOffsetNode();
-			if(offsetNode)
-				RegisterNode(offsetNode);
-		}
-		break;
-	case Node::typeFragment:
-		{
-			// fragment output is allowed only in pixel shader
-			if(shaderType != ShaderTypes::pixel)
-				THROW("Only pixel shader can do fragment output");
-			FragmentNode* fragmentNode = fast_cast<FragmentNode*>(node);
-			// register maximum number of fragment outputs
-			fragmentTargetsCount = std::max(fragmentTargetsCount, fragmentNode->GetTarget() + 1);
-			RegisterNode(fragmentNode->GetNode());
-		}
-		break;
-	case Node::typeCast:
-		RegisterNode(fast_cast<CastNode*>(node)->GetA());
-		break;
-	default:
-		THROW("Unknown node type");
-	}
-}
-
-void Hlsl11GeneratorInstance::PrintNode(Node* node)
-{
-	switch(node->GetType())
-	{
-	case Node::typeFloatConst:
-		hlsl << std::fixed << std::setprecision(10) << fast_cast<FloatConstNode*>(node)->GetValue() << 'f';
-		break;
-	case Node::typeIntConst:
-		hlsl << fast_cast<IntConstNode*>(node)->GetValue();
-		break;
-	case Node::typeAttribute:
-		hlsl << "a.a" << fast_cast<AttributeNode*>(node)->GetElementIndex();
-		break;
-	case Node::typeUniform:
-		{
-			UniformNode* uniformNode = fast_cast<UniformNode*>(node);
-			ptr<UniformGroup> uniformGroup = uniformNode->GetGroup();
-			hlsl << 'u' << uniformGroup->GetSlot() << '_' << uniformNode->GetOffset();
-		}
-		break;
-	case Node::typeSampler:
-		// семплер может участвовать, только в операции семплирования
-		// он никогда не должен приходить в PrintNode
-		THROW("Invalid use of sampler");
-	case Node::typeTemp:
-		{
-			// выяснить смещение переменной
-			std::unordered_map<ptr<TempNode>, int>::const_iterator i = temps.find(fast_cast<TempNode*>(node));
-			if(i == temps.end())
-				THROW("Temp node is not registered");
-
-			// напечатать
-			hlsl << '_' << i->second;
-		}
-		break;
-	case Node::typeTransformed:
-		hlsl << "v.v" << fast_cast<TransformedNode*>(node)->GetSemantic();
-		break;
-	case Node::typeSequence:
-		{
-			SequenceNode* sequenceNode = fast_cast<SequenceNode*>(node);
-			PrintNode(sequenceNode->GetA());
-			hlsl << ";\n\t";
-			PrintNode(sequenceNode->GetB());
-		}
+		// sequence node doesn't have initialization
 		break;
 	case Node::typeSwizzle:
 		{
+			PrintNodeInitBegin(nodeIndex);
 			SwizzleNode* swizzleNode = fast_cast<SwizzleNode*>(node);
-			hlsl << '(';
 			PrintNode(swizzleNode->GetA());
-			hlsl << ")." << swizzleNode->GetMap();
+			text << '.' << swizzleNode->GetMap();
+			PrintNodeInitEnd();
 		}
 		break;
 	case Node::typeOperation:
-		PrintOperationNode(fast_cast<OperationNode*>(node));
+		PrintNodeInitBegin(nodeIndex);
+		PrintOperationNodeInit(fast_cast<OperationNode*>(node));
+		PrintNodeInitEnd();
+		break;
+	case Node::typeAction:
+		PrintActionNodeInit(fast_cast<ActionNode*>(node));
 		break;
 	case Node::typeSample:
 		{
+			PrintNodeInitBegin(nodeIndex);
+
 			SampleNode* sampleNode = fast_cast<SampleNode*>(node);
 
 			int slot = sampleNode->GetSamplerNode()->GetSlot();
-			hlsl << 't' << slot;
+			text << 't' << slot;
 
-			ptr<Node> coordsNode = sampleNode->GetCoordsNode();
-			ptr<Node> offsetNode = sampleNode->GetOffsetNode();
-			ptr<Node> lodNode = sampleNode->GetLodNode();
-			ptr<Node> biasNode = sampleNode->GetBiasNode();
-			ptr<Node> gradXNode = sampleNode->GetGradXNode();
-			ptr<Node> gradYNode = sampleNode->GetGradYNode();
+			ValueNode* coordsNode = sampleNode->GetCoordsNode();
+			ValueNode* offsetNode = sampleNode->GetOffsetNode();
+			ValueNode* lodNode = sampleNode->GetLodNode();
+			ValueNode* biasNode = sampleNode->GetBiasNode();
+			ValueNode* gradXNode = sampleNode->GetGradXNode();
+			ValueNode* gradYNode = sampleNode->GetGradYNode();
 
 			if(lodNode)
 			{
-				hlsl << ".SampleLevel(s" << slot << ", ";
+				text << ".SampleLevel(s" << slot << ", ";
 				PrintNode(coordsNode);
-				hlsl << ", ";
+				text << ", ";
 				PrintNode(lodNode);
 			}
 			else if(biasNode)
 			{
-				hlsl << ".SampleBias(s" << slot << ", ";
+				text << ".SampleBias(s" << slot << ", ";
 				PrintNode(coordsNode);
-				hlsl << ", ";
+				text << ", ";
 				PrintNode(biasNode);
 			}
 			else if(gradXNode && gradYNode)
 			{
-				hlsl << ".SampleGrad(s" << slot << ", ";
+				text << ".SampleGrad(s" << slot << ", ";
 				PrintNode(coordsNode);
-				hlsl << ", ";
+				text << ", ";
 				PrintNode(gradXNode);
-				hlsl << ", ";
+				text << ", ";
 				PrintNode(gradYNode);
 			}
 			else
 			{
-				hlsl << ".Sample(s" << slot << ", ";
+				text << ".Sample(s" << slot << ", ";
 				PrintNode(coordsNode);
 			}
 
 			// add offset if needed
 			if(offsetNode)
 			{
-				hlsl << ", ";
+				text << ", ";
 				PrintNode(offsetNode);
 			}
 
-			hlsl << ')';
+			text << ')';
+
+			PrintNodeInitEnd();
 		}
 		break;
 	case Node::typeFragment:
 		{
 			FragmentNode* fragmentNode = fast_cast<FragmentNode*>(node);
-			hlsl << "r.r" << fragmentNode->GetTarget() << " = (";
+			text << "\tr.r" << fragmentNode->GetTarget() << " = ";
 			PrintNode(fragmentNode->GetNode());
-			hlsl << ')';
+			PrintNodeInitEnd();
 		}
 		break;
 	case Node::typeCast:
 		{
+			PrintNodeInitBegin(nodeIndex);
 			CastNode* castNode = fast_cast<CastNode*>(node);
-			hlsl << '(';
-			PrintDataType(castNode->GetCastDataType());
-			hlsl << ")(";
+			text << '(';
+			PrintDataType(castNode->GetValueType());
+			text << ")";
 			PrintNode(castNode->GetA());
-			hlsl << ')';
+			PrintNodeInitEnd();
 		}
 		break;
 	default:
@@ -297,96 +226,61 @@ void Hlsl11GeneratorInstance::PrintNode(Node* node)
 	}
 }
 
-void Hlsl11GeneratorInstance::PrintOperationNode(OperationNode* node)
+void Hlsl11GeneratorInstance::PrintOperationNodeInit(OperationNode* node)
 {
 	OperationNode::Operation operation = node->GetOperation();
 	switch(operation)
 	{
-	case OperationNode::operationAssign:
-		PrintNode(node->GetA());
-		hlsl << " = (";
-		PrintNode(node->GetB());
-		hlsl << ')';
-		break;
-	case OperationNode::operationIndex:
-		PrintNode(node->GetA());
-		hlsl << '[';
-		PrintNode(node->GetB());
-		hlsl << ']';
-		break;
 	case OperationNode::operationNegate:
-		hlsl << "-(";
+		text << '-';
 		PrintNode(node->GetA());
-		hlsl << ')';
 		break;
 	case OperationNode::operationAdd:
-		hlsl << '(';
 		PrintNode(node->GetA());
-		hlsl << ") + (";
+		text << " + ";
 		PrintNode(node->GetB());
-		hlsl << ')';
 		break;
 	case OperationNode::operationSubtract:
-		hlsl << '(';
 		PrintNode(node->GetA());
-		hlsl << ") - (";
+		text << " - ";
 		PrintNode(node->GetB());
-		hlsl << ')';
 		break;
 	case OperationNode::operationMultiply:
-		hlsl << '(';
 		PrintNode(node->GetA());
-		hlsl << ") * (";
+		text << " * ";
 		PrintNode(node->GetB());
-		hlsl << ')';
 		break;
 	case OperationNode::operationDivide:
-		hlsl << '(';
 		PrintNode(node->GetA());
-		hlsl << ") / (";
+		text << " / ";
 		PrintNode(node->GetB());
-		hlsl << ')';
 		break;
 	case OperationNode::operationLess:
-		hlsl << '(';
 		PrintNode(node->GetA());
-		hlsl << ") < (";
+		text << " < ";
 		PrintNode(node->GetB());
-		hlsl << ')';
 		break;
 	case OperationNode::operationLessEqual:
-		hlsl << '(';
 		PrintNode(node->GetA());
-		hlsl << ") <= (";
+		text << " <= ";
 		PrintNode(node->GetB());
-		hlsl << ')';
 		break;
 	case OperationNode::operationEqual:
-		hlsl << '(';
 		PrintNode(node->GetA());
-		hlsl << ") == (";
+		text << " == ";
 		PrintNode(node->GetB());
-		hlsl << ')';
 		break;
 	case OperationNode::operationNotEqual:
-		hlsl << '(';
 		PrintNode(node->GetA());
-		hlsl << ") != (";
+		text << " != ";
 		PrintNode(node->GetB());
-		hlsl << ')';
-		break;
-	case OperationNode::operationSetPosition:
-		hlsl << "(v.vTP = ";
-		PrintNode(node->GetA());
-		hlsl << ')';
 		break;
 	case OperationNode::operationGetInstanceID:
-		hlsl << "sI";
+		text << "sI";
 		break;
 	case OperationNode::operationScreenToTexture:
-		hlsl << '(';
 		PrintNode(node->GetA());
-		hlsl << ") * float2(0.5f, -0.5f) + float2(0.5f, 0.5f)";
+		text << " * float2(0.5f, -0.5f) + float2(0.5f, 0.5f)";
 		break;
 	default:
 		{
@@ -418,28 +312,45 @@ void Hlsl11GeneratorInstance::PrintOperationNode(OperationNode* node)
 				OP(Saturate, saturate);
 				OP(Ddx, ddx);
 				OP(Ddy, ddy);
-				OP(Clip, clip);
 				OP(Floor, floor);
 				OP(Ceil, ceil);
 				OP(Mod, fmod);
 #undef OP
 			default:
-				THROW("Unknown operation type");
+				THROW("Invalid operation type");
 			}
 
 			// вывести
-			hlsl << name << '(';
+			text << name << '(';
 			int argumentsCount = node->GetArgumentsCount();
 			for(int i = 0; i < argumentsCount; ++i)
 			{
 				if(i)
-					hlsl << ", ";
-				hlsl << '(';
+					text << ", ";
 				PrintNode(node->GetArgument(i));
-				hlsl << ')';
 			}
-			hlsl << ')';
+			text << ')';
 		}
+	}
+}
+
+void Hlsl11GeneratorInstance::PrintActionNodeInit(ActionNode* node)
+{
+	switch(node->GetAction())
+	{
+	case ActionNode::actionSetPosition:
+		text << "\tv.vTP = ";
+		PrintNode(node->GetA());
+		PrintNodeInitEnd();
+		break;
+	case ActionNode::actionClip:
+		text << "\tclip(";
+		PrintNode(node->GetA());
+		text << ')';
+		PrintNodeInitEnd();
+		break;
+	default:
+		THROW("Invalid action type");
 	}
 }
 
@@ -449,7 +360,7 @@ void Hlsl11GeneratorInstance::PrintUniforms()
 	// отсортировать их
 	struct Sorter
 	{
-		bool operator()(const std::pair<ptr<UniformGroup>, ptr<UniformNode> >& a, const std::pair<ptr<UniformGroup>, ptr<UniformNode> >& b) const
+		bool operator()(const std::pair<UniformGroup*, UniformNode*>& a, const std::pair<UniformGroup*, UniformNode*>& b) const
 		{
 			int slotA = a.first->GetSlot();
 			int slotB = b.first->GetSlot();
@@ -469,12 +380,12 @@ void Hlsl11GeneratorInstance::PrintUniforms()
 
 		// вывести заголовок
 		int slot = uniforms[i].first->GetSlot();
-		hlsl << "cbuffer CB" << slot << " : register(b" << slot << ")\n{\n";
+		text << "cbuffer CB" << slot << " : register(b" << slot << ")\n{\n";
 
 		// вывести переменные
 		for(size_t k = i; k < j; ++k)
 		{
-			ptr<UniformNode> uniformNode = uniforms[k].second;
+			UniformNode* uniformNode = uniforms[k].second;
 			DataType valueType = uniformNode->GetValueType();
 			int offset = uniformNode->GetOffset();
 			int count = uniformNode->GetCount();
@@ -485,20 +396,20 @@ void Hlsl11GeneratorInstance::PrintUniforms()
 
 			// печатаем определение переменной
 
-			hlsl << '\t';
+			text << '\t';
 			PrintDataType(valueType);
 			// имя переменной
-			hlsl << " u" << slot << '_' << offset;
+			text << " u" << slot << '_' << offset;
 
 			// размер массива
 			if(count > 1)
-				hlsl << '[' << count << ']';
+				text << '[' << count << ']';
 			// если массив, размер элемента должен быть кратен размеру vec4
 			if(count > 1 && GetDataTypeSize(valueType) % sizeof(vec4))
 				THROW("Size of element of array should be multiply of vec4 size");
 
 			// регистр и положение в нём переменной
-			hlsl << " : packoffset(c" << (offset / sizeof(vec4));
+			text << " : packoffset(c" << (offset / sizeof(vec4));
 			// если переменная не начинается ровно на границе регистра, нужно дописать ещё первую компоненту регистра
 			int registerOffset = offset % sizeof(vec4);
 			if(registerOffset)
@@ -510,17 +421,17 @@ void Hlsl11GeneratorInstance::PrintUniforms()
 					THROW("Variable should not intersect a register boundary");
 				// выложить нужную букву
 				registerOffset /= sizeof(float);
-				hlsl << '.' << "xyzw"[registerOffset];
+				text << '.' << "xyzw"[registerOffset];
 			}
 			// конец упаковки
-			hlsl << ")";
+			text << ")";
 
 			// конец переменной
-			hlsl << ";\n";
+			text << ";\n";
 		}
 
 		// окончание
-		hlsl << "};\n";
+		text << "};\n";
 
 		i = j;
 	}
@@ -528,8 +439,20 @@ void Hlsl11GeneratorInstance::PrintUniforms()
 
 ptr<ShaderSource> Hlsl11GeneratorInstance::Generate()
 {
-	// первый проход: зарегистрировать все переменные
+	// first stage: register all nodes
 	RegisterNode(rootNode);
+
+	// find out if we need instance id
+	for(size_t i = 0; i < nodeInits.size(); ++i)
+	{
+		Node* node = nodeInits[i];
+		if(node->GetType() == Node::typeOperation)
+		{
+			OperationNode* operationNode = fast_cast<OperationNode*>(node);
+			if(operationNode->GetOperation() == OperationNode::operationGetInstanceID)
+				needInstanceID = true;
+		}
+	}
 
 	// выборы в зависимости от типа шейдера
 	const char* mainFunctionName;
@@ -563,7 +486,7 @@ ptr<ShaderSource> Hlsl11GeneratorInstance::Generate()
 	// вывести атрибуты, если вершинный шейдер
 	if(shaderType == ShaderTypes::vertex)
 	{
-		hlsl << "struct A\n{\n";
+		text << "struct A\n{\n";
 
 		struct IndexSorter
 		{
@@ -574,24 +497,21 @@ ptr<ShaderSource> Hlsl11GeneratorInstance::Generate()
 		};
 
 		std::sort(attributes.begin(), attributes.end(), IndexSorter());
-		attributes.resize(std::unique(attributes.begin(), attributes.end()) - attributes.begin());
 		for(size_t i = 0; i < attributes.size(); ++i)
 		{
-			ptr<AttributeNode> node = attributes[i];
-			hlsl << '\t';
+			AttributeNode* node = attributes[i];
+			text << '\t';
 			PrintDataType(node->GetValueType());
 			int index = node->GetElementIndex();
-			hlsl << " a" << index << " : " << Dx11System::GetSemanticString(index) << ";\n";
+			text << " a" << index << " : " << Dx11System::GetSemanticString(index) << ";\n";
 		}
-		hlsl << "};\n";
+		text << "};\n";
 	}
 
-	// вывести промежуточные переменные в любом случае
+	// print transformed nodes
+	if(shaderType == ShaderTypes::pixel)
 	{
-		hlsl << "struct V\n{\n";
-
-		// вывести SV_Position
-		hlsl << "\tfloat4 vTP : SV_Position;\n";
+		text << "struct V\n{\n";
 
 		struct SemanticSorter
 		{
@@ -601,32 +521,63 @@ ptr<ShaderSource> Hlsl11GeneratorInstance::Generate()
 			}
 		};
 
-		std::sort(transformed.begin(), transformed.end(), SemanticSorter());
-		transformed.resize(std::unique(transformed.begin(), transformed.end()) - transformed.begin());
-		for(size_t i = 0; i < transformed.size(); ++i)
+		std::sort(transformedNodes.begin(), transformedNodes.end(), SemanticSorter());
+
+		for(size_t i = 0; i < transformedNodes.size(); ++i)
 		{
-			ptr<TransformedNode> node = transformed[i];
-			hlsl << '\t';
+			TransformedNode* node = transformedNodes[i];
+			text << '\t';
 			PrintDataType(node->GetValueType());
 			int semantic = node->GetSemantic();
-			hlsl << " v" << semantic << " : " << Dx11System::GetSemanticString(semantic) << ";\n";
+			text << " v" << semantic << " : " << Dx11System::GetSemanticString(semantic) << ";\n";
 		}
-		hlsl << "};\n";
+
+		text << "};\n";
+	}
+
+	// print interpolate nodes
+	if(shaderType == ShaderTypes::vertex)
+	{
+		text << "struct V\n{\n";
+
+		struct SemanticSorter
+		{
+			bool operator()(InterpolateNode* a, InterpolateNode* b) const
+			{
+				return a->GetSemantic() < b->GetSemantic();
+			}
+		};
+
+		std::sort(interpolateNodes.begin(), interpolateNodes.end(), SemanticSorter());
+
+		for(size_t i = 0; i < interpolateNodes.size(); ++i)
+		{
+			InterpolateNode* node = interpolateNodes[i];
+			text << '\t';
+			PrintDataType(node->GetValueType());
+			int semantic = node->GetSemantic();
+			text << " v" << semantic << " : " << Dx11System::GetSemanticString(semantic) << ";\n";
+		}
+
+		// вывести SV_Position
+		text << "\tfloat4 vTP : SV_Position;\n";
+
+		text << "};\n";
 	}
 
 	// вывести пиксельные переменные, если это пиксельный шейдер
 	if(shaderType == ShaderTypes::pixel)
 	{
-		hlsl << "struct R\n{\n";
+		text << "struct R\n{\n";
 
 		for(int i = 0; i < fragmentTargetsCount; ++i)
 		{
-			hlsl << '\t';
+			text << '\t';
 			PrintDataType(DataTypes::_vec4);
-			hlsl << " r" << i << " : SV_Target" << i << ";\n";
+			text << " r" << i << " : SV_Target" << i << ";\n";
 		}
 
-		hlsl << "};\n";
+		text << "};\n";
 	}
 
 	// вывести uniform-буферы
@@ -641,10 +592,9 @@ ptr<ShaderSource> Hlsl11GeneratorInstance::Generate()
 		}
 	};
 	std::sort(samplers.begin(), samplers.end(), SamplerSlotSorter());
-	samplers.resize(std::unique(samplers.begin(), samplers.end()) - samplers.begin());
 	for(size_t i = 0; i < samplers.size(); ++i)
 	{
-		ptr<SamplerNode> samplerNode = samplers[i];
+		SamplerNode* samplerNode = samplers[i];
 		const char* textureStr;
 		switch(samplerNode->GetCoordType())
 		{
@@ -664,49 +614,31 @@ ptr<ShaderSource> Hlsl11GeneratorInstance::Generate()
 			THROW("Invalid sampler coord type");
 		}
 		// текстура
-		hlsl << textureStr << '<';
+		text << textureStr << '<';
 		PrintDataType(samplerNode->GetValueType());
 		int slot = samplerNode->GetSlot();
-		hlsl << "> t" << slot << " : register(t" << slot << ");\n";
+		text << "> t" << slot << " : register(t" << slot << ");\n";
 		// семплер
-		hlsl << "SamplerState s" << slot << " : register(s" << slot << ");\n";
+		text << "SamplerState s" << slot << " : register(s" << slot << ");\n";
 	}
 
 	//** заголовок функции шейдера
 
-	hlsl << outputTypeName << ' ' << mainFunctionName << '(' << inputTypeName << ' ' << inputName;
+	text << outputTypeName << ' ' << mainFunctionName << '(' << inputTypeName << ' ' << inputName;
 
 	// если шейдер использует instance ID, добавить аргумент
 	if(needInstanceID)
-		hlsl << ", uint sI : SV_InstanceID";
+		text << ", uint sI : SV_InstanceID";
 
 	// завершить заголовок
-	hlsl << ")\n{\n\t" << outputTypeName << ' ' << outputName << ";\n";
+	text << ")\n{\n\t" << outputTypeName << ' ' << outputName << ";\n";
 
-	// временные переменные
-	{
-		// отсортировать по индексу
-		std::vector<std::pair<int, DataType> > v;
-		for(std::unordered_map<ptr<TempNode>, int>::const_iterator i = temps.begin(); i != temps.end(); ++i)
-			v.push_back(std::make_pair(i->second, i->first->GetValueType()));
-		std::sort(v.begin(), v.end());
-
-		// вывести
-		for(size_t i = 0; i < v.size(); ++i)
-		{
-			hlsl << '\t';
-			PrintDataType(v[i].second);
-			hlsl << " _" << v[i].first << ";\n";
-		}
-	}
-
-	hlsl << '\t';
-
-	// код шейдера
-	PrintNode(rootNode);
+	// shader code
+	for(size_t i = 0; i < nodeInits.size(); ++i)
+		PrintNodeInit(i);
 
 	// завершение шейдера
-	hlsl << ";\n\treturn " << outputName << ";\n}\n";
+	text << "\treturn " << outputName << ";\n}\n";
 
 	// получить маски ресурсов
 	int uniformBuffersMask = 0;
@@ -717,7 +649,7 @@ ptr<ShaderSource> Hlsl11GeneratorInstance::Generate()
 		samplersMask |= 1 << samplers[i]->GetSlot();
 	Dx11ShaderResources resources(uniformBuffersMask, samplersMask);
 
-	return NEW(Hlsl11Source(Strings::String2File(hlsl.str()), mainFunctionName, profile, resources));
+	return NEW(Hlsl11Source(Strings::String2File(text.str()), mainFunctionName, profile, resources));
 }
 
 END_INANITY_SHADERS

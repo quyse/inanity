@@ -180,12 +180,6 @@ inline Value<bool> operator!=(const Value<ValueType>& a, const Value<ValueType>&
 }
 
 template <typename ValueType>
-inline Value<ValueType> operator,(const Expression& a, const Value<ValueType>& b)
-{
-	return NEW(SequenceNode(a.GetNode(), b.GetNode()));
-}
-
-template <typename ValueType>
 inline void Value<ValueType>::operator+=(const Value<ValueType>& b)
 {
 	*this = *this + b;

@@ -2,13 +2,7 @@
 #include "Hlsl11GeneratorInstance.hpp"
 #include "../ShaderSource.hpp"
 #include "Expression.hpp"
-#include "AttributeNode.hpp"
-#include "TempNode.hpp"
-#include "UniformGroup.hpp"
-#include "UniformNode.hpp"
-#include "SamplerNode.hpp"
-#include "TransformedNode.hpp"
-#include "OperationNode.hpp"
+#include "Node.hpp"
 
 BEGIN_INANITY_SHADERS
 

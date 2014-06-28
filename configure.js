@@ -206,6 +206,7 @@ var libraries = {
 			'graphics.shaders.Expression',
 			'graphics.shaders.UniformGroup',
 			'graphics.shaders.Sampler',
+			'graphics.shaders.SlGeneratorInstance',
 			'graphics.shaders.GlslGenerator', 'graphics.shaders.GlslGeneratorInstance',
 			'graphics.shaders.Instancer'
 		],

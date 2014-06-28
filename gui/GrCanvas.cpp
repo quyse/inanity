@@ -115,9 +115,9 @@ struct GrCanvas::Helper : public Object
 		));
 
 		// pixel shader
-		ps = shaderCache->GetPixelShader((
+		ps = shaderCache->GetPixelShader(
 			fragment(0, newvec4(iColor["xyz"], iColor["w"] * uFontSampler.Sample(iTexcoord)))
-		));
+		);
 
 		// blending
 		bs = device->CreateBlendState();
