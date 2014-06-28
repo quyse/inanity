@@ -8,15 +8,17 @@ BEGIN_INANITY_SHADERS
 class UniformNode;
 
 template <typename ValueType>
-class UniformArray : public Value<ValueType>
+class UniformArray
 {
+private:
+	ptr<UniformNode> uniformNode;
+
 public:
-	UniformArray(ptr<UniformNode> node);
+	UniformArray(ptr<UniformNode> uniformNode);
 
-	/// Операция индексирования массива.
-	Value<ValueType> operator[](Value<unsigned int> index) const;
+	Value<ValueType> operator[](Value<uint> index) const;
 
-	void SetValue(int index, const ValueType& value);
+	void Set(int index, const ValueType& value);
 };
 
 END_INANITY_SHADERS

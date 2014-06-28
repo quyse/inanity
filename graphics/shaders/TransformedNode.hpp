@@ -1,12 +1,12 @@
 #ifndef ___INANITY_GRAPHICS_SHADERS_TRANSFORMED_NODE_HPP___
 #define ___INANITY_GRAPHICS_SHADERS_TRANSFORMED_NODE_HPP___
 
-#include "Node.hpp"
+#include "ValueNode.hpp"
 
 BEGIN_INANITY_SHADERS
 
-/// Класс переменной после вершинного шейдера.
-class TransformedNode : public Node
+/// Input variable for pixel shader.
+class TransformedNode : public ValueNode
 {
 private:
 	DataType valueType;
@@ -16,8 +16,8 @@ public:
 	TransformedNode(DataType valueType, int semantic);
 
 	Type GetType() const;
-
 	DataType GetValueType() const;
+
 	int GetSemantic() const;
 };
 

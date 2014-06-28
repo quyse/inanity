@@ -10,10 +10,13 @@ class UniformNode;
 template <typename ValueType>
 class Uniform : public Value<ValueType>
 {
-public:
-	Uniform(ptr<UniformNode> node);
+private:
+	ptr<UniformNode> uniformNode;
 
-	void SetValue(const ValueType& value);
+public:
+	Uniform(ptr<UniformNode> uniformNode = nullptr);
+
+	void Set(const ValueType& value);
 };
 
 END_INANITY_SHADERS

@@ -2,7 +2,7 @@
 
 BEGIN_INANITY_SHADERS
 
-CastNode::CastNode(DataType castDataType, ptr<Node> a)
+CastNode::CastNode(DataType castDataType, ptr<ValueNode> a)
 : castDataType(castDataType), a(a) {}
 
 Node::Type CastNode::GetType() const
@@ -10,12 +10,12 @@ Node::Type CastNode::GetType() const
 	return typeCast;
 }
 
-DataType CastNode::GetCastDataType() const
+DataType CastNode::GetValueType() const
 {
 	return castDataType;
 }
 
-ptr<Node> CastNode::GetA() const
+ptr<ValueNode> CastNode::GetA() const
 {
 	return a;
 }

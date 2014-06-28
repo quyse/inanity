@@ -4,14 +4,17 @@
 #include "FloatConstNode.hpp"
 #include "IntConstNode.hpp"
 #include "OperationNode.hpp"
+#include "ActionNode.hpp"
 #include "SampleNode.hpp"
 #include "SamplerNode.hpp"
 #include "SequenceNode.hpp"
 #include "SwizzleNode.hpp"
 #include "UniformGroup.hpp"
 #include "UniformNode.hpp"
-#include "TempNode.hpp"
+#include "ReadUniformNode.hpp"
+#include "IndexUniformArrayNode.hpp"
 #include "TransformedNode.hpp"
+#include "InterpolateNode.hpp"
 #include "FragmentNode.hpp"
 #include "CastNode.hpp"
 #include "../GlslSource.hpp"
@@ -31,7 +34,6 @@ GlslGeneratorInstance::GlslGeneratorInstance(ptr<Node> rootNode, ShaderType shad
 	shaderType(shaderType),
 	glslVersion(glslVersion),
 	supportUniformBuffers(supportUniformBuffers),
-	tempsCount(0),
 	fragmentTargetsCount(0)
 {
 	try
@@ -77,14 +79,36 @@ void GlslGeneratorInstance::PrintDataType(DataType dataType)
 	case DataTypes::_ivec2:			name = "ivec2";			break;
 	case DataTypes::_ivec3:			name = "ivec3";			break;
 	case DataTypes::_ivec4:			name = "ivec4";			break;
+	case DataTypes::_bool:			name = "bool";			break;
+	case DataTypes::_bvec2:			name = "bvec2";			break;
+	case DataTypes::_bvec3:			name = "bvec3";			break;
+	case DataTypes::_bvec4:			name = "bvec4";			break;
 	default:
 		THROW("Unknown data type");
 	}
 	glsl << name;
 }
 
+void GlslGeneratorInstance::PrintUniform(UniformNode* uniformNode)
+{
+	glsl << uniformPrefix << uniformNode->GetGroup()->GetSlot() << '_' << uniformNode->GetOffset();
+}
+
 void GlslGeneratorInstance::RegisterNode(Node* node)
 {
+	// if registration of node already began
+	if(registeredNodes.find(node) != registeredNodes.end())
+	{
+		// if node is not registered yet
+		if(nodeInitIndices.find(node) == nodeInitIndices.end())
+			// than it's a loop
+			THROW("Node cyclic dependency");
+		// else it's ok, it's just another use of node
+		return;
+	}
+	// register node
+	registeredNodes.insert(node);
+
 	switch(node->GetType())
 	{
 	case Node::typeFloatConst:
@@ -92,35 +116,41 @@ void GlslGeneratorInstance::RegisterNode(Node* node)
 		break;
 	case Node::typeAttribute:
 		{
-			// атрибуты допустимы только в вершинном шейдере
 			if(shaderType != ShaderTypes::vertex)
 				THROW("Only vertex shader can have attribute nodes");
 
 			ptr<AttributeNode> attributeNode = fast_cast<AttributeNode*>(node);
-			// просто добавляем, дубликаты удалим потом
 			attributes.push_back(attributeNode);
 		}
 		break;
 	case Node::typeUniform:
 		{
 			UniformNode* uniformNode = fast_cast<UniformNode*>(node);
-			// просто добавляем, дубликаты удалим потом
 			uniforms.push_back(std::make_pair(uniformNode->GetGroup(), uniformNode));
 		}
 		break;
 	case Node::typeSampler:
-		// просто добавляем, дубликаты удалим потом
 		samplers.push_back(fast_cast<SamplerNode*>(node));
 		break;
-	case Node::typeTemp:
+	case Node::typeReadUniform:
+		RegisterNode(fast_cast<ReadUniformNode*>(node)->GetUniformNode());
+		break;
+	case Node::typeIndexUniformArray:
 		{
-			TempNode* tempNode = fast_cast<TempNode*>(node);
-			if(temps.find(tempNode) == temps.end())
-				temps[tempNode] = tempsCount++;
+			IndexUniformArrayNode* indexUniformArrayNode = fast_cast<IndexUniformArrayNode*>(node);
+			RegisterNode(indexUniformArrayNode->GetUniformNode());
+			RegisterNode(indexUniformArrayNode->GetIndexNode());
 		}
 		break;
 	case Node::typeTransformed:
-		transformed.push_back(fast_cast<TransformedNode*>(node));
+		transformedNodes.push_back(fast_cast<TransformedNode*>(node));
+		break;
+	case Node::typeInterpolate:
+		{
+			InterpolateNode* interpolateNode = fast_cast<InterpolateNode*>(node);
+			interpolateNodes.push_back(interpolateNode);
+			RegisterNode(interpolateNode->GetNode());
+		}
 		break;
 	case Node::typeSequence:
 		{
@@ -140,6 +170,14 @@ void GlslGeneratorInstance::RegisterNode(Node* node)
 				RegisterNode(operationNode->GetArgument(i));
 		}
 		break;
+	case Node::typeAction:
+		{
+			ActionNode* actionNode = fast_cast<ActionNode*>(node);
+			int argumentsCount = actionNode->GetArgumentsCount();
+			for(int i = 0; i < argumentsCount; ++i)
+				RegisterNode(actionNode->GetArgument(i));
+		}
+		break;
 	case Node::typeSample:
 		{
 			SampleNode* sampleNode = fast_cast<SampleNode*>(node);
@@ -147,32 +185,32 @@ void GlslGeneratorInstance::RegisterNode(Node* node)
 			RegisterNode(sampleNode->GetSamplerNode());
 			RegisterNode(sampleNode->GetCoordsNode());
 
-			ptr<Node> lodNode = sampleNode->GetLodNode();
+			ptr<ValueNode> lodNode = sampleNode->GetLodNode();
 			if(lodNode)
 				RegisterNode(lodNode);
 
-			ptr<Node> biasNode = sampleNode->GetBiasNode();
+			ptr<ValueNode> biasNode = sampleNode->GetBiasNode();
 			if(biasNode)
 				RegisterNode(biasNode);
 
-			ptr<Node> gradXNode = sampleNode->GetGradXNode();
+			ptr<ValueNode> gradXNode = sampleNode->GetGradXNode();
 			if(gradXNode)
 				RegisterNode(gradXNode);
-			ptr<Node> gradYNode = sampleNode->GetGradYNode();
+			ptr<ValueNode> gradYNode = sampleNode->GetGradYNode();
 			if(gradYNode)
 				RegisterNode(gradYNode);
 
-			ptr<Node> offsetNode = sampleNode->GetOffsetNode();
+			ptr<ValueNode> offsetNode = sampleNode->GetOffsetNode();
 			if(offsetNode)
 				RegisterNode(offsetNode);
 		}
 		break;
 	case Node::typeFragment:
 		{
-			// fragment output is allowed only in pixel shader
 			if(shaderType != ShaderTypes::pixel)
 				THROW("Only pixel shader can do fragment output");
 			FragmentNode* fragmentNode = fast_cast<FragmentNode*>(node);
+
 			// register maximum number of fragment outputs
 			fragmentTargetsCount = std::max(fragmentTargetsCount, fragmentNode->GetTarget() + 1);
 			RegisterNode(fragmentNode->GetNode());
@@ -184,75 +222,121 @@ void GlslGeneratorInstance::RegisterNode(Node* node)
 	default:
 		THROW("Unknown node type");
 	}
+
+	// add initialization of node
+	THROW_ASSERT(nodeInitIndices.find(node) == nodeInitIndices.end());
+	nodeInitIndices[node] = (int)nodeInits.size();
+	nodeInits.push_back(node);
 }
 
-void GlslGeneratorInstance::PrintNode(Node* node)
+void GlslGeneratorInstance::PrintNodeInitVar(int nodeIndex)
 {
+	glsl << '\t';
+	PrintDataType(fast_cast<ValueNode*>(nodeInits[nodeIndex])->GetValueType());
+	glsl << " _" << nodeIndex;
+}
+
+void GlslGeneratorInstance::PrintNodeInitBegin(int nodeIndex)
+{
+	PrintNodeInitVar(nodeIndex);
+	glsl << " = ";
+}
+
+void GlslGeneratorInstance::PrintNodeInitEnd()
+{
+	glsl << ";\n";
+}
+
+void GlslGeneratorInstance::PrintNodeInit(int nodeIndex)
+{
+	Node* node = nodeInits[nodeIndex];
+
 	switch(node->GetType())
 	{
 	case Node::typeFloatConst:
+		PrintNodeInitBegin(nodeIndex);
 		glsl << std::fixed << std::setprecision(10) << fast_cast<FloatConstNode*>(node)->GetValue();// << 'f';
+		PrintNodeInitEnd();
 		break;
 	case Node::typeIntConst:
+		PrintNodeInitBegin(nodeIndex);
 		glsl << fast_cast<IntConstNode*>(node)->GetValue();
+		PrintNodeInitEnd();
 		break;
 	case Node::typeAttribute:
 		{
+			AttributeNode* attributeNode = fast_cast<AttributeNode*>(node);
+			PrintNodeInitBegin(nodeIndex);
 			// WebGL hack for integer attributes
 			// (only for case of using another hack - changing integer attributes to float)
 			bool intConversion = false;
 			if(glslVersion == GlslVersions::webgl)
-				intConversion = PrintWebGLConversionToIntegerBegin(fast_cast<AttributeNode*>(node)->GetValueType());
+				intConversion = PrintWebGLConversionToIntegerBegin(attributeNode->GetValueType());
 
-			glsl << "a" << fast_cast<AttributeNode*>(node)->GetElementIndex();
+			glsl << "a" << attributeNode->GetElementIndex();
 
 			if(intConversion)
 				PrintWebGLConversionToIntegerEnd();
+			PrintNodeInitEnd();
 		}
 		break;
 	case Node::typeUniform:
-		{
-			UniformNode* uniformNode = fast_cast<UniformNode*>(node);
-			ptr<UniformGroup> uniformGroup = uniformNode->GetGroup();
-			glsl << uniformPrefix << uniformGroup->GetSlot() << '_' << uniformNode->GetOffset();
-		}
+		// uniform doesn't have initialization
 		break;
 	case Node::typeSampler:
-		// семплер может участвовать, только в операции семплирования
-		// он никогда не должен приходить в PrintNode
-		THROW("Invalid use of sampler");
-	case Node::typeTemp:
+		// sampler doesn't have initialization
+		break;
+	case Node::typeReadUniform:
 		{
-			// выяснить номер переменной
-			std::unordered_map<ptr<TempNode>, int>::const_iterator i = temps.find(fast_cast<TempNode*>(node));
-			if(i == temps.end())
-				THROW("Temp node is not registered");
-
-			// напечатать
-			glsl << '_' << i->second;
+			PrintNodeInitBegin(nodeIndex);
+			ReadUniformNode* readUniformNode = fast_cast<ReadUniformNode*>(node);
+			PrintUniform(readUniformNode->GetUniformNode());
+			PrintNodeInitEnd();
+		}
+		break;
+	case Node::typeIndexUniformArray:
+		{
+			PrintNodeInitBegin(nodeIndex);
+			IndexUniformArrayNode* indexUniformArrayNode = fast_cast<IndexUniformArrayNode*>(node);
+			PrintUniform(indexUniformArrayNode->GetUniformNode());
+			glsl << '[';
+			PrintNode(indexUniformArrayNode->GetIndexNode());
+			glsl << ']';
+			PrintNodeInitEnd();
 		}
 		break;
 	case Node::typeTransformed:
+		PrintNodeInitBegin(nodeIndex);
 		glsl << "v" << fast_cast<TransformedNode*>(node)->GetSemantic();
+		PrintNodeInitEnd();
+		break;
+	case Node::typeInterpolate:
+		{
+			InterpolateNode* interpolateNode = fast_cast<InterpolateNode*>(node);
+			glsl << "\tv" << interpolateNode->GetSemantic() << " = ";
+			PrintNode(interpolateNode->GetNode());
+			PrintNodeInitEnd();
+		}
 		break;
 	case Node::typeSequence:
-		{
-			SequenceNode* sequenceNode = fast_cast<SequenceNode*>(node);
-			PrintNode(sequenceNode->GetA());
-			glsl << ";\n\t";
-			PrintNode(sequenceNode->GetB());
-		}
+		// sequence node doesn't have initialization
 		break;
 	case Node::typeSwizzle:
 		{
+			PrintNodeInitBegin(nodeIndex);
 			SwizzleNode* swizzleNode = fast_cast<SwizzleNode*>(node);
-			glsl << '(';
 			PrintNode(swizzleNode->GetA());
-			glsl << ")." << swizzleNode->GetMap();
+			glsl << '.' << swizzleNode->GetMap();
+			PrintNodeInitEnd();
 		}
 		break;
 	case Node::typeOperation:
-		PrintOperationNode(fast_cast<OperationNode*>(node));
+		PrintNodeInitBegin(nodeIndex);
+		PrintOperationNodeInit(fast_cast<OperationNode*>(node));
+		PrintNodeInitEnd();
+		break;
+	case Node::typeAction:
+		PrintActionNodeInit(fast_cast<ActionNode*>(node));
 		break;
 	case Node::typeSample:
 		{
@@ -260,15 +344,14 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 
 			int slot = sampleNode->GetSamplerNode()->GetSlot();
 
-			ptr<Node> coordsNode = sampleNode->GetCoordsNode();
-			ptr<Node> offsetNode = sampleNode->GetOffsetNode();
-			ptr<Node> lodNode = sampleNode->GetLodNode();
-			ptr<Node> biasNode = sampleNode->GetBiasNode();
-			ptr<Node> gradXNode = sampleNode->GetGradXNode();
-			ptr<Node> gradYNode = sampleNode->GetGradYNode();
+			ptr<ValueNode> coordsNode = sampleNode->GetCoordsNode();
+			ptr<ValueNode> offsetNode = sampleNode->GetOffsetNode();
+			ptr<ValueNode> lodNode = sampleNode->GetLodNode();
+			ptr<ValueNode> biasNode = sampleNode->GetBiasNode();
+			ptr<ValueNode> gradXNode = sampleNode->GetGradXNode();
+			ptr<ValueNode> gradYNode = sampleNode->GetGradYNode();
 
-			// bracket for possible swizzle
-			glsl << '(';
+			PrintNodeInitBegin(nodeIndex);
 
 			if(lodNode)
 			{
@@ -335,39 +418,15 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 			glsl << ')';
 
 			// sample always returns four-component vector, so make some swizzle if needed
-			int valueSize;
-			switch(sampleNode->GetSamplerNode()->GetValueType())
-			{
-			case DataTypes::_float:
-			case DataTypes::_uint:
-			case DataTypes::_int:
-				valueSize = 1;
-				break;
-			case DataTypes::_vec2:
-			case DataTypes::_uvec2:
-			case DataTypes::_ivec2:
-				valueSize = 2;
-				break;
-			case DataTypes::_vec3:
-			case DataTypes::_uvec3:
-			case DataTypes::_ivec3:
-				valueSize = 3;
-				break;
-			case DataTypes::_vec4:
-			case DataTypes::_uvec4:
-			case DataTypes::_ivec4:
-				valueSize = 4;
-				break;
-			default:
-				THROW("Invalid sampler value type");
-			}
+			int valueSize = GetVectorDataTypeDimensions(sampleNode->GetValueType());
 			if(valueSize < 4)
 			{
 				glsl << '.';
 				for(int i = 0; i < valueSize; ++i)
 					glsl << "xyzw"[i];
 			}
-			glsl << ')';
+
+			PrintNodeInitEnd();
 		}
 		break;
 	case Node::typeFragment:
@@ -383,18 +442,20 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 					glsl << "gl_FragColor";
 				break;
 			}
-			glsl << " = (";
+			glsl << " = ";
 			PrintNode(fragmentNode->GetNode());
-			glsl << ')';
+			glsl << ";\n";
 		}
 		break;
 	case Node::typeCast:
 		{
+			PrintNodeInitBegin(nodeIndex);
 			CastNode* castNode = fast_cast<CastNode*>(node);
-			PrintDataType(castNode->GetCastDataType());
+			PrintDataType(castNode->GetValueType());
 			glsl << '(';
 			PrintNode(castNode->GetA());
 			glsl << ')';
+			PrintNodeInitEnd();
 		}
 		break;
 	default:
@@ -402,97 +463,62 @@ void GlslGeneratorInstance::PrintNode(Node* node)
 	}
 }
 
-void GlslGeneratorInstance::PrintOperationNode(OperationNode* node)
+void GlslGeneratorInstance::PrintOperationNodeInit(OperationNode* node)
 {
 	OperationNode::Operation operation = node->GetOperation();
 	switch(operation)
 	{
-	case OperationNode::operationAssign:
-		PrintNode(node->GetA());
-		glsl << " = (";
-		PrintNode(node->GetB());
-		glsl << ')';
-		break;
-	case OperationNode::operationIndex:
-		PrintNode(node->GetA());
-		glsl << '[';
-		PrintNode(node->GetB());
-		glsl << ']';
-		break;
 	case OperationNode::operationNegate:
-		glsl << "-(";
+		glsl << '-';
 		PrintNode(node->GetA());
-		glsl << ')';
 		break;
 	case OperationNode::operationAdd:
-		glsl << '(';
 		PrintNode(node->GetA());
-		glsl << ") + (";
+		glsl << " + ";
 		PrintNode(node->GetB());
-		glsl << ')';
 		break;
 	case OperationNode::operationSubtract:
-		glsl << '(';
 		PrintNode(node->GetA());
-		glsl << ") - (";
+		glsl << " - ";
 		PrintNode(node->GetB());
-		glsl << ')';
 		break;
 	case OperationNode::operationMultiply:
 	case OperationNode::operationMul:
-		glsl << '(';
 		PrintNode(node->GetA());
-		glsl << ") * (";
+		glsl << " * ";
 		PrintNode(node->GetB());
-		glsl << ')';
 		break;
 	case OperationNode::operationDivide:
-		glsl << '(';
 		PrintNode(node->GetA());
-		glsl << ") / (";
+		glsl << " / ";
 		PrintNode(node->GetB());
-		glsl << ')';
 		break;
 	case OperationNode::operationLess:
-		glsl << '(';
 		PrintNode(node->GetA());
-		glsl << ") < (";
+		glsl << " < ";
 		PrintNode(node->GetB());
-		glsl << ')';
 		break;
 	case OperationNode::operationLessEqual:
-		glsl << '(';
 		PrintNode(node->GetA());
-		glsl << ") <= (";
+		glsl << " <= ";
 		PrintNode(node->GetB());
-		glsl << ')';
 		break;
 	case OperationNode::operationEqual:
-		glsl << '(';
 		PrintNode(node->GetA());
-		glsl << ") == (";
+		glsl << " == ";
 		PrintNode(node->GetB());
-		glsl << ')';
 		break;
 	case OperationNode::operationNotEqual:
-		glsl << '(';
 		PrintNode(node->GetA());
-		glsl << ") != (";
+		glsl << " != ";
 		PrintNode(node->GetB());
-		glsl << ')';
-		break;
-	case OperationNode::operationSetPosition:
-		glsl << "(gl_Position = ";
-		PrintNode(node->GetA());
-		glsl << ')';
 		break;
 	case OperationNode::operationGetInstanceID:
 		glsl << "uint(gl_InstanceID)";
 		break;
 	case OperationNode::operationScreenToTexture:
-		glsl << '(';
 		PrintNode(node->GetA());
-		glsl << ") * vec2(0.5, 0.5) + vec2(0.5, 0.5)";
+		glsl << " * vec2(0.5, 0.5) + vec2(0.5, 0.5)";
 		break;
 	case OperationNode::operationSaturate:
 		glsl << "clamp(";
@@ -528,13 +554,12 @@ void GlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 				OP(Log, log);
 				OP(Ddx, ddx);
 				OP(Ddy, ddy);
-				OP(Clip, clip);
 				OP(Floor, floor);
 				OP(Ceil, ceil);
 				OP(Mod, mod);
 #undef OP
 			default:
-				THROW("Unknown operation type");
+				THROW("Invalid operation type");
 			}
 
 			// вывести
@@ -544,13 +569,37 @@ void GlslGeneratorInstance::PrintOperationNode(OperationNode* node)
 			{
 				if(i)
 					glsl << ", ";
-				glsl << '(';
 				PrintNode(node->GetArgument(i));
-				glsl << ')';
 			}
 			glsl << ')';
 		}
 	}
+}
+
+void GlslGeneratorInstance::PrintActionNodeInit(ActionNode* node)
+{
+	switch(node->GetAction())
+	{
+	case ActionNode::actionSetPosition:
+		glsl << "\tgl_Position = ";
+		PrintNode(node->GetA());
+		PrintNodeInitEnd();
+		break;
+	case ActionNode::actionClip:
+		glsl << "\tclip(";
+		PrintNode(node->GetA());
+		glsl << ')';
+		PrintNodeInitEnd();
+		break;
+	default:
+		THROW("Invalid action type");
+	}
+}
+
+void GlslGeneratorInstance::PrintNode(ValueNode* node)
+{
+	THROW_ASSERT(nodeInitIndices.count(node) > 0);
+	glsl << '_' << nodeInitIndices[node];
 }
 
 void GlslGeneratorInstance::PrintUniforms()
@@ -711,7 +760,7 @@ void GlslGeneratorInstance::PrintWebGLConversionToIntegerEnd()
 
 ptr<ShaderSource> GlslGeneratorInstance::Generate()
 {
-	// первый проход: зарегистрировать все переменные
+	// first stage: register all nodes
 	RegisterNode(rootNode);
 
 	// заголовок файла
@@ -761,33 +810,44 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 		}
 	}
 
-	// вывести промежуточные переменные в любом случае
+	// print transformed nodes
+	if(!transformedNodes.empty())
 	{
+		if(shaderType != ShaderTypes::pixel)
+			THROW("Only pixel shader may have transformed nodes");
 		const char* prefixStr;
-		switch(shaderType)
+		switch(glslVersion)
 		{
-		case ShaderTypes::vertex:
-			switch(glslVersion)
-			{
-			case GlslVersions::opengl33: prefixStr = "out "; break;
-			case GlslVersions::webgl: prefixStr = "varying "; break;
-			default: THROW("Unknown GLSL version");
-			}
-			break;
-		case ShaderTypes::pixel:
-			switch(glslVersion)
-			{
-			case GlslVersions::opengl33: prefixStr = "in "; break;
-			case GlslVersions::webgl: prefixStr = "varying "; break;
-			}
-			break;
+		case GlslVersions::opengl33: prefixStr = "in "; break;
+		case GlslVersions::webgl: prefixStr = "varying "; break;
+		default: THROW("Unknown GLSL version");
 		}
 
-		std::sort(transformed.begin(), transformed.end());
-		transformed.resize(std::unique(transformed.begin(), transformed.end()) - transformed.begin());
-		for(size_t i = 0; i < transformed.size(); ++i)
+		for(size_t i = 0; i < transformedNodes.size(); ++i)
 		{
-			ptr<TransformedNode> node = transformed[i];
+			TransformedNode* node = transformedNodes[i];
+			glsl << prefixStr;
+			PrintDataType(node->GetValueType());
+			glsl << " v" << node->GetSemantic() << ";\n";
+		}
+	}
+
+	// print interpolate nodes
+	if(!interpolateNodes.empty())
+	{
+		if(shaderType != ShaderTypes::vertex)
+			THROW("Only vertex shader may have interpolate nodes");
+		const char* prefixStr;
+		switch(glslVersion)
+		{
+		case GlslVersions::opengl33: prefixStr = "out "; break;
+		case GlslVersions::webgl: prefixStr = "varying "; break;
+		default: THROW("Unknown GLSL version");
+		}
+
+		for(size_t i = 0; i < interpolateNodes.size(); ++i)
+		{
+			InterpolateNode* node = interpolateNodes[i];
 			glsl << prefixStr;
 			PrintDataType(node->GetValueType());
 			glsl << " v" << node->GetSemantic() << ";\n";
@@ -805,12 +865,10 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 		}
 	}
 
-	// вывести uniform-буферы
+	// print uniforms
 	PrintUniforms();
 
-	// семплеры
-	std::sort(samplers.begin(), samplers.end());
-	samplers.resize(std::unique(samplers.begin(), samplers.end()) - samplers.begin());
+	// samplers
 	for(size_t i = 0; i < samplers.size(); ++i)
 	{
 		ptr<SamplerNode> samplerNode = samplers[i];
@@ -867,30 +925,12 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 
 	glsl << "void main()\n{\n";
 
-	// временные переменные
-	{
-		// отсортировать по индексу
-		std::vector<std::pair<int, DataType> > v;
-		for(std::unordered_map<ptr<TempNode>, int>::const_iterator i = temps.begin(); i != temps.end(); ++i)
-			v.push_back(std::make_pair(i->second, i->first->GetValueType()));
-		std::sort(v.begin(), v.end());
-
-		// вывести
-		for(size_t i = 0; i < v.size(); ++i)
-		{
-			glsl << '\t';
-			PrintDataType(v[i].second);
-			glsl << " _" << v[i].first << ";\n";
-		}
-	}
-
-	glsl << '\t';
-
-	// код шейдера
-	PrintNode(rootNode);
+	// shader code
+	for(int i = 0; i < (int)nodeInits.size(); ++i)
+		PrintNodeInit(i);
 
 	// завершение шейдера
-	glsl << ";\n}\n";
+	glsl << "}\n";
 
 	// make list of uniform variable bindings
 	GlShaderBindings::UniformBindings uniformBindings;

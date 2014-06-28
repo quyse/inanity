@@ -2,26 +2,23 @@
 #define ___INANITY_GRAPHICS_SHADERS_UNIFORM_NODE_HPP___
 
 #include "Node.hpp"
+#include "../DataType.hpp"
 
 BEGIN_INANITY_SHADERS
 
 class UniformGroup;
 
-/// Класс узла Uniform-переменной.
+/// Uniform variable.
 class UniformNode : public Node
 {
-protected:
-	/// Группа uniform-переменных.
+private:
 	ptr<UniformGroup> group;
-	/// Тип данных переменной.
 	DataType valueType;
-	/// Смещение в группе.
 	int offset;
-	/// Размер массива (1, если не массив).
 	int count;
 
 public:
-	UniformNode(ptr<UniformGroup> group, DataType valueType, int offset, int count = 1);
+	UniformNode(ptr<UniformGroup> group, DataType valueType, int offset, int count);
 
 	Type GetType() const;
 

@@ -1,7 +1,7 @@
 #ifndef ___INANITY_GRAPHICS_SHADERS_ATTRIBUTE_NODE_HPP___
 #define ___INANITY_GRAPHICS_SHADERS_ATTRIBUTE_NODE_HPP___
 
-#include "Node.hpp"
+#include "ValueNode.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
@@ -12,7 +12,7 @@ END_INANITY_GRAPHICS
 BEGIN_INANITY_SHADERS
 
 /// Класс узла атрибута.
-class AttributeNode : public Node
+class AttributeNode : public ValueNode
 {
 private:
 	ptr<AttributeLayoutElement> element;
@@ -21,8 +21,8 @@ public:
 	AttributeNode(ptr<AttributeLayoutElement> element);
 
 	Type GetType() const;
-
 	DataType GetValueType() const;
+
 	int GetElementIndex() const;
 };
 

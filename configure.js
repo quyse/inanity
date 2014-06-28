@@ -156,7 +156,8 @@ var libraries = {
 			'graphics.AttributeLayout', 'graphics.AttributeLayoutElement', 'graphics.AttributeLayoutSlot',
 			'graphics.ShaderCache',
 			'graphics.PixelFormat', 'graphics.RawTextureData', 'graphics.TextureManager',
-			'graphics.BmpImage', 'graphics.PngImageLoader', 'graphics.TgaImageLoader', 'graphics.UniversalImageLoader'
+			'graphics.BmpImage', 'graphics.PngImageLoader', 'graphics.TgaImageLoader', 'graphics.UniversalImageLoader',
+			'graphics.DataType'
 		]
 	},
 	// ******* подсистема DirectX 11
@@ -195,14 +196,16 @@ var libraries = {
 	'libinanity-shaders': {
 		objects: [
 			'graphics.shaders.AttributeNode', 'graphics.shaders.SamplerNode',
-			'graphics.shaders.UniformNode', 'graphics.shaders.UniformGroup',
-			'graphics.shaders.SwizzleNode', 'graphics.shaders.OperationNode',
+			'graphics.shaders.UniformNode', 'graphics.shaders.ReadUniformNode', 'graphics.shaders.IndexUniformArrayNode',
+			'graphics.shaders.SwizzleNode', 'graphics.shaders.OperationNode', 'graphics.shaders.ActionNode',
 			'graphics.shaders.SampleNode', 'graphics.shaders.FloatConstNode', 'graphics.shaders.IntConstNode',
 			'graphics.shaders.SequenceNode',
-			'graphics.shaders.TransformedNode', 'graphics.shaders.TempNode',
-			'graphics.shaders.FragmentNode',
+			'graphics.shaders.TransformedNode',
+			'graphics.shaders.InterpolateNode', 'graphics.shaders.FragmentNode',
 			'graphics.shaders.CastNode',
-			'graphics.shaders.Expression', 'graphics.shaders.Sampler',
+			'graphics.shaders.Expression',
+			'graphics.shaders.UniformGroup',
+			'graphics.shaders.Sampler',
 			'graphics.shaders.GlslGenerator', 'graphics.shaders.GlslGeneratorInstance',
 			'graphics.shaders.Instancer'
 		],

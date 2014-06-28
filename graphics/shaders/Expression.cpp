@@ -1,26 +1,23 @@
 #include "Expression.hpp"
 #include "SequenceNode.hpp"
+#include "../../Exception.hpp"
 
 BEGIN_INANITY_SHADERS
 
 Expression::Expression(ptr<Node> node) : node(node) {}
 
-ptr<Node> Expression::GetNode() const
+bool Expression::IsValid() const
 {
 	return node;
 }
 
-void Expression::Assign(Expression expression)
+ptr<Node> Expression::GetNode() const
 {
-	node = expression.node;
+	THROW_ASSERT(node);
+	return node;
 }
 
-void Expression::Append(Expression expression)
-{
-	Assign((*this, expression));
-}
-
-Expression operator,(Expression a, Expression b)
+Expression operator,(const Expression& a, const Expression& b)
 {
 	return Expression(NEW(SequenceNode(a.GetNode(), b.GetNode())));
 }

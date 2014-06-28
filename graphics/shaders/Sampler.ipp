@@ -18,7 +18,7 @@ Sampler<ValueType, dimensions>::Sampler(int slot)
 : SamplerBase(NEW(SamplerNode(slot, DataTypeOf<ValueType>(), SamplerNode::CoordTypeFromDimensions(dimensions)))) {}
 
 template <typename ValueType, int dimensions>
-Value<ValueType> Sampler<ValueType, dimensions>::Sample(Value<CoordType> coords)
+Value<ValueType> Sampler<ValueType, dimensions>::Sample(const Value<CoordType>& coords)
 {
 	return Value<ValueType>(NEW(SampleNode(
 		node.FastCast<SamplerNode>(),
@@ -32,7 +32,7 @@ Value<ValueType> Sampler<ValueType, dimensions>::Sample(Value<CoordType> coords)
 }
 
 template <typename ValueType, int dimensions>
-Value<ValueType> Sampler<ValueType, dimensions>::SampleOffset(Value<CoordType> coords, Value<IntCoordType> offset)
+Value<ValueType> Sampler<ValueType, dimensions>::SampleOffset(const Value<CoordType>& coords, const Value<IntCoordType>& offset)
 {
 	return Value<ValueType>(NEW(SampleNode(
 		node.FastCast<SamplerNode>(),
@@ -46,7 +46,7 @@ Value<ValueType> Sampler<ValueType, dimensions>::SampleOffset(Value<CoordType> c
 }
 
 template <typename ValueType, int dimensions>
-Value<ValueType> Sampler<ValueType, dimensions>::SampleLod(Value<CoordType> coords, Value<float> lod)
+Value<ValueType> Sampler<ValueType, dimensions>::SampleLod(const Value<CoordType>& coords, const Value<float>& lod)
 {
 	return Value<ValueType>(NEW(SampleNode(
 		node.FastCast<SamplerNode>(),
@@ -60,7 +60,7 @@ Value<ValueType> Sampler<ValueType, dimensions>::SampleLod(Value<CoordType> coor
 }
 
 template <typename ValueType, int dimensions>
-Value<ValueType> Sampler<ValueType, dimensions>::SampleLodOffset(Value<CoordType> coords, Value<float> lod, Value<IntCoordType> offset)
+Value<ValueType> Sampler<ValueType, dimensions>::SampleLodOffset(const Value<CoordType>& coords, const Value<float>& lod, const Value<IntCoordType>& offset)
 {
 	return Value<ValueType>(NEW(SampleNode(
 		node.FastCast<SamplerNode>(),
@@ -74,7 +74,7 @@ Value<ValueType> Sampler<ValueType, dimensions>::SampleLodOffset(Value<CoordType
 }
 
 template <typename ValueType, int dimensions>
-Value<ValueType> Sampler<ValueType, dimensions>::SampleBias(Value<CoordType> coords, Value<float> bias)
+Value<ValueType> Sampler<ValueType, dimensions>::SampleBias(const Value<CoordType>& coords, const Value<float>& bias)
 {
 	return Value<ValueType>(NEW(SampleNode(
 		node.FastCast<SamplerNode>(),
@@ -88,7 +88,7 @@ Value<ValueType> Sampler<ValueType, dimensions>::SampleBias(Value<CoordType> coo
 }
 
 template <typename ValueType, int dimensions>
-Value<ValueType> Sampler<ValueType, dimensions>::SampleBiasOffset(Value<CoordType> coords, Value<float> bias, Value<IntCoordType> offset)
+Value<ValueType> Sampler<ValueType, dimensions>::SampleBiasOffset(const Value<CoordType>& coords, const Value<float>& bias, const Value<IntCoordType>& offset)
 {
 	return Value<ValueType>(NEW(SampleNode(
 		node.FastCast<SamplerNode>(),
@@ -102,7 +102,7 @@ Value<ValueType> Sampler<ValueType, dimensions>::SampleBiasOffset(Value<CoordTyp
 }
 
 template <typename ValueType, int dimensions>
-Value<ValueType> Sampler<ValueType, dimensions>::SampleGrad(Value<CoordType> coords, Value<CoordType> gradX, Value<CoordType> gradY)
+Value<ValueType> Sampler<ValueType, dimensions>::SampleGrad(const Value<CoordType>& coords, const Value<CoordType>& gradX, const Value<CoordType>& gradY)
 {
 	return Value<ValueType>(NEW(SampleNode(
 		node.FastCast<SamplerNode>(),
@@ -116,7 +116,7 @@ Value<ValueType> Sampler<ValueType, dimensions>::SampleGrad(Value<CoordType> coo
 }
 
 template <typename ValueType, int dimensions>
-Value<ValueType> Sampler<ValueType, dimensions>::SampleGradOffset(Value<CoordType> coords, Value<CoordType> gradX, Value<CoordType> gradY, Value<IntCoordType> offset)
+Value<ValueType> Sampler<ValueType, dimensions>::SampleGradOffset(const Value<CoordType>& coords, const Value<CoordType>& gradX, const Value<CoordType>& gradY, const Value<IntCoordType>& offset)
 {
 	return Value<ValueType>(NEW(SampleNode(
 		node.FastCast<SamplerNode>(),
@@ -131,10 +131,6 @@ Value<ValueType> Sampler<ValueType, dimensions>::SampleGradOffset(Value<CoordTyp
 
 
 //*** class SamplerCube
-
-template <typename ValueType>
-SamplerCube<ValueType>::SamplerCube(ptr<SamplerNode> node)
-: SamplerBase(node) {}
 
 template <typename ValueType>
 SamplerCube<ValueType>::SamplerCube(int slot)

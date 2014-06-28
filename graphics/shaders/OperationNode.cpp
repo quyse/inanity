@@ -3,20 +3,25 @@
 
 BEGIN_INANITY_SHADERS
 
-OperationNode::OperationNode(Operation operation)
-: operation(operation), argumentsCount(0) {}
-OperationNode::OperationNode(Operation operation, ptr<Node> a)
-: operation(operation), argumentsCount(1), a(a) {}
-OperationNode::OperationNode(Operation operation, ptr<Node> a, ptr<Node> b)
-: operation(operation), argumentsCount(2), a(a), b(b) {}
-OperationNode::OperationNode(Operation operation, ptr<Node> a, ptr<Node> b, ptr<Node> c)
-: operation(operation), argumentsCount(3), a(a), b(b), c(c) {}
-OperationNode::OperationNode(Operation operation, ptr<Node> a, ptr<Node> b, ptr<Node> c, ptr<Node> d)
-: operation(operation), argumentsCount(4), a(a), b(b), c(c), d(d) {}
+OperationNode::OperationNode(Operation operation, DataType valueType)
+: operation(operation), valueType(valueType), argumentsCount(0) {}
+OperationNode::OperationNode(Operation operation, DataType valueType, ptr<ValueNode> a)
+: operation(operation), valueType(valueType), argumentsCount(1), a(a) {}
+OperationNode::OperationNode(Operation operation, DataType valueType, ptr<ValueNode> a, ptr<ValueNode> b)
+: operation(operation), valueType(valueType), argumentsCount(2), a(a), b(b) {}
+OperationNode::OperationNode(Operation operation, DataType valueType, ptr<ValueNode> a, ptr<ValueNode> b, ptr<ValueNode> c)
+: operation(operation), valueType(valueType), argumentsCount(3), a(a), b(b), c(c) {}
+OperationNode::OperationNode(Operation operation, DataType valueType, ptr<ValueNode> a, ptr<ValueNode> b, ptr<ValueNode> c, ptr<ValueNode> d)
+: operation(operation), valueType(valueType), argumentsCount(4), a(a), b(b), c(c), d(d) {}
 
 Node::Type OperationNode::GetType() const
 {
 	return typeOperation;
+}
+
+DataType OperationNode::GetValueType() const
+{
+	return valueType;
 }
 
 OperationNode::Operation OperationNode::GetOperation() const
@@ -29,35 +34,31 @@ int OperationNode::GetArgumentsCount() const
 	return argumentsCount;
 }
 
-ptr<Node> OperationNode::GetA() const
+ptr<ValueNode> OperationNode::GetA() const
 {
-	if(!a)
-		THROW("Argument A is unavailable");
+	THROW_ASSERT(a);
 	return a;
 }
 
-ptr<Node> OperationNode::GetB() const
+ptr<ValueNode> OperationNode::GetB() const
 {
-	if(!b)
-		THROW("Argument B is unavailable");
+	THROW_ASSERT(b);
 	return b;
 }
 
-ptr<Node> OperationNode::GetC() const
+ptr<ValueNode> OperationNode::GetC() const
 {
-	if(!c)
-		THROW("Argument C is unavailable");
+	THROW_ASSERT(c);
 	return c;
 }
 
-ptr<Node> OperationNode::GetD() const
+ptr<ValueNode> OperationNode::GetD() const
 {
-	if(!d)
-		THROW("Argument D is unavailable");
+	THROW_ASSERT(d);
 	return d;
 }
 
-ptr<Node> OperationNode::GetArgument(int number) const
+ptr<ValueNode> OperationNode::GetArgument(int number) const
 {
 	switch(number)
 	{

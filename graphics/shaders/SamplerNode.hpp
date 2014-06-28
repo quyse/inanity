@@ -2,6 +2,7 @@
 #define ___INANITY_GRAPHICS_SHADERS_SAMPLER_NODE_HPP___
 
 #include "Node.hpp"
+#include "../DataType.hpp"
 
 BEGIN_INANITY_GRAPHICS
 

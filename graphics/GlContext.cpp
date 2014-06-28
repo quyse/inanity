@@ -173,24 +173,28 @@ void GlContext::Update()
 				break;
 #endif
 			case DataTypes::_int:
+			case DataTypes::_bool:
 #ifdef ___INANITY_PLATFORM_EMSCRIPTEN
 			case DataTypes::_uint:
 #endif
 				glUniform1iv(uniformBinding.location, uniformBinding.count, (const GLint*)data);
 				break;
 			case DataTypes::_ivec2:
+			case DataTypes::_bvec2:
 #ifdef ___INANITY_PLATFORM_EMSCRIPTEN
 			case DataTypes::_uvec2:
 #endif
 				glUniform2iv(uniformBinding.location, uniformBinding.count, (const GLint*)data);
 				break;
 			case DataTypes::_ivec3:
+			case DataTypes::_bvec3:
 #ifdef ___INANITY_PLATFORM_EMSCRIPTEN
 			case DataTypes::_uvec3:
 #endif
 				glUniform3iv(uniformBinding.location, uniformBinding.count, (const GLint*)data);
 				break;
 			case DataTypes::_ivec4:
+			case DataTypes::_bvec4:
 #ifdef ___INANITY_PLATFORM_EMSCRIPTEN
 			case DataTypes::_uvec4:
 #endif

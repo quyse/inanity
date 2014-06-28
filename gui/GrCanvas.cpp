@@ -99,30 +99,23 @@ struct GrCanvas::Helper : public Object
 		vb = device->CreateStaticVertexBuffer(MemoryFile::CreateViaCopy(vertices, sizeof(vertices)), vl);
 
 		// vertex shader
-		Temp<uint> tmpInstance;
-		Temp<vec4> tmpPosition, tmpTexcoord, tmpColor;
+		Value<uint> tmpInstance = instancer->GetInstanceID();
+		Value<vec4> tmpPosition = uPositions[tmpInstance];
+		Value<vec4> tmpTexcoord = uTexcoords[tmpInstance];
+		Value<vec4> tmpColor = uColors[tmpInstance];
 		vs = shaderCache->GetVertexShader((
-			tmpInstance = instancer->GetInstanceID(),
-
-			tmpPosition = uPositions[tmpInstance],
-			tmpTexcoord = uTexcoords[tmpInstance],
-			tmpColor = uColors[tmpInstance],
-
 			setPosition(newvec4(
 				dot(aCorner["xz"], tmpPosition["xz"]),
 				dot(aCorner["yw"], tmpPosition["yw"]),
 				0, 1)),
-			iTexcoord = newvec2(
+			iTexcoord.Set(newvec2(
 				dot(aCorner["xz"], tmpTexcoord["xz"]),
-				dot(aCorner["yw"], tmpTexcoord["yw"])),
-			iColor = tmpColor
+				dot(aCorner["yw"], tmpTexcoord["yw"]))),
+			iColor.Set(tmpColor)
 		));
 
 		// pixel shader
 		ps = shaderCache->GetPixelShader((
-			iTexcoord,
-			iColor,
-
 			fragment(0, newvec4(iColor["xyz"], iColor["w"] * uFontSampler.Sample(iTexcoord)))
 		));
 
@@ -204,13 +197,13 @@ void GrCanvas::DrawGlyph(FontGlyphs* abstractGlyphs, int glyphIndex, const vec2&
 	const GrFontGlyphs::Glyph& glyph = glyphs->GetGlyphs()[glyphIndex];
 
 	// add glyph to queue
-	helper->uPositions.SetValue(queuedGlyphsCount,
+	helper->uPositions.Set(queuedGlyphsCount,
 		(vec4(penPoint.x, penPoint.y, penPoint.x, penPoint.y) + glyph.offset)
 		* vec4(scaleX, scaleY, scaleX, scaleY)
 		+ vec4(-1, 1, -1, 1)
 	);
-	helper->uTexcoords.SetValue(queuedGlyphsCount, glyph.uv);
-	helper->uColors.SetValue(queuedGlyphsCount, color);
+	helper->uTexcoords.Set(queuedGlyphsCount, glyph.uv);
+	helper->uColors.Set(queuedGlyphsCount, color);
 	++queuedGlyphsCount;
 }
 

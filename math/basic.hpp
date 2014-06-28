@@ -545,6 +545,11 @@ typedef xmat<unsigned int, 4, 2> umat4x2;
 typedef xmat<unsigned int, 4, 3> umat4x3;
 typedef xmat<unsigned int, 4, 4> umat4x4;
 
+//*** bool
+typedef xvec<bool, 2> bvec2;
+typedef xvec<bool, 3> bvec3;
+typedef xvec<bool, 4> bvec4;
+
 //*** quaternion
 template <typename T>
 using xquat = xvec<T, 4>;

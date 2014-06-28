@@ -10,6 +10,11 @@ Node::Type IntConstNode::GetType() const
 	return typeIntConst;
 }
 
+DataType IntConstNode::GetValueType() const
+{
+	return DataTypes::_int;
+}
+
 int IntConstNode::GetValue() const
 {
 	return value;

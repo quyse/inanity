@@ -7,29 +7,21 @@ BEGIN_INANITY_SHADERS
 
 class Node;
 
-/// Класс выражения. Хранит указатель на узел выражения.
+/// Untyped shader expression.
+/** Stores a node. */
 class Expression
 {
 protected:
-	/// Объект выражения.
 	ptr<Node> node;
 
-private:
-	/// Оператор присваивания запрещён (приватный).
-	void operator=(Expression a);
-
 public:
-	Expression(ptr<Node> node);
+	Expression(ptr<Node> node = nullptr);
 
+	bool IsValid() const;
 	ptr<Node> GetNode() const;
-
-	/// Вместо оператора присваивания.
-	void Assign(Expression expression);
-	/// Приделать к выражению другое выражение через запятую.
-	void Append(Expression expression);
 };
 
-Expression operator,(Expression a, Expression b);
+Expression operator,(const Expression& a, const Expression& b);
 
 END_INANITY_SHADERS
 

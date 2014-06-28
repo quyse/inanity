@@ -1,8 +1,9 @@
 #include "FragmentNode.hpp"
+#include "ValueNode.hpp"
 
 BEGIN_INANITY_SHADERS
 
-FragmentNode::FragmentNode(int target, ptr<Node> node)
+FragmentNode::FragmentNode(int target, ptr<ValueNode> node)
 : target(target), node(node) {}
 
 Node::Type FragmentNode::GetType() const
@@ -15,7 +16,7 @@ int FragmentNode::GetTarget() const
 	return target;
 }
 
-ptr<Node> FragmentNode::GetNode() const
+ptr<ValueNode> FragmentNode::GetNode() const
 {
 	return node;
 }

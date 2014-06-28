@@ -5,6 +5,7 @@
 #include "GlslVersion.hpp"
 #include "../DataType.hpp"
 #include <vector>
+#include <unordered_set>
 #include <unordered_map>
 #include <sstream>
 
@@ -17,25 +18,24 @@ END_INANITY_GRAPHICS
 BEGIN_INANITY_SHADERS
 
 class Node;
+class ValueNode;
 class AttributeNode;
 class TempNode;
 class UniformGroup;
 class UniformNode;
 class SamplerNode;
 class TransformedNode;
-class RasterizedNode;
+class InterpolateNode;
 class OperationNode;
+class ActionNode;
 
 /// GLSL shader generator instance.
 /** Supports generating shaders with uniform buffers and without. */
 class GlslGeneratorInstance
 {
 private:
-	/// Исходный код шейдера.
 	ptr<Node> rootNode;
-	/// Тип конструируемого шейдера.
 	ShaderType shaderType;
-	/// Результирующий текст шейдера на GLSL.
 	std::ostringstream glsl;
 
 	/// Version of GLSL.
@@ -43,38 +43,41 @@ private:
 	//*** Support flags.
 	bool supportUniformBuffers;
 
-	/// Префикс имени uniform-переменной.
+	/// Prefix for uniform variable names.
 	const char* uniformPrefix;
-	/// Префикс имени uniform-буфера.
+	/// Prefix for uniform buffer names.
 	const char* uniformBufferPrefix;
-	/// Префикс имени семплера.
+	/// Prefix for sampler names.
 	const char* samplerPrefix;
 
-	/// Атрибутные переменные.
+	/// Registered nodes.
+	std::unordered_set<Node*> registeredNodes;
+	/// Nodes in order of initialization.
+	std::vector<Node*> nodeInits;
+	/// Node indices in order of initialization.
+	std::unordered_map<Node*, int> nodeInitIndices;
 	std::vector<ptr<AttributeNode> > attributes;
-	/// Временные переменные.
-	/** Мап узел-индекс. */
-	std::unordered_map<ptr<TempNode>, int> temps;
-	int tempsCount;
-	/// uniform-переменные по группам.
+	/// Univorm variables by groups.
 	std::vector<std::pair<ptr<UniformGroup>, ptr<UniformNode> > > uniforms;
-	/// Семплеры.
-	std::vector<ptr<SamplerNode> > samplers;
-	/// transformed-переменные.
-	std::vector<ptr<TransformedNode> > transformed;
-	/// Number of fragment targets.
+	std::vector<SamplerNode*> samplers;
+	std::vector<TransformedNode*> transformedNodes;
+	std::vector<InterpolateNode*> interpolateNodes;
 	int fragmentTargetsCount;
 
 private:
-	/// Напечатать имя типа.
 	void PrintDataType(DataType dataType);
-	/// Зарегистрировать узел.
 	void RegisterNode(Node* node);
-	/// Напечатать узел.
-	void PrintNode(Node* node);
-	/// Напечатать узел операции.
-	void PrintOperationNode(OperationNode* node);
-	/// Вывести uniform-буферы.
+	void PrintUniform(UniformNode* uniformNode);
+	/// Helpers to print node init.
+	void PrintNodeInitVar(int nodeIndex);
+	void PrintNodeInitBegin(int nodeIndex);
+	void PrintNodeInitEnd();
+	/// Print node initialization.
+	void PrintNodeInit(int nodeIndex);
+	void PrintOperationNodeInit(OperationNode* node);
+	void PrintActionNodeInit(ActionNode* node);
+	/// Print node representation (actually a temporary variable of node).
+	void PrintNode(ValueNode* node);
 	void PrintUniforms();
 
 	/// Change value type from integer to float.

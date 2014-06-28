@@ -4,30 +4,24 @@
 #include "UniformArray.hpp"
 #include "UniformNode.hpp"
 #include "UniformGroup.hpp"
-#include "../../Exception.hpp"
+#include "IndexUniformArrayNode.hpp"
 
 BEGIN_INANITY_SHADERS
 
 template <typename ValueType>
-UniformArray<ValueType>::UniformArray(ptr<UniformNode> node)
-: Value<ValueType>(node.StaticCast<Node>())
+UniformArray<ValueType>::UniformArray(ptr<UniformNode> uniformNode)
+: uniformNode(uniformNode)
+{}
+
+template <typename ValueType>
+Value<ValueType> UniformArray<ValueType>::operator[](Value<uint> index) const
 {
-#ifdef _DEBUG
-	if(node->GetValueType() != DataTypeOf<ValueType>())
-		THROW("Wrong uniform node type");
-#endif
+	return Value<ValueType>(NEW(IndexUniformArrayNode(uniformNode, index.GetNode())));
 }
 
 template <typename ValueType>
-Value<ValueType> UniformArray<ValueType>::operator[](Value<unsigned int> index) const
+void UniformArray<ValueType>::Set(int index, const ValueType& value)
 {
-	return Value<ValueType>(NEW(OperationNode(OperationNode::operationIndex, this->node, index.GetNode())));
-}
-
-template <typename ValueType>
-void UniformArray<ValueType>::SetValue(int index, const ValueType& value)
-{
-	UniformNode* uniformNode = fast_cast<UniformNode*>(&*this->node);
 	*((ValueType*)((char*)uniformNode->GetGroup()->GetData() + uniformNode->GetOffset()) + index) = value;
 }
 

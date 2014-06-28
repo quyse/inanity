@@ -23,7 +23,11 @@ struct DataTypes
 		_int,
 		_ivec2,
 		_ivec3,
-		_ivec4
+		_ivec4,
+		_bool,
+		_bvec2,
+		_bvec3,
+		_bvec4
 	};
 };
 
@@ -47,33 +51,16 @@ DTO(int)
 DTO(ivec2)
 DTO(ivec3)
 DTO(ivec4)
+DTO(bool)
+DTO(bvec2)
+DTO(bvec3)
+DTO(bvec4)
 #undef DTO
 
-/// Размеры данных.
-inline int GetDataTypeSize(DataType dataType)
-{
-	switch(dataType)
-	{
-#define DTS(t) case DataTypes::_##t: return sizeof(t);
-	DTS(float)
-	DTS(vec2)
-	DTS(vec3)
-	DTS(vec4)
-	DTS(mat3x3)
-	DTS(mat4x4)
-	DTS(uint)
-	DTS(uvec2)
-	DTS(uvec3)
-	DTS(uvec4)
-	DTS(int)
-	DTS(ivec2)
-	DTS(ivec3)
-	DTS(ivec4)
-#undef DTS
-	default:
-		return 0x7fffffff;
-	}
-}
+int GetDataTypeSize(DataType dataType);
+DataType GetBaseDataType(DataType dataType);
+DataType GetVectorDataType(DataType baseDataType, int dimensions);
+int GetVectorDataTypeDimensions(DataType vectorDataType);
 
 END_INANITY_GRAPHICS
 

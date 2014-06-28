@@ -3,7 +3,6 @@
 #include "../ShaderSource.hpp"
 #include "Expression.hpp"
 #include "AttributeNode.hpp"
-#include "TempNode.hpp"
 #include "UniformGroup.hpp"
 #include "UniformNode.hpp"
 #include "SamplerNode.hpp"

@@ -1,22 +1,17 @@
 #ifndef ___INANITY_GRAPHICS_SHADERS_OPERATION_NODE_HPP___
 #define ___INANITY_GRAPHICS_SHADERS_OPERATION_NODE_HPP___
 
-#include "Node.hpp"
+#include "ValueNode.hpp"
 
 BEGIN_INANITY_SHADERS
 
-/// Класс выражения-операции.
-class OperationNode : public Node
+class OperationNode : public ValueNode
 {
 public:
-	/// Максимальное количество аргументов.
 	static const int maxArgumentsCount = 4;
 
-	/// Операция.
 	enum Operation
 	{
-		operationAssign,
-		operationIndex,
 		operationNegate,
 		operationAdd,
 		operationSubtract,
@@ -26,7 +21,6 @@ public:
 		operationLessEqual,
 		operationEqual,
 		operationNotEqual,
-		operationSetPosition,
 		operationGetInstanceID,
 		operationScreenToTexture,
 		operationFloat11to2,
@@ -52,39 +46,37 @@ public:
 		operationSaturate,
 		operationDdx,
 		operationDdy,
-		operationClip,
 		operationFloor,
 		operationCeil,
 		operationMod
 	};
 
 private:
-	/// Операция.
 	Operation operation;
-	/// Количество аргументов.
+	DataType valueType;
 	int argumentsCount;
-	/// Аргументы.
-	ptr<Node> a, b, c, d;
+	/// Arguments.
+	ptr<ValueNode> a, b, c, d;
 
 public:
-	/// Конструкторы.
-	OperationNode(Operation operation);
-	OperationNode(Operation operation, ptr<Node> a);
-	OperationNode(Operation operation, ptr<Node> a, ptr<Node> b);
-	OperationNode(Operation operation, ptr<Node> a, ptr<Node> b, ptr<Node> c);
-	OperationNode(Operation operation, ptr<Node> a, ptr<Node> b, ptr<Node> c, ptr<Node> d);
+	OperationNode(Operation operation, DataType valueType);
+	OperationNode(Operation operation, DataType valueType, ptr<ValueNode> a);
+	OperationNode(Operation operation, DataType valueType, ptr<ValueNode> a, ptr<ValueNode> b);
+	OperationNode(Operation operation, DataType valueType, ptr<ValueNode> a, ptr<ValueNode> b, ptr<ValueNode> c);
+	OperationNode(Operation operation, DataType valueType, ptr<ValueNode> a, ptr<ValueNode> b, ptr<ValueNode> c, ptr<ValueNode> d);
 
 	Type GetType() const;
+	DataType GetValueType() const;
 
 	Operation GetOperation() const;
 	int GetArgumentsCount() const;
 
-	ptr<Node> GetA() const;
-	ptr<Node> GetB() const;
-	ptr<Node> GetC() const;
-	ptr<Node> GetD() const;
+	ptr<ValueNode> GetA() const;
+	ptr<ValueNode> GetB() const;
+	ptr<ValueNode> GetC() const;
+	ptr<ValueNode> GetD() const;
 
-	ptr<Node> GetArgument(int number) const;
+	ptr<ValueNode> GetArgument(int number) const;
 };
 
 END_INANITY_SHADERS

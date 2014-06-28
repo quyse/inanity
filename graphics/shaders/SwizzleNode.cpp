@@ -1,8 +1,9 @@
 #include "SwizzleNode.hpp"
+#include <cstring>
 
 BEGIN_INANITY_SHADERS
 
-SwizzleNode::SwizzleNode(ptr<Node> a, const char* map)
+SwizzleNode::SwizzleNode(ptr<ValueNode> a, const char* map)
 : a(a), map(map) {}
 
 Node::Type SwizzleNode::GetType() const
@@ -10,7 +11,12 @@ Node::Type SwizzleNode::GetType() const
 	return typeSwizzle;
 }
 
-ptr<Node> SwizzleNode::GetA() const
+DataType SwizzleNode::GetValueType() const
+{
+	return GetVectorDataType(GetBaseDataType(a->GetValueType()), strlen(map));
+}
+
+ptr<ValueNode> SwizzleNode::GetA() const
 {
 	return a;
 }

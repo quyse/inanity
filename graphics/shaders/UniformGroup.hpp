@@ -61,7 +61,7 @@ public:
 		// увеличить размер буфера
 		bufferSize = offset + valueSize;
 
-		return Uniform<ValueType>(NEW(UniformNode(this, valueType, offset)));
+		return Uniform<ValueType>(NEW(UniformNode(this, valueType, offset, 1)));
 	}
 
 	/// Добавить узел uniform-массива.

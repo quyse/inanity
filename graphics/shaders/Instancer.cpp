@@ -4,6 +4,7 @@
 #include "../UniformBuffer.hpp"
 #include "UniformGroup.hpp"
 #include "Uniform.ipp"
+#include "functions.hpp"
 #include "../Device.hpp"
 #include "../Context.hpp"
 #include "../VertexBuffer.hpp"
@@ -33,7 +34,7 @@ Instancer::Instancer(ptr<Device> device, int maximumInstancesCount, ptr<Attribut
 		// the easiest way
 		mode = modeDrawInstancing;
 
-		nodeInstanceID = NEW(OperationNode(OperationNode::operationGetInstanceID));
+		vInstanceID = getInstanceID();
 	}
 	else if(caps.flags & Device::Caps::attributeInstancing)
 	{
@@ -44,7 +45,7 @@ Instancer::Instancer(ptr<Device> device, int maximumInstancesCount, ptr<Attribut
 		ptr<VertexLayout> vl = NEW(VertexLayout(sizeof(uint)));
 		ptr<VertexLayoutElement> vle = vl->AddElement(DataTypes::_uint, 0);
 		als = attributeLayout->AddSlot(1);
-		nodeInstanceID = NEW(AttributeNode(attributeLayout->AddElement(als, vle)));
+		vInstanceID = attributeLayout->AddElement(als, vle);
 
 		// create vertex buffer
 		ptr<MemoryFile> verticesFile = NEW(MemoryFile(maximumInstancesCount * sizeof(uint)));
@@ -59,7 +60,8 @@ Instancer::Instancer(ptr<Device> device, int maximumInstancesCount, ptr<Attribut
 		mode = modeFallback;
 
 		ugInstanceID = NEW(UniformGroup(uniformBufferSlot));
-		nodeInstanceID = ugInstanceID->AddUniform<uint>().GetNode();
+		uInstanceID = ugInstanceID->AddUniform<uint>();
+		vInstanceID = uInstanceID;
 		ugInstanceID->Finalize(device);
 	}
 
@@ -68,7 +70,7 @@ Instancer::Instancer(ptr<Device> device, int maximumInstancesCount, ptr<Attribut
 
 Value<uint> Instancer::GetInstanceID() const
 {
-	return nodeInstanceID;
+	return vInstanceID;
 }
 
 void Instancer::Draw(Context* context, int instancesCount)
@@ -87,10 +89,9 @@ void Instancer::Draw(Context* context, int instancesCount)
 	case modeFallback:
 		{
 			Context::LetUniformBuffer lub(context, ugInstanceID);
-			Uniform<uint> u(nodeInstanceID.StaticCast<UniformNode>());
 			for(int i = 0; i < instancesCount; ++i)
 			{
-				u.SetValue(i);
+				uInstanceID.Set(i);
 				ugInstanceID->Upload(context);
 				context->Draw();
 			}

@@ -5,6 +5,8 @@
 
 BEGIN_INANITY_SHADERS
 
+class ValueNode;
+
 /// Write fragment color operation.
 class FragmentNode : public Node
 {
@@ -12,15 +14,15 @@ private:
 	/// Target number.
 	int target;
 	/// Node with value.
-	ptr<Node> node;
+	ptr<ValueNode> node;
 
 public:
-	FragmentNode(int target, ptr<Node> node);
+	FragmentNode(int target, ptr<ValueNode> node);
 
 	Type GetType() const;
 
 	int GetTarget() const;
-	ptr<Node> GetNode() const;
+	ptr<ValueNode> GetNode() const;
 };
 
 END_INANITY_SHADERS

@@ -11,33 +11,35 @@ END_INANITY_GRAPHICS
 
 BEGIN_INANITY_SHADERS
 
-class Node;
+class ValueNode;
 
-/// Вспомогательный класс для операции перестановки компонент.
+/// Helper for swizzle operation.
 template <typename MaybeVectorType, int n>
 class SwizzleHelper;
 
-/// Класс выражения определённого типа (то есть не семплер).
-/** Value представляет атрибуты, константы, временные
-переменные и значения. */
+/// Explicitly typed expression.
 template <typename ValueType>
 class Value : public Expression
 {
 public:
-	Value(ptr<Node> node);
+	Value(ptr<ValueNode> node = nullptr);
 	Value(ValueType constValue);
 	Value(ptr<AttributeLayoutElement> element);
 
-	/// Delete assignment operator.
-	Value& operator=(const Value&) = delete;
+	ptr<ValueNode> GetNode() const;
 
-	/// Преобразовать тип.
+	/// Cast value to another type.
 	template <typename CastValueType>
 	Value<CastValueType> Cast() const;
 
-	/// Перестановка компонент (для вектора).
+	/// Swizzle vector components.
 	template <int n>
 	Value<typename SwizzleHelper<ValueType, n>::Type> operator[](const char (&map)[n]);
+
+	void operator+=(const Value<ValueType>& b);
+	void operator-=(const Value<ValueType>& b);
+	void operator*=(const Value<ValueType>& b);
+	void operator/=(const Value<ValueType>& b);
 };
 
 END_INANITY_SHADERS

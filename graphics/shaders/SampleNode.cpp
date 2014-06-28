@@ -6,12 +6,12 @@ BEGIN_INANITY_SHADERS
 
 SampleNode::SampleNode(
 	ptr<SamplerNode> samplerNode,
-	ptr<Node> coordsNode,
-	ptr<Node> offsetNode,
-	ptr<Node> lodNode,
-	ptr<Node> biasNode,
-	ptr<Node> gradXNode,
-	ptr<Node> gradYNode
+	ptr<ValueNode> coordsNode,
+	ptr<ValueNode> offsetNode,
+	ptr<ValueNode> lodNode,
+	ptr<ValueNode> biasNode,
+	ptr<ValueNode> gradXNode,
+	ptr<ValueNode> gradYNode
 ) :
 	samplerNode(samplerNode),
 	coordsNode(coordsNode),
@@ -36,37 +36,42 @@ Node::Type SampleNode::GetType() const
 	return typeSample;
 }
 
+DataType SampleNode::GetValueType() const
+{
+	return samplerNode->GetValueType();
+}
+
 ptr<SamplerNode> SampleNode::GetSamplerNode() const
 {
 	return samplerNode;
 }
 
-ptr<Node> SampleNode::GetCoordsNode() const
+ptr<ValueNode> SampleNode::GetCoordsNode() const
 {
 	return coordsNode;
 }
 
-ptr<Node> SampleNode::GetOffsetNode() const
+ptr<ValueNode> SampleNode::GetOffsetNode() const
 {
 	return offsetNode;
 }
 
-ptr<Node> SampleNode::GetLodNode() const
+ptr<ValueNode> SampleNode::GetLodNode() const
 {
 	return lodNode;
 }
 
-ptr<Node> SampleNode::GetBiasNode() const
+ptr<ValueNode> SampleNode::GetBiasNode() const
 {
 	return biasNode;
 }
 
-ptr<Node> SampleNode::GetGradXNode() const
+ptr<ValueNode> SampleNode::GetGradXNode() const
 {
 	return gradXNode;
 }
 
-ptr<Node> SampleNode::GetGradYNode() const
+ptr<ValueNode> SampleNode::GetGradYNode() const
 {
 	return gradYNode;
 }
