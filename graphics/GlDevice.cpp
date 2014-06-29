@@ -214,35 +214,48 @@ void GlDevice::BindPresenter(Presenter* presenter)
 	{
 		BEGIN_TRY();
 
+		// switch by type of presenter
+#if defined(___INANITY_PLATFORM_WINDOWS)
+
 		if(presenter)
 		{
-			// switch by type of presenter
-#if defined(___INANITY_PLATFORM_WINDOWS)
 			WglPresenter* wglPresenter = dynamic_cast<WglPresenter*>(presenter);
 			if(wglPresenter)
 				wglPresenter->Bind(hglrc);
-#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
-			SdlPresenter* sdlPresenter = dynamic_cast<SdlPresenter*>(presenter);
-			if(sdlPresenter)
-				sdlPresenter->Bind(sdlContext);
-#else
-#error Unknown platform
-#endif
 			else
 				THROW("Unsupported type of presenter");
 		}
 		else
 		{
 			// bind hidden window
-#if defined(___INANITY_PLATFORM_WINDOWS)
 			if(!wglMakeCurrent(hiddenWindow->GetHDC(), hglrc))
+				THROW("Can't bind hidden window");
+		}
+
 #elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
+
+		if(presenter)
+		{
+			SdlPresenter* sdlPresenter = dynamic_cast<SdlPresenter*>(presenter);
+			if(sdlPresenter)
+				sdlPresenter->Bind(sdlContext);
+			else
+				THROW("Unsupported type of presenter");
+		}
+		else
+		{
+			// bind hidden window
 			if(SDL_GL_MakeCurrent(hiddenWindow->GetHandle(), sdlContext) != 0)
+				THROW("Can't bind hidden window");
+		}
+
+#elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
+
+		// no binding needed for Emscripten presenter
+
 #else
 #error Unknown platform
 #endif
-				THROW("Can't bind hidden window");
-		}
 
 		boundPresenter = presenter;
 
