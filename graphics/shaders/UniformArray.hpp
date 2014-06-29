@@ -14,7 +14,7 @@ private:
 	ptr<UniformNode> uniformNode;
 
 public:
-	UniformArray(ptr<UniformNode> uniformNode);
+	UniformArray(ptr<UniformNode> uniformNode = nullptr);
 
 	Value<ValueType> operator[](Value<uint> index) const;
 

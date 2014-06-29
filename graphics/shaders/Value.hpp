@@ -34,7 +34,7 @@ public:
 
 	/// Swizzle vector components.
 	template <int n>
-	Value<typename SwizzleHelper<ValueType, n>::Type> operator[](const char (&map)[n]);
+	Value<typename SwizzleHelper<ValueType, n>::Type> operator[](const char (&map)[n]) const;
 
 	void operator+=(const Value<ValueType>& b);
 	void operator-=(const Value<ValueType>& b);

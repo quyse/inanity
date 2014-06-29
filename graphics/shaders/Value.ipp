@@ -78,7 +78,7 @@ inline ptr<ValueNode> Value<ValueType>::GetNode() const
 
 template <typename ValueType>
 template <int n>
-inline Value<typename SwizzleHelper<ValueType, n>::Type> Value<ValueType>::operator[](const char (&map)[n])
+inline Value<typename SwizzleHelper<ValueType, n>::Type> Value<ValueType>::operator[](const char (&map)[n]) const
 {
 	return Value<typename SwizzleHelper<ValueType, n>::Type>(NEW(SwizzleNode(GetNode(), map)));
 }
