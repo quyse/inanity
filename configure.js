@@ -145,23 +145,31 @@ var libraries = {
 			'graphics.EmsAdapter', 'graphics.EmsMonitor'
 		]
 	},
-	// ******* общая графика
-	'libinanity-graphics': {
+	// ******* raw graphics (no support for graphics API needed)
+	'libinanity-graphics-raw': {
+		objects: [
+			'graphics.DataType',
+			'graphics.VertexLayout', 'graphics.VertexLayoutElement',
+			'graphics.PixelFormat', 'graphics.RawTextureData',
+			'graphics.BmpImage', 'graphics.PngImageLoader', 'graphics.TgaImageLoader', 'graphics.UniversalImageLoader',
+			'graphics.RawMesh'
+		]
+	},
+	// ******* render graphics (need support for graphics API)
+	'libinanity-graphics-render': {
 		objects: [
 			'graphics.Device', 'graphics.Context',
 			'graphics.FrameBuffer',
 			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.IndexBuffer',
 			'graphics.SamplerSettings', 'graphics.BlendState',
-			'graphics.VertexLayout', 'graphics.VertexLayoutElement',
 			'graphics.AttributeLayout', 'graphics.AttributeLayoutElement', 'graphics.AttributeLayoutSlot',
 			'graphics.ShaderCache',
-			'graphics.PixelFormat', 'graphics.RawTextureData', 'graphics.TextureManager',
-			'graphics.BmpImage', 'graphics.PngImageLoader', 'graphics.TgaImageLoader', 'graphics.UniversalImageLoader',
-			'graphics.DataType'
+			'graphics.TextureManager',
+			'graphics.Mesh'
 		]
 	},
 	// ******* подсистема DirectX 11
-	'libinanity-dx11': {
+	'libinanity-graphics-dx11': {
 		objects: [
 			'graphics.Dx11System', 'graphics.Dx11Device', 'graphics.Dx11Context',
 			'graphics.Dx11Presenter', 'graphics.Dx11SwapChainPresenter',
@@ -176,7 +184,7 @@ var libraries = {
 		]
 	},
 	// ******* подсистема OpenGl
-	'libinanity-gl': {
+	'libinanity-graphics-gl': {
 		objects: [
 			'graphics.GlSystem', 'graphics.GlDevice', 'graphics.GlContext',
 			'graphics.GlFrameBuffer',
@@ -193,7 +201,7 @@ var libraries = {
 		'objects-emscripten': ['graphics.EmsPresenter']
 	},
 	// ******* подсистема шейдеров
-	'libinanity-shaders': {
+	'libinanity-graphics-shaders': {
 		objects: [
 			'graphics.shaders.AttributeNode', 'graphics.shaders.SamplerNode',
 			'graphics.shaders.UniformNode', 'graphics.shaders.ReadUniformNode', 'graphics.shaders.IndexUniformArrayNode',
