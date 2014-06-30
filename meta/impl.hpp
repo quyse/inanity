@@ -45,7 +45,7 @@
 
 #define META_CONSTRUCTOR(...) \
 	{ \
-		static typename HelperSetConstructor<__VA_ARGS__>::Type c; \
+		static HelperSetConstructor<__VA_ARGS__>::Type c; \
 		SetConstructor(&c); \
 	}
 
