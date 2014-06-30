@@ -21,7 +21,9 @@
 #include <GL/glew.h>
 
 // hacks for missing parts of Emscripten's GLEW
+#ifndef GLEW_ARB_vertex_attrib_binding
 #define GLEW_ARB_vertex_attrib_binding 0
+#endif
 #define GLEW_OK 0
 extern "C"
 {
