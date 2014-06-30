@@ -9,10 +9,10 @@ BEGIN_INANITY_LUA
 
 //*** class MetaProvider::Constructor
 
-template <typename ConstructorType>
-void MetaProvider::Constructor<ConstructorType>::PushThunk(lua_State* luaState)
+template <typename ClassType, typename... Args>
+void MetaProvider::Constructor<ClassType, Args...>::PushThunk(lua_State* luaState)
 {
-	lua_pushcclosure(luaState, &ConstructorThunk<ConstructorType>::Thunk, 0);
+	lua_pushcclosure(luaState, &ConstructorThunk<ClassType, Args...>::Thunk, 0);
 }
 
 //*** class MetaProvider::Function

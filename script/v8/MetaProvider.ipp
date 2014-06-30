@@ -9,10 +9,10 @@ BEGIN_INANITY_V8
 
 //*** class MetaProvider::Constructor
 
-template <typename ConstructorType>
-v8::FunctionCallback MetaProvider::Constructor<ConstructorType>::GetThunk() const
+template <typename ClassType, typename... Args>
+v8::FunctionCallback MetaProvider::Constructor<ClassType, Args...>::GetThunk() const
 {
-	return &ConstructorThunk<ConstructorType>::Thunk;
+	return &ConstructorThunk<ClassType, Args...>::Thunk;
 }
 
 //*** class MetaProvider::Function

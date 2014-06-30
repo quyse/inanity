@@ -111,12 +111,12 @@ void DummyConstructorThunk(const v8::FunctionCallbackInfo<v8::Value>& info)
 			v8::String::NewFromUtf8(isolate, "Class have no constructor")));
 }
 
-template <typename CalleeType>
+template <typename ClassType, typename... A>
 struct ConstructorThunk
 {
-	typedef typename Meta::CallableConstructor<CalleeType>::ClassType ClassType;
-	typedef typename Meta::CallableConstructor<CalleeType>::Args Args;
-	typedef typename Meta::CallableConstructor<CalleeType>::ReturnType ReturnType;
+	typedef Meta::CallableConstructor<ClassType, A...> Callable;
+	typedef typename Callable::Args Args;
+	typedef typename Callable::ReturnType ReturnType;
 
 	static inline void Thunk(const v8::FunctionCallbackInfo<v8::Value>& info)
 	{
@@ -163,7 +163,7 @@ struct ConstructorThunk
 		{
 			// create an object
 			ArgGettingState argGettingState(info, false);
-			ReturnType object = Meta::CallableConstructor<CalleeType>::Call(Args(argGettingState));
+			ReturnType object = Callable::Call(Args(argGettingState));
 
 			// store a pointer to the object
 			instance->SetInternalField(0, v8::External::New(isolate, object));

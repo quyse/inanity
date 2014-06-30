@@ -15,9 +15,7 @@ template <typename CalleeType, CalleeType callee>
 struct CalleeThunk;
 
 /// Переходник для конструкторов.
-/* CalleeType = void (ClassType::*)(ArgTypes...)
-*/
-template <typename CalleeType>
+template <typename ClassType, typename... Args>
 struct ConstructorThunk;
 
 END_INANITY_LUA

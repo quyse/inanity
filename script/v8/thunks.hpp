@@ -11,7 +11,7 @@ struct CalleeThunk;
 template <typename ClassType>
 void DummyConstructorThunk(const v8::FunctionCallbackInfo<v8::Value>& info);
 
-template <typename CalleeType>
+template <typename ClassType, typename... Args>
 struct ConstructorThunk;
 
 END_INANITY_V8

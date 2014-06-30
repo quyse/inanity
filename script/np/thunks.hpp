@@ -11,7 +11,7 @@ struct FunctionThunk;
 template <typename CalleeType, CalleeType callee>
 struct MethodThunk;
 
-template <typename CalleeType>
+template <typename ClassType, typename... Args>
 struct ConstructorThunk;
 
 END_INANITY_NP

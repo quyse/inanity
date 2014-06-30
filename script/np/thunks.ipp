@@ -123,19 +123,19 @@ struct MethodThunk
 	}
 };
 
-template <typename CalleeType>
+template <typename ClassType, typename... A>
 struct ConstructorThunk
 {
-	typedef typename Meta::CallableConstructor<CalleeType>::ClassType ClassType;
-	typedef typename Meta::CallableConstructor<CalleeType>::Args Args;
-	typedef typename Meta::CallableConstructor<CalleeType>::ReturnType ReturnType;
+	typedef Meta::CallableConstructor<ClassType, A...> Callable;
+	typedef typename Callable::Args Args;
+	typedef typename Callable::ReturnType ReturnType;
 
 	static inline bool Thunk(const NPVariant* args, int argsCount, NPVariant* result)
 	{
 		try
 		{
 			ArgGettingState argGettingState(args, argsCount, false);
-			*result = Value<ReturnType>::To(Meta::CallableConstructor<CalleeType>::Call(Args(argGettingState)));
+			*result = Value<ReturnType>::To(Callable::Call(Args(argGettingState)));
 			return true;
 		}
 		catch(Exception* exception)

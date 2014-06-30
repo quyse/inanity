@@ -32,7 +32,7 @@ public:
 	typedef NamedCallableBase FunctionBase;
 	typedef NamedCallableBase MethodBase;
 
-	template <typename ConstructorType>
+	template <typename ClassType, typename... Args>
 	class Constructor : public ConstructorBase
 	{
 	public:

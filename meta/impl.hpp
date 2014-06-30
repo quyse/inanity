@@ -20,6 +20,12 @@
 	private: \
 		typedef META_PROVIDER Provider; \
 		typedef className ClassType; \
+		template <typename... Args> \
+		/* HelperSetConstructor class is needed to workaround empty __VA_ARGS__ problem. */ \
+		struct HelperSetConstructor \
+		{ \
+			typedef Provider::Constructor<ClassType, Args...> Type; \
+		}; \
 	public: \
 		Class(); \
 	}; \
@@ -39,7 +45,7 @@
 
 #define META_CONSTRUCTOR(...) \
 	{ \
-		static Provider::Constructor<void (ClassType::*)(__VA_ARGS__)> c; \
+		static typename HelperSetConstructor<__VA_ARGS__>::Type c; \
 		SetConstructor(&c); \
 	}
 

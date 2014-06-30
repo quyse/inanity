@@ -9,10 +9,10 @@ BEGIN_INANITY_NP
 
 //*** class MetaProvider::Constructor
 
-template <typename ConstructorType>
-MetaProvider::FunctionRoutine MetaProvider::Constructor<ConstructorType>::GetThunk() const
+template <typename ClassType, typename... Args>
+MetaProvider::FunctionRoutine MetaProvider::Constructor<ClassType, Args...>::GetThunk() const
 {
-	return &ConstructorThunk<ConstructorType>::Thunk;
+	return &ConstructorThunk<ClassType, Args...>::Thunk;
 }
 
 //*** class MetaProvider::Function

@@ -89,17 +89,18 @@ struct CalleeThunk
 	}
 };
 
-template <typename CalleeType>
+template <typename ClassType, typename... A>
 struct ConstructorThunk
 {
-	typedef typename Meta::CallableConstructor<CalleeType>::Args Args;
-	typedef typename Meta::CallableConstructor<CalleeType>::ReturnType ReturnType;
+	typedef Meta::CallableConstructor<ClassType, A...> Callable;
+	typedef typename Callable::Args Args;
+	typedef typename Callable::ReturnType ReturnType;
 
 	struct Helper
 	{
 		static inline ReturnType Call(const Args& args)
 		{
-			return Meta::CallableConstructor<CalleeType>::Call(args);
+			return Callable::Call(args);
 		}
 	};
 

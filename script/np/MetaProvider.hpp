@@ -48,7 +48,7 @@ public:
 		virtual MethodRoutine GetThunk() const = 0;
 	};
 
-	template <typename ConstructorType>
+	template <typename ClassType, typename... Args>
 	class Constructor : public ConstructorBase
 	{
 	public:
