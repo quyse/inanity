@@ -50,64 +50,6 @@ struct CallAndReturn<CallerType, void, Args>
 	}
 };
 
-/*
-/// Вспомогательная структура, выполняющая накопление аргументов и вызов.
-template <typename CalleeType, CalleeType callee, typename RestArgs>
-struct Caller;
-// когда все аргументы получены
-template <typename CalleeType, CalleeType callee>
-struct Caller<CalleeType, callee, void>
-{
-	static inline typename Meta::Callable<CalleeType>::ReturnType Call(ArgGettingState& state, typename Meta::Callable<CalleeType>::Args& args, Meta::VoidTuple& restArgs)
-	{
-		// в стеке не должно остаться аргументов
-		if(state.gotArgsCount != state.argsCount)
-			THROW("Extra arguments for function call");
-
-		// выполнить вызов
-		return Meta::Callable<CalleeType>::template Call<callee>(args);
-	}
-};
-// когда ещё не все аргументы получены
-template <typename CalleeType, CalleeType callee, typename FirstRestArg, typename RestRestArgs>
-struct Caller<CalleeType, callee, Meta::Tuple<FirstRestArg, RestRestArgs> >
-{
-	static inline typename Meta::Callable<CalleeType>::ReturnType Call(ArgGettingState& state, typename Meta::Callable<CalleeType>::Args& args, Meta::Tuple<FirstRestArg, RestRestArgs>& restArgs)
-	{
-		restArgs.first = ArgGetter<FirstRestArg>::Get(state);
-		return Caller<CalleeType, callee, RestRestArgs>::Call(state, args, restArgs.rest);
-	}
-};
-
-/// Вспомогательная структура, выполняющая накопление аргументов и вызов конструктора.
-template <typename CalleeType, typename RestArgs>
-struct ConstructorCaller;
-// когда все аргументы получены
-template <typename CalleeType>
-struct ConstructorCaller<CalleeType, void>
-{
-	static inline typename Meta::CallableConstructor<CalleeType>::ReturnType Call(ArgGettingState& state, typename Meta::CallableConstructor<CalleeType>::Args& args, Meta::VoidTuple& restArgs)
-	{
-		// в стеке не должно остаться аргументов
-		if(state.gotArgsCount != state.argsCount)
-			THROW("Extra arguments for function call");
-
-		// выполнить вызов
-		return Meta::CallableConstructor<CalleeType>::Call(args);
-	}
-};
-// когда ещё не все аргументы получены
-template <typename CalleeType, typename FirstRestArg, typename RestRestArgs>
-struct ConstructorCaller<CalleeType, Meta::Tuple<FirstRestArg, RestRestArgs> >
-{
-	static inline typename Meta::CallableConstructor<CalleeType>::ReturnType Call(ArgGettingState& state, typename Meta::CallableConstructor<CalleeType>::Args& args, Meta::Tuple<FirstRestArg, RestRestArgs>& restArgs)
-	{
-		restArgs.first = ArgGetter<FirstRestArg>::Get(state);
-		return ConstructorCaller<CalleeType, RestRestArgs>::Call(state, args, restArgs.rest);
-	}
-};
-*/
-
 template <typename CalleeType, CalleeType callee>
 struct CalleeThunk
 {
