@@ -5,24 +5,28 @@
 
 BEGIN_INANITY_META
 
-/// Структура, получающая список типов аргументов функции или метода.
+/// Structure for calling functions and methods.
 /**
-Функция или метод определяются просто по типу CalleeType.
-Конструктор - это особый случай, это функция с возвращаемым значением типа 
-Содержит:
-enum { isMethod = 0/1 } - является ли это методом.
-typedef CalleeType - исходный тип функции или метода.
-typedef Args - список типов аргументов.
-typedef ReturnType - тип возвращаемого значения.
-typedef ClassType - тип класса (для метода).
-template <CalleeType callee> ReturnType Call(Args& args) - вызов соответствующей функции со списком аргументов.
+Contains:
+enum { isMethod = 0/1 }
+typedef CalleeType
+typedef Args // tuple for args
+typedef ReturnType
+typedef ClassType (only for methods)
+ReturnType Call(CalleeType callee, const Args& args)
 */
 template <typename CalleeType>
 struct Callable;
 
-/// Аналогичная структура для конструкторов.
-/** CalleeType = void (ClassType::*)(ArgTypes...) */
-template <typename CalleeType>
+/// Structure for calling constructors.
+/**
+Contains:
+typedef Args
+typedef ReturnType
+typedef ClassType
+ptr<ClassType> Call(const Args& args)
+*/
+template <typename ClassType, typename... Args>
 struct CallableConstructor;
 
 END_INANITY_META
