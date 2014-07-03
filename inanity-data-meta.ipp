@@ -1,6 +1,3 @@
-#ifndef ___INANITY_INANITY_DATA_META_IPP___
-#define ___INANITY_INANITY_DATA_META_IPP___
-
 #include "data/BlobFileSystem.hpp"
 META_CLASS(Inanity::Data::BlobFileSystem, Inanity.Data.BlobFileSystem);
 	META_CLASS_PARENT(Inanity::FileSystem);
@@ -20,5 +17,3 @@ META_CLASS(Inanity::Data::Base64OutputStream, Inanity.Data.Base64OutputStream);
 	META_CLASS_PARENT(Inanity::OutputStream);
 	META_STATIC_METHOD(EncodeFile);
 META_CLASS_END();
-
-#endif

@@ -1,6 +1,3 @@
-#ifndef ___INANITY_INANITY_BASE_META_IPP___
-#define ___INANITY_INANITY_BASE_META_IPP___
-
 #include "RefCounted.hpp"
 META_CLASS(Inanity::RefCounted, Inanity.RefCounted);
 META_CLASS_END();
@@ -55,5 +52,3 @@ META_CLASS(Inanity::MemoryStream, Inanity.MemoryStream);
 	META_CONSTRUCTOR();
 	META_METHOD(ToFile);
 META_CLASS_END();
-
-#endif
