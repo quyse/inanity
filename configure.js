@@ -20,6 +20,7 @@ exports.configureCompiler = function(objectFile, compiler) {
 	compiler.addIncludeDir('deps/libvorbis/include');
 	compiler.addIncludeDir('deps/freetype/repo/include');
 	compiler.addIncludeDir('deps/harfbuzz/generated');
+	compiler.addIncludeDir('deps/mono/include');
 };
 
 var libraries = {
@@ -94,6 +95,16 @@ var libraries = {
 	// ******* скрипты на NPAPI
 	'libinanity-np': {
 		objects: ['script.np.Any', 'script.np.ClassBase', 'script.np.MetaProvider', 'script.np.State', 'script.np.wrappers', 'script.np.Namespace']
+	},
+	// ******* scripts for Mono
+	'libinanity-mono': {
+		objects: [
+			'script.mono.Any',
+			'script.mono.Assembly',
+			'script.mono.ClassBase',
+			'script.mono.MetaProvider',
+			'script.mono.State'
+		]
 	},
 	// ******* криптография
 	'libinanity-crypto': {
