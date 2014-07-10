@@ -3,7 +3,6 @@
 
 #include "mono.hpp"
 #include "MetaProvider.hpp"
-#include <unordered_map>
 #include <mono/metadata/object.h>
 
 BEGIN_INANITY_MONO

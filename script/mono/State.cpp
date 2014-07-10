@@ -28,7 +28,7 @@ State::State(const String& baseAssemblyFileName) :
 	instance = this;
 
 	// init domain
-	domain = mono_jit_init_version("inanity", "v4.0.30319");
+	domain = mono_jit_init_version("inanity", "v4.0");
 	if(!domain)
 		THROW("Can't initialize Mono JIT");
 
@@ -114,7 +114,7 @@ ptr<Assembly> State::LoadAssembly(const String& fileName)
 	if(!assembly || status != MONO_IMAGE_OK)
 		THROW(String("Can't load assembly ") + mono_image_strerror(status));
 
-	return NEW(Assembly(this, assembly));
+	return NEW(Assembly(this, assembly, fileName));
 
 	END_TRY("Can't load Mono assembly");
 }
@@ -209,6 +209,7 @@ ptr<Script::Any> State::NewDict()
 void State::Register(MetaProvider::ClassBase* classMeta)
 {
 	classes.push_back(classMeta);
+	classMeta->RegisterThunks();
 }
 
 ptr<Any> State::CreateAny(MonoObject* object)
@@ -267,6 +268,12 @@ MonoObject* State::ConvertObject(MetaProvider::ClassBase* classMeta, RefCounted*
 	instancesByHandle.insert(std::make_pair(gcHandle, object));
 
 	return monoObject;
+}
+
+void State::RegisterClassesForGeneration(BaseAssemblyGenerator* generator)
+{
+	for(size_t i = 0; i < classes.size(); ++i)
+		generator->Register(classes[i]);
 }
 
 END_INANITY_MONO

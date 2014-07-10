@@ -6,8 +6,8 @@
 
 BEGIN_INANITY_MONO
 
-Assembly::Assembly(ptr<State> state, MonoAssembly* assembly)
-: state(state), assembly(assembly) {}
+Assembly::Assembly(ptr<State> state, MonoAssembly* assembly, const String& assemblyFileName)
+: state(state), assembly(assembly), assemblyFileName(assemblyFileName) {}
 
 Assembly::~Assembly()
 {
@@ -16,10 +16,9 @@ Assembly::~Assembly()
 
 ptr<Script::Any> Assembly::Run()
 {
-	// mono_jit_exec requires valid pointer even for zero args
-	char* args[1] = { nullptr };
+	char* args[1] = { (char*)assemblyFileName.c_str() };
 
-	int result = mono_jit_exec(state->GetDomain(), assembly, 0, args);
+	int result = mono_jit_exec(state->GetDomain(), assembly, sizeof(args) / sizeof(args[0]), args);
 
 	return state->NewNumber(result);
 }

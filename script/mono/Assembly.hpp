@@ -3,6 +3,7 @@
 
 #include "mono.hpp"
 #include "../Function.hpp"
+#include "../../String.hpp"
 #include <mono/metadata/image.h>
 
 BEGIN_INANITY_MONO
@@ -18,9 +19,10 @@ class Assembly : public Script::Function
 private:
 	ptr<State> state;
 	MonoAssembly* assembly;
+	String assemblyFileName;
 
 public:
-	Assembly(ptr<State> state, MonoAssembly* assembly);
+	Assembly(ptr<State> state, MonoAssembly* assembly, const String& assemblyFileName);
 	~Assembly();
 
 	//*** Script::Function's methods.

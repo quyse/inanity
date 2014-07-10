@@ -50,4 +50,14 @@ MonoClass* ClassBase::GetMonoClass() const
 	return monoClass;
 }
 
+void ClassBase::RegisterThunks()
+{
+	if(constructor)
+		constructor->RegisterThunk();
+	for(size_t i = 0; i < methods.size(); ++i)
+		methods[i]->RegisterThunk();
+	for(size_t i = 0; i < staticMethods.size(); ++i)
+		staticMethods[i]->RegisterThunk();
+}
+
 END_INANITY_MONO

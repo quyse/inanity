@@ -27,6 +27,7 @@ public:
 	void AddStaticMethod(FunctionBase* staticMethod);
 
 	MonoClass* GetMonoClass() const;
+	void RegisterThunks();
 };
 
 END_INANITY_MONO

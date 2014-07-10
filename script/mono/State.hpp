@@ -10,10 +10,17 @@
 #include <mono/metadata/object.h>
 #include <mono/metadata/class.h>
 
+BEGIN_INANITY
+
+class Exception;
+
+END_INANITY
+
 BEGIN_INANITY_MONO
 
 class Any;
 class Assembly;
+class BaseAssemblyGenerator;
 
 /// State of Mono scripting engine.
 class State : public Script::State
@@ -90,8 +97,11 @@ public:
 	void SetObjectIntoWrapper(MonoObject* monoObject, RefCounted* object);
 	/// Convert Inanity object to Mono wrapper.
 	MonoObject* ConvertObject(MetaProvider::ClassBase* classMeta, RefCounted* object);
+	/// Raise exception into Mono.
+	/** Not returns! Caution needed, because no unwinding is performed. */
+	void RaiseException(ptr<Exception> exception);
 
-	void GenerateBaseAssembly(const String& fileName);
+	void RegisterClassesForGeneration(BaseAssemblyGenerator* generator);
 };
 
 END_INANITY_MONO
