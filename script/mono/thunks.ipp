@@ -6,6 +6,9 @@
 
 BEGIN_INANITY_MONO
 
+#define MONO_TRY_BEGIN() try {
+#define MONO_TRY_END() } catch(Exception* exception) { State::instance->RaiseException(exception); }
+
 //*** class ConstructorHelper
 
 template <typename ClassType, typename... Args>
@@ -13,8 +16,12 @@ struct ConstructorHelper
 {
 	static void Thunk(MonoObject* thisObject, typename Value<Args>::MonoType... args)
 	{
-		ptr<ClassType> object = NEW(ClassType(args...));
+		MONO_TRY_BEGIN();
+
+		ptr<ClassType> object = NEW(ClassType(Value<Args>::From(args)...));
 		State::instance->SetObjectIntoWrapper(thisObject, &*object);
+
+		MONO_TRY_END();
 	}
 };
 
@@ -26,7 +33,12 @@ struct FunctionHelper<ReturnType (*)(Args...), function>
 {
 	static typename Value<ReturnType>::MonoType Thunk(typename Value<Args>::MonoType... args)
 	{
+		MONO_TRY_BEGIN();
 		return Value<ReturnType>::To(function(Value<Args>::From(args)...));
+		MONO_TRY_END();
+
+		// no control could be here, it's only for compiler
+		return typename Value<ReturnType>::MonoType();
 	}
 };
 
@@ -36,7 +48,9 @@ struct FunctionHelper<void (*)(Args...), function>
 {
 	static void Thunk(typename Value<Args>::MonoType... args)
 	{
+		MONO_TRY_BEGIN();
 		function(Value<Args>::From(args)...);
+		MONO_TRY_END();
 	}
 };
 
@@ -48,7 +62,12 @@ struct MethodHelper<ReturnType (ClassType::*)(Args...), method>
 {
 	static typename Value<ReturnType>::MonoType Thunk(MonoObject* thisObject, typename Value<Args>::MonoType... args)
 	{
+		MONO_TRY_BEGIN();
 		return Value<ReturnType>::To((Value<ptr<ClassType> >::From(thisObject)->*method)(Value<Args>::From(args)...));
+		MONO_TRY_END();
+
+		// no control could be here, it's only for compiler
+		return typename Value<ReturnType>::MonoType();
 	}
 };
 
@@ -58,7 +77,9 @@ struct MethodHelper<void (ClassType::*)(Args...), method>
 {
 	static void Thunk(MonoObject* thisObject, typename Value<Args>::MonoType... args)
 	{
+		MONO_TRY_BEGIN();
 		(Value<ptr<ClassType> >::From(thisObject)->*method)(Value<Args>::From(args)...);
+		MONO_TRY_END();
 	}
 };
 
@@ -68,7 +89,12 @@ struct MethodHelper<ReturnType (ClassType::*)(Args...) const, method>
 {
 	static typename Value<ReturnType>::MonoType Thunk(MonoObject* thisObject, typename Value<Args>::MonoType... args)
 	{
+		MONO_TRY_BEGIN();
 		return Value<ReturnType>::To((Value<ptr<ClassType> >::From(thisObject)->*method)(Value<Args>::From(args)...));
+		MONO_TRY_END();
+
+		// no control could be here, it's only for compiler
+		return typename Value<ReturnType>::MonoType();
 	}
 };
 
@@ -78,9 +104,14 @@ struct MethodHelper<void (ClassType::*)(Args...) const, method>
 {
 	static void Thunk(MonoObject* thisObject, typename Value<Args>::MonoType... args)
 	{
+		MONO_TRY_BEGIN();
 		(Value<ptr<ClassType> >::From(thisObject)->*method)(Value<Args>::From(args)...);
+		MONO_TRY_END();
 	}
 };
+
+#undef MONO_TRY_BEGIN
+#undef MONO_TRY_END
 
 END_INANITY_MONO
 

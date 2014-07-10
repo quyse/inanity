@@ -8,6 +8,7 @@
 #include <mono/jit/jit.h>
 #include <mono/metadata/appdomain.h>
 #include <mono/metadata/assembly.h>
+#include <mono/metadata/exception.h>
 #ifdef _DEBUG
 #include <mono/metadata/mono-debug.h>
 #endif
@@ -268,6 +269,18 @@ MonoObject* State::ConvertObject(MetaProvider::ClassBase* classMeta, RefCounted*
 	instancesByHandle.insert(std::make_pair(gcHandle, object));
 
 	return monoObject;
+}
+
+void State::RaiseException(ptr<Exception> exception)
+{
+	MonoException* e = mono_exception_from_name_msg(
+		mono_get_corlib(),
+		"System",
+		"Exception",
+		exception->GetMessageText().c_str()
+	);
+	exception = nullptr;
+	mono_raise_exception(e);
 }
 
 void State::RegisterClassesForGeneration(BaseAssemblyGenerator* generator)
