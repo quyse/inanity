@@ -8,6 +8,9 @@
 #include <mono/jit/jit.h>
 #include <mono/metadata/appdomain.h>
 #include <mono/metadata/assembly.h>
+#ifdef _DEBUG
+#include <mono/metadata/mono-debug.h>
+#endif
 
 BEGIN_INANITY_MONO
 
@@ -25,9 +28,20 @@ State::State(const String& baseAssemblyFileName) :
 	instance = this;
 
 	// init domain
-	domain = mono_jit_init("inanity");
+	domain = mono_jit_init_version("inanity", "v4.0.30319");
 	if(!domain)
 		THROW("Can't initialize Mono JIT");
+
+#ifdef _DEBUG
+	static const char* options[] = {
+		"--soft-breakpoints",
+		"--debugger-agent=transport=dt_socket,address=127.0.0.1:10000"
+	};
+	mono_jit_parse_options(sizeof(options) / sizeof(const char*), (char**)options);
+
+	mono_debug_domain_create(domain);
+	mono_debug_init(MONO_DEBUG_FORMAT_MONO);
+#endif
 
 	// load base assembly
 	if(!baseAssemblyFileName.empty())
@@ -49,6 +63,8 @@ State::State(const String& baseAssemblyFileName) :
 
 		// create reference queue
 		referenceQueue = mono_gc_reference_queue_new(&ReferenceQueueCallback);
+		if(!referenceQueue)
+			THROW("Can't create GC reference queue");
 
 		// create any pool
 		anyPool = NEW(ObjectPool<Any>());
@@ -71,7 +87,9 @@ State::~State()
 		ReclaimInstanceObject(i->second);
 	instances.clear();
 
-	mono_gc_reference_queue_free(referenceQueue);
+	if(referenceQueue)
+		mono_gc_reference_queue_free(referenceQueue);
+
 	mono_jit_cleanup(domain);
 }
 
@@ -188,7 +206,7 @@ ptr<Script::Any> State::NewDict()
 
 void State::Register(MetaProvider::ClassBase* classMeta)
 {
-	classes.insert(classMeta);
+	classes.push_back(classMeta);
 }
 
 ptr<Any> State::CreateAny(MonoObject* object)

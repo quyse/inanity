@@ -5,7 +5,7 @@
 #include "../State.hpp"
 #include "../../meta/ClassBase.hpp"
 #include "../../ObjectPool.hpp"
-#include <unordered_set>
+#include <vector>
 #include <unordered_map>
 #include <mono/metadata/object.h>
 #include <mono/metadata/class.h>
@@ -32,7 +32,7 @@ private:
 	MonoReferenceQueue* referenceQueue;
 
 	/// List of all classes.
-	typedef std::unordered_set<MetaProvider::ClassBase*> Classes;
+	typedef std::vector<MetaProvider::ClassBase*> Classes;
 	Classes classes;
 
 	/// List of all instances.
