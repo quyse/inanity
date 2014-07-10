@@ -361,9 +361,9 @@ var executables = {
 		'dynamicLibraries-linux': ['pthread'],
 	}
 	// TEST
-	, monotestgen: {
-		objects: ['script.mono.testgen'],
-		staticLibraries: ['libinanity-mono', 'libinanity-mono-gen', 'libinanity-platform-filesystem', 'libinanity-base'],
+	, monotest: {
+		objects: ['script.mono.test'],
+		staticLibraries: ['libinanity-mono', 'libinanity-mono-gen', 'libinanity-data', 'libinanity-platform-filesystem', 'libinanity-base'],
 		dynamicLibraries: ['mono-2.0']
 	}
 	// TEST

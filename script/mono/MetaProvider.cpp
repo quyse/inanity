@@ -20,7 +20,7 @@ MetaProvider::FunctionBase::FunctionBase(const char* name)
 
 void MetaProvider::FunctionBase::SetClassName(const String& className)
 {
-	internalCallName = className + "::__f_" + name;
+	internalCallName = className + "::" + name;
 }
 
 MetaProvider::MethodBase::MethodBase(const char* name)
@@ -28,7 +28,7 @@ MetaProvider::MethodBase::MethodBase(const char* name)
 
 void MetaProvider::MethodBase::SetClassName(const String& className)
 {
-	internalCallName = className + "::__m_" + name;
+	internalCallName = className + "::" + name;
 }
 
 END_INANITY_MONO

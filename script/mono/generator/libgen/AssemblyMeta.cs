@@ -28,10 +28,14 @@ namespace Inanity.Script.Mono
 
 		private class ClassDesc
 		{
-			public string parent;
+			public string parentClassName;
 			public ConstructorDesc constructor;
 			public Dictionary<string, MethodDesc> methods = new Dictionary<string, MethodDesc>();
 			public Dictionary<string, FunctionDesc> staticMethods = new Dictionary<string, FunctionDesc>();
+			public ClassDesc parentClassDesc;
+			public TypeBuilder typeBuilder;
+			public MethodBuilder constructorThunkMethodBuilder;
+			public ConstructorBuilder constructorBuilder;
 		}
 
 		private Dictionary<string, ClassDesc> classes = new Dictionary<string, ClassDesc>();
@@ -42,12 +46,14 @@ namespace Inanity.Script.Mono
 
 		public void AddClass(string name)
 		{
+			if(classes.ContainsKey(name))
+				throw new Exception("Class already registered: " + name);
 			classes.Add(name, new ClassDesc());
 		}
 
 		public void SetClassParent(string className, string parentClassName)
 		{
-			classes [className].parent = parentClassName;
+			classes [className].parentClassName = parentClassName;
 		}
 
 		public void SetClassConstructor(string className, string[] argumentTypes)
@@ -77,12 +83,6 @@ namespace Inanity.Script.Mono
 			);
 			ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName, dllName);
 
-			// InternalCall attribute for methods
-			CustomAttributeBuilder internalCallAttribute = new CustomAttributeBuilder(
-				typeof(MethodImplAttribute).GetConstructor(
-					new Type[]{ typeof(MethodImplOptions) }),
-				new object[]{ MethodImplOptions.InternalCall });
-
 			// create Inanity.Object type
 			TypeBuilder inanityObjectTypeBuilder = moduleBuilder.DefineType(
 				"Inanity.Object",
@@ -92,6 +92,12 @@ namespace Inanity.Script.Mono
 					typeof(IDisposable)
 				}
 			);
+			inanityObjectTypeBuilder.DefineField(
+				"ptr",
+				typeof(UIntPtr),
+				FieldAttributes.Family
+			);
+			ConstructorBuilder inanityObjectConstructorBuilder = inanityObjectTypeBuilder.DefineDefaultConstructor(MethodAttributes.Family);
 			{
 				MethodBuilder disposeMethod = inanityObjectTypeBuilder.DefineMethod(
 					"Dispose",
@@ -99,17 +105,16 @@ namespace Inanity.Script.Mono
 					typeof(void),
 					new Type[] { }
 				);
-				disposeMethod.SetCustomAttribute(internalCallAttribute);
+				disposeMethod.SetImplementationFlags(MethodImplAttributes.InternalCall);
 			}
 			inanityObjectTypeBuilder.CreateType();
 
 			// create type bulders for all classes
-			Dictionary<string, TypeBuilder> typeBuilders = new Dictionary<string, TypeBuilder>();
 			foreach(string fullClassName in classes.Keys)
-				typeBuilders.Add(fullClassName, moduleBuilder.DefineType(
+				classes[fullClassName].typeBuilder = moduleBuilder.DefineType(
 					fullClassName,
 					TypeAttributes.Public | (classes[fullClassName].constructor == null ? TypeAttributes.Abstract : 0)
-				));
+				);
 
 			// lambda for resolving types
 			Func<string, Type> resolveType = delegate(string typeName)
@@ -136,27 +141,27 @@ namespace Inanity.Script.Mono
 					return typeof(string);
 				default:
 					{
-						TypeBuilder typeBuilder;
-						if(!typeBuilders.TryGetValue(typeName, out typeBuilder))
+						ClassDesc classDesc;
+						if(!classes.TryGetValue(typeName, out classDesc))
 							throw new Exception("Cannot resolve type " + typeName);
-						return typeBuilder;
+						return classDesc.typeBuilder;
 					}
 				}
 			};
 
-			// set parents, populate classes
+			// set parents, create constructors and methods
 			foreach(string className in classes.Keys)
 			{
 				ClassDesc classDesc = classes[className];
-				TypeBuilder typeBuilder = typeBuilders[className];
+				TypeBuilder typeBuilder = classDesc.typeBuilder;
 				// set parent
 				{
-					string parentClassName = classDesc.parent;
 					TypeBuilder parentTypeBuilder;
-					if(parentClassName != null)
+					if(classDesc.parentClassName != null)
 					{
-						if(!typeBuilders.TryGetValue(parentClassName, out parentTypeBuilder))
-							throw new Exception("Parent class " + parentClassName + " is not registered");
+						if(!classes.TryGetValue(classDesc.parentClassName, out classDesc.parentClassDesc))
+							throw new Exception("Parent class " + classDesc.parentClassName + " is not registered");
+						parentTypeBuilder = classDesc.parentClassDesc.typeBuilder;
 					}
 					else
 						parentTypeBuilder = inanityObjectTypeBuilder;
@@ -167,13 +172,29 @@ namespace Inanity.Script.Mono
 					ConstructorDesc constructorDesc = classDesc.constructor;
 					if(constructorDesc != null)
 					{
+						Type[] argumentTypes = constructorDesc.argumentTypes.Select(resolveType).ToArray();
+
+						// define extern thunk method
+						MethodBuilder methodBuilder = typeBuilder.DefineMethod(
+							"__c",
+							MethodAttributes.Private,
+							CallingConventions.HasThis,
+							typeof(void),
+							argumentTypes
+						);
+						methodBuilder.SetImplementationFlags(MethodImplAttributes.InternalCall);
+						classDesc.constructorThunkMethodBuilder = methodBuilder;
+
+						// define constructor
 						ConstructorBuilder constructorBuilder = typeBuilder.DefineConstructor(
 							MethodAttributes.Public,
-							CallingConventions.Standard,
-							constructorDesc.argumentTypes.Select(resolveType).ToArray()
+							CallingConventions.HasThis,
+							argumentTypes
 						);
-						constructorBuilder.SetCustomAttribute(internalCallAttribute);
+						classDesc.constructorBuilder = constructorBuilder;
 					}
+					else
+						classDesc.constructorBuilder = typeBuilder.DefineDefaultConstructor(MethodAttributes.Family);
 				}
 				// add methods
 				foreach(string methodName in classDesc.methods.Keys)
@@ -186,7 +207,7 @@ namespace Inanity.Script.Mono
 						resolveType(methodDesc.returnType),
 						methodDesc.argumentTypes.Select(resolveType).ToArray()
 					);
-					methodBuilder.SetCustomAttribute(internalCallAttribute);
+					methodBuilder.SetImplementationFlags(MethodImplAttributes.InternalCall);
 				}
 				// add static methods
 				foreach(string staticMethodName in classDesc.staticMethods.Keys)
@@ -194,18 +215,41 @@ namespace Inanity.Script.Mono
 					FunctionDesc functionDesc = classDesc.staticMethods[staticMethodName];
 					MethodBuilder methodBuilder = typeBuilder.DefineMethod(
 						staticMethodName,
-						MethodAttributes.Public | MethodAttributes.Final,
+						MethodAttributes.Public | MethodAttributes.Final | MethodAttributes.Static,
 						CallingConventions.Standard,
 						resolveType(functionDesc.returnType),
 						functionDesc.argumentTypes.Select(resolveType).ToArray()
 					);
-					methodBuilder.SetCustomAttribute(internalCallAttribute);
+					methodBuilder.SetImplementationFlags(MethodImplAttributes.InternalCall);
 				}
 			}
 
+			// emit code for constructors
+			foreach(ClassDesc classDesc in classes.Values)
+			{
+				ConstructorDesc constructorDesc = classDesc.constructor;
+				if(constructorDesc == null)
+					continue;
+
+				Type[] argumentTypes = constructorDesc.argumentTypes.Select(resolveType).ToArray();
+
+				ILGenerator ilGenerator = classDesc.constructorBuilder.GetILGenerator();
+				ilGenerator.Emit(OpCodes.Ldarg_0);
+				ilGenerator.Emit(OpCodes.Call,
+					classDesc.parentClassDesc != null
+					? classDesc.parentClassDesc.constructorBuilder
+					: inanityObjectConstructorBuilder
+				);
+				ilGenerator.Emit(OpCodes.Ldarg_0);
+				for(int i = 0; i < argumentTypes.Length; ++i)
+					ilGenerator.Emit(OpCodes.Ldarg, i + 1);
+				ilGenerator.Emit(OpCodes.Call, classDesc.constructorThunkMethodBuilder);
+				ilGenerator.Emit(OpCodes.Ret);
+			}
+
 			// create types
-			foreach(TypeBuilder typeBuilder in typeBuilders.Values)
-				typeBuilder.CreateType();
+			foreach(ClassDesc classDesc in classes.Values)
+				classDesc.typeBuilder.CreateType();
 
 			// save assembly
 			assemblyBuilder.Save(dllName);
