@@ -32,7 +32,9 @@ State::State(const String& baseAssemblyFileName) :
 	if(!domain)
 		THROW("Can't initialize Mono JIT");
 
-#ifdef _DEBUG
+	// launch debugger (crashes for now)
+//#ifdef _DEBUG
+#if 0
 	static const char* options[] = {
 		"--soft-breakpoints",
 		"--debugger-agent=transport=dt_socket,address=127.0.0.1:10000"

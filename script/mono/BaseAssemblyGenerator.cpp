@@ -1,142 +1,112 @@
 #include "BaseAssemblyGenerator.hpp"
 #include "State.hpp"
+#include "MetaProvider.ipp"
 #include "interop.ipp"
+#include "../../meta/ClassBase.ipp"
 #include "../../Exception.hpp"
 
 BEGIN_INANITY_MONO
 
-BaseAssemblyGenerator::BaseAssemblyGenerator(ptr<State> state)
-: state(state)
+BaseAssemblyGenerator::BaseAssemblyGenerator(ptr<State> state, const char* libgenPath)
+: state(state), currentClassFullName(nullptr)
 {
 	BEGIN_TRY();
 
 	domain = NEW(DotNetDomain(state->GetDomain()));
-	//domain = DotNetDomain::Create();
 
-	// create interop domain, get some useful things
-	ptr<DotNetImage> corlibImage = DotNetImage::GetCorlibImage();
+	// load libgen assembly
+	ptr<DotNetImage> libgenImage = domain->LoadAssembly(libgenPath);
 
-	// get System.Type class
-	cType = corlibImage->GetClass("System", "Type");
-	// get void class
-	cVoid = corlibImage->GetClass("System", "Void");
+	// get string class
+	cString = DotNetImage::GetCorlibImage()->GetClass("System", "String");
 
-	// get current domain
-	ptr<DotNetClass> cDomain = corlibImage->GetClass("System", "AppDomain");
-	ptr<DotNetObject> oDomain = cDomain->GetProperty("CurrentDomain")->GetGetter()->Call(nullptr);
+	// get AssemblyMeta class
+	ptr<DotNetClass> cAssemblyMeta = libgenImage->GetClass("Inanity.Script.Mono", "AssemblyMeta");
 
-	ptr<DotNetConstructor> ctorAssemblyName = corlibImage->GetClass("System.Reflection", "AssemblyName")
-			->GetConstructor(1);
-	ptr<DotNetObject> oAssemblyName = ctorAssemblyName->Construct(domain, domain->CreateString("inanity"));
+	// get some methods
+	mAddClass = cAssemblyMeta->GetMethod("AddClass", 1);
+	mSetClassParent = cAssemblyMeta->GetMethod("SetClassParent", 2);
+	mSetClassConstructor = cAssemblyMeta->GetMethod("SetClassConstructor", 2);
+	mAddClassMethod = cAssemblyMeta->GetMethod("AddClassMethod", 4);
+	mAddClassStaticMethod = cAssemblyMeta->GetMethod("AddClassStaticMethod", 4);
+	mResolve = cAssemblyMeta->GetMethod("Resolve", 2);
 
-	// create assembly builder
-	ptr<DotNetObject> oAssemblyBuilder = cDomain->GetMethod("DefineDynamicAssembly", 2)->Call(
-		oDomain,
-		oAssemblyName,
-		corlibImage->GetClass("System.Reflection.Emit", "AssemblyBuilderAccess")
-			->GetField("Save")->GetStatic<int>(domain)
-		);
-	ptr<DotNetClass> cAssemblyBuilder = oAssemblyBuilder->GetClass();
-
-	// create module builder
-	oModuleBuilder = cAssemblyBuilder->GetMethod("DefineDynamicModule", 2)->Call(
-		oAssemblyBuilder,
-		domain->CreateString("inanity"),
-		domain->CreateString("inanity.dll")
-	);
-	ptr<DotNetClass> cModuleBuilder = oModuleBuilder->GetClass();
-	mDefineType = cModuleBuilder->GetMethod("DefineType", 4);
-
-	// get type builder class
-	cTypeBuilder = corlibImage->GetClass("System.Reflection.Emit", "TypeBuilder");
-
-	// get method builder class
-	cMethodBuilder = corlibImage->GetClass("System.Reflection.Emit", "MethodBuilder");
-	mSetCustomAttribute = cMethodBuilder->GetMethod("SetCustomAttribute", 1);
-
-	// get type attributes class and literals
-	ptr<DotNetClass> cTypeAttributes = corlibImage->GetClass("System.Reflection", "TypeAttributes");
-	int vTypeAttributePublic = cTypeAttributes->GetField("Public")->GetStatic<int>(domain);
-	//int vTypeAttributeAbstract = cTypeAttributes->GetField("Abstract")->GetStatic<int>(domain);
-
-	// get method attributes class and literals
-	ptr<DotNetClass> cMethodAttributes = corlibImage->GetClass("System.Reflection", "MethodAttributes");
-	int vMethodAttributePublic = cMethodAttributes->GetField("Public")->GetStatic<int>(domain);
-	int vMethodAttributeHideBySig = cMethodAttributes->GetField("HideBySig")->GetStatic<int>(domain);
-	int vMethodAttributeFinal = cMethodAttributes->GetField("Final")->GetStatic<int>(domain);
-
-	// create CustomAttributeBuilder for "internal call" method attribute
-	{
-		// get InternalCall enum literal
-		ptr<DotNetClass> cMethodImplOptions = corlibImage->GetClass("System.Runtime.CompilerServices", "MethodImplOptions");
-
-		int internalCallLiteral = cMethodImplOptions->GetField("InternalCall")->GetStatic<int>(domain);
-
-		// get attribute constructor info
-		ptr<DotNetClass> cMethodImplAttribute = corlibImage->GetClass("System.Runtime.CompilerServices", "MethodImplAttribute");
-		ptr<DotNetObject> oAttributeConstructorInfo = cType->GetMethod("GetConstructor", 1)->Call(
-			cMethodImplAttribute->GetTypeObject(domain),
-			cType->CreateArray<ptr<DotNetObject> >(domain,
-				cMethodImplOptions->GetTypeObject(domain)
-			)
-		);
-
-		// get impl options
-		ptr<DotNetClass> cObject = DotNetClass::GetObjectClass();
-		ptr<DotNetArray> aMethodImplOptions = cObject->CreateArray<ptr<DotNetObject> >(domain,
-			cMethodImplOptions->Box(domain, internalCallLiteral)
-		);
-
-		// create attribute builder
-		oCustomAttributeBuilder = corlibImage->GetClass("System.Reflection.Emit", "CustomAttributeBuilder")
-			->GetConstructor(2)->Construct(domain,
-				oAttributeConstructorInfo,
-				aMethodImplOptions
-			);
-	}
-
-	// create Inanity.Object class
-	{
-		// get IDisposable class
-		ptr<DotNetClass> cIDisposable = corlibImage->GetClass("System", "IDisposable");
-
-		// define Inanity.Object type
-		ptr<DotNetObject> oTypeBuilder = mDefineType->Call(
-			oModuleBuilder,
-			domain->CreateString("Inanity.Object"),
-			vTypeAttributePublic,
-			nullptr,
-			cType->CreateArray<ptr<DotNetObject> >(domain,
-				cIDisposable->GetTypeObject(domain)
-			)
-		);
-
-		// define Dispose method
-		ptr<DotNetObject> oDisposeMethod = cTypeBuilder->GetMethod("DefineMethod", 4)->Call(
-			oTypeBuilder,
-			domain->CreateString("Dispose"),
-			vMethodAttributePublic | vMethodAttributeHideBySig | vMethodAttributeFinal,
-			cVoid->GetTypeObject(domain),
-			cType->CreateArray<ptr<DotNetObject> >(domain)
-		);
-		mSetCustomAttribute->Call(oDisposeMethod, oCustomAttributeBuilder);
-
-		cTypeBuilder->GetMethod("CreateType", 0)->Call(oTypeBuilder);
-
-		// save assembly
-		cAssemblyBuilder->GetMethod("Save", 1)->Call(
-			oAssemblyBuilder,
-			domain->CreateString("inanity.dll")
-		);
-	}
+	// create instance of assembly meta
+	oAssemblyMeta = cAssemblyMeta->GetConstructor(0)->Construct(domain);
 
 	END_TRY("Can't create base assembly generator");
 }
 
 BaseAssemblyGenerator::~BaseAssemblyGenerator() {}
 
-void BaseAssemblyGenerator::Generate(const String& fileName)
+ptr<DotNetArray> BaseAssemblyGenerator::ConvertArguments(int argumentsCount, const char** argumentTypes)
 {
+	ptr<DotNetArray> aArgumentTypes = cString->CreateArray(domain, argumentsCount);
+	for(int i = 0; i < argumentsCount; ++i)
+		aArgumentTypes->Set(i, domain->CreateString(argumentTypes[i]));
+	return aArgumentTypes;
+}
+
+void BaseAssemblyGenerator::Register(MetaProvider::ClassBase* classMeta)
+{
+	currentClassFullName = classMeta->GetFullName();
+	oCurrentClassFullName = domain->CreateString(currentClassFullName);
+	mAddClass->Call(oAssemblyMeta, oCurrentClassFullName);
+
+	MetaProvider::ClassBase* parentClassMeta = classMeta->GetParent();
+	if(parentClassMeta)
+		mSetClassParent->Call(oAssemblyMeta,
+			oCurrentClassFullName,
+			domain->CreateString(parentClassMeta->GetFullName())
+		);
+
+	MetaProvider::ConstructorBase* constructorMeta = classMeta->GetConstructor();
+	if(constructorMeta)
+		constructorMeta->RegisterForGeneration(this);
+
+	const MetaProvider::ClassBase::Methods& methods = classMeta->GetMethods();
+	for(size_t i = 0; i < methods.size(); ++i)
+		methods[i]->RegisterForGeneration(this);
+
+	const MetaProvider::ClassBase::StaticMethods& staticMethods = classMeta->GetStaticMethods();
+	for(size_t i = 0; i < staticMethods.size(); ++i)
+		staticMethods[i]->RegisterForGeneration(this);
+}
+
+void BaseAssemblyGenerator::RegisterConstructor(int argumentsCount, const char** argumentTypes)
+{
+	mSetClassConstructor->Call(oAssemblyMeta,
+		oCurrentClassFullName,
+		ConvertArguments(argumentsCount, argumentTypes)
+	);
+}
+
+void BaseAssemblyGenerator::RegisterFunction(const char* name, const char* returnType, int argumentsCount, const char** argumentTypes)
+{
+	mAddClassStaticMethod->Call(oAssemblyMeta,
+		oCurrentClassFullName,
+		domain->CreateString(name),
+		domain->CreateString(returnType),
+		ConvertArguments(argumentsCount, argumentTypes)
+	);
+}
+
+void BaseAssemblyGenerator::RegisterMethod(const char* name, const char* returnType, int argumentsCount, const char** argumentTypes)
+{
+	mAddClassMethod->Call(oAssemblyMeta,
+		oCurrentClassFullName,
+		domain->CreateString(name),
+		domain->CreateString(returnType),
+		ConvertArguments(argumentsCount, argumentTypes)
+	);
+}
+
+void BaseAssemblyGenerator::Generate(const char* fileName)
+{
+	mResolve->Call(oAssemblyMeta,
+		domain->CreateString("inanity"),
+		domain->CreateString(fileName)
+	);
 }
 
 END_INANITY_MONO

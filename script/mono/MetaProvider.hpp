@@ -7,6 +7,7 @@
 BEGIN_INANITY_MONO
 
 class ClassBase;
+class BaseAssemblyGenerator;
 
 class MetaProvider
 {
@@ -19,6 +20,7 @@ public:
 	public:
 		const String& GetInternalCallName() const;
 		virtual void RegisterThunk() = 0;
+		virtual void RegisterForGeneration(BaseAssemblyGenerator* generator) = 0;
 	};
 
 	class ConstructorBase : public CallableBase

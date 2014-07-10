@@ -106,6 +106,13 @@ var libraries = {
 			'script.mono.State'
 		]
 	},
+	// ******* assembly generation for Mono scripts
+	'libinanity-mono-gen': {
+		objects: [
+			'script.mono.BaseAssemblyGenerator',
+			'script.mono.interop'
+		]
+	},
 	// ******* криптография
 	'libinanity-crypto': {
 		objects: ['crypto.HashStream', 'crypto.LamportSignatureAlgorithm', 'crypto.WhirlpoolStream', 'crypto.StreamHasher', 'crypto.StreamSigner'],
@@ -352,6 +359,12 @@ var executables = {
 		staticLibraries: ['libinanity-platform-filesystem', 'libinanity-v8', 'libinanity-base', 'deps/v8//libv8_base', 'deps/v8//libv8_snapshot'],
 		'dynamicLibraries-win32': ['ws2_32.lib', 'winmm.lib'],
 		'dynamicLibraries-linux': ['pthread'],
+	}
+	// TEST
+	, monotestgen: {
+		objects: ['script.mono.testgen'],
+		staticLibraries: ['libinanity-mono', 'libinanity-mono-gen', 'libinanity-platform-filesystem', 'libinanity-base'],
+		dynamicLibraries: ['mono-2.0']
 	}
 	// TEST
 	, nettesttcp: {

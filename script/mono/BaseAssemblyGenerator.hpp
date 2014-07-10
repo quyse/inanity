@@ -3,7 +3,6 @@
 
 #include "mono.hpp"
 #include "MetaProvider.hpp"
-#include "../../String.hpp"
 #include <unordered_map>
 #include <mono/metadata/object.h>
 
@@ -13,6 +12,7 @@ class State;
 class DotNetDomain;
 class DotNetClass;
 class DotNetObject;
+class DotNetArray;
 class DotNetMethod;
 
 class BaseAssemblyGenerator : public Object
@@ -20,41 +20,36 @@ class BaseAssemblyGenerator : public Object
 private:
 	ptr<State> state;
 	ptr<DotNetDomain> domain;
+	ptr<DotNetClass> cString;
+	ptr<DotNetMethod> mAddClass;
+	ptr<DotNetMethod> mSetClassParent;
+	ptr<DotNetMethod> mSetClassConstructor;
+	ptr<DotNetMethod> mAddClassMethod;
+	ptr<DotNetMethod> mAddClassStaticMethod;
+	ptr<DotNetMethod> mResolve;
 
-	/// Method information for generation.
-	struct Method
-	{
-		String name;
-		/// Does any derived class override this method.
-		bool isOverrided;
-	};
+	ptr<DotNetObject> oAssemblyMeta;
 
-	/// Class information for generation.
-	struct Class
-	{
-		String fullName;
-		std::unordered_map<MetaProvider::MethodBase*, Method> methods;
-	};
-	typedef std::unordered_map<MetaProvider::ClassBase*, Class> Classes;
-	Classes classes;
+	const char* currentClassFullName;
+	ptr<DotNetObject> oCurrentClassFullName;
 
-	//*** Things for generation.
-	ptr<DotNetClass> cType;
-	ptr<DotNetClass> cVoid;
-	ptr<DotNetClass> cTypeBuilder;
-	ptr<DotNetClass> cMethodBuilder;
-	ptr<DotNetMethod> mSetCustomAttribute;
-	ptr<DotNetObject> oModuleBuilder;
-	ptr<DotNetMethod> mDefineType;
-	ptr<DotNetObject> oCustomAttributeBuilder;
+	ptr<DotNetArray> ConvertArguments(int argumentsCount, const char** argumentTypes);
 
 public:
-	BaseAssemblyGenerator(ptr<State> state);
+	BaseAssemblyGenerator(ptr<State> state, const char* libgenPath);
 	~BaseAssemblyGenerator();
 
+	/// Register class.
+	/** Class becomes current, in order to add members. */
 	void Register(MetaProvider::ClassBase* classMeta);
 
-	void Generate(const String& fileName);
+	//*** Registration methods for current class.
+	void RegisterConstructor(int argumentsCount, const char** argumentTypes);
+	void RegisterFunction(const char* name, const char* returnType, int argumentsCount, const char** argumentTypes);
+	void RegisterMethod(const char* name, const char* returnType, int argumentsCount, const char** argumentTypes);
+
+	/// Perform actual generation.
+	void Generate(const char* fileName);
 };
 
 END_INANITY_MONO
