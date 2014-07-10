@@ -15,5 +15,6 @@ META_CLASS_END();
 #include "data/Base64OutputStream.hpp"
 META_CLASS(Inanity::Data::Base64OutputStream, Inanity.Data.Base64OutputStream);
 	META_CLASS_PARENT(Inanity::OutputStream);
+	META_CONSTRUCTOR(bool, ptr<OutputStream>);
 	META_STATIC_METHOD(EncodeFile);
 META_CLASS_END();
