@@ -30,6 +30,7 @@ public:
 	static ptr<DotNetDomain> Create();
 
 	ptr<DotNetObject> CreateString(const char* str);
+	ptr<DotNetImage> LoadAssembly(const char* name);
 };
 
 class DotNetImage : public Object

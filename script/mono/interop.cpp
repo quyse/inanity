@@ -1,6 +1,7 @@
 #include "interop.ipp"
 #include "../../Exception.hpp"
 #include <mono/metadata/appdomain.h>
+#include <mono/metadata/assembly.h>
 #include <sstream>
 
 BEGIN_INANITY_MONO
@@ -28,6 +29,14 @@ ptr<DotNetDomain> DotNetDomain::Create()
 ptr<DotNetObject> DotNetDomain::CreateString(const char* str)
 {
 	return NEW(DotNetObject((MonoObject*)mono_string_new(domain, str)));
+}
+
+ptr<DotNetImage> DotNetDomain::LoadAssembly(const char* name)
+{
+	MonoAssembly* assembly = mono_domain_assembly_open(domain, name);
+	if(!assembly)
+		THROW(String("Can't load assembly ") + name);
+	return NEW(DotNetImage(mono_assembly_get_image(assembly)));
 }
 
 //*** class DotNetImage
