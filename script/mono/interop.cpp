@@ -11,10 +11,7 @@ BEGIN_INANITY_MONO
 DotNetDomain::DotNetDomain(MonoDomain* domain)
 : domain(domain) {}
 
-DotNetDomain::~DotNetDomain()
-{
-//	mono_domain_unload(domain);
-}
+DotNetDomain::~DotNetDomain() {}
 
 MonoDomain* DotNetDomain::GetDomain() const
 {

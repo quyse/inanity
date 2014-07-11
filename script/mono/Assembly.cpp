@@ -11,7 +11,12 @@ Assembly::Assembly(ptr<State> state, MonoAssembly* assembly, const String& assem
 
 Assembly::~Assembly()
 {
-	mono_assembly_close(assembly);
+	// We cannot unload assembly from appdomain,
+	// mono_assembly_close() crashes the program.
+	// Possible way is to load assembly into separate appdomain
+	// - than we can unload the whole appdomain.
+	// Example technique:
+	// http://www.west-wind.com/presentations/dynamicCode/DynamicCode.htm
 }
 
 ptr<Script::Any> Assembly::Run()
