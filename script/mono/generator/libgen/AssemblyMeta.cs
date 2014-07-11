@@ -139,6 +139,8 @@ namespace Inanity.Script.Mono
 					return typeof(double);
 				case "string":
 					return typeof(string);
+				case "object":
+					return typeof(object);
 				default:
 					{
 						ClassDesc classDesc;

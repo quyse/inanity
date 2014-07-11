@@ -67,6 +67,13 @@ template <> struct TypeName<String>
 		return "string";
 	}
 };
+template <> struct TypeName<ptr<Script::Any> >
+{
+	static const char* GetName()
+	{
+		return "object";
+	}
+};
 template <typename ObjectType>
 struct TypeName<ptr<ObjectType> >
 {
