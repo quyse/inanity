@@ -237,6 +237,13 @@ RefCounted* State::UnwrapObject(MonoObject* value)
 void State::SetObjectIntoWrapper(MonoObject* monoObject, RefCounted* object)
 {
 	mono_field_set_value(monoObject, baseClassPointerField, &object);
+
+	// create weak gc handle
+	uint32_t gcHandle = mono_gchandle_new_weakref(monoObject, true);
+
+	// save an instance
+	instances.insert(std::make_pair(object, gcHandle));
+	instancesByHandle.insert(std::make_pair(gcHandle, object));
 }
 
 MonoObject* State::ConvertObject(MetaProvider::ClassBase* classMeta, RefCounted* object)
@@ -260,13 +267,6 @@ MonoObject* State::ConvertObject(MetaProvider::ClassBase* classMeta, RefCounted*
 	mono_runtime_object_init(monoObject);
 	// store a pointer into field
 	SetObjectIntoWrapper(monoObject, object);
-
-	// create weak gc handle
-	uint32_t gcHandle = mono_gchandle_new_weakref(monoObject, true);
-
-	// save an instance
-	instances.insert(std::make_pair(object, gcHandle));
-	instancesByHandle.insert(std::make_pair(gcHandle, object));
 
 	return monoObject;
 }
