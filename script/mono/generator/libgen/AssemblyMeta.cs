@@ -101,7 +101,7 @@ namespace Inanity.Script.Mono
 			{
 				MethodBuilder disposeMethod = inanityObjectTypeBuilder.DefineMethod(
 					"Dispose",
-					MethodAttributes.Public | MethodAttributes.Final | MethodAttributes.HideBySig,
+					MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.HideBySig,
 					typeof(void),
 					new Type[] { }
 				);
