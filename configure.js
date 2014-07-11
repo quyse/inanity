@@ -20,6 +20,7 @@ exports.configureCompiler = function(objectFile, compiler) {
 	compiler.addIncludeDir('deps/libvorbis/include');
 	compiler.addIncludeDir('deps/freetype/repo/include');
 	compiler.addIncludeDir('deps/harfbuzz/generated');
+	compiler.addIncludeDir('deps/mono/include');
 };
 
 var libraries = {
@@ -94,6 +95,23 @@ var libraries = {
 	// ******* скрипты на NPAPI
 	'libinanity-np': {
 		objects: ['script.np.Any', 'script.np.ClassBase', 'script.np.MetaProvider', 'script.np.State', 'script.np.wrappers', 'script.np.Namespace']
+	},
+	// ******* scripts for Mono
+	'libinanity-mono': {
+		objects: [
+			'script.mono.Any',
+			'script.mono.Assembly',
+			'script.mono.ClassBase',
+			'script.mono.MetaProvider',
+			'script.mono.State'
+		]
+	},
+	// ******* assembly generation for Mono scripts
+	'libinanity-mono-gen': {
+		objects: [
+			'script.mono.BaseAssemblyGenerator',
+			'script.mono.interop'
+		]
 	},
 	// ******* криптография
 	'libinanity-crypto': {
@@ -341,6 +359,12 @@ var executables = {
 		staticLibraries: ['libinanity-platform-filesystem', 'libinanity-v8', 'libinanity-base', 'deps/v8//libv8_base', 'deps/v8//libv8_snapshot'],
 		'dynamicLibraries-win32': ['ws2_32.lib', 'winmm.lib'],
 		'dynamicLibraries-linux': ['pthread'],
+	}
+	// TEST
+	, monotest: {
+		objects: ['script.mono.test'],
+		staticLibraries: ['libinanity-mono', 'libinanity-mono-gen', 'libinanity-data', 'libinanity-platform-filesystem', 'libinanity-base'],
+		dynamicLibraries: ['mono-2.0']
 	}
 	// TEST
 	, nettesttcp: {

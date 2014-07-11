@@ -1,6 +1,3 @@
-#ifndef ___INANITY_INANITY_GRAPHICS_META_IPP___
-#define ___INANITY_INANITY_GRAPHICS_META_IPP___
-
 #include "graphics/Device.hpp"
 META_CLASS(Inanity::Graphics::Device, Inanity.Graphics.Device);
 META_CLASS_END();
@@ -48,5 +45,3 @@ META_CLASS(Inanity::Graphics::TgaImageLoader, Inanity.Graphics.TgaImageLoader);
 	META_CLASS_PARENT(Inanity::Graphics::ImageLoader);
 	META_CONSTRUCTOR();
 META_CLASS_END();
-
-#endif
