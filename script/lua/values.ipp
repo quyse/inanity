@@ -332,12 +332,12 @@ struct Value
 	static inline T Get(lua_State* state, int index)
 	{
 		lua_pushvalue(state, index);
-		return ConvertFromScript<T>(State::GetStateByLuaState(state)->CreateAny());
+		return ConvertFromScript<MetaProvider, T>(State::GetStateByLuaState(state)->CreateAny());
 	}
 
 	static inline void Push(lua_State* state, const T& value)
 	{
-		fast_cast<Any*>(&*ConvertToScript<T>(State::GetStateByLuaState(state), value))->PushValue();
+		fast_cast<Any*>(&*ConvertToScript<MetaProvider, T>(State::GetStateByLuaState(state), value))->PushValue();
 	}
 };
 
@@ -349,12 +349,12 @@ struct Value<const T&>
 	static inline T Get(lua_State* state, int index)
 	{
 		lua_pushvalue(state, index);
-		return ConvertFromScript<T>(State::GetStateByLuaState(state)->CreateAny());
+		return ConvertFromScript<MetaProvider, T>(State::GetStateByLuaState(state)->CreateAny());
 	}
 
 	static inline void Push(lua_State* state, const T& value)
 	{
-		fast_cast<Any*>(&*ConvertToScript<T>(State::GetStateByLuaState(state), value))->PushValue();
+		fast_cast<Any*>(&*ConvertToScript<MetaProvider, T>(State::GetStateByLuaState(state), value))->PushValue();
 	}
 };
 

@@ -140,11 +140,11 @@ struct Value
 
 	static inline T From(MonoObject* value)
 	{
-		return ConvertFromScript<T>(State::instance->CreateAny(value));
+		return ConvertFromScript<MetaProvider, T>(State::instance->CreateAny(value));
 	}
 	static inline MonoObject* To(const T& value)
 	{
-		return ConvertToScript<T>(State::instance, value).template FastCast<Any>().GetObject();
+		return ConvertToScript<MetaProvider, T>(State::instance, value).template FastCast<Any>().GetObject();
 	}
 };
 

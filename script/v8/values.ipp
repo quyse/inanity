@@ -279,12 +279,12 @@ struct Value
 
 	static inline T From(v8::Local<v8::Value> value)
 	{
-		return ConvertFromScript<T>(State::GetCurrent()->CreateAny(value));
+		return ConvertFromScript<MetaProvider, T>(State::GetCurrent()->CreateAny(value));
 	}
 
 	static inline v8::Local<v8::Value> To(const T& value)
 	{
-		return fast_cast<Any*>(&*ConvertToScript<T>(State::GetCurrent(), value))->GetV8Value();
+		return fast_cast<Any*>(&*ConvertToScript<MetaProvider, T>(State::GetCurrent(), value))->GetV8Value();
 	}
 };
 
@@ -295,12 +295,12 @@ struct Value<const T&>
 
 	static inline T From(v8::Local<v8::Value> value)
 	{
-		return ConvertFromScript<T>(State::GetCurrent()->CreateAny(value));
+		return ConvertFromScript<MetaProvider, T>(State::GetCurrent()->CreateAny(value));
 	}
 
 	static inline v8::Local<v8::Value> To(const T& value)
 	{
-		return fast_cast<Any*>(&*ConvertToScript<T>(State::GetCurrent(), value))->GetV8Value();
+		return fast_cast<Any*>(&*ConvertToScript<MetaProvider, T>(State::GetCurrent(), value))->GetV8Value();
 	}
 };
 

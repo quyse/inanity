@@ -350,12 +350,12 @@ struct Value
 
 	static inline T From(NPVariant value)
 	{
-		return ConvertFromScript<T>(State::GetCurrent()->CreateAnyViaCopy(value));
+		return ConvertFromScript<MetaProvider, T>(State::GetCurrent()->CreateAnyViaCopy(value));
 	}
 
 	static inline NPVariant To(const T& value)
 	{
-		ptr<Any> any = ConvertToScript<T>(State::GetCurrent(), value).template FastCast<Any>();
+		ptr<Any> any = ConvertToScript<MetaProvider, T>(State::GetCurrent(), value).template FastCast<Any>();
 		NPVariant variant = any->GetVariant();
 		State::DuplicateVariant(variant);
 		return variant;
@@ -369,12 +369,12 @@ struct Value<const T&>
 
 	static inline T From(NPVariant value)
 	{
-		return ConvertFromScript<T>(State::GetCurrent()->CreateAnyViaCopy(value));
+		return ConvertFromScript<MetaProvider, T>(State::GetCurrent()->CreateAnyViaCopy(value));
 	}
 
 	static inline NPVariant To(const T& value)
 	{
-		ptr<Any> any = ConvertToScript<T>(State::GetCurrent(), value).template FastCast<Any>();
+		ptr<Any> any = ConvertToScript<MetaProvider, T>(State::GetCurrent(), value).template FastCast<Any>();
 		NPVariant variant = any->GetVariant();
 		State::DuplicateVariant(variant);
 		return variant;

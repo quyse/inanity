@@ -9,23 +9,23 @@ class State;
 class Any;
 
 /// Converter of value-type things from script.
-template <typename T>
+template <typename MetaProvider, typename T>
 struct ConverterFromScript;
 
-template <typename T>
+template <typename MetaProvider, typename T>
 T ConvertFromScript(ptr<Any> value)
 {
-	return ConverterFromScript<T>::Convert(value);
+	return ConverterFromScript<MetaProvider, T>::Convert(value);
 }
 
 /// Converter of value-type things to script.
-template <typename T>
+template <typename MetaProvider, typename T>
 struct ConverterToScript;
 
-template <typename T>
+template <typename MetaProvider, typename T>
 ptr<Any> ConvertToScript(ptr<State> state, const T& value)
 {
-	return ConverterToScript<T>::Convert(state, value);
+	return ConverterToScript<MetaProvider, T>::Convert(state, value);
 }
 
 END_INANITY_SCRIPT
