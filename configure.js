@@ -388,13 +388,14 @@ var executables = {
 	, testft: {
 		objects: ['gui.testft'],
 		staticLibraries: [
-			'libinanity-graphics',
+			'libinanity-graphics-raw',
 			'libinanity-gui',
-			'libinanity-platform',
+			'libinanity-platform-filesystem',
+			'libinanity-deflate',
+			'libinanity-base',
 			'deps/freetype//libfreetype',
 			'deps/harfbuzz//libharfbuzz',
-			'libinanity-compress',
-			'libinanity-base',
+			'deps/zlib//libz'
 			],
 		dynamicLibraries: []
 	}
@@ -410,6 +411,8 @@ exports.configureComposer = function(libraryFile, composer) {
 	var confDir = a[1];
 	composer.configuration = a[2];
 	var library = libraries[a[3]];
+	if(!library)
+		throw "no library " + a[3];
 	var objects = platformed(library, 'objects', composer.platform);
 	for ( var i = 0; i < objects.length; ++i)
 		composer.addObjectFile(confDir + objects[i]);
