@@ -19,10 +19,9 @@ int main()
 		ptr<FileSystem> fs = NEW(Platform::FileSystem(""));
 		ptr<Gui::FontEngine> fontEngine = NEW(Gui::FtEngine());
 		ptr<Gui::FontFace> fontFace = fontEngine->LoadFontFace(fs->LoadFile("/gui/DejaVuSans.ttf"));
-		const int fontSize = 13;
-		ptr<Gui::FontShape> fontShape = fontFace->CreateShape(fontSize);
+		ptr<Gui::FontShape> fontShape = fontFace->CreateShape(30);
 		ptr<Gui::SwCanvas> canvas = NEW(Gui::SwCanvas());
-		ptr<Gui::FontGlyphs> fontGlyphs = fontFace->CreateGlyphs(canvas, fontSize);
+		ptr<Gui::FontGlyphs> fontGlyphs = fontFace->CreateGlyphs(canvas, 30, Gui::FontImageTypes::distanceField);
 
 		BmpImage::Save(fontGlyphs.FastCast<Gui::SwFontGlyphs>()->GetImage(), fs->SaveStream("/gui/alphabat.bmp"));
 

@@ -1,7 +1,7 @@
 #ifndef ___INANITY_GUI_FONT_GLYPHS_HPP___
 #define ___INANITY_GUI_FONT_GLYPHS_HPP___
 
-#include "gui.hpp"
+#include "FontImageType.hpp"
 #include <vector>
 
 BEGIN_INANITY_GUI
@@ -27,11 +27,20 @@ public:
 
 protected:
 	GlyphInfos glyphInfos;
+	/// Size of font used to create glyphs.
+	float originalFontSize;
+	/// Type of font image.
+	FontImageType fontImageType;
+	/// Smooth coefficient for distance field.
+	float smoothCoef;
 
-	FontGlyphs(const GlyphInfos& glyphInfos);
+	FontGlyphs(const GlyphInfos& glyphInfos, float originalFontSize, FontImageType fontImageType, float smoothCoef);
 
 public:
 	const GlyphInfos& GetGlyphInfos() const;
+	float GetOriginalFontSize() const;
+	FontImageType GetFontImageType() const;
+	float GetSmoothCoef() const;
 };
 
 END_INANITY_GUI

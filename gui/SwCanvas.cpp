@@ -15,14 +15,23 @@ void SwCanvas::SetDestination(ptr<RawTextureData> destination)
 }
 
 ptr<FontGlyphs> SwCanvas::CreateGlyphs(
-	ptr<RawTextureData> image,
-	const FontGlyphs::GlyphInfos& glyphInfos
+	const FontGlyphs::GlyphInfos& glyphInfos,
+	float originalFontSize,
+	FontImageType fontImageType,
+	float smoothCoef,
+	ptr<Graphics::RawTextureData> image
 )
 {
-	return NEW(SwFontGlyphs(glyphInfos, image));
+	return NEW(SwFontGlyphs(glyphInfos, originalFontSize, fontImageType, smoothCoef, image));
 }
 
-void SwCanvas::DrawGlyph(FontGlyphs* abstractGlyphs, int glyphIndex, const vec2& penPoint, const vec4& color)
+void SwCanvas::DrawGlyph(
+	FontGlyphs* abstractGlyphs,
+	int glyphIndex,
+	const vec2& penPoint,
+	float scale,
+	const vec4& color
+)
 {
 	SwFontGlyphs* glyphs = fast_cast<SwFontGlyphs*>(abstractGlyphs);
 
@@ -31,10 +40,10 @@ void SwCanvas::DrawGlyph(FontGlyphs* abstractGlyphs, int glyphIndex, const vec2&
 	if(glyphInfo.width == 0 || glyphInfo.height == 0)
 		return;
 
-	float x1 = penPoint.x + (float)glyphInfo.offsetX;
-	float y1 = penPoint.y + (float)glyphInfo.offsetY;
-	float x2 = x1 + (float)glyphInfo.width;
-	float y2 = y1 + (float)glyphInfo.height;
+	float x1 = penPoint.x + (float)glyphInfo.offsetX * scale;
+	float y1 = penPoint.y + (float)glyphInfo.offsetY * scale;
+	float x2 = x1 + (float)glyphInfo.width * scale;
+	float y2 = y1 + (float)glyphInfo.height * scale;
 
 	// calculate UV transform
 	float uX = (float)glyphInfo.width / (x2 - x1);
@@ -51,6 +60,16 @@ void SwCanvas::DrawGlyph(FontGlyphs* abstractGlyphs, int glyphIndex, const vec2&
 	RawTextureData* glyphImage = glyphs->GetImage();
 	int glyphPitch = glyphImage->GetMipLinePitch();
 	unsigned char* glyphData = (unsigned char*)glyphImage->GetMipData();
+
+	auto getGlyphData = [glyphData, glyphPitch, &glyphInfo](int i, int j) -> float
+	{
+		if(i < glyphInfo.leftTopY || i >= glyphInfo.leftTopY + glyphInfo.height || j < glyphInfo.leftTopX || j >= glyphInfo.leftTopX + glyphInfo.width)
+			return 0.0f;
+		return (float)glyphData[glyphPitch * i + j];
+	};
+
+	bool distanceField = glyphs->GetFontImageType() == FontImageTypes::distanceField;
+	float smooth = glyphs->GetSmoothCoef() * scale;
 
 	int destPitch = destination->GetMipLinePitch();
 	unsigned char* destData = (unsigned char*)destination->GetMipData();
@@ -69,14 +88,24 @@ void SwCanvas::DrawGlyph(FontGlyphs* abstractGlyphs, int glyphIndex, const vec2&
 
 			// bilinear interpolation
 			float alpha = (
-				(float)glyphData[glyphPitch * vi + ui] * (1.0f - uu) +
-				(float)glyphData[glyphPitch * vi + ui + 1] * uu
+				getGlyphData(vi, ui) * (1.0f - uu) +
+				getGlyphData(vi, ui + 1) * uu
+				//(float)glyphData[glyphPitch * vi + ui] * (1.0f - uu) +
+				//(float)glyphData[glyphPitch * vi + ui + 1] * uu
 			) * (1.0f - vv) +
 			(
-				(float)glyphData[glyphPitch * (vi + 1) + ui] * (1.0f - uu) +
-				(float)glyphData[glyphPitch * (vi + 1) + ui + 1] * uu
+				getGlyphData(vi + 1, ui) * (1.0f - uu) +
+				getGlyphData(vi + 1, ui + 1) * uu
+				//(float)glyphData[glyphPitch * (vi + 1) + ui] * (1.0f - uu) +
+				//(float)glyphData[glyphPitch * (vi + 1) + ui + 1] * uu
 			) * vv;
+
 			alpha /= 255;
+
+			// apply distance field transform
+			if(distanceField)
+				alpha = std::min(std::max((alpha - 0.5f) * smooth + 0.5f, 0.0f), 1.0f);
+
 			alpha *= color.w;
 
 			// alpha blend

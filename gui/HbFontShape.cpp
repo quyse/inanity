@@ -5,8 +5,8 @@ BEGIN_INANITY_GUI
 
 using namespace Graphics;
 
-HbFontShape::HbFontShape(ptr<FontFace> face, hb_font_t* font)
-: face(face), font(font) {}
+HbFontShape::HbFontShape(float fontSize, ptr<FontFace> face, hb_font_t* font, FT_Face ftFace)
+: FontShape(fontSize), face(face), font(font), ftFace(ftFace) {}
 
 HbFontShape::~HbFontShape()
 {
@@ -15,6 +15,8 @@ HbFontShape::~HbFontShape()
 
 void HbFontShape::Shape(const String& text, vec2* outAdvance, std::vector<OutGlyph>* outGlyphs)
 {
+	FT_Set_Pixel_Sizes(ftFace, (FT_UInt)fontSize, (FT_UInt)fontSize);
+
 	// shape text, and get glyph numbers and offsets
 	hb_buffer_t* buffer = hb_buffer_create();
 	hb_buffer_set_direction(buffer, HB_DIRECTION_LTR);

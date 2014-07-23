@@ -21,8 +21,16 @@ public:
 		int number;
 	};
 
+protected:
+	float fontSize;
+
+protected:
+	FontShape(float fontSize);
+
 public:
 	virtual void Shape(const String& text, Graphics::vec2* outAdvance, std::vector<OutGlyph>* outGlyphs) = 0;
+
+	float GetFontSize() const;
 };
 
 END_INANITY_GUI

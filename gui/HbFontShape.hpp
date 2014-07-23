@@ -3,6 +3,7 @@
 
 #include "FontShape.hpp"
 #include "hb.hpp"
+#include "ft.hpp"
 
 BEGIN_INANITY_GUI
 
@@ -14,9 +15,10 @@ class HbFontShape : public FontShape
 private:
 	ptr<FontFace> face;
 	hb_font_t* font;
+	FT_Face ftFace;
 
 public:
-	HbFontShape(ptr<FontFace> face, hb_font_t* font);
+	HbFontShape(float fontSize, ptr<FontFace> face, hb_font_t* font, FT_Face ftFace);
 	~HbFontShape();
 
 	/// FontShape's methods.

@@ -100,8 +100,10 @@ void Font::DrawString(
 		THROW("Invalid vertical alignment");
 	}
 
+	float scale = shape->GetFontSize() / glyphs->GetOriginalFontSize();
+
 	for(size_t i = 0; i < outGlyphs.size(); ++i)
-		canvas->DrawGlyph(glyphs, outGlyphs[i].number, origin + outGlyphs[i].position, color);
+		canvas->DrawGlyph(glyphs, outGlyphs[i].number, origin + outGlyphs[i].position, scale, color);
 
 	END_TRY("Can't draw string with font");
 }

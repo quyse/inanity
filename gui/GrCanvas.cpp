@@ -48,16 +48,18 @@ struct GrCanvas::Helper : public Object
 	Interpolant<vec2> iTexcoord;
 	Interpolant<vec4> iColor;
 
-	ptr<UniformGroup> ugSymbols;
+	ptr<UniformGroup> ug;
 	UniformArray<vec4> uPositions;
 	UniformArray<vec4> uTexcoords;
 	UniformArray<vec4> uColors;
+	Uniform<float> uSmoothCoef;
 
 	Sampler<float, 2> uFontSampler;
 
 	ptr<VertexBuffer> vb;
 	ptr<VertexShader> vs;
-	ptr<PixelShader> ps;
+	ptr<PixelShader> psGrayscale;
+	ptr<PixelShader> psDistanceField;
 	ptr<BlendState> bs;
 
 	Helper(ptr<Device> device, ptr<ShaderCache> shaderCache) :
@@ -74,16 +76,17 @@ struct GrCanvas::Helper : public Object
 		iTexcoord(1),
 		iColor(2),
 
-		ugSymbols(NEW(UniformGroup(0))),
-		uPositions(ugSymbols->AddUniformArray<vec4>(maxGlyphsCount)),
-		uTexcoords(ugSymbols->AddUniformArray<vec4>(maxGlyphsCount)),
-		uColors(ugSymbols->AddUniformArray<vec4>(maxGlyphsCount)),
+		ug(NEW(UniformGroup(0))),
+		uPositions(ug->AddUniformArray<vec4>(maxGlyphsCount)),
+		uTexcoords(ug->AddUniformArray<vec4>(maxGlyphsCount)),
+		uColors(ug->AddUniformArray<vec4>(maxGlyphsCount)),
+		uSmoothCoef(ug->AddUniform<float>()),
 
 		uFontSampler(0)
 	{
 		BEGIN_TRY();
 
-		ugSymbols->Finalize(device);
+		ug->Finalize(device);
 
 		// geometry
 		static const vec4 vertices[6] =
@@ -114,9 +117,12 @@ struct GrCanvas::Helper : public Object
 			iColor.Set(tmpColor)
 		));
 
-		// pixel shader
-		ps = shaderCache->GetPixelShader(
+		// pixel shaders
+		psGrayscale = shaderCache->GetPixelShader(
 			fragment(0, newvec4(iColor["xyz"], iColor["w"] * uFontSampler.Sample(iTexcoord)))
+		);
+		psDistanceField = shaderCache->GetPixelShader(
+			fragment(0, newvec4(iColor["xyz"], iColor["w"] * saturate((uFontSampler.Sample(iTexcoord) - val(0.5f)) * uSmoothCoef + val(0.5f))))
 		);
 
 		// blending
@@ -128,7 +134,7 @@ struct GrCanvas::Helper : public Object
 };
 
 GrCanvas::GrCanvas(ptr<Device> device, ptr<Helper> helper)
-: device(device), helper(helper), queuedGlyphsCount(0) {}
+: device(device), helper(helper), queuedGlyphsCount(0), currentSmoothCoef(-1), currentDistanceFieldMode(false) {}
 
 void GrCanvas::SetContext(ptr<Context> context)
 {
@@ -141,8 +147,11 @@ ptr<GrCanvas> GrCanvas::Create(ptr<Device> device, ptr<ShaderCache> shaderCache)
 }
 
 ptr<FontGlyphs> GrCanvas::CreateGlyphs(
-	ptr<RawTextureData> image,
-	const FontGlyphs::GlyphInfos& glyphInfos
+	const FontGlyphs::GlyphInfos& glyphInfos,
+	float originalFontSize,
+	FontImageType fontImageType,
+	float smoothCoef,
+	ptr<Graphics::RawTextureData> image
 )
 {
 	BEGIN_TRY();
@@ -174,22 +183,36 @@ ptr<FontGlyphs> GrCanvas::CreateGlyphs(
 			);
 	}
 
-	return NEW(GrFontGlyphs(glyphInfos, texture, glyphs));
+	return NEW(GrFontGlyphs(glyphInfos, originalFontSize, fontImageType, smoothCoef, texture, glyphs));
 
 	END_TRY("Can't create graphics font glyphs");
 }
 
-void GrCanvas::DrawGlyph(FontGlyphs* abstractGlyphs, int glyphIndex, const vec2& penPoint, const vec4& color)
+void GrCanvas::DrawGlyph(
+	FontGlyphs* abstractGlyphs,
+	int glyphIndex,
+	const vec2& penPoint,
+	float scale,
+	const vec4& color
+)
 {
 	GrFontGlyphs* glyphs = fast_cast<GrFontGlyphs*>(abstractGlyphs);
 
 	ptr<Texture> texture = glyphs->GetTexture();
+	float smoothCoef = glyphs->GetSmoothCoef() * scale * 2;
+	bool distanceFieldMode = glyphs->GetFontImageType() == FontImageTypes::distanceField;
 
-	// if queue is full, or current texture is different, flush
-	if(queuedGlyphsCount >= Helper::maxGlyphsCount || currentFontTexture != texture)
+	// if queue is full, or some parameter is different, flush
+	if(queuedGlyphsCount >= Helper::maxGlyphsCount
+		|| currentFontTexture != texture
+		|| currentSmoothCoef != smoothCoef
+		|| currentDistanceFieldMode != distanceFieldMode
+		)
 		Flush();
 
 	currentFontTexture = texture;
+	currentSmoothCoef = smoothCoef;
+	currentDistanceFieldMode = distanceFieldMode;
 
 	float scaleX = 2.0f / (float)context->GetViewportWidth();
 	float scaleY = -2.0f / (float)context->GetViewportHeight();
@@ -198,7 +221,7 @@ void GrCanvas::DrawGlyph(FontGlyphs* abstractGlyphs, int glyphIndex, const vec2&
 
 	// add glyph to queue
 	helper->uPositions.Set(queuedGlyphsCount,
-		(vec4(penPoint.x, penPoint.y, penPoint.x, penPoint.y) + glyph.offset)
+		(vec4(penPoint.x, penPoint.y, penPoint.x, penPoint.y) + glyph.offset * scale)
 		* vec4(scaleX, scaleY, scaleX, scaleY)
 		+ vec4(-1, 1, -1, 1)
 	);
@@ -213,20 +236,22 @@ void GrCanvas::Flush()
 	if(!queuedGlyphsCount)
 		return;
 
+	helper->uSmoothCoef.Set(currentSmoothCoef);
+
 	Context::LetAttributeBinding lab(context, helper->ab);
 	Context::LetVertexBuffer lvb(context, 0, helper->vb);
 	Context::LetIndexBuffer lib(context, 0);
 	Context::LetVertexShader lvs(context, helper->vs);
-	Context::LetPixelShader lps(context, helper->ps);
+	Context::LetPixelShader lps(context, currentDistanceFieldMode ? helper->psDistanceField : helper->psGrayscale);
 	Context::LetBlendState lbs(context, helper->bs);
 	Context::LetCullMode lcm(context, Context::cullModeNone);
 	Context::LetFillMode lfm(context, Context::fillModeSolid);
 	Context::LetDepthTestFunc ldtf(context, Context::depthTestFuncAlways);
 	Context::LetDepthWrite ldw(context, false);
-	Context::LetUniformBuffer lub(context, helper->ugSymbols);
+	Context::LetUniformBuffer lub(context, helper->ug);
 	Context::LetSampler ls(context, helper->uFontSampler, currentFontTexture);
 
-	helper->ugSymbols->Upload(context);
+	helper->ug->Upload(context);
 
 	helper->instancer->Draw(context, queuedGlyphsCount);
 

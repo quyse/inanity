@@ -2,6 +2,7 @@
 #define ___INANITY_GUI_SW_FONT_GLYPHS_HPP___
 
 #include "FontGlyphs.hpp"
+#include "FontImageType.hpp"
 #include "../graphics/graphics.hpp"
 
 BEGIN_INANITY_GRAPHICS
@@ -18,7 +19,13 @@ private:
 	ptr<Graphics::RawTextureData> image;
 
 public:
-	SwFontGlyphs(const GlyphInfos& glyphInfos, ptr<Graphics::RawTextureData> image);
+	SwFontGlyphs(
+		const GlyphInfos& glyphInfos,
+		float originalFontSize,
+		FontImageType fontImageType,
+		float smoothCoef,
+		ptr<Graphics::RawTextureData> image
+	);
 
 	ptr<Graphics::RawTextureData> GetImage() const;
 };

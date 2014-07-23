@@ -17,10 +17,19 @@ public:
 
 	//*** Canvas' methods.
 	ptr<FontGlyphs> CreateGlyphs(
-		ptr<Graphics::RawTextureData> image,
-		const FontGlyphs::GlyphInfos& glyphInfos
+		const FontGlyphs::GlyphInfos& glyphInfos,
+		float originalFontSize,
+		FontImageType fontImageType,
+		float smoothCoef,
+		ptr<Graphics::RawTextureData> image
 	);
-	void DrawGlyph(FontGlyphs* glyphs, int glyphIndex, const Graphics::vec2& penPoint, const Graphics::vec4& color);
+	void DrawGlyph(
+		FontGlyphs* glyphs,
+		int glyphIndex,
+		const Graphics::vec2& penPoint,
+		float scale,
+		const Graphics::vec4& color
+	);
 };
 
 END_INANITY_GUI

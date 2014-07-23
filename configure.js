@@ -278,7 +278,7 @@ var libraries = {
 			'gui.Element', 'gui.ContainerElement', 'gui.FreeContainer', 'gui.ContentContainer',
 			'gui.Window', 'gui.Label', 'gui.Button', 'gui.TextBox',
 			'gui.Visualizer',
-			'gui.Font', 'gui.Canvas', 'gui.FontGlyphs',
+			'gui.Font', 'gui.Canvas', 'gui.FontGlyphs', 'gui.FontShape',
 			// software
 			'gui.SwCanvas', 'gui.SwFontGlyphs',
 			// graphics

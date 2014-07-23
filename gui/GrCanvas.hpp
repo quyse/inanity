@@ -29,6 +29,10 @@ private:
 	int queuedGlyphsCount;
 	/// Last set font texture.
 	ptr<Graphics::Texture> currentFontTexture;
+	/// Last set smooth coef.
+	float currentSmoothCoef;
+	/// Is current mode is distance field.
+	bool currentDistanceFieldMode;
 
 	GrCanvas(ptr<Graphics::Device> device, ptr<Helper> helper);
 
@@ -39,10 +43,19 @@ public:
 
 	//*** Canvas' methods.
 	ptr<FontGlyphs> CreateGlyphs(
-		ptr<Graphics::RawTextureData> image,
-		const FontGlyphs::GlyphInfos& glyphInfos
+		const FontGlyphs::GlyphInfos& glyphInfos,
+		float originalFontSize,
+		FontImageType fontImageType,
+		float smoothCoef,
+		ptr<Graphics::RawTextureData> image
 	);
-	void DrawGlyph(FontGlyphs* glyphs, int glyphIndex, const Graphics::vec2& penPoint, const Graphics::vec4& color);
+	void DrawGlyph(
+		FontGlyphs* glyphs,
+		int glyphIndex,
+		const Graphics::vec2& penPoint,
+		float scale,
+		const Graphics::vec4& color
+	);
 	void Flush();
 };
 

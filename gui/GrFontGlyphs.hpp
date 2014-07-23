@@ -2,6 +2,7 @@
 #define ___INANITY_GUI_GR_FONT_GLYPHS_HPP___
 
 #include "FontGlyphs.hpp"
+#include "FontImageType.hpp"
 #include "../graphics/graphics.hpp"
 #include <vector>
 
@@ -36,7 +37,14 @@ private:
 	Glyphs glyphs;
 
 public:
-	GrFontGlyphs(const GlyphInfos& glyphInfos, ptr<Graphics::Texture> texture, const Glyphs& glyphs);
+	GrFontGlyphs(
+		const GlyphInfos& glyphInfos,
+		float originalFontSize,
+		FontImageType fontImageType,
+		float smoothCoef,
+		ptr<Graphics::Texture> texture,
+		const Glyphs& glyphs
+	);
 
 	ptr<Graphics::Texture> GetTexture() const;
 	const Glyphs& GetGlyphs() const;
