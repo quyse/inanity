@@ -19,6 +19,7 @@
 
 #include "../input/Frame.hpp"
 #include "../graphics/GlSystem.hpp"
+#include "../audio/AlSystem.hpp"
 
 BEGIN_INANITY_PLATFORM
 
@@ -29,6 +30,12 @@ ptr<Graphics::System> Game::CreateDefaultGraphicsSystem()
 		return NEW(Graphics::Dx11System());
 #endif
 	return NEW(Graphics::GlSystem());
+}
+
+ptr<Audio::System> Game::CreateDefaultAudioSystem()
+{
+	// for now there is only one system
+	return NEW(Audio::AlSystem());
 }
 
 ptr<Input::Manager> Game::CreateInputManager(ptr<Window> window)
