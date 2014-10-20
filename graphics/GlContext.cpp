@@ -217,7 +217,7 @@ void GlContext::Update()
 	}
 
 	// if vertex buffers supported, use them
-	if(GLEW_ARB_vertex_attrib_binding)
+	if(device->GetInternalCaps() & GlDevice::InternalCaps::vertexAttribBinding)
 	{
 		// attribute binding
 		THROW_ASSERT(cellAttributeBinding.top);
