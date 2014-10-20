@@ -128,7 +128,6 @@ size_t OggVorbisStream::Read(void* dataPtr, size_t size)
 	try
 	{
 		char* data = (char*)dataPtr;
-		size_t allSize = size;
 
 		size_t read = 0;
 
