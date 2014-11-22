@@ -17,11 +17,32 @@ BEGIN_INANITY_GUI
 
 class GrCanvas : public Canvas
 {
+public:
+	/// Subpixel modes.
+	enum SubPixelMode
+	{
+		subPixelModeOff,
+
+		subPixelModeOnBegin,
+
+		subPixelModeHorizontalRGB = subPixelModeOnBegin,
+		subPixelModeHorizontalBGR,
+		subPixelModeVerticalRGB,
+		subPixelModeVerticalBGR,
+
+		subPixelModeOnEnd,
+
+		subPixelModesCount = subPixelModeOnEnd
+	};
+
 private:
 	ptr<Graphics::Device> device;
 
 	struct Helper;
 	ptr<Helper> helper;
+
+	/// Subpixel mode.
+	SubPixelMode subPixelMode;
 
 	/// Current graphics context.
 	ptr<Graphics::Context> context;
@@ -36,6 +57,8 @@ public:
 	void SetContext(ptr<Graphics::Context> context);
 
 	static ptr<GrCanvas> Create(ptr<Graphics::Device> device, ptr<Graphics::ShaderCache> shaderCache);
+
+	void SetSubPixelMode(SubPixelMode subPixelMode);
 
 	//*** Canvas' methods.
 	ptr<FontGlyphs> CreateGlyphs(

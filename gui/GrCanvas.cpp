@@ -57,8 +57,8 @@ struct GrCanvas::Helper : public Object
 
 	ptr<VertexBuffer> vb;
 	ptr<VertexShader> vs;
-	ptr<PixelShader> ps;
-	ptr<BlendState> bs;
+	ptr<PixelShader> ps[subPixelModesCount];
+	ptr<BlendState> bs[subPixelModesCount];
 
 	Helper(ptr<Device> device, ptr<ShaderCache> shaderCache) :
 		vl(NEW(VertexLayout(sizeof(vec4)))),
@@ -114,21 +114,59 @@ struct GrCanvas::Helper : public Object
 			iColor.Set(tmpColor)
 		));
 
-		// pixel shader
-		ps = shaderCache->GetPixelShader(
+		// pixel shaders
+		ps[subPixelModeOff] = shaderCache->GetPixelShader(
 			fragment(0, newvec4(iColor["xyz"], iColor["w"] * uFontSampler.Sample(iTexcoord)))
-		);
+			);
+
+		for(int subPixelMode = subPixelModeOnBegin; subPixelMode < subPixelModeOnEnd; ++subPixelMode)
+		{
+			static const float offsetsX[subPixelModeOnEnd - subPixelModeOnBegin][3] =
+			{
+				-1, 0, 1,
+				1, 0, -1,
+				0, 0, 0,
+				0, 0, 0
+			};
+			static const float offsetsY[subPixelModeOnEnd - subPixelModeOnBegin][3] =
+			{
+				0, 0, 0,
+				0, 0, 0
+				-1, 0, 1,
+				1, 0, -1,
+			};
+
+			const float* dx = offsetsX[subPixelMode - subPixelModeOnBegin];
+			const float* dy = offsetsY[subPixelMode - subPixelModeOnBegin];
+
+			ps[subPixelMode] = shaderCache->GetPixelShader((
+				fragment(0, newvec4(iColor["xyz"], 1.0f)),
+				fragment(1, newvec4(
+					iColor["w"] * uFontSampler.Sample(iTexcoord + ddx(iTexcoord) * val(dx[0] / 3.0f) + ddy(iTexcoord) * val(dy[0] / 3.0f)),
+					iColor["w"] * uFontSampler.Sample(iTexcoord + ddx(iTexcoord) * val(dx[1] / 3.0f) + ddy(iTexcoord) * val(dy[1] / 3.0f)),
+					iColor["w"] * uFontSampler.Sample(iTexcoord + ddx(iTexcoord) * val(dx[2] / 3.0f) + ddy(iTexcoord) * val(dy[2] / 3.0f)),
+					1.0f))
+				));
+		}
 
 		// blending
-		bs = device->CreateBlendState();
-		bs->SetColor(BlendState::colorSourceSrcAlpha, BlendState::colorSourceInvSrcAlpha, BlendState::operationAdd);
+		{
+			ptr<BlendState> bsSubPixelOff = device->CreateBlendState();
+			bsSubPixelOff->SetColor(BlendState::colorSourceSrcAlpha, BlendState::colorSourceInvSrcAlpha, BlendState::operationAdd);
+			bs[subPixelModeOff] = bsSubPixelOff;
+
+			ptr<BlendState> bsSubPixelOn = device->CreateBlendState();
+			bsSubPixelOn->SetColor(BlendState::colorSourceSecondSrc, BlendState::colorSourceInvSecondSrc, BlendState::operationAdd);
+			for(int i = subPixelModeOnBegin; i < subPixelModeOnEnd; ++i)
+				bs[i] = bsSubPixelOn;
+		}
 
 		END_TRY("Can't create GrCanvas helper");
 	}
 };
 
 GrCanvas::GrCanvas(ptr<Device> device, ptr<Helper> helper)
-: device(device), helper(helper), queuedGlyphsCount(0) {}
+: device(device), helper(helper), subPixelMode(subPixelModeHorizontalRGB), queuedGlyphsCount(0) {}
 
 void GrCanvas::SetContext(ptr<Context> context)
 {
@@ -138,6 +176,15 @@ void GrCanvas::SetContext(ptr<Context> context)
 ptr<GrCanvas> GrCanvas::Create(ptr<Device> device, ptr<ShaderCache> shaderCache)
 {
 	return NEW(GrCanvas(device, NEW(GrCanvas::Helper(device, shaderCache))));
+}
+
+void GrCanvas::SetSubPixelMode(SubPixelMode subPixelMode)
+{
+	if(this->subPixelMode != subPixelMode)
+	{
+		Flush();
+		this->subPixelMode = subPixelMode;
+	}
 }
 
 ptr<FontGlyphs> GrCanvas::CreateGlyphs(
@@ -221,8 +268,8 @@ void GrCanvas::Flush()
 	Context::LetVertexBuffer lvb(context, 0, helper->vb);
 	Context::LetIndexBuffer lib(context, 0);
 	Context::LetVertexShader lvs(context, helper->vs);
-	Context::LetPixelShader lps(context, helper->ps);
-	Context::LetBlendState lbs(context, helper->bs);
+	Context::LetPixelShader lps(context, helper->ps[subPixelMode]);
+	Context::LetBlendState lbs(context, helper->bs[subPixelMode]);
 	Context::LetCullMode lcm(context, Context::cullModeNone);
 	Context::LetFillMode lfm(context, Context::fillModeSolid);
 	Context::LetDepthTestFunc ldtf(context, Context::depthTestFuncAlways);
