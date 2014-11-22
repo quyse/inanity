@@ -396,8 +396,8 @@ void GlslGeneratorInstance::PrintOperationNodeInit(OperationNode* node)
 				OP(Exp, exp);
 				OP(Exp2, exp2);
 				OP(Log, log);
-				OP(Ddx, ddx);
-				OP(Ddy, ddy);
+				OP(Ddx, dFdx);
+				OP(Ddy, dFdy);
 				OP(Floor, floor);
 				OP(Ceil, ceil);
 				OP(Mod, mod);
