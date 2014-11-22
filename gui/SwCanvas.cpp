@@ -16,10 +16,12 @@ void SwCanvas::SetDestination(ptr<RawTextureData> destination)
 
 ptr<FontGlyphs> SwCanvas::CreateGlyphs(
 	ptr<RawTextureData> image,
-	const FontGlyphs::GlyphInfos& glyphInfos
+	const FontGlyphs::GlyphInfos& glyphInfos,
+	int scaleX,
+	int scaleY
 )
 {
-	return NEW(SwFontGlyphs(glyphInfos, image));
+	return NEW(SwFontGlyphs(glyphInfos, scaleX, scaleY, image));
 }
 
 void SwCanvas::DrawGlyph(FontGlyphs* abstractGlyphs, int glyphIndex, const vec2& penPoint, const vec4& color)
@@ -31,10 +33,13 @@ void SwCanvas::DrawGlyph(FontGlyphs* abstractGlyphs, int glyphIndex, const vec2&
 	if(glyphInfo.width == 0 || glyphInfo.height == 0)
 		return;
 
-	float x1 = penPoint.x + (float)glyphInfo.offsetX;
-	float y1 = penPoint.y + (float)glyphInfo.offsetY;
-	float x2 = x1 + (float)glyphInfo.width;
-	float y2 = y1 + (float)glyphInfo.height;
+	float invScaleX = 1.0f / float(glyphs->GetScaleX());
+	float invScaleY = 1.0f / float(glyphs->GetScaleY());
+
+	float x1 = penPoint.x + (float)glyphInfo.offsetX * invScaleX;
+	float y1 = penPoint.y + (float)glyphInfo.offsetY * invScaleY;
+	float x2 = x1 + (float)glyphInfo.width * invScaleX;
+	float y2 = y1 + (float)glyphInfo.height * invScaleY;
 
 	// calculate UV transform
 	float uX = (float)glyphInfo.width / (x2 - x1);
@@ -59,13 +64,13 @@ void SwCanvas::DrawGlyph(FontGlyphs* abstractGlyphs, int glyphIndex, const vec2&
 	{
 		float v = vY * (float)y + vC;
 		int vi = (int)v;
-		float vv = v - (float)vi;
+		float vv = v - floor(v);
 
 		for(int x = left; x < right; ++x)
 		{
 			float u = uX * (float)x + uC;
 			int ui = (int)u;
-			float uu = u - (float)ui;
+			float uu = u - floor(u);
 
 			// bilinear interpolation
 			float alpha = (

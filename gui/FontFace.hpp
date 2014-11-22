@@ -16,8 +16,10 @@ public:
 	/// Create font shape for the given font size.
 	virtual ptr<FontShape> CreateShape(int size) = 0;
 	/// Create font glyphs for the given font size.
-	/** Size in pixels. */
-	virtual ptr<FontGlyphs> CreateGlyphs(Canvas* canvas, int size) = 0;
+	/** Size in pixels. Scale is for better quality.
+	Half scale means additional number of pixels added for either side.
+	i.e. half scale = 2 means x5, = 0 means x1. */
+	virtual ptr<FontGlyphs> CreateGlyphs(Canvas* canvas, int size, int halfScaleX = 1, int halfScaleY = 0) = 0;
 };
 
 END_INANITY_GUI

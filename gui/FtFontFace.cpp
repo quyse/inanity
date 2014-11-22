@@ -32,13 +32,13 @@ ptr<FontShape> FtFontFace::CreateShape(int size)
 	END_TRY("Can't create shape for Freetype font face");
 }
 
-ptr<FontGlyphs> FtFontFace::CreateGlyphs(Canvas* canvas, int size)
+ptr<FontGlyphs> FtFontFace::CreateGlyphs(Canvas* canvas, int size, int halfScaleX, int halfScaleY)
 {
 	BEGIN_TRY();
 
 	FT_Long glyphsCount = ftFace->num_glyphs;
 
-	if(FT_Set_Pixel_Sizes(ftFace, size, size))
+	if(FT_Set_Pixel_Sizes(ftFace, size * (halfScaleX * 2 + 1), size * (halfScaleY * 2 + 1)))
 		THROW("Can't set pixel sizes");
 
 	std::vector<ptr<RawTextureData> > glyphImages(glyphsCount);
@@ -59,13 +59,41 @@ ptr<FontGlyphs> FtFontFace::CreateGlyphs(Canvas* canvas, int size)
 		{
 			THROW_ASSERT(bitmap.pixel_mode == FT_PIXEL_MODE_GRAY);
 
-			ptr<File> pixelsFile = NEW(MemoryFile(bitmap.width * bitmap.rows));
-			char* pixelsData = (char*)pixelsFile->GetData();
+			ptr<File> sourcePixelsFile = NEW(MemoryFile(bitmap.width * bitmap.rows));
+			unsigned char* sourcePixelsData = (unsigned char*)sourcePixelsFile->GetData();
 			for(int i = 0; i < bitmap.rows; ++i)
 				memcpy(
-					pixelsData + i * bitmap.width,
+					sourcePixelsData + i * bitmap.width,
 					bitmap.buffer + (bitmap.pitch >= 0 ? i : (bitmap.rows - 1 - i)) * bitmap.pitch,
 					bitmap.width);
+
+			int pixelsWidth = bitmap.width + halfScaleX * 2;
+			int pixelsHeight = bitmap.rows + halfScaleY * 2;
+
+			ptr<File> pixelsFile;
+			if(halfScaleX || halfScaleY)
+			{
+				pixelsFile = NEW(MemoryFile(pixelsWidth * pixelsHeight));
+				unsigned char* pixelsData = (unsigned char*)pixelsFile->GetData();
+				int fullScale = (halfScaleX * 2 + 1) * (halfScaleY * 2 + 1);
+				for(int i = 0; i < pixelsHeight; ++i)
+					for(int j = 0; j < pixelsWidth; ++j)
+					{
+						int mini = std::max(i - halfScaleY * 2, 0);
+						int maxi = std::min(i + 1, bitmap.rows);
+						int minj = std::max(j - halfScaleX * 2, 0);
+						int maxj = std::min(j + 1, bitmap.width);
+						int s = 0;
+						for(int ii = mini; ii < maxi; ++ii)
+							for(int jj = minj; jj < maxj; ++jj)
+								s += sourcePixelsData[ii * bitmap.width + jj];
+						pixelsData[i * pixelsWidth + j] = (unsigned char)(s / fullScale);
+					}
+
+				sourcePixelsFile = nullptr;
+			}
+			else
+				pixelsFile = sourcePixelsFile;
 
 			glyphImage = NEW(RawTextureData(
 				pixelsFile,
@@ -73,8 +101,8 @@ ptr<FontGlyphs> FtFontFace::CreateGlyphs(Canvas* canvas, int size)
 					PixelFormat::pixelR,
 					PixelFormat::formatUint,
 					PixelFormat::size8bit),
-				bitmap.width, // width
-				bitmap.rows, // height
+				pixelsWidth, // width
+				pixelsHeight, // height
 				0, // depth
 				1, // mips
 				0 // count
@@ -104,8 +132,8 @@ ptr<FontGlyphs> FtFontFace::CreateGlyphs(Canvas* canvas, int size)
 		FontGlyphs::GlyphInfo& glyphInfo = glyphInfos[i];
 		glyphInfo.width = glyphImage->GetImageWidth();
 		glyphInfo.height = glyphImage->GetImageHeight();
-		glyphInfo.offsetX = (int)ftFace->glyph->bitmap_left;
-		glyphInfo.offsetY = -(int)ftFace->glyph->bitmap_top;
+		glyphInfo.offsetX = (int)ftFace->glyph->bitmap_left + halfScaleX;
+		glyphInfo.offsetY = -(int)ftFace->glyph->bitmap_top + halfScaleY;
 	}
 
 	// unite glyph images
@@ -119,7 +147,7 @@ ptr<FontGlyphs> FtFontFace::CreateGlyphs(Canvas* canvas, int size)
 		glyphInfos[i].leftTopY = glyphPositions[i].second;
 	}
 
-	return canvas->CreateGlyphs(glyphsImage, glyphInfos);
+	return canvas->CreateGlyphs(glyphsImage, glyphInfos, 1 + halfScaleX * 2, 1 + halfScaleY * 2);
 
 	END_TRY("Can't create Freetype font instance");
 }

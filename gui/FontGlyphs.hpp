@@ -27,11 +27,16 @@ public:
 
 protected:
 	GlyphInfos glyphInfos;
+	/// Scale of glyphs.
+	/** Glyphs may be upscaled, so we need to render them downscaled. */
+	int scaleX, scaleY;
 
-	FontGlyphs(const GlyphInfos& glyphInfos);
+	FontGlyphs(const GlyphInfos& glyphInfos, int scaleX, int scaleY);
 
 public:
 	const GlyphInfos& GetGlyphInfos() const;
+	int GetScaleX() const;
+	int GetScaleY() const;
 };
 
 END_INANITY_GUI

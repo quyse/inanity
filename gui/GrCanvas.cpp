@@ -142,7 +142,9 @@ ptr<GrCanvas> GrCanvas::Create(ptr<Device> device, ptr<ShaderCache> shaderCache)
 
 ptr<FontGlyphs> GrCanvas::CreateGlyphs(
 	ptr<RawTextureData> image,
-	const FontGlyphs::GlyphInfos& glyphInfos
+	const FontGlyphs::GlyphInfos& glyphInfos,
+	int scaleX,
+	int scaleY
 )
 {
 	BEGIN_TRY();
@@ -153,6 +155,8 @@ ptr<FontGlyphs> GrCanvas::CreateGlyphs(
 	ptr<Texture> texture = device->CreateStaticTexture(image, samplerSettings);
 
 	vec2 invSize(1.0f / float(image->GetImageWidth()), 1.0f / float(image->GetImageHeight()));
+
+	vec2 invScale(1.0f / float(scaleX), 1.0f / float(scaleY));
 
 	GrFontGlyphs::Glyphs glyphs(glyphInfos.size());
 	for(size_t i = 0; i < glyphs.size(); ++i)
@@ -171,10 +175,10 @@ ptr<FontGlyphs> GrCanvas::CreateGlyphs(
 			float(glyphInfo.offsetY + glyphInfo.height),
 			float(glyphInfo.offsetX + glyphInfo.width),
 			float(glyphInfo.offsetY)
-			);
+			) * vec4(invScale.x, invScale.y, invScale.x, invScale.y);
 	}
 
-	return NEW(GrFontGlyphs(glyphInfos, texture, glyphs));
+	return NEW(GrFontGlyphs(glyphInfos, scaleX, scaleY, texture, glyphs));
 
 	END_TRY("Can't create graphics font glyphs");
 }

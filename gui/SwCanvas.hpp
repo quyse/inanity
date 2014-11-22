@@ -18,7 +18,9 @@ public:
 	//*** Canvas' methods.
 	ptr<FontGlyphs> CreateGlyphs(
 		ptr<Graphics::RawTextureData> image,
-		const FontGlyphs::GlyphInfos& glyphInfos
+		const FontGlyphs::GlyphInfos& glyphInfos,
+		int scaleX,
+		int scaleY
 	);
 	void DrawGlyph(FontGlyphs* glyphs, int glyphIndex, const Graphics::vec2& penPoint, const Graphics::vec4& color);
 };

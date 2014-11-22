@@ -20,7 +20,9 @@ public:
 	/// Create font glyphs in appropriate format.
 	virtual ptr<FontGlyphs> CreateGlyphs(
 		ptr<Graphics::RawTextureData> image,
-		const FontGlyphs::GlyphInfos& glyphInfos
+		const FontGlyphs::GlyphInfos& glyphInfos,
+		int scaleX,
+		int scaleY
 		) = 0;
 	/// Draw glyph.
 	virtual void DrawGlyph(FontGlyphs* glyphs, int glyphIndex, const Graphics::vec2& penPoint, const Graphics::vec4& color) = 0;

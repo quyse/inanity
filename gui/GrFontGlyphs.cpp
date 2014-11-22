@@ -3,8 +3,8 @@
 
 BEGIN_INANITY_GUI
 
-GrFontGlyphs::GrFontGlyphs(const GlyphInfos& glyphInfos, ptr<Graphics::Texture> texture, const Glyphs& glyphs)
-: FontGlyphs(glyphInfos), texture(texture), glyphs(glyphs) {}
+GrFontGlyphs::GrFontGlyphs(const GlyphInfos& glyphInfos, int scaleX, int scaleY, ptr<Graphics::Texture> texture, const Glyphs& glyphs)
+: FontGlyphs(glyphInfos, scaleX, scaleY), texture(texture), glyphs(glyphs) {}
 
 ptr<Graphics::Texture> GrFontGlyphs::GetTexture() const
 {

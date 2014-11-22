@@ -36,7 +36,7 @@ private:
 	Glyphs glyphs;
 
 public:
-	GrFontGlyphs(const GlyphInfos& glyphInfos, ptr<Graphics::Texture> texture, const Glyphs& glyphs);
+	GrFontGlyphs(const GlyphInfos& glyphInfos, int scaleX, int scaleY, ptr<Graphics::Texture> texture, const Glyphs& glyphs);
 
 	ptr<Graphics::Texture> GetTexture() const;
 	const Glyphs& GetGlyphs() const;

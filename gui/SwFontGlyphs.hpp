@@ -18,7 +18,7 @@ private:
 	ptr<Graphics::RawTextureData> image;
 
 public:
-	SwFontGlyphs(const GlyphInfos& glyphInfos, ptr<Graphics::RawTextureData> image);
+	SwFontGlyphs(const GlyphInfos& glyphInfos, int scaleX, int scaleY, ptr<Graphics::RawTextureData> image);
 
 	ptr<Graphics::RawTextureData> GetImage() const;
 };
