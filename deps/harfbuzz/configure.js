@@ -26,7 +26,7 @@ var objects = [
 	'hb-shape',
 	'hb-shape-plan',
 	'hb-shaper',
-	'hb-tt-font',
+	//'hb-tt-font',
 	'hb-unicode',
 	'hb-warning',
 
