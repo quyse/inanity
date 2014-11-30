@@ -143,7 +143,7 @@ void Dx11AttributeBinding::Initialize(ptr<AttributeLayout> layout)
 		const AttributeLayout::Slot& slot = slots[element.slot];
 
 		String& semanticName = semanticNames[i];
-		semanticName = Dx11System::GetSemanticString(i);
+		semanticName = Dx11System::GetSemanticString((int)i);
 
 		D3D11_INPUT_ELEMENT_DESC& desc = descs[i];
 		desc.SemanticName = semanticName.c_str();

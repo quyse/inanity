@@ -29,7 +29,7 @@ private:
 	bool dirty;
 
 public:
-	GlUniformBuffer(ptr<GlDevice> device, GLuint name, size_t size);
+	GlUniformBuffer(ptr<GlDevice> device, GLuint name, int size);
 	~GlUniformBuffer();
 
 	GLuint GetName() const;

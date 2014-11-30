@@ -14,7 +14,7 @@ private:
 	ComPointer<ID3D11Buffer> buffer;
 
 public:
-	Dx11UniformBuffer(ComPointer<ID3D11Buffer> buffer, size_t size);
+	Dx11UniformBuffer(ComPointer<ID3D11Buffer> buffer, int size);
 
 	ID3D11Buffer* GetBufferInterface() const;
 };

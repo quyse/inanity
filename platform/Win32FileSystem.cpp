@@ -121,7 +121,7 @@ Win32FileSystem::Win32FileSystem(const String& userFolderName)
 	else
 	{
 		//получить полное имя текущего каталога
-		size_t length = GetCurrentDirectory(0, NULL);
+		DWORD length = GetCurrentDirectory(0, NULL);
 		wchar_t* buffer = new wchar_t[length];
 		if(!GetCurrentDirectory(length, buffer))
 		{

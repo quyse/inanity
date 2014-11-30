@@ -18,7 +18,7 @@ void HbFontShape::Shape(const String& text, vec2* outAdvance, std::vector<OutGly
 	// shape text, and get glyph numbers and offsets
 	hb_buffer_t* buffer = hb_buffer_create();
 	hb_buffer_set_direction(buffer, HB_DIRECTION_LTR);
-	hb_buffer_add_utf8(buffer, text.c_str(), text.length(), 0, text.length());
+	hb_buffer_add_utf8(buffer, text.c_str(), (int)text.length(), 0, (int)text.length());
 	hb_shape(font, buffer, nullptr, 0);
 
 	unsigned int glyphCount;

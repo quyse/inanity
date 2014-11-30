@@ -54,7 +54,7 @@ size_t AlStreamedPlayer::Fill(ptr<AlBuffer>& buffer)
 		alBufferData(
 			buffer->GetName(),
 			AlSystem::ConvertFormat(format),
-			data, read,
+			data, (ALsizei)read,
 			format.samplesPerSecond
 		);
 		AlSystem::CheckErrors("Can't upload data to buffer");

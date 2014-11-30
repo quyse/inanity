@@ -164,14 +164,14 @@ void SlGeneratorInstance::PrintNode(ValueNode* node)
 	text << '_' << nodeInitIndices[node];
 }
 
-void SlGeneratorInstance::PrintNodeInitVar(int nodeIndex)
+void SlGeneratorInstance::PrintNodeInitVar(size_t nodeIndex)
 {
 	text << '\t';
 	PrintDataType(fast_cast<ValueNode*>(nodeInits[nodeIndex])->GetValueType());
 	text << " _" << nodeIndex;
 }
 
-void SlGeneratorInstance::PrintNodeInitBegin(int nodeIndex)
+void SlGeneratorInstance::PrintNodeInitBegin(size_t nodeIndex)
 {
 	PrintNodeInitVar(nodeIndex);
 	text << " = ";

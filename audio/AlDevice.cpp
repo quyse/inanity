@@ -55,7 +55,7 @@ ptr<Sound> AlDevice::CreateBufferedSound(ptr<Source> source)
 		bufferName,
 		AlSystem::ConvertFormat(source->GetFormat()),
 		file->GetData(),
-		file->GetSize(),
+		(ALsizei)file->GetSize(),
 		format.samplesPerSecond
 	);
 	AlSystem::CheckErrors("Can't upload buffer data");

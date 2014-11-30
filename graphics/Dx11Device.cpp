@@ -299,7 +299,7 @@ ptr<VertexBuffer> Dx11Device::CreateStaticVertexBuffer(ptr<File> file, ptr<Verte
 		if(FAILED(device->CreateBuffer(&desc, &data, &vertexBuffer)))
 			THROW("Can't create vertex buffer");
 
-		return NEW(Dx11VertexBuffer(vertexBuffer, file->GetSize() / layout->GetStride(), layout));
+		return NEW(Dx11VertexBuffer(vertexBuffer, (int)(file->GetSize() / layout->GetStride()), layout));
 	}
 	catch(Exception* exception)
 	{
@@ -350,7 +350,7 @@ ptr<IndexBuffer> Dx11Device::CreateStaticIndexBuffer(ptr<File> file, int indexSi
 		if(FAILED(device->CreateBuffer(&desc, &data, &indexBuffer)))
 			THROW("Can't create index buffer");
 
-		return NEW(Dx11IndexBuffer(indexBuffer, file->GetSize() / indexSize, indexSize));
+		return NEW(Dx11IndexBuffer(indexBuffer, (int)(file->GetSize() / indexSize), indexSize));
 	}
 	catch(Exception* exception)
 	{

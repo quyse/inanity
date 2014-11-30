@@ -4,7 +4,7 @@
 
 BEGIN_INANITY_GRAPHICS
 
-GlUniformBuffer::GlUniformBuffer(ptr<GlDevice> device, GLuint name, size_t size)
+GlUniformBuffer::GlUniformBuffer(ptr<GlDevice> device, GLuint name, int size)
 : UniformBuffer(size), device(device), name(name), dirty(true)
 {
 	if(!name)

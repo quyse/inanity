@@ -360,13 +360,13 @@ ptr<RawTextureData> RawTextureData::GenerateMips(int newMips) const
 
 	// calculate new mip offsets and size of new pixels
 	size_t newMipOffset = 0;
-	std::vector<int> newMipOffsets(newMips);
+	std::vector<size_t> newMipOffsets(newMips);
 	for(int i = 0; i < newMips; ++i)
 	{
 		newMipOffsets[i] = newMipOffset;
 		newMipOffset += GetMipSize(i);
 	}
-	int newImageSize = newMipOffset;
+	size_t newImageSize = newMipOffset;
 	int realCount = count ? count : 1;
 	ptr<File> newPixels = NEW(MemoryFile(newImageSize * realCount));
 	char* newPixelsData = (char*)newPixels->GetData();
@@ -442,12 +442,12 @@ ptr<RawTextureData> RawTextureData::ShelfUnion(
 	// first pass: sort images by height
 	struct Sorter
 	{
-		bool operator()(const std::pair<RawTextureData*, int>& a, const std::pair<RawTextureData*, int>& b) const
+		bool operator()(const std::pair<RawTextureData*, size_t>& a, const std::pair<RawTextureData*, size_t>& b) const
 		{
 			return a.first->GetImageHeight() > b.first->GetImageHeight();
 		}
 	};
-	std::vector<std::pair<RawTextureData*, int> > sortedImages(imagesCount);
+	std::vector<std::pair<RawTextureData*, size_t> > sortedImages(imagesCount);
 	for(int i = 0; i < imagesCount; ++i)
 		sortedImages[i] = std::pair<RawTextureData*, size_t>(images[i], i);
 	std::sort(sortedImages.begin(), sortedImages.end(), Sorter());

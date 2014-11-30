@@ -60,7 +60,7 @@ int OggVorbisStream::SeekFunction(long long offset, int whence)
 	default:
 		return -1;
 	}
-	if(newPosition < 0 || newPosition > fileSize) return -1;
+	if(newPosition < 0 || (unsigned long long)newPosition > fileSize) return -1;
 	position = (size_t)newPosition;
 	return 0;
 }
@@ -134,7 +134,7 @@ size_t OggVorbisStream::Read(void* dataPtr, size_t size)
 		int bitstream;
 		while(size)
 		{
-			long result = ov_read(&ovFile, data, size,
+			long result = ov_read(&ovFile, data, (int)size,
 				0, // means little endian
 				2, // means 16-bit samples
 				1, // means signed values

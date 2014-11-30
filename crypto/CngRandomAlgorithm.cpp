@@ -26,7 +26,8 @@ CngRandomAlgorithm::~CngRandomAlgorithm()
 
 void CngRandomAlgorithm::GenerateRandom(void* data, size_t size)
 {
-	if(!NT_SUCCESS(BCryptGenRandom(algorithm, (PUCHAR)data, size, 0)))
+	THROW_ASSERT(size == (ULONG)size);
+	if(!NT_SUCCESS(BCryptGenRandom(algorithm, (PUCHAR)data, (ULONG)size, 0)))
 		THROW("Can't generate random data");
 }
 

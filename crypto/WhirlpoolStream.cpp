@@ -1187,7 +1187,8 @@ WhirlpoolStream::WhirlpoolStream()
 
 void WhirlpoolStream::Write(const void* data, size_t size)
 {
-	add((const unsigned char*)data, size * 8);
+	THROW_ASSERT(size < 0x20000000);
+	add((const unsigned char*)data, (unsigned long)(size * 8));
 }
 
 size_t WhirlpoolStream::GetHashSize() const

@@ -2,7 +2,7 @@
 
 BEGIN_INANITY_GRAPHICS
 
-Dx11UniformBuffer::Dx11UniformBuffer(ComPointer<ID3D11Buffer> buffer, size_t size)
+Dx11UniformBuffer::Dx11UniformBuffer(ComPointer<ID3D11Buffer> buffer, int size)
 : UniformBuffer(size), buffer(buffer)
 {
 }

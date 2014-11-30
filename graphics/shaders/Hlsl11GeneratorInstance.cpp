@@ -66,7 +66,7 @@ void Hlsl11GeneratorInstance::PrintUniform(UniformNode* uniformNode)
 	text << 'u' << uniformNode->GetGroup()->GetSlot() << '_' << uniformNode->GetOffset();
 }
 
-void Hlsl11GeneratorInstance::PrintNodeInit(int nodeIndex)
+void Hlsl11GeneratorInstance::PrintNodeInit(size_t nodeIndex)
 {
 	Node* node = nodeInits[nodeIndex];
 

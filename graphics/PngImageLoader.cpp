@@ -112,10 +112,10 @@ ptr<RawTextureData> PngImageLoader::Load(ptr<File> file)
 
 		// считать информацию об изображении
 		png_read_info(pngPtr, infoPtr);
-		int width = png_get_image_width(pngPtr, infoPtr);
-		int height = png_get_image_height(pngPtr, infoPtr);
-		int bitDepth = png_get_bit_depth(pngPtr, infoPtr);
-		int colorType = png_get_color_type(pngPtr, infoPtr);
+		png_uint_32 width = png_get_image_width(pngPtr, infoPtr);
+		png_uint_32 height = png_get_image_height(pngPtr, infoPtr);
+		png_byte bitDepth = png_get_bit_depth(pngPtr, infoPtr);
+		png_byte colorType = png_get_color_type(pngPtr, infoPtr);
 
 		//** установить настройки преобразования
 		// если изображение палитровое, преобразовать в RGB
@@ -140,7 +140,7 @@ ptr<RawTextureData> PngImageLoader::Load(ptr<File> file)
 		// строки после преобразований
 		png_read_update_info(pngPtr, infoPtr);
 		// вот этот размер
-		int pitch = png_get_rowbytes(pngPtr, infoPtr);
+		png_size_t pitch = png_get_rowbytes(pngPtr, infoPtr);
 		// выделить память под изображение
 		// в отдельном try-catch, чтобы исключение не выпало
 		try
@@ -155,7 +155,7 @@ ptr<RawTextureData> PngImageLoader::Load(ptr<File> file)
 		}
 		imageRows = (png_bytep*)malloc(height * sizeof(void*));
 		png_bytep imageFileData = (png_bytep)textureData->GetMipData(0, 0);
-		for(int i = 0; i < height; ++i)
+		for(png_uint_32 i = 0; i < height; ++i)
 			imageRows[i] = imageFileData + i * pitch;
 
 		// считать изображение

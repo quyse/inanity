@@ -561,7 +561,7 @@ ptr<VertexBuffer> GlDevice::CreateStaticVertexBuffer(ptr<File> file, ptr<VertexL
 		GLuint bufferName;
 		glGenBuffers(1, &bufferName);
 		GlSystem::CheckErrors("Can't gen buffer");
-		ptr<GlVertexBuffer> vertexBuffer = NEW(GlVertexBuffer(this, bufferName, file->GetSize() / layout->GetStride(), layout));
+		ptr<GlVertexBuffer> vertexBuffer = NEW(GlVertexBuffer(this, bufferName, (int)(file->GetSize() / layout->GetStride()), layout));
 
 		glBindBuffer(GL_ARRAY_BUFFER, bufferName);
 		GlSystem::CheckErrors("Can't bind buffer");
@@ -607,7 +607,7 @@ ptr<IndexBuffer> GlDevice::CreateStaticIndexBuffer(ptr<File> file, int indexSize
 		GLuint bufferName;
 		glGenBuffers(1, &bufferName);
 		GlSystem::CheckErrors("Can't gen buffer");
-		ptr<GlIndexBuffer> indexBuffer = NEW(GlIndexBuffer(this, bufferName, file->GetSize() / indexSize, indexSize));
+		ptr<GlIndexBuffer> indexBuffer = NEW(GlIndexBuffer(this, bufferName, (int)(file->GetSize() / indexSize), indexSize));
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName);
 		GlSystem::CheckErrors("Can't bind buffer");

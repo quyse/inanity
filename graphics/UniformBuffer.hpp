@@ -11,16 +11,16 @@ BEGIN_INANITY_GRAPHICS
 class UniformBuffer : public Object
 {
 protected:
-	size_t size;
+	int size;
 
 protected:
-	UniformBuffer(size_t size);
+	UniformBuffer(int size);
 
 public:
 	/// Получить размер буфера.
 	/** Размер буфера указывается при создании, и
 	не может быть изменён. */
-	size_t GetSize() const;
+	int GetSize() const;
 };
 
 END_INANITY_GRAPHICS

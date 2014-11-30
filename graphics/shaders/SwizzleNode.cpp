@@ -13,7 +13,7 @@ Node::Type SwizzleNode::GetType() const
 
 DataType SwizzleNode::GetValueType() const
 {
-	return GetVectorDataType(GetBaseDataType(a->GetValueType()), strlen(map));
+	return GetVectorDataType(GetBaseDataType(a->GetValueType()), (int)strlen(map));
 }
 
 ptr<ValueNode> SwizzleNode::GetA() const

@@ -22,7 +22,7 @@ ptr<FontFace> FtEngine::LoadFontFace(ptr<File> file)
 	BEGIN_TRY();
 
 	FT_Face face;
-	if(FT_New_Memory_Face(library, (const FT_Byte*)file->GetData(), file->GetSize(), 0, &face))
+	if(FT_New_Memory_Face(library, (const FT_Byte*)file->GetData(), (FT_Long)file->GetSize(), 0, &face))
 		THROW("Can't create font face");
 
 	return NEW(FtFontFace(this, face, file));

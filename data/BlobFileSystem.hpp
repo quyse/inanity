@@ -5,6 +5,7 @@
 #include "../FileSystem.hpp"
 #include "../meta/decl.hpp"
 #include <unordered_map>
+#include <cstdint>
 
 BEGIN_INANITY_DATA
 
@@ -27,7 +28,7 @@ public:
 		/// Сигнатура.
 		char magic[4];
 		/// Размер заголовка.
-		unsigned headerSize;
+		uint32_t headerSize;
 	};
 
 private:

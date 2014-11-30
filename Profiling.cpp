@@ -63,7 +63,7 @@ void Report(std::ostream& stream)
 		{
 			size_t j;
 			for(j = i + 1; j < points.size() && points[i] == points[j]; ++j);
-			pointsRating.push_back(std::pair<int, const char*>(j - i, points[i]));
+			pointsRating.push_back(std::pair<int, const char*>((int)(j - i), points[i]));
 			i = j;
 		}
 		std::sort(pointsRating.begin(), pointsRating.end(), std::greater<std::pair<int, const char*> >());

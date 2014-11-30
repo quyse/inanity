@@ -15,7 +15,7 @@ AttributeLayout::Element::Element(int slot, int offset, DataType dataType, Layou
 
 ptr<AttributeLayoutSlot> AttributeLayout::AddSlot(int divisor)
 {
-	int index = (size_t)slots.size();
+	int index = (int)slots.size();
 	slots.push_back(Slot(divisor));
 	return NEW(AttributeLayoutSlot(this, index));
 }

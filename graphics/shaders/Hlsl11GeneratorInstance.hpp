@@ -26,7 +26,7 @@ private:
 
 	void PrintUniform(UniformNode* uniformNode);
 	/// Print node initialization.
-	void PrintNodeInit(int nodeIndex);
+	void PrintNodeInit(size_t nodeIndex);
 	void PrintOperationNodeInit(OperationNode* node);
 	void PrintActionNodeInit(ActionNode* node);
 	void PrintUniforms();

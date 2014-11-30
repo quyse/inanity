@@ -2,9 +2,9 @@
 
 BEGIN_INANITY_GRAPHICS
 
-UniformBuffer::UniformBuffer(size_t size) : size(size) {}
+UniformBuffer::UniformBuffer(int size) : size(size) {}
 
-size_t UniformBuffer::GetSize() const
+int UniformBuffer::GetSize() const
 {
 	return size;
 }

@@ -91,7 +91,7 @@ void GlslGeneratorInstance::PrintUniform(UniformNode* uniformNode)
 	text << uniformPrefix << uniformNode->GetGroup()->GetSlot() << '_' << uniformNode->GetOffset();
 }
 
-void GlslGeneratorInstance::PrintNodeInit(int nodeIndex)
+void GlslGeneratorInstance::PrintNodeInit(size_t nodeIndex)
 {
 	Node* node = nodeInits[nodeIndex];
 

@@ -52,8 +52,8 @@ protected:
 	void PrintNode(ValueNode* node);
 	void PrintUniform(UniformNode* uniformNode);
 	/// Helpers to print node init.
-	void PrintNodeInitVar(int nodeIndex);
-	void PrintNodeInitBegin(int nodeIndex);
+	void PrintNodeInitVar(size_t nodeIndex);
+	void PrintNodeInitBegin(size_t nodeIndex);
 	void PrintNodeInitEnd();
 
 	SlGeneratorInstance(ptr<Node> rootNode, ShaderType shaderType);

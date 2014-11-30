@@ -35,7 +35,7 @@ void GlShaderBindings::ReadBindings(StreamReader& reader, Bindings& bindings)
 	for(size_t i = 0; i < bindings.size(); ++i)
 	{
 		bindings[i].first = reader.ReadString();
-		bindings[i].second = reader.ReadShortly();
+		bindings[i].second = (int)reader.ReadShortly();
 	}
 }
 
@@ -90,9 +90,9 @@ ptr<GlShaderBindings> GlShaderBindings::Deserialize(StreamReader& reader)
 	{
 		UniformBinding& ub = uniformBindings[i];
 		ub.dataType = (DataType)reader.ReadShortly();
-		ub.count = reader.ReadShortly();
-		ub.slot = reader.ReadShortly();
-		ub.offset = reader.ReadShortly();
+		ub.count = (int)reader.ReadShortly();
+		ub.slot = (int)reader.ReadShortly();
+		ub.offset = (int)reader.ReadShortly();
 		ub.name = reader.ReadString();
 	}
 
