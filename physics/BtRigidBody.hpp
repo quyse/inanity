@@ -33,7 +33,10 @@ public:
 	vec3 GetPosition() const;
 	mat3x3 GetOrientation() const;
 	mat4x4 GetTransform() const;
-	void ApplyImpulse(const vec3& impulse);
+	void ApplyImpulse(const vec3& impulse, const vec3& point);
+	void ApplyForce(const vec3& force, const vec3& point);
+	void Activate();
+	void DisableDeactivation();
 
 	// методы btMotionState
 	void getWorldTransform(btTransform& transform) const;

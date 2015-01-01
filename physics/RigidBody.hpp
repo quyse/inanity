@@ -32,8 +32,15 @@ public:
 	/// Получить текущую трансформацию твёрдого тела.
 	virtual mat4x4 GetTransform() const = 0;
 
-	/// Применить импульс к телу.
-	virtual void ApplyImpulse(const vec3& impulse) = 0;
+	/// Apply impulse to the body.
+	virtual void ApplyImpulse(const vec3& impulse, const vec3& point) = 0;
+	/// Apply force to the body.
+	virtual void ApplyForce(const vec3& force, const vec3& point) = 0;
+
+	/// Activate body.
+	virtual void Activate() = 0;
+	/// Disable deactivation.
+	virtual void DisableDeactivation() = 0;
 
 	META_DECLARE_CLASS(RigidBody);
 };
