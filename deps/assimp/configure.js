@@ -13,6 +13,7 @@ exports.configureCompiler = function(objectFile, compiler) {
 	compiler.cppMode = (b[3] != '.c');
 	compiler.addMacro('ASSIMP_BUILD_NO_OWN_ZLIB');
 	compiler.addIncludeDir('../zlib');
+	compiler.strict = false;
 };
 
 var lib = {

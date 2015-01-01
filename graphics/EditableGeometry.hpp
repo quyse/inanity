@@ -33,7 +33,7 @@ public:
 	{
 		indices.resize(vertices.size());
 		for(size_t i = 0; i < indices.size(); ++i)
-			indices[i] = i;
+			indices[i] = (Index)i;
 	}
 
 	/// Получить вершины.
@@ -125,7 +125,7 @@ public:
 		std::vector<Index> resultIndices(indices.size());
 		//и преобразовать их
 		for(size_t i = 0; i < resultIndices.size(); ++i)
-			resultIndices[i] = indexMap[indices[i]];
+			resultIndices[i] = (Index)indexMap[indices[i]];
 		return NEW(EditableGeometry(resultVertices, resultIndices));
 	}
 };

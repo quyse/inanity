@@ -48,7 +48,7 @@ void SkeletonConverter::Run(const std::vector<String>& arguments)
 			>> worldOrientation.x >> worldOrientation.y >> worldOrientation.z >> worldOrientation.w
 			>> worldOffset.x >> worldOffset.y >> worldOffset.z;
 		if(i)
-			h[parent].push_back(i);
+			h[parent].push_back((int)i);
 		writer.WriteShortly(parent);
 		writer.Write(worldOrientation);
 		writer.Write(worldOffset);

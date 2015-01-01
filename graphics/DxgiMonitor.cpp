@@ -70,7 +70,7 @@ ptr<MonitorMode> DxgiMonitor::TryCreateMode(int width, int height)
 		desc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 		desc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 		DXGI_MODE_DESC closestDesc;
-		if(FAILED(output->FindClosestMatchingMode(&desc, &closestDesc, 0)))
+		if(FAILED(output->FindClosestMatchingMode(&desc, &closestDesc, nullptr)))
 			return 0;
 		return NEW(DxgiMonitorMode(closestDesc));
 	}
