@@ -2,6 +2,7 @@
 #define ___INANITY_PHYSICS_WORLD_HPP___
 
 #include "physics.hpp"
+#include <vector>
 
 BEGIN_INANITY_PHYSICS
 
@@ -20,6 +21,8 @@ public:
 	/// Создать форму-капсулу.
 	/** Полная высота капсулы - radius * 2 + height */
 	virtual ptr<Shape> CreateCapsuleShape(float radius, float height) = 0;
+	/// Create compound shape from array of shapes.
+	virtual ptr<Shape> CreateCompoundShape(const std::vector<std::pair<mat4x4, ptr<Shape> > >& shapes) = 0;
 
 	/// Создать твёрдое тело.
 	virtual ptr<RigidBody> CreateRigidBody(ptr<Shape> shape, float mass, const mat4x4& startTransform) = 0;

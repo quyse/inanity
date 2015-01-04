@@ -89,6 +89,22 @@ ptr<Shape> BtWorld::CreateCapsuleShape(float radius, float height)
 	}
 }
 
+ptr<Shape> BtWorld::CreateCompoundShape(const std::vector<std::pair<mat4x4, ptr<Shape> > >& shapes)
+{
+	BEGIN_TRY();
+
+	btCompoundShape* compoundShape = new btCompoundShape(false);
+	for(size_t i = 0; i < shapes.size(); ++i)
+	{
+		const auto& p = shapes[i];
+		compoundShape->addChildShape(toBt(p.first), p.second.FastCast<BtShape>()->GetInternalObject());
+	}
+
+	return NEW(BtShape(this, compoundShape));
+
+	END_TRY("Can't create bullet compound shape");
+}
+
 ptr<RigidBody> BtWorld::CreateRigidBody(ptr<Shape> abstractShape, float mass, const mat4x4& startTransform)
 {
 	try
