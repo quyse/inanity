@@ -391,7 +391,9 @@ void GlslGeneratorInstance::PrintOperationNodeInit(OperationNode* node)
 				OP(Min, min);
 				OP(Max, max);
 				OP(Abs, abs);
+				OP(Sqrt, sqrt);
 				OP(Sin, sin);
+				OP(Atan2, atan);
 				OP(Cos, cos);
 				OP(Exp, exp);
 				OP(Exp2, exp2);

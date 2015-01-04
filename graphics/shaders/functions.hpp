@@ -98,10 +98,15 @@ inline Value<T> max(Value<T> a, Value<T> b) { return OP2(Max, DataTypeOf<T>()); 
 template <typename T>
 inline Value<T> abs(Value<T> a) { return OP1(Abs, DataTypeOf<T>()); }
 
+// sqrt
+inline Value<float> sqrt(Value<float> a) { return OP1(Sqrt, DataTypes::_float); }
+
 // sin
 inline Value<float> sin(Value<float> a) { return OP1(Sin, DataTypes::_float); }
 // cos
 inline Value<float> cos(Value<float> a) { return OP1(Cos, DataTypes::_float); }
+// atan2
+inline Value<float> atan2(Value<float> a, Value<float> b) { return OP2(Atan2, DataTypes::_float); }
 
 // exp
 inline Value<float> exp(Value<float> a) { return OP1(Exp, DataTypes::_float); }

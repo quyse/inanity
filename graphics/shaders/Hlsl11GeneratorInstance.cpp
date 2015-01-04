@@ -304,8 +304,10 @@ void Hlsl11GeneratorInstance::PrintOperationNodeInit(OperationNode* node)
 				OP(Min, min);
 				OP(Max, max);
 				OP(Abs, abs);
+				OP(Sqrt, sqrt);
 				OP(Sin, sin);
 				OP(Cos, cos);
+				OP(Atan2, atan2);
 				OP(Exp, exp);
 				OP(Exp2, exp2);
 				OP(Log, log);
