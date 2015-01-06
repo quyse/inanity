@@ -28,6 +28,9 @@ extern "C"
 	void glVertexAttribFormat(GLuint attribindex, GLint size, GLenum type, GLboolean normalized, GLuint relativeoffset);
 	void glVertexAttribBinding(GLuint attribindex, GLuint bindingindex);
 	void glVertexBindingDivisor(GLuint bindingindex, GLuint divisor);
+	void glTexStorage1D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width);
+	void glTexStorage2D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height);
+	void glTexStorage3D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth);
 };
 
 #else
