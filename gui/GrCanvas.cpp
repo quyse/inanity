@@ -123,17 +123,17 @@ struct GrCanvas::Helper : public Object
 		{
 			static const float offsetsX[subPixelModeOnEnd - subPixelModeOnBegin][3] =
 			{
-				-1, 0, 1,
-				1, 0, -1,
-				0, 0, 0,
-				0, 0, 0
+				{ -1, 0, 1 },
+				{ 1, 0, -1 },
+				{ 0, 0, 0 },
+				{ 0, 0, 0 }
 			};
 			static const float offsetsY[subPixelModeOnEnd - subPixelModeOnBegin][3] =
 			{
-				0, 0, 0,
-				0, 0, 0
-				-1, 0, 1,
-				1, 0, -1,
+				{ 0, 0, 0 },
+				{ 0, 0, 0 },
+				{ -1, 0, 1 },
+				{ 1, 0, -1 }
 			};
 
 			const float* dx = offsetsX[subPixelMode - subPixelModeOnBegin];
