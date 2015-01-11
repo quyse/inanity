@@ -494,7 +494,7 @@ ptr<Texture> Dx11Device::CreateStaticTexture(ptr<RawTextureData> data, const Sam
 			// fill SRV desc
 			if(data->GetCount())
 			{
-				srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+				srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE1DARRAY;
 				srvDesc.Texture1DArray.MostDetailedMip = 0;
 				srvDesc.Texture1DArray.MipLevels = -1;
 				srvDesc.Texture1DArray.FirstArraySlice = 0;
@@ -502,7 +502,7 @@ ptr<Texture> Dx11Device::CreateStaticTexture(ptr<RawTextureData> data, const Sam
 			}
 			else
 			{
-				srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+				srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE1D;
 				srvDesc.Texture1D.MostDetailedMip = 0;
 				srvDesc.Texture1D.MipLevels = -1;
 			}
