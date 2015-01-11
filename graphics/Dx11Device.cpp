@@ -385,6 +385,20 @@ ptr<Texture> Dx11Device::CreateStaticTexture(ptr<RawTextureData> data, const Sam
 		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 		ComPointer<ID3D11Resource> resource;
 
+		// create subresource data descs
+		std::vector<D3D11_SUBRESOURCE_DATA> dataDescs(realCount * mips);
+		for(int image = 0; image < realCount; ++image)
+			for(int mip = 0; mip < mips; ++mip)
+			{
+				D3D11_SUBRESOURCE_DATA& dataDesc = dataDescs[image * mips + mip];
+				dataDesc.pSysMem = data->GetMipData(image, mip);
+				dataDesc.SysMemPitch = data->GetMipLinePitch(mip);
+				dataDesc.SysMemSlicePitch = data->GetMipSlicePitch(mip);
+			}
+
+		// set format
+		srvDesc.Format = format;
+
 		// if it is a 3D texture
 		if(data->GetImageDepth())
 		{
@@ -405,15 +419,6 @@ ptr<Texture> Dx11Device::CreateStaticTexture(ptr<RawTextureData> data, const Sam
 				desc.CPUAccessFlags = 0;
 				desc.MiscFlags = 0;
 
-				std::vector<D3D11_SUBRESOURCE_DATA> dataDescs(mips);
-				for(int mip = 0; mip < mips; ++mip)
-				{
-					D3D11_SUBRESOURCE_DATA& dataDesc = dataDescs[mip];
-					dataDesc.pSysMem = data->GetMipData(0, mip);
-					dataDesc.SysMemPitch = data->GetMipLinePitch(mip);
-					dataDesc.SysMemSlicePitch = data->GetMipSlicePitch(mip);
-				}
-
 				ID3D11Texture3D* textureInterface;
 				if(FAILED(device->CreateTexture3D(&desc, &*dataDescs.begin(), &textureInterface)))
 					THROW("Can't create texture 3D");
@@ -421,7 +426,6 @@ ptr<Texture> Dx11Device::CreateStaticTexture(ptr<RawTextureData> data, const Sam
 			}
 
 			// fill SRV desc
-			srvDesc.Format = format;
 			srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE3D;
 			srvDesc.Texture3D.MostDetailedMip = 0;
 			srvDesc.Texture3D.MipLevels = -1;
@@ -444,16 +448,6 @@ ptr<Texture> Dx11Device::CreateStaticTexture(ptr<RawTextureData> data, const Sam
 				desc.CPUAccessFlags = 0;
 				desc.MiscFlags = 0;
 
-				std::vector<D3D11_SUBRESOURCE_DATA> dataDescs(realCount * mips);
-				for(int image = 0; image < realCount; ++image)
-					for(int mip = 0; mip < mips; ++mip)
-					{
-						D3D11_SUBRESOURCE_DATA& dataDesc = dataDescs[image * mips + mip];
-						dataDesc.pSysMem = data->GetMipData(image, mip);
-						dataDesc.SysMemPitch = data->GetMipLinePitch(mip);
-						dataDesc.SysMemSlicePitch = 0;
-					}
-
 				ID3D11Texture2D* textureInterface;
 				if(FAILED(device->CreateTexture2D(&desc, &*dataDescs.begin(), &textureInterface)))
 					THROW("Can't create texture 2D");
@@ -461,7 +455,6 @@ ptr<Texture> Dx11Device::CreateStaticTexture(ptr<RawTextureData> data, const Sam
 			}
 
 			// fill SRV desc
-			srvDesc.Format = format;
 			if(data->GetCount())
 			{
 				srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
@@ -492,16 +485,6 @@ ptr<Texture> Dx11Device::CreateStaticTexture(ptr<RawTextureData> data, const Sam
 				desc.CPUAccessFlags = 0;
 				desc.MiscFlags = 0;
 
-				std::vector<D3D11_SUBRESOURCE_DATA> dataDescs(realCount * mips);
-				for(int image = 0; image < realCount; ++image)
-					for(int mip = 0; mip < mips; ++mip)
-					{
-						D3D11_SUBRESOURCE_DATA& dataDesc = dataDescs[image * mips + mip];
-						dataDesc.pSysMem = data->GetMipData(image, mip);
-						dataDesc.SysMemPitch = 0;
-						dataDesc.SysMemSlicePitch = 0;
-					}
-
 				ID3D11Texture1D* textureInterface;
 				if(FAILED(device->CreateTexture1D(&desc, &*dataDescs.begin(), &textureInterface)))
 					THROW("Can't create texture 1D");
@@ -509,7 +492,6 @@ ptr<Texture> Dx11Device::CreateStaticTexture(ptr<RawTextureData> data, const Sam
 			}
 
 			// fill SRV desc
-			srvDesc.Format = format;
 			if(data->GetCount())
 			{
 				srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
