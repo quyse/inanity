@@ -18,8 +18,9 @@ var objects = [
 	'hb-buffer-serialize',
 	'hb-buffer',
 	'hb-common',
-	'hb-fallback-shape',
+	// 'hb-coretext',
 	'hb-face',
+	'hb-fallback-shape',
 	'hb-font',
 	'hb-ot-tag',
 	'hb-set',
@@ -28,7 +29,7 @@ var objects = [
 	'hb-shaper',
 	//'hb-tt-font',
 	'hb-unicode',
-	'hb-warning',
+	// 'hb-warning',
 
 	// opentype
 	'hb-ot-layout',
@@ -36,13 +37,16 @@ var objects = [
 	'hb-ot-shape',
 	'hb-ot-shape-complex-arabic',
 	'hb-ot-shape-complex-default',
-	'hb-ot-shape-complex-indic',
+	'hb-ot-shape-complex-hangul',
+	'hb-ot-shape-complex-hebrew',
 	'hb-ot-shape-complex-indic-table',
+	'hb-ot-shape-complex-indic',
 	'hb-ot-shape-complex-myanmar',
 	'hb-ot-shape-complex-sea',
 	'hb-ot-shape-complex-thai',
-	'hb-ot-shape-normalize',
+	'hb-ot-shape-complex-tibetan',
 	'hb-ot-shape-fallback',
+	'hb-ot-shape-normalize',
 
 	// freetype
 	'hb-ft',
