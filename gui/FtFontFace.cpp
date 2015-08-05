@@ -61,7 +61,7 @@ ptr<FontGlyphs> FtFontFace::CreateGlyphs(Canvas* canvas, int size, int halfScale
 
 			ptr<File> sourcePixelsFile = NEW(MemoryFile(bitmap.width * bitmap.rows));
 			unsigned char* sourcePixelsData = (unsigned char*)sourcePixelsFile->GetData();
-			for(int i = 0; i < bitmap.rows; ++i)
+			for(int i = 0; i < (int)bitmap.rows; ++i)
 				memcpy(
 					sourcePixelsData + i * bitmap.width,
 					bitmap.buffer + (bitmap.pitch >= 0 ? i : (bitmap.rows - 1 - i)) * bitmap.pitch,
@@ -80,9 +80,9 @@ ptr<FontGlyphs> FtFontFace::CreateGlyphs(Canvas* canvas, int size, int halfScale
 					for(int j = 0; j < pixelsWidth; ++j)
 					{
 						int mini = std::max(i - halfScaleY * 2, 0);
-						int maxi = std::min(i + 1, bitmap.rows);
+						int maxi = std::min(i + 1, (int)bitmap.rows);
 						int minj = std::max(j - halfScaleX * 2, 0);
-						int maxj = std::min(j + 1, bitmap.width);
+						int maxj = std::min(j + 1, (int)bitmap.width);
 						int s = 0;
 						for(int ii = mini; ii < maxi; ++ii)
 							for(int jj = minj; jj < maxj; ++jj)
