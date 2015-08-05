@@ -13,3 +13,6 @@
 [submodule "deps/assimp/repo"]
 	path = deps/assimp/repo
 	url = git://github.com/assimp/assimp.git
+[submodule "deps/ucdn/repo"]
+	path = deps/ucdn/repo
+	url = https://github.com/grigorig/ucdn.git

@@ -7,8 +7,11 @@ exports.configureCompiler = function(objectFile, compiler) {
 	compiler.configuration = a[1];
 	compiler.setSourceFile('repo/src/' + a[2] + '.cc');
 	compiler.addIncludeDir('../freetype/repo/include');
+	compiler.addIncludeDir('repo/src');
+	compiler.addIncludeDir('../ucdn/repo');
 	compiler.addIncludeDir('generated');
 	compiler.addMacro('HAVE_OT');
+	compiler.addMacro('HAVE_UCDN');
 	compiler.strict = false;
 };
 
@@ -29,6 +32,7 @@ var objects = [
 	'hb-shaper',
 	//'hb-tt-font',
 	'hb-unicode',
+	'hb-ucdn',
 	// 'hb-warning',
 
 	// opentype
