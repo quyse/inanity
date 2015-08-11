@@ -181,7 +181,7 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, bool renderbuffer, bool
 				break;
 			}
 			break;
-		case PixelFormat::pixelRG:
+		case P(RG):
 			format = GL_RG;
 			switch(pixelFormat.format)
 			{
@@ -204,7 +204,7 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, bool renderbuffer, bool
 				break;
 			}
 			break;
-		case PixelFormat::pixelRGB:
+		case P(RGB):
 			format = GL_RGB;
 			switch(pixelFormat.format)
 			{
@@ -220,7 +220,7 @@ bool GlSystem::GetTextureFormat(PixelFormat pixelFormat, bool renderbuffer, bool
 				break;
 			}
 			break;
-		case PixelFormat::pixelRGBA:
+		case P(RGBA):
 			format = GL_RGBA;
 			switch(pixelFormat.format)
 			{
