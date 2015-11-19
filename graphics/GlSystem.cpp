@@ -75,6 +75,7 @@ ptr<Context> GlSystem::CreateContext(ptr<Device> abstractDevice)
 
 void GlSystem::InitGLEW()
 {
+	glewExperimental = GL_TRUE; // enable workarounds to make core profile working (see https://www.opengl.org/wiki/OpenGL_Loading_Library#GLEW)
 	GLenum err = glewInit();
 	if(err != GLEW_OK)
 #ifdef ___INANITY_PLATFORM_EMSCRIPTEN
