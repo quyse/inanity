@@ -185,7 +185,7 @@ LRESULT Win32Window::WndProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			unsigned state = LOWORD(wParam);
 			bool active = (state == WA_ACTIVE || state == WA_CLICKACTIVE);
 			// update activity flag
-			active = active;
+			this->active = active;
 			// update mouse lock
 			UpdateMouseLock();
 			// update cursor visibility
