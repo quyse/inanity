@@ -50,17 +50,10 @@ typedef unsigned long u32;
 #define T16(x)  ((x) & ONE16)
 #define T32(x)  ((x) & ONE32)
 
-#ifdef _MSC_VER
-typedef unsigned __int64 u64;
-typedef signed __int64 s64;
-#define LL(v)   (v##i64)
-#define ONE64   LL(0xffffffffffffffff)
-#else  /* !_MSC_VER */
 typedef unsigned long long u64;
 typedef signed long long s64;
 #define LL(v)   (v##ULL)
 #define ONE64   LL(0xffffffffffffffff)
-#endif /* ?_MSC_VER */
 #define T64(x)  ((x) & ONE64)
 #define ROTR64(v, n)   (((v) >> (n)) | T64((v) << (64 - (n))))
 /*

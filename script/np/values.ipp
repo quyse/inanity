@@ -227,7 +227,7 @@ struct Value<String>
 
 	static inline NPVariant To(const String& value)
 	{
-		char* mem = (char*)Platform::NpapiPlugin::browserFuncs.memalloc(value.length() + 1);
+		char* mem = (char*)Platform::NpapiPlugin::browserFuncs.memalloc((uint32_t)(value.length() + 1));
 		memcpy(mem, value.c_str(), value.length() + 1);
 		NPVariant variant;
 		STRINGN_TO_NPVARIANT(mem, value.length(), variant);
@@ -247,8 +247,8 @@ struct Value<const char*>
 
 	static inline NPVariant To(const char* value)
 	{
-		int length = strlen(value);
-		char* mem = (char*)Platform::NpapiPlugin::browserFuncs.memalloc(length + 1);
+		size_t length = strlen(value);
+		char* mem = (char*)Platform::NpapiPlugin::browserFuncs.memalloc((uint32_t)(length + 1));
 		memcpy(mem, value, length + 1);
 		NPVariant variant;
 		STRINGN_TO_NPVARIANT(mem, length, variant);

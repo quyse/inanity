@@ -118,7 +118,7 @@ bool NPClassWrapper::npEnumerate(NPObject *npobj, NPIdentifier **value, uint32_t
 	MetaProvider::ClassBase* classMeta = objectWrapper->GetClassWrapper()->classMeta;
 
 	const MetaProvider::ClassBase::IdentifierMap& methods = classMeta->GetMethodsByIdentifier();
-	NPIdentifier* identifiers = (NPIdentifier*)Platform::NpapiPlugin::browserFuncs.memalloc(sizeof(NPIdentifier) * methods.size());
+	NPIdentifier* identifiers = (NPIdentifier*)Platform::NpapiPlugin::browserFuncs.memalloc((uint32_t)(sizeof(NPIdentifier) * methods.size()));
 	int j = 0;
 	for(MetaProvider::ClassBase::IdentifierMap::const_iterator i = methods.begin(); i != methods.end(); ++i)
 		identifiers[j++] = i->first;
@@ -267,7 +267,7 @@ bool NPClassNamespace::npEnumerate(NPObject *npobj, NPIdentifier **value, uint32
 	if(classMeta)
 		identifiersCount += classMeta->GetStaticMethodsByIdentifier().size();
 
-	NPIdentifier* identifiers = (NPIdentifier*)Platform::NpapiPlugin::browserFuncs.memalloc(sizeof(NPIdentifier) * identifiersCount);
+	NPIdentifier* identifiers = (NPIdentifier*)Platform::NpapiPlugin::browserFuncs.memalloc((uint32_t)(sizeof(NPIdentifier) * identifiersCount));
 	int j = 0;
 
 	for(Namespace::Namespaces::const_iterator i = namespaces.begin(); i != namespaces.end(); ++i)

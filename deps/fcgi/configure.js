@@ -15,6 +15,7 @@ exports.configureCompiler = function(objectFile, compiler) {
 		// .cpp
 		source = source.replace(/\./g, '/') + '.cpp';
 	compiler.setSourceFile(source);
+	compiler.strict = false;
 };
 
 var lib = {
