@@ -594,7 +594,7 @@ ptr<VertexBuffer> GlDevice::CreateDynamicVertexBuffer(int size, ptr<VertexLayout
 		glBindBuffer(GL_ARRAY_BUFFER, bufferName);
 		GlSystem::CheckErrors("Can't bind buffer");
 
-		glBufferData(GL_ARRAY_BUFFER, size, 0, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
 		GlSystem::CheckErrors("Can't setup buffer data");
 
 		return vertexBuffer;
@@ -624,7 +624,30 @@ ptr<IndexBuffer> GlDevice::CreateStaticIndexBuffer(ptr<File> file, int indexSize
 	}
 	catch(Exception* exception)
 	{
-		THROW_SECONDARY("Can't create index buffer", exception);
+		THROW_SECONDARY("Can't create OpenGL static index buffer", exception);
+	}
+}
+
+ptr<IndexBuffer> GlDevice::CreateDynamicIndexBuffer(int size, int indexSize)
+{
+	try
+	{
+		GLuint bufferName;
+		glGenBuffers(1, &bufferName);
+		GlSystem::CheckErrors("Can't gen buffer");
+		ptr<GlIndexBuffer> indexBuffer = NEW(GlIndexBuffer(this, bufferName, size / indexSize, indexSize));
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName);
+		GlSystem::CheckErrors("Can't bind buffer");
+
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+		GlSystem::CheckErrors("Can't setup buffer data");
+
+		return indexBuffer;
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY("Can't create OpenGL dynamic index buffer", exception);
 	}
 }
 

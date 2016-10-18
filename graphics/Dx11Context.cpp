@@ -475,6 +475,13 @@ void Dx11Context::UploadVertexBufferData(VertexBuffer* abstractVertexBuffer, con
 	UploadBufferData(vertexBuffer->GetBufferInterface(), data, size, vertexBuffer->GetSize());
 }
 
+void Dx11Context::UploadIndexBufferData(IndexBuffer* abstractIndexBuffer, const void* data, int size)
+{
+	Dx11IndexBuffer* indexBuffer = fast_cast<Dx11IndexBuffer*>(abstractIndexBuffer);
+
+	UploadBufferData(indexBuffer->GetBufferInterface(), data, size, indexBuffer->GetIndicesCount() * indexBuffer->GetIndexSize());
+}
+
 void Dx11Context::Draw(int count)
 {
 	Update();

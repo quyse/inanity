@@ -290,6 +290,8 @@ public:
 	virtual void UploadUniformBufferData(UniformBuffer* buffer, const void* data, int size) = 0;
 	/// Upload data to dynamic vertex buffer.
 	virtual void UploadVertexBufferData(VertexBuffer* buffer, const void* data, int size) = 0;
+	/// Upload data to dynamic index buffer.
+	virtual void UploadIndexBufferData(IndexBuffer* buffer, const void* data, int size) = 0;
 
 	//******* Draw methods.
 	/* Immediate methods. */

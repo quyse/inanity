@@ -56,6 +56,7 @@ public:
 
 	void UploadUniformBufferData(UniformBuffer* buffer, const void* data, int size);
 	void UploadVertexBufferData(VertexBuffer* buffer, const void* data, int size);
+	void UploadIndexBufferData(IndexBuffer* buffer, const void* data, int size);
 
 	void Draw(int count = -1);
 	void DrawInstanced(int instancesCount, int count = -1);

@@ -147,6 +147,7 @@ public:
 	ptr<VertexBuffer> CreateStaticVertexBuffer(ptr<File> file, ptr<VertexLayout> layout);
 	ptr<VertexBuffer> CreateDynamicVertexBuffer(int size, ptr<VertexLayout> layout);
 	ptr<IndexBuffer> CreateStaticIndexBuffer(ptr<File> file, int indexSize);
+	ptr<IndexBuffer> CreateDynamicIndexBuffer(int size, int indexSize);
 	ptr<AttributeBinding> CreateAttributeBinding(ptr<AttributeLayout> layout);
 	ptr<Texture> CreateStaticTexture(ptr<RawTextureData> data, const SamplerSettings& samplerSettings);
 	ptr<SamplerState> CreateSamplerState(const SamplerSettings& samplerSettings);

@@ -598,6 +598,14 @@ void GlContext::UploadVertexBufferData(VertexBuffer* abstractVertexBuffer, const
 	UploadBufferData(GL_ARRAY_BUFFER, vertexBuffer->GetName(), data, size, vertexBuffer->GetSize());
 }
 
+void GlContext::UploadIndexBufferData(IndexBuffer* abstractIndexBuffer, const void* data, int size)
+{
+	GlIndexBuffer* indexBuffer = fast_cast<GlIndexBuffer*>(&*abstractIndexBuffer);
+
+	UploadBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->GetName(), data, size, indexBuffer->GetIndicesCount() * indexBuffer->GetIndexSize());
+	cellIndexBuffer.Reset();
+}
+
 void GlContext::Draw(int count)
 {
 	Update();

@@ -358,6 +358,30 @@ ptr<IndexBuffer> Dx11Device::CreateStaticIndexBuffer(ptr<File> file, int indexSi
 	}
 }
 
+ptr<IndexBuffer> Dx11Device::CreateDynamicIndexBuffer(int size, int indexSize)
+{
+	try
+	{
+		D3D11_BUFFER_DESC desc;
+		desc.ByteWidth = (UINT)size;
+		desc.Usage = D3D11_USAGE_DYNAMIC;
+		desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		desc.MiscFlags = 0;
+		desc.StructureByteStride = 0;
+
+		ComPointer<ID3D11Buffer> indexBuffer;
+		if(FAILED(device->CreateBuffer(&desc, NULL, &indexBuffer)))
+			THROW("Can't create index buffer");
+
+		return NEW(Dx11IndexBuffer(indexBuffer, size / indexSize, indexSize));
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY("Can't create index buffer", exception);
+	}
+}
+
 ptr<AttributeBinding> Dx11Device::CreateAttributeBinding(ptr<AttributeLayout> layout)
 {
 	try

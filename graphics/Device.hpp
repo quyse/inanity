@@ -116,6 +116,11 @@ public:
 	\param indexSize Размер одного индекса - 2 или 4.
 	*/
 	virtual ptr<IndexBuffer> CreateStaticIndexBuffer(ptr<File> file, int indexSize) = 0;
+	/// Создать динамический индексный буфер.
+	/**
+	\param indexSize Размер одного индекса - 2 или 4.
+	*/
+	virtual ptr<IndexBuffer> CreateDynamicIndexBuffer(int size, int indexSize) = 0;
 
 	/// Создать привязку атрибутов.
 	virtual ptr<AttributeBinding> CreateAttributeBinding(ptr<AttributeLayout> layout) = 0;
