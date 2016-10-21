@@ -20,6 +20,9 @@ private:
 	/** Для упрощения привязки методов. */
 	template <typename Class>
 	class Delegate;
+	/// Класс делегата для вызова объекта.
+	template <typename Class>
+	class CallDelegate;
 
 public:
 	/// Привязать класс с методом.
@@ -27,6 +30,12 @@ public:
 	static ptr<Handler> Bind(ptr<Class> object, typename Delegate<Class>::Method method)
 	{
 		return NEW(Delegate<Class>(object, method));
+	}
+	/// Привязать вызываемый объект.
+	template <typename T>
+	static ptr<Handler> BindCall(T&& object)
+	{
+		return NEW(CallDelegate<T>(object));
 	}
 };
 
@@ -47,6 +56,24 @@ public:
 	void Fire()
 	{
 		(object->*method)();
+	}
+};
+
+template <typename T>
+class Handler::CallDelegate : public Handler
+{
+private:
+	T object;
+
+public:
+	CallDelegate(T object)
+	: object(object) {}
+	CallDelegate(T&& object)
+	: object(object) {}
+
+	void Fire()
+	{
+		object();
 	}
 };
 
