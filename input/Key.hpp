@@ -6,7 +6,7 @@
 BEGIN_INANITY_INPUT
 
 /// Key numbers.
-/** Cross-platform, but are get mostly from X11 key numbers. */
+/** Cross-platform, but are got mostly from X11 key numbers. */
 struct Keys
 {
 	enum _
@@ -22,7 +22,54 @@ struct Keys
 		ScrollLock = 0x14,
 		SysReq = 0x15,
 		Escape = 0x1b,
-		Delete = 0xff,
+		Insert = 0x1c,
+		Delete = 0x1d,
+
+		Space = ' ', // 0x20
+
+		Plus = '+', // 0x2b
+		Comma = ',', // 0x2c
+		Hyphen = '-', // 0x2d
+		Period = '.', // 0x2e
+		Slash = '/', // 0x2f
+
+		_0 = '0', // 0x30
+		_1 = '1',
+		_2 = '2',
+		_3 = '3',
+		_4 = '4',
+		_5 = '5',
+		_6 = '6',
+		_7 = '7',
+		_8 = '8',
+		_9 = '9', // 0x39
+
+		A = 'A', // 0x41
+		B = 'B',
+		C = 'C',
+		D = 'D',
+		E = 'E',
+		F = 'F',
+		G = 'G',
+		H = 'H',
+		I = 'I',
+		J = 'J',
+		K = 'K',
+		L = 'L',
+		M = 'M',
+		N = 'N',
+		O = 'O',
+		P = 'P',
+		Q = 'Q',
+		R = 'R',
+		S = 'S',
+		T = 'T',
+		U = 'U',
+		V = 'V',
+		W = 'W',
+		X = 'X',
+		Y = 'Y',
+		Z = 'Z', // 0x5A
 
 		Home = 0x60,
 		Left = 0x61,
@@ -33,44 +80,46 @@ struct Keys
 		PageDown = 0x66,
 		End = 0x67,
 		Begin = 0x68,
+		Tilde = 0x7e,
 
 		// keypad
 		NumLock = 0x7f,
-		KeyPadSpace = 0x80,
-		KeyPadTab = 0x89,
-		KeyPadEnter = 0x8d,
-		KeyPadF1 = 0x91,
-		KeyPadF2 = 0x92,
-		KeyPadF3 = 0x93,
-		KeyPadF4 = 0x94,
-		KeyPadHome = 0x95,
-		KeyPadLeft = 0x96,
-		KeyPadUp = 0x97,
-		KeyPadRight = 0x98,
-		KeyPadDown = 0x99,
-		KeyPadPageUp = 0x9a,
-		KeyPadPageDown = 0x9b,
-		KeyPadEnd = 0x9c,
-		KeyPadBegin = 0x9d,
-		KeyPadInsert = 0x9e,
-		KeyPadDelete = 0x9f,
-		KeyPadEqual = 0xbd,
-		KeyPadMultiply = 0xaa,
-		KeyPadAdd = 0xab,
-		KeyPadSeparator = 0xac, // comma
-		KeyPadSubtract = 0xad,
-		KeyPadDecimal = 0xae,
-		KeyPadDivide = 0xaf,
-		KeyPad0 = 0xb0,
-		KeyPad1 = 0xb1,
-		KeyPad2 = 0xb2,
-		KeyPad3 = 0xb3,
-		KeyPad4 = 0xb4,
-		KeyPad5 = 0xb5,
-		KeyPad6 = 0xb6,
-		KeyPad7 = 0xb7,
-		KeyPad8 = 0xb8,
-		KeyPad9 = 0xb9,
+		NumPadSpace = 0x80,
+		NumPadTab = 0x89,
+		NumPadEnter = 0x8d,
+		NumPadF1 = 0x91,
+		NumPadF2 = 0x92,
+		NumPadF3 = 0x93,
+		NumPadF4 = 0x94,
+		NumPadHome = 0x95,
+		NumPadLeft = 0x96,
+		NumPadUp = 0x97,
+		NumPadRight = 0x98,
+		NumPadDown = 0x99,
+		NumPadPageUp = 0x9a,
+		NumPadPageDown = 0x9b,
+		NumPadEnd = 0x9c,
+		NumPadBegin = 0x9d,
+		NumPadInsert = 0x9e,
+		NumPadDelete = 0x9f,
+		NumPadEqual = 0xbd,
+		NumPadMultiply = 0xaa,
+		NumPadAdd = 0xab,
+		NumPadSeparator = 0xac, // comma
+		NumPadSubtract = 0xad,
+		NumPadDecimal = 0xae,
+		NumPadDivide = 0xaf,
+
+		NumPad0 = 0xb0,
+		NumPad1 = 0xb1,
+		NumPad2 = 0xb2,
+		NumPad3 = 0xb3,
+		NumPad4 = 0xb4,
+		NumPad5 = 0xb5,
+		NumPad6 = 0xb6,
+		NumPad7 = 0xb7,
+		NumPad8 = 0xb8,
+		NumPad9 = 0xb9,
 
 		F1 = 0xbe,
 		F2 = 0xbf,
@@ -99,46 +148,6 @@ struct Keys
 		SuperR = 0xec,
 		HyperL = 0xed,
 		HyperR = 0xee,
-
-		Space = ' ',
-
-		_0 = 0x30,
-		_1 = 0x31,
-		_2 = 0x32,
-		_3 = 0x33,
-		_4 = 0x34,
-		_5 = 0x35,
-		_6 = 0x36,
-		_7 = 0x37,
-		_8 = 0x38,
-		_9 = 0x39,
-
-		A = 'A',
-		B = 'B',
-		C = 'C',
-		D = 'D',
-		E = 'E',
-		F = 'F',
-		G = 'G',
-		H = 'H',
-		I = 'I',
-		J = 'J',
-		K = 'K',
-		L = 'L',
-		M = 'M',
-		N = 'N',
-		O = 'O',
-		P = 'P',
-		Q = 'Q',
-		R = 'R',
-		S = 'S',
-		T = 'T',
-		U = 'U',
-		V = 'V',
-		W = 'W',
-		X = 'X',
-		Y = 'Y',
-		Z = 'Z',
 	};
 };
 typedef Keys::_ Key;

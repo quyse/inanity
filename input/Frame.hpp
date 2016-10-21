@@ -15,9 +15,9 @@ Usage:
 
 while(frame->NextEvent())
 {
-	e = GetCurrentEvent();
+	e = frame->GetCurrentEvent();
 	// parse event...
-	s = GetCurrentState();
+	s = frame->GetCurrentState();
 	// use current state
 }
 */
