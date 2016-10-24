@@ -21,6 +21,7 @@ public:
 
 	// методы RenderBuffer
 	ptr<Texture> GetTexture();
+	float GetScreenTopTexcoord() const;
 
 	ID3D11RenderTargetView* GetRenderTargetViewInterface() const;
 };

@@ -18,4 +18,9 @@ ID3D11RenderTargetView* Dx11RenderBuffer::GetRenderTargetViewInterface() const
 	return renderTargetView;
 }
 
+float Dx11RenderBuffer::GetScreenTopTexcoord() const
+{
+	return 0;
+}
+
 END_INANITY_GRAPHICS

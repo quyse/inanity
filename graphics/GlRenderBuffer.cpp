@@ -19,4 +19,9 @@ ptr<Texture> GlRenderBuffer::GetTexture()
 	return texture;
 }
 
+float GlRenderBuffer::GetScreenTopTexcoord() const
+{
+	return 1;
+}
+
 END_INANITY_GRAPHICS

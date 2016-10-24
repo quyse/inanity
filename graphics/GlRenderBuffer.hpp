@@ -33,8 +33,9 @@ public:
 	GlRenderBuffer(ptr<GlInternalTexture> internalTexture, ptr<GlTexture> texture);
 
 	GLuint GetName() const;
-	/// Получить рендербуфер как текстуру.
+
 	ptr<Texture> GetTexture();
+	float GetScreenTopTexcoord() const;
 };
 
 END_INANITY_GRAPHICS

@@ -15,6 +15,9 @@ public:
 	/** Может возвращать 0, если рендербуфер не имеет
 	возможности быть источником данных. */
 	virtual ptr<Texture> GetTexture() = 0;
+
+	/// Получить текстурную координату, соответствующую "верху" при рендеринге.
+	virtual float GetScreenTopTexcoord() const = 0;
 };
 
 END_INANITY_GRAPHICS
