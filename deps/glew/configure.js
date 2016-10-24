@@ -3,7 +3,7 @@
  * написан вручную по Makefile
  */
 
-var macros = ['GLEW_STATIC'];
+var macros = ['GLEW_STATIC', 'GLEW_NO_GLU'];
 
 var includes = ['include'];
 

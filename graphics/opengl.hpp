@@ -4,6 +4,7 @@
 #include "../Object.hpp"
 
 #define GLEW_STATIC
+#define GLEW_NO_GLU
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
 
