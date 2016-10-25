@@ -56,7 +56,7 @@ public:
 		object = p;
 		if(object) object->Reference();
 #ifdef ___INANITY_TRACE_PTR
-		ManagedHeapTracePtr(this, object);
+		if(object) ManagedHeapTracePtr(this, object);
 #endif
 	}
 
