@@ -4,7 +4,7 @@
 
 BEGIN_INANITY_INPUT
 
-SdlManager::SdlManager() : sdl(Platform::Sdl::Get()) {}
+SdlManager::SdlManager() : sdl(Platform::Sdl::Get()), cursorX(0), cursorY(0) {}
 
 static Key ConvertKey(SDL_Keycode code)
 {
@@ -149,6 +149,7 @@ void SdlManager::ProcessEvent(const SDL_Event& event)
 		}
 		break;
 	case SDL_MOUSEMOTION:
+		// raw move event
 		{
 			Event e;
 			e.device = Event::deviceMouse;
@@ -157,6 +158,17 @@ void SdlManager::ProcessEvent(const SDL_Event& event)
 			e.mouse.rawMoveY = event.motion.yrel;
 			e.mouse.rawMoveZ = 0;
 			AddEvent(e);
+		}
+		// cursor move event
+		{
+			Event e;
+			e.device = Event::deviceMouse;
+			e.mouse.type = Event::Mouse::typeCursorMove;
+			e.mouse.cursorMoveX = event.motion.x - cursorX;
+			e.mouse.cursorMoveY = event.motion.y - cursorY;
+			AddEvent(e);
+			cursorX = event.motion.x;
+			cursorY = event.motion.y;
 		}
 		break;
 	case SDL_MOUSEBUTTONDOWN:

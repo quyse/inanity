@@ -96,7 +96,7 @@ void SdlWindow::UpdateMouseLock()
 
 void SdlWindow::UpdateCursorVisible()
 {
-	// not supported by SDL directly, but can be done with cursors
+	SDL_ShowCursor(cursorVisible ? SDL_ENABLE : SDL_DISABLE);
 }
 
 END_INANITY_PLATFORM
