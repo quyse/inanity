@@ -80,7 +80,7 @@ struct Keys
 		PageDown = 0x66,
 		End = 0x67,
 		Begin = 0x68,
-		Tilde = 0x7e,
+		Grave = 0x7e,
 
 		// keypad
 		NumLock = 0x7f,
@@ -139,15 +139,10 @@ struct Keys
 		ControlL = 0xe3,
 		ControlR = 0xe4,
 		CapsLock = 0xe5,
-		ShiftLock = 0xe6,
-		MetaL = 0xe7,
-		MetaR = 0xe8,
 		AltL = 0xe9,
 		AltR = 0xea,
 		SuperL = 0xeb,
 		SuperR = 0xec,
-		HyperL = 0xed,
-		HyperR = 0xee,
 	};
 };
 typedef Keys::_ Key;
