@@ -9,11 +9,11 @@
 #include "../platform/platform.hpp"
 #include "../String.hpp"
 
-#if defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
+#if defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS)
 
 #include <SDL2/SDL_video.h>
 
-#endif // ___INANITY_PLATFORM_LINUX || ___INANITY_PLATFORM_FREEBSD
+#endif // ___INANITY_PLATFORM_LINUX || ___INANITY_PLATFORM_FREEBSD || defined(___INANITY_PLATFORM_MACOS)
 
 
 
@@ -21,7 +21,7 @@ BEGIN_INANITY_PLATFORM
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
 class Win32Window;
-#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS)
 class SdlWindow;
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 class EmsWindow;
@@ -41,7 +41,7 @@ class GlShaderBindings;
 #if defined(___INANITY_PLATFORM_WINDOWS)
 class WglPresenter;
 class Win32MonitorMode;
-#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS)
 class SdlPresenter;
 class SdlMonitorMode;
 class SdlWindow;
@@ -68,7 +68,7 @@ private:
 	HGLRC hglrc;
 	ptr<Platform::Win32Window> hiddenWindow;
 
-#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS)
 
 	SDL_GLContext sdlContext;
 	ptr<Platform::SdlWindow> hiddenWindow;
@@ -116,7 +116,7 @@ public:
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
 	GlDevice(ptr<GlSystem> system, const String& deviceName);
-#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS)
 	GlDevice(ptr<GlSystem> system);
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	GlDevice(ptr<GlSystem> system);
@@ -156,7 +156,7 @@ public:
 	/// Create presenter routine.
 #if defined(___INANITY_PLATFORM_WINDOWS)
 	ptr<WglPresenter> CreatePresenter(ptr<Platform::Win32Window> window, ptr<Win32MonitorMode> mode);
-#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS)
 	ptr<SdlPresenter> CreatePresenter(ptr<Platform::SdlWindow> window, ptr<SdlMonitorMode> mode);
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	ptr<EmsPresenter> CreatePresenter(ptr<Platform::EmsWindow> window, ptr<MonitorMode> mode);

@@ -29,7 +29,7 @@
 #include "WglPresenter.hpp"
 #include "Win32MonitorMode.hpp"
 #include "../platform/Win32Window.hpp"
-#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS)
 #include "SdlPresenter.hpp"
 #include "SdlMonitorMode.hpp"
 #include "../platform/Sdl.hpp"
@@ -127,7 +127,7 @@ GlDevice::~GlDevice()
 		wglDeleteContext(hglrc);
 }
 
-#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS)
 
 GlDevice::GlDevice(ptr<GlSystem> system)
 : system(system), boundPresenter(nullptr), sdlContext(0)
@@ -136,6 +136,12 @@ GlDevice::GlDevice(ptr<GlSystem> system)
 
 	// create hidden window
 	{
+#if defined(___INANITY_PLATFORM_MACOS)
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+#endif
+
 		SDL_Window* handle = SDL_CreateWindow("Inanity OpenGL Hidden Window",
 			SDL_WINDOWPOS_CENTERED, // x
 			SDL_WINDOWPOS_CENTERED, // y
@@ -183,7 +189,7 @@ GlDevice::~GlDevice() {}
 
 void GlDevice::InitCaps()
 {
-#if defined(___INANITY_PLATFORM_WINDOWS) || defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
+#if defined(___INANITY_PLATFORM_WINDOWS) || defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS)
 	internalCaps =
 		(GLEW_ARB_uniform_buffer_object ? InternalCaps::uniformBufferObject : 0) |
 		(GLEW_ARB_sampler_objects ? InternalCaps::samplerObjects : 0) |
@@ -233,7 +239,7 @@ void GlDevice::BindPresenter(Presenter* presenter)
 				THROW("Can't bind hidden window");
 		}
 
-#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS)
 
 		if(presenter)
 		{
@@ -288,7 +294,7 @@ ptr<Presenter> GlDevice::CreateWindowPresenter(ptr<Platform::Window> abstractWin
 	if(!mode && abstractMode)
 		THROW("Only Win32 monitor mode allowed");
 
-#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS)
 
 	ptr<Platform::SdlWindow> window = abstractWindow.DynamicCast<Platform::SdlWindow>();
 	if(!window)
@@ -327,7 +333,7 @@ ptr<WglPresenter> GlDevice::CreatePresenter(ptr<Platform::Win32Window> window, p
 	END_TRY("Can't create Windows OpenGL presenter");
 }
 
-#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS)
 
 ptr<SdlPresenter> GlDevice::CreatePresenter(ptr<Platform::SdlWindow> window, ptr<SdlMonitorMode> mode)
 {

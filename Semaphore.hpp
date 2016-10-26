@@ -5,6 +5,8 @@
 #if defined(___INANITY_PLATFORM_WINDOWS)
 #include "platform/windows.hpp"
 #include "platform/Win32Handle.hpp"
+#elif defined(___INANITY_PLATFORM_MACOS)
+#include <dispatch/dispatch.h>
 #elif defined(___INANITY_PLATFORM_POSIX)
 #include <semaphore.h>
 #else
@@ -19,6 +21,8 @@ class Semaphore
 private:
 #if defined(___INANITY_PLATFORM_WINDOWS)
 	Platform::Win32Handle handle;
+#elif defined(___INANITY_PLATFORM_MACOS)
+	dispatch_semaphore_t sem;
 #elif defined(___INANITY_PLATFORM_POSIX)
 	sem_t sem;
 #else

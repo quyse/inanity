@@ -184,11 +184,17 @@ ptr<File> PosixFileSystem::LoadPartOfFile(const String& fileName, long long mapp
 		{
 			struct stat st;
 			if(fstat(fd, &st) < 0)
+			{
 				THROW_SECONDARY("Can't get file size", Exception::SystemError());
+				close(fd);
+			}
 			size = st.st_size;
 		}
 		if(!size)
+		{
+			close(fd);
 			return NEW(EmptyFile());
+		}
 
 		//получить размер страницы
 		static size_t pageSize = 0;
@@ -201,6 +207,7 @@ ptr<File> PosixFileSystem::LoadPartOfFile(const String& fileName, long long mapp
 		size_t realMappingSize = size + (size_t)(mappingStart - realMappingStart);
 		//спроецировать файл с учетом этого сдвига
 		void* data = mmap(0, realMappingSize, PROT_READ, MAP_PRIVATE, fd, realMappingStart);
+		close(fd);
 		if(data == (caddr_t)-1)
 			THROW_SECONDARY("Can't map file", Exception::SystemError());
 
@@ -285,16 +292,11 @@ void PosixFileSystem::GetDirectoryEntries(const String& directoryName, std::vect
 {
 	String fullDirectoryName = GetFullName(directoryName);
 	DIR* dir = opendir(fullDirectoryName.c_str());
+	if(!dir)
+		THROW_SECONDARY("Can't open dir " + directoryName, Exception::SystemError());
 
 	while(struct dirent* ent = readdir(dir))
 	{
-		if(errno)
-		{
-			ptr<Exception> exception = Exception::SystemError();
-			closedir(dir);
-			THROW_SECONDARY("Can't read dir", exception);
-		}
-
 		String fileTitle = ent->d_name;
 		String fullFileName = fullDirectoryName + fileTitle;
 		struct stat st;

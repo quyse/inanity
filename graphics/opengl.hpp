@@ -15,10 +15,17 @@
 #elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD)
 
 #include "../deps/glew/include/GL/glew.h"
+#include <GL/gl.h>
+
+#elif defined(___INANITY_PLATFORM_MACOS)
+
+#include "../deps/glew/include/GL/glew.h"
+#include </System/Library/Frameworks/OpenGL.framework/Headers/gl.h>
 
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 
 #include <GL/glew.h>
+#include <GL/gl.h>
 
 // hacks for missing parts of Emscripten's GLEW
 extern "C"
@@ -38,7 +45,5 @@ extern "C"
 #error Unknown platform
 
 #endif
-
-#include <GL/gl.h>
 
 #endif

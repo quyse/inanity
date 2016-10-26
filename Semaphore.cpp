@@ -13,6 +13,9 @@ Semaphore::Semaphore(int initialCount)
 #if defined(___INANITY_PLATFORM_WINDOWS)
 		handle = CreateSemaphore(NULL, initialCount, 0x7fffffff, NULL);
 		if(!handle.IsValid())
+#elif defined(___INANITY_PLATFORM_MACOS)
+		sem = dispatch_semaphore_create(initialCount);
+		if(!sem)
 #elif defined(___INANITY_PLATFORM_POSIX)
 		if(sem_init(&sem, 0, 0) != 0)
 #else
@@ -28,7 +31,11 @@ Semaphore::Semaphore(int initialCount)
 
 Semaphore::~Semaphore()
 {
-#ifdef ___INANITY_PLATFORM_POSIX
+#if defined(___INANITY_PLATFORM_WINDOWS)
+	CloseHandle(handle);
+#elif defined(___INANITY_PLATFORM_MACOS)
+	dispatch_release(sem);
+#elif defined(___INANITY_PLATFORM_POSIX)
 	sem_destroy(&sem);
 #endif
 }
@@ -37,6 +44,8 @@ void Semaphore::Acquire()
 {
 #if defined(___INANITY_PLATFORM_WINDOWS)
 	if(WaitForSingleObject(handle, INFINITE) != WAIT_OBJECT_0)
+#elif defined(___INANITY_PLATFORM_MACOS)
+	if(dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER) != 0)
 #elif defined(___INANITY_PLATFORM_POSIX)
 	if(sem_wait(&sem) != 0)
 #else
@@ -55,6 +64,8 @@ bool Semaphore::TryAcquire()
 	case WAIT_TIMEOUT:
 		return false;
 	}
+#elif defined(___INANITY_PLATFORM_MACOS)
+	return (dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER) == 0);
 #elif defined(___INANITY_PLATFORM_POSIX)
 	if(sem_trywait(&sem) == 0)
 		return true;
@@ -71,6 +82,8 @@ void Semaphore::Release(int count)
 {
 #if defined(___INANITY_PLATFORM_WINDOWS)
 	if(!ReleaseSemaphore(handle, count, NULL))
+#elif defined(___INANITY_PLATFORM_MACOS)
+	if(dispatch_semaphore_signal(sem), 0)
 #elif defined(___INANITY_PLATFORM_POSIX)
 	int i;
 	for(i = 0; i < count && sem_post(&sem) == 0; ++i);

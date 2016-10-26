@@ -2,6 +2,9 @@
 #ifdef ___INANITY_PLATFORM_WINDOWS
 #include "platform/windows.hpp"
 #endif
+#ifdef ___INANITY_PLATFORM_MACOS
+#include <mach/mach_time.h>
+#endif
 #ifdef ___INANITY_PLATFORM_EMSCRIPTEN
 #include <emscripten/emscripten.h>
 #endif
@@ -41,6 +44,20 @@ Time::Tick Time::GetTick()
 Time::Tick Time::GetTicksPerSecond()
 {
 	return 1000.0f;
+}
+
+#elif defined(___INANITY_PLATFORM_MACOS)
+
+long long Time::GetTick()
+{
+	return mach_absolute_time();
+}
+
+long long Time::GetTicksPerSecond()
+{
+	mach_timebase_info_data_t timebase;
+	mach_timebase_info(&timebase);
+	return 1000000000LL * timebase.numer / timebase.denom;
 }
 
 #elif defined(___INANITY_PLATFORM_POSIX)

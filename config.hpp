@@ -13,6 +13,9 @@
 #elif defined(__FreeBSD__)
 #define ___INANITY_PLATFORM_FREEBSD
 #define ___INANITY_PLATFORM_POSIX
+#elif defined(__APPLE__) && defined(__MACH__)
+#define ___INANITY_PLATFORM_MACOS
+#define ___INANITY_PLATFORM_POSIX
 #else
 #define ___INANITY_PLATFORM_LINUX
 #define ___INANITY_PLATFORM_POSIX
