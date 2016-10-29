@@ -1,6 +1,7 @@
 #include "SdlManager.hpp"
 #include "Frame.hpp"
 #include "../platform/Sdl.hpp"
+#include "../deps/utf8.h"
 
 BEGIN_INANITY_INPUT
 
@@ -145,6 +146,16 @@ void SdlManager::ProcessEvent(const SDL_Event& event)
 			e.device = Event::deviceKeyboard;
 			e.keyboard.type = event.type == SDL_KEYDOWN ? Event::Keyboard::typeKeyDown : Event::Keyboard::typeKeyUp;
 			e.keyboard.key = ConvertKey(event.key.keysym.sym);
+			AddEvent(e);
+		}
+		break;
+	case SDL_TEXTINPUT:
+		for(auto i = utf8::unchecked::iterator<const char*>(event.text.text); *i.base(); ++i)
+		{
+			Event e;
+			e.device = Event::deviceKeyboard;
+			e.keyboard.type = Event::Keyboard::typeCharacter;
+			e.keyboard.character = *i;
 			AddEvent(e);
 		}
 		break;
