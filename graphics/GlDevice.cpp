@@ -1019,10 +1019,10 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data, const Sampl
 			{
 				int linePitch = data->GetMipLinePitch(mip);
 				int slicePitch = data->GetMipSlicePitch(mip);
-				if((linePitch % pixelSize) || (slicePitch % pixelSize))
+				if(pixelSize && ((linePitch % pixelSize) || (slicePitch % pixelSize)))
 					THROW("Wrong line or slice pitch");
-				glPixelStorei(GL_UNPACK_ROW_LENGTH, linePitch / pixelSize);
-				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, slicePitch / pixelSize);
+				glPixelStorei(GL_UNPACK_ROW_LENGTH, pixelSize ? linePitch / pixelSize : 0);
+				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, pixelSize ? slicePitch / pixelSize : 0);
 
 				int mipWidth = data->GetMipWidth(mip);
 				int mipHeight = data->GetMipHeight(mip);
@@ -1034,7 +1034,7 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data, const Sampl
 				{
 					if(compressed)
 					{
-						glCompressedTexSubImage3D(target, mip, 0, 0, 0, mipWidth, mipHeight, mipDepth, format, mipSize, mipData);
+						glCompressedTexSubImage3D(target, mip, 0, 0, 0, mipWidth, mipHeight, mipDepth, internalFormat, mipSize, mipData);
 					}
 					else
 					{
@@ -1071,15 +1071,15 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data, const Sampl
 					glTexStorage3D(target, mips, internalFormat, imageWidth, imageHeight, imageCount);
 
 				int imagePitch = data->GetImageSize();
-				if(imagePitch % pixelSize)
+				if(pixelSize && imagePitch % pixelSize)
 					THROW("Wrong image pitch");
-				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, imagePitch / pixelSize);
+				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, pixelSize ? imagePitch / pixelSize : 0);
 				for(int mip = 0; mip < mips; ++mip)
 				{
 					int linePitch = data->GetMipLinePitch(mip);
-					if(linePitch % pixelSize)
+					if(pixelSize && linePitch % pixelSize)
 						THROW("Wrong line pitch");
-					glPixelStorei(GL_UNPACK_ROW_LENGTH, linePitch / pixelSize);
+					glPixelStorei(GL_UNPACK_ROW_LENGTH, pixelSize ? linePitch / pixelSize : 0);
 
 					int mipWidth = data->GetMipWidth(mip);
 					int mipHeight = data->GetMipHeight(mip);
@@ -1090,7 +1090,7 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data, const Sampl
 					{
 						if(compressed)
 						{
-							glCompressedTexSubImage3D(target, mip, 0, 0, 0, mipWidth, mipHeight, imageCount, format, mipSize, mipData);
+							glCompressedTexSubImage3D(target, mip, 0, 0, 0, mipWidth, mipHeight, imageCount, internalFormat, mipSize, mipData);
 						}
 						else
 						{
@@ -1126,10 +1126,10 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data, const Sampl
 				for(int mip = 0; mip < mips; ++mip)
 				{
 					int linePitch = data->GetMipLinePitch(mip);
-					if(linePitch % pixelSize)
+					if(pixelSize && linePitch % pixelSize)
 						THROW("Wrong line pitch");
 #ifndef ___INANITY_PLATFORM_EMSCRIPTEN
-					glPixelStorei(GL_UNPACK_ROW_LENGTH, linePitch / pixelSize);
+					glPixelStorei(GL_UNPACK_ROW_LENGTH, pixelSize ? linePitch / pixelSize : 0);
 					GlSystem::CheckErrors("Can't set pixel store format");
 #endif
 
@@ -1142,7 +1142,7 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data, const Sampl
 					{
 						if(compressed)
 						{
-							glCompressedTexSubImage2D(target, mip, 0, 0, mipWidth, mipHeight, format, mipSize, mipData);
+							glCompressedTexSubImage2D(target, mip, 0, 0, mipWidth, mipHeight, internalFormat, mipSize, mipData);
 						}
 						else
 						{
@@ -1180,9 +1180,9 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data, const Sampl
 					glTexStorage2D(target, mips, internalFormat, imageWidth, imageCount);
 
 				int imagePitch = data->GetImageSize();
-				if(imagePitch % pixelSize)
+				if(pixelSize && imagePitch % pixelSize)
 					THROW("Wrong image pitch");
-				glPixelStorei(GL_UNPACK_ROW_LENGTH, imagePitch / pixelSize);
+				glPixelStorei(GL_UNPACK_ROW_LENGTH, pixelSize ? imagePitch / pixelSize : 0);
 				for(int mip = 0; mip < mips; ++mip)
 				{
 					int mipWidth = data->GetMipWidth(mip);
@@ -1193,7 +1193,7 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data, const Sampl
 					{
 						if(compressed)
 						{
-							glCompressedTexSubImage2D(target, mip, 0, 0, mipWidth, imageCount, format, mipSize, mipData);
+							glCompressedTexSubImage2D(target, mip, 0, 0, mipWidth, imageCount, internalFormat, mipSize, mipData);
 						}
 						else
 						{
@@ -1236,7 +1236,7 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data, const Sampl
 					{
 						if(compressed)
 						{
-							glCompressedTexSubImage1D(target, mip, 0, mipWidth, format, mipSize, mipData);
+							glCompressedTexSubImage1D(target, mip, 0, mipWidth, internalFormat, mipSize, mipData);
 						}
 						else
 						{
