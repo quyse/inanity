@@ -362,97 +362,83 @@ ptr<RawTextureData> RawTextureData::GenerateMips(int newMips) const
 	ptr<RawTextureData> newTextureData = NEW(RawTextureData(nullptr, format, width, height, depth, newMips, count));
 
 	// scale down the image
-	int pixelSize = GetPixelSize();
+	const int pixelSize = GetPixelSize();
 
-	int realCount = count > 0 ? count : 1;
+	const int realCount = count > 0 ? count : 1;
+
+	// memory for partial sums
+	const int firstMipWidth = GetMipWidth(0);
+	const int firstMipHeight = GetMipHeight(0);
+	const int firstMipDepth = GetMipDepth(0);
+	const int partialSumsLinePitch = firstMipWidth * pixelSize;
+	const int partialSumsSlicePitch = firstMipHeight * partialSumsLinePitch;
+	ptr<MemoryFile> partialSumsFile = NEW(MemoryFile(firstMipDepth * partialSumsSlicePitch * sizeof(uint32_t)));
+	uint32_t* partialSums = (uint32_t*)partialSumsFile->GetData();
+#define PARTIAL_SUM1(z, y, x, p) partialSums[(z) * partialSumsSlicePitch + (y) * partialSumsLinePitch + (x) * pixelSize + (p)]
+#define PARTIAL_SUM(z, y, x, p) (((z) >= 0 && (y) >= 0 && (x) >= 0) ? PARTIAL_SUM1((z), (y), (x), (p)) : 0)
 
 	for(int image = 0; image < realCount; ++image)
 	{
-		// copy first mip
+		// calculate partial sums on first mip
 		{
-			int mipWidth = GetMipWidth(0);
-			int mipHeight = GetMipHeight(0);
-			int mipDepth = GetMipDepth(0);
 			int sourceSlicePitch = GetMipSlicePitch(0);
 			int sourceLinePitch = GetMipLinePitch(0);
-			int destLinePitch = mipWidth * pixelSize;
 			const uint8_t* sourceData = (const uint8_t*)GetMipData(image, 0);
-			uint8_t* destData = (uint8_t*)newTextureData->GetMipData(image, 0);
-			for(int z = 0; z < mipDepth; ++z)
-			{
-				int slice = z * sourceSlicePitch;
-				for(int y = 0; y < mipHeight; ++y)
-				{
-					memcpy(destData, sourceData + slice + y * sourceLinePitch, destLinePitch);
-					destData += destLinePitch;
-				}
-			}
+
+			for(int z = 0; z < firstMipDepth; ++z)
+				for(int y = 0; y < firstMipHeight; ++y)
+					for(int x = 0; x < firstMipWidth; ++x)
+						for(int p = 0; p < pixelSize; ++p)
+							PARTIAL_SUM1(z, y, x, p) =
+								(uint32_t)sourceData[z * sourceSlicePitch + y * sourceLinePitch + x * pixelSize + p]
+								+ PARTIAL_SUM(z,     y,     x - 1, p)
+								+ PARTIAL_SUM(z,     y - 1, x,     p)
+								- PARTIAL_SUM(z,     y - 1, x - 1, p)
+								+ PARTIAL_SUM(z - 1, y,     x,     p)
+								- PARTIAL_SUM(z - 1, y,     x - 1, p)
+								- PARTIAL_SUM(z - 1, y - 1, x,     p)
+								+ PARTIAL_SUM(z - 1, y - 1, x - 1, p);
 		}
 
-		// generate other mips
-		int sourceMip = 0;
-		for(int mip = 1; mip < newMips; ++mip)
+		// generate mips
+		for(int mip = 0; mip < newMips; ++mip)
 		{
-			const uint8_t* sourceData = (const uint8_t*)newTextureData->GetMipData(image, sourceMip);
-			int sourceWidth = newTextureData->GetMipWidth(sourceMip);
-			int sourceHeight = newTextureData->GetMipHeight(sourceMip);
-			int sourceDepth = newTextureData->GetMipDepth(sourceMip);
-			int sourceSlicePitch = newTextureData->GetMipSlicePitch(sourceMip);
-			int sourceLinePitch = newTextureData->GetMipLinePitch(sourceMip);
-
 			uint8_t* destData = (uint8_t*)newTextureData->GetMipData(image, mip);
 			int destWidth = newTextureData->GetMipWidth(mip);
 			int destHeight = newTextureData->GetMipHeight(mip);
 			int destDepth = newTextureData->GetMipDepth(mip);
 
-			// use 2x downscale algorithm if possible
-			if((!width || sourceWidth == destWidth * 2) && (!height || sourceHeight == destHeight * 2) && (!depth || sourceDepth == destDepth * 2))
-			{
-				const int px = width ? 2 : 1, py = height ? 2 : 1, pz = depth ? 2 : 1, ps = px * py * pz;
-				for(int z = 0; z < destDepth; ++z)
-				{
-					int slice = z * 2 * sourceSlicePitch;
-					for(int y = 0; y < destHeight; ++y)
-					{
-						int line = slice + y * 2 * sourceLinePitch;
-						for(int x = 0; x < destWidth; ++x)
-						{
-							int pixel = line + x * 2 * pixelSize;
-							uint16_t s[4] = { 0, 0, 0, 0 };
-							for(int zz = 0; zz < pz; ++zz)
-								for(int yy = 0; yy < py; ++yy)
-									for(int xx = 0; xx < px; ++xx)
-										for(int p = 0; p < pixelSize; ++p)
-											s[p] += sourceData[pixel + zz * sourceSlicePitch + yy * sourceLinePitch + xx * pixelSize + p];
-							for(int p = 0; p < pixelSize; ++p)
-								*destData++ = (uint8_t)(s[p] / ps);
-						}
-					}
-				}
+			const int pz = firstMipDepth / destDepth;
+			const int py = firstMipHeight / destHeight;
+			const int px = firstMipWidth / destWidth;
+			const int ps = pz * py * px;
 
-				// now this mip can be used
-				sourceMip = mip;
-			}
-			// else use nearest neighbour algorithm
-			else
+			for(int z = 0; z < destDepth; ++z)
 			{
-				for(int z = 0; z < destDepth; ++z)
+				int zz = z * pz - 1;
+				for(int y = 0; y < destHeight; ++y)
 				{
-					int slice = (z * sourceDepth / destDepth) * sourceSlicePitch;
-					for(int y = 0; y < destHeight; ++y)
+					int yy = y * py - 1;
+					for(int x = 0; x < destWidth; ++x)
 					{
-						int line = slice + (y * sourceHeight / destHeight) * sourceLinePitch;
-						for(int x = 0; x < destWidth; ++x)
-						{
-							int pixel = line + (x * sourceWidth / destWidth) * pixelSize;
-							for(int p = 0; p < pixelSize; ++p)
-								*destData++ = sourceData[pixel + p];
-						}
+						int xx = x * px - 1;
+						for(int p = 0; p < pixelSize; ++p)
+							*destData++ = (uint8_t)
+								((PARTIAL_SUM(zz + pz, yy + py, xx + px, p)
+								- PARTIAL_SUM(zz + pz, yy + py, xx,      p)
+								- PARTIAL_SUM(zz + pz, yy     , xx + px, p)
+								+ PARTIAL_SUM(zz + pz, yy     , xx,      p)
+								- PARTIAL_SUM(zz     , yy + py, xx + px, p)
+								+ PARTIAL_SUM(zz     , yy + py, xx,      p)
+								+ PARTIAL_SUM(zz     , yy,      xx + px, p)
+								- PARTIAL_SUM(zz     , yy,      xx,      p)
+								) / ps);
 					}
 				}
 			}
 		}
 	}
+#undef PARTIAL_SUM
 
 	return newTextureData;
 
