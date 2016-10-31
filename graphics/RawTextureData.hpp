@@ -110,7 +110,10 @@ public:
 	void Blit(ptr<RawTextureData> image, int destX, int destY, int sourceX, int sourceY, int width, int height);
 
 	/// Generate mip levels from zero level.
-	/** Existing levels starting from 1 are ignored. If mipsCount == 0 then optimal number of mips calculated. */
+	/** Existing levels starting from 1 are ignored. If mipsCount == 0 then optimal number of mips calculated.
+	Currently 2x downscale is correct, if it's not 2x it's simple nearest neighbour.
+	Algorithm simply averages per-component and doesn't weight RGB colors with alpha.
+	Pre-multiply RGB with alpha to correctly generate RGBA mips. */
 	ptr<RawTextureData> GenerateMips(int newMips = 0) const;
 
 	/// Union several 2D images into one.

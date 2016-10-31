@@ -261,7 +261,7 @@ ptr<RawTextureData> RawTextureData::Deserialize(ptr<InputStream> stream)
 	int mips = (int)reader.ReadShortly();
 	int count = (int)reader.ReadShortly();
 
-	ptr<RawTextureData> data = NEW(RawTextureData(0, format, width, height, depth, mips, count));
+	ptr<RawTextureData> data = NEW(RawTextureData(nullptr, format, width, height, depth, mips, count));
 
 	int realCount = count > 0 ? count : 1;
 
@@ -358,58 +358,103 @@ ptr<RawTextureData> RawTextureData::GenerateMips(int newMips) const
 		newMips = lastMip + 1;
 	}
 
-	// calculate new mip offsets and size of new pixels
-	size_t newMipOffset = 0;
-	std::vector<size_t> newMipOffsets(newMips);
-	for(int i = 0; i < newMips; ++i)
-	{
-		newMipOffsets[i] = newMipOffset;
-		newMipOffset += GetMipSize(i);
-	}
-	size_t newImageSize = newMipOffset;
-	int realCount = count ? count : 1;
-	ptr<File> newPixels = NEW(MemoryFile(newImageSize * realCount));
-	char* newPixelsData = (char*)newPixels->GetData();
+	// allocate memory
+	ptr<RawTextureData> newTextureData = NEW(RawTextureData(nullptr, format, width, height, depth, newMips, count));
 
 	// scale down the image
-	// TEST: simple nearest neighbour algorithm
 	int pixelSize = GetPixelSize();
+
+	int realCount = count > 0 ? count : 1;
 
 	for(int image = 0; image < realCount; ++image)
 	{
-		const char* sourceData = (const char*)GetMipData(image, 0);
-		int sourceWidth = GetMipWidth(0);
-		int sourceHeight = GetMipHeight(0);
-		int sourceDepth = GetMipDepth(0);
-		int sourceSlicePitch = GetMipSlicePitch(0);
-		int sourceLinePitch = GetMipLinePitch(0);
-
-		for(int mip = 0; mip < newMips; ++mip)
+		// copy first mip
 		{
-			char* newMipData = (char*)newPixelsData + image * newImageSize + newMipOffsets[mip];
-
-			int newMipDepth = GetMipDepth(mip);
-			int newMipHeight = GetMipHeight(mip);
-			int newMipWidth = GetMipWidth(mip);
-
-			for(int z = 0; z < newMipDepth; ++z)
+			int mipWidth = GetMipWidth(0);
+			int mipHeight = GetMipHeight(0);
+			int mipDepth = GetMipDepth(0);
+			int sourceSlicePitch = GetMipSlicePitch(0);
+			int sourceLinePitch = GetMipLinePitch(0);
+			int destLinePitch = mipWidth * pixelSize;
+			const uint8_t* sourceData = (const uint8_t*)GetMipData(image, 0);
+			uint8_t* destData = (uint8_t*)newTextureData->GetMipData(image, 0);
+			for(int z = 0; z < mipDepth; ++z)
 			{
-				int slice = (z * sourceDepth / newMipDepth) * sourceSlicePitch;
-				for(int y = 0; y < newMipHeight; ++y)
+				int slice = z * sourceSlicePitch;
+				for(int y = 0; y < mipHeight; ++y)
 				{
-					int line = slice + (y * sourceHeight / newMipHeight) * sourceLinePitch;
-					for(int x = 0; x < newMipWidth; ++x)
+					memcpy(destData, sourceData + slice + y * sourceLinePitch, destLinePitch);
+					destData += destLinePitch;
+				}
+			}
+		}
+
+		// generate other mips
+		int sourceMip = 0;
+		for(int mip = 1; mip < newMips; ++mip)
+		{
+			const uint8_t* sourceData = (const uint8_t*)newTextureData->GetMipData(image, sourceMip);
+			int sourceWidth = newTextureData->GetMipWidth(sourceMip);
+			int sourceHeight = newTextureData->GetMipHeight(sourceMip);
+			int sourceDepth = newTextureData->GetMipDepth(sourceMip);
+			int sourceSlicePitch = newTextureData->GetMipSlicePitch(sourceMip);
+			int sourceLinePitch = newTextureData->GetMipLinePitch(sourceMip);
+
+			uint8_t* destData = (uint8_t*)newTextureData->GetMipData(image, mip);
+			int destWidth = newTextureData->GetMipWidth(mip);
+			int destHeight = newTextureData->GetMipHeight(mip);
+			int destDepth = newTextureData->GetMipDepth(mip);
+
+			// use 2x downscale algorithm if possible
+			if((!width || sourceWidth == destWidth * 2) && (!height || sourceHeight == destHeight * 2) && (!depth || sourceDepth == destDepth * 2))
+			{
+				const int px = width ? 2 : 1, py = height ? 2 : 1, pz = depth ? 2 : 1, ps = px * py * pz;
+				for(int z = 0; z < destDepth; ++z)
+				{
+					int slice = z * 2 * sourceSlicePitch;
+					for(int y = 0; y < destHeight; ++y)
 					{
-						int pixel = line + (x * sourceWidth / newMipWidth) * pixelSize;
-						for(int p = 0; p < pixelSize; ++p)
-							*newMipData++ = sourceData[pixel + p];
+						int line = slice + y * 2 * sourceLinePitch;
+						for(int x = 0; x < destWidth; ++x)
+						{
+							int pixel = line + x * 2 * pixelSize;
+							uint16_t s[4] = { 0, 0, 0, 0 };
+							for(int zz = 0; zz < pz; ++zz)
+								for(int yy = 0; yy < py; ++yy)
+									for(int xx = 0; xx < px; ++xx)
+										for(int p = 0; p < pixelSize; ++p)
+											s[p] += sourceData[pixel + zz * sourceSlicePitch + yy * sourceLinePitch + xx * pixelSize + p];
+							for(int p = 0; p < pixelSize; ++p)
+								*destData++ = (uint8_t)(s[p] / ps);
+						}
+					}
+				}
+
+				// now this mip can be used
+				sourceMip = mip;
+			}
+			// else use nearest neighbour algorithm
+			else
+			{
+				for(int z = 0; z < destDepth; ++z)
+				{
+					int slice = (z * sourceDepth / destDepth) * sourceSlicePitch;
+					for(int y = 0; y < destHeight; ++y)
+					{
+						int line = slice + (y * sourceHeight / destHeight) * sourceLinePitch;
+						for(int x = 0; x < destWidth; ++x)
+						{
+							int pixel = line + (x * sourceWidth / destWidth) * pixelSize;
+							for(int p = 0; p < pixelSize; ++p)
+								*destData++ = sourceData[pixel + p];
+						}
 					}
 				}
 			}
 		}
 	}
 
-	return NEW(RawTextureData(newPixels, format, width, height, depth, newMips, count));
+	return newTextureData;
 
 	END_TRY("Can't generate mips for raw texture data");
 }
