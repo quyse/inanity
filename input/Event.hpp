@@ -68,10 +68,6 @@ struct Event
 				//*** Absolute cursor position (in window coordinates).
 				int cursorX;
 				int cursorY;
-				//*** OS-dependent relative cursor moving.
-				/** In pixels, cropped by window, mouse ballistics applied. */
-				int cursorMoveX;
-				int cursorMoveY;
 			};
 		};
 	};

@@ -24,9 +24,6 @@ class SdlManager : public Manager
 private:
 	ptr<Platform::Sdl> sdl;
 
-	/// Last cursor position.
-	int cursorX, cursorY;
-
 public:
 	SdlManager();
 

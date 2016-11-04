@@ -104,8 +104,6 @@ Key Win32Manager::ConvertKey(USHORT key)
 	}
 }
 
-Win32Manager::Win32Manager() : cursorX(0), cursorY(0) {}
-
 bool Win32Manager::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	// process characters
@@ -124,13 +122,9 @@ bool Win32Manager::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 		Event e;
 		e.device = Event::deviceMouse;
 		e.mouse.type = Event::Mouse::typeCursorMove;
-		int newCursorX = LOWORD(lParam);
-		int newCursorY = HIWORD(lParam);
-		e.mouse.cursorMoveX = newCursorX - cursorX;
-		e.mouse.cursorMoveY = newCursorY - cursorY;
+		e.mouse.cursorX = LOWORD(lParam);
+		e.mouse.cursorY = HIWORD(lParam);
 		AddEvent(e);
-		cursorX = newCursorX;
-		cursorY = newCursorY;
 	}
 	return false;
 }
