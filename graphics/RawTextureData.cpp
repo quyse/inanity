@@ -366,79 +366,54 @@ ptr<RawTextureData> RawTextureData::GenerateMips(int newMips) const
 
 	const int realCount = count > 0 ? count : 1;
 
-	// memory for partial sums
-	const int firstMipWidth = GetMipWidth(0);
-	const int firstMipHeight = GetMipHeight(0);
-	const int firstMipDepth = GetMipDepth(0);
-	const int partialSumsLinePitch = firstMipWidth * pixelSize;
-	const int partialSumsSlicePitch = firstMipHeight * partialSumsLinePitch;
-	ptr<MemoryFile> partialSumsFile = NEW(MemoryFile(firstMipDepth * partialSumsSlicePitch * sizeof(uint32_t)));
-	uint32_t* partialSums = (uint32_t*)partialSumsFile->GetData();
-#define PARTIAL_SUM1(z, y, x, p) partialSums[(z) * partialSumsSlicePitch + (y) * partialSumsLinePitch + (x) * pixelSize + (p)]
-#define PARTIAL_SUM(z, y, x, p) (((z) >= 0 && (y) >= 0 && (x) >= 0) ? PARTIAL_SUM1((z), (y), (x), (p)) : 0)
+	// top mip metrics
+	const int topMipDepth = GetMipDepth(0);
+	const int topMipHeight = GetMipHeight(0);
+	const int topMipWidth = GetMipWidth(0);
+	const int topMipSlicePitch = GetMipSlicePitch(0);
+	const int topMipLinePitch = GetMipLinePitch(0);
 
 	for(int image = 0; image < realCount; ++image)
 	{
-		// calculate partial sums on first mip
-		{
-			int sourceSlicePitch = GetMipSlicePitch(0);
-			int sourceLinePitch = GetMipLinePitch(0);
-			const uint8_t* sourceData = (const uint8_t*)GetMipData(image, 0);
-
-			for(int z = 0; z < firstMipDepth; ++z)
-				for(int y = 0; y < firstMipHeight; ++y)
-					for(int x = 0; x < firstMipWidth; ++x)
-						for(int p = 0; p < pixelSize; ++p)
-							PARTIAL_SUM1(z, y, x, p) =
-								(uint32_t)sourceData[z * sourceSlicePitch + y * sourceLinePitch + x * pixelSize + p]
-								+ PARTIAL_SUM(z,     y,     x - 1, p)
-								+ PARTIAL_SUM(z,     y - 1, x,     p)
-								- PARTIAL_SUM(z,     y - 1, x - 1, p)
-								+ PARTIAL_SUM(z - 1, y,     x,     p)
-								- PARTIAL_SUM(z - 1, y,     x - 1, p)
-								- PARTIAL_SUM(z - 1, y - 1, x,     p)
-								+ PARTIAL_SUM(z - 1, y - 1, x - 1, p);
-		}
-
+		// top mip data
+		const uint8_t* topMipData = (const uint8_t*)GetMipData(image, 0);
 		// generate mips
 		for(int mip = 0; mip < newMips; ++mip)
 		{
-			uint8_t* destData = (uint8_t*)newTextureData->GetMipData(image, mip);
-			int destWidth = newTextureData->GetMipWidth(mip);
-			int destHeight = newTextureData->GetMipHeight(mip);
-			int destDepth = newTextureData->GetMipDepth(mip);
+			uint8_t* mipData = (uint8_t*)newTextureData->GetMipData(image, mip);
+			const int mipDepth = newTextureData->GetMipDepth(mip);
+			const int mipHeight = newTextureData->GetMipHeight(mip);
+			const int mipWidth = newTextureData->GetMipWidth(mip);
+			const int mipSlicePitch = newTextureData->GetMipSlicePitch(mip);
+			const int mipLinePitch = newTextureData->GetMipLinePitch(mip);
 
-			const int pz = firstMipDepth / destDepth;
-			const int py = firstMipHeight / destHeight;
-			const int px = firstMipWidth / destWidth;
+			const int pz = topMipDepth / mipDepth;
+			const int py = topMipHeight / mipHeight;
+			const int px = topMipWidth / mipWidth;
 			const int ps = pz * py * px;
+			const int qz = pz * topMipSlicePitch;
+			const int qy = py * topMipLinePitch;
+			const int qx = px * pixelSize;
 
-			for(int z = 0; z < destDepth; ++z)
+			for(int z = 0, az = 0, bz = 0; z < mipDepth; ++z, az += mipSlicePitch, bz += qz)
 			{
-				int zz = z * pz - 1;
-				for(int y = 0; y < destHeight; ++y)
+				for(int y = 0, ay = az, by = bz; y < mipHeight; ++y, ay += mipLinePitch, by += qy)
 				{
-					int yy = y * py - 1;
-					for(int x = 0; x < destWidth; ++x)
+					for(int x = 0, ax = ay, bx = by; x < mipWidth; ++x, ax += pixelSize, bx += qx)
 					{
-						int xx = x * px - 1;
+						uint32_t s[4] = { 0, 0, 0, 0 };
+						for(int zz = 0, bzz = bx; zz < pz; ++zz, bzz += topMipSlicePitch)
+							for(int yy = 0, byy = bzz; yy < py; ++yy, byy += topMipLinePitch)
+								for(int xx = 0, bxx = byy; xx < px; ++xx, bxx += pixelSize)
+									for(int p = 0; p < pixelSize; ++p)
+										s[p] += topMipData[bxx + p];
 						for(int p = 0; p < pixelSize; ++p)
-							*destData++ = (uint8_t)
-								((PARTIAL_SUM(zz + pz, yy + py, xx + px, p)
-								- PARTIAL_SUM(zz + pz, yy + py, xx,      p)
-								- PARTIAL_SUM(zz + pz, yy     , xx + px, p)
-								+ PARTIAL_SUM(zz + pz, yy     , xx,      p)
-								- PARTIAL_SUM(zz     , yy + py, xx + px, p)
-								+ PARTIAL_SUM(zz     , yy + py, xx,      p)
-								+ PARTIAL_SUM(zz     , yy,      xx + px, p)
-								- PARTIAL_SUM(zz     , yy,      xx,      p)
-								) / ps);
+							mipData[ax + p] = (uint8_t)(s[p] / ps);
 					}
 				}
 			}
 		}
 	}
-#undef PARTIAL_SUM
 
 	return newTextureData;
 
