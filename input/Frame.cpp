@@ -70,8 +70,8 @@ bool Frame::NextEvent()
 				// there is no state for raw move
 				break;
 			case Event::Mouse::typeCursorMove:
-				state.cursorX += e.mouse.cursorMoveX;
-				state.cursorY += e.mouse.cursorMoveY;
+				state.cursorX = e.mouse.cursorX;
+				state.cursorY = e.mouse.cursorY;
 				break;
 			}
 			break;

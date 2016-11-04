@@ -65,6 +65,9 @@ struct Event
 			// in case type == typeCursorMove
 			struct
 			{
+				//*** Absolute cursor position (in window coordinates).
+				int cursorX;
+				int cursorY;
 				//*** OS-dependent relative cursor moving.
 				/** In pixels, cropped by window, mouse ballistics applied. */
 				int cursorMoveX;

@@ -175,6 +175,8 @@ void SdlManager::ProcessEvent(const SDL_Event& event)
 			Event e;
 			e.device = Event::deviceMouse;
 			e.mouse.type = Event::Mouse::typeCursorMove;
+			e.mouse.cursorX = event.motion.x;
+			e.mouse.cursorY = event.motion.y;
 			e.mouse.cursorMoveX = event.motion.x - cursorX;
 			e.mouse.cursorMoveY = event.motion.y - cursorY;
 			AddEvent(e);
