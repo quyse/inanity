@@ -6,10 +6,15 @@
 #include <map>
 #include <sstream>
 #include <algorithm>
+#ifdef ___INANITY_PLATFORM_EMSCRIPTEN
+#include <emscripten/emscripten.h>
+#endif
 
 BEGIN_INANITY
 
-#if !defined(___INANITY_PLATFORM_WINDOWS)
+#if defined(___INANITY_PLATFORM_EMSCRIPTEN)
+#define DebugBreak() EM_ASM("debugger")
+#elif !defined(___INANITY_PLATFORM_WINDOWS)
 #define DebugBreak() asm("int3")
 #endif
 

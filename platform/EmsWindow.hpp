@@ -52,6 +52,8 @@ public:
 	void Close();
 	void Run(ptr<Handler> activeHandler);
 	void PlaceCursor(int x, int y);
+	void StartTextInput();
+	void StopTextInput();
 };
 
 END_INANITY_PLATFORM

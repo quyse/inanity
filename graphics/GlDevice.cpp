@@ -420,7 +420,16 @@ ptr<RenderBuffer> GlDevice::CreateRenderBuffer(int width, int height, PixelForma
 			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, (GLsizei)width, (GLsizei)height, 0, format, type, 0);
 		GlSystem::CheckErrors("Can't initialize texture");
 
-		SetupTextureSampling(GL_TEXTURE_2D, samplerSettings);
+		// correct sampler settings
+		SamplerSettings ss = samplerSettings;
+		ss.mipMapping = false;
+#if defined(___INANITY_PLATFORM_EMSCRIPTEN)
+		// disable mipmapping and set clamp wrapping mode for NPOT texture
+		if((width & (width - 1)) || (height & (height - 1)))
+			ss.SetWrap(SamplerSettings::wrapClamp);
+#endif
+
+		SetupTextureSampling(GL_TEXTURE_2D, ss);
 
 		return NEW(GlRenderBuffer(internalTexture, NEW(GlTexture(internalTexture))));
 	}
@@ -1260,13 +1269,27 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data, const Sampl
 			}
 		}
 
+#if !defined(___INANITY_PLATFORM_EMSCRIPTEN)
 		if(!useTextureStorage)
 		{
 			glTexParameteri(target, GL_TEXTURE_BASE_LEVEL, 0);
 			glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, mips - 1);
 		}
+#endif
 
-		SetupTextureSampling(target, samplerSettings);
+		// correct sampler settings
+		SamplerSettings ss = samplerSettings;
+		if(mips <= 1) ss.mipMapping = false;
+#if defined(___INANITY_PLATFORM_EMSCRIPTEN)
+		// disable mipmapping and set clamp wrapping mode for NPOT texture
+		if((imageWidth & (imageWidth - 1)) || (imageHeight & (imageHeight - 1)))
+		{
+			ss.SetWrap(SamplerSettings::wrapClamp);
+			ss.mipMapping = false;
+		}
+#endif
+
+		SetupTextureSampling(target, ss);
 
 		return NEW(GlTexture(internalTexture));
 	}

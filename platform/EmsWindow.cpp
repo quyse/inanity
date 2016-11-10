@@ -68,6 +68,16 @@ void EmsWindow::PlaceCursor(int x, int y)
 	// not implemented yet
 }
 
+void EmsWindow::StartTextInput()
+{
+	// not implemented yet
+}
+
+void EmsWindow::StopTextInput()
+{
+	// not implemented yet
+}
+
 void EmsWindow::UpdateMouseLock()
 {
 	// not implemented yet
@@ -86,8 +96,8 @@ void EmsWindow::StaticMainLoop()
 void EmsWindow::MainLoop()
 {
 	// update size
-	int newWidth, newHeight;
-	emscripten_get_canvas_size(&newWidth, &newHeight, nullptr);
+	int newWidth, newHeight, isFullScreen;
+	emscripten_get_canvas_size(&newWidth, &newHeight, &isFullScreen);
 	if(newWidth != width || newHeight != height)
 	{
 		width = newWidth;
