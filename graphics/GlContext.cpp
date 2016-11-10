@@ -216,8 +216,8 @@ void GlContext::Update()
 		}
 	}
 
-	// if vertex buffers supported, use them
-	if(device->GetInternalCaps() & GlDevice::InternalCaps::vertexAttribBinding)
+	// if vertex arrays supported, use them
+	if(device->GetInternalCaps() & GlDevice::InternalCaps::vertexArrayObject)
 	{
 		// attribute binding
 		THROW_ASSERT(cellAttributeBinding.top);
@@ -227,10 +227,12 @@ void GlContext::Update()
 			AttributeBinding* abstractAttributeBinding = let ? let->attributeBinding : nullptr;
 			glBindVertexArray(fast_cast<GlAttributeBinding*>(abstractAttributeBinding)->GetVertexArrayName());
 			GlSystem::CheckErrors("Can't bind attribute binding");
-
-			cellAttributeBinding.Actual();
 		}
+	}
 
+	// use vertex buffers if possible
+	if(device->GetInternalCaps() & GlDevice::InternalCaps::vertexAttribBinding)
+	{
 		// vertex buffers
 		for(int i = 0; i < vertexBuffersCount; ++i)
 			if(!cellVertexBuffers[i].IsActual())
@@ -317,10 +319,11 @@ void GlContext::Update()
 				glDisableVertexAttribArray(i);
 			boundAttributesCount = maxUsedElement + 1;
 			GlSystem::CheckErrors("Can't disable unused attributes");
-
-			cellAttributeBinding.Actual();
 		}
 	}
+
+	// make attribute binding cell actual in any case
+	cellAttributeBinding.Actual();
 
 	// index buffer
 	if(!cellIndexBuffer.IsActual())

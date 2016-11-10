@@ -89,12 +89,14 @@ public:
 			uniformBufferObject = 1,
 			// ARB_sampler_objects, core since OpenGL 3.3
 			samplerObjects = 2,
+			// ARB_vertex_array_object, core since OpenGL 3.0
+			vertexArrayObject = 4,
 			// ARB_vertex_attrib_binding, core since OpenGL 4.3
-			vertexAttribBinding = 4,
+			vertexAttribBinding = 8,
 			// ARB_framebuffer_object, core since OpenGL 3.0
-			frameBufferObject = 8,
+			frameBufferObject = 16,
 			// ARB_texture_storage, core since OpenGL 4.2
-			textureStorage = 16
+			textureStorage = 32
 		};
 	};
 

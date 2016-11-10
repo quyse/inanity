@@ -189,17 +189,22 @@ GlDevice::~GlDevice() {}
 
 void GlDevice::InitCaps()
 {
+	GLint majorVersion, minorVersion;
+	glGetIntegerv(GL_MAJOR_VERSION, &majorVersion);
+	glGetIntegerv(GL_MINOR_VERSION, &minorVersion);
+	GLint version = majorVersion * 100 + minorVersion;
 #if defined(___INANITY_PLATFORM_WINDOWS) || defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS)
 	internalCaps =
-		(GLEW_ARB_uniform_buffer_object ? InternalCaps::uniformBufferObject : 0) |
-		(GLEW_ARB_sampler_objects ? InternalCaps::samplerObjects : 0) |
-		(GLEW_ARB_vertex_attrib_binding ? InternalCaps::vertexAttribBinding : 0) |
-		(GLEW_ARB_framebuffer_object ? InternalCaps::frameBufferObject : 0) |
-		(GLEW_ARB_texture_storage ? InternalCaps::textureStorage : 0)
+		((version >= 301 || GLEW_ARB_uniform_buffer_object) ? InternalCaps::uniformBufferObject : 0) |
+		((version >= 303 || GLEW_ARB_sampler_objects) ? InternalCaps::samplerObjects : 0) |
+		((version >= 300 || GLEW_ARB_vertex_array_object) ? InternalCaps::vertexArrayObject : 0) |
+		((version >= 403 || GLEW_ARB_vertex_attrib_binding) ? InternalCaps::vertexAttribBinding : 0) |
+		((version >= 300 || GLEW_ARB_framebuffer_object) ? InternalCaps::frameBufferObject : 0) |
+		((version >= 402 || GLEW_ARB_texture_storage) ? InternalCaps::textureStorage : 0)
 		;
 	caps.flags =
-		(GLEW_ARB_instanced_arrays ? Caps::attributeInstancing : 0) |
-		(GLEW_ARB_draw_instanced ? Caps::drawInstancing : 0);
+		((version >= 303 || GLEW_ARB_instanced_arrays) ? Caps::attributeInstancing : 0) |
+		((version >= 301 || GLEW_ARB_draw_instanced) ? Caps::drawInstancing : 0);
 	caps.maxColorBuffersCount = GlFrameBuffer::maxColorBuffersCount;
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	internalCaps = InternalCaps::frameBufferObject;
@@ -744,23 +749,25 @@ ptr<AttributeBinding> GlDevice::CreateAttributeBinding(ptr<AttributeLayout> layo
 {
 	try
 	{
-		// если поддерживается vertex bindings, используем их как более оптимальный метод
-		if(internalCaps & InternalCaps::vertexAttribBinding)
+		// if vertex arrays are supported, we have to create one
+		GLuint vertexArrayName = 0;
+		if(internalCaps & InternalCaps::vertexArrayObject)
 		{
 			// создать Vertex Array Object
-			GLuint vertexArrayName;
 			glGenVertexArrays(1, &vertexArrayName);
 			GlSystem::CheckErrors("Can't gen vertex array");
-
-			// сразу создать привязку
-			ptr<AttributeBinding> binding = NEW(GlAttributeBinding(this, vertexArrayName));
-
-			// задать все настройки для VAO
 
 			// привязать VAO
 			glBindVertexArray(vertexArrayName);
 			GlSystem::CheckErrors("Can't bind vertex array");
+		}
 
+		// create binding
+		ptr<GlAttributeBinding> binding = NEW(GlAttributeBinding(this, vertexArrayName));
+
+		// if both arrays and attrib bindings are supported, we can create binding now
+		if(vertexArrayName && (internalCaps & InternalCaps::vertexAttribBinding))
+		{
 			const AttributeLayout::Elements& elements = layout->GetElements();
 			const AttributeLayout::Slots& slots = layout->GetSlots();
 
@@ -794,20 +801,10 @@ ptr<AttributeBinding> GlDevice::CreateAttributeBinding(ptr<AttributeLayout> layo
 				glVertexBindingDivisor((GLuint)i, slots[i].divisor);
 				GlSystem::CheckErrors("Can't set vertex binding divisor");
 			}
-
-			// отвязать VAO
-			glBindVertexArray(0);
-			GlSystem::CheckErrors("Can't unbind vertex array");
-
-			// вернуть привязку
-			return binding;
 		}
 		// иначе использовать "ручную" привязку
 		else
 		{
-			// создать привязку
-			ptr<GlAttributeBinding> binding = NEW(GlAttributeBinding(this, 0));
-
 			const AttributeLayout::Elements& elements = layout->GetElements();
 			const AttributeLayout::Slots& slots = layout->GetSlots();
 
@@ -833,10 +830,16 @@ ptr<AttributeBinding> GlDevice::CreateAttributeBinding(ptr<AttributeLayout> layo
 
 				bindingSlot.elements.push_back(bindingElement);
 			}
-
-			// вернуть привязку
-			return binding;
 		}
+
+		// unbind VAO if needed
+		if(vertexArrayName)
+		{
+			glBindVertexArray(0);
+			GlSystem::CheckErrors("Can't unbind vertex array");
+		}
+
+		return binding;
 	}
 	catch(Exception* exception)
 	{
