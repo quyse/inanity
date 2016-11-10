@@ -189,11 +189,11 @@ GlDevice::~GlDevice() {}
 
 void GlDevice::InitCaps()
 {
+#if defined(___INANITY_PLATFORM_WINDOWS) || defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS)
 	GLint majorVersion, minorVersion;
 	glGetIntegerv(GL_MAJOR_VERSION, &majorVersion);
 	glGetIntegerv(GL_MINOR_VERSION, &minorVersion);
 	GLint version = majorVersion * 100 + minorVersion;
-#if defined(___INANITY_PLATFORM_WINDOWS) || defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS)
 	internalCaps =
 		((version >= 301 || GLEW_ARB_uniform_buffer_object) ? InternalCaps::uniformBufferObject : 0) |
 		((version >= 303 || GLEW_ARB_sampler_objects) ? InternalCaps::samplerObjects : 0) |
