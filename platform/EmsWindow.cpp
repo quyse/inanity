@@ -70,12 +70,12 @@ void EmsWindow::PlaceCursor(int x, int y)
 
 void EmsWindow::StartTextInput()
 {
-	// not implemented yet
+	SDL_StartTextInput();
 }
 
 void EmsWindow::StopTextInput()
 {
-	// not implemented yet
+	SDL_StopTextInput();
 }
 
 void EmsWindow::UpdateMouseLock()
