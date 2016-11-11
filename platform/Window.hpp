@@ -9,6 +9,7 @@
 BEGIN_INANITY_GRAPHICS
 
 class Presenter;
+class RawTextureData;
 
 END_INANITY_GRAPHICS
 
@@ -18,6 +19,11 @@ BEGIN_INANITY_PLATFORM
 class Window : public Object
 {
 public:
+	/// Mouse cursor class.
+	class Cursor : public Object
+	{
+	};
+
 	/// Указать заголовок окна.
 	virtual void SetTitle(const String& title) = 0;
 	/// Закрыть окно.
@@ -39,6 +45,10 @@ public:
 	virtual void StartTextInput() = 0;
 	/// Stop text input.
 	virtual void StopTextInput() = 0;
+	/// Create custom mouse cursor.
+	virtual ptr<Cursor> CreateCursor(ptr<Graphics::RawTextureData> texture, int hotX, int hotY) = 0;
+	/// Set cursor.
+	virtual void SetCursor(ptr<Cursor> cursor) = 0;
 
 protected:
 	/// Presenter for notifications.

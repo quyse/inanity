@@ -28,6 +28,8 @@ private:
 	ptr<Input::SdlManager> inputManager;
 	int width, height;
 
+	class SdlCursor;
+
 	/// Emscripten window can be only one.
 	static EmsWindow* instance;
 
@@ -54,6 +56,8 @@ public:
 	void PlaceCursor(int x, int y);
 	void StartTextInput();
 	void StopTextInput();
+	ptr<Window::Cursor> CreateCursor(ptr<Graphics::RawTextureData> texture, int hotX, int hotY);
+	void SetCursor(ptr<Cursor> cursor);
 };
 
 END_INANITY_PLATFORM

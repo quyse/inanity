@@ -25,6 +25,8 @@ private:
 	bool quit;
 	int clientWidth, clientHeight;
 
+	class SdlCursor;
+
 protected:
 	void UpdateMouseLock();
 	void UpdateCursorVisible();
@@ -47,6 +49,8 @@ public:
 	void PlaceCursor(int x, int y);
 	void StartTextInput();
 	void StopTextInput();
+	ptr<Window::Cursor> CreateCursor(ptr<Graphics::RawTextureData> texture, int hotX, int hotY);
+	void SetCursor(ptr<Cursor> cursor);
 };
 
 END_INANITY_PLATFORM
