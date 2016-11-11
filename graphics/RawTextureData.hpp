@@ -67,6 +67,7 @@ public:
 	RawTextureData(ptr<File> pixels, PixelFormat format, int width, int height, int depth, int mips, int count);
 
 	PixelFormat GetFormat() const;
+	void SetFormat(PixelFormat format);
 	/// Gets a width of topmost mip of one image.
 	int GetImageWidth() const;
 	/// Gets a height of topmost mip of one image.

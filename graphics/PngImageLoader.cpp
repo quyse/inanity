@@ -145,7 +145,7 @@ ptr<RawTextureData> PngImageLoader::Load(ptr<File> file)
 		// в отдельном try-catch, чтобы исключение не выпало
 		try
 		{
-			textureData = NEW(RawTextureData(0, PixelFormats::uintRGBA32, width, height, 0, 1, 0));
+			textureData = NEW(RawTextureData(0, PixelFormats::uintRGBA32S, width, height, 0, 1, 0));
 		}
 		catch(Exception* exception)
 		{

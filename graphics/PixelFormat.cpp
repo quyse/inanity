@@ -134,6 +134,11 @@ PixelFormat PixelFormats::uintRGBA32(
 	PixelFormat::pixelRGBA,
 	PixelFormat::formatUint,
 	PixelFormat::size32bit);
+PixelFormat PixelFormats::uintRGBA32S(
+	PixelFormat::pixelRGBA,
+	PixelFormat::formatUint,
+	PixelFormat::size32bit,
+	true);
 PixelFormat PixelFormats::floatR16(
 	PixelFormat::pixelR,
 	PixelFormat::formatFloat,

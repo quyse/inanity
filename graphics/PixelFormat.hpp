@@ -98,6 +98,7 @@ bool operator==(const PixelFormat& a, const PixelFormat& b);
 struct PixelFormats
 {
 	static PixelFormat uintRGBA32;
+	static PixelFormat uintRGBA32S;
 	static PixelFormat floatR16;
 	static PixelFormat floatR32;
 	static PixelFormat floatRGB32;

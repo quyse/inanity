@@ -77,6 +77,11 @@ PixelFormat RawTextureData::GetFormat() const
 	return format;
 }
 
+void RawTextureData::SetFormat(PixelFormat format)
+{
+	this->format = format;
+}
+
 int RawTextureData::GetImageWidth() const
 {
 	return width;
