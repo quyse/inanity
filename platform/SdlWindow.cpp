@@ -131,8 +131,18 @@ ptr<Window::Cursor> SdlWindow::CreateCursor(ptr<Graphics::RawTextureData> textur
 	if(!(texture->GetFormat() == Graphics::PixelFormats::uintRGBA32S))
 		THROW("SDL window cursor must be RGB");
 
-	SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(texture->GetMipData(), texture->GetImageWidth(), texture->GetImageHeight(), 24, texture->GetMipLinePitch(), 0xFF000000, 0xFF0000, 0xFF00, 0xFF);
+	int width = texture->GetImageWidth();
+	int height = texture->GetImageHeight();
+	SDL_Surface* surface = SDL_CreateRGBSurface(0, width, height, 32, 0xFF000000, 0xFF0000, 0xFF00, 0xFF);
+	// SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(texture->GetMipData(), texture->GetImageWidth(), texture->GetImageHeight(), 32, texture->GetMipLinePitch(), 0xFF000000, 0xFF0000, 0xFF00, 0xFF);
 	if(!surface) THROW_SECONDARY("Can't create surface", Sdl::Error());
+
+	SDL_LockSurface(surface);
+	void* texturePixels = texture->GetMipData();
+	int texturePitch = texture->GetMipLinePitch();
+	for(int i = 0; i < height; ++i)
+		memcpy((uint8_t*)surface->pixels + i * surface->pitch, (uint8_t*)texturePixels + i * texturePitch, width * 4);
+	SDL_UnlockSurface(surface);
 
 	SDL_Cursor* cursor = SDL_CreateColorCursor(surface, hotX, hotY);
 	SDL_FreeSurface(surface);
