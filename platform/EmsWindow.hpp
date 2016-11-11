@@ -28,8 +28,6 @@ private:
 	ptr<Input::SdlManager> inputManager;
 	int width, height;
 
-	class SdlCursor;
-
 	/// Emscripten window can be only one.
 	static EmsWindow* instance;
 

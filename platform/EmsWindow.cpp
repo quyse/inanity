@@ -1,7 +1,6 @@
 #include "EmsWindow.hpp"
 #include "Sdl.hpp"
 #include "../graphics/Presenter.hpp"
-#include "../graphics/RawTextureData.hpp"
 #include "../input/SdlManager.hpp"
 #include "../Exception.hpp"
 #include <emscripten/emscripten.h>
@@ -114,42 +113,13 @@ void EmsWindow::MainLoop()
 	activeHandler->Fire();
 }
 
-class EmsWindow::SdlCursor : public Window::Cursor
-{
-	friend class EmsWindow;
-private:
-	SDL_Cursor* cursor;
-
-public:
-	SdlCursor(SDL_Cursor* cursor) : cursor(cursor) {}
-	~SdlCursor()
-	{
-		SDL_FreeCursor(cursor);
-	}
-};
-
 ptr<Window::Cursor> EmsWindow::CreateCursor(ptr<Graphics::RawTextureData> texture, int hotX, int hotY)
 {
-	BEGIN_TRY();
-
-	if(!(texture->GetFormat() == Graphics::PixelFormats::uintRGBA32S))
-		THROW("SDL window cursor must be RGB");
-
-	SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(texture->GetMipData(), texture->GetImageWidth(), texture->GetImageHeight(), 24, texture->GetMipLinePitch(), 0xFF000000, 0xFF0000, 0xFF00, 0xFF);
-	if(!surface) THROW_SECONDARY("Can't create surface", Sdl::Error());
-
-	SDL_Cursor* cursor = SDL_CreateColorCursor(surface, hotX, hotY);
-	SDL_FreeSurface(surface);
-	if(!cursor) THROW_SECONDARY("Can't create cursor", Sdl::Error());
-
-	return NEW(SdlCursor(cursor));
-
-	END_TRY("Can't create SDL cursor");
+	return NEW(Cursor());
 }
 
 void EmsWindow::SetCursor(ptr<Cursor> cursor)
 {
-	SDL_SetCursor(cursor.FastCast<SdlCursor>()->cursor);
 }
 
 END_INANITY_PLATFORM
