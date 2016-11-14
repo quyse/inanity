@@ -38,10 +38,14 @@ private:
 
 	ptr<Input::Win32Manager> inputManager;
 
+	class Win32Cursor;
+
 	/// Is cursor was hided.
 	/** This needed to not to break things, because
 	ShowCursor() works like a counter. */
 	bool cursorHidden;
+	/// Current cursor.
+	ptr<Win32Cursor> cursor;
 
 	static LRESULT CALLBACK StaticWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	LRESULT WndProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -54,6 +58,7 @@ private:
 
 	void UpdateMouseLock();
 	void UpdateCursorVisible();
+	void UpdateCursor();
 
 public:
 	Win32Window(HWND hWnd, bool own = true, WNDPROC prevWndProc = nullptr);
@@ -64,6 +69,10 @@ public:
 	void Close();
 	void Run(ptr<Handler> activeHandler);
 	void PlaceCursor(int x, int y);
+	void StartTextInput();
+	void StopTextInput();
+	ptr<Cursor> CreateCursor(ptr<Graphics::RawTextureData> texture, int hotX, int hotY);
+	void SetCursor(ptr<Cursor> cursor);
 
 	/// Создать окно для DirectX.
 	static ptr<Win32Window> CreateForDirectX(const String& title,

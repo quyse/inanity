@@ -1,5 +1,6 @@
 #include "Win32Window.hpp"
 #include "../graphics/Presenter.hpp"
+#include "../graphics/RawTextureData.hpp"
 #include "../input/Win32Manager.hpp"
 #include "../Strings.hpp"
 #include "../Exception.hpp"
@@ -41,6 +42,103 @@ void Win32Window::PlaceCursor(int x, int y)
 	POINT pt = { x, y };
 	ClientToScreen(hWnd, &pt);
 	SetCursorPos(pt.x, pt.y);
+}
+
+void Win32Window::StartTextInput()
+{
+}
+
+void Win32Window::StopTextInput()
+{
+}
+
+class Win32Window::Win32Cursor : public Window::Cursor
+{
+	friend class Win32Window;
+private:
+	HCURSOR cursor;
+
+public:
+	Win32Cursor(HCURSOR cursor) : cursor(cursor) {}
+	~Win32Cursor()
+	{
+		DestroyCursor(cursor);
+	}
+};
+
+ptr<Window::Cursor> Win32Window::CreateCursor(ptr<Graphics::RawTextureData> texture, int hotX, int hotY)
+{
+	BEGIN_TRY();
+
+	if(!(texture->GetFormat() == Graphics::PixelFormats::uintRGBA32S))
+		THROW("Win32 window cursor must be RGB");
+
+	int width = texture->GetImageWidth();
+	int height = texture->GetImageHeight();
+	int pitch = (width * 3 + 3) & ~3;
+	BITMAPV5HEADER h;
+	ZeroMemory(&h, sizeof(h));
+	h.bV5Size = sizeof(h);
+	h.bV5Width = width;
+	h.bV5Height = height;
+	h.bV5Planes = 1;
+	h.bV5BitCount = 32;
+	h.bV5Compression = BI_BITFIELDS;
+	h.bV5RedMask = 0x00FF0000;
+	h.bV5GreenMask = 0x0000FF00;
+	h.bV5BlueMask = 0x000000FF;
+	h.bV5AlphaMask = 0xFF000000;
+	const uint8_t* pixels = (const uint8_t*)texture->GetMipData();
+	uint8_t* buf = new uint8_t[width * 4 * height];
+	for(int i = 0; i < height; ++i)
+	{
+		const uint8_t* linePixels = pixels + i * width * 4;
+		uint8_t* lineBuf = buf + (height - 1 - i) * width * 4;
+		for(int j = 0; j < width; ++j)
+		{
+			lineBuf[j * 4 + 0] = linePixels[j * 4 + 2];
+			lineBuf[j * 4 + 1] = linePixels[j * 4 + 1];
+			lineBuf[j * 4 + 2] = linePixels[j * 4 + 0];
+			lineBuf[j * 4 + 3] = linePixels[j * 4 + 3];
+		}
+	}
+
+	HDC hdc = GetDC(NULL);
+	HBITMAP hbmpColor = CreateDIBitmap(hdc, (BITMAPINFOHEADER*)&h, CBM_INIT, buf, (BITMAPINFO*)&h, DIB_RGB_COLORS);
+	HBITMAP hbmpMask = CreateBitmap(width, height, 1, 1, NULL);
+	ReleaseDC(NULL, hdc);
+
+	delete [] buf;
+
+	if(!hbmpColor || !hbmpMask)
+	{
+		if(hbmpColor) DeleteBitmap(hbmpColor);
+		if(hbmpMask) DeleteBitmap(hbmpMask);
+		THROW("Can't create bitmaps");
+	}
+
+	ICONINFO ii;
+	ii.fIcon = FALSE;
+	ii.xHotspot = hotX;
+	ii.yHotspot = hotY;
+	ii.hbmMask = hbmpMask;
+	ii.hbmColor = hbmpColor;
+	HCURSOR cursor = CreateIconIndirect(&ii);
+
+	DeleteBitmap(hbmpColor);
+	DeleteBitmap(hbmpMask);
+
+	if(!cursor) THROW("Can't create cursor");
+
+	return NEW(Win32Cursor(cursor));
+
+	END_TRY("Can't create Win32 cursor");
+}
+
+void Win32Window::SetCursor(ptr<Cursor> cursor)
+{
+	this->cursor = cursor.FastCast<Win32Cursor>();
+	UpdateCursor();
 }
 
 ptr<Win32Window> Win32Window::Create(ATOM windowClass, const String& title,
@@ -202,6 +300,9 @@ LRESULT Win32Window::WndProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			presenter->Resize(clientWidth, clientHeight);
 		UpdateMouseLock();
 		return 0;
+	case WM_SETCURSOR:
+		UpdateCursor();
+		return 0;
 	case WM_CLOSE:
 		Close();
 		return 0;
@@ -289,6 +390,11 @@ void Win32Window::UpdateCursorVisible()
 		ShowCursor(cursorVisible ? TRUE : FALSE);
 		cursorHidden = !cursorVisible;
 	}
+}
+
+void Win32Window::UpdateCursor()
+{
+	::SetCursor(cursor->cursor);
 }
 
 END_INANITY_PLATFORM
