@@ -110,6 +110,9 @@ public:
 	/** Clip if isn't in bounds. */
 	void Blit(ptr<RawTextureData> image, int destX, int destY, int sourceX, int sourceY, int width, int height);
 
+	/// Premultiply color components with alpha.
+	ptr<RawTextureData> PremultiplyAlpha() const;
+
 	/// Generate mip levels from zero level.
 	/** Existing levels starting from 1 are ignored. If mipsCount == 0 then optimal number of mips calculated.
 	Currently 2x downscale is correct, if it's not 2x it's simple nearest neighbour.

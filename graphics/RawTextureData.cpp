@@ -351,6 +351,42 @@ void RawTextureData::Blit(ptr<RawTextureData> image, int destX, int destY, int s
 	END_TRY("Can't blit raw texture data");
 }
 
+ptr<RawTextureData> RawTextureData::PremultiplyAlpha() const
+{
+	if(format.type != PixelFormat::typeUncompressed || format.pixel != PixelFormat::pixelRGBA || format.size != PixelFormat::size32bit)
+		THROW("Unsupported texture format for premultiplying alpha");
+
+	ptr<RawTextureData> data = NEW(RawTextureData(nullptr, format, GetImageWidth(), GetImageHeight(), GetImageDepth(), GetImageMips(), GetCount()));
+
+	int realCount = count > 0 ? count : 1;
+	int pixelSize = GetPixelSize();
+	for(int image = 0; image < realCount; ++image)
+	{
+		for(int mip = 0; mip < mips; ++mip)
+		{
+			const uint8_t* inputData = (const uint8_t*)GetMipData(image, mip);
+			uint8_t* outputData = (uint8_t*)data->GetMipData(image, mip);
+			int mipDepth = GetMipDepth(mip);
+			int mipHeight = GetMipHeight(mip);
+			int mipWidth = GetMipWidth(mip);
+			int mipSlicePitch = GetMipSlicePitch(mip);
+			int mipLinePitch = GetMipLinePitch(mip);
+			for(int z = 0, zz = 0; z < mipDepth; ++z, zz += mipSlicePitch)
+				for(int y = 0, yy = zz; y < mipHeight; ++y, yy += mipLinePitch)
+					for(int x = 0, xx = yy; x < mipWidth; ++x, xx += pixelSize)
+					{
+						float alpha = (float)inputData[xx + 3] / 255.0f;
+						outputData[xx + 0] = (uint8_t)(alpha * (float)inputData[xx + 0]);
+						outputData[xx + 1] = (uint8_t)(alpha * (float)inputData[xx + 1]);
+						outputData[xx + 2] = (uint8_t)(alpha * (float)inputData[xx + 2]);
+						outputData[xx + 3] = inputData[xx + 3];
+					}
+		}
+	}
+
+	return data;
+}
+
 ptr<RawTextureData> RawTextureData::GenerateMips(int newMips) const
 {
 	BEGIN_TRY();
