@@ -12,12 +12,6 @@
 
 BEGIN_INANITY
 
-#if defined(___INANITY_PLATFORM_EMSCRIPTEN)
-#define DebugBreak() EM_ASM("debugger")
-#elif !defined(___INANITY_PLATFORM_WINDOWS)
-#define DebugBreak() asm("int3")
-#endif
-
 #ifdef ___INANITY_TRACE_PTR
 /// Выключить трассировку указателей?
 /** Она очень замедляет работу в debug. */
@@ -132,10 +126,7 @@ void ManagedHeap::Free(void *data)
 	{
 		CriticalCode code(criticalSection);
 
-		Allocations::iterator i = allocations.find(data);
-		if(i == allocations.end())
-			DebugBreak();
-		allocations.erase(i);
+		allocations.erase(data);
 	}
 #endif
 }
