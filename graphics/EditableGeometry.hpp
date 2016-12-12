@@ -16,7 +16,7 @@ BEGIN_INANITY_GRAPHICS
 Различные процедуры выдвигают различные требования к шаблонным параметрам.
 Они написаны в комментариях.
 */
-template <typename Vertex, typename Index = unsigned short>
+template <typename Vertex, typename Index>
 class EditableGeometry : public Object
 {
 private:

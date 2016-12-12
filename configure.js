@@ -306,13 +306,13 @@ var executables = {
 			'archi.SystemFontCreator', 'archi.WavefrontObj', /*'archi.XafConverter'*/ 'archi.SkeletonConverter',
 			'archi.BoneAnimationConverter', 'archi.AssimpConvertor'],
 		staticLibraries: [
-			'libinanity-base',
 			'libinanity-data',
 			'libinanity-graphics-raw',
 			'libinanity-platform-filesystem',
 			'deps/assimp//libassimp',
+			'libinanity-base',
 			'deps/zlib//libz'],
-		dynamicLibraries: ['user32.lib', 'gdi32.lib', 'comdlg32.lib']
+		'dynamicLibraries-win32': ['user32.lib', 'gdi32.lib', 'comdlg32.lib']
 	}
 	, adapterstest: {
 		objects: ['graphics.adapters_test'],

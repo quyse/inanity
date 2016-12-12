@@ -27,7 +27,7 @@ void PrintHelp()
 	std::cout << "  xaf <source .xaf> <result .a> [<result .gt>]\n";
 }
 
-int wmain(int argc, const wchar_t** argv)
+int main(int argc, const char** argv)
 {
 	ptr<Processor> processors[] =
 	{
@@ -46,7 +46,7 @@ int wmain(int argc, const wchar_t** argv)
 
 	std::vector<String> arguments(argc);
 	for(int i = 0; i < argc; ++i)
-		arguments[i] = Strings::Unicode2UTF8(argv[i]);
+		arguments[i] = argv[i];
 
 	if(arguments.size() <= 0)
 	{
@@ -55,9 +55,9 @@ int wmain(int argc, const wchar_t** argv)
 		std::cout << "Available commands:\n\n";
 		for(size_t i = 0; i < processorsCount; ++i)
 		{
-			std::wcout << L" === Command: " << Strings::UTF82Unicode(processors[i]->GetCommand()) << L" ===\n";
+			std::cout << " === Command: " << processors[i]->GetCommand() << L" ===\n";
 			processors[i]->PrintHelp();
-			std::wcout << L"\n";
+			std::cout << "\n";
 		}
 		return 0;
 	}
@@ -76,7 +76,7 @@ int wmain(int argc, const wchar_t** argv)
 				std::cout << "Exception occured: ";
 				std::ostringstream stream;
 				MakePointer(exception)->PrintStack(stream);
-				std::wcout << Strings::UTF82Unicode(stream.str());
+				std::cout << stream.str();
 			}
 			return 0;
 		}

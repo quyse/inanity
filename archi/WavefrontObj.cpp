@@ -27,11 +27,11 @@ void WavefrontObj::Run(const std::vector<String>& arguments)
 	if(arguments.size() < 2)
 		THROW("Must be at least 2 arguments for command");
 
-	if(!_wfreopen(Strings::UTF82Unicode(arguments[0]).c_str(), L"r", stdin))
+	if(!freopen(arguments[0].c_str(), "r", stdin))
 		THROW("Can't open source file");
 
 	std::vector<int> positionNumbers;
-	ptr<Graphics::EditableGeometry<Vertex, unsigned> > geometry = WavefrontObj::Convert(positionNumbers);
+	ptr<Graphics::EditableGeometry<Vertex, size_t> > geometry = WavefrontObj::Convert(positionNumbers);
 
 	ptr<FileSystem> fileSystem = Platform::FileSystem::GetNativeFileSystem();
 
@@ -40,7 +40,7 @@ void WavefrontObj::Run(const std::vector<String>& arguments)
 		std::vector<Vertex>& vertices = geometry->GetVertices();
 		std::vector<SkinnedVertex> skinnedVertices(vertices.size());
 
-		if(!_wfreopen(Strings::UTF82Unicode(arguments[2]).c_str(), L"r", stdin))
+		if(!freopen(arguments[2].c_str(), "r", stdin))
 			THROW("Can't open skin file");
 
 		// считать коэффициенты для кожи
@@ -110,7 +110,7 @@ void WavefrontObj::Run(const std::vector<String>& arguments)
 			// проверить, что позиция совпадает
 			if(fabs(length(sv.position - skinCoef.position)) > 1e-5f)
 			{
-				printf("Vertex %d: position: %f %f %f, skin position: %f %f %f\n", i, sv.position.x, sv.position.y, sv.position.z,
+				printf("Vertex %zu: position: %f %f %f, skin position: %f %f %f\n", i, sv.position.x, sv.position.y, sv.position.z,
 					skinCoef.position.x, skinCoef.position.y, skinCoef.position.z);
 			}
 			for(int j = 0; j < 4; ++j)
@@ -120,9 +120,9 @@ void WavefrontObj::Run(const std::vector<String>& arguments)
 			}
 		}
 
-		ptr<Graphics::EditableGeometry<SkinnedVertex, unsigned> > skinnedGeometry = NEW(Graphics::EditableGeometry<SkinnedVertex, unsigned>(skinnedVertices, geometry->GetIndices()));
+		ptr<Graphics::EditableGeometry<SkinnedVertex, size_t> > skinnedGeometry = NEW(Graphics::EditableGeometry<SkinnedVertex, size_t>(skinnedVertices, geometry->GetIndices()));
 
-		ptr<Graphics::EditableGeometry<SkinnedVertex> > optimizedSkinnedGeometry = skinnedGeometry->Optimize()->CastIndices<unsigned short>();
+		ptr<Graphics::EditableGeometry<SkinnedVertex, uint16_t> > optimizedSkinnedGeometry = skinnedGeometry->Optimize()->CastIndices<uint16_t>();
 
 		if(0)
 		{
@@ -142,14 +142,23 @@ void WavefrontObj::Run(const std::vector<String>& arguments)
 	}
 	else
 	{
-		ptr<Graphics::EditableGeometry<Vertex> > optimizedGeometry = geometry->Optimize()->CastIndices<unsigned short>();
-
-		fileSystem->SaveFile(optimizedGeometry->SerializeVertices(), arguments[1] + ".vertices");
-		fileSystem->SaveFile(optimizedGeometry->SerializeIndices(), arguments[1] + ".indices");
+		ptr<Graphics::EditableGeometry<Vertex, size_t> > optimizedGeometry = geometry->Optimize();
+		if(optimizedGeometry->GetVertices().size() > 0x10000)
+		{
+			ptr<Graphics::EditableGeometry<Vertex, uint32_t> > typedGeometry = optimizedGeometry->CastIndices<uint32_t>();
+			fileSystem->SaveFile(typedGeometry->SerializeVertices(), arguments[1] + ".vertices");
+			fileSystem->SaveFile(typedGeometry->SerializeIndices(), arguments[1] + ".indices");
+		}
+		else
+		{
+			ptr<Graphics::EditableGeometry<Vertex, uint16_t> > typedGeometry = optimizedGeometry->CastIndices<uint16_t>();
+			fileSystem->SaveFile(typedGeometry->SerializeVertices(), arguments[1] + ".vertices");
+			fileSystem->SaveFile(typedGeometry->SerializeIndices(), arguments[1] + ".indices");
+		}
 	}
 }
 
-ptr<Graphics::EditableGeometry<Vertex, unsigned> > WavefrontObj::Convert(std::vector<int>& positionNumbers)
+ptr<Graphics::EditableGeometry<Vertex, size_t> > WavefrontObj::Convert(std::vector<int>& positionNumbers)
 {
 	std::vector<vec3> points;
 	std::vector<vec3> normals;
@@ -159,7 +168,7 @@ ptr<Graphics::EditableGeometry<Vertex, unsigned> > WavefrontObj::Convert(std::ve
 
 	//цикл по строкам файла
 	char ss[1000];
-	while(gets(ss))
+	while(fgets(ss, sizeof(ss), stdin))
 	{
 		//если пустая, пропустить
 		if(!ss[0]) continue;
@@ -220,5 +229,5 @@ ptr<Graphics::EditableGeometry<Vertex, unsigned> > WavefrontObj::Convert(std::ve
 	}
 
 	//создать модель, оптимизировать и вернуть
-	return MakePointer(NEW(Graphics::EditableGeometry<Vertex, unsigned>(vertices)));
+	return MakePointer(NEW(Graphics::EditableGeometry<Vertex, size_t>(vertices)));
 }

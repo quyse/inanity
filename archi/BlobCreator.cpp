@@ -9,7 +9,7 @@ String BlobCreator::GetCommand() const
 void BlobCreator::PrintHelp() const
 {
 	std::cout << "Creates a blob from specified directory(-ies). Usage:\n";
-	std::cout << GetCommand() << L" <output-blob-file> <directory> [<directory>]...\n";
+	std::cout << GetCommand() << " <output-blob-file> <directory> [<directory>]...\n";
 }
 
 void BlobCreator::Run(const std::vector<String>& arguments)
