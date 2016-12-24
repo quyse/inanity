@@ -236,6 +236,8 @@ void RawTextureData::Serialize(ptr<OutputStream> stream)
 			const char* sliceData = (const char*)GetMipData(image, mip);
 			int mipDepth = GetMipDepth(mip);
 			int mipHeight = GetMipHeight(mip);
+			if(format.type == PixelFormat::typeCompressed)
+				mipHeight /= 4;
 			int mipLinePitch = GetMipLinePitch(mip);
 			int mipSlicePitch = GetMipSlicePitch(mip);
 			for(int slice = 0; slice < mipDepth; ++slice)
@@ -276,6 +278,8 @@ ptr<RawTextureData> RawTextureData::Deserialize(ptr<InputStream> stream)
 			char* sliceData = (char*)data->GetMipData(image, mip);
 			int mipDepth = data->GetMipDepth(mip);
 			int mipHeight = data->GetMipHeight(mip);
+			if(format.type == PixelFormat::typeCompressed)
+				mipHeight /= 4;
 			int mipLinePitch = data->GetMipLinePitch(mip);
 			int mipSlicePitch = data->GetMipSlicePitch(mip);
 			for(int slice = 0; slice < mipDepth; ++slice)
