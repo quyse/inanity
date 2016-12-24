@@ -1,6 +1,7 @@
 #include "Lz4CompressStream.hpp"
 #include "../MemoryFile.hpp"
 #include "../deps/lz4/lz4.h"
+#include <memory.h>
 #include <algorithm>
 
 BEGIN_INANITY_DATA
@@ -24,7 +25,6 @@ void Lz4CompressStream::Write(const void* data, size_t size)
 {
 	const char* dataPtr = (const char*)data;
 	char* inputData = (char*)inputFile->GetData();
-	char* outputData = (char*)outputFile->GetData();
 
 	while(size)
 	{

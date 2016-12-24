@@ -3,10 +3,12 @@
 #include "../MemoryFile.hpp"
 #include "../Exception.hpp"
 #include "../deps/lz4/lz4.h"
+#include <memory.h>
 #include <algorithm>
 
 BEGIN_INANITY_DATA
 
+const size_t Lz4DecompressStream::outputBufferPrefix = 0x10000;
 const size_t Lz4DecompressStream::outputBufferSize =
 	Lz4DecompressStream::outputBufferPrefix +
 	Lz4CompressStream::inputBufferSize;

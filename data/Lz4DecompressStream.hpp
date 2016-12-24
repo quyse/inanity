@@ -19,7 +19,7 @@ private:
 	static const size_t inputBufferSize;
 	static const size_t outputBufferSize;
 	/// Prefix contains previous block.
-	static const size_t outputBufferPrefix = 0x10000;
+	static const size_t outputBufferPrefix;
 
 	StreamReader reader;
 	ptr<MemoryFile> inputFile;
