@@ -7,18 +7,21 @@
 BEGIN_INANITY_DATA
 
 const size_t Lz4CompressStream::inputBufferSize = 0x40000;
+const size_t Lz4CompressStream::dictSize = 0x10000;
+const size_t Lz4CompressStream::outputBufferSize = LZ4_COMPRESSBOUND(Lz4CompressStream::inputBufferSize);
 
 Lz4CompressStream::Lz4CompressStream(ptr<OutputStream> outputStream)
 : writer(outputStream), inputBegin(0), inputEnd(0)
 {
 	inputFile = NEW(MemoryFile(inputBufferSize));
-	outputFile = NEW(MemoryFile(LZ4_compressBound(inputBufferSize)));
-	internal = LZ4_create((const char*)inputFile->GetData());
+	dictFile = NEW(MemoryFile(dictSize));
+	outputFile = NEW(MemoryFile(outputBufferSize));
+	internal = LZ4_createStream();
 }
 
 Lz4CompressStream::~Lz4CompressStream()
 {
-	LZ4_free(internal);
+	LZ4_freeStream((LZ4_stream_t*)internal);
 }
 
 void Lz4CompressStream::Write(const void* data, size_t size)
@@ -47,11 +50,12 @@ void Lz4CompressStream::Flush()
 	{
 		char* inputData = (char*)inputFile->GetData();
 		char* outputData = (char*)outputFile->GetData();
-		size_t outputSize = LZ4_compress_continue(internal, inputData + inputBegin, outputData, inputEnd - inputBegin);
+		size_t outputSize = LZ4_compress_fast_continue((LZ4_stream_t*)internal, inputData + inputBegin, outputData, inputEnd - inputBegin, outputBufferSize, 1);
 		writer.WriteShortly(outputSize);
 		writer.Write(outputData, outputSize);
-		inputBegin = LZ4_slideInputBuffer(internal) - inputData;
-		inputEnd = inputBegin;
+		LZ4_saveDict((LZ4_stream_t*)internal, (char*)dictFile->GetData(), dictSize);
+		inputBegin = 0;
+		inputEnd = 0;
 	}
 }
 

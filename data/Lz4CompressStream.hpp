@@ -20,9 +20,12 @@ class Lz4CompressStream : public OutputStream
 	friend class Lz4DecompressStream;
 private:
 	static const size_t inputBufferSize;
+	static const size_t dictSize;
+	static const size_t outputBufferSize;
 
 	StreamWriter writer;
 	ptr<MemoryFile> inputFile;
+	ptr<MemoryFile> dictFile;
 	ptr<MemoryFile> outputFile;
 	size_t inputBegin, inputEnd;
 	/// Internal LZ4 structure.
