@@ -110,6 +110,56 @@ void SdlWindow::UpdateCursorVisible()
 	SDL_ShowCursor(cursorVisible ? SDL_ENABLE : SDL_DISABLE);
 }
 
+SDL_Surface* SdlWindow::CreateSurfaceFromTexture(ptr<Graphics::RawTextureData> texture)
+{
+	texture = texture->PremultiplyAlpha();
+
+	int width = texture->GetImageWidth();
+	int height = texture->GetImageHeight();
+	SDL_Surface* surface = SDL_CreateRGBSurface(0, width, height, 32, 0xFF, 0xFF00, 0xFF0000, 0xFF000000);
+	if(!surface) THROW_SECONDARY("Can't create surface", Sdl::Error());
+
+	SDL_LockSurface(surface);
+	void* texturePixels = texture->GetMipData();
+	int texturePitch = texture->GetMipLinePitch();
+	for(int i = 0; i < height; ++i)
+		memcpy((uint8_t*)surface->pixels + i * surface->pitch, (uint8_t*)texturePixels + i * texturePitch, width * 4);
+	SDL_UnlockSurface(surface);
+
+	return surface;
+}
+
+class SdlWindow::SdlIcon : public Window::Icon
+{
+	friend class SdlWindow;
+private:
+	SDL_Surface* surface;
+
+public:
+	SdlIcon(SDL_Surface* surface) : surface(surface) {}
+	~SdlIcon()
+	{
+		SDL_FreeSurface(surface);
+	}
+};
+
+ptr<Window::Icon> SdlWindow::CreateIcon(ptr<Graphics::RawTextureData> texture)
+{
+	BEGIN_TRY();
+
+	if(!(texture->GetFormat() == Graphics::PixelFormats::uintRGBA32S))
+		THROW("SDL window icon must be RGB");
+
+	return NEW(SdlIcon(CreateSurfaceFromTexture(texture)));
+
+	END_TRY("Can't create SDL icon");
+}
+
+void SdlWindow::SetIcon(ptr<Icon> icon)
+{
+	SDL_SetWindowIcon(handle, icon.FastCast<SdlIcon>()->surface);
+}
+
 class SdlWindow::SdlCursor : public Window::Cursor
 {
 	friend class SdlWindow;
@@ -131,20 +181,7 @@ ptr<Window::Cursor> SdlWindow::CreateCursor(ptr<Graphics::RawTextureData> textur
 	if(!(texture->GetFormat() == Graphics::PixelFormats::uintRGBA32S))
 		THROW("SDL window cursor must be RGB");
 
-	texture = texture->PremultiplyAlpha();
-
-	int width = texture->GetImageWidth();
-	int height = texture->GetImageHeight();
-	SDL_Surface* surface = SDL_CreateRGBSurface(0, width, height, 32, 0xFF, 0xFF00, 0xFF0000, 0xFF000000);
-	if(!surface) THROW_SECONDARY("Can't create surface", Sdl::Error());
-
-	SDL_LockSurface(surface);
-	void* texturePixels = texture->GetMipData();
-	int texturePitch = texture->GetMipLinePitch();
-	for(int i = 0; i < height; ++i)
-		memcpy((uint8_t*)surface->pixels + i * surface->pitch, (uint8_t*)texturePixels + i * texturePitch, width * 4);
-	SDL_UnlockSurface(surface);
-
+	SDL_Surface* surface = CreateSurfaceFromTexture(texture);
 	SDL_Cursor* cursor = SDL_CreateColorCursor(surface, hotX, hotY);
 	SDL_FreeSurface(surface);
 	if(!cursor) THROW_SECONDARY("Can't create cursor", Sdl::Error());

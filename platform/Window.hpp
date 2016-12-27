@@ -19,6 +19,11 @@ BEGIN_INANITY_PLATFORM
 class Window : public Object
 {
 public:
+	/// Icon class.
+	class Icon : public Object
+	{
+	};
+
 	/// Mouse cursor class.
 	class Cursor : public Object
 	{
@@ -45,6 +50,10 @@ public:
 	virtual void StartTextInput() = 0;
 	/// Stop text input.
 	virtual void StopTextInput() = 0;
+	/// Create custom icon.
+	virtual ptr<Icon> CreateIcon(ptr<Graphics::RawTextureData> texture) = 0;
+	/// Set window icon.
+	virtual void SetIcon(ptr<Icon> icon) = 0;
 	/// Create custom mouse cursor.
 	virtual ptr<Cursor> CreateCursor(ptr<Graphics::RawTextureData> texture, int hotX, int hotY) = 0;
 	/// Set cursor.

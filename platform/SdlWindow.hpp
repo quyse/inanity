@@ -25,7 +25,10 @@ private:
 	bool quit;
 	int clientWidth, clientHeight;
 
+	class SdlIcon;
 	class SdlCursor;
+
+	static SDL_Surface* CreateSurfaceFromTexture(ptr<Graphics::RawTextureData> texture);
 
 protected:
 	void UpdateMouseLock();
@@ -49,6 +52,8 @@ public:
 	void PlaceCursor(int x, int y);
 	void StartTextInput();
 	void StopTextInput();
+	ptr<Icon> CreateIcon(ptr<Graphics::RawTextureData> texture);
+	void SetIcon(ptr<Icon> icon);
 	ptr<Window::Cursor> CreateCursor(ptr<Graphics::RawTextureData> texture, int hotX, int hotY);
 	void SetCursor(ptr<Cursor> cursor);
 };
