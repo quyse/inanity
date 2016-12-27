@@ -38,8 +38,11 @@ private:
 
 	ptr<Input::Win32Manager> inputManager;
 
+	class Win32Icon;
 	class Win32Cursor;
 
+	/// Current icon.
+	ptr<Win32Icon> icon;
 	/// Is cursor was hided.
 	/** This needed to not to break things, because
 	ShowCursor() works like a counter. */
@@ -60,6 +63,8 @@ private:
 	void UpdateCursorVisible();
 	void UpdateCursor();
 
+	static HICON CreateIconFromTexture(ptr<Graphics::RawTextureData> texture, BOOL isIcon, int hotX, int hotY);
+
 public:
 	Win32Window(HWND hWnd, bool own = true, WNDPROC prevWndProc = nullptr);
 	~Win32Window();
@@ -71,6 +76,8 @@ public:
 	void PlaceCursor(int x, int y);
 	void StartTextInput();
 	void StopTextInput();
+	ptr<Icon> CreateIcon(ptr<Graphics::RawTextureData> texture);
+	void SetIcon(ptr<Icon> icon);
 	ptr<Cursor> CreateCursor(ptr<Graphics::RawTextureData> texture, int hotX, int hotY);
 	void SetCursor(ptr<Cursor> cursor);
 

@@ -52,27 +52,8 @@ void Win32Window::StopTextInput()
 {
 }
 
-class Win32Window::Win32Cursor : public Window::Cursor
+HICON Win32Window::CreateIconFromTexture(ptr<Graphics::RawTextureData> texture, BOOL isIcon, int hotX, int hotY)
 {
-	friend class Win32Window;
-private:
-	HCURSOR cursor;
-
-public:
-	Win32Cursor(HCURSOR cursor) : cursor(cursor) {}
-	~Win32Cursor()
-	{
-		DestroyCursor(cursor);
-	}
-};
-
-ptr<Window::Cursor> Win32Window::CreateCursor(ptr<Graphics::RawTextureData> texture, int hotX, int hotY)
-{
-	BEGIN_TRY();
-
-	if(!(texture->GetFormat() == Graphics::PixelFormats::uintRGBA32S))
-		THROW("Win32 window cursor must be RGB");
-
 	int width = texture->GetImageWidth();
 	int height = texture->GetImageHeight();
 	int pitch = (width * 3 + 3) & ~3;
@@ -118,15 +99,80 @@ ptr<Window::Cursor> Win32Window::CreateCursor(ptr<Graphics::RawTextureData> text
 	}
 
 	ICONINFO ii;
-	ii.fIcon = FALSE;
+	ii.fIcon = isIcon;
 	ii.xHotspot = hotX;
 	ii.yHotspot = hotY;
 	ii.hbmMask = hbmpMask;
 	ii.hbmColor = hbmpColor;
-	HCURSOR cursor = CreateIconIndirect(&ii);
+	HICON icon = CreateIconIndirect(&ii);
 
 	DeleteBitmap(hbmpColor);
 	DeleteBitmap(hbmpMask);
+
+	return icon;
+}
+
+class Win32Window::Win32Icon : public Window::Icon
+{
+	friend class Win32Window;
+private:
+	HICON icon;
+
+public:
+	Win32Icon(HICON icon) : icon(icon) {}
+	~Win32Icon()
+	{
+		DestroyIcon(icon);
+	}
+};
+
+ptr<Window::Icon> Win32Window::CreateIcon(ptr<Graphics::RawTextureData> texture)
+{
+	BEGIN_TRY();
+
+	if(!(texture->GetFormat() == Graphics::PixelFormats::uintRGBA32S))
+		THROW("Win32 window icon must be RGBA");
+
+	HCURSOR icon = CreateIconFromTexture(texture, TRUE, 0, 0);
+
+	if(!icon) THROW("Can't create icon");
+
+	return NEW(Win32Icon(icon));
+
+	END_TRY("Can't create Win32 icon");
+}
+
+void Win32Window::SetIcon(ptr<Icon> icon)
+{
+	ptr<Win32Icon> win32Icon = icon.FastCast<Win32Icon>();
+	HICON ico = win32Icon->icon;
+	SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)ico);
+	SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)ico);
+	this->icon = win32Icon;
+}
+
+class Win32Window::Win32Cursor : public Window::Cursor
+{
+	friend class Win32Window;
+private:
+	HCURSOR cursor;
+
+public:
+	Win32Cursor(HCURSOR cursor) : cursor(cursor) {}
+	~Win32Cursor()
+	{
+		DestroyCursor(cursor);
+	}
+};
+
+ptr<Window::Cursor> Win32Window::CreateCursor(ptr<Graphics::RawTextureData> texture, int hotX, int hotY)
+{
+	BEGIN_TRY();
+
+	if(!(texture->GetFormat() == Graphics::PixelFormats::uintRGBA32S))
+		THROW("Win32 window cursor must be RGB");
+
+	HCURSOR cursor = CreateIconFromTexture(texture, FALSE, hotX, hotY);
 
 	if(!cursor) THROW("Can't create cursor");
 
@@ -137,6 +183,7 @@ ptr<Window::Cursor> Win32Window::CreateCursor(ptr<Graphics::RawTextureData> text
 
 void Win32Window::SetCursor(ptr<Cursor> cursor)
 {
+	ptr<Win32Cursor> lastCursor = this->cursor;
 	this->cursor = cursor.FastCast<Win32Cursor>();
 	UpdateCursor();
 }
