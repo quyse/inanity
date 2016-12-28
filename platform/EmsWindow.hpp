@@ -54,7 +54,9 @@ public:
 	void PlaceCursor(int x, int y);
 	void StartTextInput();
 	void StopTextInput();
-	ptr<Window::Cursor> CreateCursor(ptr<Graphics::RawTextureData> texture, int hotX, int hotY);
+	ptr<Icon> CreateIcon(ptr<Graphics::RawTextureData> texture);
+	void SetIcon(ptr<Icon> icon);
+	ptr<Cursor> CreateCursor(ptr<Graphics::RawTextureData> texture, int hotX, int hotY);
 	void SetCursor(ptr<Cursor> cursor);
 };
 

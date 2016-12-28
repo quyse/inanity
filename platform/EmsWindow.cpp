@@ -113,6 +113,15 @@ void EmsWindow::MainLoop()
 	activeHandler->Fire();
 }
 
+ptr<Window::Icon> EmsWindow::CreateIcon(ptr<Graphics::RawTextureData> texture)
+{
+	return NEW(Icon());
+}
+
+void EmsWindow::SetIcon(ptr<Icon> icon)
+{
+}
+
 ptr<Window::Cursor> EmsWindow::CreateCursor(ptr<Graphics::RawTextureData> texture, int hotX, int hotY)
 {
 	return NEW(Cursor());
