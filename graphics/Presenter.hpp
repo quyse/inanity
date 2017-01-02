@@ -27,6 +27,9 @@ public:
 	/// Сменить режим экрана.
 	virtual void SetMode(ptr<MonitorMode> mode) = 0;
 
+	/// Set swap interval.
+	virtual void SetSwapInterval(int swapInterval) = 0;
+
 	/// Отобразить очередной кадр.
 	/** Обычно, это переворот двойного буфера. */
 	virtual void Present() = 0;

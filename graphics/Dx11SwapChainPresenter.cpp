@@ -11,7 +11,7 @@
 BEGIN_INANITY_GRAPHICS
 
 Dx11SwapChainPresenter::Dx11SwapChainPresenter(ptr<Dx11Device> device, ptr<Platform::Win32Window> window, ComPointer<IDXGISwapChain> swapChain)
-: Dx11Presenter(device), window(window), swapChain(swapChain), currentMode(0)
+: Dx11Presenter(device), window(window), swapChain(swapChain), currentMode(0), swapInterval(1)
 {
 	window->SetPresenter(this);
 	width = window->GetClientWidth();
@@ -88,9 +88,14 @@ void Dx11SwapChainPresenter::SetMode(ptr<MonitorMode> abstractMode)
 	}
 }
 
+void Dx11SwapChainPresenter::SetSwapInterval(int swapInterval)
+{
+	this->swapInterval = swapInterval;
+}
+
 void Dx11SwapChainPresenter::Present()
 {
-	if(FAILED(swapChain->Present(0, 0)))
+	if(FAILED(swapChain->Present(swapInterval, 0)))
 		THROW("Can't present");
 }
 

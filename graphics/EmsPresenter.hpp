@@ -34,6 +34,7 @@ public:
 	int GetHeight() const;
 	ptr<FrameBuffer> GetFrameBuffer() const;
 	void SetMode(ptr<MonitorMode> mode);
+	void SetSwapInterval(int swapInterval);
 	void Present();
 	void Resize(int width, int height);
 };

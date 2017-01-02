@@ -18,6 +18,7 @@ private:
 	ptr<Platform::SdlWindow> window;
 	/// Size of back buffer.
 	int width, height;
+	int currentSwapInterval, targetSwapInterval;
 
 public:
 	SdlPresenter(ptr<GlDevice> device, ptr<GlFrameBuffer> frameBuffer, ptr<Platform::SdlWindow> window);
@@ -31,6 +32,7 @@ public:
 	int GetWidth() const;
 	int GetHeight() const;
 	void SetMode(ptr<MonitorMode> mode);
+	void SetSwapInterval(int swapInterval);
 	void Present();
 	void Resize(int width, int height);
 };

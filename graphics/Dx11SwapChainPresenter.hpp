@@ -31,6 +31,8 @@ private:
 	ptr<DxgiMonitorMode> currentMode;
 	/// Size of back buffer.
 	int width, height;
+	/// Swap interval.
+	int swapInterval;
 
 public:
 	Dx11SwapChainPresenter(ptr<Dx11Device> device, ptr<Platform::Win32Window> window, ComPointer<IDXGISwapChain> swapChain);
@@ -43,6 +45,7 @@ public:
 	int GetWidth() const;
 	int GetHeight() const;
 	void SetMode(ptr<MonitorMode> mode);
+	void SetSwapInterval(int swapInterval);
 	void Present();
 	void Resize(int width, int height);
 };

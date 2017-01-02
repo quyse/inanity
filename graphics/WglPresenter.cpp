@@ -7,7 +7,7 @@
 BEGIN_INANITY_GRAPHICS
 
 WglPresenter::WglPresenter(ptr<GlDevice> device, ptr<GlFrameBuffer> frameBuffer, HDC hdc, ptr<Platform::Win32Window> window)
-: device(device), frameBuffer(frameBuffer), hdc(hdc), window(window)
+: device(device), frameBuffer(frameBuffer), hdc(hdc), window(window), currentSwapInterval(-1), targetSwapInterval(1)
 {
 	window->SetPresenter(this);
 	width = window->GetClientWidth();
@@ -73,8 +73,18 @@ void WglPresenter::SetMode(ptr<MonitorMode> abstractMode)
 	END_TRY("Can't set mode for WGL presenter");
 }
 
+void WglPresenter::SetSwapInterval(int swapInterval)
+{
+	targetSwapInterval = swapInterval;
+}
+
 void WglPresenter::Present()
 {
+	if(targetSwapInterval != currentSwapInterval)
+	{
+		if(WGLEW_EXT_swap_control) wglSwapIntervalEXT(targetSwapInterval);
+		currentSwapInterval = targetSwapInterval;
+	}
 	SwapBuffers(hdc);
 }
 

@@ -42,6 +42,10 @@ void EmsPresenter::SetMode(ptr<MonitorMode> mode)
 {
 }
 
+void EmsPresenter::SetSwapInterval(int swapInterval)
+{
+}
+
 void EmsPresenter::Present()
 {
 }

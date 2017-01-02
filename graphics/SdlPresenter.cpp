@@ -5,7 +5,7 @@
 BEGIN_INANITY_GRAPHICS
 
 SdlPresenter::SdlPresenter(ptr<GlDevice> device, ptr<GlFrameBuffer> frameBuffer, ptr<Platform::SdlWindow> window)
-: device(device), frameBuffer(frameBuffer), window(window)
+: device(device), frameBuffer(frameBuffer), window(window), currentSwapInterval(-1), targetSwapInterval(1)
 {
 	window->SetPresenter(this);
 	width = window->GetClientWidth();
@@ -47,8 +47,18 @@ void SdlPresenter::SetMode(ptr<MonitorMode> mode)
 {
 }
 
+void SdlPresenter::SetSwapInterval(int swapInterval)
+{
+	targetSwapInterval = swapInterval;
+}
+
 void SdlPresenter::Present()
 {
+	if(targetSwapInterval != currentSwapInterval)
+	{
+		SDL_GL_SetSwapInterval(targetSwapInterval);
+		currentSwapInterval = targetSwapInterval;
+	}
 	SDL_GL_SwapWindow(window->GetHandle());
 }
 

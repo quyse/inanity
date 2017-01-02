@@ -25,6 +25,7 @@ private:
 	HDC hdc;
 	ptr<Platform::Win32Window> window;
 	int width, height;
+	int currentSwapInterval, targetSwapInterval;
 
 public:
 	WglPresenter(ptr<GlDevice> device, ptr<GlFrameBuffer> frameBuffer, HDC hdc, ptr<Platform::Win32Window> window);
@@ -38,6 +39,7 @@ public:
 	int GetHeight() const;
 	ptr<FrameBuffer> GetFrameBuffer() const;
 	void SetMode(ptr<MonitorMode> mode);
+	void SetSwapInterval(int swapInterval);
 	void Present();
 	void Resize(int width, int height);
 };
