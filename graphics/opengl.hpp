@@ -3,8 +3,12 @@
 
 #include "../Object.hpp"
 
+#if !defined(GLEW_STATIC)
 #define GLEW_STATIC
+#endif
+#if !defined(GLEW_NO_GLU)
 #define GLEW_NO_GLU
+#endif
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
 
