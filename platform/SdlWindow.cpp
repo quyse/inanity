@@ -7,7 +7,7 @@
 BEGIN_INANITY_PLATFORM
 
 SdlWindow::SdlWindow(SDL_Window* handle)
-: sdl(Sdl::Get()), handle(handle), quit(false)
+: sdl(Sdl::Get()), handle(handle), quit(false), fullscreen(false)
 {
 	SDL_GetWindowSize(handle, &clientWidth, &clientHeight);
 }
@@ -52,6 +52,13 @@ void SdlWindow::Close()
 	quit = true;
 }
 
+void SdlWindow::SetFullScreen(bool fullscreen)
+{
+	if(this->fullscreen == fullscreen) return;
+	this->fullscreen = fullscreen;
+	SDL_SetWindowFullscreen(handle, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+}
+
 void SdlWindow::Run(ptr<Handler> activeHandler)
 {
 	while(!quit)
@@ -66,7 +73,7 @@ void SdlWindow::Run(ptr<Handler> activeHandler)
 			{
 				switch(event.window.event)
 				{
-				case SDL_WINDOWEVENT_RESIZED:
+				case SDL_WINDOWEVENT_SIZE_CHANGED:
 					clientWidth = event.window.data1;
 					clientHeight = event.window.data2;
 					if(presenter)

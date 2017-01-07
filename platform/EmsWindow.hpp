@@ -50,6 +50,7 @@ public:
 	//*** Window's methods.
 	void SetTitle(const String& title);
 	void Close();
+	void SetFullScreen(bool fullscreen);
 	void Run(ptr<Handler> activeHandler);
 	void PlaceCursor(int x, int y);
 	void StartTextInput();

@@ -23,6 +23,7 @@ private:
 	SDL_Window* handle;
 	ptr<Input::SdlManager> inputManager;
 	bool quit;
+	bool fullscreen;
 	int clientWidth, clientHeight;
 
 	class SdlIcon;
@@ -48,6 +49,7 @@ public:
 	//*** Window's methods.
 	void SetTitle(const String& title);
 	void Close();
+	void SetFullScreen(bool fullscreen);
 	void Run(ptr<Handler> activeHandler);
 	void PlaceCursor(int x, int y);
 	void StartTextInput();

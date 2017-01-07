@@ -54,6 +54,11 @@ void EmsWindow::Close()
 	emscripten_cancel_main_loop();
 }
 
+void EmsWindow::SetFullScreen(bool fullscreen)
+{
+	// not implemented yet
+}
+
 void EmsWindow::Run(ptr<Handler> activeHandler)
 {
 	this->activeHandler = activeHandler;
