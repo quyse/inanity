@@ -50,6 +50,11 @@ private:
 	/// Current cursor.
 	ptr<Win32Cursor> cursor;
 
+	/// Fullscreen state.
+	bool fullscreen;
+	/// Pre-fullscreen rectangle.
+	WINDOWPLACEMENT preFullScreenPlacement;
+
 	static LRESULT CALLBACK StaticWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	LRESULT WndProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -72,6 +77,7 @@ public:
 	//*** методы Window
 	void SetTitle(const String& title);
 	void Close();
+	void SetFullScreen(bool fullscreen);
 	void Run(ptr<Handler> activeHandler);
 	void PlaceCursor(int x, int y);
 	void StartTextInput();

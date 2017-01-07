@@ -33,6 +33,8 @@ public:
 	virtual void SetTitle(const String& title) = 0;
 	/// Закрыть окно.
 	virtual void Close() = 0;
+	/// Установить полноэкранно-оконный (borderless) режим.
+	virtual void SetFullScreen(bool fullscreen) = 0;
 
 	/// Запустить оконный цикл.
 	/** Цикл завершается, когда окно закрывается. */

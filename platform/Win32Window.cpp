@@ -9,7 +9,7 @@
 BEGIN_INANITY_PLATFORM
 
 Win32Window::Win32Window(HWND hWnd, bool own, WNDPROC prevWndProc)
-: hWnd(hWnd), hdc(0), own(own), active(true), clientWidth(0), clientHeight(0), prevWndProc(prevWndProc), cursorHidden(false)
+: hWnd(hWnd), hdc(0), own(own), active(true), clientWidth(0), clientHeight(0), prevWndProc(prevWndProc), cursorHidden(false), fullscreen(false)
 {
 	SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)this);
 
@@ -406,6 +406,33 @@ void Win32Window::Close()
 {
 	if(hWnd)
 		DestroyWindow(hWnd);
+}
+
+void Win32Window::SetFullScreen(bool fullscreen)
+{
+	if(this->fullscreen == fullscreen) return;
+	this->fullscreen = fullscreen;
+	if(fullscreen)
+	{
+		// remember window placement before going fullscreen
+		LONG_PTR styles = GetWindowLongPtr(hWnd, GWL_STYLE);
+		preFullScreenPlacement.length = sizeof(preFullScreenPlacement);
+		GetWindowPlacement(hWnd, &preFullScreenPlacement);
+		// remove window frame
+		SetWindowLongPtr(hWnd, GWL_STYLE, (styles & (~WS_OVERLAPPEDWINDOW)) | WS_POPUP);
+		// if window is maximized already, restore it first
+		// otherwise Windows will not maximize it over whole screen
+		if(styles & WS_MAXIMIZE) ShowWindowAsync(hWnd, SW_RESTORE);
+		// maximize window
+		ShowWindowAsync(hWnd, SW_MAXIMIZE);
+	}
+	else
+	{
+		// bring window frame back
+		SetWindowLongPtr(hWnd, GWL_STYLE, (GetWindowLongPtr(hWnd, GWL_STYLE) & (~WS_POPUP)) | WS_OVERLAPPEDWINDOW);
+		// restore window placement
+		SetWindowPlacement(hWnd, &preFullScreenPlacement);
+	}
 }
 
 void Win32Window::Run(ptr<Handler> activeHandler)
