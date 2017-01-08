@@ -54,7 +54,7 @@ const Adapter::Monitors& SdlAdapter::GetMonitors()
 
 ptr<Platform::Window> SdlAdapter::CreateOptimizedWindow(const String& title, int left, int top, int width, int height)
 {
-	SDL_Window* handle = SDL_CreateWindow(title.c_str(), left, top, width, height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+	SDL_Window* handle = SDL_CreateWindow(title.c_str(), left, top, width, height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
 	if(!handle)
 		THROW_SECONDARY("Can't create SDL-optimized window", Platform::Sdl::Error());
 

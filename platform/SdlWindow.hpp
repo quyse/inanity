@@ -24,6 +24,7 @@ private:
 	ptr<Input::SdlManager> inputManager;
 	bool quit;
 	bool fullscreen;
+	int virtualWidth, virtualHeight;
 	int clientWidth, clientHeight;
 
 	class SdlIcon;

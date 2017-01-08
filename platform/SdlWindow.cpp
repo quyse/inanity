@@ -9,7 +9,8 @@ BEGIN_INANITY_PLATFORM
 SdlWindow::SdlWindow(SDL_Window* handle)
 : sdl(Sdl::Get()), handle(handle), quit(false), fullscreen(false)
 {
-	SDL_GetWindowSize(handle, &clientWidth, &clientHeight);
+	SDL_GetWindowSize(handle, &virtualWidth, &virtualHeight);
+	SDL_GL_GetDrawableSize(handle, &clientWidth, &clientHeight);
 }
 
 SdlWindow::~SdlWindow()
@@ -25,6 +26,7 @@ SDL_Window* SdlWindow::GetHandle() const
 void SdlWindow::SetInputManager(ptr<Input::SdlManager> inputManager)
 {
 	this->inputManager = inputManager;
+	inputManager->SetVirtualScale((float)clientWidth / (float)virtualWidth, (float)clientHeight / (float)virtualHeight);
 }
 
 int SdlWindow::GetClientWidth() const
@@ -86,8 +88,10 @@ void SdlWindow::Run(ptr<Handler> activeHandler)
 				switch(event.window.event)
 				{
 				case SDL_WINDOWEVENT_SIZE_CHANGED:
-					clientWidth = event.window.data1;
-					clientHeight = event.window.data2;
+					SDL_GetWindowSize(handle, &virtualWidth, &virtualHeight);
+					SDL_GL_GetDrawableSize(handle, &clientWidth, &clientHeight);
+					if(inputManager)
+						inputManager->SetVirtualScale((float)clientWidth / (float)virtualWidth, (float)clientHeight / (float)virtualHeight);
 					if(presenter)
 						presenter->Resize(clientWidth, clientHeight);
 					break;

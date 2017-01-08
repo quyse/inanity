@@ -23,11 +23,14 @@ class SdlManager : public Manager
 {
 private:
 	ptr<Platform::Sdl> sdl;
+	float widthScale;
+	float heightScale;
 
 public:
 	SdlManager();
 
 	void ProcessEvent(const SDL_Event& event);
+	void SetVirtualScale(float widthScale, float heightScale);
 };
 
 END_INANITY_INPUT

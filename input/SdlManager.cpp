@@ -5,7 +5,7 @@
 
 BEGIN_INANITY_INPUT
 
-SdlManager::SdlManager() : sdl(Platform::Sdl::Get()) {}
+SdlManager::SdlManager() : sdl(Platform::Sdl::Get()), widthScale(1), heightScale(1) {}
 
 static Key ConvertKey(SDL_Keycode code)
 {
@@ -175,8 +175,8 @@ void SdlManager::ProcessEvent(const SDL_Event& event)
 			Event e;
 			e.device = Event::deviceMouse;
 			e.mouse.type = Event::Mouse::typeCursorMove;
-			e.mouse.cursorX = event.motion.x;
-			e.mouse.cursorY = event.motion.y;
+			e.mouse.cursorX = (int)(event.motion.x * widthScale);
+			e.mouse.cursorY = (int)(event.motion.y * heightScale);
 			AddEvent(e);
 		}
 		break;
@@ -207,6 +207,12 @@ void SdlManager::ProcessEvent(const SDL_Event& event)
 		}
 		break;
 	}
+}
+
+void SdlManager::SetVirtualScale(float widthScale, float heightScale)
+{
+	this->widthScale = widthScale;
+	this->heightScale = heightScale;
 }
 
 END_INANITY_INPUT
