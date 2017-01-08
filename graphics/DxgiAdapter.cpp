@@ -1,5 +1,6 @@
 #include "DxgiAdapter.hpp"
 #include "DxgiMonitor.hpp"
+#include "../platform/Win32Window.hpp"
 #include "../Strings.hpp"
 #include "../Exception.hpp"
 #include <sstream>
@@ -57,6 +58,11 @@ const Adapter::Monitors& DxgiAdapter::GetMonitors()
 		}
 
 	return monitors;
+}
+
+ptr<Platform::Window> DxgiAdapter::CreateOptimizedWindow(const String& title, int left, int top, int width, int height)
+{
+	return Platform::Win32Window::CreateForDirectX(title, left, top, width, height);
 }
 
 IDXGIAdapter* DxgiAdapter::GetInterface() const

@@ -5,6 +5,12 @@
 #include "../String.hpp"
 #include <vector>
 
+BEGIN_INANITY_PLATFORM
+
+class Window;
+
+END_INANITY_PLATFORM
+
 BEGIN_INANITY_GRAPHICS
 
 class Monitor;
@@ -25,6 +31,9 @@ public:
 	virtual String GetName() const = 0;
 	/// Получить мониторы.
 	virtual const Monitors& GetMonitors() = 0;
+	/// Создать окно, оптимизированное под адаптер.
+	/** Метод не может быть назван CreateWindow, потому что винда. */
+	virtual ptr<Platform::Window> CreateOptimizedWindow(const String& title, int left, int top, int width, int height) = 0;
 };
 
 END_INANITY_GRAPHICS

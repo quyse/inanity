@@ -1,5 +1,6 @@
 #include "Win32Adapter.hpp"
 #include "Win32Monitor.hpp"
+#include "../platform/Win32Window.hpp"
 #include "../Strings.hpp"
 
 BEGIN_INANITY_GRAPHICS
@@ -50,6 +51,11 @@ void Win32Adapter::GetAdapters(Adapters& adapters)
 			break;
 		adapters.push_back(NEW(Win32Adapter(adapterInfo)));
 	}
+}
+
+ptr<Platform::Window> Win32Adapter::CreateOptimizedWindow(const String& title, int left, int top, int width, int height)
+{
+	return Platform::Win32Window::CreateForOpenGL(title, left, top, width, height);
 }
 
 END_INANITY_GRAPHICS

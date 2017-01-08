@@ -1,6 +1,7 @@
 #include "SdlAdapter.hpp"
 #include "SdlMonitor.hpp"
 #include "../platform/Sdl.hpp"
+#include "../platform/SdlWindow.hpp"
 #include "../Exception.hpp"
 #include <SDL2/SDL_video.h>
 
@@ -49,6 +50,15 @@ const Adapter::Monitors& SdlAdapter::GetMonitors()
 	return monitors;
 
 	END_TRY("Can't get SDL monitors");
+}
+
+ptr<Platform::Window> SdlAdapter::CreateOptimizedWindow(const String& title, int left, int top, int width, int height)
+{
+	SDL_Window* handle = SDL_CreateWindow(title.c_str(), left, top, width, height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+	if(!handle)
+		THROW_SECONDARY("Can't create SDL-optimized window", Platform::Sdl::Error());
+
+	return NEW(Platform::SdlWindow(handle));
 }
 
 void SdlAdapter::GetAdapters(Adapters& adapters)

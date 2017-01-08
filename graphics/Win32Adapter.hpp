@@ -23,6 +23,7 @@ public:
 	String GetId() const;
 	String GetName() const;
 	const Monitors& GetMonitors();
+	ptr<Platform::Window> CreateOptimizedWindow(const String& title, int left, int top, int width, int height);
 
 	static void GetAdapters(Adapters& adapters);
 };
