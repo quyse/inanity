@@ -348,8 +348,12 @@ LRESULT Win32Window::WndProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		UpdateMouseLock();
 		return 0;
 	case WM_SETCURSOR:
-		UpdateCursor();
-		return 0;
+		if(LOWORD(lParam) == HTCLIENT)
+		{
+			UpdateCursor();
+			return 0;
+		}
+		break;
 	case WM_CLOSE:
 		Close();
 		return 0;
