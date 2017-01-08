@@ -59,6 +59,14 @@ void EmsWindow::SetFullScreen(bool fullscreen)
 	// not implemented yet
 }
 
+void EmsWindow::GetRect(int& left, int& top, int& width, int& height)
+{
+	left = 0;
+	top = 0;
+	width = this->width;
+	height = this->height;
+}
+
 void EmsWindow::Run(ptr<Handler> activeHandler)
 {
 	this->activeHandler = activeHandler;

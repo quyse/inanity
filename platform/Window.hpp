@@ -36,6 +36,9 @@ public:
 	/// Установить полноэкранно-оконный (borderless) режим.
 	virtual void SetFullScreen(bool fullscreen) = 0;
 
+	/// Get window rectangle.
+	virtual void GetRect(int& left, int& top, int& width, int& height) = 0;
+
 	/// Запустить оконный цикл.
 	/** Цикл завершается, когда окно закрывается. */
 	virtual void Run(ptr<Handler> activeHandler) = 0;

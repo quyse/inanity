@@ -435,6 +435,16 @@ void Win32Window::SetFullScreen(bool fullscreen)
 	}
 }
 
+void Win32Window::GetRect(int& left, int& top, int& width, int& height)
+{
+	RECT rect;
+	GetWindowRect(hWnd, &rect);
+	left = rect.left;
+	top = rect.top;
+	width = rect.right - rect.left;
+	height = rect.bottom - rect.top;
+}
+
 void Win32Window::Run(ptr<Handler> activeHandler)
 {
 	while(Do(activeHandler));

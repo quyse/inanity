@@ -59,6 +59,18 @@ void SdlWindow::SetFullScreen(bool fullscreen)
 	SDL_SetWindowFullscreen(handle, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
 }
 
+void SdlWindow::GetRect(int& left, int& top, int& width, int& height)
+{
+	SDL_GetWindowPosition(handle, &left, &top);
+	SDL_GetWindowSize(handle, &width, &height);
+	int borderTop, borderLeft, borderBottom, borderRight;
+	SDL_GetWindowBordersSize(handle, &borderTop, &borderLeft, &borderBottom, &borderRight);
+	left -= borderLeft;
+	top -= borderTop;
+	width += borderLeft + borderRight;
+	height += borderTop + borderBottom;
+}
+
 void SdlWindow::Run(ptr<Handler> activeHandler)
 {
 	while(!quit)
