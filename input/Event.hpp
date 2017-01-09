@@ -11,7 +11,8 @@ struct Event
 	enum Device
 	{
 		deviceKeyboard,
-		deviceMouse
+		deviceMouse,
+		deviceController
 	} device;
 
 	struct Keyboard
@@ -72,12 +73,70 @@ struct Event
 		};
 	};
 
+	struct Controller
+	{
+		enum Type
+		{
+			typeDeviceAdded,
+			typeDeviceRemoved,
+			typeButtonDown,
+			typeButtonUp,
+			typeAxisMotion
+		} type;
+
+		enum Button
+		{
+			buttonA,
+			buttonB,
+			buttonX,
+			buttonY,
+			buttonBack,
+			buttonGuide,
+			buttonStart,
+			buttonLeftStick,
+			buttonRightStick,
+			buttonLeftShoulder,
+			buttonRightShoulder,
+			buttonDPadUp,
+			buttonDPadDown,
+			buttonDPadLeft,
+			buttonDPadRight
+		};
+
+		enum Axis
+		{
+			axisLeftX,
+			axisLeftY,
+			axisRightX,
+			axisRightY,
+			axisTriggerLeft,
+			axisTriggerRight
+		};
+
+		/// Device id (for all event types).
+		int device;
+
+		union
+		{
+			// in case type == typeButton{Down,Up}
+			Button button;
+			// in case type == typeAxisMotion
+			struct
+			{
+				Axis axis;
+				int axisValue;
+			};
+		};
+	};
+
 	union
 	{
 		// in case device == deviceKeyboard
 		Keyboard keyboard;
 		// in case device == deviceMouse
 		Mouse mouse;
+		// in case device == deviceController
+		Controller controller;
 	};
 
 	// debug output into std::ostream

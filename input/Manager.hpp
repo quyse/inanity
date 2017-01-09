@@ -8,6 +8,7 @@ BEGIN_INANITY_INPUT
 
 class Frame;
 struct Event;
+class Controller;
 
 /// Abstract input manager class.
 class Manager : public Object
@@ -36,6 +37,9 @@ public:
 	virtual void Update();
 	/// Gets current input frame.
 	ptr<Frame> GetCurrentFrame();
+
+	/// Get new controller by controller id.
+	virtual ptr<Controller> TryGetController(int controllerId);
 };
 
 END_INANITY_INPUT

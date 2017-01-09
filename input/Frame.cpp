@@ -75,6 +75,9 @@ bool Frame::NextEvent()
 				break;
 			}
 			break;
+		case Event::deviceController:
+			// TODO: controller state
+			break;
 		}
 
 		// if we are here, event changes something

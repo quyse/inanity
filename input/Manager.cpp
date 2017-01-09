@@ -1,5 +1,6 @@
 #include "Manager.hpp"
 #include "Frame.hpp"
+#include "Controller.hpp"
 #include "../CriticalCode.hpp"
 #include "../Exception.hpp"
 #include <algorithm>
@@ -36,6 +37,11 @@ void Manager::Update()
 ptr<Frame> Manager::GetCurrentFrame()
 {
 	return currentFrame;
+}
+
+ptr<Controller> Manager::TryGetController(int controllerId)
+{
+	return nullptr;
 }
 
 END_INANITY_INPUT

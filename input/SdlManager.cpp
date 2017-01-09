@@ -1,11 +1,14 @@
 #include "SdlManager.hpp"
 #include "Frame.hpp"
 #include "../platform/Sdl.hpp"
+#include "../CriticalCode.hpp"
 #include "../deps/utf8.h"
 
 BEGIN_INANITY_INPUT
 
-SdlManager::SdlManager() : sdl(Platform::Sdl::Get()), widthScale(1), heightScale(1) {}
+SdlManager::SdlManager() : sdl(Platform::Sdl::Get(SDL_INIT_GAMECONTROLLER)), widthScale(1), heightScale(1)
+{
+}
 
 static Key ConvertKey(SDL_Keycode code)
 {
@@ -206,6 +209,125 @@ void SdlManager::ProcessEvent(const SDL_Event& event)
 				AddEvent(e);
 		}
 		break;
+	case SDL_CONTROLLERDEVICEADDED:
+		// device added event
+		{
+			// open controller
+			SDL_GameController* sdlController = SDL_GameControllerOpen(event.cdevice.which);
+			if(sdlController)
+			{
+				ptr<SdlController> controller = NEW(SdlController(sdlController));
+				{
+					CriticalCode criticalCode(criticalSection);
+					controllers[controller->GetControllerId()] = controller;
+				}
+
+				Event e;
+				e.device = Event::deviceController;
+				e.controller.type = Event::Controller::typeDeviceAdded;
+				e.controller.device = controller->GetControllerId();
+				AddEvent(e);
+			}
+		}
+		break;
+	case SDL_CONTROLLERDEVICEREMOVED:
+		// device removed event
+		{
+			// try to find controller by id, and remove it from map
+			ptr<SdlController> controller;
+			{
+				CriticalCode criticalCode(criticalSection);
+				decltype(controllers)::const_iterator i = controllers.find(event.cdevice.which);
+				if(i != controllers.end())
+				{
+					controller = i->second;
+					controllers.erase(i);
+				}
+			}
+
+			// if it's found
+			if(controller)
+			{
+				// close controller
+				controller->Close();
+				controller = nullptr;
+
+				// emit event
+				Event e;
+				e.device = Event::deviceController;
+				e.controller.type = Event::Controller::typeDeviceRemoved;
+				e.controller.device = event.cdevice.which;
+				AddEvent(e);
+			}
+		}
+		break;
+	case SDL_CONTROLLERBUTTONDOWN:
+	case SDL_CONTROLLERBUTTONUP:
+		// controller button down/up event
+		{
+			Event::Controller::Button button;
+			bool ok = true;
+			switch(event.cbutton.button)
+			{
+#define B(a, b) case SDL_CONTROLLER_BUTTON_##a: button = Event::Controller::button##b; break
+			B(A, A);
+			B(B, B);
+			B(X, X);
+			B(Y, Y);
+			B(BACK, Back);
+			B(GUIDE, Guide);
+			B(START, Start);
+			B(LEFTSTICK, LeftStick);
+			B(RIGHTSTICK, RightStick);
+			B(LEFTSHOULDER, LeftShoulder);
+			B(RIGHTSHOULDER, RightShoulder);
+			B(DPAD_UP, DPadUp);
+			B(DPAD_DOWN, DPadDown);
+			B(DPAD_LEFT, DPadLeft);
+			B(DPAD_RIGHT, DPadRight);
+#undef B
+			default: ok = false; break;
+			}
+			if(ok)
+			{
+				Event e;
+				e.device = Event::deviceController;
+				e.controller.type = event.type == SDL_CONTROLLERBUTTONDOWN ? Event::Controller::typeButtonDown : Event::Controller::typeButtonUp;
+				e.controller.device = event.cbutton.which;
+				e.controller.button = button;
+				AddEvent(e);
+			}
+		}
+		break;
+	case SDL_CONTROLLERAXISMOTION:
+		// controller axis motion event
+		{
+			Event::Controller::Axis axis;
+			bool ok = true;
+			switch(event.caxis.axis)
+			{
+#define A(a, b) case SDL_CONTROLLER_AXIS_##a: axis = Event::Controller::axis##b; break
+			A(LEFTX, LeftX);
+			A(LEFTY, LeftY);
+			A(RIGHTX, RightX);
+			A(RIGHTY, RightY);
+			A(TRIGGERLEFT, TriggerLeft);
+			A(TRIGGERRIGHT, TriggerRight);
+#undef A
+			default: ok = false; break;
+			}
+			if(ok)
+			{
+				Event e;
+				e.device = Event::deviceController;
+				e.controller.type = Event::Controller::typeAxisMotion;
+				e.controller.device = event.caxis.which;
+				e.controller.axis = axis;
+				e.controller.axisValue = event.caxis.value;
+				AddEvent(e);
+			}
+		}
+		break;
 	}
 }
 
@@ -213,6 +335,43 @@ void SdlManager::SetVirtualScale(float widthScale, float heightScale)
 {
 	this->widthScale = widthScale;
 	this->heightScale = heightScale;
+}
+
+ptr<Controller> SdlManager::TryGetController(int controllerId)
+{
+	CriticalCode criticalCode(criticalSection);
+
+	decltype(controllers)::const_iterator i = controllers.find(controllerId);
+	if(i != controllers.end())
+		return i->second;
+	return nullptr;
+}
+
+SdlManager::SdlController::SdlController(SDL_GameController* controller)
+: Controller(SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controller))), controller(controller)
+{}
+
+SdlManager::SdlController::~SdlController()
+{
+	Close();
+}
+
+bool SdlManager::SdlController::IsActive() const
+{
+	CriticalCode criticalCode(criticalSection);
+
+	return controller;
+}
+
+void SdlManager::SdlController::Close()
+{
+	CriticalCode criticalCode(criticalSection);
+
+	if(controller)
+	{
+		SDL_GameControllerClose(controller);
+		controller = nullptr;
+	}
 }
 
 END_INANITY_INPUT

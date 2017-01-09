@@ -120,7 +120,7 @@ var libraries = {
 	},
 	// ******* подсистема ввода
 	'libinanity-input': {
-		objects: ['input.Event', 'input.Frame', 'input.Manager', 'input.Mux', 'input.Processor'],
+		objects: ['input.Controller', 'input.Event', 'input.Frame', 'input.Manager', 'input.Mux', 'input.Processor'],
 		'objects-win32': ['input.Win32Manager', 'input.Win32WmManager', 'input.Win32RawManager'],
 		'objects-linux': ['input.SdlManager'],
 		'objects-freebsd': ['input.SdlManager'],
