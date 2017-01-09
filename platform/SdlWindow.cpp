@@ -11,6 +11,7 @@ SdlWindow::SdlWindow(SDL_Window* handle)
 {
 	SDL_GetWindowSize(handle, &virtualWidth, &virtualHeight);
 	SDL_GL_GetDrawableSize(handle, &clientWidth, &clientHeight);
+	dpiScale = float(clientWidth) / float(virtualWidth);
 }
 
 SdlWindow::~SdlWindow()
@@ -61,6 +62,11 @@ void SdlWindow::SetFullScreen(bool fullscreen)
 	SDL_SetWindowFullscreen(handle, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
 }
 
+float SdlWindow::GetDPIScale() const
+{
+	return dpiScale;
+}
+
 void SdlWindow::GetRect(int& left, int& top, int& width, int& height)
 {
 	SDL_GetWindowPosition(handle, &left, &top);
@@ -90,6 +96,7 @@ void SdlWindow::Run(ptr<Handler> activeHandler)
 				case SDL_WINDOWEVENT_SIZE_CHANGED:
 					SDL_GetWindowSize(handle, &virtualWidth, &virtualHeight);
 					SDL_GL_GetDrawableSize(handle, &clientWidth, &clientHeight);
+					dpiScale = float(clientWidth) / float(virtualWidth);
 					if(inputManager)
 						inputManager->SetVirtualScale((float)clientWidth / (float)virtualWidth, (float)clientHeight / (float)virtualHeight);
 					if(presenter)

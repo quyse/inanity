@@ -26,6 +26,7 @@ private:
 	bool fullscreen;
 	int virtualWidth, virtualHeight;
 	int clientWidth, clientHeight;
+	float dpiScale;
 
 	class SdlIcon;
 	class SdlCursor;
@@ -51,6 +52,7 @@ public:
 	void SetTitle(const String& title);
 	void Close();
 	void SetFullScreen(bool fullscreen);
+	float GetDPIScale() const;
 	void GetRect(int& left, int& top, int& width, int& height);
 	void Run(ptr<Handler> activeHandler);
 	void PlaceCursor(int x, int y);
