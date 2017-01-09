@@ -8,6 +8,11 @@ Window::Window() :
 	cursorVisible(true)
 {}
 
+float Window::GetDPIScale() const
+{
+	return 1;
+}
+
 void Window::SetPresenter(Graphics::Presenter* presenter)
 {
 	this->presenter = presenter;

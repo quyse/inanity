@@ -36,6 +36,9 @@ public:
 	/// Установить полноэкранно-оконный (borderless) режим.
 	virtual void SetFullScreen(bool fullscreen) = 0;
 
+	/// Get window DPI scale.
+	/** Basically it's resolution. 1 means 96 dpi, 1.5 means 144 dpi, etc. */
+	virtual float GetDPIScale() const;
 	/// Get window rectangle.
 	virtual void GetRect(int& left, int& top, int& width, int& height) = 0;
 

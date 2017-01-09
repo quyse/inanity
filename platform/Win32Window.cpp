@@ -8,8 +8,10 @@
 
 BEGIN_INANITY_PLATFORM
 
+typedef UINT (WINAPI *GETDPIFORWINDOW_FUNC)(HWND);
+
 Win32Window::Win32Window(HWND hWnd, bool own, WNDPROC prevWndProc)
-: hWnd(hWnd), hdc(0), own(own), active(true), clientWidth(0), clientHeight(0), prevWndProc(prevWndProc), cursorHidden(false), fullscreen(false)
+: hWnd(hWnd), hdc(0), own(own), active(true), clientWidth(0), clientHeight(0), dpiScale(1), prevWndProc(prevWndProc), cursorHidden(false), fullscreen(false)
 {
 	SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)this);
 
@@ -17,6 +19,25 @@ Win32Window::Win32Window(HWND hWnd, bool own, WNDPROC prevWndProc)
 	GetClientRect(hWnd, &rect);
 	clientWidth = rect.right - rect.left;
 	clientHeight = rect.bottom - rect.top;
+
+	// use multiple methods to determine initial DPI scale
+	UINT dpi;
+	// GetDpiForWindow is supported starting with Windows 10
+	HMODULE user32dll = GetModuleHandle(TEXT("user32.dll"));
+	GETDPIFORWINDOW_FUNC getDpiForWindow = (GETDPIFORWINDOW_FUNC)GetProcAddress(user32dll, "GetDpiForWindow");
+	if(getDpiForWindow)
+	{
+		dpi = getDpiForWindow(hWnd);
+	}
+	else
+	{
+		// works in every Windows version, but returns DPI of primary monitor
+		// which is a system-wide setting updated only on re-login
+		HDC hdc = GetDC(hWnd);
+		dpi = GetDeviceCaps(hdc, LOGPIXELSX);
+		ReleaseDC(hWnd, hdc);
+	}
+	dpiScale = float(dpi) / float(USER_DEFAULT_SCREEN_DPI);
 }
 
 Win32Window::~Win32Window()
@@ -354,6 +375,13 @@ LRESULT Win32Window::WndProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			return 0;
 		}
 		break;
+	case WM_DPICHANGED:
+		{
+			dpiScale = float(LOWORD(wParam)) / float(USER_DEFAULT_SCREEN_DPI);
+			const RECT* rect = (const RECT*)lParam;
+			SetWindowPos(hWnd, NULL, rect->left, rect->top, rect->right - rect->left, rect->bottom - rect->top, SWP_NOACTIVATE | SWP_NOZORDER);
+		}
+		break;
 	case WM_CLOSE:
 		Close();
 		return 0;
@@ -437,6 +465,11 @@ void Win32Window::SetFullScreen(bool fullscreen)
 		// restore window placement
 		SetWindowPlacement(hWnd, &preFullScreenPlacement);
 	}
+}
+
+float Win32Window::GetDPIScale() const
+{
+	return dpiScale;
 }
 
 void Win32Window::GetRect(int& left, int& top, int& width, int& height)
