@@ -20,6 +20,8 @@ public:
 
 	/// Return if controller is still connected.
 	virtual bool IsActive() const = 0;
+	virtual void RunHapticLeftRight(float left, float right) = 0;
+	virtual void StopHaptic() = 0;
 };
 
 END_INANITY_INPUT

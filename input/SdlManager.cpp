@@ -6,7 +6,8 @@
 
 BEGIN_INANITY_INPUT
 
-SdlManager::SdlManager() : sdl(Platform::Sdl::Get(SDL_INIT_GAMECONTROLLER)), widthScale(1), heightScale(1)
+SdlManager::SdlManager()
+: sdl(Platform::Sdl::Get(SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC)), widthScale(1), heightScale(1)
 {
 }
 
@@ -347,8 +348,20 @@ ptr<Controller> SdlManager::TryGetController(int controllerId)
 	return nullptr;
 }
 
+void SdlManager::TryLoadControllerMappingsFromFile(const char* fileName)
+{
+	SDL_GameControllerAddMappingsFromFile(fileName);
+}
+
+SdlManager::SdlController::SdlController(SDL_GameController* controller, SDL_Joystick* joystick)
+: Controller(SDL_JoystickInstanceID(joystick))
+, controller(controller)
+, haptic(SDL_HapticOpenFromJoystick(joystick))
+, hapticEffectIndex(-1)
+{}
+
 SdlManager::SdlController::SdlController(SDL_GameController* controller)
-: Controller(SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controller))), controller(controller)
+: SdlController(controller, SDL_GameControllerGetJoystick(controller))
 {}
 
 SdlManager::SdlController::~SdlController()
@@ -363,9 +376,62 @@ bool SdlManager::SdlController::IsActive() const
 	return controller;
 }
 
+void SdlManager::SdlController::RunHapticLeftRight(float left, float right)
+{
+	CriticalCode criticalCode(criticalSection);
+
+	if(!haptic) return;
+
+	hapticEffect.leftright.length = SDL_HAPTIC_INFINITY;
+	hapticEffect.leftright.large_magnitude = uint16_t(left * 0xffff);
+	hapticEffect.leftright.small_magnitude = uint16_t(right * 0xffff);
+
+	if(hapticEffectIndex >= 0 && hapticEffect.type == SDL_HAPTIC_LEFTRIGHT)
+	{
+		SDL_HapticStopEffect(haptic, hapticEffectIndex);
+		SDL_HapticUpdateEffect(haptic, hapticEffectIndex, &hapticEffect);
+	}
+	else
+	{
+		if(hapticEffectIndex >= 0)
+		{
+			SDL_HapticStopEffect(haptic, hapticEffectIndex);
+			SDL_HapticDestroyEffect(haptic, hapticEffectIndex);
+		}
+
+		hapticEffect.type = SDL_HAPTIC_LEFTRIGHT;
+		hapticEffectIndex = SDL_HapticNewEffect(haptic, &hapticEffect);
+	}
+
+	SDL_HapticRunEffect(haptic, hapticEffectIndex, 1);
+}
+
+void SdlManager::SdlController::StopHaptic()
+{
+	CriticalCode criticalCode(criticalSection);
+
+	if(hapticEffectIndex >= 0)
+	{
+		SDL_HapticStopEffect(haptic, hapticEffectIndex);
+	}
+}
+
 void SdlManager::SdlController::Close()
 {
 	CriticalCode criticalCode(criticalSection);
+
+	if(hapticEffectIndex >= 0)
+	{
+		SDL_HapticStopEffect(haptic, hapticEffectIndex);
+		SDL_HapticDestroyEffect(haptic, hapticEffectIndex);
+		hapticEffectIndex = -1;
+	}
+
+	if(haptic)
+	{
+		SDL_HapticClose(haptic);
+		haptic = nullptr;
+	}
 
 	if(controller)
 	{

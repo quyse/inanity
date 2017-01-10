@@ -9,8 +9,10 @@
 #ifdef ___INANITY_PLATFORM_EMSCRIPTEN
 // workaround for emscripten
 #include <SDL/SDL_events.h>
+#include <SDL/SDL_haptic.h>
 #else
 #include <SDL2/SDL_events.h>
+#include <SDL2/SDL_haptic.h>
 #endif
 
 BEGIN_INANITY_PLATFORM
@@ -33,12 +35,19 @@ private:
 	private:
 		mutable CriticalSection criticalSection;
 		SDL_GameController* controller;
+		SDL_Haptic* haptic;
+		SDL_HapticEffect hapticEffect;
+		int hapticEffectIndex;
+
+		SdlController(SDL_GameController* controller, SDL_Joystick* joystick);
 
 	public:
 		SdlController(SDL_GameController* controller);
 		~SdlController();
 
 		bool IsActive() const;
+		void RunHapticLeftRight(float left, float right);
+		void StopHaptic();
 
 		void Close();
 	};
@@ -51,6 +60,8 @@ public:
 	void ProcessEvent(const SDL_Event& event);
 	void SetVirtualScale(float widthScale, float heightScale);
 	ptr<Controller> TryGetController(int controllerId);
+
+	void TryLoadControllerMappingsFromFile(const char* fileName);
 };
 
 END_INANITY_INPUT
