@@ -25,6 +25,7 @@ All third-party software are placed under `/deps` directory.
 * [npapi](https://code.google.com/p/npapi-sdk/) - Mozilla Public License 1.1
 * [fcgi](http://www.fastcgi.com) - BSD-style license (see `/deps/fcgi/LICENSE.TERMS`)
 * [assimp](http://assimp.sourceforge.net/) - BSD license (see `/deps/assimp/repo/LICENSE`)
+* [softfloat](http://www.jhauser.us/arithmetic/SoftFloat.html) - BSD license (see `/deps/softfloat/softfloat/COPYING.txt`)
 
 ## Other used third-party software
 
