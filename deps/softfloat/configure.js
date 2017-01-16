@@ -12,6 +12,7 @@ exports.configureCompiler = function(objectFile, compiler) {
 	else {
 		compiler.setSourceFile('softfloat/source/' + a[2].replace(/\./g, '/') + '.c');
 		compiler.cppMode = false;
+		compiler.strict = false;
 	}
 	compiler.addIncludeDir('softfloat/source/8086');
 	compiler.addIncludeDir('softfloat/source/include');
