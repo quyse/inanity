@@ -19,47 +19,15 @@ Key Win32Manager::ConvertKey(USHORT key)
 	K(ESCAPE, Escape);
 	K(INSERT, Insert);
 	K(DELETE, Delete);
-	K(HOME, Home);
-	K(LEFT, Left);
-	K(UP, Up);
-	K(RIGHT, Right);
-	K(DOWN, Down);
-	K(PRIOR, PageUp);
-	K(NEXT, PageDown);
-	K(END, End);
-	K(NUMLOCK, NumLock);
-	K(NUMPAD0, NumPad0);
-	K(NUMPAD1, NumPad1);
-	K(NUMPAD2, NumPad2);
-	K(NUMPAD3, NumPad3);
-	K(NUMPAD4, NumPad4);
-	K(NUMPAD5, NumPad5);
-	K(NUMPAD6, NumPad6);
-	K(NUMPAD7, NumPad7);
-	K(NUMPAD8, NumPad8);
-	K(NUMPAD9, NumPad9);
-	K(F1, F1);
-	K(F2, F2);
-	K(F3, F3);
-	K(F4, F4);
-	K(F5, F5);
-	K(F6, F6);
-	K(F7, F7);
-	K(F8, F8);
-	K(F9, F9);
-	K(F10, F10);
-	K(F11, F11);
-	K(F12, F12);
-	K(LSHIFT, ShiftL);
-	K(RSHIFT, ShiftR);
-	K(LCONTROL, ControlL);
-	K(RCONTROL, ControlR);
-	K(CAPITAL, CapsLock);
-	K(LMENU, AltL);
-	K(RMENU, AltR);
-	K(LWIN, SuperL);
-	K(RWIN, SuperR);
+
 	K(SPACE, Space);
+
+	K(OEM_PLUS, Plus);
+	K(OEM_COMMA, Comma);
+	K(OEM_MINUS, Hyphen);
+	K(OEM_PERIOD, Period);
+	K(OEM_2, Slash);
+
 	KN(0);
 	KN(1);
 	KN(2);
@@ -70,6 +38,7 @@ Key Win32Manager::ConvertKey(USHORT key)
 	KN(7);
 	KN(8);
 	KN(9);
+
 	KA('A', A);
 	KA('B', B);
 	KA('C', C);
@@ -96,6 +65,51 @@ Key Win32Manager::ConvertKey(USHORT key)
 	KA('X', X);
 	KA('Y', Y);
 	KA('Z', Z);
+
+	K(HOME, Home);
+	K(LEFT, Left);
+	K(UP, Up);
+	K(RIGHT, Right);
+	K(DOWN, Down);
+	K(PRIOR, PageUp);
+	K(NEXT, PageDown);
+	K(END, End);
+	K(OEM_3, Grave);
+
+	K(NUMLOCK, NumLock);
+	K(NUMPAD0, NumPad0);
+	K(NUMPAD1, NumPad1);
+	K(NUMPAD2, NumPad2);
+	K(NUMPAD3, NumPad3);
+	K(NUMPAD4, NumPad4);
+	K(NUMPAD5, NumPad5);
+	K(NUMPAD6, NumPad6);
+	K(NUMPAD7, NumPad7);
+	K(NUMPAD8, NumPad8);
+	K(NUMPAD9, NumPad9);
+
+	K(F1, F1);
+	K(F2, F2);
+	K(F3, F3);
+	K(F4, F4);
+	K(F5, F5);
+	K(F6, F6);
+	K(F7, F7);
+	K(F8, F8);
+	K(F9, F9);
+	K(F10, F10);
+	K(F11, F11);
+	K(F12, F12);
+
+	K(LSHIFT, ShiftL);
+	K(RSHIFT, ShiftR);
+	K(LCONTROL, ControlL);
+	K(RCONTROL, ControlR);
+	K(CAPITAL, CapsLock);
+	K(LMENU, AltL);
+	K(RMENU, AltR);
+	K(LWIN, SuperL);
+	K(RWIN, SuperR);
 #undef K
 #undef KN
 #undef KA
