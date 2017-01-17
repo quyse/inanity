@@ -294,7 +294,7 @@ time_t Win32FileSystem::GetFileMTime(const String& fileName)
 	try
 	{
 		Win32Handle hFile = CreateFile(Strings::UTF82Unicode(name).c_str(), 0, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, NULL);
-		if(!file.IsValid())
+		if(!hFile.IsValid())
 			THROW_SECONDARY("Can't open file", Exception::SystemError());
 
 		FILETIME t;
@@ -302,8 +302,8 @@ time_t Win32FileSystem::GetFileMTime(const String& fileName)
 			THROW_SECONDARY("Can't get file's mtime", Exception::SystemError());
 
 		ULARGE_INTEGER ull;
-		ull.LowPart = t.LowPart;
-		ull.HighPart = t.HighPart;
+		ull.LowPart = t.dwLowDateTime;
+		ull.HighPart = t.dwHighDateTime;
 
 		return (time_t)(ull.QuadPart / 10000000ULL - 11644473600ULL);
 	}
