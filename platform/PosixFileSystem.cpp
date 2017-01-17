@@ -288,6 +288,22 @@ ptr<OutputStream> PosixFileSystem::SaveStream(const String& fileName)
 	}
 }
 
+time_t PosixFileSystem::GetFileMTime(const String& fileName)
+{
+	String name = GetFullName(fileName);
+	try
+	{
+		struct stat s;
+		if(stat(name.c_str(), &s) != 0)
+			THROW_SECONDARY("Can't get file's mtime", Exception::SystemError());
+		return s.st_mtime;
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY(String("Can't get mtime of \"") + fileName + "\"", exception);
+	}
+}
+
 void PosixFileSystem::GetDirectoryEntries(const String& directoryName, std::vector<String>& entries) const
 {
 	String fullDirectoryName = GetFullName(directoryName);

@@ -49,6 +49,11 @@ ptr<OutputStream> FileSystem::SaveStream(const String& fileName)
 	THROW("Saving files as stream in this filesystem is not supported");
 }
 
+time_t FileSystem::GetFileMTime(const String& fileName)
+{
+	THROW("Getting mtime in this filesystem is not supported");
+}
+
 void FileSystem::GetFileNames(std::vector<String>& fileNames) const
 {
 	THROW("Getting file names in this filesystem is not supported");

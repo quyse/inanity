@@ -288,6 +288,31 @@ ptr<OutputStream> Win32FileSystem::SaveStream(const String& fileName)
 	}
 }
 
+time_t Win32FileSystem::GetFileMTime(const String& fileName)
+{
+	String name = GetFullName(fileName);
+	try
+	{
+		Win32Handle hFile = CreateFile(Strings::UTF82Unicode(name).c_str(), 0, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, NULL);
+		if(!file.IsValid())
+			THROW_SECONDARY("Can't open file", Exception::SystemError());
+
+		FILETIME t;
+		if(!GetFileTime(hFile, NULL, NULL, &t))
+			THROW_SECONDARY("Can't get file's mtime", Exception::SystemError());
+
+		ULARGE_INTEGER ull;
+		ull.LowPart = t.LowPart;
+		ull.HighPart = t.HighPart;
+
+		return (time_t)(ull.QuadPart / 10000000ULL - 11644473600ULL);
+	}
+	catch(Exception* exception)
+	{
+		THROW_SECONDARY(String("Can't get mtime of \"") + fileName + "\"", exception);
+	}
+}
+
 void Win32FileSystem::GetDirectoryEntries(const String& directoryName, std::vector<String>& entries) const
 {
 	WIN32_FIND_DATA find;

@@ -38,6 +38,7 @@ public:
 	ptr<InputStream> LoadStream(const String& fileName);
 	void SaveFile(ptr<File> file, const String& fileName);
 	ptr<OutputStream> SaveStream(const String& fileName);
+	time_t GetFileMTime(const String& fileName);
 	void GetFileNames(std::vector<String>& fileNames) const;
 	void GetDirectoryEntries(const String& directoryName, std::vector<String>& fileNames) const;
 

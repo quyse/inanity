@@ -5,6 +5,7 @@
 #include "String.hpp"
 #include "meta/decl.hpp"
 #include <vector>
+#include <ctime>
 
 BEGIN_INANITY
 
@@ -76,6 +77,9 @@ public:
 	\return Поток вывода.
 	*/
 	virtual ptr<OutputStream> SaveStream(const String& fileName);
+
+	/// Получить время модификации файла.
+	virtual time_t GetFileMTime(const String& fileName);
 
 	/// Получить список имен файлов в файловой системе.
 	/** Получает список имен файлов. Не гарантируется, что он будет полным
