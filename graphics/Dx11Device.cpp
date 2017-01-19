@@ -82,6 +82,10 @@ ptr<Dx11SwapChainPresenter> Dx11Device::CreatePresenter(ptr<Platform::Win32Windo
 	if(FAILED(system->GetDXGIFactory()->CreateSwapChain(device, &desc, &swapChain)))
 		THROW("Can't create swap chain");
 
+	// запретить переходить в полноэкранный режим по Alt+Enter
+	if(FAILED(system->GetDXGIFactory()->MakeWindowAssociation(window->GetHWND(), DXGI_MWA_NO_WINDOW_CHANGES)))
+		THROW("Can't make window association");
+
 	// создать Presenter
 	ptr<Dx11SwapChainPresenter> presenter = NEW(Dx11SwapChainPresenter(this, window, swapChain));
 
