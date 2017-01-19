@@ -17,7 +17,7 @@ Float::Float(int32_t i) : d(i32_to_f32(i)) {}
 
 Float::Float(uint32_t i) : d(ui32_to_f32(i)) {}
 
-Float::Float(float f) : d(*reinterpret_cast<float32_t*>(&f)) {}
+Float::Float(float f) : f(f) {}
 
 Float Float::operator-() const
 {
@@ -173,7 +173,7 @@ Float::operator uint8_t() const
 
 Float::operator float() const
 {
-	return *reinterpret_cast<const float*>(&d);
+	return f;
 }
 
 } END_INANITY

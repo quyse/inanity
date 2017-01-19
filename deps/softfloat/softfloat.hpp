@@ -56,7 +56,11 @@ public:
 private:
 	explicit Float(float32_t);
 
-	float32_t d;
+	union
+	{
+		float f;
+		float32_t d;
+	};
 };
 
 } END_INANITY
