@@ -46,7 +46,7 @@ Float operator/(Float a, Float b)
 
 Float fmod(Float a, Float b)
 {
-	return Float(f32_rem(a.d, b.d));
+	return a - Float(f32_roundToInt(f32_div(a.d, b.d), softfloat_round_minMag, false)) * b;
 }
 
 Float& Float::operator+=(Float b)
@@ -110,12 +110,12 @@ Float abs(Float a)
 
 Float floor(Float a)
 {
-	return Float(f32_roundToInt(a.d, softfloat_round_minMag, false));
+	return Float(f32_roundToInt(a.d, softfloat_round_min, false));
 }
 
 Float ceil(Float a)
 {
-	return Float(f32_roundToInt(a.d, softfloat_round_near_maxMag, false));
+	return Float(f32_roundToInt(a.d, softfloat_round_max, false));
 }
 
 Float sqrt(Float a)
