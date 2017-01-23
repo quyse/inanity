@@ -58,6 +58,13 @@ public:
 	void WriteGap(size_t alignment);
 };
 
+template <typename T>
+StreamWriter& operator<<(StreamWriter& writer, const T& value)
+{
+	writer.Write(value);
+	return writer;
+}
+
 END_INANITY
 
 #endif

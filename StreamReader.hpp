@@ -73,6 +73,14 @@ public:
 	bigsize_t Skip(bigsize_t size);
 };
 
+template <typename T>
+StreamReader& operator>>(StreamReader& reader, T& value)
+{
+	reader.Read(value);
+	return reader;
+}
+
+
 END_INANITY
 
 #endif
