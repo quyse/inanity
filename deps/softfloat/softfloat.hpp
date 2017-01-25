@@ -43,6 +43,7 @@ public:
 	friend Float sqrt(Float);
 	friend Float sin(Float);
 	friend Float cos(Float);
+	friend Float atan(Float);
 	friend Float atan2(Float, Float);
 
 	explicit operator int32_t() const;
@@ -55,6 +56,10 @@ public:
 
 private:
 	explicit Float(float32_t);
+
+	static Float fromUint32Const(uint32_t);
+
+	static const Float pi, pi2, pi_2;
 
 	union
 	{
