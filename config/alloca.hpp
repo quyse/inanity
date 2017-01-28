@@ -3,14 +3,10 @@
 
 #include "../config.hpp"
 
-#if defined(___INANITY_PLATFORM_FREEBSD)
-#include <stdlib.h>
-#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_EMSCRIPTEN)
-#include <alloca.h>
-#elif defined(___INANITY_PLATFORM_WINDOWS)
+#if defined(___INANITY_PLATFORM_WINDOWS)
 #include <malloc.h>
 #else
-#error Unknown platform
+#include <stdlib.h>
 #endif
 
 #endif
