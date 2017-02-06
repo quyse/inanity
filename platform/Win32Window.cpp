@@ -412,7 +412,7 @@ bool Win32Window::Do(Handler* activeHandler)
 
 	MSG msg;
 	bool lastActive;
-	while((lastActive = active) ? PeekMessage(&msg, 0, 0, 0, PM_REMOVE) : GetMessage(&msg, 0, 0, 0))
+	while(((lastActive = active) || !sleepWhenInactive) ? PeekMessage(&msg, 0, 0, 0, PM_REMOVE) : GetMessage(&msg, 0, 0, 0))
 	{
 		if(msg.message == WM_QUIT)
 			return false;
@@ -420,8 +420,8 @@ bool Win32Window::Do(Handler* activeHandler)
 		DispatchMessage(&msg);
 	}
 
-	// если окно активно, работаем
-	if(active)
+	// если окно активно, или сказано не спать, работаем
+	if(active || !sleepWhenInactive)
 	{
 		if(inputManager)
 			inputManager->Update();

@@ -76,6 +76,8 @@ protected:
 	bool mouseLock;
 	/// Mouse cursor visibility.
 	bool cursorVisible;
+	/// Sleep when window is inactive.
+	bool sleepWhenInactive;
 
 	Window();
 

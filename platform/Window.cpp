@@ -5,7 +5,8 @@ BEGIN_INANITY_PLATFORM
 Window::Window() :
 	presenter(nullptr),
 	mouseLock(false),
-	cursorVisible(true)
+	cursorVisible(true),
+	sleepWhenInactive(false)
 {}
 
 float Window::GetDPIScale() const
