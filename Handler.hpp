@@ -148,6 +148,9 @@ private:
 	/** Для упрощения привязки методов. */
 	template <typename Class>
 	class Delegate;
+	/// Класс делегата вызываемого объекта.
+	template <typename Class>
+	class CallDelegate;
 
 protected:
 	/// Обработать данные.
@@ -165,6 +168,12 @@ public:
 	static ptr<DataHandler> Bind(ptr<Class> object, typename Delegate<Class>::Method method)
 	{
 		return NEW(Delegate<Class>(object, method));
+	}
+	/// Привязать вызываемый объект.
+	template <typename Class>
+	static ptr<DataHandler> BindCall(Class&& object)
+	{
+		return NEW(CallDelegate<Class>(object));
 	}
 };
 
@@ -191,6 +200,28 @@ public:
 	void OnData(T data)
 	{
 		(object->*method)(DataResult(data));
+	}
+};
+
+template <typename T>
+template <typename Class>
+class DataHandler<T>::CallDelegate : public DataHandler
+{
+private:
+	Class object;
+
+public:
+	CallDelegate(Class object) : object(object) {}
+	CallDelegate(Class&& object) : object(object) {}
+
+	void OnError(ptr<Exception> exception)
+	{
+		object(ErrorResult(exception));
+	}
+
+	void OnData(T data)
+	{
+		object(DataResult(data));
 	}
 };
 
