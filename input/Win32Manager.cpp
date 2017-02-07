@@ -3,7 +3,7 @@
 
 BEGIN_INANITY_INPUT
 
-Key Win32Manager::ConvertKey(USHORT key)
+Key Win32Manager::ConvertKey(USHORT key, USHORT makeCode, USHORT flags)
 {
 	switch(key)
 	{
@@ -101,11 +101,14 @@ Key Win32Manager::ConvertKey(USHORT key)
 	K(F11, F11);
 	K(F12, F12);
 
+	case VK_SHIFT: return makeCode == 0x36 ? Keys::ShiftR : Keys::ShiftL;
 	K(LSHIFT, ShiftL);
 	K(RSHIFT, ShiftR);
+	case VK_CONTROL: return (flags & RI_KEY_E0) ? Keys::ControlR : Keys::ControlL;
 	K(LCONTROL, ControlL);
 	K(RCONTROL, ControlR);
 	K(CAPITAL, CapsLock);
+	case VK_MENU: return (flags & RI_KEY_E0) ? Keys::AltR : Keys::AltL;
 	K(LMENU, AltL);
 	K(RMENU, AltR);
 	K(LWIN, SuperL);

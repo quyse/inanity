@@ -11,7 +11,7 @@ BEGIN_INANITY_INPUT
 class Win32Manager : public Manager
 {
 protected:
-	static Key ConvertKey(USHORT key);
+	static Key ConvertKey(USHORT key, USHORT makeCode, USHORT flags);
 
 public:
 	virtual bool ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam);

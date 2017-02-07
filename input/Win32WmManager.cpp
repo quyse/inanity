@@ -15,7 +15,7 @@ bool Win32WmManager::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam
 			Event e;
 			e.device = Event::deviceKeyboard;
 			e.keyboard.type = Event::Keyboard::typeKeyDown;
-			e.keyboard.key = ConvertKey((USHORT)wParam);
+			e.keyboard.key = ConvertKey((USHORT)wParam, 0, 0);
 			AddEvent(e);
 		}
 		break;
@@ -24,7 +24,7 @@ bool Win32WmManager::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam
 			Event e;
 			e.device = Event::deviceKeyboard;
 			e.keyboard.type = Event::Keyboard::typeKeyUp;
-			e.keyboard.key = ConvertKey((USHORT)wParam);
+			e.keyboard.key = ConvertKey((USHORT)wParam, 0, 0);
 			AddEvent(e);
 		}
 		break;
