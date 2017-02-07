@@ -382,6 +382,11 @@ LRESULT Win32Window::WndProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			SetWindowPos(hWnd, NULL, rect->left, rect->top, rect->right - rect->left, rect->bottom - rect->top, SWP_NOACTIVATE | SWP_NOZORDER);
 		}
 		break;
+	case WM_SYSCOMMAND:
+		// prevent use of Alt for system menu
+		// see https://msdn.microsoft.com/en-us/library/windows/desktop/ms646360
+		if(wParam == SC_KEYMENU && GET_Y_LPARAM(lParam) <= 0) return 0;
+		break;
 	case WM_CLOSE:
 		Close();
 		return 0;
