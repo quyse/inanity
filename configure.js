@@ -62,6 +62,11 @@ var libraries = {
 	'libinanity-oil': {
 		objects: ['data.oil.KeyValueStore']
 	},
+	// ******* net
+	'libinanity-net': {
+		objects: [
+		'net.TcpSocket']
+	},
 	// ******* сетевая библиотека ASIO
 	'libinanity-asio': {
 		objects: [

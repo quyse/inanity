@@ -23,7 +23,7 @@ public:
 
 public:
 	/// Do network job.
-	/** Doesn't return control until be stopped. */
+	/** Doesn't return control until stopped. */
 	virtual void Run() = 0;
 	/// Stop network job.
 	/** Could be called from any thread. Causes Run() to return control in threads

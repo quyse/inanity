@@ -7,6 +7,7 @@
 BEGIN_INANITY
 
 class File;
+class OutputStream;
 
 END_INANITY
 
@@ -30,6 +31,9 @@ public:
 	with zero file pointer. */
 	typedef DataHandler<ptr<File> > ReceiveHandler;
 
+	/// Socket as output stream.
+	class Stream;
+
 public:
 	/// Write data to the socket.
 	/** Data goes into queue, and will be sent in order. */
@@ -42,6 +46,8 @@ public:
 	/// Close receiving data side.
 	/** Releases references to itself and all handlers. */
 	virtual void Close() = 0;
+
+	ptr<OutputStream> GetOutputStream();
 };
 
 END_INANITY_NET

@@ -194,9 +194,8 @@ void AsioTcpSocket::Sent(const boost::system::error_code& error, size_t transfer
 		{
 			CriticalCode cc(cs);
 			handlers.resize(sendQueue.size());
-			std::deque<SendItem>::iterator i;
 			size_t j = 0;
-			for(i = sendQueue.begin(); i != sendQueue.end(); ++i)
+			for(std::deque<SendItem>::iterator i = sendQueue.begin(); i != sendQueue.end(); ++i)
 				handlers[j++] = i->handler;
 			sendQueue.clear();
 		}

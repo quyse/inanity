@@ -44,7 +44,7 @@ size_t Out2InStream::Reader::Read(void* data, size_t size)
 		}
 		size_t fileSize = file->GetSize();
 		// получить размер куска, который мы возьмём из этого файла
-		size_t chunkSize = std::min(file->GetSize() - firstOffset, size);
+		size_t chunkSize = std::min(fileSize - firstOffset, size);
 		// скопировать данные
 		memcpy(dataPtr, (char*)file->GetData() + firstOffset, chunkSize);
 		dataPtr += chunkSize;

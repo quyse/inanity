@@ -242,7 +242,12 @@ ptr<Exception> AsioService::ConvertError(const boost::system::system_error& erro
 
 void AsioService::Run()
 {
-	ioService.run();
+	do
+	{
+		ioService.run();
+		ioService.reset();
+	}
+	while(!ioService.stopped());
 }
 
 void AsioService::Stop()
