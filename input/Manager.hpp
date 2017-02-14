@@ -45,6 +45,8 @@ public:
 	virtual void StartTextInput();
 	/// Stop text input.
 	virtual void StopTextInput();
+	/// Is text input enabled.
+	bool IsTextInput() const;
 	/// Get new controller by controller id.
 	virtual ptr<Controller> TryGetController(int controllerId);
 };

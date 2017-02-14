@@ -57,6 +57,11 @@ void Manager::StopTextInput()
 	textInputEnabled = false;
 }
 
+bool Manager::IsTextInput() const
+{
+	return textInputEnabled;
+}
+
 ptr<Controller> Manager::TryGetController(int controllerId)
 {
 	return nullptr;
