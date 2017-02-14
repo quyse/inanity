@@ -54,10 +54,6 @@ public:
 	/// Set position of hardware mouse cursor.
 	/** Coordinates are relative to window. */
 	virtual void PlaceCursor(int x, int y) = 0;
-	/// Start text input.
-	virtual void StartTextInput() = 0;
-	/// Stop text input.
-	virtual void StopTextInput() = 0;
 	/// Create custom icon.
 	virtual ptr<Icon> CreateIcon(ptr<Graphics::RawTextureData> texture) = 0;
 	/// Set window icon.

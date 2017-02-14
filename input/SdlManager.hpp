@@ -59,6 +59,8 @@ public:
 
 	void ProcessEvent(const SDL_Event& event);
 	void SetVirtualScale(float widthScale, float heightScale);
+	void StartTextInput();
+	void StopTextInput();
 	ptr<Controller> TryGetController(int controllerId);
 
 	void TryLoadControllerMappingsFromFile(const char* fileName);

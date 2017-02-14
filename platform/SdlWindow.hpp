@@ -56,8 +56,6 @@ public:
 	void GetRect(int& left, int& top, int& width, int& height);
 	void Run(ptr<Handler> activeHandler);
 	void PlaceCursor(int x, int y);
-	void StartTextInput();
-	void StopTextInput();
 	ptr<Icon> CreateIcon(ptr<Graphics::RawTextureData> texture);
 	void SetIcon(ptr<Icon> icon);
 	ptr<Window::Cursor> CreateCursor(ptr<Graphics::RawTextureData> texture, int hotX, int hotY);

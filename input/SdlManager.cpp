@@ -338,6 +338,18 @@ void SdlManager::SetVirtualScale(float widthScale, float heightScale)
 	this->heightScale = heightScale;
 }
 
+void SdlManager::StartTextInput()
+{
+	Manager::StartTextInput();
+	SDL_StartTextInput();
+}
+
+void SdlManager::StopTextInput()
+{
+	Manager::StopTextInput();
+	SDL_StopTextInput();
+}
+
 ptr<Controller> SdlManager::TryGetController(int controllerId)
 {
 	CriticalCode criticalCode(criticalSection);

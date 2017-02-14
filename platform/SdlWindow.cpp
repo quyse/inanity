@@ -120,16 +120,6 @@ void SdlWindow::PlaceCursor(int x, int y)
 	SDL_WarpMouseInWindow(handle, x, y);
 }
 
-void SdlWindow::StartTextInput()
-{
-	SDL_StartTextInput();
-}
-
-void SdlWindow::StopTextInput()
-{
-	SDL_StopTextInput();
-}
-
 void SdlWindow::UpdateMouseLock()
 {
 	SDL_SetRelativeMouseMode(mouseLock ? SDL_TRUE : SDL_FALSE);

@@ -8,6 +8,7 @@
 BEGIN_INANITY_INPUT
 
 Manager::Manager()
+: textInputEnabled(false)
 {
 	currentFrame = NEW(Frame);
 	internalFrame = NEW(Frame);
@@ -16,6 +17,9 @@ Manager::Manager()
 void Manager::AddEvent(const Event& e)
 {
 	CriticalCode criticalCode(criticalSection);
+
+	// skip text input events if text input is disabled
+	if(e.device == Event::deviceKeyboard && e.keyboard.type == Event::Keyboard::typeCharacter && !textInputEnabled) return;
 
 	internalFrame->AddEvent(e);
 }
@@ -37,6 +41,20 @@ void Manager::Update()
 ptr<Frame> Manager::GetCurrentFrame()
 {
 	return currentFrame;
+}
+
+void Manager::StartTextInput()
+{
+	CriticalCode criticalCode(criticalSection);
+
+	textInputEnabled = true;
+}
+
+void Manager::StopTextInput()
+{
+	CriticalCode criticalCode(criticalSection);
+
+	textInputEnabled = false;
 }
 
 ptr<Controller> Manager::TryGetController(int controllerId)

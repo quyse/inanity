@@ -65,14 +65,6 @@ void Win32Window::PlaceCursor(int x, int y)
 	SetCursorPos(pt.x, pt.y);
 }
 
-void Win32Window::StartTextInput()
-{
-}
-
-void Win32Window::StopTextInput()
-{
-}
-
 HICON Win32Window::CreateIconFromTexture(ptr<Graphics::RawTextureData> texture, BOOL isIcon, int hotX, int hotY)
 {
 	int width = texture->GetImageWidth();

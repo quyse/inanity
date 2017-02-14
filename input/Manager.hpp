@@ -27,6 +27,9 @@ protected:
 	Eventually it will become current frame. */
 	ptr<Frame> internalFrame;
 
+	/// Enable text input events.
+	bool textInputEnabled;
+
 protected:
 	Manager();
 
@@ -38,6 +41,10 @@ public:
 	/// Gets current input frame.
 	ptr<Frame> GetCurrentFrame();
 
+	/// Start text input.
+	virtual void StartTextInput();
+	/// Stop text input.
+	virtual void StopTextInput();
 	/// Get new controller by controller id.
 	virtual ptr<Controller> TryGetController(int controllerId);
 };
