@@ -54,10 +54,11 @@ public:
 	explicit operator uint8_t() const;
 	explicit operator float() const;
 
+	uint32_t getInternalUint32() const;
+	static Float fromUint32Const(uint32_t);
+
 private:
 	explicit Float(float32_t);
-
-	static Float fromUint32Const(uint32_t);
 
 	static const Float pi, pi2, pi_2;
 

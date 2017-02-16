@@ -44,13 +44,6 @@ Float::Float(uint32_t i) : d(ui32_to_f32(i)) {}
 
 Float::Float(float f) : f(f) {}
 
-Float Float::fromUint32Const(uint32_t v)
-{
-	float32_t d;
-	d.v = v;
-	return Float(d);
-}
-
 Float Float::operator-() const
 {
 	return Float() - *this;
@@ -250,6 +243,18 @@ Float::operator uint8_t() const
 Float::operator float() const
 {
 	return f;
+}
+
+uint32_t Float::getInternalUint32() const
+{
+	return d.v;
+}
+
+Float Float::fromUint32Const(uint32_t v)
+{
+	float32_t d;
+	d.v = v;
+	return Float(d);
 }
 
 } END_INANITY
