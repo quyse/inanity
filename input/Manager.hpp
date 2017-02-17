@@ -30,6 +30,9 @@ protected:
 	/// Enable text input events.
 	bool textInputEnabled;
 
+	/// Release buttons on next Update().
+	bool releaseButtonsOnUpdate;
+
 protected:
 	Manager();
 
@@ -40,6 +43,10 @@ public:
 	virtual void Update();
 	/// Gets current input frame.
 	ptr<Frame> GetCurrentFrame();
+
+	/// Send 'up' events for all buttons on next Update().
+	/** To be called when window is deactivated. */
+	void ReleaseButtonsOnUpdate();
 
 	/// Start text input.
 	virtual void StartTextInput();

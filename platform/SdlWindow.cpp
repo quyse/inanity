@@ -105,6 +105,12 @@ void SdlWindow::Run(ptr<Handler> activeHandler)
 				case SDL_WINDOWEVENT_CLOSE:
 					Close();
 					break;
+				case SDL_WINDOWEVENT_FOCUS_LOST:
+					if(inputManager)
+					{
+						inputManager->ReleaseButtonsOnUpdate();
+					}
+					break;
 				}
 			}
 		}

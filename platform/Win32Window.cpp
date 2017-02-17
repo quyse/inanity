@@ -348,6 +348,9 @@ LRESULT Win32Window::WndProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			UpdateMouseLock();
 			// update cursor visibility
 			UpdateCursorVisible();
+			// tell input manager that window has been deactivated
+			if(!active && inputManager)
+				inputManager->ReleaseButtonsOnUpdate();
 		}
 		return 0;
 	case WM_MOVE:
