@@ -113,6 +113,9 @@ public:
 	/// Premultiply color components with alpha.
 	ptr<RawTextureData> PremultiplyAlpha() const;
 
+	/// Convert to RG format.
+	ptr<RawTextureData> ConvertToRG() const;
+
 	/// Generate mip levels from zero level.
 	/** Existing levels starting from 1 are ignored. If mipsCount == 0 then optimal number of mips calculated.
 	Currently 2x downscale is correct, if it's not 2x it's simple nearest neighbour.

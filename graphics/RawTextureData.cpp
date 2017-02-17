@@ -391,6 +391,78 @@ ptr<RawTextureData> RawTextureData::PremultiplyAlpha() const
 	return data;
 }
 
+ptr<RawTextureData> RawTextureData::ConvertToRG() const
+{
+	BEGIN_TRY();
+
+	if(format.type != PixelFormat::typeUncompressed) THROW("Texture must be uncompressed");
+
+	PixelFormat newFormat = format;
+	newFormat.pixel = PixelFormat::pixelRG;
+	switch(format.pixel)
+	{
+	case PixelFormat::pixelRGB:
+		switch(format.size)
+		{
+		case PixelFormat::size24bit:
+			newFormat.size = PixelFormat::size16bit;
+			break;
+		case PixelFormat::size96bit:
+			newFormat.size = PixelFormat::size64bit;
+			break;
+		default:
+			THROW("Unsupported RGB pixel size");
+		}
+	case PixelFormat::pixelRGBA:
+		switch(format.size)
+		{
+		case PixelFormat::size32bit:
+			newFormat.size = PixelFormat::size16bit;
+			break;
+		case PixelFormat::size128bit:
+			newFormat.size = PixelFormat::size64bit;
+			break;
+		default:
+			THROW("Unsupported RGBA pixel size");
+		}
+		break;
+	default:
+		THROW("Unsupported pixel format");
+	}
+
+	// allocate memory
+	ptr<RawTextureData> newTextureData = NEW(RawTextureData(nullptr, newFormat, width, height, depth, mips, count));
+
+	const int pixelSize = GetPixelSize();
+	const int newPixelSize = newTextureData->GetPixelSize();
+	const int realCount = count > 0 ? count : 1;
+
+	for(int image = 0; image < realCount; ++image)
+	{
+		for(int mip = 0; mip < mips; ++mip)
+		{
+			const uint8_t* mipData = (const uint8_t*)GetMipData(image, mip);
+			uint8_t* newMipData = (uint8_t*)newTextureData->GetMipData(image, mip);
+			const int mipDepth = newTextureData->GetMipDepth(mip);
+			const int mipHeight = newTextureData->GetMipHeight(mip);
+			const int mipWidth = newTextureData->GetMipWidth(mip);
+			const int mipSlicePitch = GetMipSlicePitch(mip);
+			const int mipLinePitch = GetMipLinePitch(mip);
+			const int newMipSlicePitch = newTextureData->GetMipSlicePitch(mip);
+			const int newMipLinePitch = newTextureData->GetMipLinePitch(mip);
+			for(int z = 0, az = 0, bz = 0; z < mipDepth; ++z, az += mipSlicePitch, bz += newMipSlicePitch)
+				for(int y = 0, ay = az, by = bz; y < mipHeight; ++y, ay += mipLinePitch, by += newMipLinePitch)
+					for(int x = 0, ax = ay, bx = by; x < mipWidth; ++x, ax += pixelSize, bx += newPixelSize)
+						for(int p = 0; p < newPixelSize; ++p)
+							newMipData[bx + p] = mipData[ax + p];
+		}
+	}
+
+	return newTextureData;
+
+	END_TRY("Can't convert to RG format");
+}
+
 ptr<RawTextureData> RawTextureData::GenerateMips(int newMips) const
 {
 	BEGIN_TRY();
