@@ -6,10 +6,9 @@
 #include "../platform/platform.hpp"
 #include <unordered_map>
 
+// emscripten's SDL does not support controllers
 #ifdef ___INANITY_PLATFORM_EMSCRIPTEN
-// workaround for emscripten
 #include <SDL/SDL_events.h>
-#include <SDL/SDL_haptic.h>
 #else
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_haptic.h>
@@ -30,6 +29,7 @@ private:
 	float widthScale;
 	float heightScale;
 
+#if !defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	class SdlController : public Controller
 	{
 	private:
@@ -53,6 +53,7 @@ private:
 	};
 
 	std::unordered_map<SDL_JoystickID, ptr<SdlController> > controllers;
+#endif
 
 public:
 	SdlManager();
@@ -61,9 +62,11 @@ public:
 	void SetVirtualScale(float widthScale, float heightScale);
 	void StartTextInput();
 	void StopTextInput();
+#if !defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	ptr<Controller> TryGetController(int controllerId);
 
 	void TryLoadControllerMappingsFromFile(const char* fileName);
+#endif
 };
 
 END_INANITY_INPUT

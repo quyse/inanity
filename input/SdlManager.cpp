@@ -7,7 +7,13 @@
 BEGIN_INANITY_INPUT
 
 SdlManager::SdlManager()
-: sdl(Platform::Sdl::Get(SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC)), widthScale(1), heightScale(1)
+: sdl(Platform::Sdl::Get(
+#if defined(___INANITY_PLATFORM_EMSCRIPTEN)
+	0
+#else
+	SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC
+#endif
+	)), widthScale(1), heightScale(1)
 {
 }
 
@@ -210,6 +216,7 @@ void SdlManager::ProcessEvent(const SDL_Event& event)
 				AddEvent(e);
 		}
 		break;
+#if !defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	case SDL_CONTROLLERDEVICEADDED:
 		// device added event
 		{
@@ -329,6 +336,7 @@ void SdlManager::ProcessEvent(const SDL_Event& event)
 			}
 		}
 		break;
+#endif // !defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	}
 }
 
@@ -349,6 +357,8 @@ void SdlManager::StopTextInput()
 	Manager::StopTextInput();
 	SDL_StopTextInput();
 }
+
+#if !defined(___INANITY_PLATFORM_EMSCRIPTEN)
 
 ptr<Controller> SdlManager::TryGetController(int controllerId)
 {
@@ -451,5 +461,7 @@ void SdlManager::SdlController::Close()
 		controller = nullptr;
 	}
 }
+
+#endif
 
 END_INANITY_INPUT
