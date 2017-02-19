@@ -110,6 +110,9 @@ public:
 	/** Clip if isn't in bounds. */
 	void Blit(ptr<RawTextureData> image, int destX, int destY, int sourceX, int sourceY, int width, int height);
 
+	/// Extract one mip as a separate texture data.
+	ptr<RawTextureData> ExtractMipImage(int image, int mip) const;
+
 	/// Premultiply color components with alpha.
 	ptr<RawTextureData> PremultiplyAlpha() const;
 

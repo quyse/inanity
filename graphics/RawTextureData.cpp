@@ -2,6 +2,7 @@
 #include "../StreamWriter.hpp"
 #include "../StreamReader.hpp"
 #include "../MemoryFile.hpp"
+#include "../PartFile.hpp"
 #include "../Exception.hpp"
 #include <algorithm>
 
@@ -353,6 +354,15 @@ void RawTextureData::Blit(ptr<RawTextureData> image, int destX, int destY, int s
 			copySize);
 
 	END_TRY("Can't blit raw texture data");
+}
+
+ptr<RawTextureData> RawTextureData::ExtractMipImage(int image, int mip) const
+{
+	return NEW(RawTextureData(NEW(PartFile(pixels, GetMipData(image, mip), GetMipSize(mip))), format,
+		width ? GetMipWidth(mip) : 0,
+		height ? GetMipHeight(mip) : 0,
+		depth ? GetMipDepth(mip) : 0,
+		1, 0));
 }
 
 ptr<RawTextureData> RawTextureData::PremultiplyAlpha() const
