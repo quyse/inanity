@@ -73,6 +73,8 @@ bool Frame::NextEvent()
 				state.cursorX = e.mouse.cursorX;
 				state.cursorY = e.mouse.cursorY;
 				break;
+			case Event::Mouse::typeDoubleClick:
+				break;
 			}
 			break;
 		case Event::deviceController:

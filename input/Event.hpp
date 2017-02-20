@@ -40,7 +40,8 @@ struct Event
 			typeButtonDown,
 			typeButtonUp,
 			typeRawMove,
-			typeCursorMove
+			typeCursorMove,
+			typeDoubleClick
 		} type;
 
 		enum Button
@@ -52,7 +53,7 @@ struct Event
 
 		union
 		{
-			// in case type == typeButton{Down,Up}
+			// in case type == typeButton{Down,Up,DoubleClick}
 			Button button;
 			// in case type == typeRawMove
 			struct

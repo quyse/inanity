@@ -123,25 +123,46 @@ Key Win32Manager::ConvertKey(USHORT key, USHORT makeCode, USHORT flags)
 
 bool Win32Manager::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	switch(msg)
+	{
 	// process characters
-	if(msg == WM_CHAR)
-	{
-		Event e;
-		e.device = Event::deviceKeyboard;
-		e.keyboard.type = Event::Keyboard::typeCharacter;
-		e.keyboard.character = (wchar_t)wParam;
-		AddEvent(e);
+	case WM_CHAR:
+		{
+			Event e;
+			e.device = Event::deviceKeyboard;
+			e.keyboard.type = Event::Keyboard::typeCharacter;
+			e.keyboard.character = (wchar_t)wParam;
+			AddEvent(e);
+		}
 		return true;
-	}
 	// process cursor mouse move
-	else if(msg == WM_MOUSEMOVE)
-	{
-		Event e;
-		e.device = Event::deviceMouse;
-		e.mouse.type = Event::Mouse::typeCursorMove;
-		e.mouse.cursorX = LOWORD(lParam);
-		e.mouse.cursorY = HIWORD(lParam);
-		AddEvent(e);
+	case WM_MOUSEMOVE:
+		{
+			Event e;
+			e.device = Event::deviceMouse;
+			e.mouse.type = Event::Mouse::typeCursorMove;
+			e.mouse.cursorX = LOWORD(lParam);
+			e.mouse.cursorY = HIWORD(lParam);
+			AddEvent(e);
+		}
+		return true;
+	// process double clicks
+	case WM_LBUTTONDBLCLK:
+	case WM_RBUTTONDBLCLK:
+	case WM_MBUTTONDBLCLK:
+		{
+			Event e;
+			e.device = Event::deviceMouse;
+			e.mouse.type = Event::Mouse::typeDoubleClick;
+			switch(msg)
+			{
+			case WM_LBUTTONDBLCLK: e.mouse.button = Event::Mouse::buttonLeft; break;
+			case WM_RBUTTONDBLCLK: e.mouse.button = Event::Mouse::buttonRight; break;
+			case WM_MBUTTONDBLCLK: e.mouse.button = Event::Mouse::buttonMiddle; break;
+			}
+			AddEvent(e);
+		}
+		return true;
 	}
 	return false;
 }

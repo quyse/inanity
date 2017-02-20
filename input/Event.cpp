@@ -39,12 +39,16 @@ std::ostream& operator<<(std::ostream& stream, const Event& event)
 			case Event::Mouse::typeCursorMove:
 				stream << "MOUSECURSORMOVE";
 				break;
+			case Event::Mouse::typeDoubleClick:
+				stream << "MOUSEDOUBLECLICK";
+				break;
 		}
 		stream << ' ';
 		switch(event.mouse.type)
 		{
 			case Event::Mouse::typeButtonDown:
 			case Event::Mouse::typeButtonUp:
+			case Event::Mouse::typeDoubleClick:
 				switch(event.mouse.button)
 				{
 				case Event::Mouse::buttonLeft:
