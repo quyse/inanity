@@ -228,6 +228,7 @@ ptr<Win32Window> Win32Window::CreateForDirectX(const String& title, int left, in
 	{
 		WNDCLASS wndClass;
 		ZeroMemory(&wndClass, sizeof(wndClass));
+		wndClass.style = CS_DBLCLKS;
 		wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
 		wndClass.hbrBackground = GetStockBrush(BLACK_BRUSH);
 		wndClass.lpszClassName = TEXT("Win32DirectXWindow");
@@ -251,7 +252,7 @@ ptr<Win32Window> Win32Window::CreateForOpenGL(const String& title, int left, int
 	{
 		WNDCLASS wndClass;
 		ZeroMemory(&wndClass, sizeof(wndClass));
-		wndClass.style = CS_OWNDC;
+		wndClass.style = CS_DBLCLKS | CS_OWNDC;
 		wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
 		wndClass.lpszClassName = TEXT("Win32OpenGLWindow");
 		wndClass.hInstance = GetModuleHandle(NULL);
