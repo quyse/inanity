@@ -216,11 +216,13 @@ void SdlManager::ProcessEvent(const SDL_Event& event)
 			{
 				AddEvent(e);
 				// send double click event for second button up
+#if !defined(___INANITY_PLATFORM_EMSCRIPTEN)
 				if(e.mouse.type == Event::Mouse::typeButtonUp && event.button.clicks == 2)
 				{
 					e.mouse.type = Event::Mouse::typeDoubleClick;
 					AddEvent(e);
 				}
+#endif
 			}
 		}
 		break;
