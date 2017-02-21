@@ -143,6 +143,11 @@ struct Keys
 		AltR = 0xea,
 		SuperL = 0xeb,
 		SuperR = 0xec,
+
+		// virtual keys
+		Shift = 0xed,
+		Control = 0xee,
+		Alt = 0xef
 	};
 };
 typedef Keys::_ Key;

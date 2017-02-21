@@ -50,6 +50,7 @@ bool Frame::NextEvent()
 			case Event::Keyboard::typeCharacter:
 				break;
 			}
+			ProcessKeyboardVirtualEvents(e);
 			break;
 		case Event::deviceMouse:
 			switch(e.mouse.type)
@@ -111,6 +112,52 @@ void Frame::CopyTo(ptr<Frame> frame)
 	frame->events = events;
 	frame->nextEvent = nextEvent;
 	frame->state = state;
+}
+
+void Frame::ProcessKeyboardVirtualEvents(const Event& e)
+{
+	switch(e.keyboard.type)
+	{
+	case Event::Keyboard::typeKeyDown:
+	case Event::Keyboard::typeKeyUp:
+		break;
+	default:
+		return;
+	}
+
+	Key virtualKey;
+	bool newPressed;
+	switch(e.keyboard.key)
+	{
+	case Key::ShiftL:
+	case Key::ShiftR:
+		virtualKey = Key::Shift;
+		newPressed = state.keyboard[Key::ShiftL] || state.keyboard[Key::ShiftR];
+		break;
+	case Key::ControlL:
+	case Key::ControlR:
+		virtualKey = Key::Control;
+		newPressed = state.keyboard[Key::ControlL] || state.keyboard[Key::ControlR];
+		break;
+	case Key::AltL:
+	case Key::AltR:
+		virtualKey = Key::Alt;
+		newPressed = state.keyboard[Key::AltL] || state.keyboard[Key::AltR];
+		break;
+	default:
+		return;
+	}
+
+	bool oldPressed = state.keyboard[virtualKey];
+
+	if(newPressed != oldPressed)
+	{
+		Event virtualEvent;
+		virtualEvent.device = Event::deviceKeyboard;
+		virtualEvent.keyboard.type = newPressed ? Event::Keyboard::typeKeyDown : Event::Keyboard::typeKeyUp;
+		virtualEvent.keyboard.key = virtualKey;
+		events.insert(events.begin() + nextEvent, virtualEvent);
+	}
 }
 
 END_INANITY_INPUT

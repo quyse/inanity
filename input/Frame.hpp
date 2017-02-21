@@ -28,6 +28,8 @@ private:
 	size_t nextEvent;
 	State state;
 
+	void ProcessKeyboardVirtualEvents(const Event& e);
+
 public:
 	Frame();
 
