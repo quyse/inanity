@@ -148,7 +148,7 @@ void Frame::ProcessKeyboardVirtualEvents(const Event& e)
 		return;
 	}
 
-	bool oldPressed = state.keyboard[virtualKey];
+	bool oldPressed = !!state.keyboard[virtualKey];
 
 	if(newPressed != oldPressed)
 	{
