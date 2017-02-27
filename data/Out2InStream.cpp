@@ -1,13 +1,14 @@
 #include "Out2InStream.hpp"
 #include "../File.hpp"
+#include "../Handler.hpp"
 #include "../CriticalCode.hpp"
 #include "../Exception.hpp"
 #include <cstring>
 
 BEGIN_INANITY_DATA
 
-Out2InStream::Reader::Reader(ptr<Out2InStream> stream)
-	: stream(stream), firstOffset(0)
+Out2InStream::Reader::Reader(ptr<Out2InStream> stream, ptr<Handler> pollHandler)
+	: stream(stream), pollHandler(pollHandler), firstOffset(0)
 {
 	// зарегистрировать считыватель в потоке
 	CriticalCode code(stream->criticalSection);
@@ -28,8 +29,21 @@ size_t Out2InStream::Reader::Read(void* data, size_t size)
 	// цикл по кускам, которыми будем считывать
 	while(size)
 	{
-		// захватить семафор
-		semaphore.Acquire();
+		if(pollHandler)
+		{
+			// попробовать захватить семафор
+			while(!semaphore.TryAcquire())
+			{
+				// выполнять обработчик опроса, пока семафор не захватится
+				pollHandler->Fire();
+			}
+		}
+		else
+		{
+			// захватить семафор с ожиданием
+			semaphore.Acquire();
+		}
+
 		// теперь мы знаем, что в очереди есть как минимум один файл
 		CriticalCode code(criticalSection);
 		// получить первый файл
@@ -98,10 +112,10 @@ void Out2InStream::End()
 		(*i)->Push(0);
 }
 
-ptr<InputStream> Out2InStream::CreateInputStream()
+ptr<InputStream> Out2InStream::CreateInputStream(ptr<Handler> pollHandler)
 {
 	// создать считыватель
-	ptr<Reader> reader = NEW(Reader(this));
+	ptr<Reader> reader = NEW(Reader(this, pollHandler));
 	// если поток уже закончился, сразу выдать сигнал
 	CriticalCode code(criticalSection);
 	if(flushed)

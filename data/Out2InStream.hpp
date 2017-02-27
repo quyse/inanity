@@ -9,6 +9,12 @@
 #include <queue>
 #include <list>
 
+BEGIN_INANITY
+
+class Handler;
+
+END_INANITY
+
 BEGIN_INANITY_DATA
 
 /// Поток выход-типа-вход.
@@ -31,6 +37,8 @@ private:
 	private:
 		/// Ссылка на поток.
 		ptr<Out2InStream> stream;
+		/// Обработчик опроса.
+		ptr<Handler> pollHandler;
 		/// Итератор в списке считывателей.
 		std::list<Reader*>::iterator iterator;
 		/// Очередь файлов на выход.
@@ -43,7 +51,7 @@ private:
 		size_t firstOffset;
 
 	public:
-		Reader(ptr<Out2InStream> stream);
+		Reader(ptr<Out2InStream> stream, ptr<Handler> pollHandler);
 		~Reader();
 		size_t Read(void* data, size_t size);
 		/// Запихать данные в очередь.
@@ -72,8 +80,10 @@ public:
 	 * с тех данных, которые будут записаны после этой точки.
 	 * Считыватель данных работает по обычным правилам InputStream,
 	 * но нужно учитывать, что данные могут возвращаться долго
-	 * (это зависит от того, когда их запишут в Out2InStream). */
-	ptr<InputStream> CreateInputStream();
+	 * (это зависит от того, когда их запишут в Out2InStream).
+	 * Если данных нет, вызывает в цикле pollHandler, если он задан,
+	 * иначе просто ждёт. */
+	ptr<InputStream> CreateInputStream(ptr<Handler> pollHandler = nullptr);
 };
 
 END_INANITY_DATA
