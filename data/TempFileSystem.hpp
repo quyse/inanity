@@ -12,11 +12,13 @@ BEGIN_INANITY_DATA
 class TempFileSystem : public FileSystem
 {
 private:
-	std::unordered_map<String, ptr<File> > files;
+	typedef std::unordered_map<String, ptr<File> > Files;
+	Files files;
 
 public:
 	ptr<File> TryLoadFile(const String& fileName);
 	void SaveFile(ptr<File> file, const String& fileName);
+	void GetFileNames(std::vector<String>& fileNames) const;
 };
 
 END_INANITY_DATA
