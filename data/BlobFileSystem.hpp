@@ -32,8 +32,8 @@ public:
 		static const char magicValue[4];
 		/// Сигнатура.
 		char magic[4];
-		/// Размер заголовка.
-		uint32_t headerSize;
+		/// Размер заголовка в low endian.
+		uint8_t headerSize[4];
 	};
 
 	/// Открыть и распаковать blob-файловую систему в заданную файловую систему.

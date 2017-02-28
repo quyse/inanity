@@ -70,7 +70,9 @@ void BlobFileSystemBuilder::Finalize()
 		//записать терминатор
 		BlobFileSystem::Terminator terminator;
 		memcpy(terminator.magic, BlobFileSystem::Terminator::magicValue, sizeof(terminator.magic));
-		terminator.headerSize = (uint32_t)headerFile->GetSize();
+		size_t headerSize = headerFile->GetSize();
+		for(size_t i = 0; i < 4; ++i)
+			terminator.headerSize[i] = (uint8_t)((headerSize >> (i * 8)) & 0xFF);
 		outputWriter->Write(terminator);
 
 		//всё!

@@ -28,14 +28,19 @@ void BlobFileSystem::Unpack(ptr<File> file, ptr<FileSystem> fileSystem)
 	if(memcmp(terminator->magic, Terminator::magicValue, sizeof(terminator->magic)) != 0)
 		THROW("Invalid magic");
 
+	//получить размер заголовка
+	size_t headerSize = 0;
+	for(size_t i = 0; i < 4; ++i)
+		headerSize += size_t(terminator->headerSize[i]) << (i * 8);
+
 	//проверить, что заголовок читается
-	if(size < terminator->headerSize)
+	if(size < headerSize)
 		THROW("Can't read header");
 
 	//получить читатель заголовка
 	ptr<StreamReader> headerReader = NEW(StreamReader(NEW(FileInputStream(
-		NEW(PartFile(file, (char*)terminator - terminator->headerSize, terminator->headerSize))))));
-	size -= terminator->headerSize;
+		NEW(PartFile(file, (char*)terminator - headerSize, headerSize))))));
+	size -= headerSize;
 
 	//считывать файлы, пока есть
 	for(;;)
