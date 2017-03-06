@@ -83,9 +83,9 @@ D3D11_BLEND_OP Dx11BlendState::ConvertOperation(Operation operation)
 	case operationAdd:
 		r = D3D11_BLEND_OP_ADD; break;
 	case operationSubtractAB:
-		r = D3D11_BLEND_OP_REV_SUBTRACT; break;
-	case operationSubtractBA:
 		r = D3D11_BLEND_OP_SUBTRACT; break;
+	case operationSubtractBA:
+		r = D3D11_BLEND_OP_REV_SUBTRACT; break;
 	case operationMin:
 		r = D3D11_BLEND_OP_MIN; break;
 	case operationMax:
