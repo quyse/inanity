@@ -17,6 +17,7 @@
 #include "graphics/Context.hpp"
 #include "graphics/DataType.hpp"
 #include "graphics/DepthStencilBuffer.hpp"
+#include "graphics/DepthStencilState.hpp"
 #include "graphics/Device.hpp"
 #include "graphics/EditableGeometry.hpp"
 #include "graphics/FrameBuffer.hpp"

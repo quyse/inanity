@@ -11,6 +11,7 @@
 #include "AttributeLayoutSlot.hpp"
 #include "VertexBuffer.hpp"
 #include "IndexBuffer.hpp"
+#include "DepthStencilState.hpp"
 #include "BlendState.hpp"
 #include "shaders/Sampler.hpp"
 #include "shaders/UniformGroup.hpp"
@@ -262,34 +263,19 @@ void Context::LetViewport::operator()(Context* context, int viewportWidth, int v
 	this->viewportHeight = viewportHeight;
 }
 
-//*** Context::LetDepthTestFunc
+//*** Context::LetDepthStencilState
 
-Context::LetDepthTestFunc::LetDepthTestFunc() {}
+Context::LetDepthStencilState::LetDepthStencilState() {}
 
-Context::LetDepthTestFunc::LetDepthTestFunc(Context* context, DepthTestFunc depthTestFunc)
+Context::LetDepthStencilState::LetDepthStencilState(Context* context, ptr<DepthStencilState> depthStencilState)
 {
-	operator()(context, depthTestFunc);
+	operator()(context, depthStencilState);
 }
 
-void Context::LetDepthTestFunc::operator()(Context* context, DepthTestFunc depthTestFunc)
+void Context::LetDepthStencilState::operator()(Context* context, ptr<DepthStencilState> depthStencilState)
 {
-	Init(&context->cellDepthTestFunc);
-	this->depthTestFunc = depthTestFunc;
-}
-
-//*** Context::LetDepthWrite
-
-Context::LetDepthWrite::LetDepthWrite() {}
-
-Context::LetDepthWrite::LetDepthWrite(Context* context, bool depthWrite)
-{
-	operator()(context, depthWrite);
-}
-
-void Context::LetDepthWrite::operator()(Context* context, bool depthWrite)
-{
-	Init(&context->cellDepthWrite);
-	this->depthWrite = depthWrite;
+	Init(&context->cellDepthStencilState);
+	this->depthStencilState = depthStencilState;
 }
 
 //*** Context::LetBlendState
@@ -310,14 +296,13 @@ void Context::LetBlendState::operator()(Context* context, ptr<BlendState> blendS
 //*** Context
 
 Context::Context() :
-	letDefaultVertexShader(this, 0),
-	letDefaultPixelShader(this, 0),
-	letDefaultIndexBuffer(this, 0),
+	letDefaultVertexShader(this, nullptr),
+	letDefaultPixelShader(this, nullptr),
+	letDefaultIndexBuffer(this, nullptr),
 	letDefaultFillMode(this, fillModeSolid),
 	letDefaultCullMode(this, cullModeBack),
-	letDefaultDepthTestFunc(this, depthTestFuncLess),
-	letDefaultDepthWrite(this, true),
-	letDefaultBlendState(this, 0)
+	letDefaultDepthStencilState(this, nullptr),
+	letDefaultBlendState(this, nullptr)
 {}
 
 int Context::GetViewportWidth() const
