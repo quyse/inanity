@@ -13,10 +13,15 @@ DepthStencilState::DepthStencilState() :
 	depthTestFunc(testFuncAlways),
 	depthWrite(false),
 	stencilEnable(false),
-	stencilMask(0xFF),
 	stencilRef(0),
+	stencilMask(0xFF),
 	dirty(true)
 {}
+
+uint8_t DepthStencilState::GetStencilRef() const
+{
+	return stencilRef;
+}
 
 void DepthStencilState::SetDepthTest(TestFunc depthTestFunc, bool depthWrite)
 {
@@ -25,12 +30,12 @@ void DepthStencilState::SetDepthTest(TestFunc depthTestFunc, bool depthWrite)
 	this->depthWrite = depthWrite;
 }
 
-void DepthStencilState::SetStencil(bool stencilEnable, uint8_t stencilMask, uint8_t stencilRef)
+void DepthStencilState::SetStencil(bool stencilEnable, uint8_t stencilRef, uint8_t stencilMask)
 {
 	dirty = true;
 	this->stencilEnable = stencilEnable;
-	this->stencilMask = stencilMask;
 	this->stencilRef = stencilRef;
+	this->stencilMask = stencilMask;
 }
 
 void DepthStencilState::SetStencilFrontFace(const StencilFace& stencilFrontFace)

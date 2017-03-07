@@ -487,7 +487,7 @@ void GlContext::ClearDepth(float depth)
 	GlSystem::CheckErrors("Can't clear depth");
 }
 
-void GlContext::ClearStencil(unsigned stencil)
+void GlContext::ClearStencil(uint8_t stencil)
 {
 	UpdateFramebuffer();
 	GLint s = stencil;
@@ -500,7 +500,7 @@ void GlContext::ClearStencil(unsigned stencil)
 	GlSystem::CheckErrors("Can't clear stencil");
 }
 
-void GlContext::ClearDepthStencil(float depth, unsigned stencil)
+void GlContext::ClearDepthStencil(float depth, uint8_t stencil)
 {
 	UpdateFramebuffer();
 	// nesessary for depth clear

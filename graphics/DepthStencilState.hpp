@@ -46,8 +46,8 @@ protected:
 	TestFunc depthTestFunc;
 	bool depthWrite;
 	bool stencilEnable;
-	uint8_t stencilMask;
 	uint8_t stencilRef;
+	uint8_t stencilMask;
 	StencilFace stencilFrontFace;
 	StencilFace stencilBackFace;
 
@@ -56,9 +56,10 @@ protected:
 	DepthStencilState();
 
 public:
+	uint8_t GetStencilRef() const;
 
 	void SetDepthTest(TestFunc depthTestFunc = testFuncLess, bool depthWrite = true);
-	void SetStencil(bool stencilEnable, uint8_t stencilMask = 0xFF, uint8_t stencilRef = 0);
+	void SetStencil(bool stencilEnable, uint8_t stencilRef = 0, uint8_t stencilMask = 0xFF);
 	void SetStencilFrontFace(const StencilFace& stencilFrontFace);
 	void SetStencilBackFace(const StencilFace& stencilBackFace);
 };

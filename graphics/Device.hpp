@@ -46,6 +46,7 @@ class Texture;
 class RawTextureData;
 class SamplerState;
 struct SamplerSettings;
+class DepthStencilState;
 class BlendState;
 
 /// Абстрактный класс устройства вывода.
@@ -130,6 +131,9 @@ public:
 
 	/// Create sampler state from sampler settings.
 	virtual ptr<SamplerState> CreateSamplerState(const SamplerSettings& samplerSettings) = 0;
+
+	/// Создать объект настроек depth-stencil.
+	virtual ptr<DepthStencilState> CreateDepthStencilState() = 0;
 
 	/// Создать объект настроек смешивания.
 	virtual ptr<BlendState> CreateBlendState() = 0;

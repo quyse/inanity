@@ -153,6 +153,7 @@ public:
 	ptr<AttributeBinding> CreateAttributeBinding(ptr<AttributeLayout> layout);
 	ptr<Texture> CreateStaticTexture(ptr<RawTextureData> data, const SamplerSettings& samplerSettings);
 	ptr<SamplerState> CreateSamplerState(const SamplerSettings& samplerSettings);
+	ptr<DepthStencilState> CreateDepthStencilState();
 	ptr<BlendState> CreateBlendState();
 
 	/// Create presenter routine.

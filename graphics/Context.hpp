@@ -257,9 +257,9 @@ public:
 	/// Clear depth in depth-stencil buffer.
 	virtual void ClearDepth(float depth) = 0;
 	/// Clear stencil in depth-stencil buffer.
-	virtual void ClearStencil(unsigned stencil) = 0;
+	virtual void ClearStencil(uint8_t stencil) = 0;
 	/// Clear depth & stencil in depth-stencil buffer.
-	virtual void ClearDepthStencil(float depth, unsigned stencil) = 0;
+	virtual void ClearDepthStencil(float depth, uint8_t stencil) = 0;
 
 	//******* Methods to upload data.
 	/* Immediate methods. */

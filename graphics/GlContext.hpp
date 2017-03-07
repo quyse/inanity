@@ -51,8 +51,8 @@ public:
 
 	void ClearColor(int colorBufferIndex, const vec4& color);
 	void ClearDepth(float depth);
-	void ClearStencil(unsigned stencil);
-	void ClearDepthStencil(float depth, unsigned stencil);
+	void ClearStencil(uint8_t stencil);
+	void ClearDepthStencil(float depth, uint8_t stencil);
 
 	void UploadUniformBufferData(UniformBuffer* buffer, const void* data, int size);
 	void UploadVertexBufferData(VertexBuffer* buffer, const void* data, int size);

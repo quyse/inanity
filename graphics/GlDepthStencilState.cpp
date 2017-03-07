@@ -5,72 +5,52 @@ BEGIN_INANITY_GRAPHICS
 
 GLenum GlDepthStencilState::ConvertTestFunc(TestFunc testFunc)
 {
-	GLenum func;
 	switch(testFunc)
 	{
 	case testFuncNever:
-		func = GL_NEVER;
-		break;
+		return GL_NEVER;
 	case testFuncLess:
-		func = GL_LESS;
-		break;
+		return GL_LESS;
 	case testFuncLessOrEqual:
-		func = GL_LEQUAL;
-		break;
+		return GL_LEQUAL;
 	case testFuncEqual:
-		func = GL_EQUAL;
-		break;
+		return GL_EQUAL;
 	case testFuncNonEqual:
-		func = GL_NOTEQUAL;
-		break;
+		return GL_NOTEQUAL;
 	case testFuncGreaterOrEqual:
-		func = GL_GEQUAL;
-		break;
+		return GL_GEQUAL;
 	case testFuncGreater:
-		func = GL_GREATER;
-		break;
+		return GL_GREATER;
 	case testFuncAlways:
-		func = GL_ALWAYS;
-		break;
+		return GL_ALWAYS;
 	default:
 		THROW("Unknown test func");
 	}
-	return func;
 }
 
 GLenum GlDepthStencilState::ConvertStencilOp(StencilOp op)
 {
-	GLenum o;
 	switch(op)
 	{
 	case stencilOpKeep:
-		o = GL_KEEP;
-		break;
+		return GL_KEEP;
 	case stencilOpZero:
-		o = GL_ZERO;
-		break;
+		return GL_ZERO;
 	case stencilOpReplace:
-		o = GL_REPLACE;
-		break;
+		return GL_REPLACE;
 	case stencilOpIncrementClamp:
-		o = GL_INCR;
-		break;
+		return GL_INCR;
 	case stencilOpDecrementClamp:
-		o = GL_DECR;
-		break;
+		return GL_DECR;
 	case stencilOpIncrementWrap:
-		o = GL_INCR_WRAP;
-		break;
+		return GL_INCR_WRAP;
 	case stencilOpDecrementWrap:
-		o = GL_DECR_WRAP;
-		break;
+		return GL_DECR_WRAP;
 	case stencilOpInvert:
-		o = GL_INVERT;
-		break;
+		return GL_INVERT;
 	default:
 		THROW("Unknown stencil op");
 	}
-	return o;
 }
 
 void GlDepthStencilState::Apply()
