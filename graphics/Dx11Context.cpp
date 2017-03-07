@@ -13,6 +13,7 @@
 #include "Dx11VertexBuffer.hpp"
 #include "Dx11IndexBuffer.hpp"
 #include "VertexLayout.hpp"
+#include "Dx11DepthStencilState.hpp"
 #include "Dx11BlendState.hpp"
 #include "../File.hpp"
 #include "../Exception.hpp"
@@ -90,57 +91,6 @@ int Dx11Context::GetRasterizerStateKey()
 		if(FAILED(device->CreateRasterizerState(&desc, &rasterizerState)))
 			THROW("Can't create rasterizer state");
 		rasterizerStateCache[key] = rasterizerState;
-	}
-
-	return key;
-}
-
-int Dx11Context::GetDepthStencilStateKey()
-{
-	DepthTestFunc depthTestFunc = ((LetDepthTestFunc*)cellDepthTestFunc.top)->depthTestFunc;
-	bool depthWrite = ((LetDepthWrite*)cellDepthWrite.top)->depthWrite;
-	int key = ((int)depthTestFunc) | (((int)depthWrite) << 3);
-
-	// if depth-stencil state missed, create new
-	if(!depthStencilStateCache[key])
-	{
-		D3D11_DEPTH_STENCIL_DESC desc = CD3D11_DEPTH_STENCIL_DESC(CD3D11_DEFAULT());
-
-		switch(depthTestFunc)
-		{
-		case depthTestFuncNever:
-			desc.DepthFunc = D3D11_COMPARISON_NEVER;
-			break;
-		case depthTestFuncLess:
-			desc.DepthFunc = D3D11_COMPARISON_LESS;
-			break;
-		case depthTestFuncLessOrEqual:
-			desc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-			break;
-		case depthTestFuncEqual:
-			desc.DepthFunc = D3D11_COMPARISON_EQUAL;
-			break;
-		case depthTestFuncNonEqual:
-			desc.DepthFunc = D3D11_COMPARISON_NOT_EQUAL;
-			break;
-		case depthTestFuncGreaterOrEqual:
-			desc.DepthFunc = D3D11_COMPARISON_GREATER_EQUAL;
-			break;
-		case depthTestFuncGreater:
-			desc.DepthFunc = D3D11_COMPARISON_GREATER;
-			break;
-		case depthTestFuncAlways:
-			desc.DepthFunc = D3D11_COMPARISON_ALWAYS;
-			break;
-		}
-
-		desc.DepthEnable = depthTestFunc != depthTestFuncAlways || depthWrite;
-		desc.DepthWriteMask = depthWrite ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
-
-		ComPointer<ID3D11DepthStencilState> depthStencilState;
-		if(FAILED(device->CreateDepthStencilState(&desc, &depthStencilState)))
-			THROW("Can't create depth-stencil state");
-		depthStencilStateCache[key] = depthStencilState;
 	}
 
 	return key;
@@ -325,7 +275,7 @@ void Dx11Context::Update()
 		VertexShader* abstractVertexShader = let->vertexShader;
 		ID3D11VertexShader* shader = abstractVertexShader
 			? fast_cast<Dx11VertexShader*>(abstractVertexShader)->GetVertexShaderInterface()
-			: 0;
+			: nullptr;
 		deviceContext->VSSetShader(shader, NULL, 0);
 
 		cellVertexShader.Actual();
@@ -338,7 +288,7 @@ void Dx11Context::Update()
 		PixelShader* abstractPixelShader = let->pixelShader;
 		ID3D11PixelShader* shader = abstractPixelShader
 			? fast_cast<Dx11PixelShader*>(abstractPixelShader)->GetPixelShaderInterface()
-			: 0;
+			: nullptr;
 		deviceContext->PSSetShader(shader, NULL, 0);
 
 		cellPixelShader.Actual();
@@ -354,14 +304,21 @@ void Dx11Context::Update()
 		cellCullMode.Actual();
 	}
 
-	// depth-stencil state (depth test func & depth write)
-	if(!cellDepthTestFunc.IsActual() || !cellDepthWrite.IsActual())
+	// depth-stencil state
+	if(!cellDepthStencilState.IsActual())
 	{
-		int key = GetDepthStencilStateKey();
-		deviceContext->OMSetDepthStencilState(depthStencilStateCache[key], 0);
+		LetDepthStencilState* let = (LetDepthStencilState*)cellDepthStencilState.top;
+		DepthStencilState* abstractDepthStencilState = let->depthStencilState;
+		Dx11DepthStencilState* depthStencilState = abstractDepthStencilState
+			? fast_cast<Dx11DepthStencilState*>(abstractDepthStencilState)
+			: nullptr;
 
-		cellDepthTestFunc.Actual();
-		cellDepthWrite.Actual();
+		if(depthStencilState)
+			deviceContext->OMSetDepthStencilState(depthStencilState->GetDepthStencilStateInterface(device), depthStencilState->GetStencilRef());
+		else
+			deviceContext->OMSetDepthStencilState(nullptr, 0);
+
+		cellDepthStencilState.Actual();
 	}
 
 	// viewport
@@ -419,7 +376,7 @@ void Dx11Context::ClearDepth(float depth)
 		D3D11_CLEAR_DEPTH, depth, 0);
 }
 
-void Dx11Context::ClearStencil(unsigned stencil)
+void Dx11Context::ClearStencil(uint8_t stencil)
 {
 	LetFrameBuffer* let = (LetFrameBuffer*)cellFrameBuffer.top;
 	THROW_ASSERT(let);
@@ -431,7 +388,7 @@ void Dx11Context::ClearStencil(unsigned stencil)
 		D3D11_CLEAR_STENCIL, 0, stencil);
 }
 
-void Dx11Context::ClearDepthStencil(float depth, unsigned stencil)
+void Dx11Context::ClearDepthStencil(float depth, uint8_t stencil)
 {
 	LetFrameBuffer* let = (LetFrameBuffer*)cellFrameBuffer.top;
 	THROW_ASSERT(let);

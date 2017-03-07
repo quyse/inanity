@@ -209,7 +209,7 @@ var libraries = {
 			'graphics.Dx11VertexBuffer', 'graphics.Dx11IndexBuffer', 'graphics.Dx11AttributeBinding',
 			'graphics.Dx11VertexShader', 'graphics.Dx11PixelShader',
 			'graphics.Dx11CompiledShader', 'graphics.Dx11ShaderResources',
-			'graphics.Dx11SamplerState', 'graphics.Dx11BlendState',
+			'graphics.Dx11SamplerState', 'graphics.Dx11DepthStencilState', 'graphics.Dx11BlendState',
 			'graphics.D3DBlobFile', 'graphics.Dx11ShaderCompiler', 'graphics.Hlsl11Source',
 			'graphics.DxgiAdapter', 'graphics.DxgiMonitor', 'graphics.DxgiMonitorMode'
 		]
