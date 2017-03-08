@@ -26,10 +26,12 @@ size_t StreamReader::Read(void* data, size_t size)
 	return size;
 }
 
-String StreamReader::ReadString()
+String StreamReader::ReadString(size_t maximumLength)
 {
 	//считать длину строки
 	size_t length = ReadShortly();
+	if(length > maximumLength)
+		THROW("String length is too big");
 	//считать строку
 	std::string r(length, ' ');
 	if(length)
