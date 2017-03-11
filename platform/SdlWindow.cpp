@@ -89,8 +89,9 @@ void SdlWindow::Run(ptr<Handler> activeHandler)
 			if(inputManager)
 				inputManager->ProcessEvent(event);
 
-			if(event.type == SDL_WINDOWEVENT)
+			switch(event.type)
 			{
+			case SDL_WINDOWEVENT:
 				switch(event.window.event)
 				{
 				case SDL_WINDOWEVENT_SIZE_CHANGED:
@@ -112,6 +113,10 @@ void SdlWindow::Run(ptr<Handler> activeHandler)
 					}
 					break;
 				}
+				break;
+			case SDL_QUIT:
+				Close();
+				break;
 			}
 		}
 
