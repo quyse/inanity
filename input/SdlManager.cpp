@@ -17,12 +17,12 @@ SdlManager::SdlManager()
 {
 }
 
-static Key ConvertKey(SDL_Keycode code)
+static Key ConvertKey(SDL_Scancode code)
 {
 	Key key;
 	switch(code)
 	{
-#define C(c, k) case SDLK_##c: key = Key::k; break
+#define C(c, k) case SDL_SCANCODE_##c: key = Key::k; break
 
 		C(BACKSPACE, BackSpace);
 		C(TAB, Tab);
@@ -37,7 +37,7 @@ static Key ConvertKey(SDL_Keycode code)
 
 		C(SPACE, Space);
 
-		C(PLUS, Plus);
+		// C(PLUS, Plus);
 		C(COMMA, Comma);
 		C(MINUS, Hyphen);
 		C(PERIOD, Period);
@@ -54,32 +54,32 @@ static Key ConvertKey(SDL_Keycode code)
 		C(8, _8);
 		C(9, _9);
 
-		C(a, A);
-		C(b, B);
-		C(c, C);
-		C(d, D);
-		C(e, E);
-		C(f, F);
-		C(g, G);
-		C(h, H);
-		C(i, I);
-		C(j, J);
-		C(k, K);
-		C(l, L);
-		C(m, M);
-		C(n, N);
-		C(o, O);
-		C(p, P);
-		C(q, Q);
-		C(r, R);
-		C(s, S);
-		C(t, T);
-		C(u, U);
-		C(v, V);
-		C(w, W);
-		C(x, X);
-		C(y, Y);
-		C(z, Z);
+		C(A, A);
+		C(B, B);
+		C(C, C);
+		C(D, D);
+		C(E, E);
+		C(F, F);
+		C(G, G);
+		C(H, H);
+		C(I, I);
+		C(J, J);
+		C(K, K);
+		C(L, L);
+		C(M, M);
+		C(N, N);
+		C(O, O);
+		C(P, P);
+		C(Q, Q);
+		C(R, R);
+		C(S, S);
+		C(T, T);
+		C(U, U);
+		C(V, V);
+		C(W, W);
+		C(X, X);
+		C(Y, Y);
+		C(Z, Z);
 
 		C(HOME, Home);
 		C(LEFT, Left);
@@ -89,7 +89,7 @@ static Key ConvertKey(SDL_Keycode code)
 		C(PAGEUP, PageUp);
 		C(PAGEDOWN, PageDown);
 		C(END, End);
-		C(BACKQUOTE, Grave);
+		C(GRAVE, Grave);
 
 		C(KP_SPACE, NumPadSpace);
 		C(KP_TAB, NumPadTab);
@@ -155,7 +155,7 @@ void SdlManager::ProcessEvent(const SDL_Event& event)
 			Event e;
 			e.device = Event::deviceKeyboard;
 			e.keyboard.type = event.type == SDL_KEYDOWN ? Event::Keyboard::typeKeyDown : Event::Keyboard::typeKeyUp;
-			e.keyboard.key = ConvertKey(event.key.keysym.sym);
+			e.keyboard.key = ConvertKey(event.key.keysym.scancode);
 			AddEvent(e);
 		}
 		break;
