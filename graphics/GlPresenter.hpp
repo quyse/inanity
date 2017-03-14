@@ -20,7 +20,6 @@ public:
 	// Presenter's methods.
 	ptr<Device> GetDevice() const override;
 	ptr<FrameBuffer> GetFrameBuffer() const override;
-	ptr<RawTextureData> GetTextureData() const override;
 };
 
 END_INANITY_GRAPHICS

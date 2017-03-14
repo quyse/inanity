@@ -87,6 +87,8 @@ public:
 
 	void Draw(int count = -1);
 	void DrawInstanced(int instancesCount, int count = -1);
+
+	ptr<RawTextureData> GetPresenterTextureData(ptr<Presenter> presenter) override;
 };
 
 END_INANITY_GRAPHICS

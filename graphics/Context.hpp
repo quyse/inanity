@@ -25,6 +25,8 @@ class VertexBuffer;
 class IndexBuffer;
 class BlendState;
 class AttributeLayoutSlot;
+class Presenter;
+class RawTextureData;
 
 /// Abstract graphics context class.
 class Context : public Object
@@ -299,6 +301,9 @@ public:
 	virtual void Draw(int count = -1) = 0;
 	/// Do instanced draw.
 	virtual void DrawInstanced(int instancesCount, int count = -1) = 0;
+
+	//******* Misc methods.
+	virtual ptr<RawTextureData> GetPresenterTextureData(ptr<Presenter> presenter) = 0;
 };
 
 END_INANITY_GRAPHICS

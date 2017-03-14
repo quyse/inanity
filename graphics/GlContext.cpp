@@ -17,6 +17,8 @@
 #include "GlBlendState.hpp"
 #include "GlInternalTexture.hpp"
 #include "VertexLayout.hpp"
+#include "Presenter.hpp"
+#include "RawTextureData.hpp"
 #include "../MemoryFile.hpp"
 #include "../Exception.hpp"
 #include <memory.h>
@@ -649,6 +651,35 @@ void GlContext::DrawInstanced(int instancesCount, int count)
 		glDrawArraysInstanced(GL_TRIANGLES, 0, count >= 0 ? count : fast_cast<GlVertexBuffer*>(abstractVertexBuffer)->GetVerticesCount(), instancesCount);
 	}
 	GlSystem::CheckErrors("Can't draw instanced");
+}
+
+ptr<RawTextureData> GlContext::GetPresenterTextureData(ptr<Presenter> presenter)
+{
+	BEGIN_TRY();
+
+	int width = presenter->GetWidth();
+	int height = presenter->GetHeight();
+
+	ptr<RawTextureData> data = NEW(RawTextureData(nullptr, PixelFormats::uintRGBA32, width, height, 0, 1, 0));
+
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glPixelStorei(GL_PACK_ROW_LENGTH, data->GetMipWidth());
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+	glReadBuffer(GL_BACK);
+	glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data->GetMipData());
+	GlSystem::CheckErrors("Can't read pixels");
+
+	// mirror image vertically (because OpenGL writes image from bottom to top)
+	uint8_t* lines = (uint8_t*)data->GetMipData();
+	int pitch = data->GetMipLinePitch();
+	for(int i = 0; i * 2 < height; ++i)
+	{
+		std::swap_ranges(lines + i * pitch, lines + (i + 1) * pitch, lines + (height - i - 1) * pitch);
+	}
+
+	return data;
+
+	END_TRY("Can't get OpenGL presenter texture data");
 }
 
 END_INANITY_GRAPHICS

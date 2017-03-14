@@ -14,6 +14,8 @@
 #include "Dx11IndexBuffer.hpp"
 #include "VertexLayout.hpp"
 #include "Dx11BlendState.hpp"
+#include "Dx11Presenter.hpp"
+#include "RawTextureData.hpp"
 #include "../File.hpp"
 #include "../Exception.hpp"
 
@@ -514,6 +516,57 @@ void Dx11Context::DrawInstanced(int instancesCount, int count)
 		THROW_ASSERT(abstractVertexBuffer);
 		deviceContext->DrawInstanced(count >= 0 ? count : fast_cast<Dx11VertexBuffer*>(abstractVertexBuffer)->GetVerticesCount(), instancesCount, 0, 0);
 	}
+}
+
+ptr<RawTextureData> Dx11Context::GetPresenterTextureData(ptr<Presenter> presenter)
+{
+	BEGIN_TRY();
+
+	ID3D11RenderTargetView* renderTargetViewInterface = presenter.FastCast<Dx11Presenter>()->GetBackBuffer()->GetRenderTargetViewInterface();
+
+	ComPointer<ID3D11Resource> resourceInterface;
+	renderTargetViewInterface->GetResource(&resourceInterface);
+
+	ComPointer<ID3D11Texture2D> textureInterface;
+	if(FAILED(resourceInterface->QueryInterface(__uuidof(ID3D11Texture2D), (void**)&textureInterface)))
+		THROW("Can't get texture interface");
+	resourceInterface = nullptr;
+
+	D3D11_TEXTURE2D_DESC desc;
+	textureInterface->GetDesc(&desc);
+
+	// create temporary CPU-accessible texture
+	desc.Usage = D3D11_USAGE_STAGING;
+	desc.BindFlags = 0;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	desc.MiscFlags = 0;
+	ComPointer<ID3D11Texture2D> tempTextureInterface;
+	if(FAILED(device->CreateTexture2D(&desc, NULL, &tempTextureInterface)))
+		THROW("Can't create temporary texture");
+
+	// copy data
+	deviceContext->CopyResource(tempTextureInterface, textureInterface);
+	textureInterface = nullptr;
+
+	// create buffer
+	ptr<RawTextureData> textureData = NEW(RawTextureData(nullptr, PixelFormats::uintRGBA32, desc.Width, desc.Height, 0, 1, 0));
+
+	// map data
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	if(FAILED(deviceContext->Map(tempTextureInterface, 0, D3D11_MAP_READ, 0, &mappedResource)))
+		THROW("Can't map resource");
+
+	uint8_t* mipData = (uint8_t*)textureData->GetMipData();
+	int pitch = textureData->GetMipLinePitch();
+	for(UINT i = 0; i < desc.Height; ++i)
+		memcpy(mipData + i * pitch, (uint8_t const*)mappedResource.pData + i * mappedResource.RowPitch, pitch);
+
+	// unmap data
+	deviceContext->Unmap(tempTextureInterface, 0);
+
+	return textureData;
+
+	END_TRY("Can't get DirectX11 presenter texture data");
 }
 
 END_INANITY_GRAPHICS
