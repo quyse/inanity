@@ -18,6 +18,7 @@
 #include "AttributeLayout.hpp"
 #include "RawTextureData.hpp"
 #include "Dx11SamplerState.hpp"
+#include "Dx11DepthStencilState.hpp"
 #include "Dx11BlendState.hpp"
 #include "../platform/Win32Window.hpp"
 #include "../File.hpp"
@@ -621,6 +622,11 @@ ptr<SamplerState> Dx11Device::CreateSamplerState(const SamplerSettings& samplerS
 	return NEW(Dx11SamplerState(samplerStateInterface));
 
 	END_TRY("Can't create DirectX 11 sampler state");
+}
+
+ptr<DepthStencilState> Dx11Device::CreateDepthStencilState()
+{
+	return NEW(Dx11DepthStencilState());
 }
 
 ptr<BlendState> Dx11Device::CreateBlendState()

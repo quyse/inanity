@@ -14,6 +14,7 @@
 #include "GlAttributeBinding.hpp"
 #include "GlVertexBuffer.hpp"
 #include "GlIndexBuffer.hpp"
+#include "GlDepthStencilState.hpp"
 #include "GlBlendState.hpp"
 #include "GlInternalTexture.hpp"
 #include "VertexLayout.hpp"
@@ -396,66 +397,19 @@ void GlContext::Update()
 		cellViewport.Actual();
 	}
 
-	// depth test func & depth write
-	LetDepthTestFunc* letDTF = (LetDepthTestFunc*)cellDepthTestFunc.top;
-	DepthTestFunc depthTestFunc = letDTF->depthTestFunc;
-	LetDepthWrite* letDW = (LetDepthWrite*)cellDepthWrite.top;
-	bool depthWrite = letDW->depthWrite;
-	// enable or disable depth test
-	if(!cellDepthTestFunc.IsActual() || !cellDepthWrite.IsActual())
+	// depth-stencil state
+	if(!cellDepthStencilState.IsActual())
 	{
-		((depthTestFunc != depthTestFuncAlways || depthWrite) ? glEnable : glDisable)(GL_DEPTH_TEST);
-	}
+		LetDepthStencilState* let = (LetDepthStencilState*)cellDepthStencilState.top;
+		DepthStencilState* abstractDepthStencilState = let->depthStencilState;
+		if(abstractDepthStencilState)
+			fast_cast<GlDepthStencilState*>(abstractDepthStencilState)->Apply();
+		else
+			GlDepthStencilState::ApplyDefault();
 
-	// depth test func
-	if(!cellDepthTestFunc.IsActual())
-	{
-		GLenum func;
-		switch(depthTestFunc)
-		{
-		case depthTestFuncNever:
-			func = GL_NEVER;
-			break;
-		case depthTestFuncLess:
-			func = GL_LESS;
-			break;
-		case depthTestFuncLessOrEqual:
-			func = GL_LEQUAL;
-			break;
-		case depthTestFuncEqual:
-			func = GL_EQUAL;
-			break;
-		case depthTestFuncNonEqual:
-			func = GL_NOTEQUAL;
-			break;
-		case depthTestFuncGreaterOrEqual:
-			func = GL_GEQUAL;
-			break;
-		case depthTestFuncGreater:
-			func = GL_GREATER;
-			break;
-		case depthTestFuncAlways:
-			func = GL_ALWAYS;
-			break;
-		default:
-			THROW("Unknown depth test func");
-		}
+		GlSystem::CheckErrors("Can't bind depth-stencil state");
 
-		glDepthFunc(func);
-
-		GlSystem::CheckErrors("Can't bind depth test func");
-
-		cellDepthTestFunc.Actual();
-	}
-
-	// depth write
-	if(!cellDepthWrite.IsActual())
-	{
-		glDepthMask(depthWrite ? GL_TRUE : GL_FALSE);
-
-		GlSystem::CheckErrors("Can't bind depth write");
-
-		cellDepthWrite.Actual();
+		cellDepthStencilState.Actual();
 	}
 
 	// blend state
@@ -522,10 +476,9 @@ void GlContext::ClearDepth(float depth)
 	UpdateFramebuffer();
 	// nesessary for depth clear
 	glEnable(GL_DEPTH_TEST);
-	cellDepthTestFunc.Reset();
 	glDepthFunc(GL_ALWAYS);
-	cellDepthWrite.Reset();
 	glDepthMask(GL_TRUE);
+	cellDepthStencilState.Reset();
 
 #ifdef ___INANITY_PLATFORM_EMSCRIPTEN
 	glClearDepth(depth);
@@ -536,7 +489,7 @@ void GlContext::ClearDepth(float depth)
 	GlSystem::CheckErrors("Can't clear depth");
 }
 
-void GlContext::ClearStencil(unsigned stencil)
+void GlContext::ClearStencil(uint8_t stencil)
 {
 	UpdateFramebuffer();
 	GLint s = stencil;
@@ -549,9 +502,15 @@ void GlContext::ClearStencil(unsigned stencil)
 	GlSystem::CheckErrors("Can't clear stencil");
 }
 
-void GlContext::ClearDepthStencil(float depth, unsigned stencil)
+void GlContext::ClearDepthStencil(float depth, uint8_t stencil)
 {
 	UpdateFramebuffer();
+	// nesessary for depth clear
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_ALWAYS);
+	glDepthMask(GL_TRUE);
+	cellDepthStencilState.Reset();
+
 #ifdef ___INANITY_PLATFORM_EMSCRIPTEN
 	glClearDepth(depth);
 	glClearStencil(stencil);

@@ -3,97 +3,85 @@
 
 BEGIN_INANITY_GRAPHICS
 
-ID3D11BlendState* Dx11BlendState::GetBlendStateInterface(ID3D11Device* deviceInterface)
-{
-	Update(deviceInterface);
-	return blendState;
-}
-
 D3D11_BLEND Dx11BlendState::ConvertColorSource(ColorSource colorSource)
 {
-	D3D11_BLEND r;
 	switch(colorSource)
 	{
 	case colorSourceZero:
-		r = D3D11_BLEND_ZERO; break;
+		return D3D11_BLEND_ZERO;
 	case colorSourceOne:
-		r = D3D11_BLEND_ONE; break;
+		return D3D11_BLEND_ONE;
 	case colorSourceSrc:
-		r = D3D11_BLEND_SRC_COLOR; break;
+		return D3D11_BLEND_SRC_COLOR;
 	case colorSourceInvSrc:
-		r = D3D11_BLEND_INV_SRC_COLOR; break;
+		return D3D11_BLEND_INV_SRC_COLOR;
 	case colorSourceSrcAlpha:
-		r = D3D11_BLEND_SRC_ALPHA; break;
+		return D3D11_BLEND_SRC_ALPHA;
 	case colorSourceInvSrcAlpha:
-		r = D3D11_BLEND_INV_SRC_ALPHA; break;
+		return D3D11_BLEND_INV_SRC_ALPHA;
 	case colorSourceDest:
-		r = D3D11_BLEND_DEST_COLOR; break;
+		return D3D11_BLEND_DEST_COLOR;
 	case colorSourceInvDest:
-		r = D3D11_BLEND_INV_DEST_COLOR; break;
+		return D3D11_BLEND_INV_DEST_COLOR;
 	case colorSourceDestAlpha:
-		r = D3D11_BLEND_DEST_ALPHA; break;
+		return D3D11_BLEND_DEST_ALPHA;
 	case colorSourceInvDestAlpha:
-		r = D3D11_BLEND_INV_DEST_ALPHA; break;
+		return D3D11_BLEND_INV_DEST_ALPHA;
 	case colorSourceSecondSrc:
-		r = D3D11_BLEND_SRC1_COLOR; break;
+		return D3D11_BLEND_SRC1_COLOR;
 	case colorSourceInvSecondSrc:
-		r = D3D11_BLEND_INV_SRC1_COLOR; break;
+		return D3D11_BLEND_INV_SRC1_COLOR;
 	case colorSourceSecondSrcAlpha:
-		r = D3D11_BLEND_SRC1_ALPHA; break;
+		return D3D11_BLEND_SRC1_ALPHA;
 	case colorSourceInvSecondSrcAlpha:
-		r = D3D11_BLEND_INV_SRC1_ALPHA; break;
+		return D3D11_BLEND_INV_SRC1_ALPHA;
 	default:
 		THROW("Unknown color source");
 	}
-	return r;
 }
 
 D3D11_BLEND Dx11BlendState::ConvertAlphaSource(AlphaSource alphaSource)
 {
-	D3D11_BLEND r;
 	switch(alphaSource)
 	{
 	case alphaSourceZero:
-		r = D3D11_BLEND_ZERO; break;
+		return D3D11_BLEND_ZERO;
 	case alphaSourceOne:
-		r = D3D11_BLEND_ONE; break;
+		return D3D11_BLEND_ONE;
 	case alphaSourceSrc:
-		r = D3D11_BLEND_SRC_ALPHA; break;
+		return D3D11_BLEND_SRC_ALPHA;
 	case alphaSourceInvSrc:
-		r = D3D11_BLEND_INV_SRC_ALPHA; break;
+		return D3D11_BLEND_INV_SRC_ALPHA;
 	case alphaSourceDest:
-		r = D3D11_BLEND_DEST_ALPHA; break;
+		return D3D11_BLEND_DEST_ALPHA;
 	case alphaSourceInvDest:
-		r = D3D11_BLEND_INV_DEST_ALPHA; break;
+		return D3D11_BLEND_INV_DEST_ALPHA;
 	case alphaSourceSecondSrc:
-		r = D3D11_BLEND_SRC1_ALPHA; break;
+		return D3D11_BLEND_SRC1_ALPHA;
 	case alphaSourceInvSecondSrc:
-		r = D3D11_BLEND_INV_SRC1_ALPHA; break;
+		return D3D11_BLEND_INV_SRC1_ALPHA;
 	default:
 		THROW("Unknown alpha source");
 	}
-	return r;
 }
 
 D3D11_BLEND_OP Dx11BlendState::ConvertOperation(Operation operation)
 {
-	D3D11_BLEND_OP r;
 	switch(operation)
 	{
 	case operationAdd:
-		r = D3D11_BLEND_OP_ADD; break;
+		return D3D11_BLEND_OP_ADD;
 	case operationSubtractAB:
-		r = D3D11_BLEND_OP_SUBTRACT; break;
+		return D3D11_BLEND_OP_SUBTRACT;
 	case operationSubtractBA:
-		r = D3D11_BLEND_OP_REV_SUBTRACT; break;
+		return D3D11_BLEND_OP_REV_SUBTRACT;
 	case operationMin:
-		r = D3D11_BLEND_OP_MIN; break;
+		return D3D11_BLEND_OP_MIN;
 	case operationMax:
-		r = D3D11_BLEND_OP_MAX; break;
+		return D3D11_BLEND_OP_MAX;
 	default:
 		THROW("Unknown operation");
 	}
-	return r;
 }
 
 void Dx11BlendState::Update(ID3D11Device* deviceInterface)
@@ -104,34 +92,37 @@ void Dx11BlendState::Update(ID3D11Device* deviceInterface)
 	// удалить предыдущий объект
 	blendState = 0;
 
-	try
-	{
-		D3D11_BLEND_DESC desc = CD3D11_BLEND_DESC(CD3D11_DEFAULT());
+	BEGIN_TRY();
 
-		// пока не реализовано
-		desc.AlphaToCoverageEnable = FALSE;
-		// пока смешивание общее для всех таргетов
-		desc.IndependentBlendEnable = FALSE;
-		
-		D3D11_RENDER_TARGET_BLEND_DESC& d = desc.RenderTarget[0];
+	D3D11_BLEND_DESC desc = CD3D11_BLEND_DESC(CD3D11_DEFAULT());
 
-		d.BlendEnable = enable;
-		d.SrcBlend = ConvertColorSource(sourceColor);
-		d.DestBlend = ConvertColorSource(destColor);
-		d.BlendOp = ConvertOperation(colorOperation);
-		d.SrcBlendAlpha = ConvertAlphaSource(sourceAlpha);
-		d.DestBlendAlpha = ConvertAlphaSource(destAlpha);
-		d.BlendOpAlpha = ConvertOperation(alphaOperation);
+	// пока не реализовано
+	desc.AlphaToCoverageEnable = FALSE;
+	// пока смешивание общее для всех таргетов
+	desc.IndependentBlendEnable = FALSE;
 
-		if(FAILED(deviceInterface->CreateBlendState(&desc, &blendState)))
-			THROW("Can't create blend state");
+	D3D11_RENDER_TARGET_BLEND_DESC& d = desc.RenderTarget[0];
 
-		dirty = false;
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY("Can't update DirectX blend state", exception);
-	}
+	d.BlendEnable = enable;
+	d.SrcBlend = ConvertColorSource(sourceColor);
+	d.DestBlend = ConvertColorSource(destColor);
+	d.BlendOp = ConvertOperation(colorOperation);
+	d.SrcBlendAlpha = ConvertAlphaSource(sourceAlpha);
+	d.DestBlendAlpha = ConvertAlphaSource(destAlpha);
+	d.BlendOpAlpha = ConvertOperation(alphaOperation);
+
+	if(FAILED(deviceInterface->CreateBlendState(&desc, &blendState)))
+		THROW("Can't create blend state");
+
+	dirty = false;
+
+	END_TRY("Can't update DirectX blend state");
+}
+
+ID3D11BlendState* Dx11BlendState::GetBlendStateInterface(ID3D11Device* deviceInterface)
+{
+	Update(deviceInterface);
+	return blendState;
 }
 
 END_INANITY_GRAPHICS

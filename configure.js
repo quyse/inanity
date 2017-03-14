@@ -192,7 +192,7 @@ var libraries = {
 			'graphics.Device', 'graphics.Context',
 			'graphics.FrameBuffer',
 			'graphics.UniformBuffer', 'graphics.VertexBuffer', 'graphics.IndexBuffer',
-			'graphics.SamplerSettings', 'graphics.BlendState',
+			'graphics.SamplerSettings', 'graphics.DepthStencilState', 'graphics.BlendState',
 			'graphics.AttributeLayout', 'graphics.AttributeLayoutElement', 'graphics.AttributeLayoutSlot',
 			'graphics.ShaderCache',
 			'graphics.TextureManager',
@@ -209,7 +209,7 @@ var libraries = {
 			'graphics.Dx11VertexBuffer', 'graphics.Dx11IndexBuffer', 'graphics.Dx11AttributeBinding',
 			'graphics.Dx11VertexShader', 'graphics.Dx11PixelShader',
 			'graphics.Dx11CompiledShader', 'graphics.Dx11ShaderResources',
-			'graphics.Dx11SamplerState', 'graphics.Dx11BlendState',
+			'graphics.Dx11SamplerState', 'graphics.Dx11DepthStencilState', 'graphics.Dx11BlendState',
 			'graphics.D3DBlobFile', 'graphics.Dx11ShaderCompiler', 'graphics.Hlsl11Source',
 			'graphics.DxgiAdapter', 'graphics.DxgiMonitor', 'graphics.DxgiMonitorMode'
 		]
@@ -223,7 +223,7 @@ var libraries = {
 			'graphics.GlRenderBuffer', 'graphics.GlDepthStencilBuffer', 'graphics.GlTexture', 'graphics.GlUniformBuffer',
 			'graphics.GlVertexBuffer', 'graphics.GlIndexBuffer', 'graphics.GlAttributeBinding',
 			'graphics.GlVertexShader', 'graphics.GlPixelShader',
-			'graphics.GlSamplerState', 'graphics.GlBlendState',
+			'graphics.GlSamplerState', 'graphics.GlDepthStencilState', 'graphics.GlBlendState',
 			'graphics.GlShaderCompiler', 'graphics.GlslSource', 'graphics.GlShaderBindings'
 		],
 		'objects-win32': ['graphics.WglPresenter'],

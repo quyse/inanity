@@ -18,6 +18,7 @@
 #include "GlInternalTexture.hpp"
 #include "RawTextureData.hpp"
 #include "GlSamplerState.hpp"
+#include "GlDepthStencilState.hpp"
 #include "GlBlendState.hpp"
 #include "GlslSource.hpp"
 #include "GlShaderBindings.hpp"
@@ -1354,16 +1355,14 @@ ptr<SamplerState> GlDevice::CreateSamplerState(const SamplerSettings& samplerSet
 	END_TRY("Can't create OpenGL sampler state");
 }
 
+ptr<DepthStencilState> GlDevice::CreateDepthStencilState()
+{
+	return NEW(GlDepthStencilState());
+}
+
 ptr<BlendState> GlDevice::CreateBlendState()
 {
-	try
-	{
-		return NEW(GlBlendState());
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY("Can't create OpenGL blend state", exception);
-	}
+	return NEW(GlBlendState());
 }
 
 END_INANITY_GRAPHICS

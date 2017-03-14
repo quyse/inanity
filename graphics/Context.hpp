@@ -23,6 +23,7 @@ class PixelShader;
 class AttributeBinding;
 class VertexBuffer;
 class IndexBuffer;
+class DepthStencilState;
 class BlendState;
 class AttributeLayoutSlot;
 class Presenter;
@@ -197,34 +198,13 @@ public:
 		void operator()(Context* context, int viewportWidth, int viewportHeight);
 	};
 
-	// Depth test function.
-	/** To disable depth test simply set this function to 'always'. */
-	enum DepthTestFunc
+	/// Depth-stencil state element.
+	struct LetDepthStencilState : public Let
 	{
-		depthTestFuncNever,
-		depthTestFuncLess,
-		depthTestFuncLessOrEqual,
-		depthTestFuncEqual,
-		depthTestFuncNonEqual,
-		depthTestFuncGreaterOrEqual,
-		depthTestFuncGreater,
-		depthTestFuncAlways
-	};
-	struct LetDepthTestFunc : public Let
-	{
-		DepthTestFunc depthTestFunc;
-		LetDepthTestFunc();
-		LetDepthTestFunc(Context* context, DepthTestFunc depthTestFunc);
-		void operator()(Context* context, DepthTestFunc depthTestFunc);
-	};
-
-	/// Depth write element.
-	struct LetDepthWrite : public Let
-	{
-		bool depthWrite;
-		LetDepthWrite();
-		LetDepthWrite(Context* context, bool depthWrite);
-		void operator()(Context* context, bool depthWrite);
+		ptr<DepthStencilState> depthStencilState;
+		LetDepthStencilState();
+		LetDepthStencilState(Context* context, ptr<DepthStencilState> depthStencilState);
+		void operator()(Context* context, ptr<DepthStencilState> depthStencilState);
 	};
 
 	/// Blend state element.
@@ -252,8 +232,7 @@ protected:
 	Cell cellFillMode;
 	Cell cellCullMode;
 	Cell cellViewport;
-	Cell cellDepthTestFunc;
-	Cell cellDepthWrite;
+	Cell cellDepthStencilState;
 	Cell cellBlendState;
 
 	//*** Default lets for necessary cells.
@@ -262,8 +241,7 @@ protected:
 	LetIndexBuffer letDefaultIndexBuffer;
 	LetFillMode letDefaultFillMode;
 	LetCullMode letDefaultCullMode;
-	LetDepthTestFunc letDefaultDepthTestFunc;
-	LetDepthWrite letDefaultDepthWrite;
+	LetDepthStencilState letDefaultDepthStencilState;
 	LetBlendState letDefaultBlendState;
 
 protected:
@@ -281,9 +259,9 @@ public:
 	/// Clear depth in depth-stencil buffer.
 	virtual void ClearDepth(float depth) = 0;
 	/// Clear stencil in depth-stencil buffer.
-	virtual void ClearStencil(unsigned stencil) = 0;
+	virtual void ClearStencil(uint8_t stencil) = 0;
 	/// Clear depth & stencil in depth-stencil buffer.
-	virtual void ClearDepthStencil(float depth, unsigned stencil) = 0;
+	virtual void ClearDepthStencil(float depth, uint8_t stencil) = 0;
 
 	//******* Methods to upload data.
 	/* Immediate methods. */
