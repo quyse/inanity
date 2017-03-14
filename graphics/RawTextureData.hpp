@@ -106,6 +106,9 @@ public:
 	/// Load texture from stream.
 	static ptr<RawTextureData> Deserialize(ptr<InputStream> stream);
 
+	/// Make a copy of texture data.
+	ptr<RawTextureData> Clone() const;
+
 	/// Blit another 2D image on this image.
 	/** Clip if isn't in bounds. */
 	void Blit(ptr<RawTextureData> image, int destX, int destY, int sourceX, int sourceY, int width, int height);
@@ -116,8 +119,8 @@ public:
 	/// Premultiply color components with alpha.
 	ptr<RawTextureData> PremultiplyAlpha() const;
 
-	/// Convert to RG format.
-	ptr<RawTextureData> ConvertToRG() const;
+	/// Convert to another pixel format.
+	ptr<RawTextureData> Convert(PixelFormat newFormat) const;
 
 	/// Generate mip levels from zero level.
 	/** Existing levels starting from 1 are ignored. If mipsCount == 0 then optimal number of mips calculated.

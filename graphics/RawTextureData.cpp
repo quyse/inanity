@@ -300,6 +300,11 @@ ptr<RawTextureData> RawTextureData::Deserialize(ptr<InputStream> stream)
 	END_TRY("Can't deserialize raw texture data");
 }
 
+ptr<RawTextureData> RawTextureData::Clone() const
+{
+	return NEW(RawTextureData(MemoryFile::CreateViaCopy(pixels), format, width, height, depth, mips, count));
+}
+
 void RawTextureData::Blit(ptr<RawTextureData> image, int destX, int destY, int sourceX, int sourceY, int width, int height)
 {
 	BEGIN_TRY();
@@ -401,50 +406,31 @@ ptr<RawTextureData> RawTextureData::PremultiplyAlpha() const
 	return data;
 }
 
-ptr<RawTextureData> RawTextureData::ConvertToRG() const
+ptr<RawTextureData> RawTextureData::Convert(PixelFormat newFormat) const
 {
 	BEGIN_TRY();
 
-	if(format.type != PixelFormat::typeUncompressed) THROW("Texture must be uncompressed");
+	// if formats are the same, do nothing
+	if(format == newFormat) return Clone();
 
-	PixelFormat newFormat = format;
-	newFormat.pixel = PixelFormat::pixelRG;
-	switch(format.pixel)
-	{
-	case PixelFormat::pixelRGB:
-		switch(format.size)
-		{
-		case PixelFormat::size24bit:
-			newFormat.size = PixelFormat::size16bit;
-			break;
-		case PixelFormat::size96bit:
-			newFormat.size = PixelFormat::size64bit;
-			break;
-		default:
-			THROW("Unsupported RGB pixel size");
-		}
-	case PixelFormat::pixelRGBA:
-		switch(format.size)
-		{
-		case PixelFormat::size32bit:
-			newFormat.size = PixelFormat::size16bit;
-			break;
-		case PixelFormat::size128bit:
-			newFormat.size = PixelFormat::size64bit;
-			break;
-		default:
-			THROW("Unsupported RGBA pixel size");
-		}
-		break;
-	default:
-		THROW("Unsupported pixel format");
-	}
+	// compressed textures are not supported
+	if(format.type != PixelFormat::typeUncompressed || newFormat.type != PixelFormat::typeUncompressed) THROW("Texture must be uncompressed");
+
+	// different base types are not supported
+	if(format.format != newFormat.format) THROW("Formats are different");
+
+	// gamma conversion is not supported
+	if(format.srgb != newFormat.srgb) THROW("Gamma conversion is not supported");
+
+	const int pixelSize = PixelFormat::GetPixelSize(format.size);
+	const int newPixelSize = PixelFormat::GetPixelSize(newFormat.size);
+
+	// we can only reduce pixels
+	if(newPixelSize > pixelSize) THROW("Pixels may only be reduced");
 
 	// allocate memory
 	ptr<RawTextureData> newTextureData = NEW(RawTextureData(nullptr, newFormat, width, height, depth, mips, count));
 
-	const int pixelSize = GetPixelSize();
-	const int newPixelSize = newTextureData->GetPixelSize();
 	const int realCount = count > 0 ? count : 1;
 
 	for(int image = 0; image < realCount; ++image)
@@ -470,7 +456,7 @@ ptr<RawTextureData> RawTextureData::ConvertToRG() const
 
 	return newTextureData;
 
-	END_TRY("Can't convert to RG format");
+	END_TRY("Can't convert to another pixel format");
 }
 
 ptr<RawTextureData> RawTextureData::GenerateMips(int newMips) const

@@ -45,6 +45,145 @@ PixelFormat::PixelFormat(Compression compression, bool srgb) :
 	}
 }
 
+void PixelFormat::SetPixel(Pixel newPixel)
+{
+	switch(pixel)
+	{
+	case pixelR:
+		switch(newPixel)
+		{
+		case pixelR:
+			break;
+		case pixelRG:
+			switch(size)
+			{
+			case size8bit: size = size16bit; break;
+			case size16bit: size = size32bit; break;
+			case size32bit: size = size64bit; break;
+			case size64bit: size = size128bit; break;
+			default: THROW("Unsupported size for R->RG pixel conversion");
+			}
+			break;
+		case pixelRGB:
+			switch(size)
+			{
+			case size8bit: size = size24bit; break;
+			case size32bit: size = size96bit; break;
+			default: THROW("Unsupported size for R->RGB pixel conversion");
+			}
+			break;
+		case pixelRGBA:
+			switch(size)
+			{
+			case size8bit: size = size32bit; break;
+			case size16bit: size = size64bit; break;
+			case size32bit: size = size128bit; break;
+			default: THROW("Unsupported size for R->RGBA pixel conversion");
+			}
+			break;
+		}
+		break;
+	case pixelRG:
+		switch(newPixel)
+		{
+		case pixelR:
+			switch(size)
+			{
+			case size16bit: size = size8bit; break;
+			case size32bit: size = size16bit; break;
+			case size64bit: size = size32bit; break;
+			case size128bit: size = size64bit; break;
+			default: THROW("Unsupported size for RG->R pixel conversion");
+			}
+			break;
+		case pixelRG:
+			break;
+		case pixelRGB:
+			switch(size)
+			{
+			case size16bit: size = size24bit; break;
+			case size64bit: size = size96bit; break;
+			default: THROW("Unsupported size for RG->RGB pixel conversion");
+			}
+			break;
+		case pixelRGBA:
+			switch(size)
+			{
+			case size16bit: size = size32bit; break;
+			case size32bit: size = size64bit; break;
+			case size64bit: size = size128bit; break;
+			default: THROW("Unsupported size for RG->RGBA pixel conversion");
+			}
+			break;
+		}
+		break;
+	case pixelRGB:
+		switch(newPixel)
+		{
+		case pixelR:
+			switch(size)
+			{
+			case size24bit: size = size8bit; break;
+			case size96bit: size = size32bit; break;
+			default: THROW("Unsupported size for RGB->R pixel conversion");
+			}
+			break;
+		case pixelRG:
+			switch(size)
+			{
+			case size24bit: size = size16bit; break;
+			case size96bit: size = size64bit; break;
+			default: THROW("Unsupported size for RGB->RG pixel conversion");
+			}
+			break;
+		case pixelRGB:
+			break;
+		case pixelRGBA:
+			switch(size)
+			{
+			case size24bit: size = size32bit; break;
+			case size96bit: size = size128bit; break;
+			default: THROW("Unsupported size for RGB->RGBA pixel conversion");
+			}
+			break;
+		}
+		break;
+	case pixelRGBA:
+		switch(newPixel)
+		{
+		case pixelR:
+			switch(size)
+			{
+			case size32bit: size = size8bit; break;
+			case size64bit: size = size16bit; break;
+			case size128bit: size = size32bit; break;
+			default: THROW("Unsupported size for RGBA->R pixel compression");
+			}
+			break;
+		case pixelRG:
+			switch(size)
+			{
+			case size32bit: size = size16bit; break;
+			case size64bit: size = size32bit; break;
+			case size128bit: size = size64bit; break;
+			default: THROW("Unsupported size for RGBA->RG pixel compression");
+			}
+			break;
+		case pixelRGB:
+			switch(size)
+			{
+			case size32bit: size = size24bit; break;
+			case size128bit: size = size96bit; break;
+			default: THROW("Unsupported size for RGBA->RGB pixel conversion");
+			}
+			break;
+		case pixelRGBA:
+			break;
+		}
+		break;
+	}
+}
+
 void PixelFormat::Serialize(StreamWriter& writer)
 {
 	writer.WriteShortly(type);
@@ -138,6 +277,15 @@ PixelFormat PixelFormats::uintRGBA32S(
 	PixelFormat::pixelRGBA,
 	PixelFormat::formatUint,
 	PixelFormat::size32bit,
+	true);
+PixelFormat PixelFormats::uintRGB24(
+	PixelFormat::pixelRGB,
+	PixelFormat::formatUint,
+	PixelFormat::size24bit);
+PixelFormat PixelFormats::uintRGB24S(
+	PixelFormat::pixelRGB,
+	PixelFormat::formatUint,
+	PixelFormat::size24bit,
 	true);
 PixelFormat PixelFormats::floatR16(
 	PixelFormat::pixelR,

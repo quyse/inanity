@@ -87,6 +87,9 @@ struct PixelFormat
 	/// Compressed format constructor.
 	PixelFormat(Compression compression, bool srgb = false);
 
+	/// Set pixel components, preserving correct size.
+	void SetPixel(Pixel newPixel);
+
 	void Serialize(StreamWriter& writer);
 	static PixelFormat Deserialize(StreamReader& reader);
 
@@ -99,6 +102,8 @@ struct PixelFormats
 {
 	static PixelFormat uintRGBA32;
 	static PixelFormat uintRGBA32S;
+	static PixelFormat uintRGB24;
+	static PixelFormat uintRGB24S;
 	static PixelFormat floatR16;
 	static PixelFormat floatR32;
 	static PixelFormat floatRGB32;
