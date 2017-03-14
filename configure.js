@@ -217,7 +217,7 @@ var libraries = {
 	// ******* подсистема OpenGl
 	'libinanity-graphics-gl': {
 		objects: [
-			'graphics.GlSystem', 'graphics.GlDevice', 'graphics.GlContext',
+			'graphics.GlSystem', 'graphics.GlDevice', 'graphics.GlContext', 'graphics.GlPresenter',
 			'graphics.GlFrameBuffer',
 			'graphics.GlInternalTexture', 'graphics.GlInternalProgram', 'graphics.GlInternalProgramCache',
 			'graphics.GlRenderBuffer', 'graphics.GlDepthStencilBuffer', 'graphics.GlTexture', 'graphics.GlUniformBuffer',

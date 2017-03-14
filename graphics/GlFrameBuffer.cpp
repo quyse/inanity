@@ -34,7 +34,7 @@ void GlFrameBuffer::Apply()
 		device->BindPresenter(presenter);
 
 	// bind framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, name);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, name);
 	GlSystem::CheckErrors("Can't bind framebuffer");
 
 	// if not dirty, all ok

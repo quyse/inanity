@@ -8,6 +8,7 @@ BEGIN_INANITY_GRAPHICS
 class Device;
 class FrameBuffer;
 class MonitorMode;
+class RawTextureData;
 
 /// Абстрактный класс "представлятеля" графики на экран.
 class Presenter : public Object
@@ -37,6 +38,9 @@ public:
 	/// Изменить размер области вывода.
 	/** Вызывается окном, когда его размер изменяется. */
 	virtual void Resize(int width, int height) = 0;
+
+	/// Получить текстуру экрана на CPU (скриншот).
+	virtual ptr<RawTextureData> GetTextureData() const = 0;
 };
 
 END_INANITY_GRAPHICS

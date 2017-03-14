@@ -5,7 +5,7 @@
 BEGIN_INANITY_GRAPHICS
 
 SdlPresenter::SdlPresenter(ptr<GlDevice> device, ptr<GlFrameBuffer> frameBuffer, ptr<Platform::SdlWindow> window)
-: device(device), frameBuffer(frameBuffer), window(window), currentSwapInterval(-1), targetSwapInterval(1)
+: GlPresenter(device, frameBuffer), window(window), currentSwapInterval(-1), targetSwapInterval(1)
 {
 	window->SetPresenter(this);
 	width = window->GetClientWidth();
@@ -21,16 +21,6 @@ SdlPresenter::~SdlPresenter()
 void SdlPresenter::Bind(SDL_GLContext sdlContext)
 {
 	SDL_GL_MakeCurrent(window->GetHandle(), sdlContext);
-}
-
-ptr<Device> SdlPresenter::GetDevice() const
-{
-	return device;
-}
-
-ptr<FrameBuffer> SdlPresenter::GetFrameBuffer() const
-{
-	return frameBuffer;
 }
 
 int SdlPresenter::GetWidth() const
