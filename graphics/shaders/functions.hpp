@@ -23,12 +23,14 @@ inline Value<vec3> newvec3(Value<float> a, Value<float> b, Value<float> c) { ret
 inline Value<vec4> newvec4(Value<float> a, Value<float> b, Value<float> c, Value<float> d) { return OP4(Float1111to4, DataTypes::_vec4); }
 inline Value<vec4> newvec4(Value<vec3> a, Value<float> b) { return OP2(Float31to4, DataTypes::_vec4); }
 inline Value<vec4> newvec4(Value<vec2> a, Value<float> b, Value<float> c) { return OP3(Float211to4, DataTypes::_vec4); }
+inline Value<ivec2> newivec2(Value<int> a, Value<int> b) { return OP2(Int11to2, DataTypes::_ivec2); }
 
 // constants
 inline Value<float> val(float a) { return Value<float>(a); }
 inline Value<vec2> val(const vec2& a) { return newvec2(a.x, a.y); }
 inline Value<vec3> val(const vec3& a) { return newvec3(a.x, a.y, a.z); }
 inline Value<vec4> val(const vec4& a) { return newvec4(a.x, a.y, a.z, a.w); }
+inline Value<ivec2> val(const ivec2& a) { return newivec2(a.x, a.y); }
 
 // setPosition
 inline Expression setPosition(Value<vec4> a) { return AC1(SetPosition); }

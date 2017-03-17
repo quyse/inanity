@@ -28,6 +28,7 @@ public:
 		operationFloat1111to4,
 		operationFloat31to4,
 		operationFloat211to4,
+		operationInt11to2,
 		operationDot,
 		operationCross,
 		operationMul,

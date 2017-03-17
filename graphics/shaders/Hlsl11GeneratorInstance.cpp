@@ -294,6 +294,7 @@ void Hlsl11GeneratorInstance::PrintOperationNodeInit(OperationNode* node)
 				OP(Float1111to4, float4);
 				OP(Float31to4, float4);
 				OP(Float211to4, float4);
+				OP(Int11to2, int2);
 				OP(Dot, dot);
 				OP(Cross, cross);
 				OP(Mul, mul);

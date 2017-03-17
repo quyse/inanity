@@ -197,6 +197,26 @@ void GlslGeneratorInstance::PrintNodeInit(size_t nodeIndex)
 			ValueNode* gradXNode = sampleNode->GetGradXNode();
 			ValueNode* gradYNode = sampleNode->GetGradYNode();
 
+			auto printOffsetNode = [&]()
+			{
+				// offset node is required to be constant expression,
+				// but AMD driver requires it also to be compile-time expression
+				// so HACK: print value inline, only for known node
+				// PrintNode(offsetNode);
+				if(offsetNode->GetType() != Node::typeOperation)
+					THROW("wrong offset node");
+				OperationNode* offsetOperationNode = fast_cast<OperationNode*>(offsetNode);
+				if(
+					offsetOperationNode->GetOperation() != OperationNode::operationInt11to2 ||
+					offsetOperationNode->GetA()->GetType() != Node::typeIntConst ||
+					offsetOperationNode->GetB()->GetType() != Node::typeIntConst
+					)
+					THROW("wrong offset node");
+				text << "ivec2("
+					<< offsetOperationNode->GetA().FastCast<IntConstNode>()->GetValue() << ", "
+					<< offsetOperationNode->GetB().FastCast<IntConstNode>()->GetValue() << ")";
+			};
+
 			if(lodNode)
 			{
 				text << "textureLod";
@@ -209,7 +229,7 @@ void GlslGeneratorInstance::PrintNodeInit(size_t nodeIndex)
 				if(offsetNode)
 				{
 					text << ", ";
-					PrintNode(offsetNode);
+					printOffsetNode();
 				}
 			}
 			else if(biasNode)
@@ -222,7 +242,7 @@ void GlslGeneratorInstance::PrintNodeInit(size_t nodeIndex)
 				if(offsetNode)
 				{
 					text << ", ";
-					PrintNode(offsetNode);
+					printOffsetNode();
 				}
 				text << ", ";
 				PrintNode(biasNode);
@@ -241,7 +261,7 @@ void GlslGeneratorInstance::PrintNodeInit(size_t nodeIndex)
 				if(offsetNode)
 				{
 					text << ", ";
-					PrintNode(offsetNode);
+					printOffsetNode();
 				}
 			}
 			else
@@ -254,7 +274,7 @@ void GlslGeneratorInstance::PrintNodeInit(size_t nodeIndex)
 				if(offsetNode)
 				{
 					text << ", ";
-					PrintNode(offsetNode);
+					printOffsetNode();
 				}
 			}
 
@@ -381,6 +401,7 @@ void GlslGeneratorInstance::PrintOperationNodeInit(OperationNode* node)
 				OP(Float1111to4, vec4);
 				OP(Float31to4, vec4);
 				OP(Float211to4, vec4);
+				OP(Int11to2, ivec2);
 				OP(Dot, dot);
 				OP(Cross, cross);
 				OP(Mul, mul);
