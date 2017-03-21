@@ -268,8 +268,8 @@ void AsioTcpSocket::Received(const boost::system::error_code& error, size_t tran
 		if(error)
 		{
 			CloseNonSynced();
-			this->receiveHandler = 0;
-			this->receiveFile = 0;
+			this->receiveHandler = nullptr;
+			this->receiveFile = nullptr;
 		}
 		else
 			StartReceiving();
@@ -281,7 +281,7 @@ void AsioTcpSocket::Received(const boost::system::error_code& error, size_t tran
 		{
 			// если корректный конец файла, это не ошибка
 			if(error == boost::asio::error::eof)
-				receiveHandler->FireData(0);
+				receiveHandler->FireData(nullptr);
 			else
 				receiveHandler->FireError(AsioService::ConvertError(error));
 		}
@@ -303,33 +303,30 @@ void AsioTcpSocket::CloseNonSynced()
 
 void AsioTcpSocket::Send(ptr<File> file, ptr<SendHandler> sendHandler)
 {
-	try
+	BEGIN_TRY();
+
+	CriticalCode cc(cs);
+
+	// если запланировано закрытие передачи, то больше в очередь добавлять ничего нельзя
+	if(sendClosed)
+		THROW("Sending closed");
+
+	bool queueWasEmpty = sendQueue.empty();
+
+	// добавить элемент в очередь
+	sendQueue.push_back(SendItem(file, sendHandler));
+
+	// сбросить количество переданных данных в первом элементе,
+	// если очередь была пуста (то есть первый элемент как раз
+	// был добавлен)
+	// также, если очередь была пуста, начать отправку
+	if(queueWasEmpty)
 	{
-		CriticalCode cc(cs);
-
-		// если запланировано закрытие передачи, то больше в очередь добавлять ничего нельзя
-		if(sendClosed)
-			THROW("Sending closed");
-
-		bool queueWasEmpty = sendQueue.empty();
-
-		// добавить элемент в очередь
-		sendQueue.push_back(SendItem(file, sendHandler));
-
-		// сбросить количество переданных данных в первом элементе,
-		// если очередь была пуста (то есть первый элемент как раз
-		// был добавлен)
-		// также, если очередь была пуста, начать отправку
-		if(queueWasEmpty)
-		{
-			firstItemSent = 0;
-			StartSending();
-		}
+		firstItemSent = 0;
+		StartSending();
 	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY("Can't send data to Asio TCP socket", exception);
-	}
+
+	END_TRY("Can't send data to Asio TCP socket");
 }
 
 void AsioTcpSocket::End()
@@ -355,6 +352,11 @@ void AsioTcpSocket::SetReceiveHandler(ptr<ReceiveHandler> receiveHandler)
 	if(firstTime)
 		// запустить приём
 		StartReceiving();
+}
+
+void AsioTcpSocket::SetNoDelay(bool noDelay)
+{
+	socket.set_option(boost::asio::ip::tcp::no_delay(noDelay));
 }
 
 void AsioTcpSocket::Close()

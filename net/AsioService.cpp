@@ -221,7 +221,7 @@ public:
 	}
 };
 
-AsioService::AsioService() : tcpResolver(ioService), udpResolver(ioService) {}
+AsioService::AsioService() : work(ioService), tcpResolver(ioService), udpResolver(ioService) {}
 
 boost::asio::io_service& AsioService::GetIoService()
 {
@@ -242,12 +242,11 @@ ptr<Exception> AsioService::ConvertError(const boost::system::system_error& erro
 
 void AsioService::Run()
 {
-	do
+	while(!ioService.stopped())
 	{
-		ioService.run();
 		ioService.reset();
+		ioService.run();
 	}
-	while(!ioService.stopped());
 }
 
 void AsioService::Stop()

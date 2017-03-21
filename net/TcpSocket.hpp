@@ -43,6 +43,8 @@ public:
 	virtual void End() = 0;
 	/// Set receive data handler.
 	virtual void SetReceiveHandler(ptr<ReceiveHandler> receiveHandler) = 0;
+	/// Set NoDelay option.
+	virtual void SetNoDelay(bool noDelay) = 0;
 	/// Close receiving data side.
 	/** Releases references to itself and all handlers. */
 	virtual void Close() = 0;

@@ -34,7 +34,7 @@ public:
 	AsioTcpListener(ptr<AsioService> service, int port, ptr<SocketHandler> socketHandler);
 
 	//*** Методы TcpListener.
-	void Close();
+	void Close() override;
 };
 
 END_INANITY_NET

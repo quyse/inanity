@@ -59,10 +59,11 @@ public:
 	boost::asio::ip::tcp::socket& GetSocket();
 
 	//*** Методы TcpSocket.
-	void Send(ptr<File> file, ptr<SendHandler> sendHandler);
-	void End();
-	void SetReceiveHandler(ptr<ReceiveHandler> receiveHandler);
-	void Close();
+	void Send(ptr<File> file, ptr<SendHandler> sendHandler) override;
+	void End() override;
+	void SetReceiveHandler(ptr<ReceiveHandler> receiveHandler) override;
+	void SetNoDelay(bool noDelay) override;
+	void Close() override;
 };
 
 END_INANITY_NET
