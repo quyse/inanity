@@ -9,24 +9,20 @@ BEGIN_INANITY
 
 Thread::Thread(ptr<ThreadHandler> handler) : handler(handler)
 {
-	try
-	{
+	BEGIN_TRY();
 #if defined(___INANITY_PLATFORM_WINDOWS)
-		thread = NEW(Platform::Win32Handle(CreateThread(0, 0, ThreadRoutine, this, 0, 0)));
-		if(!thread->IsValid())
-			THROW_SECONDARY("CreateThread failed", Exception::SystemError());
+	thread = NEW(Platform::Win32Handle(CreateThread(0, 0, ThreadRoutine, this, 0, 0)));
+	if(!thread->IsValid())
+		THROW_SECONDARY("CreateThread failed", Exception::SystemError());
 #elif defined(___INANITY_PLATFORM_POSIX)
-		if(pthread_create(&thread, 0, ThreadRoutine, this))
-			THROW_SECONDARY("pthread_create failed", Exception::SystemError());
+	if(pthread_create(&thread, 0, ThreadRoutine, this))
+		THROW_SECONDARY("pthread_create failed", Exception::SystemError());
 #else
 #error Unknown platform
 #endif
-		Reference();
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY("Can't create thread", exception);
-	}
+	Reference();
+
+	END_TRY("Can't create thread");
 }
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
