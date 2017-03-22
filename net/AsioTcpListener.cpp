@@ -40,6 +40,8 @@ void AsioTcpListener::Close()
 	catch(boost::system::system_error error)
 	{
 	}
+
+	socketHandler = nullptr;
 }
 
 void AsioTcpListener::StartAccept()
@@ -63,13 +65,15 @@ void AsioTcpListener::Accepted(const boost::system::error_code& error)
 {
 	if(error)
 	{
-		socketHandler->FireError(AsioService::ConvertError(error));
+		if(socketHandler)
+			socketHandler->FireError(AsioService::ConvertError(error));
 		Close();
 	}
 	else
 	{
-		socketHandler->FireData(acceptingSocket);
-		acceptingSocket = 0;
+		if(socketHandler)
+			socketHandler->FireData(acceptingSocket);
+		acceptingSocket = nullptr;
 		StartAccept();
 	}
 }

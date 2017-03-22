@@ -167,9 +167,8 @@ void AsioTcpSocket::StartSending()
 			{
 				socket.shutdown(boost::asio::ip::tcp::socket::shutdown_send);
 			}
-			catch(boost::system::system_error error)
+			catch(boost::system::system_error)
 			{
-				THROW_SECONDARY("Can't close Asio TCP socket", AsioService::ConvertError(error));
 			}
 	}
 	else
