@@ -48,7 +48,7 @@ public:
 	static ptr<HttpStream> CreateRequestStream(ptr<OutputStream> outputStream);
 	static ptr<HttpStream> CreateResponseStream(ptr<OutputStream> outputStream);
 
-	void Write(const void* data, size_t size);
+	void Write(const void* data, size_t size) override;
 	void End();
 
 	/// Завершено ли корректно получение HTTP-ответа.
