@@ -19,8 +19,10 @@ class Service;
 class HttpClient : public Object
 {
 public:
-	/// Download data via HTTP.
-	static void Fetch(ptr<Service> service, const String& url, ptr<SuccessHandler> handler, ptr<OutputStream> outputStream);
+	/// General method for making HTTP request.
+	static void Fetch(ptr<Service> service, const String& url, const String& method, const String& data, const String& contentType, ptr<SuccessHandler> handler, ptr<OutputStream> outputStream);
+	/// Simple method for GET request.
+	static void Get(ptr<Service> service, const String& url, ptr<SuccessHandler> handler, ptr<OutputStream> outputStream);
 };
 
 END_INANITY_NET
