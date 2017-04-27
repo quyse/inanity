@@ -339,7 +339,7 @@ void GlContext::Update()
 		cellIndexBuffer.Actual();
 	}
 
-#ifndef ___INANITY_PLATFORM_EMSCRIPTEN
+#if !defined(___INANITY_PLATFORM_ANDROID) && !defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	if(!cellFillMode.IsActual())
 	{
 		LetFillMode* let = (LetFillMode*)cellFillMode.top;
@@ -614,6 +614,12 @@ void GlContext::DrawInstanced(int instancesCount, int count)
 
 ptr<RawTextureData> GlContext::GetPresenterTextureData(ptr<Presenter> presenter)
 {
+#if defined(___INANITY_PLATFORM_ANDROID)
+
+	THROW("Getting presenter texture data is unsupported");
+
+#else
+
 	BEGIN_TRY();
 
 	int width = presenter->GetWidth();
@@ -639,6 +645,8 @@ ptr<RawTextureData> GlContext::GetPresenterTextureData(ptr<Presenter> presenter)
 	return data;
 
 	END_TRY("Can't get OpenGL presenter texture data");
+
+#endif
 }
 
 END_INANITY_GRAPHICS

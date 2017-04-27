@@ -5,7 +5,7 @@
 #include "Win32Window.hpp"
 #include "../graphics/Dx11System.hpp"
 #include "../input/Win32RawManager.hpp"
-#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS) || defined(___INANITY_PLATFORM_ANDROID)
 #include "Sdl.hpp"
 #include "SdlWindow.hpp"
 #include "../input/SdlManager.hpp"
@@ -19,7 +19,9 @@
 
 #include "../input/Frame.hpp"
 #include "../graphics/GlSystem.hpp"
+#if !defined(___INANITY_PLATFORM_ANDROID)
 #include "../audio/AlSystem.hpp"
+#endif
 
 BEGIN_INANITY_PLATFORM
 
@@ -34,8 +36,12 @@ ptr<Graphics::System> Game::CreateDefaultGraphicsSystem()
 
 ptr<Audio::System> Game::CreateDefaultAudioSystem()
 {
+#if !defined(___INANITY_PLATFORM_ANDROID)
 	// for now there is only one system
 	return NEW(Audio::AlSystem());
+#else
+	THROW("No audio system supported");
+#endif
 }
 
 ptr<Input::Manager> Game::CreateInputManager(ptr<Window> window)
@@ -47,7 +53,7 @@ ptr<Input::Manager> Game::CreateInputManager(ptr<Window> window)
 	ptr<Input::Win32Manager> inputManager = NEW(Input::Win32RawManager(win32Window->GetHWND()));
 	win32Window->SetInputManager(inputManager);
 	return inputManager;
-#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS) || defined(___INANITY_PLATFORM_ANDROID)
 	ptr<Platform::SdlWindow> sdlWindow = window.DynamicCast<Platform::SdlWindow>();
 	ptr<Input::SdlManager> inputManager = NEW(Input::SdlManager());
 	sdlWindow->SetInputManager(inputManager);

@@ -130,6 +130,7 @@ var libraries = {
 		'objects-linux': ['input.SdlManager'],
 		'objects-freebsd': ['input.SdlManager'],
 		'objects-darwin': ['input.SdlManager'],
+		'objects-android': ['input.SdlManager'],
 		'objects-emscripten': ['input.SdlManager']
 	},
 	// ******* filesystem platform
@@ -145,6 +146,9 @@ var libraries = {
 			'platform.PosixFileSystem'
 		],
 		'objects-darwin': [
+			'platform.PosixFileSystem'
+		],
+		'objects-android': [
 			'platform.PosixFileSystem'
 		],
 		'objects-emscripten': [
@@ -168,6 +172,10 @@ var libraries = {
 			'graphics.SdlAdapter', 'graphics.SdlMonitor', 'graphics.SdlMonitorMode'
 		],
 		'objects-darwin': [
+			'platform.Sdl', 'platform.SdlWindow',
+			'graphics.SdlAdapter', 'graphics.SdlMonitor', 'graphics.SdlMonitorMode'
+		],
+		'objects-android': [
 			'platform.Sdl', 'platform.SdlWindow',
 			'graphics.SdlAdapter', 'graphics.SdlMonitor', 'graphics.SdlMonitorMode'
 		],
@@ -230,6 +238,7 @@ var libraries = {
 		'objects-linux': ['graphics.SdlPresenter'],
 		'objects-freebsd': ['graphics.SdlPresenter'],
 		'objects-darwin': ['graphics.SdlPresenter'],
+		'objects-android': ['graphics.SdlPresenter'],
 		'objects-emscripten': ['graphics.EmsPresenter']
 	},
 	// ******* подсистема шейдеров

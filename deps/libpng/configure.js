@@ -19,7 +19,8 @@ exports.configureCompiler = function(objectFile, compiler) {
 	compiler.cppMode = false;
 };
 
-var objects = [
+var library = {
+	objects: [
 	'png',
 	'pngerror',
 	'pngget',
@@ -34,14 +35,24 @@ var objects = [
 	'pngwio',
 	'pngwrite',
 	'pngwtran',
-	'pngwutil'
-];
+	'pngwutil',
+	],
+	'objects-android': [
+	'arm.arm_init',
+	'arm.filter_neon_intrinsics',
+	]
+};
+
+var platformed = function(object, field, platform) {
+	return (object[field] || []).concat(object[field + '-' + platform] || []);
+};
 
 exports.configureComposer = function(libraryFile, composer) {
 	// файлы библиотек: <conf>/library
 	var a = /^(([^\/]+)\/)([^\/]+)$/.exec(libraryFile);
 	var confDir = a[1];
 	composer.configuration = a[2];
+	var objects = platformed(library, 'objects', composer.platform);
 	for ( var i = 0; i < objects.length; ++i)
-		composer.addObjectFile(confDir + objects[i].replace(/\//g, '.'));
+		composer.addObjectFile(confDir + objects[i]);
 };

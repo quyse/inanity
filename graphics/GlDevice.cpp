@@ -30,7 +30,7 @@
 #include "WglPresenter.hpp"
 #include "Win32MonitorMode.hpp"
 #include "../platform/Win32Window.hpp"
-#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS) || defined(___INANITY_PLATFORM_ANDROID)
 #include "SdlPresenter.hpp"
 #include "SdlMonitorMode.hpp"
 #include "../platform/Sdl.hpp"
@@ -128,7 +128,7 @@ GlDevice::~GlDevice()
 		wglDeleteContext(hglrc);
 }
 
-#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS) || defined(___INANITY_PLATFORM_ANDROID)
 
 GlDevice::GlDevice(ptr<GlSystem> system)
 : system(system), boundPresenter(nullptr), sdlContext(0)
@@ -190,7 +190,7 @@ GlDevice::~GlDevice() {}
 
 void GlDevice::InitCaps()
 {
-#if defined(___INANITY_PLATFORM_WINDOWS) || defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS)
+#if defined(___INANITY_PLATFORM_WINDOWS) || defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS) || defined(___INANITY_PLATFORM_ANDROID)
 	GLint majorVersion, minorVersion;
 	glGetIntegerv(GL_MAJOR_VERSION, &majorVersion);
 	glGetIntegerv(GL_MINOR_VERSION, &minorVersion);
@@ -245,7 +245,7 @@ void GlDevice::BindPresenter(Presenter* presenter)
 				THROW("Can't bind hidden window");
 		}
 
-#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS) || defined(___INANITY_PLATFORM_ANDROID)
 
 		if(presenter)
 		{
@@ -300,7 +300,7 @@ ptr<Presenter> GlDevice::CreateWindowPresenter(ptr<Platform::Window> abstractWin
 	if(!mode && abstractMode)
 		THROW("Only Win32 monitor mode allowed");
 
-#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS) || defined(___INANITY_PLATFORM_ANDROID)
 
 	ptr<Platform::SdlWindow> window = abstractWindow.DynamicCast<Platform::SdlWindow>();
 	if(!window)
@@ -339,7 +339,7 @@ ptr<WglPresenter> GlDevice::CreatePresenter(ptr<Platform::Win32Window> window, p
 	END_TRY("Can't create Windows OpenGL presenter");
 }
 
-#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS) || defined(___INANITY_PLATFORM_ANDROID)
 
 ptr<SdlPresenter> GlDevice::CreatePresenter(ptr<Platform::SdlWindow> window, ptr<SdlMonitorMode> mode)
 {
@@ -1253,7 +1253,11 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data, const Sampl
 						}
 						else
 						{
+#if defined(___INANITY_PLATFORM_ANDROID)
+							glTexSubImage2D(target, mip, 0, 0, mipWidth, 1, format, type, mipData);
+#else
 							glTexSubImage1D(target, mip, 0, mipWidth, format, type, mipData);
+#endif
 						}
 					}
 					else
@@ -1264,7 +1268,11 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data, const Sampl
 						}
 						else
 						{
+#if defined(___INANITY_PLATFORM_ANDROID)
+							glTexImage2D(target, mip, internalFormat, mipWidth, 1, 0, format, type, mipData);
+#else
 							glTexImage1D(target, mip, internalFormat, mipWidth, 0, format, type, mipData);
+#endif
 						}
 					}
 

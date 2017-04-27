@@ -1,8 +1,5 @@
 #include "CriticalSection.hpp"
 #include "Exception.hpp"
-#ifdef ___INANITY_PLATFORM_POSIX
-#include <pthread.h>
-#endif
 
 BEGIN_INANITY
 

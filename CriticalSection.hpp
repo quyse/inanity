@@ -5,7 +5,7 @@
 #if defined(___INANITY_PLATFORM_WINDOWS)
 #include "platform/windows.hpp"
 #elif defined(___INANITY_PLATFORM_POSIX)
-#include <sys/types.h>
+#include <pthread.h>
 #else
 #error Unknown platform
 #endif
