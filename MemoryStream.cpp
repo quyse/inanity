@@ -68,4 +68,13 @@ ptr<File> MemoryStream::ToFile()
 	return dataSize < files[0]->GetSize() ? NEW(PartFile(files[0], files[0]->GetData(), dataSize)) : files[0];
 }
 
+void MemoryStream::Clear()
+{
+	// сжать все данные в не более чем один файл
+	Compact();
+	// очистить
+	dataSize = 0;
+	lastDataSize = 0;
+}
+
 END_INANITY
