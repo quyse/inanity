@@ -3,6 +3,7 @@
 
 #include "Service.hpp"
 #include "asio.hpp"
+#include <boost/scoped_ptr.hpp>
 
 BEGIN_INANITY_NET
 
@@ -11,7 +12,7 @@ class AsioService : public Service
 {
 private:
 	boost::asio::io_service ioService;
-	boost::asio::io_service::work work;
+	boost::scoped_ptr<boost::asio::io_service::work> work;
 	boost::asio::ip::tcp::resolver tcpResolver;
 	boost::asio::ip::udp::resolver udpResolver;
 

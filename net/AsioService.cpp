@@ -221,7 +221,7 @@ public:
 	}
 };
 
-AsioService::AsioService() : work(ioService), tcpResolver(ioService), udpResolver(ioService) {}
+AsioService::AsioService() : work(new boost::asio::io_service::work(ioService)), tcpResolver(ioService), udpResolver(ioService) {}
 
 boost::asio::io_service& AsioService::GetIoService()
 {
@@ -251,6 +251,7 @@ void AsioService::Run()
 
 void AsioService::Stop()
 {
+	work.reset();
 	ioService.stop();
 }
 
