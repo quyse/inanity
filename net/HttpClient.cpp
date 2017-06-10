@@ -40,8 +40,6 @@ private:
 			// отправить HTTP-запрос
 			socket->Send(requestFile);
 			requestFile = nullptr;
-			// закрыть передающую сторону
-			socket->End();
 		}
 		catch(Exception* exception)
 		{
