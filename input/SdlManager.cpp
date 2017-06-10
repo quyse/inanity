@@ -235,7 +235,11 @@ void SdlManager::ProcessEvent(const SDL_Event& event)
 			e.mouse.type = Event::Mouse::typeRawMove;
 			e.mouse.rawMoveX = 0;
 			e.mouse.rawMoveY = 0;
+#if defined(___INANITY_PLATFORM_EMSCRIPTEN)
+			e.mouse.rawMoveZ = event.wheel.y;
+#else
 			e.mouse.rawMoveZ = event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? -event.wheel.y : event.wheel.y;
+#endif
 			AddEvent(e);
 		}
 		// cursor move event
@@ -245,7 +249,11 @@ void SdlManager::ProcessEvent(const SDL_Event& event)
 			e.mouse.type = Event::Mouse::typeCursorMove;
 			e.mouse.cursorX = 0;
 			e.mouse.cursorY = 0;
+#if defined(___INANITY_PLATFORM_EMSCRIPTEN)
+			e.mouse.cursorZ = event.wheel.y;
+#else
 			e.mouse.cursorZ = event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? -event.wheel.y : event.wheel.y;
+#endif
 			AddEvent(e);
 		}
 		break;
