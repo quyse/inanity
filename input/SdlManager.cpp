@@ -227,6 +227,28 @@ void SdlManager::ProcessEvent(const SDL_Event& event)
 			}
 		}
 		break;
+	case SDL_MOUSEWHEEL:
+		// raw move event
+		{
+			Event e;
+			e.device = Event::deviceMouse;
+			e.mouse.type = Event::Mouse::typeRawMove;
+			e.mouse.rawMoveX = 0;
+			e.mouse.rawMoveY = 0;
+			e.mouse.rawMoveZ = event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? -event.wheel.y : event.wheel.y;
+			AddEvent(e);
+		}
+		// cursor move event
+		{
+			Event e;
+			e.device = Event::deviceMouse;
+			e.mouse.type = Event::Mouse::typeCursorMove;
+			e.mouse.cursorX = 0;
+			e.mouse.cursorY = 0;
+			e.mouse.cursorZ = event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? -event.wheel.y : event.wheel.y;
+			AddEvent(e);
+		}
+		break;
 #if !defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	case SDL_CONTROLLERDEVICEADDED:
 		// device added event
