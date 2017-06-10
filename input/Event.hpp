@@ -70,6 +70,8 @@ struct Event
 				//*** Absolute cursor position (in window coordinates).
 				int cursorX;
 				int cursorY;
+				//*** Relative mouse wheel movement.
+				int cursorZ;
 			};
 		};
 	};

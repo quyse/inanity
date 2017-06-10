@@ -187,6 +187,7 @@ void SdlManager::ProcessEvent(const SDL_Event& event)
 			e.mouse.type = Event::Mouse::typeCursorMove;
 			e.mouse.cursorX = (int)(event.motion.x * widthScale);
 			e.mouse.cursorY = (int)(event.motion.y * heightScale);
+			e.mouse.cursorZ = 0;
 			AddEvent(e);
 		}
 		break;

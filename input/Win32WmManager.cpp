@@ -83,17 +83,6 @@ bool Win32WmManager::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam
 			AddEvent(e);
 		}
 		break;
-	case WM_MOUSEWHEEL:
-		{
-			Event e;
-			e.device = Event::deviceMouse;
-			e.mouse.type = Event::Mouse::typeRawMove;
-			e.mouse.rawMoveX = 0;
-			e.mouse.rawMoveY = 0;
-			e.mouse.rawMoveZ = HIWORD(wParam);
-			AddEvent(e);
-		}
-		break;
 	default:
 		return false;
 	}

@@ -143,6 +143,18 @@ bool Win32Manager::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 			e.mouse.type = Event::Mouse::typeCursorMove;
 			e.mouse.cursorX = LOWORD(lParam);
 			e.mouse.cursorY = HIWORD(lParam);
+			e.mouse.cursorZ = 0;
+			AddEvent(e);
+		}
+		return true;
+	case WM_MOUSEWHEEL:
+		{
+			Event e;
+			e.device = Event::deviceMouse;
+			e.mouse.type = Event::Mouse::typeCursorMove;
+			e.mouse.cursorX = 0;
+			e.mouse.cursorY = 0;
+			e.mouse.cursorZ = HIWORD(wParam);
 			AddEvent(e);
 		}
 		return true;
