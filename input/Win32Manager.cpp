@@ -154,7 +154,7 @@ bool Win32Manager::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 			e.mouse.type = Event::Mouse::typeCursorMove;
 			e.mouse.cursorX = 0;
 			e.mouse.cursorY = 0;
-			e.mouse.cursorZ = (int)HIWORD(wParam);
+			e.mouse.cursorZ = GET_WHEEL_DELTA_WPARAM(wParam);
 			AddEvent(e);
 		}
 		return true;
