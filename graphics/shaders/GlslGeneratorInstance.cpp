@@ -267,11 +267,11 @@ void GlslGeneratorInstance::PrintNodeInit(size_t nodeIndex)
 			else
 			{
 				text << (glslVersion == GlslVersions::webgl ? "texture2D" : "texture");
-				if(offsetNode)
+				if(offsetNode && glslVersion != GlslVersions::webgl)
 					text << "Offset";
 				text << '(' << samplerPrefix << slot << ", ";
 				PrintNode(coordsNode);
-				if(offsetNode)
+				if(offsetNode && glslVersion != GlslVersions::webgl)
 				{
 					text << ", ";
 					printOffsetNode();

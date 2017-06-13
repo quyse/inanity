@@ -34,7 +34,11 @@ void GlFrameBuffer::Apply()
 		device->BindPresenter(presenter);
 
 	// bind framebuffer
+#ifdef ___INANITY_PLATFORM_EMSCRIPTEN
+	glBindFramebuffer(GL_FRAMEBUFFER, name);
+#else
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, name);
+#endif
 	GlSystem::CheckErrors("Can't bind framebuffer");
 
 	// if not dirty, all ok
