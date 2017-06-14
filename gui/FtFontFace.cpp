@@ -32,11 +32,11 @@ ptr<FontShape> FtFontFace::CreateShape(int size)
 	END_TRY("Can't create shape for Freetype font face");
 }
 
-ptr<FontGlyphs> FtFontFace::CreateGlyphs(Canvas* canvas, int size, int halfScaleX, int halfScaleY)
+ptr<FontGlyphs> FtFontFace::CreateGlyphs(Canvas* canvas, int size, int halfScaleX, int halfScaleY, std::vector<int>* glyphsNeeded)
 {
 	BEGIN_TRY();
 
-	FT_Long glyphsCount = ftFace->num_glyphs;
+	FT_Long glyphsCount = glyphsNeeded ? glyphsNeeded->size() : ftFace->num_glyphs;
 
 	if(FT_Set_Pixel_Sizes(ftFace, size * (halfScaleX * 2 + 1), size * (halfScaleY * 2 + 1)))
 		THROW("Can't set pixel sizes");
@@ -46,7 +46,7 @@ ptr<FontGlyphs> FtFontFace::CreateGlyphs(Canvas* canvas, int size, int halfScale
 
 	for(FT_Long i = 0; i < glyphsCount; ++i)
 	{
-		if(FT_Load_Glyph(ftFace, i, FT_LOAD_NO_HINTING))
+		if(FT_Load_Glyph(ftFace, glyphsNeeded ? (*glyphsNeeded)[i] : i, FT_LOAD_NO_HINTING))
 			THROW("Can't load glyph");
 
 		if(FT_Render_Glyph(ftFace->glyph, FT_RENDER_MODE_NORMAL))

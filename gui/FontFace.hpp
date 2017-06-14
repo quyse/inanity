@@ -2,6 +2,7 @@
 #define ___INANITY_GUI_FONT_FACE_HPP___
 
 #include "gui.hpp"
+#include <vector>
 
 BEGIN_INANITY_GUI
 
@@ -19,7 +20,7 @@ public:
 	/** Size in pixels. Scale is for better quality.
 	Half scale means additional number of pixels added for either side.
 	i.e. half scale = 2 means x5, = 0 means x1. */
-	virtual ptr<FontGlyphs> CreateGlyphs(Canvas* canvas, int size, int halfScaleX = 1, int halfScaleY = 0) = 0;
+	virtual ptr<FontGlyphs> CreateGlyphs(Canvas* canvas, int size, int halfScaleX = 0, int halfScaleY = 0, std::vector<int>* glyphsNeeded = nullptr) = 0;
 };
 
 END_INANITY_GUI

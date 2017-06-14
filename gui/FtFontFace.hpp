@@ -31,7 +31,7 @@ public:
 
 	//*** FontFace's methods.
 	ptr<FontShape> CreateShape(int size);
-	ptr<FontGlyphs> CreateGlyphs(Canvas* canvas, int size, int halfScaleX, int halfScaleY);
+	ptr<FontGlyphs> CreateGlyphs(Canvas* canvas, int size, int halfScaleX, int halfScaleY, std::vector<int>* glyphsNeeded);
 };
 
 END_INANITY_GUI
