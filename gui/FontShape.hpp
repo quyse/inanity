@@ -21,8 +21,11 @@ public:
 		int number;
 	};
 
+	/// Font script code.
+	typedef uint32_t Script;
+
 public:
-	virtual void Shape(const String& text, Graphics::vec2* outAdvance, std::vector<OutGlyph>* outGlyphs) = 0;
+	virtual void Shape(const String& text, Script script, Graphics::vec2* outAdvance, std::vector<OutGlyph>* outGlyphs) = 0;
 };
 
 END_INANITY_GUI

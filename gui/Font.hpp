@@ -36,7 +36,7 @@ private:
 	/// Bounds of shaped glyphs.
 	float left, top, right, bottom;
 
-	void InternalShape(const String& text);
+	void InternalShape(const String& text, FontShape::Script script);
 
 public:
 	Font(ptr<FontShape> shape, ptr<FontGlyphs> glyphs);
@@ -47,11 +47,12 @@ public:
 	void DrawString(
 		Canvas* canvas,
 		const String& text,
+		FontShape::Script script,
 		const Graphics::vec2& position,
 		const Graphics::vec4& color,
 		int textOriginFlags = textOriginPen | textOriginBaseline);
 
-	Graphics::vec2 GetStringSize(const String& text);
+	Graphics::vec2 GetStringSize(const String& text, FontShape::Script script);
 };
 
 END_INANITY_GUI

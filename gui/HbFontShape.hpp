@@ -14,6 +14,7 @@ class HbFontShape : public FontShape
 private:
 	ptr<FontFace> face;
 	hb_font_t* font;
+	hb_buffer_t* buffer;
 
 public:
 	HbFontShape(ptr<FontFace> face, hb_font_t* font);
@@ -21,7 +22,7 @@ public:
 
 	/// FontShape's methods.
 	/** Out parameters are optional. */
-	void Shape(const String& text, Graphics::vec2* outSize, std::vector<OutGlyph>* outGlyphs);
+	void Shape(const String& text, Script script, Graphics::vec2* outSize, std::vector<OutGlyph>* outGlyphs);
 };
 
 END_INANITY_GUI

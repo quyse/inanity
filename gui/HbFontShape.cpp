@@ -6,18 +6,19 @@ BEGIN_INANITY_GUI
 using namespace Graphics;
 
 HbFontShape::HbFontShape(ptr<FontFace> face, hb_font_t* font)
-: face(face), font(font) {}
+: face(face), font(font), buffer(hb_buffer_create()) {}
 
 HbFontShape::~HbFontShape()
 {
 	hb_font_destroy(font);
+	hb_buffer_destroy(buffer);
 }
 
-void HbFontShape::Shape(const String& text, vec2* outAdvance, std::vector<OutGlyph>* outGlyphs)
+void HbFontShape::Shape(const String& text, Script script, vec2* outAdvance, std::vector<OutGlyph>* outGlyphs)
 {
 	// shape text, and get glyph numbers and offsets
-	hb_buffer_t* buffer = hb_buffer_create();
-	hb_buffer_set_direction(buffer, HB_DIRECTION_LTR);
+	hb_buffer_set_script(buffer, (hb_script_t)script);
+	hb_buffer_set_direction(buffer, hb_script_get_horizontal_direction((hb_script_t)script));
 	hb_buffer_add_utf8(buffer, text.c_str(), (int)text.length(), 0, (int)text.length());
 	hb_shape(font, buffer, nullptr, 0);
 
@@ -53,7 +54,7 @@ void HbFontShape::Shape(const String& text, vec2* outAdvance, std::vector<OutGly
 		*outAdvance = position;
 
 	// cleanup
-	hb_buffer_destroy(buffer);
+	hb_buffer_clear_contents(buffer);
 }
 
 END_INANITY_GUI
