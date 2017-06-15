@@ -11,6 +11,7 @@
 #include "../graphics/VertexShader.hpp"
 #include "../graphics/PixelShader.hpp"
 #include "../graphics/BlendState.hpp"
+#include "../graphics/DepthStencilState.hpp"
 #include "../graphics/SamplerState.hpp"
 #include "../graphics/ShaderCache.hpp"
 #include "../graphics/VertexLayout.hpp"
@@ -272,8 +273,7 @@ void GrCanvas::Flush()
 	Context::LetBlendState lbs(context, helper->bs[subPixelMode]);
 	Context::LetCullMode lcm(context, Context::cullModeNone);
 	Context::LetFillMode lfm(context, Context::fillModeSolid);
-	Context::LetDepthTestFunc ldtf(context, Context::depthTestFuncAlways);
-	Context::LetDepthWrite ldw(context, false);
+	Context::LetDepthStencilState ldss(context, nullptr);
 	Context::LetUniformBuffer lub(context, helper->ugSymbols);
 	Context::LetSampler ls(context, helper->uFontSampler, currentFontTexture);
 
