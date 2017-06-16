@@ -2,23 +2,21 @@
 #define ___INANITY_DATA_BLOB_FILE_SYSTEM_BUILDER_HPP___
 
 #include "data.hpp"
-#include "../String.hpp"
+#include "../FileSystem.hpp"
 #include "../meta/decl.hpp"
 
 BEGIN_INANITY
 
-class OutputStream;
 class MemoryStream;
-class InputStream;
 class StreamWriter;
-class File;
 
 END_INANITY
 
 BEGIN_INANITY_DATA
 
 /// Класс построителя файловой системы.
-class BlobFileSystemBuilder : public Object
+/** Для удобства также является write-only файловой системой. */
+class BlobFileSystemBuilder : public FileSystem
 {
 private:
 	/// Записыватель, выполняющий запись в файловую систему.
@@ -32,6 +30,10 @@ public:
 	/// Создать построитель файловой системы.
 	/** Указывается поток, в который следует записывать данные. */
 	BlobFileSystemBuilder(ptr<OutputStream> outputStream);
+
+	/// Методы FileSystem.
+	ptr<File> TryLoadFile(const String& fileName);
+	void SaveFile(ptr<File> file, const String& fileName);
 
 	/// Добавить файл.
 	/**

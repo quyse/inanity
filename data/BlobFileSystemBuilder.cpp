@@ -26,6 +26,16 @@ BlobFileSystemBuilder::BlobFileSystemBuilder(ptr<OutputStream> outputStream)
 	}
 }
 
+ptr<File> BlobFileSystemBuilder::TryLoadFile(const String& fileName)
+{
+	return nullptr;
+}
+
+void BlobFileSystemBuilder::SaveFile(ptr<File> file, const String& fileName)
+{
+	AddFile(fileName, file);
+}
+
 void BlobFileSystemBuilder::AddFile(const String& fileName, ptr<File> file, size_t alignment)
 {
 	AddFileStream(fileName, NEW(FileInputStream(file)), alignment);
