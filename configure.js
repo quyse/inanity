@@ -311,6 +311,12 @@ var libraries = {
 			// harfbuzz
 			'gui.HbFontShape'
 		]
+	},
+	// ******* детерминированные числа
+	'libinanity-hardfloat': {
+		objects: [
+			'math.HardFloat'
+		]
 	}
 };
 
