@@ -126,32 +126,32 @@ HardFloat& HardFloat::operator/=(HardFloat b)
 
 bool operator==(HardFloat a, HardFloat b) CHECKED_IMPL_BEGIN_OP2_BOOL(a, b, ==)
 {
-	return (bool)_mm_comieq_ss(_mm_set_ss(a.f), _mm_set_ss(b.f));
+	return !!_mm_comieq_ss(_mm_set_ss(a.f), _mm_set_ss(b.f));
 } CHECKED_IMPL_END_OP0()
 
 bool operator!=(HardFloat a, HardFloat b) CHECKED_IMPL_BEGIN_OP2_BOOL(a, b, !=)
 {
-	return (bool)_mm_comineq_ss(_mm_set_ss(a.f), _mm_set_ss(b.f));
+	return !!_mm_comineq_ss(_mm_set_ss(a.f), _mm_set_ss(b.f));
 } CHECKED_IMPL_END_OP0()
 
 bool operator<(HardFloat a, HardFloat b) CHECKED_IMPL_BEGIN_OP2_BOOL(a, b, <)
 {
-	return (bool)_mm_comilt_ss(_mm_set_ss(a.f), _mm_set_ss(b.f));
+	return !!_mm_comilt_ss(_mm_set_ss(a.f), _mm_set_ss(b.f));
 } CHECKED_IMPL_END_OP0()
 
 bool operator<=(HardFloat a, HardFloat b) CHECKED_IMPL_BEGIN_OP2_BOOL(a, b, <=)
 {
-	return (bool)_mm_comile_ss(_mm_set_ss(a.f), _mm_set_ss(b.f));
+	return !!_mm_comile_ss(_mm_set_ss(a.f), _mm_set_ss(b.f));
 } CHECKED_IMPL_END_OP0()
 
 bool operator>(HardFloat a, HardFloat b) CHECKED_IMPL_BEGIN_OP2_BOOL(a, b, >)
 {
-	return (bool)_mm_comigt_ss(_mm_set_ss(a.f), _mm_set_ss(b.f));
+	return !!_mm_comigt_ss(_mm_set_ss(a.f), _mm_set_ss(b.f));
 } CHECKED_IMPL_END_OP0()
 
 bool operator>=(HardFloat a, HardFloat b) CHECKED_IMPL_BEGIN_OP2_BOOL(a, b, >=)
 {
-	return (bool)_mm_comige_ss(_mm_set_ss(a.f), _mm_set_ss(b.f));
+	return !!_mm_comige_ss(_mm_set_ss(a.f), _mm_set_ss(b.f));
 } CHECKED_IMPL_END_OP0()
 
 HardFloat abs(HardFloat a) CHECKED_IMPL_BEGIN(a, abs)
