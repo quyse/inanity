@@ -40,6 +40,7 @@ public:
 	friend Float abs(Float);
 	friend Float floor(Float);
 	friend Float ceil(Float);
+	friend Float trunc(Float);
 	friend Float sqrt(Float);
 	friend Float sin(Float);
 	friend Float cos(Float);

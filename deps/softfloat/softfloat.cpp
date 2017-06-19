@@ -143,6 +143,11 @@ Float ceil(Float a) CHECKED_IMPL_BEGIN(a, std::ceil)
 	return Float(f32_roundToInt(a.d, softfloat_round_max, false));
 } CHECKED_IMPL_END()
 
+Float trunc(Float a) CHECKED_IMPL_BEGIN(a, std::trunc)
+{
+	return Float(f32_roundToInt(a.d, softfloat_round_minMag, false));
+} CHECKED_IMPL_END()
+
 Float sqrt(Float a) CHECKED_IMPL_BEGIN(a, std::sqrt)
 {
 	return Float(f32_sqrt(a.d));
