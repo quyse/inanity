@@ -1,5 +1,4 @@
 #include "HardFloat.hpp"
-#include <xmmintrin.h>
 #include <cassert>
 
 // Debug checks
@@ -20,7 +19,7 @@
 		HardFloat ours = ([a, b]() mutable
 #define CHECKED_IMPL_END() \
 	)(); \
-		assert(theirs.getInternalUint32() == ours.getInternalUint32()); \
+		assert(theirs.getInternalUint32() == ours.d); \
 		return ours; \
 	}
 #define CHECKED_IMPL_BEGIN_OP0(op) \
@@ -52,7 +51,10 @@ const HardFloat HardFloat::pi = HardFloat::fromUint32Const(0x40490fdb);
 const HardFloat HardFloat::pi2 = HardFloat::fromUint32Const(0x40c90fdb);
 const HardFloat HardFloat::pi_2 = HardFloat::fromUint32Const(0x3fc90fdb);
 
-HardFloat::HardFloat() : f(0) {}
+HardFloat::HardFloat()
+{
+	_mm_store_ss(&f, _mm_setzero_ps());
+}
 
 HardFloat::HardFloat(int32_t n)
 {
@@ -66,123 +68,124 @@ HardFloat::HardFloat(uint32_t n)
 
 HardFloat::HardFloat(float n) : f(n) {}
 
+HardFloat::HardFloat(__m128 n)
+{
+	_mm_store_ss(&f, n);
+}
+
 HardFloat HardFloat::operator-() const
 {
-	float q = f;
-	*(uint32_t*)&q ^= 0x80000000U;
-	return HardFloat(q);
+	return fromUint32Const(d ^ 0x80000000);
 }
 
 HardFloat operator+(HardFloat a, HardFloat b) CHECKED_IMPL_BEGIN_OP2(a, b, +)
 {
-	return HardFloat(_mm_cvtss_f32(_mm_add_ss(_mm_set_ss(a.f), _mm_set_ss(b.f))));
+	return HardFloat(_mm_add_ss(_mm_load_ss(&a.f), _mm_load_ss(&b.f)));
 } CHECKED_IMPL_END()
 
 HardFloat operator-(HardFloat a, HardFloat b) CHECKED_IMPL_BEGIN_OP2(a, b, -)
 {
-	return HardFloat(_mm_cvtss_f32(_mm_sub_ss(_mm_set_ss(a.f), _mm_set_ss(b.f))));
+	return HardFloat(_mm_sub_ss(_mm_load_ss(&a.f), _mm_load_ss(&b.f)));
 } CHECKED_IMPL_END()
 
 HardFloat operator*(HardFloat a, HardFloat b) CHECKED_IMPL_BEGIN_OP2(a, b, *)
 {
-	return HardFloat(_mm_cvtss_f32(_mm_mul_ss(_mm_set_ss(a.f), _mm_set_ss(b.f))));
+	return HardFloat(_mm_mul_ss(_mm_load_ss(&a.f), _mm_load_ss(&b.f)));
 } CHECKED_IMPL_END()
 
 HardFloat operator/(HardFloat a, HardFloat b) CHECKED_IMPL_BEGIN_OP2(a, b, /)
 {
-	return HardFloat(_mm_cvtss_f32(_mm_div_ss(_mm_set_ss(a.f), _mm_set_ss(b.f))));
+	return HardFloat(_mm_div_ss(_mm_load_ss(&a.f), _mm_load_ss(&b.f)));
 } CHECKED_IMPL_END()
 
 HardFloat fmod(HardFloat a, HardFloat b) CHECKED_IMPL_BEGIN2(a, b, fmod)
 {
-	__m128 p = _mm_set_ss(a.f);
-	__m128 q = _mm_set_ss(b.f);
-	return HardFloat(_mm_cvtss_f32(_mm_sub_ss(p, _mm_mul_ss(_mm_cvt_si2ss(p, _mm_cvtt_ss2si(_mm_div_ss(p, q))), q))));
+	__m128 p = _mm_load_ss(&a.f);
+	__m128 q = _mm_load_ss(&b.f);
+	return HardFloat(_mm_sub_ss(p, _mm_mul_ss(_mm_cvt_si2ss(p, _mm_cvtt_ss2si(_mm_div_ss(p, q))), q)));
 } CHECKED_IMPL_END()
 
 HardFloat& HardFloat::operator+=(HardFloat b)
 {
-	_mm_store_ss(&f, _mm_add_ss(_mm_set_ss(f), _mm_set_ss(b.f)));
+	_mm_store_ss(&f, _mm_add_ss(_mm_load_ss(&f), _mm_load_ss(&b.f)));
 	return *this;
 }
 
 HardFloat& HardFloat::operator-=(HardFloat b)
 {
-	_mm_store_ss(&f, _mm_sub_ss(_mm_set_ss(f), _mm_set_ss(b.f)));
+	_mm_store_ss(&f, _mm_sub_ss(_mm_load_ss(&f), _mm_load_ss(&b.f)));
 	return *this;
 }
 
 HardFloat& HardFloat::operator*=(HardFloat b)
 {
-	_mm_store_ss(&f, _mm_mul_ss(_mm_set_ss(f), _mm_set_ss(b.f)));
+	_mm_store_ss(&f, _mm_mul_ss(_mm_load_ss(&f), _mm_load_ss(&b.f)));
 	return *this;
 }
 
 HardFloat& HardFloat::operator/=(HardFloat b)
 {
-	_mm_store_ss(&f, _mm_div_ss(_mm_set_ss(f), _mm_set_ss(b.f)));
+	_mm_store_ss(&f, _mm_div_ss(_mm_load_ss(&f), _mm_load_ss(&b.f)));
 	return *this;
 }
 
 bool operator==(HardFloat a, HardFloat b) CHECKED_IMPL_BEGIN_OP2_BOOL(a, b, ==)
 {
-	return !!_mm_comieq_ss(_mm_set_ss(a.f), _mm_set_ss(b.f));
+	return !!_mm_comieq_ss(_mm_load_ss(&a.f), _mm_load_ss(&b.f));
 } CHECKED_IMPL_END_OP0()
 
 bool operator!=(HardFloat a, HardFloat b) CHECKED_IMPL_BEGIN_OP2_BOOL(a, b, !=)
 {
-	return !!_mm_comineq_ss(_mm_set_ss(a.f), _mm_set_ss(b.f));
+	return !!_mm_comineq_ss(_mm_load_ss(&a.f), _mm_load_ss(&b.f));
 } CHECKED_IMPL_END_OP0()
 
 bool operator<(HardFloat a, HardFloat b) CHECKED_IMPL_BEGIN_OP2_BOOL(a, b, <)
 {
-	return !!_mm_comilt_ss(_mm_set_ss(a.f), _mm_set_ss(b.f));
+	return !!_mm_comilt_ss(_mm_load_ss(&a.f), _mm_load_ss(&b.f));
 } CHECKED_IMPL_END_OP0()
 
 bool operator<=(HardFloat a, HardFloat b) CHECKED_IMPL_BEGIN_OP2_BOOL(a, b, <=)
 {
-	return !!_mm_comile_ss(_mm_set_ss(a.f), _mm_set_ss(b.f));
+	return !!_mm_comile_ss(_mm_load_ss(&a.f), _mm_load_ss(&b.f));
 } CHECKED_IMPL_END_OP0()
 
 bool operator>(HardFloat a, HardFloat b) CHECKED_IMPL_BEGIN_OP2_BOOL(a, b, >)
 {
-	return !!_mm_comigt_ss(_mm_set_ss(a.f), _mm_set_ss(b.f));
+	return !!_mm_comigt_ss(_mm_load_ss(&a.f), _mm_load_ss(&b.f));
 } CHECKED_IMPL_END_OP0()
 
 bool operator>=(HardFloat a, HardFloat b) CHECKED_IMPL_BEGIN_OP2_BOOL(a, b, >=)
 {
-	return !!_mm_comige_ss(_mm_set_ss(a.f), _mm_set_ss(b.f));
+	return !!_mm_comige_ss(_mm_load_ss(&a.f), _mm_load_ss(&b.f));
 } CHECKED_IMPL_END_OP0()
 
 HardFloat abs(HardFloat a) CHECKED_IMPL_BEGIN(a, abs)
 {
-	float f = a.f;
-	*(uint32_t*)&f &= 0x7FFFFFFFU;
-	return HardFloat(f);
+	return HardFloat::fromUint32Const(a.d & 0x7FFFFFFF);
 } CHECKED_IMPL_END()
 
 HardFloat floor(HardFloat a) CHECKED_IMPL_BEGIN(a, floor)
 {
-	__m128 p = _mm_set_ss(a.f);
+	__m128 p = _mm_load_ss(&a.f);
 	__m128 t = _mm_cvtepi32_ps(_mm_cvttps_epi32(p));
-	return HardFloat(_mm_cvtss_f32(_mm_sub_ps(t, _mm_and_ps(_mm_cmplt_ps(p, t), _mm_set_ss(1.0f)))));
+	return HardFloat(_mm_sub_ps(t, _mm_and_ps(_mm_cmplt_ps(p, t), _mm_set_ss(1.0f))));
 } CHECKED_IMPL_END()
 
 HardFloat ceil(HardFloat a) CHECKED_IMPL_BEGIN(a, ceil)
 {
-	__m128 p = _mm_set_ss(a.f);
+	__m128 p = _mm_load_ss(&a.f);
 	__m128 t = _mm_cvtepi32_ps(_mm_cvttps_epi32(p));
-	return HardFloat(_mm_cvtss_f32(_mm_add_ps(t, _mm_and_ps(_mm_cmpgt_ps(p, t), _mm_set_ss(1.0f)))));
+	return HardFloat(_mm_add_ps(t, _mm_and_ps(_mm_cmpgt_ps(p, t), _mm_set_ss(1.0f))));
 } CHECKED_IMPL_END()
 
 HardFloat trunc(HardFloat a) CHECKED_IMPL_BEGIN(a, trunc)
 {
-	return HardFloat(_mm_cvtss_f32(_mm_cvtepi32_ps(_mm_cvttps_epi32(_mm_set_ss(a.f)))));
+	return HardFloat(_mm_cvtepi32_ps(_mm_cvttps_epi32(_mm_load_ss(&a.f))));
 } CHECKED_IMPL_END()
 
 HardFloat sqrt(HardFloat a) CHECKED_IMPL_BEGIN(a, sqrt)
 {
-	return HardFloat(_mm_cvtss_f32(_mm_sqrt_ss(_mm_set_ss(a.f))));
+	return HardFloat(_mm_sqrt_ss(_mm_load_ss(&a.f)));
 } CHECKED_IMPL_END()
 
 HardFloat sin(HardFloat a) CHECKED_IMPL_BEGIN(a, sin)
@@ -249,12 +252,12 @@ HardFloat atan2(HardFloat y, HardFloat x) CHECKED_IMPL_BEGIN2(y, x, atan2)
 
 HardFloat::operator int32_t() const CHECKED_IMPL_BEGIN_OP0(int32_t)
 {
-	return (int32_t)_mm_cvtt_ss2si(_mm_set_ss(f));
+	return (int32_t)_mm_cvtt_ss2si(_mm_load_ss(&f));
 } CHECKED_IMPL_END_OP0()
 
 HardFloat::operator uint32_t() const CHECKED_IMPL_BEGIN_OP0(uint32_t)
 {
-	return (uint32_t)_mm_cvtt_ss2si(_mm_set_ss(f));
+	return (uint32_t)_mm_cvtt_ss2si(_mm_load_ss(&f));
 } CHECKED_IMPL_END_OP0()
 
 HardFloat::operator float() const CHECKED_IMPL_BEGIN_OP0(float)
@@ -262,15 +265,10 @@ HardFloat::operator float() const CHECKED_IMPL_BEGIN_OP0(float)
 	return f;
 } CHECKED_IMPL_END_OP0()
 
-uint32_t HardFloat::getInternalUint32() const
-{
-	return *(uint32_t*)&f;
-}
-
 HardFloat HardFloat::fromUint32Const(uint32_t a)
 {
 	HardFloat f;
-	*(uint32_t*)&f.f = a;
+	f.d = a;
 	return f;
 }
 

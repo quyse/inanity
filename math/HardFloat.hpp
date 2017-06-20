@@ -3,12 +3,12 @@
 
 #include "math.hpp"
 #include <limits>
+#include <xmmintrin.h>
 
 BEGIN_INANITY_MATH
 
 /// Class of IEEE 754 deterministic float, based on SSE2.
-/** Performs all operations in 32-bit precision.
-Should be unaffected by compiler optimizations, etc. */
+/** Performs all operations in 32-bit precision. */
 class HardFloat
 {
 public:
@@ -18,6 +18,7 @@ public:
 	explicit HardFloat(int32_t);
 	explicit HardFloat(uint32_t);
 	explicit HardFloat(float);
+	explicit HardFloat(__m128);
 
 	HardFloat operator-() const;
 
@@ -53,13 +54,16 @@ public:
 	explicit operator uint32_t() const;
 	explicit operator float() const;
 
-	uint32_t getInternalUint32() const;
 	static HardFloat fromUint32Const(uint32_t);
 
 private:
 	static const HardFloat pi, pi2, pi_2;
 
-	float f;
+	union
+	{
+		float f;
+		uint32_t d;
+	};
 };
 
 END_INANITY_MATH
@@ -67,7 +71,7 @@ END_INANITY_MATH
 namespace std
 {
 	template <>
-	class numeric_limits<Inanity::Math::HardFloat> : public numeric_limits<float>
+	class numeric_limits<Inanity::Math::HardFloat>
 	{
 	public:
 		static constexpr float_round_style round_style = round_to_nearest;
