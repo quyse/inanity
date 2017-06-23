@@ -26,6 +26,7 @@ All third-party software are placed under `/deps` directory.
 * [fcgi](http://www.fastcgi.com) - BSD-style license (see `/deps/fcgi/LICENSE.TERMS`)
 * [assimp](http://assimp.sourceforge.net/) - BSD license (see `/deps/assimp/repo/LICENSE`)
 * [softfloat](http://www.jhauser.us/arithmetic/SoftFloat.html) - BSD license (see `/deps/softfloat/softfloat/COPYING.txt`)
+* [icu](http://site.icu-project.org/) - Unicode license
 
 ## Other used third-party software
 
