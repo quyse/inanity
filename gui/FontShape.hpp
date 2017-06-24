@@ -18,7 +18,10 @@ public:
 	struct OutGlyph
 	{
 		Graphics::vec2 position;
-		int number;
+		Graphics::vec2 advance;
+		int glyphIndex;
+		/// Index of first character in a cluster corresponding to this glyph.
+		int characterIndex;
 	};
 
 	/// Font script code.

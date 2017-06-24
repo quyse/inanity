@@ -3,6 +3,7 @@
 
 #include "FontShape.hpp"
 #include "hb.hpp"
+#include "../deps/icu/repo/source/common/unicode/locid.h"
 
 BEGIN_INANITY_GUI
 
@@ -23,6 +24,8 @@ public:
 	/// FontShape's methods.
 	/** Out parameters are optional. */
 	void Shape(const String& text, Script script, Graphics::vec2* outSize, std::vector<OutGlyph>* outGlyphs);
+
+	void ShapeParagraph(const String& text, Script script, const icu::Locale& locale, float maxLineWidth, float lineHeight, std::vector<OutGlyph>* outGlyphs);
 };
 
 END_INANITY_GUI

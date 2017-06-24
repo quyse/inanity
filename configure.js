@@ -20,7 +20,9 @@ exports.configureCompiler = function(objectFile, compiler) {
 	compiler.addIncludeDir('deps/libvorbis/include');
 	compiler.addIncludeDir('deps/freetype/repo/include');
 	compiler.addIncludeDir('deps/harfbuzz/generated');
+	compiler.addIncludeDir('deps/icu/repo/source/common');
 	compiler.addIncludeDir('deps/mono/include');
+	compiler.addMacro('U_STATIC_IMPLEMENTATION');
 };
 
 var libraries = {

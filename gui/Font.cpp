@@ -39,7 +39,7 @@ void Font::InternalShape(const String& text, FontShape::Script script)
 
 		for(size_t i = 0; i < outGlyphs.size(); ++i)
 		{
-			const FontGlyphs::GlyphInfo& glyphInfo = glyphInfos[outGlyphs[i].number];
+			const FontGlyphs::GlyphInfo& glyphInfo = glyphInfos[outGlyphs[i].glyphIndex];
 			const Graphics::vec2& glyphPosition = outGlyphs[i].position;
 			left = std::min(left, glyphPosition.x + glyphInfo.offsetX);
 			right = std::max(right, glyphPosition.x + glyphInfo.offsetX + glyphInfo.width);
@@ -104,7 +104,7 @@ void Font::DrawString(
 	Graphics::vec2 scale(1.0f / glyphs->GetScaleX(), 1.0f / glyphs->GetScaleY());
 
 	for(size_t i = 0; i < outGlyphs.size(); ++i)
-		canvas->DrawGlyph(glyphs, outGlyphs[i].number, origin + outGlyphs[i].position * scale, color);
+		canvas->DrawGlyph(glyphs, outGlyphs[i].glyphIndex, origin + outGlyphs[i].position * scale, color);
 
 	END_TRY("Can't draw string with font");
 }
