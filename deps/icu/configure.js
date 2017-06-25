@@ -19,6 +19,7 @@ exports.configureCompiler = function(objectFile, compiler) {
 	compiler.addIncludeDir('repo/source/common');
 	compiler.addIncludeDir('repo/source/i18n');
 	compiler.addMacro('U_STATIC_IMPLEMENTATION');
+	compiler.addMacro('U_ENABLE_DYLOAD=0');
 	var c = /^([^\/]*)\//.exec(source);
 	switch(c[1]) {
 	case 'common':
@@ -217,6 +218,8 @@ var objects = [
 	'common.uvectr64',
 	'common.wintz',
 
+// not used
+/*
 	'i18n.affixpatternparser',
 	'i18n.alphaindex',
 	'i18n.anytrans',
@@ -413,6 +416,7 @@ var objects = [
 	'i18n.zonemeta',
 	'i18n.zrule',
 	'i18n.ztrans',
+*/
 
 	'stubdata.stubdata',
 ];
