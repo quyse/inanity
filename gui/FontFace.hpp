@@ -14,13 +14,26 @@ class FontGlyphs;
 class FontFace : public Object
 {
 public:
+	struct CreateGlyphsConfig
+	{
+		int halfScaleX;
+		int halfScaleY;
+		std::vector<int>* glyphsNeeded;
+		int maxTextureWidth;
+		int maxTextureHeight;
+
+		CreateGlyphsConfig()
+		: halfScaleX(0), halfScaleY(0), glyphsNeeded(nullptr), maxTextureWidth(4096), maxTextureHeight(4096) {}
+	};
+
+public:
 	/// Create font shape for the given font size.
 	virtual ptr<FontShape> CreateShape(int size) = 0;
 	/// Create font glyphs for the given font size.
 	/** Size in pixels. Scale is for better quality.
 	Half scale means additional number of pixels added for either side.
 	i.e. half scale = 2 means x5, = 0 means x1. */
-	virtual ptr<FontGlyphs> CreateGlyphs(Canvas* canvas, int size, int halfScaleX = 0, int halfScaleY = 0, std::vector<int>* glyphsNeeded = nullptr) = 0;
+	virtual ptr<FontGlyphs> CreateGlyphs(Canvas* canvas, int size, const CreateGlyphsConfig& config) = 0;
 };
 
 END_INANITY_GUI

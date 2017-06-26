@@ -32,9 +32,13 @@ ptr<FontShape> FtFontFace::CreateShape(int size)
 	END_TRY("Can't create shape for Freetype font face");
 }
 
-ptr<FontGlyphs> FtFontFace::CreateGlyphs(Canvas* canvas, int size, int halfScaleX, int halfScaleY, std::vector<int>* glyphsNeeded)
+ptr<FontGlyphs> FtFontFace::CreateGlyphs(Canvas* canvas, int size, const CreateGlyphsConfig& config)
 {
 	BEGIN_TRY();
+
+	int halfScaleX = config.halfScaleX;
+	int halfScaleY = config.halfScaleY;
+	std::vector<int>* glyphsNeeded = config.glyphsNeeded;
 
 	FT_Long glyphsCount = glyphsNeeded ? glyphsNeeded->size() : ftFace->num_glyphs;
 
@@ -138,7 +142,9 @@ ptr<FontGlyphs> FtFontFace::CreateGlyphs(Canvas* canvas, int size, int halfScale
 
 	// unite glyph images
 	std::vector<std::pair<int, int> > glyphPositions;
-	ptr<RawTextureData> glyphsImage = RawTextureData::ShelfUnion(glyphImages, glyphPositions, 1024, 1, true);
+	ptr<RawTextureData> glyphsImage = RawTextureData::ShelfUnion(glyphImages, glyphPositions, config.maxTextureWidth, 1, true);
+
+	if(glyphsImage->GetImageHeight() > config.maxTextureHeight) THROW("Result texture is too big");
 
 	// set glyph positions
 	for(FT_Long i = 0; i < glyphsCount; ++i)
