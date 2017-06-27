@@ -23,6 +23,10 @@ exports.configureCompiler = function(objectFile, compiler) {
 	compiler.addIncludeDir('deps/icu/repo/source/common');
 	compiler.addIncludeDir('deps/mono/include');
 	compiler.addMacro('U_STATIC_IMPLEMENTATION');
+
+	// hack for deterministic floats
+	if(source == 'math/HardFloat.cpp')
+		compiler.fastMath = false;
 };
 
 var libraries = {
