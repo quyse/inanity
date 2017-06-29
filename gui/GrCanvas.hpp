@@ -68,6 +68,7 @@ public:
 		int scaleY
 	);
 	void DrawGlyph(FontGlyphs* glyphs, int glyphIndex, const Graphics::vec2& penPoint, const Graphics::vec4& color);
+	void DrawGlyph(FontGlyphs* glyphs, int glyphIndex, const Graphics::vec2& penPoint, const Graphics::vec4& color, const Graphics::vec2& scale);
 	void Flush();
 };
 

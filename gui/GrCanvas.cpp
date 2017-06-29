@@ -233,6 +233,11 @@ ptr<FontGlyphs> GrCanvas::CreateGlyphs(
 
 void GrCanvas::DrawGlyph(FontGlyphs* abstractGlyphs, int glyphIndex, const vec2& penPoint, const vec4& color)
 {
+	DrawGlyph(abstractGlyphs, glyphIndex, penPoint, color, vec2(1.0f, 1.0f));
+}
+
+void GrCanvas::DrawGlyph(FontGlyphs* abstractGlyphs, int glyphIndex, const vec2& penPoint, const vec4& color, const vec2& scale)
+{
 	GrFontGlyphs* glyphs = fast_cast<GrFontGlyphs*>(abstractGlyphs);
 
 	ptr<Texture> texture = glyphs->GetTexture();
@@ -250,7 +255,7 @@ void GrCanvas::DrawGlyph(FontGlyphs* abstractGlyphs, int glyphIndex, const vec2&
 
 	// add glyph to queue
 	helper->uPositions.Set(queuedGlyphsCount,
-		(vec4(penPoint.x, penPoint.y, penPoint.x, penPoint.y) + glyph.offset)
+		(vec4(penPoint.x, penPoint.y, penPoint.x, penPoint.y) + glyph.offset * vec4(scale.x, scale.y, scale.x, scale.y))
 		* vec4(scaleX, scaleY, scaleX, scaleY)
 		+ vec4(-1, 1, -1, 1)
 	);
