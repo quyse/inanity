@@ -434,8 +434,10 @@ var executables = {
 			'libinanity-platform-filesystem',
 			'libinanity-deflate',
 			'libinanity-base',
-			'deps/freetype//libfreetype',
 			'deps/harfbuzz//libharfbuzz',
+			'deps/freetype//libfreetype',
+			'deps/icu//libicu',
+			'deps/ucdn//libucdn',
 			'deps/zlib//libz'
 			],
 		dynamicLibraries: []

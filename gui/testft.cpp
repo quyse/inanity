@@ -22,7 +22,8 @@ int main()
 		const int fontSize = 13;
 		ptr<Gui::FontShape> fontShape = fontFace->CreateShape(fontSize);
 		ptr<Gui::SwCanvas> canvas = NEW(Gui::SwCanvas());
-		ptr<Gui::FontGlyphs> fontGlyphs = fontFace->CreateGlyphs(canvas, fontSize);
+		Gui::FontFace::CreateGlyphsConfig config;
+		ptr<Gui::FontGlyphs> fontGlyphs = fontFace->CreateGlyphs(canvas, fontSize, config);
 
 		BmpImage::Save(fontGlyphs.FastCast<Gui::SwFontGlyphs>()->GetImage(), fs->SaveStream("/gui/alphabat.bmp"));
 
@@ -43,7 +44,7 @@ int main()
 		memset(image->GetMipData(), 255, image->GetImageSize());
 
 		canvas->SetDestination(image);
-		font->DrawString(canvas, "Inanity", vec2(100.0f, 500.0f), vec4(0, 0, 0, 1));
+		font->DrawString(canvas, "Inanity", (uint32_t)'Zyyy', vec2(100.0f, 500.0f), vec4(0, 0, 0, 1));
 
 		BmpImage::Save(image, fs->SaveStream("/gui/out.bmp"));
 	}
