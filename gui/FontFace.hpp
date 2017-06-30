@@ -21,9 +21,10 @@ public:
 		std::vector<int>* glyphsNeeded;
 		int maxTextureWidth;
 		int maxTextureHeight;
+		bool enableHinting;
 
 		CreateGlyphsConfig()
-		: halfScaleX(0), halfScaleY(0), glyphsNeeded(nullptr), maxTextureWidth(4096), maxTextureHeight(4096) {}
+		: halfScaleX(0), halfScaleY(0), glyphsNeeded(nullptr), maxTextureWidth(4096), maxTextureHeight(4096), enableHinting(false) {}
 	};
 
 public:

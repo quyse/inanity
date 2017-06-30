@@ -50,7 +50,7 @@ ptr<FontGlyphs> FtFontFace::CreateGlyphs(Canvas* canvas, int size, const CreateG
 
 	for(FT_Long i = 0; i < glyphsCount; ++i)
 	{
-		if(FT_Load_Glyph(ftFace, glyphsNeeded ? (*glyphsNeeded)[i] : i, FT_LOAD_NO_HINTING))
+		if(FT_Load_Glyph(ftFace, glyphsNeeded ? (*glyphsNeeded)[i] : i, config.enableHinting ? FT_LOAD_DEFAULT : FT_LOAD_NO_HINTING))
 			THROW("Can't load glyph");
 
 		if(FT_Render_Glyph(ftFace->glyph, FT_RENDER_MODE_NORMAL))
