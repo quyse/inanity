@@ -150,7 +150,9 @@ ptr<Dx11RenderBuffer> Dx11Device::InternalCreateRenderBuffer(int width, int heig
 		renderTargetView,
 		NEW(Dx11Texture(
 			shaderResourceView,
-			CreateSamplerState(samplerSettings).FastCast<Dx11SamplerState>()))));
+			CreateSamplerState(samplerSettings).FastCast<Dx11SamplerState>(),
+			width, height, 0
+			))));
 
 	END_TRY("Can't create DirectX 11 render buffer");
 }
@@ -208,7 +210,7 @@ ptr<DepthStencilBuffer> Dx11Device::CreateDepthStencilBuffer(int width, int heig
 			desc.Texture2D.MipLevels = 1;
 			if(FAILED(device->CreateShaderResourceView(buffer, &desc, &shaderResourceView)))
 				THROW("Can't create shader resource view");
-			return NEW(Dx11DepthStencilBuffer(depthStencilView, NEW(Dx11Texture(shaderResourceView, nullptr))));
+			return NEW(Dx11DepthStencilBuffer(depthStencilView, NEW(Dx11Texture(shaderResourceView, nullptr, width, height, 0))));
 		}
 
 		return NEW(Dx11DepthStencilBuffer(depthStencilView));
@@ -543,7 +545,7 @@ ptr<Texture> Dx11Device::CreateStaticTexture(ptr<RawTextureData> data, const Sam
 		if(FAILED(device->CreateShaderResourceView(resource, &srvDesc, &shaderResourceView)))
 			THROW("Can't create shader resource view");
 
-		return NEW(Dx11Texture(shaderResourceView, samplerState));
+		return NEW(Dx11Texture(shaderResourceView, samplerState, data->GetImageWidth(), data->GetImageHeight(), data->GetImageDepth()));
 	}
 	catch(Exception* exception)
 	{

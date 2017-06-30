@@ -4,7 +4,8 @@
 
 BEGIN_INANITY_GRAPHICS
 
-GlTexture::GlTexture(ptr<GlInternalTexture> internalTexture) : internalTexture(internalTexture) {}
+GlTexture::GlTexture(ptr<GlInternalTexture> internalTexture, int width, int height, int depth)
+: Texture(width, height, depth), internalTexture(internalTexture) {}
 
 GLuint GlTexture::GetName() const
 {

@@ -437,7 +437,7 @@ ptr<RenderBuffer> GlDevice::CreateRenderBuffer(int width, int height, PixelForma
 
 		SetupTextureSampling(GL_TEXTURE_2D, ss);
 
-		return NEW(GlRenderBuffer(internalTexture, NEW(GlTexture(internalTexture))));
+		return NEW(GlRenderBuffer(internalTexture, NEW(GlTexture(internalTexture, width, height, 0))));
 	}
 	catch(Exception* exception)
 	{
@@ -468,7 +468,7 @@ ptr<DepthStencilBuffer> GlDevice::CreateDepthStencilBuffer(int width, int height
 #endif
 		GlSystem::CheckErrors("Can't set texture parameters");
 
-		return NEW(GlDepthStencilBuffer(internalTexture, NEW(GlTexture(internalTexture)), width, height));
+		return NEW(GlDepthStencilBuffer(internalTexture, NEW(GlTexture(internalTexture, width, height, 0)), width, height));
 	}
 	catch(Exception* exception)
 	{
@@ -1303,7 +1303,7 @@ ptr<Texture> GlDevice::CreateStaticTexture(ptr<RawTextureData> data, const Sampl
 
 		SetupTextureSampling(target, ss);
 
-		return NEW(GlTexture(internalTexture));
+		return NEW(GlTexture(internalTexture, imageWidth, imageHeight, imageDepth));
 	}
 	catch(Exception* exception)
 	{

@@ -13,6 +13,27 @@ class Texture : public Object
 {
 public:
 	META_DECLARE_CLASS(Texture);
+
+	int GetWidth() const
+	{
+		return width;
+	}
+
+	int GetHeight() const
+	{
+		return height;
+	}
+
+	int GetDepth() const
+	{
+		return depth;
+	}
+
+protected:
+	Texture(int width, int height, int depth)
+	: width(width), height(height), depth(depth) {}
+
+	int width, height, depth;
 };
 
 END_INANITY_GRAPHICS

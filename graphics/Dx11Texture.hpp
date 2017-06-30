@@ -17,7 +17,7 @@ private:
 	ptr<Dx11SamplerState> samplerState;
 
 public:
-	Dx11Texture(ComPointer<ID3D11ShaderResourceView> shaderResourceView, ptr<Dx11SamplerState> samplerState);
+	Dx11Texture(ComPointer<ID3D11ShaderResourceView> shaderResourceView, ptr<Dx11SamplerState> samplerState, int width, int height, int depth);
 
 	ID3D11ShaderResourceView* GetShaderResourceViewInterface();
 	ptr<Dx11SamplerState> GetSamplerState() const;

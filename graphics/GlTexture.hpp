@@ -15,7 +15,7 @@ private:
 	ptr<GlInternalTexture> internalTexture;
 
 public:
-	GlTexture(ptr<GlInternalTexture> internalTexture);
+	GlTexture(ptr<GlInternalTexture> internalTexture, int width, int height, int depth);
 
 	GLuint GetName() const;
 };
