@@ -136,7 +136,7 @@ public:
 		std::vector<std::pair<int, int> >& outPositions,
 		int resultWidth,
 		int border = 0,
-		bool heightPowerOfTwo = false
+		bool powerOfTwo = false
 	);
 };
 

@@ -536,9 +536,9 @@ ptr<RawTextureData> RawTextureData::GenerateMips(int newMips) const
 ptr<RawTextureData> RawTextureData::ShelfUnion(
 	const std::vector<ptr<RawTextureData> >& images,
 	std::vector<std::pair<int, int> >& outPositions,
-	int resultWidth,
+	int maxResultWidth,
 	int border,
-	bool heightPowerOfTwo
+	bool powerOfTwo
 )
 {
 	BEGIN_TRY();
@@ -571,15 +571,15 @@ ptr<RawTextureData> RawTextureData::ShelfUnion(
 		sortedImages[i] = std::pair<RawTextureData*, size_t>(images[i], i);
 	std::sort(sortedImages.begin(), sortedImages.end(), Sorter());
 
-	// second pass: determine result height
-	int resultHeight = border;
+	// second pass: determine result width and height
+	int resultWidth = border, resultHeight = border;
 	{
 		int currentX = border, currentRowHeight = 0;
 		for(int i = 0; i < imagesCount; ++i)
 		{
 			RawTextureData* image = sortedImages[i].first;
 			int width = image->GetMipWidth();
-			if(currentX + width + border > resultWidth)
+			if(currentX + width + border > maxResultWidth)
 			{
 				// move to the next row
 				resultHeight += currentRowHeight;
@@ -587,13 +587,20 @@ ptr<RawTextureData> RawTextureData::ShelfUnion(
 				currentX = border;
 			}
 			currentX += width + border;
+			if(resultWidth < currentX)
+			{
+				resultWidth = currentX;
+			}
 			currentRowHeight = std::max(currentRowHeight, image->GetMipHeight() + border);
 		}
 		resultHeight += currentRowHeight;
 	}
 
-	if(heightPowerOfTwo)
+	if(powerOfTwo)
 	{
+		int w;
+		for(w = 1; w < resultWidth; w <<= 1);
+		resultWidth = w;
 		int h;
 		for(h = 1; h < resultHeight; h <<= 1);
 		resultHeight = h;
