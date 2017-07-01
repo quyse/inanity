@@ -158,4 +158,14 @@ ptr<FontGlyphs> FtFontFace::CreateGlyphs(Canvas* canvas, int size, const CreateG
 	END_TRY("Can't create Freetype font instance");
 }
 
+FontFace::Metrics FtFontFace::CalculateMetrics(int size) const
+{
+	float scale = (float)size / (float)ftFace->units_per_EM;
+	Metrics metrics;
+	metrics.ascender = (float)ftFace->ascender * scale;
+	metrics.descender = (float)ftFace->descender * scale;
+	metrics.height = (float)ftFace->height * scale;
+	return metrics;
+}
+
 END_INANITY_GUI

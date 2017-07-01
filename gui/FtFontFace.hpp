@@ -32,6 +32,7 @@ public:
 	//*** FontFace's methods.
 	ptr<FontShape> CreateShape(int size);
 	ptr<FontGlyphs> CreateGlyphs(Canvas* canvas, int size, const CreateGlyphsConfig& config);
+	Metrics CalculateMetrics(int size) const;
 };
 
 END_INANITY_GUI
