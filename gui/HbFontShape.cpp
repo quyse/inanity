@@ -19,6 +19,13 @@ HbFontShape::~HbFontShape()
 
 void HbFontShape::Shape(const String& text, Script script, vec2* outAdvance, std::vector<OutGlyph>* outGlyphs)
 {
+	if(text.empty())
+	{
+		if(outAdvance)
+			*outAdvance = vec2(0.0f, 0.0f);
+		return;
+	}
+
 	// shape text, and get glyph numbers and offsets
 	hb_buffer_set_script(buffer, (hb_script_t)script);
 	hb_buffer_set_direction(buffer, hb_script_get_horizontal_direction((hb_script_t)script));
