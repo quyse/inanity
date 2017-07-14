@@ -315,4 +315,24 @@ int Context::GetViewportHeight() const
 	return ((LetViewport*)cellViewport.top)->viewportHeight;
 }
 
+void Context::Reset()
+{
+	cellFrameBuffer.Reset();
+	for(size_t i = 0; i < samplersCount; ++i)
+		cellSamplers[i].Reset();
+	for(size_t i = 0; i < uniformBuffersCount; ++i)
+		cellUniformBuffers[i].Reset();
+	cellVertexShader.Reset();
+	cellPixelShader.Reset();
+	cellAttributeBinding.Reset();
+	for(size_t i = 0; i < vertexBuffersCount; ++i)
+		cellVertexBuffers[i].Reset();
+	cellIndexBuffer.Reset();
+	cellFillMode.Reset();
+	cellCullMode.Reset();
+	cellViewport.Reset();
+	cellDepthStencilState.Reset();
+	cellBlendState.Reset();
+}
+
 END_INANITY_GRAPHICS

@@ -252,6 +252,9 @@ public:
 	int GetViewportWidth() const;
 	int GetViewportHeight() const;
 
+	/// Reset all cells.
+	void Reset();
+
 	//******* Methods to clean color/depth/stencil buffers of bound framebuffer.
 	/* These are immediate methods. */
 	/// Clear color buffer.
