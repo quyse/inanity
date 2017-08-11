@@ -15,6 +15,7 @@
 #include "TransformedNode.hpp"
 #include "InterpolateNode.hpp"
 #include "FragmentNode.hpp"
+#include "DualFragmentNode.hpp"
 #include "CastNode.hpp"
 #include "../Hlsl11Source.hpp"
 #include "../Dx11System.hpp"
@@ -207,6 +208,17 @@ void Hlsl11GeneratorInstance::PrintNodeInit(size_t nodeIndex)
 			FragmentNode* fragmentNode = fast_cast<FragmentNode*>(node);
 			text << "\tr.r" << fragmentNode->GetTarget() << " = ";
 			PrintNode(fragmentNode->GetNode());
+			PrintNodeInitEnd();
+		}
+		break;
+	case Node::typeDualFragment:
+		{
+			DualFragmentNode* dualFragmentNode = fast_cast<DualFragmentNode*>(node);
+			text << "\tr.r0 = ";
+			PrintNode(dualFragmentNode->GetNode0());
+			PrintNodeInitEnd();
+			text << "\tr.r1 = ";
+			PrintNode(dualFragmentNode->GetNode1());
 			PrintNodeInitEnd();
 		}
 		break;
