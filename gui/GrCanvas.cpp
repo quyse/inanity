@@ -140,14 +140,15 @@ struct GrCanvas::Helper : public Object
 			const float* dx = offsetsX[subPixelMode - subPixelModeOnBegin];
 			const float* dy = offsetsY[subPixelMode - subPixelModeOnBegin];
 
-			ps[subPixelMode] = shaderCache->GetPixelShader((
-				fragment(0, newvec4(iColor["xyz"], 1.0f)),
-				fragment(1, newvec4(
-					iColor["w"] * uFontSampler.Sample(iTexcoord + ddx(iTexcoord) * val(dx[0] / 3.0f) + ddy(iTexcoord) * val(dy[0] / 3.0f)),
-					iColor["w"] * uFontSampler.Sample(iTexcoord + ddx(iTexcoord) * val(dx[1] / 3.0f) + ddy(iTexcoord) * val(dy[1] / 3.0f)),
-					iColor["w"] * uFontSampler.Sample(iTexcoord + ddx(iTexcoord) * val(dx[2] / 3.0f) + ddy(iTexcoord) * val(dy[2] / 3.0f)),
+			ps[subPixelMode] = shaderCache->GetPixelShader(
+				dualFragment(
+					newvec4(iColor["xyz"], 1.0f),
+					newvec4(
+						iColor["w"] * uFontSampler.Sample(iTexcoord + ddx(iTexcoord) * val(dx[0] / 3.0f) + ddy(iTexcoord) * val(dy[0] / 3.0f)),
+						iColor["w"] * uFontSampler.Sample(iTexcoord + ddx(iTexcoord) * val(dx[1] / 3.0f) + ddy(iTexcoord) * val(dy[1] / 3.0f)),
+						iColor["w"] * uFontSampler.Sample(iTexcoord + ddx(iTexcoord) * val(dx[2] / 3.0f) + ddy(iTexcoord) * val(dy[2] / 3.0f)),
 					1.0f))
-				));
+				);
 		}
 
 		// blending

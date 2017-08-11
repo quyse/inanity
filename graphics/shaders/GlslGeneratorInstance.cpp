@@ -15,6 +15,7 @@
 #include "TransformedNode.hpp"
 #include "InterpolateNode.hpp"
 #include "FragmentNode.hpp"
+#include "DualFragmentNode.hpp"
 #include "CastNode.hpp"
 #include "../GlslSource.hpp"
 #include "../GlShaderBindings.hpp"
@@ -309,6 +310,30 @@ void GlslGeneratorInstance::PrintNodeInit(size_t nodeIndex)
 			text << " = ";
 			PrintNode(fragmentNode->GetNode());
 			PrintNodeInitEnd();
+		}
+		break;
+	case Node::typeDualFragment:
+		{
+			DualFragmentNode* dualFragmentNode = fast_cast<DualFragmentNode*>(node);
+			switch(glslVersion)
+			{
+			case GlslVersions::opengl33:
+				text << "\tr0 = ";
+				PrintNode(dualFragmentNode->GetNode0());
+				PrintNodeInitEnd();
+				text << "\tr1 = ";
+				PrintNode(dualFragmentNode->GetNode1());
+				PrintNodeInitEnd();
+				break;
+			case GlslVersions::webgl:
+				text << "\tgl_FragData[0] = ";
+				PrintNode(dualFragmentNode->GetNode0());
+				PrintNodeInitEnd();
+				text << "\tgl_FragData[1] = ";
+				PrintNode(dualFragmentNode->GetNode1());
+				PrintNodeInitEnd();
+				break;
+			}
 		}
 		break;
 	case Node::typeCast:
@@ -872,7 +897,7 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 
 	return NEW(GlslSource(
 		Strings::String2File(text.str()),
-		NEW(GlShaderBindings(uniformBindings, uniformBlockBindings, samplerBindings, attributeBindings, targetBindings))
+		NEW(GlShaderBindings(uniformBindings, uniformBlockBindings, samplerBindings, attributeBindings, targetBindings, dualFragmentTarget))
 	));
 }
 

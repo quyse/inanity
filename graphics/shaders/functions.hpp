@@ -5,6 +5,7 @@
 #include "OperationNode.hpp"
 #include "ActionNode.hpp"
 #include "FragmentNode.hpp"
+#include "DualFragmentNode.hpp"
 
 BEGIN_INANITY_SHADERS
 
@@ -41,6 +42,12 @@ inline Value<uint> getInstanceID() { return OP0(GetInstanceID, DataTypes::_uint)
 inline Expression fragment(int target, Value<vec4> f)
 {
 	return ptr<Node>(NEW(FragmentNode(target, f.GetNode())));
+}
+
+// output dual fragment (for dual source color blending)
+inline Expression dualFragment(Value<vec4> f0, Value<vec4> f1)
+{
+	return ptr<Node>(NEW(DualFragmentNode(f0.GetNode(), f1.GetNode())));
 }
 
 // screenToTexture

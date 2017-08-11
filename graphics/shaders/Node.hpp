@@ -38,6 +38,8 @@ public:
 		typeSample,
 		/// Fragment output.
 		typeFragment,
+		/// Dual fragment output.
+		typeDualFragment,
 		/// Casting.
 		typeCast
 	};

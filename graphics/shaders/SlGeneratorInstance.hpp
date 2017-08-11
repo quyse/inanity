@@ -43,6 +43,7 @@ protected:
 	std::vector<TransformedNode*> transformedNodes;
 	std::vector<InterpolateNode*> interpolateNodes;
 	int fragmentTargetsCount;
+	bool dualFragmentTarget;
 
 protected:
 	virtual void PrintDataType(DataType dataType) = 0;

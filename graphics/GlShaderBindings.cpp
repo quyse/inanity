@@ -9,13 +9,15 @@ GlShaderBindings::GlShaderBindings(
 	const Bindings& uniformBlockBindings,
 	const Bindings& samplerBindings,
 	const Bindings& attributeBindings,
-	const Bindings& targetBindings
+	const Bindings& targetBindings,
+	bool dualFragmentTarget
 ) :
 	uniformBindings(uniformBindings),
 	uniformBlockBindings(uniformBlockBindings),
 	samplerBindings(samplerBindings),
 	attributeBindings(attributeBindings),
-	targetBindings(targetBindings)
+	targetBindings(targetBindings),
+	dualFragmentTarget(dualFragmentTarget)
 {
 }
 
@@ -64,6 +66,11 @@ const GlShaderBindings::Bindings& GlShaderBindings::GetTargetBindings() const
 	return targetBindings;
 }
 
+bool GlShaderBindings::GetDualFragmentTarget() const
+{
+	return dualFragmentTarget;
+}
+
 void GlShaderBindings::Serialize(StreamWriter& writer)
 {
 	writer.WriteShortly(uniformBindings.size());
@@ -80,6 +87,7 @@ void GlShaderBindings::Serialize(StreamWriter& writer)
 	WriteBindings(writer, samplerBindings);
 	WriteBindings(writer, attributeBindings);
 	WriteBindings(writer, targetBindings);
+	writer.WriteShortly((size_t)dualFragmentTarget);
 }
 
 ptr<GlShaderBindings> GlShaderBindings::Deserialize(StreamReader& reader)
@@ -101,8 +109,9 @@ ptr<GlShaderBindings> GlShaderBindings::Deserialize(StreamReader& reader)
 	ReadBindings(reader, samplerBindings);
 	ReadBindings(reader, attributeBindings);
 	ReadBindings(reader, targetBindings);
+	bool dualFragmentTarget = !!reader.ReadShortly();
 
-	return NEW(GlShaderBindings(uniformBindings, uniformBlockBindings, samplerBindings, attributeBindings, targetBindings));
+	return NEW(GlShaderBindings(uniformBindings, uniformBlockBindings, samplerBindings, attributeBindings, targetBindings, dualFragmentTarget));
 }
 
 END_INANITY_GRAPHICS

@@ -38,11 +38,21 @@ void GlInternalProgramCache::ApplyPreLinkBindings(GLuint programName, ptr<GlShad
 
 	// применить привязки выходных переменных пиксельного шейдера
 	const GlShaderBindings::Bindings& targetBindings = shaderBindings->GetTargetBindings();
-	for(size_t i = 0; i < targetBindings.size(); ++i)
+	// dual source color blending
+	if(shaderBindings->GetDualFragmentTarget())
 	{
-		// привязать переменную к заданному номеру цветового рендертаргета
-		glBindFragDataLocation(programName, targetBindings[i].second, targetBindings[i].first.c_str());
-		GlSystem::CheckErrors("Can't bind frag data location");
+		glBindFragDataLocationIndexed(programName, 0, targetBindings[0].second, targetBindings[0].first.c_str());
+		glBindFragDataLocationIndexed(programName, 0, targetBindings[1].second, targetBindings[1].first.c_str());
+		GlSystem::CheckErrors("Can't bind dual frag data location");
+	}
+	else
+	{
+		for(size_t i = 0; i < targetBindings.size(); ++i)
+		{
+			// привязать переменную к заданному номеру цветового рендертаргета
+			glBindFragDataLocation(programName, targetBindings[i].second, targetBindings[i].first.c_str());
+			GlSystem::CheckErrors("Can't bind frag data location");
+		}
 	}
 }
 

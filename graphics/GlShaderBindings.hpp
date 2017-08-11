@@ -41,6 +41,7 @@ private:
 	Bindings samplerBindings;
 	Bindings attributeBindings;
 	Bindings targetBindings;
+	bool dualFragmentTarget;
 
 	static void WriteBindings(StreamWriter& writer, const Bindings& bindings);
 	static void ReadBindings(StreamReader& reader, Bindings& bindings);
@@ -51,7 +52,8 @@ public:
 		const Bindings& uniformBlockBindings,
 		const Bindings& samplerBindings,
 		const Bindings& attributeBindings,
-		const Bindings& targetBindings
+		const Bindings& targetBindings,
+		bool dualFragmentTarget
 	);
 
 	const UniformBindings& GetUniformBindings() const;
@@ -59,6 +61,7 @@ public:
 	const Bindings& GetSamplerBindings() const;
 	const Bindings& GetAttributeBindings() const;
 	const Bindings& GetTargetBindings() const;
+	bool GetDualFragmentTarget() const;
 
 	void Serialize(StreamWriter& writer);
 	static ptr<GlShaderBindings> Deserialize(StreamReader& reader);

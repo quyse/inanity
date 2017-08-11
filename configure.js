@@ -256,7 +256,7 @@ var libraries = {
 			'graphics.shaders.SampleNode', 'graphics.shaders.FloatConstNode', 'graphics.shaders.IntConstNode',
 			'graphics.shaders.SequenceNode',
 			'graphics.shaders.TransformedNode',
-			'graphics.shaders.InterpolateNode', 'graphics.shaders.FragmentNode',
+			'graphics.shaders.InterpolateNode', 'graphics.shaders.FragmentNode', 'graphics.shaders.DualFragmentNode',
 			'graphics.shaders.CastNode',
 			'graphics.shaders.Expression',
 			'graphics.shaders.UniformGroup',

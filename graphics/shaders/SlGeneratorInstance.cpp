@@ -12,6 +12,7 @@
 #include "ActionNode.hpp"
 #include "SampleNode.hpp"
 #include "FragmentNode.hpp"
+#include "DualFragmentNode.hpp"
 #include "CastNode.hpp"
 #include "UniformGroup.hpp"
 #include "../../Exception.hpp"
@@ -21,7 +22,8 @@ BEGIN_INANITY_SHADERS
 SlGeneratorInstance::SlGeneratorInstance(ptr<Node> rootNode, ShaderType shaderType) :
 	rootNode(rootNode),
 	shaderType(shaderType),
-	fragmentTargetsCount(0)
+	fragmentTargetsCount(0),
+	dualFragmentTarget(false)
 {}
 
 void SlGeneratorInstance::RegisterNode(Node* node)
@@ -143,6 +145,20 @@ void SlGeneratorInstance::RegisterNode(Node* node)
 			// register maximum number of fragment outputs
 			fragmentTargetsCount = std::max(fragmentTargetsCount, fragmentNode->GetTarget() + 1);
 			RegisterNode(fragmentNode->GetNode());
+		}
+		break;
+	case Node::typeDualFragment:
+		{
+			if(shaderType != ShaderTypes::pixel)
+				THROW("Only pixel shader can do dual fragment output");
+			DualFragmentNode* dualFragmentNode = fast_cast<DualFragmentNode*>(node);
+
+			dualFragmentTarget = true;
+
+			// register maximum number of fragment outputs
+			fragmentTargetsCount = std::max(fragmentTargetsCount, 2);
+			RegisterNode(dualFragmentNode->GetNode0());
+			RegisterNode(dualFragmentNode->GetNode1());
 		}
 		break;
 	case Node::typeCast:
