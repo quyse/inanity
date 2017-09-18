@@ -4,6 +4,7 @@
 #include "../input/SdlManager.hpp"
 #include "../Exception.hpp"
 #include <emscripten/emscripten.h>
+#include <emscripten/html5.h>
 #include <SDL/SDL_video.h>
 
 BEGIN_INANITY_PLATFORM
@@ -96,8 +97,8 @@ void EmsWindow::StaticMainLoop()
 void EmsWindow::MainLoop()
 {
 	// update size
-	int newWidth, newHeight, isFullScreen;
-	emscripten_get_canvas_size(&newWidth, &newHeight, &isFullScreen);
+	int newWidth, newHeight;
+	emscripten_get_canvas_element_size(nullptr, &newWidth, &newHeight);
 	if(newWidth != width || newHeight != height)
 	{
 		width = newWidth;
