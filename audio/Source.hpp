@@ -29,9 +29,11 @@ public:
 	size_t GetSize() const;
 
 	/// Get sound data as a file.
-	virtual ptr<File> GetData() = 0;
+	/** Default implementation is quite inefficient and uses CreateStream. */
+	virtual ptr<File> GetData();
 	/// Create stream to read sound data from beginning.
-	virtual ptr<InputStream> CreateStream() = 0;
+	/** Default implementation uses GetData. */
+	virtual ptr<InputStream> CreateStream();
 };
 
 END_INANITY_AUDIO
