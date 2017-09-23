@@ -658,6 +658,8 @@ ptr<ShaderSource> GlslGeneratorInstance::Generate()
 	case GlslVersions::webgl:
 		// version numbers in WebGL are not supported
 		text <<
+			"#extension GL_OES_standard_derivatives : enable\n"
+			"#extension GL_EXT_draw_buffers : enable\n"
 			"#ifdef GL_ES\n"
 			"precision highp float;\n"
 			"#endif\n";
