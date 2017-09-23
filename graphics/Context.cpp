@@ -38,7 +38,8 @@ Context::Let::~Let()
 	{
 		if(cell->current == this)
 			cell->current = 0;
-		THROW_ASSERT(cell->top == this);
+		// cannot really throw exceptions from destructor
+		// THROW_ASSERT(cell->top == this);
 		cell->top = next;
 	}
 }
