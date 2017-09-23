@@ -21,6 +21,11 @@
 extern "C" {
 #endif
 
+// added by quyse: see https://github.com/nothings/stb/issues/262
+#if defined(__linux__) || defined(__linux) || defined(__EMSCRIPTEN__)
+#include <alloca.h>
+#endif
+
 #include <stddef.h>
 #include <ogg/os_types.h>
 
