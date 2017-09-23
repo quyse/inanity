@@ -25,6 +25,12 @@ AlPlayer::~AlPlayer()
 	}
 }
 
+void AlPlayer::SetVolume(float volume)
+{
+	alSourcef(sourceName, AL_GAIN, volume);
+	AlSystem::CheckErrors("Can't set OpenAL player volume");
+}
+
 void AlPlayer::SetPosition(const Math::vec3& position)
 {
 	alSource3f(sourceName, AL_POSITION, position.x, position.y, position.z);

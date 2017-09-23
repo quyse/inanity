@@ -19,6 +19,9 @@ public:
 	AlPlayer(ptr<AlDevice> device);
 	~AlPlayer();
 
+	//** Player's methods.
+	void SetVolume(float volume);
+
 	//** Player3D's methods
 	void SetPosition(const Math::vec3& position);
 	void SetDirection(const Math::vec3& direction);

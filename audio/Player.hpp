@@ -23,6 +23,9 @@ public:
 
 	/// Get if sound is playing.
 	virtual bool IsPlaying() const = 0;
+
+	/// Set volume.
+	virtual void SetVolume(float volume) = 0;
 };
 
 END_INANITY_AUDIO
