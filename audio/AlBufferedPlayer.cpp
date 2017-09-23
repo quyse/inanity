@@ -17,6 +17,17 @@ AlBufferedPlayer::AlBufferedPlayer(ptr<AlBuffer> buffer)
 	END_TRY("Can't create OpenAL buffered player");
 }
 
+AlBufferedPlayer::~AlBufferedPlayer()
+{
+	// we need to delete source before buffer, so don't rely on ~AlPlayer()
+	if(sourceName)
+	{
+		alDeleteSources(1, &sourceName);
+		sourceName = 0;
+		AlSystem::CheckErrors("Can't delete source");
+	}
+}
+
 void AlBufferedPlayer::Play(bool looped)
 {
 	alSourcei(sourceName, AL_LOOPING, looped ? AL_TRUE : AL_FALSE);

@@ -26,6 +26,14 @@ AlStreamedPlayer::~AlStreamedPlayer()
 {
 	Stop();
 	device->GetSystem()->UnregisterStreamedPlayer(this);
+
+	// we need to delete source before buffers, so don't rely on ~AlPlayer()
+	if(sourceName)
+	{
+		alDeleteSources(1, &sourceName);
+		sourceName = 0;
+		AlSystem::CheckErrors("Can't delete source");
+	}
 }
 
 size_t AlStreamedPlayer::Fill(ptr<AlBuffer>& buffer)
@@ -87,6 +95,7 @@ void AlStreamedPlayer::Process()
 		for(int i = 0; i < buffersProcessed; ++i)
 			buffersToUnqueue[i] = buffers[i]->GetName();
 		alSourceUnqueueBuffers(sourceName, buffersProcessed, buffersToUnqueue);
+		AlSystem::CheckErrors("Can't unqueue buffers");
 
 		// get processed buffers
 		ptr<AlBuffer> freeBuffers[buffersCount];
@@ -122,6 +131,7 @@ void AlStreamedPlayer::Process()
 				buffersQueued - initialBuffersQueued,
 				bufferNames + initialBuffersQueued
 			);
+			AlSystem::CheckErrors("Can't queue buffers");
 		}
 
 		// ensure playing
@@ -142,7 +152,7 @@ void AlStreamedPlayer::Process()
 
 void AlStreamedPlayer::Pause()
 {
-	alSourcePause(source);
+	alSourcePause(sourceName);
 	AlSystem::CheckErrors("Can't pause OpenAL streamed player");
 	playing = false;
 }
@@ -150,7 +160,7 @@ void AlStreamedPlayer::Pause()
 void AlStreamedPlayer::Stop()
 {
 	stream = 0;
-	alSourceStop(source);
+	alSourceStop(sourceName);
 	AlSystem::CheckErrors("Can't stop OpenAL streamed player");
 	playing = false;
 }

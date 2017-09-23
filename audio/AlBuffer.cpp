@@ -1,5 +1,6 @@
 #include "AlBuffer.hpp"
 #include "AlDevice.hpp"
+#include "AlSystem.hpp"
 
 BEGIN_INANITY_AUDIO
 
@@ -9,6 +10,7 @@ AlBuffer::AlBuffer(ptr<AlDevice> device, ALuint bufferName)
 AlBuffer::~AlBuffer()
 {
 	alDeleteBuffers(1, &bufferName);
+	AlSystem::CheckErrors("Can't delete buffer");
 }
 
 ptr<AlDevice> AlBuffer::GetDevice() const

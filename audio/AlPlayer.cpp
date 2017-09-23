@@ -19,7 +19,10 @@ AlPlayer::AlPlayer(ptr<AlDevice> device)
 AlPlayer::~AlPlayer()
 {
 	if(sourceName)
+	{
 		alDeleteSources(1, &sourceName);
+		AlSystem::CheckErrors("Can't delete source");
+	}
 }
 
 void AlPlayer::SetPosition(const Math::vec3& position)

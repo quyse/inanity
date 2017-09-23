@@ -15,6 +15,7 @@ private:
 
 public:
 	AlBufferedPlayer(ptr<AlBuffer> buffer);
+	~AlBufferedPlayer();
 
 	//** Player's methods.
 	void Play(bool looped = false);
