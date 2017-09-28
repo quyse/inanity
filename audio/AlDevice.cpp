@@ -70,4 +70,23 @@ ptr<Sound> AlDevice::CreateStreamedSound(ptr<Source> source)
 	return NEW(AlStreamedSound(this, source));
 }
 
+void AlDevice::SetListenerPosition(const Math::vec3& position)
+{
+	alListener3f(AL_POSITION, position.x, position.y, position.z);
+	AlSystem::CheckErrors("Can't set OpenAL listener position");
+}
+
+void AlDevice::SetListenerOrientation(const Math::vec3& forward, const Math::vec3& up)
+{
+	float v[] = { forward.x, forward.y, forward.z, up.x, up.y, up.z };
+	alListenerfv(AL_ORIENTATION, v);
+	AlSystem::CheckErrors("Can't set OpenAL listener orientation");
+}
+
+void AlDevice::SetListenerVelocity(const Math::vec3& velocity)
+{
+	alListener3f(AL_VELOCITY, velocity.x, velocity.y, velocity.z);
+	AlSystem::CheckErrors("Can't set OpenAL listener velocity");
+}
+
 END_INANITY_AUDIO

@@ -25,8 +25,11 @@ public:
 	ptr<AlSystem> GetSystem() const;
 
 	//** Device's methods.
-	ptr<Sound> CreateBufferedSound(ptr<Source> source);
-	ptr<Sound> CreateStreamedSound(ptr<Source> source);
+	ptr<Sound> CreateBufferedSound(ptr<Source> source) override;
+	ptr<Sound> CreateStreamedSound(ptr<Source> source) override;
+	void SetListenerPosition(const Math::vec3& position) override;
+	void SetListenerOrientation(const Math::vec3& forward, const Math::vec3& up) override;
+	void SetListenerVelocity(const Math::vec3& velocity) override;
 };
 
 END_INANITY_AUDIO
