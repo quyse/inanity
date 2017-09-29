@@ -20,6 +20,7 @@ AlPlayer::~AlPlayer()
 {
 	if(sourceName)
 	{
+		alSourceStop(sourceName);
 		alDeleteSources(1, &sourceName);
 		AlSystem::CheckErrors("Can't delete source");
 	}

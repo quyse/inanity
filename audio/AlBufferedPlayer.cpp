@@ -22,6 +22,7 @@ AlBufferedPlayer::~AlBufferedPlayer()
 	// we need to delete source before buffer, so don't rely on ~AlPlayer()
 	if(sourceName)
 	{
+		alSourceStop(sourceName);
 		alDeleteSources(1, &sourceName);
 		sourceName = 0;
 		AlSystem::CheckErrors("Can't delete source");
