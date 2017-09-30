@@ -1,14 +1,82 @@
 #include "HttpClient.hpp"
 #include "Service.hpp"
+#include "../OutputStream.hpp"
+#if defined(___INANITY_PLATFORM_EMSCRIPTEN)
+#include <emscripten/fetch.h>
+#else
 #include "TcpSocket.hpp"
 #include "HttpStream.hpp"
 #include "../File.hpp"
-#include "../OutputStream.hpp"
 #include "../Strings.hpp"
 #include "../Exception.hpp"
 #include <sstream>
+#endif
 
 BEGIN_INANITY_NET
+
+#if defined(___INANITY_PLATFORM_EMSCRIPTEN)
+
+class HttpClientRequest : public Object
+{
+private:
+	ptr<SuccessHandler> handler;
+	ptr<OutputStream> outputStream;
+
+public:
+	HttpClientRequest(ptr<SuccessHandler> handler, ptr<OutputStream> outputStream)
+	: handler(handler), outputStream(outputStream) {}
+
+	void OnSuccess(emscripten_fetch_t* fetch)
+	{
+		if(fetch->numBytes)
+			outputStream->Write(fetch->data, fetch->numBytes);
+		handler->FireSuccess();
+		emscripten_fetch_close(fetch);
+		Dereference();
+	}
+
+	void OnError(emscripten_fetch_t* fetch)
+	{
+		handler->FireError(NEW(Exception(String("Http client error: ") + fetch->statusText)));
+		emscripten_fetch_close(fetch);
+		Dereference();
+	}
+
+	void OnProgress(emscripten_fetch_t* fetch)
+	{
+		if(fetch->numBytes)
+			outputStream->Write(fetch->data, fetch->numBytes);
+	}
+
+	static void StaticOnSuccess  (emscripten_fetch_t* fetch) { ((HttpClientRequest*)fetch->userData)->OnSuccess(fetch); }
+	static void StaticOnError    (emscripten_fetch_t* fetch) { ((HttpClientRequest*)fetch->userData)->OnError(fetch); }
+	static void StaticOnProgress (emscripten_fetch_t* fetch) { ((HttpClientRequest*)fetch->userData)->OnProgress(fetch); }
+};
+
+void HttpClient::Fetch(ptr<Service> service, const String& url, const String& method, const String& data, const String& contentType, ptr<SuccessHandler> handler, ptr<OutputStream> outputStream)
+{
+	BEGIN_TRY();
+
+	emscripten_fetch_attr_t attr;
+	emscripten_fetch_attr_init(&attr);
+	strcpy(attr.requestMethod, method.c_str());
+	attr.userData = NEW(HttpClientRequest(handler, outputStream));
+	attr.onsuccess = &HttpClientRequest::StaticOnSuccess;
+	attr.onerror = &HttpClientRequest::StaticOnError;
+	attr.onprogress = &HttpClientRequest::StaticOnProgress;
+	// attr.attributes = EMSCRIPTEN_FETCH_STREAM_DATA; // doesn't work :(
+	attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
+	const char* const headers[] = { "Content-Type", contentType.c_str(), nullptr };
+	if(contentType.length())
+		attr.requestHeaders = headers;
+	attr.requestData = data.c_str();
+	attr.requestDataSize = data.length();
+	emscripten_fetch(&attr, url.c_str());
+
+	END_TRY("Can't fetch http");
+}
+
+#else
 
 class HttpClientRequest : public Object
 {
@@ -123,6 +191,8 @@ void HttpClient::Fetch(ptr<Service> service, const String& url, const String& me
 
 	END_TRY("Can't fetch http");
 }
+
+#endif
 
 void HttpClient::Get(ptr<Service> service, const String& url, ptr<SuccessHandler> handler, ptr<OutputStream> outputStream)
 {
