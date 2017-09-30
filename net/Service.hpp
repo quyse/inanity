@@ -31,16 +31,16 @@ public:
 	virtual void Stop() = 0;
 
 	/// Open a TCP port and begin listening incoming TCP connections.
-	virtual ptr<TcpListener> ListenTcp(int port, ptr<TcpSocketHandler> socketHandler) = 0;
+	virtual ptr<TcpListener> ListenTcp(int port, ptr<TcpSocketHandler> socketHandler);
 	/// Create outcoming TCP connection.
 	/** socketHandler will be called once. */
-	virtual void ConnectTcp(const String& host, int port, ptr<TcpSocketHandler> socketHandler) = 0;
+	virtual void ConnectTcp(const String& host, int port, ptr<TcpSocketHandler> socketHandler);
 
 	/// Open an UDP port and begin listening incoming UDP packets.
-	virtual ptr<UdpListener> ListenUdp(int port, ptr<UdpPacketHandler> receiveHandler) = 0;
+	virtual ptr<UdpListener> ListenUdp(int port, ptr<UdpPacketHandler> receiveHandler);
 	/// Create outcoming UDP connection.
 	/** Of course this is not actually connection, but only an abstraction. */
-	virtual void ConnectUdp(const String& host, int port, ptr<UdpSocketHandler> socketHandler) = 0;
+	virtual void ConnectUdp(const String& host, int port, ptr<UdpSocketHandler> socketHandler);
 };
 
 END_INANITY_NET

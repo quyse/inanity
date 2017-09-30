@@ -37,7 +37,7 @@ public:
 public:
 	/// Write data to the socket.
 	/** Data goes into queue, and will be sent in order. */
-	virtual void Send(ptr<File> file, ptr<SendHandler> sendHandler = 0) = 0;
+	virtual void Send(ptr<File> file, ptr<SendHandler> sendHandler = nullptr) = 0;
 	/// Close sending side of the socket.
 	/** Socket will be closed only when all enqueued data will be sent. */
 	virtual void End() = 0;

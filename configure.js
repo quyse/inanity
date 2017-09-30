@@ -71,12 +71,17 @@ var libraries = {
 	// ******* net
 	'libinanity-net': {
 		objects: [
-		'net.TcpSocket']
+		'net.Service', 'net.TcpSocket']
 	},
 	// ******* сетевая библиотека ASIO
 	'libinanity-asio': {
 		objects: [
 		'net.asio', 'net.AsioService', 'net.AsioTcpListener', 'net.AsioTcpSocket', 'net.AsioInternalUdpSocket', 'net.AsioUdpListener', 'net.AsioUdpSocket']
+	},
+	// ******* сетевая библиотека Emscripten
+	'libinanity-net-ems': {
+		objects: [
+		'net.EmsService', 'net.EmsTcpSocket']
 	},
 	// ******* FCGI support
 	'libinanity-fcgi': {
