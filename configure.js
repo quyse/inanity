@@ -25,7 +25,7 @@ exports.configureCompiler = function(objectFile, compiler) {
 	compiler.addMacro('U_STATIC_IMPLEMENTATION');
 
 	// hack for deterministic floats
-	if(source == 'math/HardFloat.cpp')
+	if(source == 'math/HardFloat.cpp' || source == 'math/EmsHardFloat.cpp')
 		compiler.fastMath = false;
 };
 
@@ -320,9 +320,10 @@ var libraries = {
 	},
 	// ******* детерминированные числа
 	'libinanity-hardfloat': {
-		objects: [
-			'math.HardFloat'
-		]
+		'objects-win32': ['math.HardFloat'],
+		'objects-linux': ['math.HardFloat'],
+		'objects-darwin': ['math.HardFloat'],
+		'objects-emscripten': ['math.EmsHardFloat'],
 	}
 };
 
