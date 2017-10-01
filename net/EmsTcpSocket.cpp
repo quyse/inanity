@@ -44,6 +44,10 @@ void EmsTcpSocket::OnOpen()
 {
 	socketHandler->FireData(this);
 	socketHandler = nullptr;
+
+	// perform first read
+	OnMessage();
+
 	Dereference();
 }
 
