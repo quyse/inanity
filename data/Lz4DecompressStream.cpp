@@ -29,19 +29,15 @@ size_t Lz4DecompressStream::ReadSource(void* data)
 	if(sourceExhausted)
 		return 0;
 
-	// read block size
-	size_t size;
-	try
+	// process end of file
+	if(reader.IsAtEnd())
 	{
-		size = reader.ReadShortly();
-	}
-	catch(Exception* exception)
-	{
-		// process end of file
-		MakePointer(exception);
 		sourceExhausted = true;
 		return 0;
 	}
+
+	// read block size
+	size_t size = reader.ReadShortly();
 
 	if(size > inputBufferSize)
 		THROW("Too big block");

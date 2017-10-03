@@ -147,4 +147,9 @@ bigsize_t StreamReader::Skip(bigsize_t size)
 	return skipped;
 }
 
+bool StreamReader::IsAtEnd() const
+{
+	return stream->IsAtEnd();
+}
+
 END_INANITY

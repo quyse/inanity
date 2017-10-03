@@ -4,6 +4,12 @@
 #include "platform.hpp"
 #include "../FileSystem.hpp"
 
+BEGIN_INANITY
+
+class Exception;
+
+END_INANITY
+
 BEGIN_INANITY_PLATFORM
 
 /// Posix file system.
@@ -35,6 +41,7 @@ public:
 
 	//*** FileSystem's methods.
 	ptr<File> LoadFile(const String& fileName);
+	ptr<File> TryLoadFile(const String& fileName);
 	ptr<InputStream> LoadStream(const String& fileName);
 	void SaveFile(ptr<File> file, const String& fileName);
 	ptr<OutputStream> SaveStream(const String& fileName);
@@ -51,7 +58,7 @@ public:
 	of system allocation granularity.
 	If mappingSize == 0 then whole size of file will be used.
 	*/
-	ptr<File> LoadPartOfFile(const String& fileName, long long mappingStart, size_t mappingSize);
+	ptr<File> TryLoadPartOfFile(const String& fileName, long long mappingStart, size_t mappingSize, ptr<Exception>& exception);
 
 	META_DECLARE_CLASS(PosixFileSystem);
 };

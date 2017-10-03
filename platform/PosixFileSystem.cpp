@@ -169,14 +169,20 @@ size_t PosixFileSystem::GetFileSize(const String& fileName)
 	return st.st_size;
 }
 
-ptr<File> PosixFileSystem::LoadPartOfFile(const String& fileName, long long mappingStart, size_t mappingSize)
+ptr<File> PosixFileSystem::TryLoadPartOfFile(const String& fileName, long long mappingStart, size_t mappingSize, ptr<Exception>& exception)
 {
+	exception = nullptr;
+
 	String name = GetFullName(fileName);
-	try
+
+	do
 	{
 		int fd = open(name.c_str(), O_RDONLY, 0);
 		if(fd < 0)
-			THROW_SECONDARY("Can't open file", Exception::SystemError());
+		{
+			exception = NEW_SECONDARY_EXCEPTION("Can't open file", Exception::SystemError());
+			break;
+		}
 		size_t size;
 		if(mappingSize)
 			size = mappingSize;
@@ -185,8 +191,9 @@ ptr<File> PosixFileSystem::LoadPartOfFile(const String& fileName, long long mapp
 			struct stat st;
 			if(fstat(fd, &st) < 0)
 			{
-				THROW_SECONDARY("Can't get file size", Exception::SystemError());
 				close(fd);
+				exception = NEW_SECONDARY_EXCEPTION("Can't get file size", Exception::SystemError());
+				break;
 			}
 			size = st.st_size;
 		}
@@ -209,7 +216,10 @@ ptr<File> PosixFileSystem::LoadPartOfFile(const String& fileName, long long mapp
 		void* data = mmap(0, realMappingSize, PROT_READ, MAP_PRIVATE, fd, realMappingStart);
 		close(fd);
 		if(data == (caddr_t)-1)
-			THROW_SECONDARY("Can't map file", Exception::SystemError());
+		{
+			exception = NEW_SECONDARY_EXCEPTION("Can't map file", Exception::SystemError());
+			break;
+		}
 
 		//если сдвиг был
 		if(realMappingStart < (unsigned long long)mappingStart)
@@ -218,10 +228,10 @@ ptr<File> PosixFileSystem::LoadPartOfFile(const String& fileName, long long mapp
 		//иначе сдвига не было, просто вернуть файл
 		return NEW(PosixFile(data, size));
 	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY("Can't load file \"" + fileName + "\" as \"" + name + "\"", exception);
-	}
+	while(false);
+
+	exception = NEW_SECONDARY_EXCEPTION("Can't load file \"" + fileName + "\" as \"" + name + "\"", exception);
+	return nullptr;
 }
 
 void PosixFileSystem::SaveFile(ptr<File> file, const String& fileName)
@@ -341,7 +351,16 @@ void PosixFileSystem::GetDirectoryEntries(const String& directoryName, std::vect
 
 ptr<File> PosixFileSystem::LoadFile(const String& fileName)
 {
-	return LoadPartOfFile(fileName, 0, 0);
+	ptr<Exception> exception;
+	ptr<File> file = TryLoadPartOfFile(fileName, 0, 0, exception);
+	if(file) return file;
+	throw exception;
+}
+
+ptr<File> PosixFileSystem::TryLoadFile(const String& fileName)
+{
+	ptr<Exception> exception;
+	return TryLoadPartOfFile(fileName, 0, 0, exception);
 }
 
 ptr<PosixFileSystem> PosixFileSystem::GetNativeFileSystem()

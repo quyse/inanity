@@ -31,6 +31,9 @@ public:
 	Реализация по умолчанию просто читает данные в никуда. */
 	virtual bigsize_t Skip(bigsize_t size);
 
+	/// Is stream at the end?
+	virtual bool IsAtEnd() const;
+
 	/// Read some data into memory file.
 	ptr<File> Read(size_t size);
 

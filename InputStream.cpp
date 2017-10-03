@@ -42,4 +42,9 @@ ptr<File> InputStream::Read(size_t size)
 	END_TRY("Can't read data as file from input stream");
 }
 
+bool InputStream::IsAtEnd() const
+{
+	return false;
+}
+
 END_INANITY

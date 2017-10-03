@@ -71,6 +71,8 @@ public:
 
 	/// Пропустить заданное количество байт.
 	bigsize_t Skip(bigsize_t size);
+
+	bool IsAtEnd() const;
 };
 
 template <typename T>

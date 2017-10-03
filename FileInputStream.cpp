@@ -18,4 +18,9 @@ size_t FileInputStream::Read(void *data, size_t size)
 	return size;
 }
 
+bool FileInputStream::IsAtEnd() const
+{
+	return !fileSize;
+}
+
 END_INANITY

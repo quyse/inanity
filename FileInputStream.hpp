@@ -19,7 +19,8 @@ public:
 	/** \param file объект File для чтения */
 	FileInputStream(ptr<File> file);
 
-	size_t Read(void* data, size_t size);
+	size_t Read(void* data, size_t size) override;
+	bool IsAtEnd() const override;
 };
 
 END_INANITY

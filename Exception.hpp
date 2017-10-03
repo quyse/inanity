@@ -46,12 +46,18 @@ public:
 /// Throw exception in case of assert failure.
 #define THROW_ASSERT(condition) \
 	if(!(condition)) THROW(#condition)
+/// New primary exception.
+#define NEW_EXCEPTION(message) NEW(Inanity::Exception(Inanity::String("[ " __FILE__ ", " __SLINE__ " ] ") + (message)))
+/// New secondary exception.
+#define NEW_SECONDARY_EXCEPTION(message, exception) NEW(Inanity::Exception(Inanity::String("[ " __FILE__ ", " __SLINE__ " ] ") + (message), (exception)))
 
 #else
 
 #define THROW(message) throw NEW(Inanity::Exception((message)))
 #define THROW_SECONDARY(message, exception) throw NEW(Inanity::Exception((message), (exception)))
 #define THROW_ASSERT(condition)
+#define NEW_EXCEPTION(message) NEW(Inanity::Exception((message)))
+#define NEW_SECONDARY_EXCEPTION(message, exception) NEW(Inanity::Exception((message), (exception)))
 
 #endif
 
