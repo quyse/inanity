@@ -179,14 +179,18 @@ size_t Win32FileSystem::GetFileSize(const String& fileName)
 	return resultSize;
 }
 
-ptr<File> Win32FileSystem::LoadPartOfFile(const String& fileName, long long mappingStart, size_t mappingSize)
+ptr<File> Win32FileSystem::TryLoadPartOfFile(const String& fileName, long long mappingStart, size_t mappingSize, ptr<Exception>* exception)
 {
 	String name = GetFullName(fileName);
-	try
+	do
 	{
 		Win32Handle hFile = CreateFile(Strings::UTF82Unicode(name).c_str(), GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, NULL);
 		if(!hFile.IsValid())
-			THROW_SECONDARY("Can't open file", Exception::SystemError());
+		{
+			if(exception)
+				*exception = NEW_SECONDARY_EXCEPTION("Can't open file", Exception::SystemError());
+			break;
+		}
 		size_t size;
 		if(mappingSize)
 			size = mappingSize;
@@ -196,13 +200,21 @@ ptr<File> Win32FileSystem::LoadPartOfFile(const String& fileName, long long mapp
 			::GetFileSizeEx(hFile, &li);
 			size = (size_t)li.QuadPart;
 			if(size != li.QuadPart)
-				THROW("File too long to map");
+			{
+				if(exception)
+					*exception = NEW_EXCEPTION("File too long to map");
+				break;
+			}
 		}
 		if(!size)
 			return NEW(EmptyFile());
 		Win32Handle hMapping = CreateFileMapping(hFile, 0, PAGE_READONLY, 0, 0, 0);
 		if(!hMapping)
-			THROW_SECONDARY("Can't create file mapping", Exception::SystemError());
+		{
+			if(exception)
+				*exception = NEW_SECONDARY_EXCEPTION("Can't create file mapping", Exception::SystemError());
+			break;
+		}
 
 		//получить гранулярность выделения памяти
 		static unsigned allocationGranularity = 0;
@@ -220,7 +232,11 @@ ptr<File> Win32FileSystem::LoadPartOfFile(const String& fileName, long long mapp
 		//спроецировать файл с учетом этого сдвига
 		void* data = MapViewOfFile(hMapping, FILE_MAP_READ, realMappingStart >> 32, realMappingStart & ((1LL << 32) - 1), realMappingSize);
 		if(!data)
-			THROW_SECONDARY("Can't map view of file", Exception::SystemError());
+		{
+			if(exception)
+				*exception = NEW_SECONDARY_EXCEPTION("Can't map view of file", Exception::SystemError());
+			break;
+		}
 
 		//если сдвиг был
 		if(realMappingStart < mappingStart)
@@ -229,10 +245,11 @@ ptr<File> Win32FileSystem::LoadPartOfFile(const String& fileName, long long mapp
 		//иначе сдвига не было, просто вернуть файл
 		return NEW(Win32File(data, size));
 	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY("Can't load file \"" + fileName + "\" as \"" + name + "\"", exception);
-	}
+	while(false);
+
+	if(exception)
+		*exception = NEW_SECONDARY_EXCEPTION("Can't load file \"" + fileName + "\" as \"" + name + "\"", *exception);
+	return nullptr;
 }
 
 void Win32FileSystem::SaveFile(ptr<File> file, const String& fileName)
@@ -333,7 +350,15 @@ void Win32FileSystem::GetDirectoryEntries(const String& directoryName, std::vect
 
 ptr<File> Win32FileSystem::LoadFile(const String& fileName)
 {
-	return LoadPartOfFile(fileName, 0, 0);
+	ptr<Exception> exception;
+	ptr<File> file = TryLoadPartOfFile(fileName, 0, 0, &exception);
+	if(file) return file;
+	throw exception;
+}
+
+ptr<File> Win32FileSystem::TryLoadFile(const String& fileName)
+{
+	return TryLoadPartOfFile(fileName, 0, 0, nullptr);
 }
 
 ptr<Win32FileSystem> Win32FileSystem::GetNativeFileSystem()
