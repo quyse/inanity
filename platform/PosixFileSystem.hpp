@@ -58,7 +58,7 @@ public:
 	of system allocation granularity.
 	If mappingSize == 0 then whole size of file will be used.
 	*/
-	ptr<File> TryLoadPartOfFile(const String& fileName, long long mappingStart, size_t mappingSize, ptr<Exception>& exception);
+	ptr<File> TryLoadPartOfFile(const String& fileName, long long mappingStart, size_t mappingSize, ptr<Exception>* exception);
 
 	META_DECLARE_CLASS(PosixFileSystem);
 };
