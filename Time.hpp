@@ -14,7 +14,7 @@ public:
 	/// Type to represent ticks.
 #ifdef ___INANITY_PLATFORM_EMSCRIPTEN
 	/// On emscripten 'long long' is slow.
-	typedef float Tick;
+	typedef double Tick;
 #else
 	typedef long long Tick;
 #endif
