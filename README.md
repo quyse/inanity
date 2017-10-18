@@ -6,6 +6,10 @@ Inanity is a cross-platform C++ game engine. It aims to provide full, abstract-f
 
 The whole engine is work-in-progress, it is far from finished state. There are almost no tools for "end users". The engine is considered as an experimental piece of software for those who doesn't afraid to read the engine's code before using.
 
+## Projects using it
+
+* [Insatia](https://insatia.kozinaka.com/)
+
 ## Documentation
 
 [Wiki pages on GitHub](https://github.com/quyse/inanity/wiki/Start)
