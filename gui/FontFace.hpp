@@ -30,9 +30,10 @@ public:
 	// Global font metrics.
 	struct Metrics
 	{
-		float ascender;
-		float descender;
-		float height;
+		float ascender = 0;
+		float descender = 0;
+		float height = 0;
+		float capHeight = 0;
 	};
 
 public:

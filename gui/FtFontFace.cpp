@@ -6,6 +6,7 @@
 #include "../graphics/RawTextureData.hpp"
 #include "../MemoryFile.hpp"
 #include "../Exception.hpp"
+#include FT_TRUETYPE_TABLES_H
 
 BEGIN_INANITY_GUI
 
@@ -165,6 +166,16 @@ FontFace::Metrics FtFontFace::CalculateMetrics(int size) const
 	metrics.ascender = (float)ftFace->ascender * scale;
 	metrics.descender = (float)ftFace->descender * scale;
 	metrics.height = (float)ftFace->height * scale;
+
+	{
+		TT_PCLT* pcltTable;
+		TT_OS2* os2Table;
+		if((pcltTable = (TT_PCLT*)FT_Get_Sfnt_Table(ftFace, FT_SFNT_PCLT)) != nullptr)
+			metrics.capHeight = (float)pcltTable->CapHeight * scale;
+		else if((os2Table = (TT_OS2*)FT_Get_Sfnt_Table(ftFace, FT_SFNT_OS2)) != nullptr && os2Table->version != 0xFFFF && os2Table->version >= 2)
+			metrics.capHeight = (float)os2Table->sCapHeight * scale;
+	}
+
 	return metrics;
 }
 
