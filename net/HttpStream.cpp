@@ -62,7 +62,7 @@ int HttpStream::OnUrl(http_parser* parser, const char* data, size_t size)
 
 int HttpStream::OnStatus(http_parser* parser, const char* data, size_t size)
 {
-	return 0;
+	return (parser->status_code >= 200 && parser->status_code <= 299) ? 0 : 1;
 }
 
 int HttpStream::OnHeaderField(http_parser* parser, const char* data, size_t size)
