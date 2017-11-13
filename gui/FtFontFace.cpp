@@ -7,6 +7,7 @@
 #include "../MemoryFile.hpp"
 #include "../Exception.hpp"
 #include FT_TRUETYPE_TABLES_H
+#include FT_GLYPH_H
 
 BEGIN_INANITY_GUI
 
@@ -174,6 +175,46 @@ FontFace::Metrics FtFontFace::CalculateMetrics(int size) const
 			metrics.capHeight = (float)pcltTable->CapHeight * scale;
 		else if((os2Table = (TT_OS2*)FT_Get_Sfnt_Table(ftFace, FT_SFNT_OS2)) != nullptr && os2Table->version != 0xFFFF && os2Table->version >= 2)
 			metrics.capHeight = (float)os2Table->sCapHeight * scale;
+		else
+		{
+			// fallback method: average heights of 'M' and 'X'
+			FT_Set_Pixel_Sizes(ftFace, size, size);
+
+			FT_UInt charIndex;
+			FT_BBox bbox;
+			FT_Glyph glyph;
+
+			FT_Pos mHeight = 0;
+			charIndex = FT_Get_Char_Index(ftFace, 'M');
+			if(charIndex && !FT_Load_Glyph(ftFace, charIndex, FT_LOAD_NO_HINTING) && !FT_Get_Glyph(ftFace->glyph, &glyph))
+			{
+				FT_Glyph_Get_CBox(glyph, FT_GLYPH_BBOX_SUBPIXELS, &bbox);
+				FT_Done_Glyph(glyph);
+				mHeight = bbox.yMax - bbox.yMin;
+			}
+
+			FT_Pos xHeight = 0;
+			charIndex = FT_Get_Char_Index(ftFace, 'M');
+			if(charIndex && !FT_Load_Glyph(ftFace, charIndex, FT_LOAD_NO_HINTING) && !FT_Get_Glyph(ftFace->glyph, &glyph))
+			{
+				FT_Glyph_Get_CBox(glyph, FT_GLYPH_BBOX_SUBPIXELS, &bbox);
+				FT_Done_Glyph(glyph);
+				xHeight = bbox.yMax - bbox.yMin;
+			}
+
+			if(mHeight || xHeight)
+			{
+				metrics.capHeight = mHeight + xHeight;
+				if(mHeight && xHeight)
+				{
+					metrics.capHeight *= 0.5f;
+				}
+				metrics.capHeight /= 64; // because of 26.6 fixed point format
+			}
+			else
+				// last resort
+				metrics.capHeight = metrics.ascender;
+		}
 	}
 
 	return metrics;
