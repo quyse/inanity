@@ -204,7 +204,7 @@ FontFace::Metrics FtFontFace::CalculateMetrics(int size) const
 
 			if(mHeight || xHeight)
 			{
-				metrics.capHeight = FT_Pos(mHeight + xHeight);
+				metrics.capHeight = float(mHeight + xHeight);
 				if(mHeight && xHeight)
 				{
 					metrics.capHeight *= 0.5f;
