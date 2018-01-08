@@ -16,3 +16,6 @@
 [submodule "deps/ucdn/repo"]
 	path = deps/ucdn/repo
 	url = https://github.com/grigorig/ucdn.git
+[submodule "deps/eigen/repo"]
+	path = deps/eigen/repo
+	url = https://github.com/eigenteam/eigen-git-mirror.git

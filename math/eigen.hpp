@@ -18,9 +18,9 @@ http://eigen.tuxfamily.org/dox/TopicUnalignedArrayAssert.html
 #include "math.hpp"
 
 #define EIGEN_MPL2_ONLY
-#include "../deps/eigen/Eigen/Core"
-#include "../deps/eigen/Eigen/Geometry"
-#include "../deps/eigen/Eigen/LU"
+#include "../deps/eigen/repo/Eigen/Core"
+#include "../deps/eigen/repo/Eigen/Geometry"
+#include "../deps/eigen/repo/Eigen/LU"
 
 BEGIN_INANITY_MATH
 
