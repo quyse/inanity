@@ -3,7 +3,6 @@
 
 #include "math.hpp"
 #include <limits>
-#include <emmintrin.h>
 
 BEGIN_INANITY_MATH
 
