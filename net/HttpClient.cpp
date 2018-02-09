@@ -2,14 +2,16 @@
 #include "Service.hpp"
 #include "../OutputStream.hpp"
 #if defined(___INANITY_PLATFORM_EMSCRIPTEN)
+#include "../File.hpp"
 #include <emscripten/fetch.h>
 #else
+#include "../MemoryFile.hpp"
 #include "TcpSocket.hpp"
 #include "HttpStream.hpp"
-#include "../File.hpp"
 #include "../Strings.hpp"
 #include "../Exception.hpp"
 #include <sstream>
+#include <cstring>
 #endif
 
 BEGIN_INANITY_NET
@@ -19,12 +21,18 @@ BEGIN_INANITY_NET
 class HttpClientRequest : public Object
 {
 private:
+	ptr<File> dataFile;
 	ptr<SuccessHandler> handler;
 	ptr<OutputStream> outputStream;
 
 public:
-	HttpClientRequest(ptr<SuccessHandler> handler, ptr<OutputStream> outputStream)
-	: handler(handler), outputStream(outputStream) {}
+	HttpClientRequest(ptr<File> dataFile, ptr<SuccessHandler> handler, ptr<OutputStream> outputStream)
+	: dataFile(dataFile), handler(handler), outputStream(outputStream) {}
+
+	ptr<File> GetData() const
+	{
+		return dataFile;
+	}
 
 	void OnSuccess(emscripten_fetch_t* fetch)
 	{
@@ -53,14 +61,14 @@ public:
 	static void StaticOnProgress (emscripten_fetch_t* fetch) { ((HttpClientRequest*)fetch->userData)->OnProgress(fetch); }
 };
 
-void HttpClient::Fetch(ptr<Service> service, const String& url, const String& method, const String& data, const String& contentType, ptr<SuccessHandler> handler, ptr<OutputStream> outputStream)
+void HttpClient::Fetch(ptr<Service> service, const String& url, const String& method, ptr<File> dataFile, const String& contentType, ptr<SuccessHandler> handler, ptr<OutputStream> outputStream)
 {
 	BEGIN_TRY();
 
 	emscripten_fetch_attr_t attr;
 	emscripten_fetch_attr_init(&attr);
 	strcpy(attr.requestMethod, method.c_str());
-	attr.userData = NEW(HttpClientRequest(handler, outputStream));
+	attr.userData = NEW(HttpClientRequest(dataFile, handler, outputStream));
 	attr.onsuccess = &HttpClientRequest::StaticOnSuccess;
 	attr.onerror = &HttpClientRequest::StaticOnError;
 	attr.onprogress = &HttpClientRequest::StaticOnProgress;
@@ -69,8 +77,8 @@ void HttpClient::Fetch(ptr<Service> service, const String& url, const String& me
 	const char* const headers[] = { "Content-Type", contentType.c_str(), nullptr };
 	if(contentType.length())
 		attr.requestHeaders = headers;
-	attr.requestData = data.c_str();
-	attr.requestDataSize = data.length();
+	attr.requestData = dataFile ? (const char*)dataFile->GetData() : nullptr;
+	attr.requestDataSize = dataFile ? dataFile->GetSize() : 0;
 	emscripten_fetch(&attr, url.c_str());
 
 	END_TRY("Can't fetch http");
@@ -144,7 +152,7 @@ private:
 	}
 };
 
-void HttpClient::Fetch(ptr<Service> service, const String& url, const String& method, const String& data, const String& contentType, ptr<SuccessHandler> handler, ptr<OutputStream> outputStream)
+void HttpClient::Fetch(ptr<Service> service, const String& url, const String& method, ptr<File> data, const String& contentType, ptr<SuccessHandler> handler, ptr<OutputStream> outputStream)
 {
 	BEGIN_TRY();
 
@@ -181,11 +189,13 @@ void HttpClient::Fetch(ptr<Service> service, const String& url, const String& me
 	request << "User-Agent: Inanity HttpClient/2.0\r\n";
 	if(contentType.length())
 		request << "Content-Type: " << contentType << "\r\n";
-	request << "Content-Length: " << data.length() << "\r\n";
+	request << "Content-Length: " << (data ? data->GetSize() : 0) << "\r\n";
 	request << "\r\n";
-	request << data;
 
-	ptr<File> requestFile = Strings::String2File(request.str());
+	ptr<MemoryFile> requestFile = NEW(MemoryFile(request.str().length() + (data ? data->GetSize() : 0)));
+	memcpy(requestFile->GetData(), request.str().c_str(), request.str().length());
+	if(data)
+		memcpy((char*)requestFile->GetData() + request.str().length(), data->GetData(), data->GetSize());
 
 	MakePointer(NEW(HttpClientRequest(service, host, port, requestFile, handler, outputStream)));
 
@@ -196,7 +206,7 @@ void HttpClient::Fetch(ptr<Service> service, const String& url, const String& me
 
 void HttpClient::Get(ptr<Service> service, const String& url, ptr<SuccessHandler> handler, ptr<OutputStream> outputStream)
 {
-	return Fetch(service, url, "", "", "", handler, outputStream);
+	return Fetch(service, url, "", nullptr, "", handler, outputStream);
 }
 
 END_INANITY_NET

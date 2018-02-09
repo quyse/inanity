@@ -7,6 +7,7 @@
 
 BEGIN_INANITY
 
+class File;
 class OutputStream;
 
 END_INANITY
@@ -20,7 +21,7 @@ class HttpClient : public Object
 {
 public:
 	/// General method for making HTTP request.
-	static void Fetch(ptr<Service> service, const String& url, const String& method, const String& data, const String& contentType, ptr<SuccessHandler> handler, ptr<OutputStream> outputStream);
+	static void Fetch(ptr<Service> service, const String& url, const String& method, ptr<File> dataFile, const String& contentType, ptr<SuccessHandler> handler, ptr<OutputStream> outputStream);
 	/// Simple method for GET request.
 	static void Get(ptr<Service> service, const String& url, ptr<SuccessHandler> handler, ptr<OutputStream> outputStream);
 };
