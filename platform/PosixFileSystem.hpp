@@ -49,8 +49,7 @@ public:
 	void GetFileNames(std::vector<String>& fileNames) const;
 	void GetDirectoryEntries(const String& directoryName, std::vector<String>& fileNames) const;
 	void MakeDirectory(const String& directoryName);
-	void RemoveFile(const String& fileName);
-	void RemoveDirectory(const String& directoryName);
+	void DeleteEntry(const String& entryName);
 	EntryType GetEntryType(const String& entryName) const;
 
 	//*** Extended methods for PosixFileSystem.

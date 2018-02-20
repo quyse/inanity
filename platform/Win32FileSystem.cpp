@@ -348,6 +348,33 @@ void Win32FileSystem::GetDirectoryEntries(const String& directoryName, std::vect
 	FindClose(hFind);
 }
 
+void Win32FileSystem::MakeDirectory(const String& directoryName)
+{
+	if(!CreateDirectory(Strings::UTF82Unicode(GetFullName(directoryName)).c_str(), NULL))
+		THROW_SECONDARY("Can't make directory " + directoryName, Exception::SystemError());
+}
+
+void Win32FileSystem::DeleteEntry(const String& entryName)
+{
+	std::wstring fullEntryName = Strings::UTF82Unicode(GetFullName(entryName));
+	DWORD attrs = GetFileAttributes(fullEntryName.c_str());
+	if(attrs == INVALID_FILE_ATTRIBUTES || !((attrs & FILE_ATTRIBUTE_DIRECTORY) ? RemoveDirectory : DeleteFile)(fullEntryName.c_str()))
+		THROW_SECONDARY("Can't delete entry " + entryName, Exception::SystemError());
+}
+
+FileSystem::EntryType Win32FileSystem::GetEntryType(const String& entryName) const
+{
+	DWORD attrs = GetFileAttributes(Strings::UTF82Unicode(GetFullName(entryName)).c_str());
+	if(attrs == INVALID_FILE_ATTRIBUTES)
+	{
+		if(GetLastError() == ERROR_FILE_NOT_FOUND) return entryTypeMissing;
+		THROW_SECONDARY("Can't get entry type of " + entryName, Exception::SystemError());
+	}
+
+	if(attrs & FILE_ATTRIBUTE_DIRECTORY) return entryTypeDirectory;
+	return entryTypeFile;
+}
+
 ptr<File> Win32FileSystem::LoadFile(const String& fileName)
 {
 	ptr<Exception> exception;

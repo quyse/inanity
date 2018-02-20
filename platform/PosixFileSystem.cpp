@@ -358,18 +358,11 @@ void PosixFileSystem::MakeDirectory(const String& directoryName)
 		THROW_SECONDARY("Can't make dir " + directoryName, Exception::SystemError());
 }
 
-void PosixFileSystem::RemoveFile(const String& fileName)
+void PosixFileSystem::DeleteEntry(const String& entryName)
 {
-	String fullFileName = GetFullName(fileName);
-	if(unlink(fullFileName.c_str()))
-		THROW_SECONDARY("Can't remove file " + fileName, Exception::SystemError());
-}
-
-void PosixFileSystem::RemoveDirectory(const String& directoryName)
-{
-	String fullDirectoryName = GetFullName(directoryName);
-	if(rmdir(fullDirectoryName.c_str()))
-		THROW_SECONDARY("Can't remove directory " + directoryName, Exception::SystemError());
+	String fullEntryName = GetFullName(entryName);
+	if(remove(fullEntryName.c_str()))
+		THROW_SECONDARY("Can't delete entry " + entryName, Exception::SystemError());
 }
 
 FileSystem::EntryType PosixFileSystem::GetEntryType(const String& entryName) const

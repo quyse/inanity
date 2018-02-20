@@ -118,17 +118,11 @@ public:
 	*/
 	virtual void MakeDirectory(const String& directoryName);
 
-	/// Remove file.
+	/// Delete file or directory.
 	/**
-	\param fileName File name to remove. Should not be a directory.
+	\param entryName Entry name to delete.
 	*/
-	virtual void RemoveFile(const String& fileName);
-
-	/// Remove directory.
-	/**
-	\param directoryName Directory name with slash at the end.
-	*/
-	virtual void RemoveDirectory(const String& directoryName);
+	virtual void DeleteEntry(const String& entryName);
 
 	/// Get entry type.
 	/**

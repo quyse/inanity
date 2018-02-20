@@ -91,14 +91,9 @@ void FileSystem::MakeDirectory(const String& directoryName)
 	THROW("Making directory in this filesystem is not supported");
 }
 
-void FileSystem::RemoveFile(const String& fileName)
+void FileSystem::DeleteEntry(const String& entryName)
 {
-	THROW("Removing file in this filesystem is not supported");
-}
-
-void FileSystem::RemoveDirectory(const String& directoryName)
-{
-	THROW("Removing directory in this filesystem is not supported");
+	THROW("Removing entry in this filesystem is not supported");
 }
 
 FileSystem::EntryType FileSystem::GetEntryType(const String& entryName) const
