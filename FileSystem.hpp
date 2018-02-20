@@ -39,6 +39,14 @@ MemoryStream. Реализация SaveStream только бросает иск
 class FileSystem : public Object
 {
 public:
+	enum EntryType
+	{
+		entryTypeMissing,
+		entryTypeFile,
+		entryTypeDirectory,
+		entryTypeOther
+	};
+
 	/// Загрузить файл.
 	/** Возвращает объект File для заданного файла. При отсутствии файла
 	с заданным именем выбрасывает исключение.
@@ -103,6 +111,30 @@ public:
 	\param entries Выходной список с абсолютными именами файлов и каталогов.
 	*/
 	virtual void GetAllDirectoryEntries(const String& directoryName, std::vector<String>& entries) const;
+
+	/// Create directory.
+	/**
+	\param directoryName Directory name with slash at the end.
+	*/
+	virtual void MakeDirectory(const String& directoryName);
+
+	/// Remove file.
+	/**
+	\param fileName File name to remove. Should not be a directory.
+	*/
+	virtual void RemoveFile(const String& fileName);
+
+	/// Remove directory.
+	/**
+	\param directoryName Directory name with slash at the end.
+	*/
+	virtual void RemoveDirectory(const String& directoryName);
+
+	/// Get entry type.
+	/**
+	\param entryName File or directory name.
+	*/
+	virtual EntryType GetEntryType(const String& entryName) const;
 
 	META_DECLARE_CLASS(FileSystem);
 };

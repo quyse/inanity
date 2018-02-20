@@ -86,4 +86,24 @@ void FileSystem::GetAllDirectoryEntries(const String& directoryName, std::vector
 	}
 }
 
+void FileSystem::MakeDirectory(const String& directoryName)
+{
+	THROW("Making directory in this filesystem is not supported");
+}
+
+void FileSystem::RemoveFile(const String& fileName)
+{
+	THROW("Removing file in this filesystem is not supported");
+}
+
+void FileSystem::RemoveDirectory(const String& directoryName)
+{
+	THROW("Removing directory in this filesystem is not supported");
+}
+
+FileSystem::EntryType FileSystem::GetEntryType(const String& entryName) const
+{
+	THROW("Getting entry type in this filesystem is not supported");
+}
+
 END_INANITY

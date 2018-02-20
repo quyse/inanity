@@ -341,7 +341,7 @@ void PosixFileSystem::GetDirectoryEntries(const String& directoryName, std::vect
 			continue;
 
 		// если это каталог
-		if((st.st_mode & S_IFMT) == S_IFDIR)
+		if(S_ISDIR(st.st_mode))
 			// добавить слеш в конец
 			fileTitle += '/';
 		// добавить файл/каталог в результат
@@ -349,6 +349,41 @@ void PosixFileSystem::GetDirectoryEntries(const String& directoryName, std::vect
 	}
 
 	closedir(dir);
+}
+
+void PosixFileSystem::MakeDirectory(const String& directoryName)
+{
+	String fullDirectoryName = GetFullName(directoryName);
+	if(mkdir(fullDirectoryName.c_str(), 0755))
+		THROW_SECONDARY("Can't make dir " + directoryName, Exception::SystemError());
+}
+
+void PosixFileSystem::RemoveFile(const String& fileName)
+{
+	String fullFileName = GetFullName(fileName);
+	if(unlink(fullFileName.c_str()))
+		THROW_SECONDARY("Can't remove file " + fileName, Exception::SystemError());
+}
+
+void PosixFileSystem::RemoveDirectory(const String& directoryName)
+{
+	String fullDirectoryName = GetFullName(directoryName);
+	if(rmdir(fullDirectoryName.c_str()))
+		THROW_SECONDARY("Can't remove directory " + directoryName, Exception::SystemError());
+}
+
+FileSystem::EntryType PosixFileSystem::GetEntryType(const String& entryName) const
+{
+	String fullEntryName = GetFullName(entryName);
+	struct stat st;
+	if(!stat(fullEntryName.c_str(), &st))
+	{
+		if(S_ISREG(st.st_mode)) return entryTypeFile;
+		if(S_ISDIR(st.st_mode)) return entryTypeDirectory;
+		return entryTypeOther;
+	}
+	if(errno == ENOENT) return entryTypeMissing;
+	THROW_SECONDARY("Can't get entry type of " + entryName, Exception::SystemError());
 }
 
 ptr<File> PosixFileSystem::LoadFile(const String& fileName)
