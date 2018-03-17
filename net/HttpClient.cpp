@@ -18,15 +18,15 @@ BEGIN_INANITY_NET
 
 #if defined(___INANITY_PLATFORM_EMSCRIPTEN)
 
-class HttpClientRequest : public Object
+class HttpClient::Request : public Object
 {
 private:
 	ptr<File> dataFile;
-	ptr<SuccessHandler> handler;
+	Handler handler;
 	ptr<OutputStream> outputStream;
 
 public:
-	HttpClientRequest(ptr<File> dataFile, ptr<SuccessHandler> handler, ptr<OutputStream> outputStream)
+	Request(ptr<File> dataFile, Handler handler, ptr<OutputStream> outputStream)
 	: dataFile(dataFile), handler(handler), outputStream(outputStream) {}
 
 	ptr<File> GetData() const
@@ -38,7 +38,7 @@ public:
 	{
 		if(fetch->numBytes)
 			outputStream->Write(fetch->data, fetch->numBytes);
-		handler->FireSuccess();
+		handler(nullptr);
 		emscripten_fetch_close(fetch);
 		Dereference();
 	}
@@ -56,22 +56,22 @@ public:
 			outputStream->Write(fetch->data, fetch->numBytes);
 	}
 
-	static void StaticOnSuccess  (emscripten_fetch_t* fetch) { ((HttpClientRequest*)fetch->userData)->OnSuccess(fetch); }
-	static void StaticOnError    (emscripten_fetch_t* fetch) { ((HttpClientRequest*)fetch->userData)->OnError(fetch); }
-	static void StaticOnProgress (emscripten_fetch_t* fetch) { ((HttpClientRequest*)fetch->userData)->OnProgress(fetch); }
+	static void StaticOnSuccess  (emscripten_fetch_t* fetch) { ((Request*)fetch->userData)->OnSuccess(fetch); }
+	static void StaticOnError    (emscripten_fetch_t* fetch) { ((Request*)fetch->userData)->OnError(fetch); }
+	static void StaticOnProgress (emscripten_fetch_t* fetch) { ((Request*)fetch->userData)->OnProgress(fetch); }
 };
 
-void HttpClient::Fetch(ptr<Service> service, const String& url, const String& method, ptr<File> dataFile, const String& contentType, ptr<SuccessHandler> handler, ptr<OutputStream> outputStream)
+void HttpClient::Fetch(ptr<Service> service, const String& url, const String& method, ptr<File> dataFile, const String& contentType, std::function<void(ptr<Exception>)> handler, ptr<OutputStream> outputStream)
 {
 	BEGIN_TRY();
 
 	emscripten_fetch_attr_t attr;
 	emscripten_fetch_attr_init(&attr);
 	strcpy(attr.requestMethod, method.c_str());
-	attr.userData = NEW(HttpClientRequest(dataFile, handler, outputStream));
-	attr.onsuccess = &HttpClientRequest::StaticOnSuccess;
-	attr.onerror = &HttpClientRequest::StaticOnError;
-	attr.onprogress = &HttpClientRequest::StaticOnProgress;
+	attr.userData = NEW(Request(dataFile, handler, outputStream));
+	attr.onsuccess = &Request::StaticOnSuccess;
+	attr.onerror = &Request::StaticOnError;
+	attr.onprogress = &Request::StaticOnProgress;
 	// attr.attributes = EMSCRIPTEN_FETCH_STREAM_DATA; // doesn't work :(
 	attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
 	const char* const headers[] = { "Content-Type", contentType.c_str(), nullptr };
@@ -86,24 +86,24 @@ void HttpClient::Fetch(ptr<Service> service, const String& url, const String& me
 
 #else
 
-class HttpClientRequest : public Object
+class HttpClient::Request : public Object
 {
 private:
 	ptr<File> requestFile;
-	ptr<SuccessHandler> handler;
+	Handler handler;
 	ptr<HttpStream> outputStream;
 
 public:
-	HttpClientRequest(ptr<Service> service, const String& host, int port, ptr<File> requestFile, ptr<SuccessHandler> handler, ptr<OutputStream> outputStream)
+	Request(ptr<Service> service, const String& host, int port, ptr<File> requestFile, Handler handler, ptr<OutputStream> outputStream)
 	: requestFile(requestFile), handler(handler), outputStream(HttpStream::CreateResponseStream(outputStream))
 	{
-		service->ConnectTcp(host, port, Service::TcpSocketHandler::Bind(MakePointer(this), &HttpClientRequest::OnConnect));
+		service->ConnectTcp(host, port, Service::TcpSocketHandler::Bind(MakePointer(this), &Request::OnConnect));
 	}
 
 private:
 	void OnConnect(const Service::TcpSocketHandler::Result& result)
 	{
-		ptr<HttpClientRequest> self = this;
+		ptr<Request> self = this;
 
 		ptr<TcpSocket> socket;
 		try
@@ -111,7 +111,7 @@ private:
 			socket = result.GetData();
 
 			// установить принимающий обработчик
-			socket->SetReceiveHandler(TcpSocket::ReceiveHandler::Bind(MakePointer(this), &HttpClientRequest::OnReceive));
+			socket->SetReceiveHandler(TcpSocket::ReceiveHandler::Bind(MakePointer(this), &Request::OnReceive));
 
 			// отправить HTTP-запрос
 			socket->Send(requestFile);
@@ -121,7 +121,7 @@ private:
 		{
 			if(socket)
 				socket->Close();
-			handler->FireError(exception);
+			handler(exception);
 		}
 	}
 
@@ -139,7 +139,7 @@ private:
 				// корректный конец данных
 				outputStream->End();
 				if(outputStream->IsCompleted())
-					handler->FireSuccess();
+					handler(nullptr);
 				else
 					THROW("HTTP response is not completed");
 			}
@@ -147,12 +147,12 @@ private:
 		catch(Exception* exception)
 		{
 			// ошибка получения
-			handler->FireError(exception);
+			handler(exception);
 		}
 	}
 };
 
-void HttpClient::Fetch(ptr<Service> service, const String& url, const String& method, ptr<File> data, const String& contentType, ptr<SuccessHandler> handler, ptr<OutputStream> outputStream)
+void HttpClient::Fetch(ptr<Service> service, const String& url, const String& method, ptr<File> data, const String& contentType, Handler handler, ptr<OutputStream> outputStream)
 {
 	BEGIN_TRY();
 
@@ -197,14 +197,14 @@ void HttpClient::Fetch(ptr<Service> service, const String& url, const String& me
 	if(data)
 		memcpy((char*)requestFile->GetData() + request.str().length(), data->GetData(), data->GetSize());
 
-	MakePointer(NEW(HttpClientRequest(service, host, port, requestFile, handler, outputStream)));
+	MakePointer(NEW(Request(service, host, port, requestFile, handler, outputStream)));
 
 	END_TRY("Can't fetch http");
 }
 
 #endif
 
-void HttpClient::Get(ptr<Service> service, const String& url, ptr<SuccessHandler> handler, ptr<OutputStream> outputStream)
+void HttpClient::Get(ptr<Service> service, const String& url, Handler handler, ptr<OutputStream> outputStream)
 {
 	return Fetch(service, url, "", nullptr, "", handler, outputStream);
 }
