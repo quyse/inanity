@@ -30,6 +30,7 @@ public:
 	//*** Методы Service.
 	void Run() override;
 	void Stop() override;
+	void Wait(std::function<void()> handler, int seconds) override;
 	ptr<TcpListener> ListenTcp(int port, ptr<TcpSocketHandler> socketHandler) override;
 	void ConnectTcp(const String& host, int port, ptr<TcpSocketHandler> socketHandler) override;
 	ptr<UdpListener> ListenUdp(int port, ptr<UdpPacketHandler> receiveHandler) override;

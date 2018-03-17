@@ -30,6 +30,9 @@ public:
 	which called Run(). */
 	virtual void Stop() = 0;
 
+	/// Wait asyncronously for specified number of seconds.
+	virtual void Wait(std::function<void()> handler, int seconds) = 0;
+
 	/// Open a TCP port and begin listening incoming TCP connections.
 	virtual ptr<TcpListener> ListenTcp(int port, ptr<TcpSocketHandler> socketHandler);
 	/// Create outcoming TCP connection.

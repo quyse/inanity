@@ -255,6 +255,15 @@ void AsioService::Stop()
 	ioService.stop();
 }
 
+void AsioService::Wait(std::function<void()> handler, int seconds)
+{
+	std::shared_ptr<boost::asio::deadline_timer> timer = std::make_shared<boost::asio::deadline_timer>(ioService, boost::posix_time::seconds(seconds));
+	timer->async_wait([timer, handler](const boost::system::error_code& error)
+	{
+		handler();
+	});
+}
+
 ptr<TcpListener> AsioService::ListenTcp(int port, ptr<TcpSocketHandler> socketHandler)
 {
 	return NEW(AsioTcpListener(this, port, socketHandler));
