@@ -45,7 +45,7 @@ public:
 
 	void OnError(emscripten_fetch_t* fetch)
 	{
-		handler->FireError(NEW(Exception(String("Http client error: ") + fetch->statusText)));
+		handler(NEW(Exception(String("Http client error: ") + fetch->statusText)));
 		emscripten_fetch_close(fetch);
 		Dereference();
 	}

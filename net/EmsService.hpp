@@ -20,6 +20,7 @@ public:
 	//*** Service's methods.
 	void Run() override;
 	void Stop() override;
+	void Wait(std::function<void()> handler, int seconds) override;
 	void ConnectTcp(const String& host, int port, ptr<TcpSocketHandler> socketHandler) override;
 
 	void RegisterTcpSocket(int fd, EmsTcpSocket* tcpSocket);

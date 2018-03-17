@@ -26,6 +26,16 @@ void EmsService::Stop()
 	emscripten_set_socket_close_callback(nullptr, nullptr);
 }
 
+void EmsService::Wait(std::function<void()> handler, int seconds)
+{
+	emscripten_async_call([](void* vhandlerCopy)
+	{
+		std::function<void()>* handlerCopy = static_cast<std::function<void()>*>(vhandlerCopy);
+		(*handlerCopy)();
+		delete handlerCopy;
+	}, new std::function<void()>(handler), seconds * 1000);
+}
+
 void EmsService::ConnectTcp(const String& host, int port, ptr<TcpSocketHandler> socketHandler)
 {
 	BEGIN_TRY();
