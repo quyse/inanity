@@ -4,6 +4,7 @@
 #include "net.hpp"
 #include "../Handler.hpp"
 #include "../String.hpp"
+#include <vector>
 
 BEGIN_INANITY
 

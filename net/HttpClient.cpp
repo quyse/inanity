@@ -13,7 +13,6 @@
 #include <sstream>
 #include <cstring>
 #endif
-#include <vector>
 
 BEGIN_INANITY_NET
 
