@@ -13,6 +13,7 @@
 #include <sstream>
 #include <cstring>
 #endif
+#include <vector>
 
 BEGIN_INANITY_NET
 
@@ -61,7 +62,7 @@ public:
 	static void StaticOnProgress (emscripten_fetch_t* fetch) { ((Request*)fetch->userData)->OnProgress(fetch); }
 };
 
-void HttpClient::Fetch(ptr<Service> service, const String& url, const String& method, ptr<File> dataFile, const String& contentType, std::function<void(ptr<Exception>)> handler, ptr<OutputStream> outputStream)
+void HttpClient::Fetch(ptr<Service> service, const String& url, const String& method, ptr<File> dataFile, const std::vector<std::pair<String, String> >& headers, std::function<void(ptr<Exception>)> handler, ptr<OutputStream> outputStream)
 {
 	BEGIN_TRY();
 
@@ -74,9 +75,14 @@ void HttpClient::Fetch(ptr<Service> service, const String& url, const String& me
 	attr.onprogress = &Request::StaticOnProgress;
 	// attr.attributes = EMSCRIPTEN_FETCH_STREAM_DATA; // doesn't work :(
 	attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
-	const char* const headers[] = { "Content-Type", contentType.c_str(), nullptr };
-	if(contentType.length())
-		attr.requestHeaders = headers;
+	std::vector<const char*> headersPtrs;
+	for(size_t i = 0; i < headers.size(); ++i)
+	{
+		headersPtrs.push_back(headers[i].first.c_str());
+		headersPtrs.push_back(headers[i].second.c_str());
+	}
+	headersPtrs.push_back(nullptr);
+	attr.requestHeaders = &headersPtrs[0];
 	attr.requestData = dataFile ? (const char*)dataFile->GetData() : nullptr;
 	attr.requestDataSize = dataFile ? dataFile->GetSize() : 0;
 	emscripten_fetch(&attr, url.c_str());
@@ -152,7 +158,7 @@ private:
 	}
 };
 
-void HttpClient::Fetch(ptr<Service> service, const String& url, const String& method, ptr<File> data, const String& contentType, Handler handler, ptr<OutputStream> outputStream)
+void HttpClient::Fetch(ptr<Service> service, const String& url, const String& method, ptr<File> data, const std::vector<std::pair<String, String> >& headers, Handler handler, ptr<OutputStream> outputStream)
 {
 	BEGIN_TRY();
 
@@ -187,8 +193,8 @@ void HttpClient::Fetch(ptr<Service> service, const String& url, const String& me
 		request << ":" << port;
 	request << "\r\n";
 	request << "User-Agent: Inanity HttpClient/2.0\r\n";
-	if(contentType.length())
-		request << "Content-Type: " << contentType << "\r\n";
+	for(size_t i = 0; i < headers.size(); ++i)
+		request << headers[i].first << ": " << headers[i].second << "\r\n";
 	request << "Content-Length: " << (data ? data->GetSize() : 0) << "\r\n";
 	request << "\r\n";
 
@@ -206,7 +212,7 @@ void HttpClient::Fetch(ptr<Service> service, const String& url, const String& me
 
 void HttpClient::Get(ptr<Service> service, const String& url, Handler handler, ptr<OutputStream> outputStream)
 {
-	return Fetch(service, url, "", nullptr, "", handler, outputStream);
+	return Fetch(service, url, "", nullptr, {}, handler, outputStream);
 }
 
 END_INANITY_NET

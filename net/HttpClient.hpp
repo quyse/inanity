@@ -23,7 +23,7 @@ public:
 	typedef std::function<void(ptr<Exception>)> Handler;
 
 	/// General method for making HTTP request.
-	static void Fetch(ptr<Service> service, const String& url, const String& method, ptr<File> dataFile, const String& contentType, Handler handler, ptr<OutputStream> outputStream);
+	static void Fetch(ptr<Service> service, const String& url, const String& method, ptr<File> dataFile, const std::vector<std::pair<String, String> >& headers, Handler handler, ptr<OutputStream> outputStream);
 	/// Simple method for GET request.
 	static void Get(ptr<Service> service, const String& url, Handler handler, ptr<OutputStream> outputStream);
 
