@@ -2,17 +2,17 @@ exports.configureCompiler = function(objectFile, compiler) {
 	// объектные файлы: <conf>/object
 	var a = /^([^\/]+)\/([^\/]+)$/.exec(objectFile);
 	compiler.configuration = a[1];
-	compiler.setSourceFile('repo/src/' + a[2] + '.cpp');
+	compiler.setSourceFile('repo/src/' + a[2]);
 	compiler.addIncludeDir('repo/include');
 	compiler.addIncludeDir('../rapidjson/include');
 	compiler.strict = false;
 };
 
 var config = {
-	objects: 'discord_rpc rpc_connection serialization'.split(' '),
-	'objects-win32': 'connection_win discord_register_win'.split(' '),
-	'objects-linux': 'connection_unix discord_register_linux'.split(' '),
-	'objects-darwin': 'connection_unix discord_register_osx'.split(' ')
+	objects: 'discord_rpc.cpp rpc_connection.cpp serialization.cpp'.split(' '),
+	'objects-win32': 'connection_win.cpp discord_register_win.cpp'.split(' '),
+	'objects-linux': 'connection_unix.cpp discord_register_linux.cpp'.split(' '),
+	'objects-darwin': 'connection_unix.cpp discord_register_osx.m'.split(' ')
 };
 
 var platformed = function(object, field, platform) {
