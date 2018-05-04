@@ -27,6 +27,8 @@ All third-party software are placed under `/deps` directory.
 * [assimp](http://assimp.sourceforge.net/) - BSD license (see `/deps/assimp/repo/LICENSE`)
 * [softfloat](http://www.jhauser.us/arithmetic/SoftFloat.html) - BSD license (see `/deps/softfloat/softfloat/COPYING.txt`)
 * [icu](http://site.icu-project.org/) - Unicode license
+* [discord-rpc](https://github.com/discordapp/discord-rpc) - MIT license
+* [rapidjson](https://github.com/Tencent/rapidjson) - MIT license
 
 ## Other used third-party software
 

@@ -19,3 +19,9 @@
 [submodule "deps/eigen/repo"]
 	path = deps/eigen/repo
 	url = https://github.com/eigenteam/eigen-git-mirror.git
+[submodule "deps/discord-rpc/repo"]
+	path = deps/discord-rpc/repo
+	url = https://github.com/discordapp/discord-rpc.git
+[submodule "deps/rapidjson"]
+	path = deps/rapidjson
+	url = https://github.com/Tencent/rapidjson.git
