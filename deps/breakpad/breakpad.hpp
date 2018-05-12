@@ -3,10 +3,23 @@
 
 #include "../../Object.hpp"
 #include <unordered_map>
+#if defined(___INANITY_PLATFORM_WINDOWS)
+#include "../../platform/windows.hpp"
+#endif
 
 BEGIN_INANITY
 
-void setupBreakpadExceptionHandler(const char* url, std::unordered_map<std::string, std::string>&& parameters = {});
+struct BreakpadInfo
+{
+	std::string appName;
+#if defined(___INANITY_PLATFORM_WINDOWS)
+	PCWSTR appIcon;
+#endif
+	const char* crashSendUrl;
+	std::unordered_map<std::string, std::string> crashSendParameters;
+};
+
+void setupBreakpadExceptionHandler(BreakpadInfo&& info);
 
 END_INANITY
 

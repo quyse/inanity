@@ -4,37 +4,76 @@
 #include "repo/src/client/windows/sender/crash_report_sender.h"
 #include "../../Strings.hpp"
 #include <sstream>
+#include <commctrl.h>
 #endif
 
 BEGIN_INANITY
 
-#if defined(___INANITY_PLATFORM_WINDOWS)
+BreakpadInfo g_info;
 
-static std::wstring g_crashSenderUrl;
-static std::map<std::wstring, std::wstring> g_parameters;
+#if defined(___INANITY_PLATFORM_WINDOWS)
 
 static bool minidumpCallback(const wchar_t* dumpPath, const wchar_t* minidumpId, void* context, EXCEPTION_POINTERS* exinfo, MDRawAssertionInfo* assertion, bool succeeded)
 {
+	if(!succeeded) return false;
+
 	// get dump file path
-	std::wostringstream ss;
-	ss << dumpPath << L'\\' << minidumpId << L".dmp";
+	std::wstring dumpPathFile;
+	{
+		std::wostringstream ss;
+		ss << dumpPath << minidumpId << L".dmp";
+		dumpPathFile = ss.str();
+	}
+
+	// ask user
+	{
+		TASKDIALOGCONFIG taskConfig;
+		memset(&taskConfig, 0, sizeof(taskConfig));
+		taskConfig.cbSize = sizeof(taskConfig);
+		taskConfig.hInstance = GetModuleHandle(NULL);
+		taskConfig.dwFlags = TDF_ENABLE_HYPERLINKS | TDF_ALLOW_DIALOG_CANCELLATION | TDF_USE_COMMAND_LINKS | TDF_EXPAND_FOOTER_AREA;
+		taskConfig.dwCommonButtons = TDCBF_CLOSE_BUTTON;
+		taskConfig.pszWindowTitle = L"Application crash";
+		taskConfig.pszMainIcon = g_info.appIcon;
+		std::wstring mainInstruction = Strings::UTF82Unicode(g_info.appName) + L" crashed";
+		taskConfig.pszMainInstruction = mainInstruction.c_str();
+		taskConfig.pszContent = L"Would you like to report it?";
+		const TASKDIALOG_BUTTON buttons[] = {
+			{ 1, L"Submit crash report\nto help developers fix this problem" }
+		};
+		taskConfig.cButtons = sizeof(buttons) / sizeof(buttons[0]);
+		taskConfig.pButtons = buttons;
+		taskConfig.nDefaultButton = 1;
+		std::wstring expandedInfo;
+		{
+			std::wostringstream ss;
+			ss << L"Dump file: <a href=\"dump_file\">" << dumpPathFile << L"</a>";
+			expandedInfo = ss.str();
+		}
+		taskConfig.pszExpandedInformation = expandedInfo.c_str();
+		taskConfig.pszCollapsedControlText = L"Report's contents";
+		taskConfig.pszExpandedControlText = L"Report's contents:";
+		int button;
+		if(TaskDialogIndirect(&taskConfig, &button, nullptr, nullptr) != S_OK) return true;
+	}
 
 	// send report
 	google_breakpad::CrashReportSender sender({});
-	sender.SendCrashReport(g_crashSenderUrl.c_str(), g_parameters, { { L"dump", ss.str() } }, nullptr);
+	std::map<std::wstring, std::wstring> parameters;
+	for(const auto& parameter : g_info.crashSendParameters)
+		parameters.insert({ Strings::UTF82Unicode(parameter.first), Strings::UTF82Unicode(parameter.second) });
+	sender.SendCrashReport(Strings::UTF82Unicode(g_info.crashSendUrl).c_str(), parameters, { { L"dump", dumpPathFile } }, nullptr);
 
-	return succeeded;
+	return true;
 }
 
 #endif
 
-void setupBreakpadExceptionHandler(const char* url, std::unordered_map<std::string, std::string>&& parameters)
+void setupBreakpadExceptionHandler(BreakpadInfo&& info)
 {
 #if defined(___INANITY_PLATFORM_WINDOWS)
-	// save url and parameters
-	g_crashSenderUrl = Strings::UTF82Unicode(url);
-	for(auto&& parameter : parameters)
-		g_parameters.insert({ Strings::UTF82Unicode(parameter.first), Strings::UTF82Unicode(parameter.second) });
+	// save info
+	g_info = std::move(info);
 
 	// get temp path for storing dumps
 	wchar_t tempPath[MAX_PATH + 1];
@@ -42,6 +81,7 @@ void setupBreakpadExceptionHandler(const char* url, std::unordered_map<std::stri
 	{
 		tempPath[0] = 0;
 	}
+
 	// register exception handler
 	new google_breakpad::ExceptionHandler(tempPath, nullptr, &minidumpCallback, nullptr, google_breakpad::ExceptionHandler::HANDLER_ALL);
 #endif
