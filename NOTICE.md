@@ -29,6 +29,7 @@ All third-party software are placed under `/deps` directory.
 * [icu](http://site.icu-project.org/) - Unicode license
 * [discord-rpc](https://github.com/discordapp/discord-rpc) - MIT license
 * [rapidjson](https://github.com/Tencent/rapidjson) - MIT license
+* [breakpad](https://chromium.googlesource.com/breakpad/breakpad) - BSD3 license
 
 ## Other used third-party software
 

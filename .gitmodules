@@ -25,3 +25,6 @@
 [submodule "deps/rapidjson"]
 	path = deps/rapidjson
 	url = https://github.com/Tencent/rapidjson.git
+[submodule "deps/breakpad/repo"]
+	path = deps/breakpad/repo
+	url = https://chromium.googlesource.com/breakpad/breakpad
