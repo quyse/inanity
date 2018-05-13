@@ -3,6 +3,7 @@
 
 #include "../../Object.hpp"
 #include <unordered_map>
+#include <string>
 #if defined(___INANITY_PLATFORM_WINDOWS)
 #include "../../platform/windows.hpp"
 #endif
