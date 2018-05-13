@@ -6,6 +6,11 @@
 #include <sstream>
 #include <commctrl.h>
 #endif
+#if defined(___INANITY_PLATFORM_LINUX)
+#include "repo/src/client/linux/handler/exception_handler.h"
+#include <filesystem>
+#include <iostream>
+#endif
 
 BEGIN_INANITY
 
@@ -69,12 +74,43 @@ static bool minidumpCallback(const wchar_t* dumpPath, const wchar_t* minidumpId,
 
 #endif
 
+#if defined(___INANITY_PLATFORM_LINUX)
+
+static bool minidumpCallback(const google_breakpad::MinidumpDescriptor& descriptor, void* context, bool succeeded)
+{
+	if(!succeeded) return false;
+
+	// try to use zenity to get user's consent
+	int r = 1;
+	{
+		std::stringstream ss;
+		ss
+			<< "zenity --question"
+			<< " --title '" << g_info.appName << " crashed'"
+			<< " --icon-name error"
+			<< " --no-wrap --text $'"
+			<< g_info.appName
+			<< " crashed.\\n\\n"
+			<< "Would you like to help resolve this issue by submitting crash report to developers?\\n\\n"
+			<< "Dump file: " << descriptor.path() << "'";
+		r = system(ss.str().c_str());
+	}
+	// if there's no zenity it should be non-zero too
+	if(r != 0) return true;
+
+	std::cout << "Submitting crash dump...\n";
+
+	return true;
+}
+
+#endif
+
 void setupBreakpadExceptionHandler(BreakpadInfo&& info)
 {
-#if defined(___INANITY_PLATFORM_WINDOWS)
 	// save info
 	g_info = std::move(info);
 
+#if defined(___INANITY_PLATFORM_WINDOWS)
 	// get temp path for storing dumps
 	wchar_t tempPath[MAX_PATH + 1];
 	if(!GetTempPath(MAX_PATH + 1, tempPath))
@@ -84,6 +120,11 @@ void setupBreakpadExceptionHandler(BreakpadInfo&& info)
 
 	// register exception handler
 	new google_breakpad::ExceptionHandler(tempPath, nullptr, &minidumpCallback, nullptr, google_breakpad::ExceptionHandler::HANDLER_ALL);
+#endif
+
+#if defined(___INANITY_PLATFORM_LINUX)
+	// register exception handler
+	new google_breakpad::ExceptionHandler(google_breakpad::MinidumpDescriptor("/tmp"), nullptr, &minidumpCallback, nullptr, true, -1);
 #endif
 }
 

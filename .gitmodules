@@ -28,3 +28,6 @@
 [submodule "deps/breakpad/repo"]
 	path = deps/breakpad/repo
 	url = https://chromium.googlesource.com/breakpad/breakpad
+[submodule "deps/linux-syscall-support/repo"]
+	path = deps/linux-syscall-support/repo
+	url = https://chromium.googlesource.com/linux-syscall-support

@@ -5,17 +5,18 @@ exports.configureCompiler = function(objectFile, compiler) {
 	var b = /(.*)(\.(c|cc|cpp))$/.exec(a[2]);
 	compiler.setSourceFile(b[1].replace(/\./g, '/') + b[2]);
 	compiler.addIncludeDir('repo/src');
+	compiler.addIncludeDir('include');
 	compiler.addMacro('UNICODE');
+	compiler.addMacro('NO_STABS_SUPPORT');
+	if(b[3] == 'c')
+		compiler.cppMode = false;
 };
 
 var libraries = {
 	'libbreakpad_client': {
 		objects: [
 			'breakpad.cpp',
-			// 'repo.src.common.convert_UTF.c',
 			// 'repo.src.common.md5.cc',
-			// 'repo.src.common.string_conversion.cc',
-			// 'repo.src.client.minidump_file_writer.cc',
 		],
 		'objects-win32': [
 			'repo.src.client.windows.crash_generation.client_info.cc',
@@ -32,8 +33,9 @@ var libraries = {
 			// 'repo.src.common.windows.string_utils.cc',
 		],
 		'objects-linux': [
+			'repo.src.common.convert_UTF.c',
 			'repo.src.client.linux.crash_generation.crash_generation_client.cc',
-			'repo.src.client.linux.crash_generation.crash_generation_server.cc',
+			// 'repo.src.client.linux.crash_generation.crash_generation_server.cc',
 			'repo.src.client.linux.dump_writer_common.thread_info.cc',
 			'repo.src.client.linux.dump_writer_common.ucontext_reader.cc',
 			'repo.src.client.linux.handler.exception_handler.cc',
@@ -51,9 +53,39 @@ var libraries = {
 			'repo.src.common.linux.linux_libc_support.cc',
 			'repo.src.common.linux.memory_mapped_file.cc',
 			'repo.src.common.linux.safe_readlink.cc',
+			'repo.src.common.string_conversion.cc',
+			'repo.src.client.minidump_file_writer.cc',
 		]
 	}
 };
+
+var executables = {
+	dump_syms: {
+		'objects-linux': [
+			'repo.src.common.dwarf_cfi_to_module.cc',
+			'repo.src.common.dwarf_cu_to_module.cc',
+			'repo.src.common.dwarf_line_to_module.cc',
+			'repo.src.common.language.cc',
+			'repo.src.common.module.cc',
+			'repo.src.common.path_helper.cc',
+			// 'repo.src.common.stabs_reader.cc',
+			// 'repo.src.common.stabs_to_module.cc',
+			'repo.src.common.dwarf.bytereader.cc',
+			'repo.src.common.dwarf.dwarf2diehandler.cc',
+			'repo.src.common.dwarf.dwarf2reader.cc',
+			'repo.src.common.dwarf.elf_reader.cc',
+			'repo.src.common.linux.crc32.cc',
+			'repo.src.common.linux.dump_symbols.cc',
+			'repo.src.common.linux.elf_symbols_to_module.cc',
+			'repo.src.common.linux.elfutils.cc',
+			'repo.src.common.linux.file_id.cc',
+			'repo.src.common.linux.linux_libc_support.cc',
+			'repo.src.common.linux.memory_mapped_file.cc',
+			'repo.src.common.linux.safe_readlink.cc',
+			'repo.src.tools.linux.dump_syms.dump_syms.cc',
+			]
+	}
+}
 
 var platformed = function(object, field, platform) {
 	return (object[field] || []).concat(object[field + '-' + platform] || []);
@@ -68,3 +100,25 @@ exports.configureComposer = function(libraryFile, composer) {
 	for ( var i = 0; i < objects.length; ++i)
 		composer.addObjectFile(confDir + objects[i]);
 };
+
+exports.configureLinker = function(executableFile, linker) {
+	var a = /^(([^\/]+)\/)([^\/]+)$/.exec(executableFile);
+	linker.configuration = a[2];
+
+	var executable = executables[a[3]];
+	var objects = platformed(executable, 'objects', linker.platform);
+	for(var i = 0; i < objects.length; ++i) {
+		linker.addObjectFile(a[1] + objects[i]);
+	}
+	var dynamicLibraries = executable.dynamicLibraries || {};
+	var dl = dynamicLibraries[linker.platform] || [];
+	for(var i = 0; i < dl.length; ++i) {
+		var lib = undefined;
+		if(typeof dl[i] == 'string')
+			lib = dl[i];
+		else if((!dl[i].arch || dl[i].arch == linker.arch) && (!dl[i].configuration || dl[i].configuration == linker.configuration))
+			lib = dl[i].lib;
+		if(lib)
+			linker.addDynamicLibrary(lib);
+	}
+}
