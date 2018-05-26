@@ -4,6 +4,9 @@
 #include "values.ipp"
 #include "MetaProvider.ipp"
 #include "../../Exception.hpp"
+#ifdef _DEBUG
+#include <cassert>
+#endif
 
 BEGIN_INANITY_LUA
 
@@ -176,8 +179,7 @@ ptr<Script::Any> Any::ApplyWith(ptr<Script::Any> thisValue, ptr<Script::Any> arg
 		StackBalanceCheck(lua_State* state) : state(state), top(lua_gettop(state)) {}
 		~StackBalanceCheck()
 		{
-			if(top != lua_gettop(state))
-				THROW("Unbalanced Lua stack while call Any");
+			assert(top == lua_gettop(state));
 		}
 	};
 	StackBalanceCheck check(luaState);
