@@ -281,6 +281,9 @@ struct Value<ptr<ObjectType> >
 			if(cls == Meta::MetaOf<MetaProvider, ObjectType>())
 				// вернуть объект
 				return (ObjectType*)userData->object;
+		// разрешать преобразовывать в корневой тип (RefCounted)
+		if(Meta::MetaOf<MetaProvider, ObjectType>() == Meta::MetaOf<MetaProvider, RefCounted>())
+			return (ObjectType*)userData->object;
 		// если здесь, значит, мы проверили всю цепочку наследования, а тип не нашли
 		const char* fullClassName = Meta::MetaOf<MetaProvider, ObjectType>()->GetFullName();
 		THROW(String("Can't cast object of type '") + userData->cls->GetFullName() + "' to expected type '" + fullClassName + "'");
