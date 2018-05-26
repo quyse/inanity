@@ -43,7 +43,7 @@ void Manager::Update()
 		releaseButtonsOnUpdate = false;
 
 		const State& state = internalFrame->GetCurrentState();
-		for(int i = 0; i < sizeof(state.keyboard) / sizeof(state.keyboard[0]); ++i)
+		for(size_t i = 0; i < sizeof(state.keyboard) / sizeof(state.keyboard[0]); ++i)
 			if(state.keyboard[i])
 			{
 				Event e;
@@ -52,7 +52,7 @@ void Manager::Update()
 				e.keyboard.key = Key(i);
 				internalFrame->AddEvent(e);
 			}
-		for(int i = 0; i < sizeof(state.mouseButtons) / sizeof(state.mouseButtons[0]); ++i)
+		for(size_t i = 0; i < sizeof(state.mouseButtons) / sizeof(state.mouseButtons[0]); ++i)
 			if(state.mouseButtons[i])
 			{
 				Event e;
