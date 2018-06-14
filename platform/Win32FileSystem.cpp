@@ -367,7 +367,12 @@ FileSystem::EntryType Win32FileSystem::GetEntryType(const String& entryName) con
 	DWORD attrs = GetFileAttributes(Strings::UTF82Unicode(GetFullName(entryName)).c_str());
 	if(attrs == INVALID_FILE_ATTRIBUTES)
 	{
-		if(GetLastError() == ERROR_FILE_NOT_FOUND) return entryTypeMissing;
+		switch(GetLastError())
+		{
+		case ERROR_FILE_NOT_FOUND:
+		case ERROR_PATH_NOT_FOUND:
+			return entryTypeMissing;
+		}
 		THROW_SECONDARY("Can't get entry type of " + entryName, Exception::SystemError());
 	}
 
