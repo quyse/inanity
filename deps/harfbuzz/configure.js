@@ -12,6 +12,11 @@ exports.configureCompiler = function(objectFile, compiler) {
 	compiler.addIncludeDir('generated');
 	compiler.addMacro('HAVE_OT');
 	compiler.addMacro('HAVE_UCDN');
+	// crazy hacks for xbox
+	if(compiler.platform == 'xbox') {
+		compiler.addMacro('getenv=(char*)""+__noop');
+	}
+
 	compiler.strict = false;
 };
 

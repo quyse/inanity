@@ -71,7 +71,7 @@ size_t Lz4DecompressStream::Read(void* data, size_t size)
 
 			// decompress data
 			outputBegin = outputBufferPrefix;
-			size_t outputSize = LZ4_decompress_safe_usingDict(inputData, outputData + outputBegin, inputSize, outputBufferSize - outputBegin, outputData, prefixSize);
+			size_t outputSize = LZ4_decompress_safe_usingDict(inputData, outputData + outputBegin, (int)inputSize, (int)(outputBufferSize - outputBegin), outputData, (int)prefixSize);
 			if(!outputSize)
 				THROW("Can't decompress LZ4 data");
 			outputEnd = outputBegin + outputSize;

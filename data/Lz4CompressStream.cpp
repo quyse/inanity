@@ -50,7 +50,7 @@ void Lz4CompressStream::Flush()
 	{
 		char* inputData = (char*)inputFile->GetData();
 		char* outputData = (char*)outputFile->GetData();
-		size_t outputSize = LZ4_compress_fast_continue((LZ4_stream_t*)internal, inputData + inputBegin, outputData, inputEnd - inputBegin, outputBufferSize, 1);
+		size_t outputSize = LZ4_compress_fast_continue((LZ4_stream_t*)internal, inputData + inputBegin, outputData, (int)(inputEnd - inputBegin), outputBufferSize, 1);
 		writer.WriteShortly(outputSize);
 		writer.Write(outputData, outputSize);
 		LZ4_saveDict((LZ4_stream_t*)internal, (char*)dictFile->GetData(), dictSize);

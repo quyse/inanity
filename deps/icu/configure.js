@@ -20,6 +20,17 @@ exports.configureCompiler = function(objectFile, compiler) {
 	compiler.addIncludeDir('repo/source/i18n');
 	compiler.addMacro('U_STATIC_IMPLEMENTATION');
 	compiler.addMacro('U_ENABLE_DYLOAD=0');
+	compiler.addMacro('UCONFIG_NO_FILE_IO=1');
+	// crazy hacks for windows
+	compiler.addMacro('__WINTZ'); // to skip including wintz.h
+	compiler.addMacro('uprv_detectWindowsTimeZone=__noop');
+	// crazy hacks for xbox
+	if(compiler.platform == 'xbox') {
+		compiler.addMacro('U_TZSET=__noop');
+		compiler.addMacro('getenv=""+__noop');
+		compiler.addMacro('GetACP=65001+__noop');
+	}
+
 	var c = /^([^\/]*)\//.exec(source);
 	switch(c[1]) {
 	case 'common':
@@ -216,7 +227,7 @@ var objects = [
 	'common.uvector',
 	'common.uvectr32',
 	'common.uvectr64',
-	'common.wintz',
+	// 'common.wintz',
 
 // not used
 /*

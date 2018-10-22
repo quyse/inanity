@@ -11,7 +11,11 @@
 #endif
 #define UNICODE
 #define _UNICODE
+#if defined(_XBOX_ONE)
+#define _WIN32_WINNT _WIN32_WINNT_WIN8
+#else
 #define _WIN32_WINNT _WIN32_WINNT_WIN7
+#endif
 #include <windows.h>
 
 #endif

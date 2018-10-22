@@ -164,7 +164,10 @@ var libraries = {
 		],
 		'objects-emscripten': [
 			'platform.PosixFileSystem'
-		]
+		],
+		'objects-xbox': [
+			'platform.Win32Handle', 'platform.Win32FileSystem'
+		],
 	},
 	// ******* general platform subsystem
 	'libinanity-platform': {

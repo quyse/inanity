@@ -58,12 +58,19 @@ ptr<Exception> Exception::SystemError(int errorCode)
 {
 #if defined(___INANITY_PLATFORM_WINDOWS)
 
+#if defined(___INANITY_PLATFORM_XBOX)
+	wchar_t buffer[1024];
+	if(!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, 0, errorCode, 0, (wchar_t*)&buffer, sizeof(buffer) / sizeof(buffer[0]), 0))
+#else
 	wchar_t* buffer;
 	if(!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, 0, errorCode, 0, (wchar_t*)&buffer, 0, 0))
+#endif
 		return NEW(Exception("Unknown system error"));
 
 	ptr<Exception> exception = NEW(Exception(Strings::Unicode2UTF8(buffer)));
+#if !defined(___INANITY_PLATFORM_XBOX)
 	LocalFree(buffer);
+#endif
 
 	return exception;
 

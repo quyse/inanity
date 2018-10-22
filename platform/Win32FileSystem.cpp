@@ -3,6 +3,7 @@
 #include "../File.hpp"
 #include "../InputStream.hpp"
 #include "../OutputStream.hpp"
+#include "../MemoryFile.hpp"
 #include "../EmptyFile.hpp"
 #include "../PartFile.hpp"
 #include "../Strings.hpp"
@@ -11,17 +12,19 @@
 
 BEGIN_INANITY_PLATFORM
 
-class Win32File : public File
+#if !defined(___INANITY_PLATFORM_XBOX)
+
+class Win32MemoryMappedFile : public File
 {
 private:
 	void* data;
 	size_t size;
 
 public:
-	Win32File(void* data, size_t size)
+	Win32MemoryMappedFile(void* data, size_t size)
 	: data(data), size(size) {}
 
-	~Win32File()
+	~Win32MemoryMappedFile()
 	{
 		UnmapViewOfFile(data);
 	}
@@ -36,6 +39,8 @@ public:
 		return size;
 	}
 };
+
+#endif
 
 class Win32InputStream : public InputStream
 {
@@ -184,6 +189,7 @@ ptr<File> Win32FileSystem::TryLoadPartOfFile(const String& fileName, long long m
 	String name = GetFullName(fileName);
 	do
 	{
+		// open file
 		Win32Handle hFile = CreateFile(Strings::UTF82Unicode(name).c_str(), GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, NULL);
 		if(!hFile.IsValid())
 		{
@@ -191,6 +197,7 @@ ptr<File> Win32FileSystem::TryLoadPartOfFile(const String& fileName, long long m
 				*exception = NEW_SECONDARY_EXCEPTION("Can't open file", Exception::SystemError());
 			break;
 		}
+		// determine mapping size if not known
 		size_t size;
 		if(mappingSize)
 			size = mappingSize;
@@ -206,8 +213,34 @@ ptr<File> Win32FileSystem::TryLoadPartOfFile(const String& fileName, long long m
 				break;
 			}
 		}
+		// shortcut for empty mapping
 		if(!size)
 			return NEW(EmptyFile());
+
+		// Xbox doesn't support file mappings
+#if defined(___INANITY_PLATFORM_XBOX)
+
+		ptr<MemoryFile> file = NEW(MemoryFile(size));
+		// support only zero mapping start for now
+		if(mappingStart)
+		{
+			if(exception)
+				*exception = NEW_EXCEPTION("Only zero mapping start supported");
+			break;
+		}
+		// read data
+		DWORD read;
+		ReadFile(hFile, file->GetData(), (DWORD)size, &read, NULL);
+		if(read != size)
+		{
+			if(exception)
+				*exception = NEW_EXCEPTION("Can't read data");
+			break;
+		}
+		return file;
+
+#else
+
 		Win32Handle hMapping = CreateFileMapping(hFile, 0, PAGE_READONLY, 0, 0, 0);
 		if(!hMapping)
 		{
@@ -241,9 +274,11 @@ ptr<File> Win32FileSystem::TryLoadPartOfFile(const String& fileName, long long m
 		//если сдвиг был
 		if(realMappingStart < mappingStart)
 			//вернуть указатель на частичный файл, с учетом сдвига
-			return NEW(PartFile(NEW(Win32File(data, realMappingSize)), (char*)data + (size_t)(mappingStart - realMappingStart), size));
+			return NEW(PartFile(NEW(Win32MemoryMappedFile(data, realMappingSize)), (char*)data + (size_t)(mappingStart - realMappingStart), size));
 		//иначе сдвига не было, просто вернуть файл
-		return NEW(Win32File(data, size));
+		return NEW(Win32MemoryMappedFile(data, size));
+
+#endif
 	}
 	while(false);
 

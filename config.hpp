@@ -7,6 +7,10 @@
 
 #if defined(_WIN32) || defined(__WIN32__)
 #define ___INANITY_PLATFORM_WINDOWS
+#if defined(_XBOX_ONE)
+#define ___INANITY_PLATFORM_XBOX
+#define ___INANITY_PLATFORM_XBOX_ONE
+#endif
 #elif defined(EMSCRIPTEN)
 #define ___INANITY_PLATFORM_EMSCRIPTEN
 #define ___INANITY_PLATFORM_POSIX

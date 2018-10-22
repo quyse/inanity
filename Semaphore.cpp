@@ -11,7 +11,7 @@ Semaphore::Semaphore(int initialCount)
 	try
 	{
 #if defined(___INANITY_PLATFORM_WINDOWS)
-		handle = CreateSemaphore(NULL, initialCount, 0x7fffffff, NULL);
+		handle = CreateSemaphoreEx(NULL, initialCount, 0x7fffffff, NULL, 0, SEMAPHORE_ALL_ACCESS);
 		if(!handle.IsValid())
 #elif defined(___INANITY_PLATFORM_MACOS)
 		sem = dispatch_semaphore_create(initialCount);

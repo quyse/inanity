@@ -42,7 +42,7 @@ ptr<FontGlyphs> FtFontFace::CreateGlyphs(Canvas* canvas, int size, const CreateG
 	int halfScaleY = config.halfScaleY;
 	std::vector<int>* glyphsNeeded = config.glyphsNeeded;
 
-	FT_Long glyphsCount = glyphsNeeded ? glyphsNeeded->size() : ftFace->num_glyphs;
+	FT_Long glyphsCount = glyphsNeeded ? (FT_Long)glyphsNeeded->size() : ftFace->num_glyphs;
 
 	if(FT_Set_Pixel_Sizes(ftFace, size * (halfScaleX * 2 + 1), size * (halfScaleY * 2 + 1)))
 		THROW("Can't set pixel sizes");
