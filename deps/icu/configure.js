@@ -19,7 +19,7 @@ exports.configureCompiler = function(objectFile, compiler) {
 	compiler.addIncludeDir('repo/source/common');
 	compiler.addIncludeDir('repo/source/i18n');
 	compiler.addMacro('U_STATIC_IMPLEMENTATION');
-	compiler.addMacro('U_ENABLE_DYLOAD'); // disable dyload: empty macro needed
+	compiler.addMacro('U_ENABLE_DYLOAD=0');
 	compiler.addMacro('UCONFIG_NO_FILE_IO=1');
 	// crazy hacks for windows
 	compiler.addMacro('__WINTZ'); // to skip including wintz.h
