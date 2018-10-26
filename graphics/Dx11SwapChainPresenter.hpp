@@ -9,6 +9,7 @@
 
 BEGIN_INANITY_PLATFORM
 
+class CoreWindow;
 class Win32Window;
 
 END_INANITY_PLATFORM
@@ -22,8 +23,13 @@ class Dx11RenderBuffer;
 class Dx11SwapChainPresenter : public Dx11Presenter
 {
 private:
+#if defined(___INANITY_PLATFORM_XBOX)
+	ptr<Platform::CoreWindow> window;
+	ComPointer<IDXGISwapChain1> swapChain;
+#else
 	ptr<Platform::Win32Window> window;
 	ComPointer<IDXGISwapChain> swapChain;
+#endif
 	ptr<Dx11RenderBuffer> backBuffer;
 
 	/// Current screen mode.
@@ -35,7 +41,11 @@ private:
 	int swapInterval;
 
 public:
+#if defined(___INANITY_PLATFORM_XBOX)
+	Dx11SwapChainPresenter(ptr<Dx11Device> device, ptr<Platform::CoreWindow> window, ComPointer<IDXGISwapChain1> swapChain);
+#else
 	Dx11SwapChainPresenter(ptr<Dx11Device> device, ptr<Platform::Win32Window> window, ComPointer<IDXGISwapChain> swapChain);
+#endif
 	~Dx11SwapChainPresenter();
 
 	//*** Dx11Presenter's methods.

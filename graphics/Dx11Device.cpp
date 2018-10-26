@@ -20,7 +20,11 @@
 #include "Dx11SamplerState.hpp"
 #include "Dx11DepthStencilState.hpp"
 #include "Dx11BlendState.hpp"
+#if defined(___INANITY_PLATFORM_XBOX)
+#include "../platform/CoreWindow.hpp"
+#else
 #include "../platform/Win32Window.hpp"
+#endif
 #include "../File.hpp"
 #include "../FileInputStream.hpp"
 #include "../Exception.hpp"
@@ -44,9 +48,16 @@ ptr<Presenter> Dx11Device::CreateWindowPresenter(ptr<Platform::Window> abstractW
 {
 	BEGIN_TRY();
 
+#if defined(___INANITY_PLATFORM_XBOX)
+	ptr<Platform::CoreWindow> window = abstractWindow.DynamicCast<Platform::CoreWindow>();
+	if(!window)
+		THROW("Only core window is allowed");
+#else
 	ptr<Platform::Win32Window> window = abstractWindow.DynamicCast<Platform::Win32Window>();
 	if(!window)
 		THROW("Only Win32 window is allowed");
+#endif
+
 	ptr<DxgiMonitorMode> mode = abstractMode.DynamicCast<DxgiMonitorMode>();
 	if(!mode && abstractMode)
 		THROW("Only DXGI monitor mode allowed");
@@ -56,27 +67,57 @@ ptr<Presenter> Dx11Device::CreateWindowPresenter(ptr<Platform::Window> abstractW
 	END_TRY("Can't create DirectX 11 window presenter");
 }
 
+#if defined(___INANITY_PLATFORM_XBOX)
+ptr<Dx11SwapChainPresenter> Dx11Device::CreatePresenter(ptr<Platform::CoreWindow> window, ptr<DxgiMonitorMode> mode)
+#else
 ptr<Dx11SwapChainPresenter> Dx11Device::CreatePresenter(ptr<Platform::Win32Window> window, ptr<DxgiMonitorMode> mode)
+#endif
 {
 	BEGIN_TRY();
 
 	// сформировать структуру настроек swap chain
+#if defined(___INANITY_PLATFORM_XBOX)
+	DXGI_SWAP_CHAIN_DESC1 desc;
+#else
 	DXGI_SWAP_CHAIN_DESC desc;
+#endif
 	ZeroMemory(&desc, sizeof(desc));
 
+#if defined(___INANITY_PLATFORM_XBOX)
+	desc.Width = 0;
+	desc.Height = 0;
+	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+#else
 	desc.BufferDesc = Dx11System::GetModeDesc(mode, window->GetClientWidth(), window->GetClientHeight());
+#endif
 
 	// мультисемплинга пока нет
 	desc.SampleDesc.Count = 1;
 	desc.SampleDesc.Quality = 0;
 	desc.BufferUsage = DXGI_USAGE_BACK_BUFFER | DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	desc.BufferCount = 2;
+#if !defined(___INANITY_PLATFORM_XBOX)
 	desc.OutputWindow = window->GetHWND();
 	// согласно рекомендации SDK, даже в случае полного экрана, лучше
 	// создавать в оконном режиме, а потом переключать
 	desc.Windowed = TRUE;
+#endif
 	desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 	desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+
+#if defined(___INANITY_PLATFORM_XBOX)
+
+	// получить нужный интерфейс
+	ComPointer<IDXGIFactory2> dxgiFactory2;
+	if(FAILED(system->GetDXGIFactory()->QueryInterface(__uuidof(IDXGIFactory2), (void**)&dxgiFactory2)))
+		THROW("Can't get DXGI factory interface");
+
+	// создать swap chain
+	ComPointer<IDXGISwapChain1> swapChain;
+	if(FAILED(dxgiFactory2->CreateSwapChainForCoreWindow(device, window->GetWindowUnknown(), &desc, nullptr, &swapChain)))
+		THROW("Can't create swap chain");
+
+#else
 
 	// создать swap chain
 	ComPointer<IDXGISwapChain> swapChain;
@@ -86,6 +127,8 @@ ptr<Dx11SwapChainPresenter> Dx11Device::CreatePresenter(ptr<Platform::Win32Windo
 	// запретить переходить в полноэкранный режим по Alt+Enter
 	if(FAILED(system->GetDXGIFactory()->MakeWindowAssociation(window->GetHWND(), DXGI_MWA_NO_WINDOW_CHANGES)))
 		THROW("Can't make window association");
+
+#endif
 
 	// создать Presenter
 	ptr<Dx11SwapChainPresenter> presenter = NEW(Dx11SwapChainPresenter(this, window, swapChain));

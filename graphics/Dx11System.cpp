@@ -10,6 +10,9 @@ BEGIN_INANITY_GRAPHICS
 
 bool Dx11System::IsSupported()
 {
+#if defined(___INANITY_PLATFORM_XBOX)
+	return true;
+#else
 	try
 	{
 		return Platform::DllCache::Load("dxgi.dll") && Platform::DllCache::Load("d3d11.dll");
@@ -19,16 +22,38 @@ bool Dx11System::IsSupported()
 		MakePointer(exception);
 		return false;
 	}
+#endif
 }
 
 IDXGIFactory* Dx11System::GetDXGIFactory()
 {
 	if(!dxgiFactory)
 	{
+#if defined(___INANITY_PLATFORM_XBOX)
+		// create temporary device
+		D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_10_0;
+		ComPointer<ID3D11Device> device;
+		ComPointer<ID3D11DeviceContext> deviceContext;
+		D3D_FEATURE_LEVEL featureLevelSupported;
+		if(FAILED(D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, &featureLevel, 1, D3D11_SDK_VERSION, &device, &featureLevelSupported, &deviceContext)))
+			THROW("Can't create temporary device and context");
+		// get DXGI device
+		ComPointer<IDXGIDevice> dxgiDevice;
+		if(FAILED(device->QueryInterface(__uuidof(IDXGIDevice), (void**)&dxgiDevice)))
+			THROW("Can't get temporary DXGI device");
+		// get adapter
+		ComPointer<IDXGIAdapter> adapter;
+		if(FAILED(dxgiDevice->GetAdapter(&adapter)))
+			THROW("Can't get temporary adapter");
+		// get factory
+		if(FAILED(adapter->GetParent(__uuidof(IDXGIFactory), (void**)&dxgiFactory)))
+			THROW("Can't get DXGI factory");
+#else
 		Platform::DllFunction<decltype(&CreateDXGIFactory)> functionCreateDXGIFactory("dxgi.dll", "CreateDXGIFactory");
 
 		if(FAILED(functionCreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&dxgiFactory)))
 			THROW("Can't create DXGI Factory");
+#endif
 	}
 	return dxgiFactory;
 }
@@ -211,17 +236,22 @@ const std::vector<ptr<Adapter> >& Dx11System::GetAdapters()
 		{
 			IDXGIFactory* factory = GetDXGIFactory();
 
-			for(UINT i = 0; ; ++i)
+			if(factory)
 			{
-				ComPointer<IDXGIAdapter> adapterInterface;
-				HRESULT hr = factory->EnumAdapters(i, &adapterInterface);
-				if(SUCCEEDED(hr))
-					adapters.push_back(NEW(DxgiAdapter(adapterInterface)));
-				else if(hr == DXGI_ERROR_NOT_FOUND)
-					break;
-				else
-					THROW("Error enumerating adapters");
+				for(UINT i = 0; ; ++i)
+				{
+					ComPointer<IDXGIAdapter> adapterInterface;
+					HRESULT hr = factory->EnumAdapters(i, &adapterInterface);
+					if(SUCCEEDED(hr))
+						adapters.push_back(NEW(DxgiAdapter(adapterInterface)));
+					else if(hr == DXGI_ERROR_NOT_FOUND)
+						break;
+					else
+						THROW("Error enumerating adapters");
+				}
 			}
+			else
+				adapters.push_back(NEW(DxgiAdapter(nullptr)));
 
 			adaptersInitialized = true;
 		}
@@ -238,17 +268,28 @@ ptr<Device> Dx11System::CreateDevice(ptr<Adapter> abstractAdapter)
 	try
 	{
 		// получить функцию создания в первую очередь
+#if defined(___INANITY_PLATFORM_XBOX)
+		auto functionD3D11CreateDevice = &D3D11CreateDevice;
+#else
 		Platform::DllFunction<PFN_D3D11_CREATE_DEVICE> functionD3D11CreateDevice("d3d11.dll", "D3D11CreateDevice");
+#endif
 
 		ptr<DxgiAdapter> adapter = abstractAdapter.DynamicCast<DxgiAdapter>();
 		if(!adapter)
 			THROW("Wrong adapter type");
 		IDXGIAdapter* adapterInterface = adapter->GetInterface();
 
+		// see https://developer.microsoft.com/en-us/games/xbox/docs/xdk/creation-flags for Xbox
+
 		// флаги устройства
-		UINT flags = D3D11_CREATE_DEVICE_SINGLETHREADED
+		UINT flags = 0
 #ifdef _DEBUG
 			| D3D11_CREATE_DEVICE_DEBUG
+#endif
+#if defined(___INANITY_PLATFORM_XBOX)
+			| D3D11_CREATE_DEVICE_FAST_KICKOFFS
+#else
+			| D3D11_CREATE_DEVICE_SINGLETHREADED
 #endif
 			;
 		// уровень устройства - DirectX 10
@@ -259,7 +300,7 @@ ptr<Device> Dx11System::CreateDevice(ptr<Adapter> abstractAdapter)
 		D3D_FEATURE_LEVEL featureLevelSupported;
 		// здесь необходимо указывать D3D_DRIVER_TYPE_UNKNOWN, если мы указываем adapter.
 		// http://msdn.microsoft.com/en-us/library/ff476082 (remarks)
-		if(FAILED(functionD3D11CreateDevice(adapterInterface, D3D_DRIVER_TYPE_UNKNOWN, NULL, flags, &featureLevel, 1, D3D11_SDK_VERSION, &device, &featureLevelSupported, &deviceContext)))
+		if(FAILED(functionD3D11CreateDevice(adapterInterface, adapterInterface ? D3D_DRIVER_TYPE_UNKNOWN : D3D_DRIVER_TYPE_HARDWARE, nullptr, flags, &featureLevel, 1, D3D11_SDK_VERSION, &device, &featureLevelSupported, &deviceContext)))
 			THROW("Can't create device and context");
 
 		// вернуть объект

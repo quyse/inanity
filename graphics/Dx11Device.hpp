@@ -9,6 +9,7 @@
 
 BEGIN_INANITY_PLATFORM
 
+class CoreWindow;
 class Win32Window;
 
 END_INANITY_PLATFORM
@@ -70,8 +71,13 @@ public:
 	ptr<DepthStencilState> CreateDepthStencilState();
 	ptr<BlendState> CreateBlendState();
 
+#if defined(___INANITY_PLATFORM_XBOX)
+	/// Create presenter for CoreWindow.
+	ptr<Dx11SwapChainPresenter> CreatePresenter(ptr<Platform::CoreWindow> window, ptr<DxgiMonitorMode> mode);
+#else
 	/// Create presenter for Win32Window.
 	ptr<Dx11SwapChainPresenter> CreatePresenter(ptr<Platform::Win32Window> window, ptr<DxgiMonitorMode> mode);
+#endif
 
 	/// Получить интерфейс устройства DirectX 11.
 	ID3D11Device* GetDeviceInterface() const;

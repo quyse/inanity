@@ -5,11 +5,21 @@ exports.configureCompiler = function(objectFile, compiler) {
 	// заменяем точки на слеши, и добавляем расширение
 	// если оканчивается на .c - это .c-файл, иначе .cpp
 	var source = a[2];
-	var b = /^(.*)\.c$/.exec(source);
+	var b = /^(.*)\.(c|cx)$/.exec(source);
 	if(b) {
-		// .c-файл
-		source = b[1].replace(/\./g, '/') + '.c';
-		compiler.cppMode = false;
+		switch(b[2])
+		{
+		case 'c':
+			// .c-файл
+			source = b[1].replace(/\./g, '/') + '.c';
+			compiler.cppMode = false;
+			break;
+		case 'cx':
+			// .cpp-файл в C++/CX режиме
+			source = b[1].replace(/\./g, '/') + '.cpp';
+			compiler.cppCxMode = true;
+			break;
+		}
 	}
 	else
 		// .cpp-файл
@@ -142,7 +152,8 @@ var libraries = {
 		'objects-freebsd': ['input.SdlManager'],
 		'objects-darwin': ['input.SdlManager'],
 		'objects-android': ['input.SdlManager'],
-		'objects-emscripten': ['input.SdlManager']
+		'objects-emscripten': ['input.SdlManager'],
+		'objects-xbox': ['input.CoreManager.cx'],
 	},
 	// ******* filesystem platform
 	'libinanity-platform-filesystem': {
@@ -171,32 +182,43 @@ var libraries = {
 	},
 	// ******* general platform subsystem
 	'libinanity-platform': {
-		objects: ['platform.Window', 'platform.Game'],
+		objects: ['platform.Window'],
 		'objects-win32': [
 			'platform.Win32Window',
 			'graphics.Win32Adapter', 'graphics.Win32Monitor', 'graphics.Win32MonitorMode',
+			'platform.Game',
 			'platform.DllCache'
 		],
 		'objects-linux': [
 			'platform.Sdl', 'platform.SdlWindow',
-			'graphics.SdlAdapter', 'graphics.SdlMonitor', 'graphics.SdlMonitorMode'
+			'graphics.SdlAdapter', 'graphics.SdlMonitor', 'graphics.SdlMonitorMode',
+			'platform.Game'
 		],
 		'objects-freebsd': [
 			'platform.Sdl', 'platform.SdlWindow',
-			'graphics.SdlAdapter', 'graphics.SdlMonitor', 'graphics.SdlMonitorMode'
+			'graphics.SdlAdapter', 'graphics.SdlMonitor', 'graphics.SdlMonitorMode',
+			'platform.Game'
 		],
 		'objects-darwin': [
 			'platform.Sdl', 'platform.SdlWindow',
-			'graphics.SdlAdapter', 'graphics.SdlMonitor', 'graphics.SdlMonitorMode'
+			'graphics.SdlAdapter', 'graphics.SdlMonitor', 'graphics.SdlMonitorMode',
+			'platform.Game'
 		],
 		'objects-android': [
 			'platform.Sdl', 'platform.SdlWindow',
-			'graphics.SdlAdapter', 'graphics.SdlMonitor', 'graphics.SdlMonitorMode'
+			'graphics.SdlAdapter', 'graphics.SdlMonitor', 'graphics.SdlMonitorMode',
+			'platform.Game'
 		],
 		'objects-emscripten': [
 			'platform.Sdl', 'platform.EmsWindow',
-			'graphics.EmsAdapter', 'graphics.EmsMonitor'
-		]
+			'graphics.EmsAdapter', 'graphics.EmsMonitor',
+			'platform.Game'
+		],
+		'objects-xbox': [
+			'platform.CoreWindow.cx',
+			'platform.Game.cx',
+			'platform.DllCache'
+		],
 	},
 	// ******* raw graphics (no support for graphics API needed)
 	'libinanity-graphics-raw': {
@@ -224,8 +246,8 @@ var libraries = {
 	// ******* подсистема DirectX 11
 	'libinanity-graphics-dx11': {
 		objects: [
-			'graphics.Dx11System', 'graphics.Dx11Device', 'graphics.Dx11Context',
-			'graphics.Dx11Presenter', 'graphics.Dx11SwapChainPresenter',
+			'graphics.Dx11System', 'graphics.Dx11Context',
+			'graphics.Dx11Presenter',
 			'graphics.Dx11FrameBuffer',
 			'graphics.Dx11RenderBuffer', 'graphics.Dx11DepthStencilBuffer', 'graphics.Dx11Texture', 'graphics.Dx11UniformBuffer',
 			'graphics.Dx11VertexBuffer', 'graphics.Dx11IndexBuffer', 'graphics.Dx11AttributeBinding',
@@ -233,8 +255,18 @@ var libraries = {
 			'graphics.Dx11CompiledShader', 'graphics.Dx11ShaderResources',
 			'graphics.Dx11SamplerState', 'graphics.Dx11DepthStencilState', 'graphics.Dx11BlendState',
 			'graphics.D3DBlobFile', 'graphics.Dx11ShaderCompiler', 'graphics.Hlsl11Source',
-			'graphics.DxgiAdapter', 'graphics.DxgiMonitor', 'graphics.DxgiMonitorMode'
-		]
+			'graphics.DxgiMonitorMode'
+		],
+		'objects-win32': [
+			'graphics.Dx11Device',
+			'graphics.Dx11SwapChainPresenter',
+			'graphics.DxgiAdapter', 'graphics.DxgiMonitor'
+		],
+		'objects-xbox': [
+			'graphics.Dx11Device.cx',
+			'graphics.Dx11SwapChainPresenter.cx',
+			'graphics.DxgiAdapter.cx', 'graphics.DxgiMonitor.cx'
+		],
 	},
 	// ******* подсистема OpenGl
 	'libinanity-graphics-gl': {
@@ -273,7 +305,8 @@ var libraries = {
 			'graphics.shaders.GlslGenerator', 'graphics.shaders.GlslGeneratorInstance',
 			'graphics.shaders.Instancer'
 		],
-		'objects-win32': ['graphics.shaders.Hlsl11Generator', 'graphics.shaders.Hlsl11GeneratorInstance']
+		'objects-win32': ['graphics.shaders.Hlsl11Generator', 'graphics.shaders.Hlsl11GeneratorInstance'],
+		'objects-xbox': ['graphics.shaders.Hlsl11Generator', 'graphics.shaders.Hlsl11GeneratorInstance'],
 	},
 	// ******* общее аудио
 	'libinanity-audio': {
@@ -332,6 +365,7 @@ var libraries = {
 		'objects-linux': ['math.HardFloat'],
 		'objects-darwin': ['math.HardFloat'],
 		'objects-emscripten': ['math.EmsHardFloat'],
+		'objects-xbox': ['math.HardFloat'],
 	}
 };
 

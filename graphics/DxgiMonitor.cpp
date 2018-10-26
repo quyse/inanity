@@ -1,6 +1,10 @@
 #include "DxgiMonitor.hpp"
 #include "DxgiMonitorMode.hpp"
+#if defined(___INANITY_PLATFORM_XBOX)
+#include "../platform/CoreWindow.hpp"
+#else
 #include "../platform/Win32Window.hpp"
+#endif
 #include "../Exception.hpp"
 #include "../Strings.hpp"
 #include <sstream>
@@ -82,36 +86,38 @@ ptr<MonitorMode> DxgiMonitor::TryCreateMode(int width, int height)
 
 ptr<Platform::Window> DxgiMonitor::CreateDefaultWindow(const String& title, int width, int height)
 {
-	try
-	{
-		RECT rect = GetRect();
-		return Platform::Win32Window::CreateForDirectX(
-			title,
-			rect.left + (rect.right - rect.left - width) / 2,
-			rect.top + (rect.bottom - rect.top - height) / 2,
-			width, height
-			);
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY("Can't create window centered in DXGI monitor", exception);
-	}
+	BEGIN_TRY();
+
+#if defined(___INANITY_PLATFORM_XBOX)
+	return Platform::CoreWindow::CreateForDirectX(title);
+#else
+	RECT rect = GetRect();
+	return Platform::Win32Window::CreateForDirectX(
+		title,
+		rect.left + (rect.right - rect.left - width) / 2,
+		rect.top + (rect.bottom - rect.top - height) / 2,
+		width, height
+		);
+#endif
+
+	END_TRY("Can't create window centered in DXGI monitor");
 }
 
 RECT DxgiMonitor::GetRect() const
 {
-	try
-	{
-		MONITORINFO info;
-		info.cbSize = sizeof(info);
-		if(!GetMonitorInfo(desc.Monitor, &info))
-			THROW("Can't get monitor info");
-		return info.rcMonitor;
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY("Can't get DXGI monitor rect", exception);
-	}
+	BEGIN_TRY();
+
+#if defined(___INANITY_PLATFORM_XBOX)
+	THROW("Can't get monitor info on Xbox");
+#else
+	MONITORINFO info;
+	info.cbSize = sizeof(info);
+	if(!GetMonitorInfo(desc.Monitor, &info))
+		THROW("Can't get monitor info");
+	return info.rcMonitor;
+#endif
+
+	END_TRY("Can't get DXGI monitor rect");
 }
 
 const DXGI_OUTPUT_DESC& DxgiMonitor::GetDesc() const

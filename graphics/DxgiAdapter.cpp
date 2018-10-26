@@ -1,6 +1,10 @@
 #include "DxgiAdapter.hpp"
 #include "DxgiMonitor.hpp"
+#if defined(___INANITY_PLATFORM_XBOX)
+#include "../platform/CoreWindow.hpp"
+#else
 #include "../platform/Win32Window.hpp"
+#endif
 #include "../Strings.hpp"
 #include "../Exception.hpp"
 #include <sstream>
@@ -12,8 +16,9 @@ DxgiAdapter::DxgiAdapter(ComPointer<IDXGIAdapter> adapter)
 {
 	try
 	{
-		if(FAILED(adapter->GetDesc(&desc)))
-			THROW("Can't get adapter desc");
+		if(adapter)
+			if(FAILED(adapter->GetDesc(&desc)))
+				THROW("Can't get adapter desc");
 	}
 	catch(Exception* exception)
 	{
@@ -62,7 +67,11 @@ const Adapter::Monitors& DxgiAdapter::GetMonitors()
 
 ptr<Platform::Window> DxgiAdapter::CreateOptimizedWindow(const String& title, int left, int top, int width, int height)
 {
+#if defined(___INANITY_PLATFORM_XBOX)
+	return Platform::CoreWindow::CreateForDirectX(title);
+#else
 	return Platform::Win32Window::CreateForDirectX(title, left, top, width, height);
+#endif
 }
 
 IDXGIAdapter* DxgiAdapter::GetInterface() const

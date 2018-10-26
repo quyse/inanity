@@ -5,17 +5,34 @@
 #include "Dx11RenderBuffer.hpp"
 #include "Dx11Texture.hpp"
 #include "DxgiMonitorMode.hpp"
+#if defined(___INANITY_PLATFORM_XBOX)
+#include "../platform/CoreWindow.hpp"
+#else
 #include "../platform/Win32Window.hpp"
+#endif
 #include "../Exception.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
+#if defined(___INANITY_PLATFORM_XBOX)
+Dx11SwapChainPresenter::Dx11SwapChainPresenter(ptr<Dx11Device> device, ptr<Platform::CoreWindow> window, ComPointer<IDXGISwapChain1> swapChain)
+#else
 Dx11SwapChainPresenter::Dx11SwapChainPresenter(ptr<Dx11Device> device, ptr<Platform::Win32Window> window, ComPointer<IDXGISwapChain> swapChain)
+#endif
 : Dx11Presenter(device), window(window), swapChain(swapChain), currentMode(0), swapInterval(1)
 {
 	window->SetPresenter(this);
+
+#if defined(___INANITY_PLATFORM_XBOX)
+	DXGI_SWAP_CHAIN_DESC1 desc;
+	if(FAILED(swapChain->GetDesc1(&desc)))
+		THROW("Can't get swap chain desc");
+	width = desc.Width;
+	height = desc.Height;
+#else
 	width = window->GetClientWidth();
 	height = window->GetClientHeight();
+#endif
 }
 
 Dx11SwapChainPresenter::~Dx11SwapChainPresenter()
