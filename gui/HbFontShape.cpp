@@ -208,6 +208,8 @@ void HbFontShape::ShapeParagraph(const String& text, Script script, const icu::L
 		hb_buffer_clear_contents(buffer);
 	};
 
+	delete breakIter;
+
 	ubidi_close(ubidi);
 }
 
