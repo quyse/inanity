@@ -25,38 +25,19 @@ bool Dx11System::IsSupported()
 #endif
 }
 
+#if !defined(___INANITY_PLATFORM_XBOX)
 IDXGIFactory* Dx11System::GetDXGIFactory()
 {
 	if(!dxgiFactory)
 	{
-#if defined(___INANITY_PLATFORM_XBOX)
-		// create temporary device
-		D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_10_0;
-		ComPointer<ID3D11Device> device;
-		ComPointer<ID3D11DeviceContext> deviceContext;
-		D3D_FEATURE_LEVEL featureLevelSupported;
-		if(FAILED(D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, &featureLevel, 1, D3D11_SDK_VERSION, &device, &featureLevelSupported, &deviceContext)))
-			THROW("Can't create temporary device and context");
-		// get DXGI device
-		ComPointer<IDXGIDevice> dxgiDevice;
-		if(FAILED(device->QueryInterface(__uuidof(IDXGIDevice), (void**)&dxgiDevice)))
-			THROW("Can't get temporary DXGI device");
-		// get adapter
-		ComPointer<IDXGIAdapter> adapter;
-		if(FAILED(dxgiDevice->GetAdapter(&adapter)))
-			THROW("Can't get temporary adapter");
-		// get factory
-		if(FAILED(adapter->GetParent(__uuidof(IDXGIFactory), (void**)&dxgiFactory)))
-			THROW("Can't get DXGI factory");
-#else
 		Platform::DllFunction<decltype(&CreateDXGIFactory)> functionCreateDXGIFactory("dxgi.dll", "CreateDXGIFactory");
 
 		if(FAILED(functionCreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&dxgiFactory)))
 			THROW("Can't create DXGI Factory");
-#endif
 	}
 	return dxgiFactory;
 }
+#endif
 
 DXGI_FORMAT Dx11System::GetDXGIFormat(PixelFormat format)
 {
@@ -234,6 +215,7 @@ const std::vector<ptr<Adapter> >& Dx11System::GetAdapters()
 	if(!adaptersInitialized)
 		try
 		{
+#if !defined(___INANITY_PLATFORM_XBOX)
 			IDXGIFactory* factory = GetDXGIFactory();
 
 			if(factory)
@@ -251,6 +233,7 @@ const std::vector<ptr<Adapter> >& Dx11System::GetAdapters()
 				}
 			}
 			else
+#endif
 				adapters.push_back(NEW(DxgiAdapter(nullptr)));
 
 			adaptersInitialized = true;

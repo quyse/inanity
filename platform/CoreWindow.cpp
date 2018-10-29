@@ -1,4 +1,5 @@
 #include "CoreWindow.hpp"
+#include "../graphics/Presenter.hpp"
 #include "../graphics/RawTextureData.hpp"
 #include "../input/CoreManager.hpp"
 #include <ppltasks.h>
@@ -12,6 +13,7 @@ using Windows::ApplicationModel::Core::IFrameworkView;
 using Windows::ApplicationModel::Core::IFrameworkViewSource;
 using Windows::UI::Core::CoreProcessEventsOption;
 using Windows::UI::Core::CoreWindow;
+using Windows::UI::Core::WindowSizeChangedEventArgs;
 using Windows::Foundation::EventHandler;
 using Windows::Foundation::TypedEventHandler;
 namespace WUC = Windows::UI::Core;
@@ -40,10 +42,11 @@ public:
 	{
 	}
 
-	virtual void SetWindow(WUC::CoreWindow^ newWindow)
+	virtual void SetWindow(WUC::CoreWindow^ coreWindow)
 	{
-		window->window = newWindow;
-		newWindow->Closed += ref new TypedEventHandler<WUC::CoreWindow^, CoreWindowEventArgs^>(this, &ViewProvider::OnWindowClosed);
+		window->window = coreWindow;
+		coreWindow->SizeChanged += ref new TypedEventHandler<WUC::CoreWindow^, WindowSizeChangedEventArgs^>(this, &ViewProvider::OnWindowSizeChanged);
+		coreWindow->Closed += ref new TypedEventHandler<WUC::CoreWindow^, CoreWindowEventArgs^>(this, &ViewProvider::OnWindowClosed);
 	}
 
 	virtual void Load(::Platform::String^ entryPoint)
@@ -87,6 +90,12 @@ private:
 	void OnResuming(::Platform::Object^ sender, ::Platform::Object^ args)
 	{
 		window->active = false;
+	}
+
+	void OnWindowSizeChanged(WUC::CoreWindow^ sender, WindowSizeChangedEventArgs^ args)
+	{
+		if(window->presenter)
+			window->presenter->Resize((int)args->Size.Width, (int)args->Size.Height);
 	}
 
 	void OnWindowClosed(WUC::CoreWindow^ sender, CoreWindowEventArgs^ args)

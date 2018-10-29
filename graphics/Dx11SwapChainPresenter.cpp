@@ -74,6 +74,7 @@ int Dx11SwapChainPresenter::GetHeight() const
 
 void Dx11SwapChainPresenter::SetMode(ptr<MonitorMode> abstractMode)
 {
+#if !defined(___INANITY_PLATFORM_XBOX)
 	try
 	{
 		ptr<DxgiMonitorMode> mode = abstractMode.DynamicCast<DxgiMonitorMode>();
@@ -103,6 +104,7 @@ void Dx11SwapChainPresenter::SetMode(ptr<MonitorMode> abstractMode)
 	{
 		THROW_SECONDARY("Can't set mode", exception);
 	}
+#endif
 }
 
 void Dx11SwapChainPresenter::SetSwapInterval(int swapInterval)

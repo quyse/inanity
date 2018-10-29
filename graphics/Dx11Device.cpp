@@ -84,8 +84,8 @@ ptr<Dx11SwapChainPresenter> Dx11Device::CreatePresenter(ptr<Platform::Win32Windo
 	ZeroMemory(&desc, sizeof(desc));
 
 #if defined(___INANITY_PLATFORM_XBOX)
-	desc.Width = 0;
-	desc.Height = 0;
+	desc.Width = 1920;
+	desc.Height = 1080;
 	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 #else
 	desc.BufferDesc = Dx11System::GetModeDesc(mode, window->GetClientWidth(), window->GetClientHeight());
@@ -107,14 +107,22 @@ ptr<Dx11SwapChainPresenter> Dx11Device::CreatePresenter(ptr<Platform::Win32Windo
 
 #if defined(___INANITY_PLATFORM_XBOX)
 
-	// получить нужный интерфейс
-	ComPointer<IDXGIFactory2> dxgiFactory2;
-	if(FAILED(system->GetDXGIFactory()->QueryInterface(__uuidof(IDXGIFactory2), (void**)&dxgiFactory2)))
-		THROW("Can't get DXGI factory interface");
+	// get DXGI device
+	ComPointer<IDXGIDevice> dxgiDevice;
+	if(FAILED(device->QueryInterface(__uuidof(IDXGIDevice), (void**)&dxgiDevice)))
+		THROW("Can't get temporary DXGI device");
+	// get DXGI adapter
+	ComPointer<IDXGIAdapter> adapter;
+	if(FAILED(dxgiDevice->GetAdapter(&adapter)))
+		THROW("Can't get temporary adapter");
+	// get DXGI factory
+	ComPointer<IDXGIFactory2> dxgiFactory;
+	if(FAILED(adapter->GetParent(__uuidof(IDXGIFactory2), (void**)&dxgiFactory)))
+		THROW("Can't get DXGI factory");
 
-	// создать swap chain
+	// create swap chain
 	ComPointer<IDXGISwapChain1> swapChain;
-	if(FAILED(dxgiFactory2->CreateSwapChainForCoreWindow(device, window->GetWindowUnknown(), &desc, nullptr, &swapChain)))
+	if(FAILED(dxgiFactory->CreateSwapChainForCoreWindow(device, window->GetWindowUnknown(), &desc, nullptr, &swapChain)))
 		THROW("Can't create swap chain");
 
 #else

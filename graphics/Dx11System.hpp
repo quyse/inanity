@@ -16,7 +16,9 @@ class Dx11System : public System
 {
 private:
 	/// Фабрика объектов DXGI.
+#if !defined(___INANITY_PLATFORM_XBOX)
 	ComPointer<IDXGIFactory> dxgiFactory;
+#endif
 	/// Адаптеры DXGI.
 	std::vector<ptr<Adapter> > adapters;
 	bool adaptersInitialized;
@@ -41,7 +43,9 @@ public:
 
 	/// Получить фабрику DXGI.
 	/** Создаёт её, если ещё не создана. */
+#if !defined(___INANITY_PLATFORM_XBOX)
 	IDXGIFactory* GetDXGIFactory();
+#endif
 };
 
 END_INANITY_GRAPHICS
