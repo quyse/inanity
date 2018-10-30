@@ -2,10 +2,10 @@
 
 BEGIN_INANITY_INPUT
 
-Controller::Controller(int controllerId)
+Controller::Controller(uint64_t controllerId)
 : controllerId(controllerId) {}
 
-int Controller::GetControllerId() const
+uint64_t Controller::GetControllerId() const
 {
 	return controllerId;
 }

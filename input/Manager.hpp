@@ -55,7 +55,7 @@ public:
 	/// Is text input enabled.
 	bool IsTextInput() const;
 	/// Get new controller by controller id.
-	virtual ptr<Controller> TryGetController(int controllerId);
+	virtual ptr<Controller> TryGetController(uint64_t controllerId);
 };
 
 END_INANITY_INPUT

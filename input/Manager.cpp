@@ -95,7 +95,7 @@ bool Manager::IsTextInput() const
 	return textInputEnabled;
 }
 
-ptr<Controller> Manager::TryGetController(int controllerId)
+ptr<Controller> Manager::TryGetController(uint64_t controllerId)
 {
 	return nullptr;
 }

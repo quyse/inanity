@@ -117,7 +117,7 @@ struct Event
 		};
 
 		/// Device id (for all event types).
-		int device;
+		uint64_t device;
 
 		union
 		{

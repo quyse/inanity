@@ -60,8 +60,11 @@ public:
 			WUC::CoreWindow::GetForCurrentThread()->Dispatcher->
 				ProcessEvents(window->active ? CoreProcessEventsOption::ProcessAllIfPresent : CoreProcessEventsOption::ProcessUntilQuit);
 
-			// if(window->active)
-			// 	window->inputManager->Update();
+			if(window->active)
+			{
+				if(window->inputManager)
+					window->inputManager->Update();
+			}
 			window->activeHandler->Fire();
 		}
 	}
@@ -77,6 +80,9 @@ private:
 	{
 		window->active = false;
 		auto deferral = args->SuspendingOperation->GetDeferral();
+
+		if(window->inputManager)
+			window->inputManager->ReleaseButtonsOnUpdate();
 
 		concurrency::create_task([this, deferral]()
 		{

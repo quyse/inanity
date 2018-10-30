@@ -10,13 +10,13 @@ class Controller : public Object
 {
 protected:
 	/// Controller id to distinguish events for this controller.
-	int controllerId;
+	uint64_t controllerId;
 
-	Controller(int controllerId);
+	Controller(uint64_t controllerId);
 
 public:
 	/// Get controller id.
-	int GetControllerId() const;
+	uint64_t GetControllerId() const;
 
 	/// Return if controller is still connected.
 	virtual bool IsActive() const = 0;
