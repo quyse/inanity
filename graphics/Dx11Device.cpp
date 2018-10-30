@@ -87,8 +87,15 @@ ptr<Dx11SwapChainPresenter> Dx11Device::CreatePresenter(ptr<Platform::Win32Windo
 	desc.Width = 1920;
 	desc.Height = 1080;
 	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	desc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
+	desc.Flags = DXGIX_SWAP_CHAIN_FLAG_QUANTIZATION_RGB_FULL;
 #else
 	desc.BufferDesc = Dx11System::GetModeDesc(mode, window->GetClientWidth(), window->GetClientHeight());
+	desc.OutputWindow = window->GetHWND();
+	// согласно рекомендации SDK, даже в случае полного экрана, лучше
+	// создавать в оконном режиме, а потом переключать
+	desc.Windowed = TRUE;
+	desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 #endif
 
 	// мультисемплинга пока нет
@@ -96,14 +103,7 @@ ptr<Dx11SwapChainPresenter> Dx11Device::CreatePresenter(ptr<Platform::Win32Windo
 	desc.SampleDesc.Quality = 0;
 	desc.BufferUsage = DXGI_USAGE_BACK_BUFFER | DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	desc.BufferCount = 2;
-#if !defined(___INANITY_PLATFORM_XBOX)
-	desc.OutputWindow = window->GetHWND();
-	// согласно рекомендации SDK, даже в случае полного экрана, лучше
-	// создавать в оконном режиме, а потом переключать
-	desc.Windowed = TRUE;
-#endif
 	desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-	desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 #if defined(___INANITY_PLATFORM_XBOX)
 
