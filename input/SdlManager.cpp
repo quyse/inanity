@@ -401,7 +401,7 @@ void SdlManager::StopTextInput()
 
 #if !defined(___INANITY_PLATFORM_EMSCRIPTEN)
 
-ptr<Controller> SdlManager::TryGetController(int controllerId)
+ptr<Controller> SdlManager::TryGetController(uint64_t controllerId)
 {
 	CriticalCode criticalCode(criticalSection);
 

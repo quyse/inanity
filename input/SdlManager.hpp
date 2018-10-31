@@ -52,7 +52,7 @@ private:
 		void Close();
 	};
 
-	std::unordered_map<SDL_JoystickID, ptr<SdlController> > controllers;
+	std::unordered_map<uint64_t, ptr<SdlController> > controllers;
 #endif
 
 public:
@@ -63,7 +63,7 @@ public:
 	void StartTextInput();
 	void StopTextInput();
 #if !defined(___INANITY_PLATFORM_EMSCRIPTEN)
-	ptr<Controller> TryGetController(int controllerId);
+	ptr<Controller> TryGetController(uint64_t controllerId);
 
 	void TryLoadControllerMappingsFromFile(const char* fileName);
 #endif
