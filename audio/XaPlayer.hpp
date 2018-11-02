@@ -4,6 +4,7 @@
 #include "Player3D.hpp"
 #include "xaudio2.hpp"
 #include <queue>
+#include <atomic>
 
 BEGIN_INANITY
 
@@ -30,6 +31,8 @@ protected:
 
 	bool playing;
 
+	std::atomic<size_t> onBufferEndCounter;
+
 	XaPlayer(ptr<XaDevice> device);
 	~XaPlayer();
 
@@ -48,6 +51,9 @@ protected:
 	void ApplyPitch();
 
 public:
+	/// Регулярная обработка.
+	virtual void Tick();
+
 	//*** Some Player's methods.
 	bool IsPlaying() const override;
 	void SetVolume(float volume) override;

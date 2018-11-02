@@ -1,6 +1,8 @@
 #include "XaSystem.hpp"
 #include "XaDevice.hpp"
+#include "XaPlayer.hpp"
 #include "Format.hpp"
+#include "../CriticalCode.hpp"
 #include "../Exception.hpp"
 
 BEGIN_INANITY_AUDIO
@@ -24,6 +26,20 @@ IXAudio2SourceVoice* XaSystem::AllocateSourceVoice(const Format& format, IXAudio
 	return voiceInterface;
 }
 
+void XaSystem::RegisterPlayer(XaPlayer* player)
+{
+	CriticalCode cc(csPlayers);
+
+	players.insert(player);
+}
+
+void XaSystem::UnregisterPlayer(XaPlayer* player)
+{
+	CriticalCode cc(csPlayers);
+
+	players.erase(player);
+}
+
 ptr<Device> XaSystem::CreateDefaultDevice()
 {
 	BEGIN_TRY();
@@ -41,6 +57,19 @@ ptr<Device> XaSystem::CreateDefaultDevice()
 
 void XaSystem::Tick()
 {
+	{
+		CriticalCode cc(csPlayers);
+
+		tempPlayers.assign(players.begin(), players.end());
+	}
+
+	for(size_t i = 0; i < tempPlayers.size(); ++i)
+	{
+		tempPlayers[i]->Tick();
+		tempPlayers[i] = nullptr;
+	}
+
+	tempPlayers.clear();
 }
 
 WAVEFORMATEX XaSystem::ConvertFormat(const Format& format)

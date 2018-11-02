@@ -1,4 +1,5 @@
 #include "XaPlayer.hpp"
+#include "XaSystem.hpp"
 #include "XaDevice.hpp"
 #include "../File.hpp"
 #include "../Exception.hpp"
@@ -6,7 +7,7 @@
 BEGIN_INANITY_AUDIO
 
 XaPlayer::XaPlayer(ptr<XaDevice> device)
-: device(device), voice(nullptr), volume(1.0f), pitch(1.0f), playing(false)
+: device(device), voice(nullptr), volume(1.0f), pitch(1.0f), playing(false), onBufferEndCounter(0)
 {}
 
 XaPlayer::~XaPlayer()
@@ -17,7 +18,10 @@ XaPlayer::~XaPlayer()
 void XaPlayer::SetVoice(IXAudio2SourceVoice* voice)
 {
 	if(this->voice)
+	{
+		StopPlaying();
 		this->voice->DestroyVoice();
+	}
 	this->voice = voice;
 	if(this->voice)
 	{
@@ -50,6 +54,7 @@ void XaPlayer::StartPlaying()
 		if(FAILED(voice->Start()))
 			THROW("Can't start XAudio2 source voice");
 		playing = true;
+		device->GetSystem()->RegisterPlayer(this);
 	}
 }
 
@@ -60,6 +65,7 @@ void XaPlayer::StopPlaying()
 		if(FAILED(voice->Stop()))
 			THROW("Can't stop XAudio2 source voice");
 		playing = false;
+		device->GetSystem()->UnregisterPlayer(this);
 	}
 }
 
@@ -73,6 +79,16 @@ void XaPlayer::ApplyPitch()
 {
 	if(FAILED(voice->SetFrequencyRatio(pitch)))
 		THROW("Can't apply pitch to XAudio2 source voice");
+}
+
+void XaPlayer::Tick()
+{
+	for(; onBufferEndCounter > 0; --onBufferEndCounter)
+		if(!files.empty())
+			files.pop();
+
+	if(files.empty())
+		playing = false;
 }
 
 bool XaPlayer::IsPlaying() const
@@ -124,9 +140,7 @@ void CALLBACK XaPlayer::OnBufferStart(void* pBufferContext)
 
 void CALLBACK XaPlayer::OnBufferEnd(void* pBufferContext)
 {
-	files.pop();
-	if(files.empty())
-		playing = false;
+	++onBufferEndCounter;
 }
 
 void CALLBACK XaPlayer::OnLoopEnd(void* pBufferContext)
