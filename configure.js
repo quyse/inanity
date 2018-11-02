@@ -322,6 +322,14 @@ var libraries = {
 			'audio.AlStreamedSound', 'audio.AlStreamedPlayer'
 		]
 	},
+	// ******* XAudio2
+	'libinanity-xaudio2': {
+		objects: [
+			'audio.XaSystem', 'audio.XaDevice', 'audio.XaPlayer',
+			'audio.XaBufferedSound', 'audio.XaBufferedPlayer',
+			'audio.XaStreamedSound', 'audio.XaStreamedPlayer'
+		]
+	},
 	// ******* общая физика
 	'libinanity-physics': {
 		objects: [

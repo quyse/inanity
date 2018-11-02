@@ -42,8 +42,8 @@ WavSource::WavSource(ptr<File> file)
 	// prepare data
 	dataFile = file->Slice(40, header->dataSize);
 	format.samplesPerSecond = header->sampleRate;
-	format.bitsPerSample = header->bitsPerSample;
-	format.channelsCount = header->numChannels;
+	format.bitsPerSample = (uint8_t)header->bitsPerSample;
+	format.channelsCount = (uint8_t)header->numChannels;
 	samplesCount = header->dataSize / (format.channelsCount * format.bitsPerSample / 8);
 
 	END_TRY("Can't load WAV source");
