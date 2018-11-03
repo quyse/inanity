@@ -4,21 +4,39 @@
 #include "XaStreamedSound.hpp"
 #include "Source.hpp"
 #include "../File.hpp"
+#include "../Exception.hpp"
 
 BEGIN_INANITY_AUDIO
 
 XaDevice::XaDevice(ptr<XaSystem> system, IXAudio2MasteringVoice* voice)
 : system(system), voice(voice)
-{}
+{
+	if(FAILED(voice->GetChannelMask(&channelMask)))
+		THROW("Can't get XAudio2 mastering voice channel mask");
+
+	XAUDIO2_VOICE_DETAILS details;
+	voice->GetVoiceDetails(&details);
+	channelsCount = details.InputChannels;
+}
 
 XaDevice::~XaDevice()
 {
 	voice->DestroyVoice();
 }
 
-ptr<XaSystem> XaDevice::GetSystem() const
+XaSystem* XaDevice::GetSystem() const
 {
 	return system;
+}
+
+DWORD XaDevice::GetChannelMask() const
+{
+	return channelMask;
+}
+
+uint32_t XaDevice::GetChannelsCount() const
+{
+	return channelsCount;
 }
 
 ptr<Sound> XaDevice::CreateBufferedSound(ptr<Source> source)

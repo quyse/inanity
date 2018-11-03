@@ -26,6 +26,8 @@ public:
 
 	/// Set volume.
 	virtual void SetVolume(float volume) = 0;
+	/// Set panning (-1 means left, 1 means right).
+	virtual void SetPanning(float pan) = 0;
 	/// Set pitch.
 	virtual void SetPitch(float pitch) = 0;
 };

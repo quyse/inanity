@@ -22,12 +22,17 @@ private:
 	std::unordered_set<XaPlayer*> players;
 	CriticalSection csPlayers;
 	std::vector<ptr<XaPlayer> > tempPlayers;
+	uint32_t operationSet;
+	bool hadOperations;
 
 public:
 	XaSystem();
 
 	/// Получить voice нужного формата.
 	IXAudio2SourceVoice* AllocateSourceVoice(const Format& format, IXAudio2VoiceCallback* callback);
+	/// Получить текущий номер operation set.
+	//** Предполагается, что операция будет произведена.
+	uint32_t GetOperationSet();
 
 	/// Зарегистрировать плеер, чтобы вызывать у него тик. Потоковобезопасно.
 	void RegisterPlayer(XaPlayer* player);

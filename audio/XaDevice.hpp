@@ -15,12 +15,16 @@ class XaDevice : public Device
 private:
 	ptr<XaSystem> system;
 	IXAudio2MasteringVoice* voice;
+	DWORD channelMask;
+	uint32_t channelsCount;
 
 public:
 	XaDevice(ptr<XaSystem> system, IXAudio2MasteringVoice* voice);
 	~XaDevice();
 
-	ptr<XaSystem> GetSystem() const;
+	XaSystem* GetSystem() const;
+	DWORD GetChannelMask() const;
+	uint32_t GetChannelsCount() const;
 
 	//** Device's methods.
 	ptr<Sound> CreateBufferedSound(ptr<Source> source) override;

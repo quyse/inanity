@@ -7,7 +7,7 @@
 
 BEGIN_INANITY_AUDIO
 
-XaSystem::XaSystem()
+XaSystem::XaSystem() : operationSet(0), hadOperations(false)
 {
 	BEGIN_TRY();
 
@@ -24,6 +24,17 @@ IXAudio2SourceVoice* XaSystem::AllocateSourceVoice(const Format& format, IXAudio
 		THROW("Can't create source voice");
 
 	return voiceInterface;
+}
+
+uint32_t XaSystem::GetOperationSet()
+{
+	if(!hadOperations)
+	{
+		hadOperations = true;
+		++operationSet;
+	}
+
+	return operationSet;
 }
 
 void XaSystem::RegisterPlayer(XaPlayer* player)
@@ -70,6 +81,12 @@ void XaSystem::Tick()
 	}
 
 	tempPlayers.clear();
+
+	if(hadOperations)
+	{
+		hadOperations = false;
+		xAudio2->CommitChanges(XAUDIO2_COMMIT_ALL);
+	}
 }
 
 WAVEFORMATEX XaSystem::ConvertFormat(const Format& format)

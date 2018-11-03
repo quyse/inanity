@@ -27,7 +27,8 @@ protected:
 	/// Очередь из буферов на проигрывание.
 	std::queue<ptr<File> > files;
 
-	float volume, pitch;
+	float volume, pan, pitch;
+	uint32_t channelsCount;
 
 	bool playing;
 
@@ -48,6 +49,7 @@ protected:
 	void StopPlaying();
 
 	void ApplyVolume();
+	void ApplyPan();
 	void ApplyPitch();
 
 public:
@@ -57,6 +59,7 @@ public:
 	//*** Some Player's methods.
 	bool IsPlaying() const override;
 	void SetVolume(float volume) override;
+	void SetPanning(float pan) override;
 	void SetPitch(float pitch) override;
 	//** Player3D's methods.
 	void SetPosition(const Math::vec3& position) override;
