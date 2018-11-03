@@ -21,6 +21,7 @@ public:
 
 	//** Player's methods.
 	void SetVolume(float volume);
+	void SetPanning(float pan);
 	void SetPitch(float pitch);
 
 	//** Player3D's methods

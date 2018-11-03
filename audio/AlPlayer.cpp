@@ -32,6 +32,11 @@ void AlPlayer::SetVolume(float volume)
 	AlSystem::CheckErrors("Can't set OpenAL player volume");
 }
 
+void AlPlayer::SetPanning(float pan)
+{
+	// not implemented yet
+}
+
 void AlPlayer::SetPitch(float pitch)
 {
 	alSourcef(sourceName, AL_PITCH, pitch);
