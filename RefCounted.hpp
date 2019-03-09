@@ -2,6 +2,7 @@
 #define ___INANITY_REF_COUNTED_HPP___
 
 #include "ptr.hpp"
+#include <atomic>
 
 BEGIN_INANITY
 
@@ -9,7 +10,7 @@ BEGIN_INANITY
 class RefCounted
 {
 private:
-	int referencesCount;
+	std::atomic<int> referencesCount;
 
 protected:
 	/// Free an instance run out of references.
