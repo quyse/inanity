@@ -11,7 +11,7 @@ BEGIN_INANITY_INPUT
 class Win32Manager : public Manager
 {
 private:
-	int cursorX, cursorY;
+	int lastCursorX, lastCursorY;
 
 protected:
 	Win32Manager();
