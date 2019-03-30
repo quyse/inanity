@@ -10,7 +10,12 @@ BEGIN_INANITY_INPUT
 /// General class for Win32 input managers.
 class Win32Manager : public Manager
 {
+private:
+	int cursorX, cursorY;
+
 protected:
+	Win32Manager();
+
 	static Key ConvertKey(USHORT key, USHORT makeCode, USHORT flags);
 
 public:

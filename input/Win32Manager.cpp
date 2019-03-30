@@ -3,6 +3,10 @@
 
 BEGIN_INANITY_INPUT
 
+Win32Manager::Win32Manager() : lastCursorX(0), lastCursorY(0)
+{
+}
+
 Key Win32Manager::ConvertKey(USHORT key, USHORT makeCode, USHORT flags)
 {
 	switch(key)
@@ -141,8 +145,8 @@ bool Win32Manager::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 			Event e;
 			e.device = Event::deviceMouse;
 			e.mouse.type = Event::Mouse::typeCursorMove;
-			e.mouse.cursorX = LOWORD(lParam);
-			e.mouse.cursorY = HIWORD(lParam);
+			lastCursorX = e.mouse.cursorX = LOWORD(lParam);
+			lastCursorY = e.mouse.cursorY = HIWORD(lParam);
 			e.mouse.cursorZ = 0;
 			AddEvent(e);
 		}
@@ -152,8 +156,8 @@ bool Win32Manager::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 			Event e;
 			e.device = Event::deviceMouse;
 			e.mouse.type = Event::Mouse::typeCursorMove;
-			e.mouse.cursorX = 0;
-			e.mouse.cursorY = 0;
+			e.mouse.cursorX = lastCursorX;
+			e.mouse.cursorY = lastCursorY;
 			e.mouse.cursorZ = GET_WHEEL_DELTA_WPARAM(wParam);
 			AddEvent(e);
 		}
