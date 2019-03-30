@@ -26,8 +26,8 @@ class SdlManager : public Manager
 {
 private:
 	ptr<Platform::Sdl> sdl;
-	float widthScale;
-	float heightScale;
+	float widthScale, heightScale;
+	int lastCursorX, lastCursorY;
 
 #if !defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	class SdlController : public Controller

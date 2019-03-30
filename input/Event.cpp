@@ -66,7 +66,7 @@ std::ostream& operator<<(std::ostream& stream, const Event& event)
 				stream << event.mouse.rawMoveX << ' ' << event.mouse.rawMoveY << ' ' << event.mouse.rawMoveZ;
 				break;
 			case Event::Mouse::typeCursorMove:
-				stream << event.mouse.cursorX << ' ' << event.mouse.cursorY;
+				stream << event.mouse.cursorX << ' ' << event.mouse.cursorY << ' ' << event.mouse.cursorZ;
 				break;
 		}
 		break;

@@ -13,7 +13,7 @@ SdlManager::SdlManager()
 #else
 	SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC
 #endif
-	)), widthScale(1), heightScale(1)
+	)), widthScale(1), heightScale(1), lastCursorX(0), lastCursorY(0)
 {
 }
 
@@ -185,8 +185,8 @@ void SdlManager::ProcessEvent(const SDL_Event& event)
 			Event e;
 			e.device = Event::deviceMouse;
 			e.mouse.type = Event::Mouse::typeCursorMove;
-			e.mouse.cursorX = (int)(event.motion.x * widthScale);
-			e.mouse.cursorY = (int)(event.motion.y * heightScale);
+			lastCursorX = e.mouse.cursorX = (int)(event.motion.x * widthScale);
+			lastCursorY = e.mouse.cursorY = (int)(event.motion.y * heightScale);
 			e.mouse.cursorZ = 0;
 			AddEvent(e);
 		}
@@ -247,8 +247,8 @@ void SdlManager::ProcessEvent(const SDL_Event& event)
 			Event e;
 			e.device = Event::deviceMouse;
 			e.mouse.type = Event::Mouse::typeCursorMove;
-			e.mouse.cursorX = 0;
-			e.mouse.cursorY = 0;
+			e.mouse.cursorX = lastCursorX;
+			e.mouse.cursorY = lastCursorY;
 #if defined(___INANITY_PLATFORM_EMSCRIPTEN)
 			e.mouse.cursorZ = event.wheel.y;
 #else
