@@ -155,10 +155,12 @@ struct GrCanvas::Helper : public Object
 		{
 			ptr<BlendState> bsSubPixelOff = device->CreateBlendState();
 			bsSubPixelOff->SetColor(BlendState::colorSourceSrcAlpha, BlendState::colorSourceInvSrcAlpha, BlendState::operationAdd);
+			bsSubPixelOff->SetAlpha(BlendState::alphaSourceOne, BlendState::alphaSourceInvSrc, BlendState::operationAdd);
 			bs[subPixelModeOff] = bsSubPixelOff;
 
 			ptr<BlendState> bsSubPixelOn = device->CreateBlendState();
 			bsSubPixelOn->SetColor(BlendState::colorSourceSecondSrc, BlendState::colorSourceInvSecondSrc, BlendState::operationAdd);
+			bsSubPixelOn->SetAlpha(BlendState::alphaSourceOne, BlendState::alphaSourceInvSrc, BlendState::operationAdd);
 			for(int i = subPixelModeOnBegin; i < subPixelModeOnEnd; ++i)
 				bs[i] = bsSubPixelOn;
 		}
