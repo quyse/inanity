@@ -16,7 +16,7 @@
 #define ___INANITY_PLATFORM_XBOX_ONE
 #endif
 
-#elif defined(EMSCRIPTEN)
+#elif defined(__EMSCRIPTEN__)
 
 #define ___INANITY_PLATFORM_EMSCRIPTEN
 #define ___INANITY_PLATFORM_POSIX
