@@ -30,8 +30,10 @@ exports.configureCompiler = function(objectFile, compiler) {
 		compiler.addMacro('getenv=""+__noop');
 		compiler.addMacro('GetACP=65001+__noop');
 	}
-	// another hack
-	compiler.addMacro('register=');
+	// crazy hack for switch
+	if(compiler.platform == 'switch') {
+		compiler.addMacro('register=');
+	}
 
 	var c = /^([^\/]*)\//.exec(source);
 	switch(c[1]) {
