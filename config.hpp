@@ -31,6 +31,11 @@
 #define ___INANITY_PLATFORM_MACOS
 #define ___INANITY_PLATFORM_POSIX
 
+#elif defined(NN_NINTENDO_SDK)
+
+#define ___INANITY_PLATFORM_SWITCH
+#define ___INANITY_PLATFORM_POSIX
+
 #elif defined(__ANDROID__)
 
 #define ___INANITY_PLATFORM_ANDROID

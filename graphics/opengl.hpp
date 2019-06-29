@@ -26,6 +26,11 @@
 #include "../deps/glew/include/GL/glew.h"
 #include </System/Library/Frameworks/OpenGL.framework/Headers/gl.h>
 
+#elif defined(___INANITY_PLATFORM_SWITCH)
+
+#include <GL/glew.h>
+#include <GL/gl.h>
+
 #elif defined(___INANITY_PLATFORM_ANDROID)
 
 #include "../deps/glew/include/GL/glew.h"

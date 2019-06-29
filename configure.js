@@ -179,6 +179,9 @@ var libraries = {
 		'objects-xbox': [
 			'platform.Win32Handle', 'platform.Win32FileSystem'
 		],
+		'objects-switch': [
+			'platform.PosixFileSystem'
+		],
 	},
 	// ******* general platform subsystem
 	'libinanity-platform': {
