@@ -23,9 +23,9 @@ public:
 	ptr<Device> CreateDevice(ptr<Adapter> adapter);
 	ptr<Context> CreateContext(ptr<Device> device);
 
-	/// Инициализация GLEW.
+	/// Инициализация.
 	/** Нужно вызывать после создания контекста OpenGL. */
-	static void InitGLEW();
+	static void Init();
 
 	/// Очистить ошибки OpenGL (игнорируя их).
 	static void ClearErrors();

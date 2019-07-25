@@ -7,6 +7,11 @@
 #include "../Strings.hpp"
 #elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS) || defined(___INANITY_PLATFORM_ANDROID)
 #include "SdlAdapter.hpp"
+#elif defined(___INANITY_PLATFORM_SWITCH)
+#include "NxAdapter.hpp"
+#include <nn/nn_Assert.h>
+#include <nn/vi.h>
+#include <nv/nv_MemoryManagement.h>
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 #include "EmsAdapter.hpp"
 #include "../platform/EmsWindow.hpp"
@@ -17,7 +22,40 @@
 
 BEGIN_INANITY_GRAPHICS
 
-GlSystem::GlSystem() : adaptersInitialized(false) {}
+GlSystem::GlSystem() : adaptersInitialized(false)
+{
+#if defined(___INANITY_PLATFORM_SWITCH)
+
+	// init memory
+
+	struct NvAllocators
+	{
+		static void* Allocate(size_t size, size_t alignment, void* userPtr)
+		{
+			return aligned_alloc(alignment, nn::util::align_up(size, alignment));
+		}
+
+		static void Free(void* addr, void* userPtr)
+		{
+			free(addr);
+		}
+
+		static void* Reallocate(void* addr, size_t newSize, void* userPtr)
+		{
+			return realloc(addr, newSize);
+		}
+	};
+
+	nv::SetGraphicsAllocator(NvAllocators::Allocate, NvAllocators::Free, NvAllocators::Reallocate, this);
+	nv::SetGraphicsDevtoolsAllocator(NvAllocators::Allocate, NvAllocators::Free, NvAllocators::Reallocate, this);
+
+	// initialize graphics
+	const size_t graphicsSystemMemorySize = 8 * 1024 * 1024;
+	nv::InitializeGraphics(malloc(graphicsSystemMemorySize), graphicsSystemMemorySize);
+	nn::vi::Initialize();
+
+#endif
+}
 
 const std::vector<ptr<Adapter> >& GlSystem::GetAdapters()
 {
@@ -27,6 +65,8 @@ const std::vector<ptr<Adapter> >& GlSystem::GetAdapters()
 		Win32Adapter::GetAdapters(adapters);
 #elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS) || defined(___INANITY_PLATFORM_ANDROID)
 		SdlAdapter::GetAdapters(adapters);
+#elif defined(___INANITY_PLATFORM_SWITCH)
+		NxAdapter::GetAdapters(adapters);
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 		EmsAdapter::GetAdapters(adapters);
 #else
@@ -48,7 +88,7 @@ ptr<Device> GlSystem::CreateDevice(ptr<Adapter> abstractAdapter)
 	if(!adapter)
 		THROW("Wrong adapter type");
 	return NEW(GlDevice(this, adapter->GetId()));
-#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS) || defined(___INANITY_PLATFORM_ANDROID) || defined(___INANITY_PLATFORM_EMSCRIPTEN)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS) || defined(___INANITY_PLATFORM_ANDROID) || defined(___INANITY_PLATFORM_SWITCH) || defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	return NEW(GlDevice(this));
 #else
 #error Unknown platform
@@ -73,8 +113,15 @@ ptr<Context> GlSystem::CreateContext(ptr<Device> abstractDevice)
 	END_TRY("Can't create OpenGL context");
 }
 
-void GlSystem::InitGLEW()
+void GlSystem::Init()
 {
+#if defined(___INANITY_PLATFORM_SWITCH)
+
+	if(nngllInitializeGl() != nngllResult_Succeeded)
+		THROW("Can't initialize gll");
+
+#else
+
 	glewExperimental = GL_TRUE; // enable workarounds to make core profile working (see https://www.opengl.org/wiki/OpenGL_Loading_Library#GLEW)
 	GLenum err = glewInit();
 	if(err != GLEW_OK)
@@ -82,6 +129,8 @@ void GlSystem::InitGLEW()
 		THROW("Can't initialize GLEW");
 #else
 		THROW(String("Can't initialize GLEW: ") + (const char*)glewGetErrorString(err));
+#endif
+
 #endif
 }
 

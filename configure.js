@@ -154,6 +154,7 @@ var libraries = {
 		'objects-android': ['input.SdlManager'],
 		'objects-emscripten': ['input.SdlManager'],
 		'objects-xbox': ['input.CoreManager.cx'],
+		'objects-switch': ['input.NxManager'],
 	},
 	// ******* filesystem platform
 	'libinanity-platform-filesystem': {
@@ -222,6 +223,9 @@ var libraries = {
 			'platform.Game.cx',
 			'platform.DllCache'
 		],
+		'objects-switch': [
+			'platform.NxWindow',
+		],
 	},
 	// ******* raw graphics (no support for graphics API needed)
 	'libinanity-graphics-raw': {
@@ -288,7 +292,8 @@ var libraries = {
 		'objects-freebsd': ['graphics.SdlPresenter'],
 		'objects-darwin': ['graphics.SdlPresenter'],
 		'objects-android': ['graphics.SdlPresenter'],
-		'objects-emscripten': ['graphics.EmsPresenter']
+		'objects-emscripten': ['graphics.EmsPresenter'],
+		'objects-switch': ['graphics.NxPresenter']
 	},
 	// ******* подсистема шейдеров
 	'libinanity-graphics-shaders': {

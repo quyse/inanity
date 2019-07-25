@@ -28,8 +28,7 @@
 
 #elif defined(___INANITY_PLATFORM_SWITCH)
 
-#include <GL/glew.h>
-#include <GL/gl.h>
+#include <nn/gll.h>
 
 #elif defined(___INANITY_PLATFORM_ANDROID)
 

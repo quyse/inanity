@@ -35,6 +35,10 @@
 #include "SdlMonitorMode.hpp"
 #include "../platform/Sdl.hpp"
 #include "../platform/SdlWindow.hpp"
+#elif defined(___INANITY_PLATFORM_SWITCH)
+#include "NxPresenter.hpp"
+#include "../platform/NxWindow.hpp"
+#include "MonitorMode.hpp"
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 #include "EmsPresenter.hpp"
 #include "MonitorMode.hpp"
@@ -112,8 +116,8 @@ GlDevice::GlDevice(ptr<GlSystem> system, const String& deviceName)
 	// delete temporary context
 	wglDeleteContext(hglrcTemp);
 
-	// initialize GLEW
-	GlSystem::InitGLEW();
+	// initialize
+	GlSystem::Init();
 
 	// init capabilities
 	InitCaps();
@@ -160,7 +164,7 @@ GlDevice::GlDevice(ptr<GlSystem> system)
 		THROW_SECONDARY("Can't create OpenGL context", Platform::Sdl::Error());
 
 	// initialize extensions
-	GlSystem::InitGLEW();
+	GlSystem::Init();
 	GlSystem::ClearErrors();
 
 	// init capabilities
@@ -174,6 +178,13 @@ GlDevice::~GlDevice()
 	if(sdlContext)
 		SDL_GL_DeleteContext(sdlContext);
 }
+
+#elif defined(___INANITY_PLATFORM_SWITCH)
+
+GlDevice::GlDevice(ptr<GlSystem> system)
+: system(system) {}
+
+GlDevice::~GlDevice() {}
 
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 
@@ -206,6 +217,20 @@ void GlDevice::InitCaps()
 	caps.flags =
 		((version >= 303 || GLEW_ARB_instanced_arrays) ? Caps::attributeInstancing : 0) |
 		((version >= 301 || GLEW_ARB_draw_instanced) ? Caps::drawInstancing : 0);
+	caps.maxColorBuffersCount = GlFrameBuffer::maxColorBuffersCount;
+#elif defined(___INANITY_PLATFORM_SWITCH)
+	internalCaps =
+		InternalCaps::uniformBufferObject |
+		InternalCaps::samplerObjects |
+		InternalCaps::vertexArrayObject |
+		InternalCaps::vertexAttribBinding |
+		InternalCaps::frameBufferObject |
+		InternalCaps::textureStorage
+		;
+	caps.flags =
+		Caps::attributeInstancing |
+		Caps::drawInstancing
+		;
 	caps.maxColorBuffersCount = GlFrameBuffer::maxColorBuffersCount;
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	internalCaps = InternalCaps::frameBufferObject;
@@ -262,6 +287,10 @@ void GlDevice::BindPresenter(Presenter* presenter)
 				THROW("Can't bind hidden window");
 		}
 
+#elif defined(___INANITY_PLATFORM_SWITCH)
+
+		// TODO
+
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 
 		// no binding needed for Emscripten presenter
@@ -293,25 +322,32 @@ ptr<Presenter> GlDevice::CreateWindowPresenter(ptr<Platform::Window> abstractWin
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
 
-	ptr<Platform::Win32Window> window = abstractWindow.DynamicCast<Platform::Win32Window>();
+	ptr<Platform::Win32Window> window = abstractWindow.FastCast<Platform::Win32Window>();
 	if(!window)
 		THROW("Only Win32 window is allowed");
-	ptr<Win32MonitorMode> mode = abstractMode.DynamicCast<Win32MonitorMode>();
+	ptr<Win32MonitorMode> mode = abstractMode.FastCast<Win32MonitorMode>();
 	if(!mode && abstractMode)
 		THROW("Only Win32 monitor mode allowed");
 
 #elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS) || defined(___INANITY_PLATFORM_ANDROID)
 
-	ptr<Platform::SdlWindow> window = abstractWindow.DynamicCast<Platform::SdlWindow>();
+	ptr<Platform::SdlWindow> window = abstractWindow.FastCast<Platform::SdlWindow>();
 	if(!window)
 		THROW("Only SDL window is allowed");
-	ptr<SdlMonitorMode> mode = abstractMode.DynamicCast<SdlMonitorMode>();
+	ptr<SdlMonitorMode> mode = abstractMode.FastCast<SdlMonitorMode>();
 	if(!mode && abstractMode)
 		THROW("Only SDL monitor mode is allowed");
 
+#elif defined(___INANITY_PLATFORM_SWITCH)
+
+	ptr<Platform::NxWindow> window = abstractWindow.FastCast<Platform::NxWindow>();
+	if(!window)
+		THROW("Only Nx window is allowed");
+	ptr<MonitorMode> mode = nullptr;
+
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 
-	ptr<Platform::EmsWindow> window = abstractWindow.DynamicCast<Platform::EmsWindow>();
+	ptr<Platform::EmsWindow> window = abstractWindow.FastCast<Platform::EmsWindow>();
 	if(!window)
 		THROW("Only Emscripten window is allowed");
 	ptr<MonitorMode> mode = abstractMode;
@@ -351,6 +387,17 @@ ptr<SdlPresenter> GlDevice::CreatePresenter(ptr<Platform::SdlWindow> window, ptr
 	return presenter;
 
 	END_TRY("Can't create SDL presenter");
+}
+
+#elif defined(___INANITY_PLATFORM_SWITCH)
+
+ptr<NxPresenter> GlDevice::CreatePresenter(ptr<Platform::NxWindow> window, ptr<MonitorMode> mode)
+{
+	BEGIN_TRY();
+
+	return NEW(NxPresenter(window, mode));
+
+	END_TRY("Can't create Nx presenter");
 }
 
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)

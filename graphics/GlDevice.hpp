@@ -23,6 +23,8 @@ BEGIN_INANITY_PLATFORM
 class Win32Window;
 #elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS) || defined(___INANITY_PLATFORM_ANDROID)
 class SdlWindow;
+#elif defined(___INANITY_PLATFORM_SWITCH)
+class NxWindow;
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 class EmsWindow;
 #else
@@ -45,6 +47,8 @@ class Win32MonitorMode;
 class SdlPresenter;
 class SdlMonitorMode;
 class SdlWindow;
+#elif defined(___INANITY_PLATFORM_SWITCH)
+class NxPresenter;
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 class EmsPresenter;
 #else
@@ -72,6 +76,10 @@ private:
 
 	SDL_GLContext sdlContext;
 	ptr<Platform::SdlWindow> hiddenWindow;
+
+#elif defined(___INANITY_PLATFORM_SWITCH)
+
+	// TODO
 
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	// nothing needed
@@ -118,7 +126,7 @@ public:
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
 	GlDevice(ptr<GlSystem> system, const String& deviceName);
-#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS) || defined(___INANITY_PLATFORM_ANDROID)
+#elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS) || defined(___INANITY_PLATFORM_ANDROID) || defined(___INANITY_PLATFORM_SWITCH)
 	GlDevice(ptr<GlSystem> system);
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	GlDevice(ptr<GlSystem> system);
@@ -161,6 +169,8 @@ public:
 	ptr<WglPresenter> CreatePresenter(ptr<Platform::Win32Window> window, ptr<Win32MonitorMode> mode);
 #elif defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_FREEBSD) || defined(___INANITY_PLATFORM_MACOS) || defined(___INANITY_PLATFORM_ANDROID)
 	ptr<SdlPresenter> CreatePresenter(ptr<Platform::SdlWindow> window, ptr<SdlMonitorMode> mode);
+#elif defined(___INANITY_PLATFORM_SWITCH)
+	ptr<NxPresenter> CreatePresenter(ptr<Platform::NxWindow> window, ptr<MonitorMode> mode);
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	ptr<EmsPresenter> CreatePresenter(ptr<Platform::EmsWindow> window, ptr<MonitorMode> mode);
 #else

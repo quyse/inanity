@@ -5,6 +5,9 @@
 #ifdef ___INANITY_PLATFORM_MACOS
 #include <mach/mach_time.h>
 #endif
+#ifdef ___INANITY_PLATFORM_SWITCH
+#include <nn/os.h>
+#endif
 #ifdef ___INANITY_PLATFORM_EMSCRIPTEN
 #include <emscripten/emscripten.h>
 #endif
@@ -58,6 +61,18 @@ long long Time::GetTicksPerSecond()
 	mach_timebase_info_data_t timebase;
 	mach_timebase_info(&timebase);
 	return 1000000000LL * timebase.numer / timebase.denom;
+}
+
+#elif defined(___INANITY_PLATFORM_SWITCH)
+
+long long Time::GetTick()
+{
+	return nn::os::GetSystemTick().GetInt64Value();
+}
+
+long long Time::GetTicksPerSecond()
+{
+	return nn::os::GetSystemTickFrequency();
 }
 
 #elif defined(___INANITY_PLATFORM_POSIX)
