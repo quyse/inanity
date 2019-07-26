@@ -14,6 +14,9 @@
 #include <dirent.h>
 #include <errno.h>
 #include <stdlib.h>
+#if defined(___INANITY_PLATFORM_SWITCH)
+#include <nn/os.h>
+#endif
 
 BEGIN_INANITY_PLATFORM
 
@@ -206,7 +209,11 @@ ptr<File> PosixFileSystem::TryLoadPartOfFile(const String& fileName, long long m
 		//получить размер страницы
 		static size_t pageSize = 0;
 		if(!pageSize)
+#if defined(___INANITY_PLATFORM_SWITCH)
+			pageSize = nn::os::MemoryBlockUnitSize;
+#else
 			pageSize = getpagesize();
+#endif
 
 		//округлить начало проекции вниз на размер страницы
 		size_t realMappingStart = mappingStart & ~(pageSize - 1);
