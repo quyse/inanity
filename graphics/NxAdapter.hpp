@@ -10,12 +10,11 @@ BEGIN_INANITY_GRAPHICS
 class NxAdapter : public Adapter
 {
 private:
-	String name;
 	Monitors monitors;
 	bool monitorsInitialized;
 
 public:
-	NxAdapter(int videoDriverIndex);
+	NxAdapter();
 
 	//*** Adapter's methods.
 	String GetId() const;

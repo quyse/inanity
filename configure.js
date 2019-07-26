@@ -225,6 +225,7 @@ var libraries = {
 		],
 		'objects-switch': [
 			'platform.NxWindow',
+			'graphics.NxAdapter',
 		],
 	},
 	// ******* raw graphics (no support for graphics API needed)
@@ -336,6 +337,12 @@ var libraries = {
 			'audio.XaSystem', 'audio.XaDevice', 'audio.XaPlayer',
 			'audio.XaBufferedSound', 'audio.XaBufferedPlayer',
 			'audio.XaStreamedSound', 'audio.XaStreamedPlayer'
+		]
+	},
+	// ******* NX Audio
+	'libinanity-nxaudio': {
+		objects: [
+			'audio.NxSystem',
 		]
 	},
 	// ******* общая физика

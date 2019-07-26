@@ -395,7 +395,8 @@ ptr<NxPresenter> GlDevice::CreatePresenter(ptr<Platform::NxWindow> window, ptr<M
 {
 	BEGIN_TRY();
 
-	return NEW(NxPresenter(window, mode));
+	ptr<GlFrameBuffer> frameBuffer = NEW(GlFrameBuffer(this, 0));
+	return NEW(NxPresenter(this, frameBuffer, window));
 
 	END_TRY("Can't create Nx presenter");
 }

@@ -40,7 +40,11 @@ var library = {
 	'objects-android': [
 	'arm.arm_init',
 	'arm.filter_neon_intrinsics',
-	]
+	],
+	'objects-switch': [
+	'arm.arm_init',
+	'arm.filter_neon_intrinsics',
+	],
 };
 
 var platformed = function(object, field, platform) {
