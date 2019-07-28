@@ -181,7 +181,7 @@ var libraries = {
 			'platform.Win32Handle', 'platform.Win32FileSystem'
 		],
 		'objects-switch': [
-			'platform.PosixFileSystem'
+			'platform.NxFileSystem'
 		],
 	},
 	// ******* general platform subsystem
