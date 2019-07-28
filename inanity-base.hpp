@@ -11,6 +11,7 @@
 #include "File.hpp"
 #include "FileInputStream.hpp"
 #include "FileSystem.hpp"
+#include "SubFileSystem.hpp"
 #include "Handler.hpp"
 #include "ManagedHeap.hpp"
 #include "MemoryFile.hpp"

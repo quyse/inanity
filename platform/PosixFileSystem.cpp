@@ -405,4 +405,9 @@ void PosixFileSystem::GetFileNames(std::vector<String>& fileNames) const
 		GetAllDirectoryEntries("/", fileNames);
 }
 
+ptr<FileSystem> PosixFileSystem::GetSubFileSystem(const String& folderName)
+{
+	return NEW(PosixFileSystem(GetFullName(folderName)));
+}
+
 END_INANITY_PLATFORM

@@ -130,6 +130,9 @@ public:
 	*/
 	virtual EntryType GetEntryType(const String& entryName) const;
 
+	/// Create sub file system.
+	virtual ptr<FileSystem> GetSubFileSystem(const String& folderName);
+
 	META_DECLARE_CLASS(FileSystem);
 };
 
