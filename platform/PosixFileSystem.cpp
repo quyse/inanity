@@ -141,7 +141,7 @@ PosixFileSystem::PosixFileSystem(const String& userFolderName)
 	}
 
 	// add '/' to the end
-	if(!folderName.length() || folderName[folderName.length() - 1] != '/')
+	if(folderName.empty() || folderName[folderName.length() - 1] != '/')
 		folderName += '/';
 }
 
@@ -151,11 +151,11 @@ PosixFileSystem::PosixFileSystem()
 	//folderName - пустая строка
 }
 
-String PosixFileSystem::GetFullName(String fileName) const
+String PosixFileSystem::GetFullName(const String& fileName) const
 {
 	if(folderName.length())
 	{
-		if(!fileName.length() || fileName[0] != '/')
+		if(fileName.empty() || fileName[0] != '/')
 			THROW("File name should begin with slash");
 		return folderName + fileName.substr(1);
 	}

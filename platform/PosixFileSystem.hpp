@@ -21,7 +21,7 @@ private:
 	/** It's absolute, and with '/' at end. */
 	String folderName;
 
-	String GetFullName(String fileName) const;
+	String GetFullName(const String& fileName) const;
 
 	/// Create absolute file system.
 	PosixFileSystem();
