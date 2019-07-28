@@ -52,7 +52,7 @@ var libraries = {
 		'File', 'EmptyFile', 'PartFile', 'MemoryFile',
 		'InputStream', 'OutputStream', 'FileInputStream', 'MemoryStream',
 		'StreamReader', 'StreamWriter',
-		'FileSystem'
+		'FileSystem', 'SubFileSystem',
 		]
 	},
 	// ******* data

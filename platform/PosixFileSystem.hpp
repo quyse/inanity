@@ -51,6 +51,7 @@ public:
 	void MakeDirectory(const String& directoryName);
 	void DeleteEntry(const String& entryName);
 	EntryType GetEntryType(const String& entryName) const;
+	ptr<FileSystem> GetSubFileSystem(const String& folderName);
 
 	//*** Extended methods for PosixFileSystem.
 

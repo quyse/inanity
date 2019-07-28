@@ -1,6 +1,7 @@
 #include "FileSystem.hpp"
 #include "File.hpp"
 #include "FileInputStream.hpp"
+#include "SubFileSystem.hpp"
 #include "OutputStream.hpp"
 #include "Exception.hpp"
 
@@ -99,6 +100,11 @@ void FileSystem::DeleteEntry(const String& entryName)
 FileSystem::EntryType FileSystem::GetEntryType(const String& entryName) const
 {
 	THROW("Getting entry type in this filesystem is not supported");
+}
+
+ptr<FileSystem> FileSystem::GetSubFileSystem(const String& folderName)
+{
+	return NEW(SubFileSystem(this, folderName));
 }
 
 END_INANITY
