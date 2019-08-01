@@ -347,7 +347,7 @@ var libraries = {
 	// ******* NX Audio
 	'libinanity-nxaudio': {
 		objects: [
-			'audio.NxSystem',
+			'audio.NxSystem', 'audio.NxDevice',
 		]
 	},
 	// ******* общая физика

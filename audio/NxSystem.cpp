@@ -1,11 +1,11 @@
 #include "NxSystem.hpp"
-#include "Device.hpp"
+#include "NxDevice.hpp"
 
 BEGIN_INANITY_AUDIO
 
 ptr<Device> NxSystem::CreateDefaultDevice()
 {
-	return nullptr; // TODO
+	return NEW(NxDevice()); // TODO
 }
 
 void NxSystem::Tick()
