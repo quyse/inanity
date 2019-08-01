@@ -225,7 +225,7 @@ var libraries = {
 		],
 		'objects-switch': [
 			'platform.NxWindow',
-			'graphics.NxAdapter',
+			'graphics.NxAdapter', 'graphics.NxMonitor',
 		],
 	},
 	// ******* raw graphics (no support for graphics API needed)

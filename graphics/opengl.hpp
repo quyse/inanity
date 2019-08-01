@@ -29,6 +29,7 @@
 #elif defined(___INANITY_PLATFORM_SWITCH)
 
 #include <nn/gll.h>
+#include <EGL/egl.h>
 
 #elif defined(___INANITY_PLATFORM_ANDROID)
 

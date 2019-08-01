@@ -13,12 +13,12 @@ NxPresenter::NxPresenter(ptr<GlDevice> device, ptr<GlFrameBuffer> frameBuffer, p
 
 int NxPresenter::GetWidth() const
 {
-	return 0; // TODO
+	return 1280; // TODO
 }
 
 int NxPresenter::GetHeight() const
 {
-	return 0; // TODO
+	return 720; // TODO
 }
 
 void NxPresenter::SetMode(ptr<MonitorMode> mode)
@@ -33,7 +33,7 @@ void NxPresenter::SetSwapInterval(int swapInterval)
 
 void NxPresenter::Present()
 {
-	// TODO
+	device->Present();
 }
 
 void NxPresenter::Resize(int width, int height)

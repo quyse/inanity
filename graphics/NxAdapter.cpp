@@ -1,5 +1,6 @@
 #include "NxAdapter.hpp"
-#include "../platform/Window.hpp"
+#include "NxMonitor.hpp"
+#include "../platform/NxWindow.hpp"
 
 BEGIN_INANITY_GRAPHICS
 
@@ -23,31 +24,35 @@ const Adapter::Monitors& NxAdapter::GetMonitors()
 
 	if(!monitorsInitialized)
 	{
-		// TODO
-		int monitorsCount = 1;
-		monitors.resize(monitorsCount);
+		// init vi
+		nn::vi::Initialize();
+
+		// at the moment initialize just one display
+		nn::vi::DisplayInfo displayInfo;
+		if(nn::vi::ListDisplays(&displayInfo, 1) != 1)
+			THROW("Can't list displays");
+		ptr<NxMonitor> monitor = NEW(NxMonitor(displayInfo));
+
+		monitors.assign(1, monitor);
 
 		monitorsInitialized = true;
 	}
 
 	return monitors;
 
-	END_TRY("Can't get SDL monitors");
-
+	END_TRY("Can't get Nx monitors");
 }
 
 ptr<Platform::Window> NxAdapter::CreateOptimizedWindow(const String& title, int left, int top, int width, int height)
 {
-	// TODO
-	return nullptr;
+	return NEW(Platform::NxWindow());
 }
 
 void NxAdapter::GetAdapters(Adapters& adapters)
 {
-	// TODO
 	int adaptersCount = 1;
 	for(int i = 0; i < adaptersCount; ++i)
-		adapters.push_back(nullptr);
+		adapters.push_back(NEW(NxAdapter()));
 }
 
 END_INANITY_GRAPHICS

@@ -43,6 +43,12 @@ void NxWindow::GetRect(int& left, int& top, int& width, int& height)
 
 void NxWindow::Run(ptr<Handler> activeHandler)
 {
+	for(;;)
+	{
+		if(inputManager)
+			inputManager->Update();
+		activeHandler->Fire();
+	}
 }
 
 void NxWindow::PlaceCursor(int x, int y)
@@ -67,5 +73,12 @@ void NxWindow::SetCursor(ptr<Cursor> cursor)
 {
 }
 
+void NxWindow::UpdateMouseLock()
+{
+}
+
+void NxWindow::UpdateCursorVisible()
+{
+}
 
 END_INANITY_PLATFORM

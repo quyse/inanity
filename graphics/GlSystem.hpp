@@ -23,9 +23,9 @@ public:
 	ptr<Device> CreateDevice(ptr<Adapter> adapter);
 	ptr<Context> CreateContext(ptr<Device> device);
 
-	/// Инициализация.
+	/// Инициализация OpenGL.
 	/** Нужно вызывать после создания контекста OpenGL. */
-	static void Init();
+	static void InitGL();
 
 	/// Очистить ошибки OpenGL (игнорируя их).
 	static void ClearErrors();

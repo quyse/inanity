@@ -13,6 +13,10 @@
 
 #include <SDL2/SDL_video.h>
 
+#elif defined(___INANITY_PLATFORM_SWITCH)
+
+#include <nn/vi.h>
+
 #endif // ___INANITY_PLATFORM_LINUX || ___INANITY_PLATFORM_FREEBSD || defined(___INANITY_PLATFORM_MACOS)
 
 
@@ -79,7 +83,12 @@ private:
 
 #elif defined(___INANITY_PLATFORM_SWITCH)
 
-	// TODO
+	nn::vi::Display* display = nullptr;
+	nn::vi::Layer* layer = nullptr;
+	nn::vi::NativeWindowHandle window = { nullptr };
+	EGLDisplay eglDisplay = nullptr;
+	EGLSurface eglSurface = nullptr;
+	EGLContext eglContext = nullptr;
 
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	// nothing needed
@@ -171,6 +180,7 @@ public:
 	ptr<SdlPresenter> CreatePresenter(ptr<Platform::SdlWindow> window, ptr<SdlMonitorMode> mode);
 #elif defined(___INANITY_PLATFORM_SWITCH)
 	ptr<NxPresenter> CreatePresenter(ptr<Platform::NxWindow> window, ptr<MonitorMode> mode);
+	void Present();
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)
 	ptr<EmsPresenter> CreatePresenter(ptr<Platform::EmsWindow> window, ptr<MonitorMode> mode);
 #else

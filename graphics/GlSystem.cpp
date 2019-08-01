@@ -50,7 +50,7 @@ GlSystem::GlSystem() : adaptersInitialized(false)
 	nv::SetGraphicsDevtoolsAllocator(NvAllocators::Allocate, NvAllocators::Free, NvAllocators::Reallocate, this);
 
 	// initialize graphics
-	const size_t graphicsSystemMemorySize = 8 * 1024 * 1024;
+	const size_t graphicsSystemMemorySize = 256 * 1024 * 1024;
 	nv::InitializeGraphics(malloc(graphicsSystemMemorySize), graphicsSystemMemorySize);
 	nn::vi::Initialize();
 
@@ -113,7 +113,7 @@ ptr<Context> GlSystem::CreateContext(ptr<Device> abstractDevice)
 	END_TRY("Can't create OpenGL context");
 }
 
-void GlSystem::Init()
+void GlSystem::InitGL()
 {
 #if defined(___INANITY_PLATFORM_SWITCH)
 

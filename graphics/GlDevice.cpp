@@ -116,8 +116,8 @@ GlDevice::GlDevice(ptr<GlSystem> system, const String& deviceName)
 	// delete temporary context
 	wglDeleteContext(hglrcTemp);
 
-	// initialize
-	GlSystem::Init();
+	// initialize OpenGL
+	GlSystem::InitGL();
 
 	// init capabilities
 	InitCaps();
@@ -164,7 +164,7 @@ GlDevice::GlDevice(ptr<GlSystem> system)
 		THROW_SECONDARY("Can't create OpenGL context", Platform::Sdl::Error());
 
 	// initialize extensions
-	GlSystem::Init();
+	GlSystem::InitGL();
 	GlSystem::ClearErrors();
 
 	// init capabilities
@@ -182,7 +182,67 @@ GlDevice::~GlDevice()
 #elif defined(___INANITY_PLATFORM_SWITCH)
 
 GlDevice::GlDevice(ptr<GlSystem> system)
-: system(system) {}
+: system(system)
+{
+	BEGIN_TRY();
+
+	if(!nn::vi::OpenDefaultDisplay(&display).IsSuccess())
+		THROW("Can't open default display");
+
+	if(!nn::vi::CreateLayer(&layer, display).IsSuccess())
+		THROW("Can't create layer");
+
+	if(!nn::vi::GetNativeWindow(&window, layer).IsSuccess())
+		THROW("Can't get native window");
+
+	// initialize EGL
+	eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+	if(!eglDisplay)
+		THROW("Can't get EGL display");
+
+	if(!eglInitialize(eglDisplay, 0, 0))
+		THROW("Can't initialize EGL display");
+
+	EGLint attribs[] =
+	{
+		EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT,
+		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+		EGL_RED_SIZE, 8,
+		EGL_GREEN_SIZE, 8,
+		EGL_BLUE_SIZE, 8,
+		EGL_ALPHA_SIZE, 8,
+		EGL_NONE
+	};
+	EGLint eglConfigsCount = 0;
+	EGLConfig eglConfig;
+	if(!eglChooseConfig(eglDisplay, attribs, &eglConfig, 1, &eglConfigsCount) || eglConfigsCount != 1)
+		THROW("Can't choose EGL config");
+
+	eglSurface = eglCreateWindowSurface(eglDisplay, eglConfig, window, 0);
+	if(eglSurface == EGL_NO_SURFACE)
+		THROW("Can't create window surface");
+
+	if(!eglBindAPI(EGL_OPENGL_API))
+		THROW("Can't bind OpenGL API");
+
+	EGLint contextAttribs[] =
+	{
+		EGL_CONTEXT_MAJOR_VERSION, 4,
+		EGL_CONTEXT_MINOR_VERSION, 5,
+		EGL_NONE
+	};
+	eglContext = eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT, contextAttribs);
+	if(!eglContext)
+		THROW("Can't create EGL context");
+
+	if(!eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext))
+		THROW("Can't make EGL context current");
+
+	GlSystem::InitGL();
+	InitCaps();
+
+	END_TRY("Can't create OpenGL device");
+}
 
 GlDevice::~GlDevice() {}
 
@@ -399,6 +459,11 @@ ptr<NxPresenter> GlDevice::CreatePresenter(ptr<Platform::NxWindow> window, ptr<M
 	return NEW(NxPresenter(this, frameBuffer, window));
 
 	END_TRY("Can't create Nx presenter");
+}
+
+void GlDevice::Present()
+{
+	eglSwapBuffers(eglDisplay, eglSurface);
 }
 
 #elif defined(___INANITY_PLATFORM_EMSCRIPTEN)

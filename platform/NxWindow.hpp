@@ -17,9 +17,6 @@ class NxWindow : public Window
 {
 private:
 	ptr<Input::NxManager> inputManager;
-	bool quit;
-	bool fullscreen;
-	int virtualWidth, virtualHeight;
 	int clientWidth, clientHeight;
 	float dpiScale;
 
@@ -36,17 +33,17 @@ public:
 	int GetClientHeight() const;
 
 	//*** Window's methods.
-	void SetTitle(const String& title);
-	void Close();
-	void SetFullScreen(bool fullscreen);
-	float GetDPIScale() const;
-	void GetRect(int& left, int& top, int& width, int& height);
-	void Run(ptr<Handler> activeHandler);
-	void PlaceCursor(int x, int y);
-	ptr<Icon> CreateIcon(ptr<Graphics::RawTextureData> texture);
-	void SetIcon(ptr<Icon> icon);
-	ptr<Window::Cursor> CreateCursor(ptr<Graphics::RawTextureData> texture, int hotX, int hotY);
-	void SetCursor(ptr<Cursor> cursor);
+	void SetTitle(const String& title) override;
+	void Close() override;
+	void SetFullScreen(bool fullscreen)  override;
+	float GetDPIScale() const override;
+	void GetRect(int& left, int& top, int& width, int& height) override;
+	void Run(ptr<Handler> activeHandler) override;
+	void PlaceCursor(int x, int y) override;
+	ptr<Icon> CreateIcon(ptr<Graphics::RawTextureData> texture) override;
+	void SetIcon(ptr<Icon> icon) override;
+	ptr<Window::Cursor> CreateCursor(ptr<Graphics::RawTextureData> texture, int hotX, int hotY) override;
+	void SetCursor(ptr<Cursor> cursor) override;
 };
 
 END_INANITY_PLATFORM
