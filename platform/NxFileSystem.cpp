@@ -155,6 +155,12 @@ public:
 	NxOutputStream(NxFileHandle&& fileHandle)
 	: fileHandle(std::move(fileHandle)) {}
 
+	~NxOutputStream()
+	{
+		// flush before close
+		nn::fs::FlushFile(fileHandle);
+	}
+
 	void Write(const void* data, size_t size) override
 	{
 		NxCheckResult(nn::fs::WriteFile(fileHandle, offset, data, size, nn::fs::WriteOption::MakeValue(0)), "Can't write to Nx output stream");
@@ -227,12 +233,20 @@ ptr<InputStream> NxFileSystem::LoadStream(const String& fileName)
 
 void NxFileSystem::SaveFile(ptr<File> file, const String& fileName)
 {
+	String fullName = GetFullName(fileName);
+
+	// create file if not exist
+	nn::fs::CreateFile(fullName.c_str(), 0);
+
 	// open file
 	NxFileHandle fileHandle;
-	NxCheckResult(nn::fs::OpenFile(&fileHandle, GetFullName(fileName).c_str(), nn::fs::OpenMode_Write | nn::fs::OpenMode_AllowAppend), "Can't open file");
+	NxCheckResult(nn::fs::OpenFile(&fileHandle, fullName.c_str(), nn::fs::OpenMode_Write | nn::fs::OpenMode_AllowAppend), "Can't open file");
 
 	// write data
 	NxCheckResult(nn::fs::WriteFile(fileHandle, 0, file->GetData(), file->GetSize(), nn::fs::WriteOption::MakeValue(0)), "Can't write file");
+
+	// apparently flushing after writing is mandatory (otherwise it crashes on CloseFile)
+	NxCheckResult(nn::fs::FlushFile(fileHandle), "Can't flush file");;
 }
 
 ptr<OutputStream> NxFileSystem::SaveStream(const String& fileName)
