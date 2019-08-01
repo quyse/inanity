@@ -7,9 +7,13 @@
 
 BEGIN_INANITY_PLATFORM
 
-static void NxCheckResult(const nn::Result& result, const char* message)
+/// Check result of operation.
+/** If message is null, simply return result. Otherwise throw an exception. */
+static bool NxCheckResult(const nn::Result& result, const char* message = nullptr)
 {
-	if(result.IsSuccess()) return;
+	if(result.IsSuccess()) return true;
+
+	if(!message) return false;
 
 	ptr<Exception> exception;
 	if(nn::fs::ResultPathNotFound::Includes(result))
@@ -186,6 +190,23 @@ ptr<File> NxFileSystem::LoadFile(const String& fileName)
 	// load data
 	ptr<File> file = NEW(MemoryFile((size_t)fileSize));
 	NxCheckResult(nn::fs::ReadFile(fileHandle, 0, file->GetData(), file->GetSize()), "Can't read file");
+
+	return file;
+}
+
+ptr<File> NxFileSystem::TryLoadFile(const String& fileName)
+{
+	// open file
+	NxFileHandle fileHandle;
+	if(!NxCheckResult(nn::fs::OpenFile(&fileHandle, GetFullName(fileName).c_str(), nn::fs::OpenMode_Read))) return nullptr;
+
+	// get size
+	int64_t fileSize;
+	if(!NxCheckResult(nn::fs::GetFileSize(&fileSize, fileHandle))) return nullptr;
+
+	// load data
+	ptr<File> file = NEW(MemoryFile((size_t)fileSize));
+	if(!NxCheckResult(nn::fs::ReadFile(fileHandle, 0, file->GetData(), file->GetSize()))) return nullptr;
 
 	return file;
 }
