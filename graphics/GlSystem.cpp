@@ -73,7 +73,7 @@ ptr<Context> GlSystem::CreateContext(ptr<Device> abstractDevice)
 	END_TRY("Can't create OpenGL context");
 }
 
-void GlSystem::InitGLEW()
+void GlSystem::InitGL()
 {
 	glewExperimental = GL_TRUE; // enable workarounds to make core profile working (see https://www.opengl.org/wiki/OpenGL_Loading_Library#GLEW)
 	GLenum err = glewInit();

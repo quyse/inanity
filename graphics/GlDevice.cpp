@@ -112,8 +112,8 @@ GlDevice::GlDevice(ptr<GlSystem> system, const String& deviceName)
 	// delete temporary context
 	wglDeleteContext(hglrcTemp);
 
-	// initialize GLEW
-	GlSystem::InitGLEW();
+	// initialize OpenGL
+	GlSystem::InitGL();
 
 	// init capabilities
 	InitCaps();
@@ -160,7 +160,7 @@ GlDevice::GlDevice(ptr<GlSystem> system)
 		THROW_SECONDARY("Can't create OpenGL context", Platform::Sdl::Error());
 
 	// initialize extensions
-	GlSystem::InitGLEW();
+	GlSystem::InitGL();
 	GlSystem::ClearErrors();
 
 	// init capabilities
