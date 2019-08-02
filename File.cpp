@@ -1,6 +1,8 @@
 #include "File.hpp"
 #include "MemoryFile.hpp"
 #include "PartFile.hpp"
+#include "FileInputStream.hpp"
+#include "Exception.hpp"
 #include <string.h>
 
 BEGIN_INANITY
@@ -32,6 +34,21 @@ ptr<File> File::Concat(ptr<File> other)
 	memcpy(resultData, GetData(), size);
 	memcpy(resultData + size, other->GetData(), otherSize);
 	return resultFile;
+}
+
+bigsize_t File::GetBigSize() const
+{
+	return GetSize();
+}
+
+void File::Read(bigsize_t offset, size_t size, void* data)
+{
+	std::memcpy(data, (const uint8_t*)GetData() + offset, size);
+}
+
+ptr<InputStream> File::GetInputStream(bigsize_t offset, bigsize_t size)
+{
+	return NEW(FileInputStream(Slice((size_t)offset, (size_t)size)));
 }
 
 END_INANITY

@@ -1,14 +1,14 @@
 #ifndef ___INANITY_FILE_HPP___
 #define ___INANITY_FILE_HPP___
 
-#include "Object.hpp"
+#include "Storage.hpp"
 #include "meta/decl.hpp"
 
 BEGIN_INANITY
 
 /// Abstract file class.
 /** File represents a continious region of address space. */
-class File : public Object
+class File : public Storage
 {
 public:
 	/// Comparer for STL classes.
@@ -27,6 +27,11 @@ public:
 
 	/// Concatenate files.
 	ptr<File> Concat(ptr<File> other);
+
+	/// Storage's methods.
+	bigsize_t GetBigSize() const final override;
+	void Read(bigsize_t offset, size_t size, void* data) override;
+	ptr<InputStream> GetInputStream(bigsize_t offset, bigsize_t size) override;
 
 	META_DECLARE_CLASS(File);
 };

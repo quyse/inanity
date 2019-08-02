@@ -28,6 +28,11 @@ ptr<File> FileSystem::TryLoadFile(const String& fileName)
 	}
 }
 
+ptr<Storage> FileSystem::LoadStorage(const String& fileName)
+{
+	return LoadFile(fileName);
+}
+
 ptr<InputStream> FileSystem::LoadStream(const String& fileName)
 {
 	try

@@ -1,7 +1,6 @@
 #include "BlobFileSystem.hpp"
-#include "TempFileSystem.hpp"
-#include "../PartFile.hpp"
-#include "../FileInputStream.hpp"
+#include "BufferedInputStream.hpp"
+#include "../MemoryFile.hpp"
 #include "../StreamReader.hpp"
 #include "../Exception.hpp"
 #include <string.h>
@@ -10,36 +9,36 @@ BEGIN_INANITY_DATA
 
 const char BlobFileSystem::Terminator::magicValue[4] = { 'B', 'L', 'O', 'B' };
 
-void BlobFileSystem::Unpack(ptr<File> file, ptr<FileSystem> fileSystem)
+BlobFileSystem::BlobFileSystem(ptr<Storage> storage)
+: storage(storage)
 {
 	BEGIN_TRY();
 
-	void* fileData = file->GetData();
-	size_t fileSize = file->GetSize();
-	size_t size = fileSize;
+	bigsize_t storageSize = storage->GetBigSize();
+	bigsize_t size = storageSize;
 
 	//получить терминатор
 	if(size < sizeof(Terminator))
 		THROW("Can't read terminator");
-	Terminator* terminator = (Terminator*)((char*)fileData + fileSize) - 1;
-	size -= sizeof(*terminator);
+	Terminator terminator;
+	storage->Read(storageSize - sizeof(terminator), sizeof(terminator), &terminator);
+	size -= sizeof(terminator);
 
 	//проверить сигнатуру
-	if(memcmp(terminator->magic, Terminator::magicValue, sizeof(terminator->magic)) != 0)
+	if(memcmp(terminator.magic, Terminator::magicValue, sizeof(terminator.magic)) != 0)
 		THROW("Invalid magic");
 
 	//получить размер заголовка
 	size_t headerSize = 0;
 	for(size_t i = 0; i < 4; ++i)
-		headerSize += size_t(terminator->headerSize[i]) << (i * 8);
+		headerSize += size_t(terminator.headerSize[i]) << (i * 8);
 
 	//проверить, что заголовок читается
 	if(size < headerSize)
 		THROW("Can't read header");
 
 	//получить читатель заголовка
-	ptr<StreamReader> headerReader = NEW(StreamReader(NEW(FileInputStream(
-		NEW(PartFile(file, (char*)terminator - headerSize, headerSize))))));
+	ptr<StreamReader> headerReader = NEW(StreamReader(NEW(BufferedInputStream(storage->GetInputStream(size - headerSize, headerSize)))));
 	size -= headerSize;
 
 	//считывать файлы, пока есть
@@ -52,25 +51,27 @@ void BlobFileSystem::Unpack(ptr<File> file, ptr<FileSystem> fileSystem)
 			break;
 
 		//считать смещение до файла и его размер
-		size_t fileOffset = headerReader->ReadShortly();
+		bigsize_t fileOffset = headerReader->ReadShortlyBig();
 		size_t fileSize = headerReader->ReadShortly();
 
 		//проверить, что файл читается
-		if(fileOffset > size || size - fileOffset < fileSize)
+		if(fileOffset > size || fileOffset + fileSize > size)
 			THROW("Can't read file " + fileName);
 
 		//добавить файл в файловую систему
-		fileSystem->SaveFile(NEW(PartFile(file, (char*)fileData + fileOffset, fileSize)), fileName);
+		files.insert({ fileName, { fileOffset, fileSize }});
 	}
 
 	END_TRY("Can't unpack blob file system");
 }
 
-ptr<FileSystem> BlobFileSystem::Load(ptr<File> file)
+ptr<File> BlobFileSystem::TryLoadFile(const String& fileName)
 {
-	ptr<FileSystem> fileSystem = NEW(TempFileSystem());
-	Unpack(file, fileSystem);
-	return fileSystem;
+	Files::const_iterator i = files.find(fileName);
+	if(i == files.end()) return nullptr;
+	ptr<File> file = NEW(MemoryFile(i->second.second));
+	storage->Read(i->second.first, i->second.second, file->GetData());
+	return file;
 }
 
 END_INANITY_DATA

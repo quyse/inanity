@@ -9,11 +9,11 @@
 
 BEGIN_INANITY
 
-StreamWriter::StreamWriter(ptr<OutputStream> stream) : stream(stream), written(0)
+StreamWriter::StreamWriter(ptr<OutputStream> stream) : stream(stream)
 {
 }
 
-size_t StreamWriter::GetWrittenSize() const
+bigsize_t StreamWriter::GetWrittenSize() const
 {
 	return written;
 }
