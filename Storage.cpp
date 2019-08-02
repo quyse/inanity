@@ -13,8 +13,8 @@ void Storage::Read(bigsize_t offset, size_t size, void* data)
 
 ptr<InputStream> Storage::GetInputStream(bigsize_t offset, bigsize_t size)
 {
-	ptr<MemoryFile> file = NEW(MemoryFile(size));
-	Read(offset, size, file->GetData());
+	ptr<MemoryFile> file = NEW(MemoryFile((size_t)size));
+	Read(offset, (size_t)size, file->GetData());
 	return NEW(FileInputStream(file));
 }
 
