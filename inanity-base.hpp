@@ -25,6 +25,7 @@
 #include "Profiling.hpp"
 #include "ResourceManager.ipp"
 #include "Semaphore.hpp"
+#include "Storage.hpp"
 #include "StreamReader.hpp"
 #include "StreamWriter.hpp"
 #include "String.hpp"

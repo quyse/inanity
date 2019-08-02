@@ -48,7 +48,7 @@ void BlobFileSystemBuilder::AddFileStream(const String& fileName, ptr<InputStrea
 		//сделать выравнивание
 		outputWriter->WriteGap(alignment);
 		//запомнить текущую позицию
-		size_t fileOffset = outputWriter->GetWrittenSize();
+		bigsize_t fileOffset = outputWriter->GetWrittenSize();
 		//записать данные файла
 		char buffer[0x10000];
 		size_t fileSize = 0;
@@ -57,7 +57,7 @@ void BlobFileSystemBuilder::AddFileStream(const String& fileName, ptr<InputStrea
 
 		//добавить запись о файле
 		headerWriter->WriteString(fileName);
-		headerWriter->WriteShortly(fileOffset);
+		headerWriter->WriteShortlyBig(fileOffset);
 		headerWriter->WriteShortly(fileSize);
 	}
 	catch(Exception* exception)

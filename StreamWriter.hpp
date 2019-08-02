@@ -14,7 +14,7 @@ class StreamWriter : public OutputStream
 {
 private:
 	ptr<OutputStream> stream;
-	size_t written;
+	bigsize_t written = 0;
 
 public:
 	/// Создать записыватель.
@@ -24,7 +24,7 @@ public:
 	StreamWriter(ptr<OutputStream> stream);
 
 	/// Получить значение счётчика записываемых данных.
-	size_t GetWrittenSize() const;
+	bigsize_t GetWrittenSize() const;
 
 	// Prevent hiding `Write` methods from base class.
 	using OutputStream::Write;

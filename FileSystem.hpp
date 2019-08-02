@@ -17,6 +17,7 @@ TryLoadFile может выдавать нулевую ссылку (при от
 */
 
 class File;
+class Storage;
 class InputStream;
 class OutputStream;
 /// Абстрактный класс файловой системы.
@@ -63,6 +64,10 @@ public:
 	удалось загрузить.
 	*/
 	virtual ptr<File> TryLoadFile(const String& fileName);
+
+	/// Load file as storage.
+	/** Default implementation uses LoadFile. */
+	virtual ptr<Storage> LoadStorage(const String& fileName);
 
 	/// Открыть файл как поток ввода.
 	/** Возвращает поток ввода, предназначенный для чтения файла.

@@ -2,13 +2,12 @@
 #define ___INANITY_DATA_BLOB_FILE_SYSTEM_HPP___
 
 #include "data.hpp"
-#include "../meta/decl.hpp"
-#include <cstdint>
+#include "../FileSystem.hpp"
+#include <unordered_map>
 
 BEGIN_INANITY
 
-class File;
-class FileSystem;
+class Storage;
 
 END_INANITY
 
@@ -23,8 +22,13 @@ BEGIN_INANITY_DATA
  * Формат с заголовком в конце выбран специально, чтобы упростить
  * формирование такой системы на лету, не в памяти.
  * */
-class BlobFileSystem
+class BlobFileSystem : public FileSystem
 {
+private:
+	ptr<Storage> storage;
+	typedef std::unordered_map<String, std::pair<bigsize_t, size_t> > Files;
+	Files files;
+
 public:
 	/// Структура, которой заканчивается файл системы.
 	struct Terminator
@@ -36,11 +40,11 @@ public:
 		uint8_t headerSize[4];
 	};
 
-	/// Открыть и распаковать blob-файловую систему в заданную файловую систему.
-	static void Unpack(ptr<File> file, ptr<FileSystem> fileSystem);
+	/// Load blob file system from storage.
+	BlobFileSystem(ptr<Storage> storage);
 
-	/// Загрузить blob-файловую систему.
-	static ptr<FileSystem> Load(ptr<File> file);
+	// FileSystem's methods.
+	ptr<File> TryLoadFile(const String& fileName) override;
 
 	META_DECLARE_CLASS(BlobFileSystem);
 };
