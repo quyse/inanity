@@ -3,7 +3,9 @@
 
 BEGIN_INANITY_PLATFORM
 
-NxWindow::NxWindow() {}
+NxWindow::NxWindow()
+: clientWidth(1280), clientHeight(720), dpiScale(1) // TODO
+{}
 
 void NxWindow::SetInputManager(ptr<Input::NxManager> inputManager)
 {

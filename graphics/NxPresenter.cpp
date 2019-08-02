@@ -9,16 +9,18 @@ BEGIN_INANITY_GRAPHICS
 NxPresenter::NxPresenter(ptr<GlDevice> device, ptr<GlFrameBuffer> frameBuffer, ptr<Platform::NxWindow> window)
 : GlPresenter(device, frameBuffer), window(window)
 {
+	width = window->GetClientWidth();
+	height = window->GetClientHeight();
 }
 
 int NxPresenter::GetWidth() const
 {
-	return 1280; // TODO
+	return width;
 }
 
 int NxPresenter::GetHeight() const
 {
-	return 720; // TODO
+	return height;
 }
 
 void NxPresenter::SetMode(ptr<MonitorMode> mode)
@@ -38,7 +40,8 @@ void NxPresenter::Present()
 
 void NxPresenter::Resize(int width, int height)
 {
-	// TODO
+	this->width = width;
+	this->height = height;
 }
 
 END_INANITY_GRAPHICS

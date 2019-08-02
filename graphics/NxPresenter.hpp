@@ -17,6 +17,7 @@ class NxPresenter : public GlPresenter
 {
 private:
 	ptr<Platform::NxWindow> window;
+	int width, height;
 
 public:
 	NxPresenter(ptr<GlDevice> device, ptr<GlFrameBuffer> frameBuffer, ptr<Platform::NxWindow> window);
