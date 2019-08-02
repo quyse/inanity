@@ -391,7 +391,7 @@ ptr<File> PosixFileSystem::LoadFile(const String& fileName)
 	ptr<Exception> exception;
 	ptr<File> file = TryLoadPartOfFile(fileName, 0, 0, &exception);
 	if(file) return file;
-	throw exception;
+	THROW_SECONDARY("Can't load file " + fileName, exception);
 }
 
 ptr<File> PosixFileSystem::TryLoadFile(const String& fileName)
