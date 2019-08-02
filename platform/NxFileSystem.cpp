@@ -111,30 +111,25 @@ public:
 	}
 };
 
+class NxStorage;
+
 class NxInputStream : public InputStream
 {
 private:
-	NxFileHandle fileHandle;
-	int64_t offset = 0;
-	int64_t fileSize = 0;
+	ptr<NxStorage> storage;
+	bigsize_t offset;
+	bigsize_t endOffset;
 
 public:
-	NxInputStream(NxFileHandle&& fileHandle, int64_t fileSize)
-	: fileHandle(std::move(fileHandle)), fileSize(fileSize) {}
+	NxInputStream(ptr<NxStorage> storage, bigsize_t offset, bigsize_t endOffset)
+	: storage(storage), offset(offset), endOffset(endOffset) {}
 
-	size_t Read(void* data, size_t size) override
-	{
-		int64_t end = offset + (int64_t)size;
-		if(end > fileSize) end = fileSize;
-		size_t read = end - offset;
-		NxCheckResult(nn::fs::ReadFile(fileHandle, offset, data, read), "Can't read from Nx input stream");
-		return read;
-	}
+	size_t Read(void* data, size_t size) override;
 
 	bigsize_t Skip(bigsize_t size) override
 	{
-		int64_t newOffset = offset + (int64_t)size;
-		if(newOffset > fileSize) newOffset = fileSize;
+		bigsize_t newOffset = offset + size;
+		if(newOffset > endOffset) newOffset = endOffset;
 		bigsize_t skipped = newOffset - offset;
 		offset = newOffset;
 		return skipped;
@@ -142,7 +137,7 @@ public:
 
 	bool IsAtEnd() const override
 	{
-		return offset >= fileSize;
+		return offset >= endOffset;
 	}
 };
 
@@ -167,6 +162,41 @@ public:
 		offset += size;
 	}
 };
+
+class NxStorage : public Storage
+{
+	NxFileHandle fileHandle;
+	bigsize_t size;
+
+public:
+	NxStorage(NxFileHandle&& fileHandle, bigsize_t size)
+	: fileHandle(std::move(fileHandle)), size(size) {}
+
+	bigsize_t GetBigSize() const override
+	{
+		return size;
+	}
+
+	void Read(bigsize_t offset, size_t size, void* data) override
+	{
+		NxCheckResult(nn::fs::ReadFile(fileHandle, offset, data, size), "Can't read Nx storage");
+	}
+
+	ptr<InputStream> GetInputStream(bigsize_t offset, bigsize_t size) override
+	{
+		return NEW(NxInputStream(this, offset, offset + size));
+	}
+};
+
+size_t NxInputStream::Read(void* data, size_t size)
+{
+	bigsize_t end = offset + size;
+	if(end > endOffset) end = endOffset;
+	size_t read = end - offset;
+	storage->Read(offset, read, data);
+	offset = end;
+	return read;
+}
 
 NxFileSystem::NxFileSystem(const String& userFolderName)
 : folderName(userFolderName)
@@ -217,7 +247,7 @@ ptr<File> NxFileSystem::TryLoadFile(const String& fileName)
 	return file;
 }
 
-ptr<InputStream> NxFileSystem::LoadStream(const String& fileName)
+ptr<Storage> NxFileSystem::LoadStorage(const String& fileName)
 {
 	// open file
 	NxFileHandle fileHandle;
@@ -227,8 +257,14 @@ ptr<InputStream> NxFileSystem::LoadStream(const String& fileName)
 	int64_t fileSize;
 	NxCheckResult(nn::fs::GetFileSize(&fileSize, fileHandle), "Can't get file size");
 
-	// create stream
-	return NEW(NxInputStream(std::move(fileHandle), fileSize));
+	return NEW(NxStorage(std::move(fileHandle), fileSize));
+}
+
+ptr<InputStream> NxFileSystem::LoadStream(const String& fileName)
+{
+	ptr<Storage> storage = LoadStorage(fileName);
+
+	return storage->GetInputStream(0, storage->GetBigSize());
 }
 
 void NxFileSystem::SaveFile(ptr<File> file, const String& fileName)

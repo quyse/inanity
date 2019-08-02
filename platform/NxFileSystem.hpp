@@ -22,19 +22,20 @@ public:
 	NxFileSystem(const String& userFolderName);
 
 	// FileSystem's methods.
-	ptr<File> LoadFile(const String& fileName);
-	ptr<File> TryLoadFile(const String& fileName);
-	ptr<InputStream> LoadStream(const String& fileName);
-	void SaveFile(ptr<File> file, const String& fileName);
-	ptr<OutputStream> SaveStream(const String& fileName);
+	ptr<File> LoadFile(const String& fileName) override;
+	ptr<File> TryLoadFile(const String& fileName) override;
+	ptr<Storage> LoadStorage(const String& fileName) override;
+	ptr<InputStream> LoadStream(const String& fileName) override;
+	void SaveFile(ptr<File> file, const String& fileName) override;
+	ptr<OutputStream> SaveStream(const String& fileName) override;
 #if defined(_DEBUG)
 	time_t GetFileMTime(const String& fileName);
 #endif
-	void GetDirectoryEntries(const String& directoryName, std::vector<String>& entries) const;
-	void MakeDirectory(const String& directoryName);
-	void DeleteEntry(const String& entryName);
-	EntryType GetEntryType(const String& entryName) const;
-	ptr<FileSystem> GetSubFileSystem(const String& folderName);
+	void GetDirectoryEntries(const String& directoryName, std::vector<String>& entries) const override;
+	void MakeDirectory(const String& directoryName) override;
+	void DeleteEntry(const String& entryName) override;
+	EntryType GetEntryType(const String& entryName) const override;
+	ptr<FileSystem> GetSubFileSystem(const String& folderName) override;
 };
 
 END_INANITY_PLATFORM
