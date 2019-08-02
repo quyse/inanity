@@ -43,7 +43,7 @@ bigsize_t File::GetBigSize() const
 
 void File::Read(bigsize_t offset, size_t size, void* data)
 {
-	std::memcpy(data, (const uint8_t*)GetData() + offset, size);
+	memcpy(data, (const uint8_t*)GetData() + offset, size);
 }
 
 ptr<InputStream> File::GetInputStream(bigsize_t offset, bigsize_t size)
