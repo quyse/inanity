@@ -4,31 +4,21 @@
 
 BEGIN_INANITY_DATA
 
-ptr<FileSystem> CompositeFileSystem::GetFileSystemForPath(String& path)
+String CompositeFileSystem::TryFileSystemForPath(size_t i, const String& path)
 {
 	//перебрать файловые системы
-	for(size_t i = 0; i < fileSystems.size(); ++i)
+	const String& prefix = fileSystems[i].first;
+	//если путь начинается с пути примонтированной файловой системы
+	if(path.compare(0, prefix.length(), prefix, 0, prefix.length()) == 0)
 	{
-		const String& prefix = fileSystems[i].first;
-		//если путь начинается с пути примонтированной файловой системы
-		if(path.compare(0, prefix.length(), prefix, 0, prefix.length()) == 0)
-		{
-			// исправить путь (отрезать префикс)
-			path = path.substr(prefix.length() - 1);
-			// вернуть файловую систему
-			return fileSystems[i].second;
-		}
+		// исправить путь (отрезать префикс)
+		return path.substr(prefix.length() - 1);
 	}
-	// файловая система не найдена
-	return nullptr;
+
+	return String();
 }
 
-void CompositeFileSystem::MountFileSystem(ptr<FileSystem> fileSystem)
-{
-	MountFileSystem("/", fileSystem);
-}
-
-void CompositeFileSystem::MountFileSystem(String path, ptr<FileSystem> fileSystem)
+void CompositeFileSystem::Mount(ptr<FileSystem> fileSystem, String path)
 {
 	//если в конце нет слеша, добавить его
 	if(!path.length() || path.back() != '/')
@@ -36,59 +26,19 @@ void CompositeFileSystem::MountFileSystem(String path, ptr<FileSystem> fileSyste
 	fileSystems.push_back(std::make_pair(path, fileSystem));
 }
 
-ptr<File> CompositeFileSystem::LoadFile(const String& fileName)
-{
-	try
-	{
-		String path = fileName;
-		ptr<FileSystem> fileSystem = GetFileSystemForPath(path);
-		if(!fileSystem)
-			THROW("No mounted file system for such path");
-		try
-		{
-			return fileSystem->LoadFile(path);
-		}
-		catch(Exception* exception)
-		{
-			THROW_SECONDARY("Mounted file system opening file exception", exception);
-		}
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY("Can't load file " + fileName + " from composite file system", exception);
-	}
-}
-
 ptr<File> CompositeFileSystem::TryLoadFile(const String& fileName)
 {
-	String path = fileName;
-	ptr<FileSystem> fileSystem = GetFileSystemForPath(path);
-	if(!fileSystem)
-		return nullptr;
-	return fileSystem->TryLoadFile(path);
-}
+	for(size_t i = 0; i < fileSystems.size(); ++i)
+	{
+		String path = TryFileSystemForPath(i, fileName);
+		if(!path.empty())
+		{
+			ptr<File> file = fileSystems[i].second->TryLoadFile(path);
+			if(file) return file;
+		}
+	}
 
-void CompositeFileSystem::SaveFile(ptr<File> file, const String& fileName)
-{
-	try
-	{
-		String path = fileName;
-		ptr<FileSystem> fileSystem = GetFileSystemForPath(path);
-		if(!fileSystem)
-			THROW("No mounted file system for such path");
-		try
-		{
-			fileSystem->SaveFile(file, path);
-		}
-		catch(Exception* exception)
-		{
-			THROW_SECONDARY("Mounted file system saving file exception", exception);
-		}
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY("Can't save file " + fileName + " into composite file system", exception);
-	}
+	return nullptr;
 }
 
 END_INANITY_DATA

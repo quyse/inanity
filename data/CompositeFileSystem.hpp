@@ -20,19 +20,15 @@ private:
 	/** Путь монтирования должен начинаться и заканчиваться на слеш /. */
 	std::vector<std::pair<String, ptr<FileSystem> > > fileSystems;
 
-	/// Получить файловую систему, которая должна работать с данным файлом.
-	/** Если файловая система найдена, то отрезает от файла префикс. */
-	ptr<FileSystem> GetFileSystemForPath(String& path);
+	/// Check that file system accepts that file.
+	/** Returns non-empty subpath for that file system if it does. */
+	String TryFileSystemForPath(size_t i, const String& path);
 
 public:
-	/// Примонтировать файловую систему в корень.
-	void MountFileSystem(ptr<FileSystem> fileSystem);
 	/// Примонтировать файловую систему в указанный путь.
-	void MountFileSystem(String path, ptr<FileSystem> fileSystem);
+	void Mount(ptr<FileSystem> fileSystem, String path = "/");
 
-	ptr<File> LoadFile(const String& fileName);
-	ptr<File> TryLoadFile(const String& fileName);
-	void SaveFile(ptr<File> file, const String& fileName);
+	ptr<File> TryLoadFile(const String& fileName) override;
 };
 
 END_INANITY_DATA
