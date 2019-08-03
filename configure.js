@@ -64,7 +64,8 @@ var libraries = {
 		'data.CompositeFileSystem',
 		'data.BlobFileSystem', 'data.BlobFileSystemBuilder',
 		'data.Base64OutputStream', 'data.Out2InStream',
-		'data.BufferedFileSystem', 'data.BufferedInputStream', 'data.BufferedOutputStream'
+		'data.BufferedFileSystem', 'data.BufferedInputStream', 'data.BufferedOutputStream',
+		'data.ConvertingFileSystem',
 		]
 	},
 	// ******* deflate compression

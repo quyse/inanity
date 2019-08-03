@@ -8,6 +8,7 @@
 #include "data/BufferedInputStream.hpp"
 #include "data/BufferedOutputStream.hpp"
 #include "data/CompositeFileSystem.hpp"
+#include "data/ConvertingFileSystem.hpp"
 #include "data/FilterFileSystem.hpp"
 #include "data/Out2InStream.hpp"
 #include "data/TempFileSystem.hpp"

@@ -89,4 +89,9 @@ size_t Lz4DecompressStream::Read(void* data, size_t size)
 	return read;
 }
 
+ptr<InputStream> Lz4DecompressStream::ConvertStream(ptr<InputStream> inputStream)
+{
+	return NEW(Lz4DecompressStream(inputStream));
+}
+
 END_INANITY_DATA

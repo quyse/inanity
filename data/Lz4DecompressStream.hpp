@@ -33,6 +33,8 @@ public:
 	Lz4DecompressStream(ptr<InputStream> inputStream);
 
 	size_t Read(void* data, size_t size);
+
+	static ptr<InputStream> ConvertStream(ptr<InputStream> inputStream);
 };
 
 END_INANITY_DATA
