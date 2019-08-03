@@ -20,15 +20,23 @@ private:
 	/** Путь монтирования должен начинаться и заканчиваться на слеш /. */
 	std::vector<std::pair<String, ptr<FileSystem> > > fileSystems;
 
-	/// Check that file system accepts that file.
-	/** Returns non-empty subpath for that file system if it does. */
-	String TryFileSystemForPath(size_t i, const String& path);
+	template <typename F>
+	auto WithPath(const String& path, F&& f) const -> decltype(f(ptr<FileSystem>(), String()));
 
 public:
 	/// Примонтировать файловую систему в указанный путь.
 	void Mount(ptr<FileSystem> fileSystem, String path = "/");
 
 	ptr<File> TryLoadFile(const String& fileName) override;
+	ptr<Storage> LoadStorage(const String& fileName) override;
+	ptr<InputStream> LoadStream(const String& fileName) override;
+	void SaveFile(ptr<File> file, const String& fileName) override;
+	ptr<OutputStream> SaveStream(const String& fileName) override;
+	time_t GetFileMTime(const String& fileName) override;
+	void GetDirectoryEntries(const String& directoryName, std::vector<String>& entries) const override;
+	void MakeDirectory(const String& directoryName) override;
+	void DeleteEntry(const String& entryName) override;
+	EntryType GetEntryType(const String& entryName) const override;
 };
 
 END_INANITY_DATA
