@@ -4,15 +4,21 @@ BEGIN_INANITY_PLATFORM
 
 Win32Handle::Win32Handle(HANDLE handle) : handle(handle) {}
 
+Win32Handle::Win32Handle(Win32Handle&& handle)
+{
+	std::swap(this->handle, handle.handle);
+}
+
 Win32Handle::~Win32Handle()
 {
 	if(IsValid())
 		CloseHandle(handle);
 }
 
-void Win32Handle::operator=(HANDLE handle)
+Win32Handle& Win32Handle::operator=(Win32Handle&& handle)
 {
-	this->handle = handle;
+	std::swap(this->handle, handle.handle);
+	return *this;
 }
 
 bool Win32Handle::IsValid() const

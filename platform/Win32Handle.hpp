@@ -7,16 +7,18 @@
 BEGIN_INANITY_PLATFORM
 
 /// Class incapsulates Windows HANDLE.
-class Win32Handle : public Object
+class Win32Handle
 {
 private:
-	HANDLE handle;
+	HANDLE handle = nullptr;
 
 public:
-	Win32Handle(HANDLE handle = 0);
+	Win32Handle(HANDLE handle = nullptr);
+	Win32Handle(Win32Handle&& handle);
 	~Win32Handle();
 
-	void operator=(HANDLE handle);
+	Win32Handle& operator=(Win32Handle&& handle);
+
 	bool IsValid() const;
 	operator HANDLE();
 };
