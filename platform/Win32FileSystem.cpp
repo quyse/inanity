@@ -42,80 +42,101 @@ public:
 
 #endif
 
+class Win32Storage;
+
 class Win32InputStream : public InputStream
 {
 private:
-	ptr<Win32Handle> handle;
-	mutable bigsize_t fileSize;
-
-	bigsize_t GetFileSize() const
-	{
-		if(fileSize == (bigsize_t)-1)
-		{
-			LARGE_INTEGER size;
-			if(!GetFileSizeEx(*handle, &size))
-				THROW("Error getting file size");
-			fileSize = (bigsize_t)size.QuadPart;
-		}
-		return fileSize;
-	}
+	ptr<Win32Storage> storage;
+	bigsize_t offset;
+	bigsize_t endOffset;
+	Win32Handle handle;
 
 public:
-	Win32InputStream(ptr<Win32Handle> handle)
-	: handle(handle), fileSize(-1) {}
+	Win32InputStream(ptr<Win32Storage> storage, bigsize_t offset, bigsize_t endOffset)
+	: storage(storage), offset(offset), endOffset(endOffset) {}
 
-	size_t Read(void* data, size_t size)
+	size_t Read(void* data, size_t size) override;
+
+	bigsize_t Skip(bigsize_t size) override
 	{
-		if((DWORD)size != size)
-			THROW("So big reading size is not supported");
-		DWORD read;
-		ReadFile(*handle, data, (DWORD)size, &read, NULL);
-		return read;
-	}
-
-	bigsize_t Skip(bigsize_t size)
-	{
-		LARGE_INTEGER distance, oldFilePointer, newFilePointer;
-
-		// determine current file pointer
-		distance.QuadPart = (LONGLONG)0;
-		if(!SetFilePointerEx(*handle, distance, &oldFilePointer, FILE_CURRENT))
-			THROW("Can't determine current file pointer");
-
-		// get file size
-		bigsize_t fileSize = GetFileSize();
-
-		// fix distance to move (because Windows allows
-		// setting file pointer beyond the end of file)
-		size = std::min((bigsize_t)oldFilePointer.QuadPart + size, fileSize) - (bigsize_t)oldFilePointer.QuadPart;
-
-		// move
-		distance.QuadPart = (LONGLONG)size;
-		if(!SetFilePointerEx(*handle, distance, &newFilePointer, FILE_CURRENT))
-			THROW("Can't move file pointer");
-
-		return size;
+		bigsize_t newOffset = offset + size;
+		if(newOffset > endOffset) newOffset = endOffset;
+		bigsize_t skipped = newOffset - offset;
+		offset = newOffset;
+		return skipped;
 	}
 };
 
 class Win32OutputStream : public OutputStream
 {
 private:
-	ptr<Win32Handle> handle;
+	Win32Handle handle;
 
 public:
-	Win32OutputStream(ptr<Win32Handle> handle)
-	: handle(handle) {}
+	Win32OutputStream(Win32Handle&& handle)
+	: handle(std::move(handle)) {}
 
 	void Write(const void* data, size_t size)
 	{
 		if((DWORD)size != size)
 			THROW("So big write size is not supported");
 		DWORD written;
-		if(!WriteFile(*handle, data, (DWORD)size, &written, NULL) || written != size)
+		if(!WriteFile(handle, data, (DWORD)size, &written, NULL) || written != size)
 			THROW("Disk write error");
 	}
 };
+
+class Win32Storage : public Storage
+{
+private:
+	Win32Handle handle;
+	bigsize_t totalSize;
+	bigsize_t currentOffset;
+
+public:
+	Win32Storage(Win32Handle&& handle, bigsize_t totalSize)
+	: handle(std::move(handle)), totalSize(totalSize), currentOffset(0) {}
+
+	bigsize_t GetBigSize() const override
+	{
+		return totalSize;
+	}
+
+	void Read(bigsize_t offset, size_t size, void* data) override
+	{
+		if((DWORD)size != size)
+			THROW("So big reading size is not supported");
+
+		if(offset != currentOffset)
+		{
+			LARGE_INTEGER newOffset;
+			newOffset.QuadPart = (LONGLONG)offset;
+			if(!SetFilePointerEx(handle, newOffset, nullptr, FILE_BEGIN))
+				THROW("Can't move file pointer");
+			currentOffset = offset;
+		}
+
+		DWORD read;
+		if(!ReadFile(handle, data, (DWORD)size, &read, NULL) || read != size)
+			THROW("Can't read data");
+	}
+
+	ptr<InputStream> GetInputStream(bigsize_t offset, bigsize_t size) override
+	{
+		return NEW(Win32InputStream(this, offset, offset + size));
+	}
+};
+
+size_t Win32InputStream::Read(void* data, size_t size)
+{
+	bigsize_t end = offset + size;
+	if(end > endOffset) end = endOffset;
+	size_t read = (size_t)(end - offset);
+	storage->Read(offset, read, data);
+	offset = end;
+	return read;
+}
 
 Win32FileSystem::Win32FileSystem(const String& userFolderName)
 {
@@ -298,54 +319,41 @@ ptr<File> Win32FileSystem::TryLoadPartOfFile(const String& fileName, long long m
 void Win32FileSystem::SaveFile(ptr<File> file, const String& fileName)
 {
 	String name = GetFullName(fileName);
-	try
-	{
-		Win32Handle hFile = CreateFile(Strings::UTF82Unicode(name).c_str(), GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, NULL);
-		if(!hFile.IsValid())
-			THROW_SECONDARY("Can't create file", Exception::SystemError());
-		DWORD written;
-		size_t size = file->GetSize();
-		if((DWORD)size != size)
-			THROW("So big files is not supported");
-		if(!WriteFile(hFile, file->GetData(), (DWORD)size, &written, NULL) || written != size)
-			THROW_SECONDARY("Can't write file", Exception::SystemError());
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY(String("Can't save file \"") + fileName + "\" as \"" + name + "\"", exception);
-	}
+
+	BEGIN_TRY();
+
+	Win32Handle hFile = CreateFile(Strings::UTF82Unicode(name).c_str(), GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, NULL);
+	if(!hFile.IsValid())
+		THROW_SECONDARY("Can't create file", Exception::SystemError());
+	DWORD written;
+	size_t size = file->GetSize();
+	if((DWORD)size != size)
+		THROW("So big files is not supported");
+	if(!WriteFile(hFile, file->GetData(), (DWORD)size, &written, NULL) || written != size)
+		THROW_SECONDARY("Can't write file", Exception::SystemError());
+
+	END_TRY("Can't save file \"" + fileName + "\" as \"" + name + "\"");
 }
 
 ptr<InputStream> Win32FileSystem::LoadStream(const String& fileName)
 {
-	String name = GetFullName(fileName);
-	try
-	{
-		ptr<Win32Handle> file = NEW(Win32Handle(CreateFile(Strings::UTF82Unicode(name).c_str(), GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL)));
-		if(!file->IsValid())
-			THROW_SECONDARY("Can't open file", Exception::SystemError());
-		return NEW(Win32InputStream(file));
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY(String("Can't load file \"") + fileName + "\" as \"" + name + "\" as stream", exception);
-	}
+	ptr<Storage> storage = LoadStorage(fileName);
+
+	return storage->GetInputStream(0, storage->GetBigSize());
 }
 
 ptr<OutputStream> Win32FileSystem::SaveStream(const String& fileName)
 {
 	String name = GetFullName(fileName);
-	try
-	{
-		ptr<Win32Handle> file = NEW(Win32Handle(CreateFile(Strings::UTF82Unicode(name).c_str(), GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, NULL)));
-		if(!file->IsValid())
-			THROW_SECONDARY("Can't open file", Exception::SystemError());
-		return NEW(Win32OutputStream(file));
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY(String("Can't save file \"") + fileName + "\" as \"" + name + "\" as stream", exception);
-	}
+
+	BEGIN_TRY();
+
+	Win32Handle file = CreateFile(Strings::UTF82Unicode(name).c_str(), GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, NULL);
+	if(!file.IsValid())
+		THROW_SECONDARY("Can't open file", Exception::SystemError());
+	return NEW(Win32OutputStream(std::move(file)));
+
+	END_TRY("Can't save file \"" + fileName + "\" as \"" + name + "\" as stream");
 }
 
 time_t Win32FileSystem::GetFileMTime(const String& fileName)
@@ -434,6 +442,25 @@ ptr<File> Win32FileSystem::LoadFile(const String& fileName)
 ptr<File> Win32FileSystem::TryLoadFile(const String& fileName)
 {
 	return TryLoadPartOfFile(fileName, 0, 0, nullptr);
+}
+
+ptr<Storage> Win32FileSystem::LoadStorage(const String& fileName)
+{
+	BEGIN_TRY();
+
+	String name = GetFullName(fileName);
+	// open file
+	Win32Handle hFile = CreateFile(Strings::UTF82Unicode(name).c_str(), GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, NULL);
+	if(!hFile.IsValid())
+		THROW_SECONDARY("Can't open file", Exception::SystemError());
+
+	LARGE_INTEGER size;
+	if(!GetFileSizeEx(hFile, &size))
+		THROW("Error getting file size");
+
+	return NEW(Win32Storage(std::move(hFile), (bigsize_t)size.QuadPart));
+
+	END_TRY("Can't load storage " + fileName);
 }
 
 ptr<Win32FileSystem> Win32FileSystem::GetNativeFileSystem()
