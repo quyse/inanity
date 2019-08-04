@@ -144,9 +144,17 @@ Win32FileSystem::Win32FileSystem(const String& userFolderName)
 		}
 	}
 
+	//заменить все слеши на обратные
+	for(char& i : folderName)
+		if(i == '/') i = '\\';
+
+	//убедиться, что есть слеш в конце
+	if(!folderName.empty() && folderName[folderName.length() - 1] != '\\')
+		folderName += '\\';
+
 	//убедиться, что имя каталога поддерживает длинные имена
-	if(this->folderName.compare(0, 4, "\\\\?\\") != 0)
-		this->folderName = "\\\\?\\" + this->folderName;
+	if(folderName.compare(0, 4, "\\\\?\\") != 0)
+		folderName = "\\\\?\\" + folderName;
 }
 
 Win32FileSystem::Win32FileSystem()
@@ -157,9 +165,9 @@ Win32FileSystem::Win32FileSystem()
 
 String Win32FileSystem::GetFullName(String fileName) const
 {
-	if(folderName.length() && fileName.length() && fileName.front() == '/')
+	if(!folderName.empty() && !fileName.empty() && fileName[0] == '/')
 		fileName = fileName.substr(1);
-	String result = folderName.length() ? (folderName + "\\" + fileName) : fileName;
+	String result = folderName.empty() ? fileName : (folderName + fileName);
 	size_t length = result.length();
 	for(size_t i = 0; i < length; ++i)
 		if(result[i] == '/')
