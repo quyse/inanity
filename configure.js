@@ -188,38 +188,52 @@ var libraries = {
 		'objects-win32': [
 			'platform.Win32Window',
 			'graphics.Win32Adapter', 'graphics.Win32Monitor', 'graphics.Win32MonitorMode',
-			'platform.Game',
 			'platform.DllCache'
 		],
 		'objects-linux': [
 			'platform.Sdl', 'platform.SdlWindow',
 			'graphics.SdlAdapter', 'graphics.SdlMonitor', 'graphics.SdlMonitorMode',
-			'platform.Game'
 		],
 		'objects-freebsd': [
 			'platform.Sdl', 'platform.SdlWindow',
 			'graphics.SdlAdapter', 'graphics.SdlMonitor', 'graphics.SdlMonitorMode',
-			'platform.Game'
 		],
 		'objects-darwin': [
 			'platform.Sdl', 'platform.SdlWindow',
 			'graphics.SdlAdapter', 'graphics.SdlMonitor', 'graphics.SdlMonitorMode',
-			'platform.Game'
 		],
 		'objects-android': [
 			'platform.Sdl', 'platform.SdlWindow',
 			'graphics.SdlAdapter', 'graphics.SdlMonitor', 'graphics.SdlMonitorMode',
-			'platform.Game'
 		],
 		'objects-emscripten': [
 			'platform.Sdl', 'platform.EmsWindow',
 			'graphics.EmsAdapter', 'graphics.EmsMonitor',
-			'platform.Game'
 		],
 		'objects-xbox': [
 			'platform.CoreWindow.cx',
-			'platform.Game.cx',
 			'platform.DllCache'
+		],
+	},
+	// ******* game library
+	'libinanity-platform-game': {
+		'objects-win32': [
+			'platform.Game',
+		],
+		'objects-linux': [
+			'platform.Game',
+		],
+		'objects-darwin': [
+			'platform.Game',
+		],
+		'objects-android': [
+			'platform.Game',
+		],
+		'objects-emscripten': [
+			'platform.Game',
+		],
+		'objects-xbox': [
+			'platform.Game.cx',
 		],
 	},
 	// ******* raw graphics (no support for graphics API needed)
