@@ -43,6 +43,7 @@ public:
 	//*** FileSystem's methods.
 	ptr<File> LoadFile(const String& fileName);
 	ptr<File> TryLoadFile(const String& fileName);
+	ptr<Storage> LoadStorage(const String& fileName);
 	ptr<InputStream> LoadStream(const String& fileName);
 	void SaveFile(ptr<File> file, const String& fileName);
 	ptr<OutputStream> SaveStream(const String& fileName);
