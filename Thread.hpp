@@ -24,7 +24,7 @@ private:
 
 #if defined(___INANITY_PLATFORM_WINDOWS)
 
-	ptr<Platform::Win32Handle> thread;
+	Platform::Win32Handle thread;
 
 	static DWORD CALLBACK ThreadRoutine(void* self);
 
