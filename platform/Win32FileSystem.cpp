@@ -118,7 +118,10 @@ public:
 		}
 
 		DWORD read;
-		if(!ReadFile(handle, data, (DWORD)size, &read, NULL) || read != size)
+		BOOL ok = ReadFile(handle, data, (DWORD)size, &read, NULL);
+		if(ok)
+			currentOffset += read;
+		if(!ok || read != size)
 			THROW("Can't read data");
 	}
 
