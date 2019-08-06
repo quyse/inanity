@@ -92,6 +92,7 @@ void NxManager::Update()
 			// process input
 			if(isConnected)
 			{
+				// buttons
 				auto updateButton = [&](Event::Controller::Button button, bool buttonState)
 				{
 					if(!!(controller->buttons & (1 << button)) != buttonState)
@@ -130,6 +131,47 @@ void NxManager::Update()
 				B(Left, DPadLeft);
 				B(Right, DPadRight);
 #undef B
+				// convert triggers (buttons) to axis
+				auto updateTrigger = [&](Event::Controller::Axis axis, bool& buttonState, bool newButtonState)
+				{
+					if(buttonState != newButtonState)
+					{
+						buttonState = newButtonState;
+
+						Event e;
+						e.device = Event::deviceController;
+						e.controller.type = Event::Controller::typeAxisMotion;
+						e.controller.device = controllerId;
+						e.controller.axis = axis;
+						e.controller.axisValue = buttonState ? 0x7fff : 0;
+						AddEvent(e);
+					}
+				};
+				updateTrigger(Event::Controller::Axis::axisTriggerLeft, controller->leftTrigger, npadState.buttons.Test<nn::hid::NpadButton::ZL>());
+				updateTrigger(Event::Controller::Axis::axisTriggerRight, controller->rightTrigger, npadState.buttons.Test<nn::hid::NpadButton::ZR>());
+
+				// sticks
+				auto updateStick = [&](Event::Controller::Axis axis, int& value, int32_t newValue)
+				{
+					if(value != newValue)
+					{
+						value = newValue;
+
+						Event e;
+						e.device = Event::deviceController;
+						e.controller.type = Event::Controller::typeAxisMotion;
+						e.controller.device = controllerId;
+						e.controller.axis = axis;
+						e.controller.axisValue = value;
+						AddEvent(e);
+					}
+				};
+#define S(a, b, c) updateStick(Event::Controller::Axis::axis##a, controller->b, c)
+				S(LeftX, leftStickX, npadState.analogStickL.x);
+				S(LeftY, leftStickY, -npadState.analogStickL.y);
+				S(RightX, rightStickX, npadState.analogStickR.x);
+				S(RightY, rightStickY, -npadState.analogStickR.y);
+#undef S
 			}
 		}
 	}

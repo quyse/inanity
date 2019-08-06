@@ -24,6 +24,9 @@ public:
 	private:
 		bool active = true;
 		uint32_t buttons = 0;
+		bool leftTrigger = false, rightTrigger = false;
+		int leftStickX = 0, leftStickY = 0;
+		int rightStickX = 0, rightStickY = 0;
 
 	public:
 		NxController(uint64_t controllerId);
