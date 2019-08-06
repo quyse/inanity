@@ -1,12 +1,35 @@
 #include "NxManager.hpp"
 #include "Frame.hpp"
 #include "../platform/NxWindow.hpp"
-#include <nn/hid.h>
 
 BEGIN_INANITY_INPUT
 
 NxManager::NxController::NxController(uint64_t controllerId)
-: Controller(controllerId) {}
+: Controller(controllerId)
+{
+	// initialize vibration devices
+	nn::hid::VibrationDeviceHandle vibrationDevices[2];
+	int vibrationDevicesCount = nn::hid::GetVibrationDeviceHandles(vibrationDevices, sizeof(vibrationDevices) / sizeof(vibrationDevices[0]), controllerId, nn::hid::NpadStyleFullKey::Mask);
+	for(int i = 0; i < vibrationDevicesCount; ++i)
+	{
+		const nn::hid::VibrationDeviceHandle& vibrationDevice = vibrationDevices[i];
+		nn::hid::VibrationDeviceInfo vibrationDeviceInfo;
+		nn::hid::GetVibrationDeviceInfo(&vibrationDeviceInfo, vibrationDevice);
+		switch(vibrationDeviceInfo.position)
+		{
+		case nn::hid::VibrationDevicePosition_Left:
+			leftVibrationDevice = vibrationDevice;
+			break;
+		case nn::hid::VibrationDevicePosition_Right:
+			rightVibrationDevice = vibrationDevice;
+			break;
+		default:
+			continue;
+		}
+
+		nn::hid::InitializeVibrationDevice(vibrationDevice);
+	}
+}
 
 bool NxManager::NxController::IsActive() const
 {
@@ -15,12 +38,30 @@ bool NxManager::NxController::IsActive() const
 
 void NxManager::NxController::RunHapticLeftRight(float left, float right)
 {
-	// TODO
+	// treat "left" and "right" values as low and high amplitudes
+	// for compatibility with Xbox controller
+	nn::hid::VibrationValue value;
+	value.frequencyLow = nn::hid::VibrationFrequencyLowDefault;
+	value.frequencyHigh = nn::hid::VibrationFrequencyHighDefault;
+	value.amplitudeLow = right;
+	value.amplitudeHigh = left;
+
+	if(leftVibrationDevice._storage)
+	{
+		// value.amplitudeLow = value.amplitudeHigh = left * 0.5f;
+		nn::hid::SendVibrationValue(leftVibrationDevice, value);
+	}
+
+	if(rightVibrationDevice._storage)
+	{
+		// value.amplitudeLow = value.amplitudeHigh = right * 0.5f;
+		nn::hid::SendVibrationValue(rightVibrationDevice, value);
+	}
 }
 
 void NxManager::NxController::StopHaptic()
 {
-	// TODO
+	RunHapticLeftRight(0, 0);
 }
 
 NxManager::NxManager()

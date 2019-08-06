@@ -5,6 +5,7 @@
 #include "Controller.hpp"
 #include "../platform/platform.hpp"
 #include <unordered_map>
+#include <nn/hid.h>
 
 BEGIN_INANITY_PLATFORM
 
@@ -27,6 +28,7 @@ public:
 		bool leftTrigger = false, rightTrigger = false;
 		int leftStickX = 0, leftStickY = 0;
 		int rightStickX = 0, rightStickY = 0;
+		nn::hid::VibrationDeviceHandle leftVibrationDevice = { 0 }, rightVibrationDevice = { 0 };
 
 	public:
 		NxController(uint64_t controllerId);
