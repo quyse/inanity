@@ -39,12 +39,12 @@ public:
 	/**
 		\param alignment Выравнивание файла в потоке данных.
 	*/
-	void AddFile(const String& fileName, ptr<File> file, size_t alignment = 4);
+	void AddFile(const String& fileName, ptr<File> file, size_t alignment = 16);
 	/// Добавить поток в качестве файла.
 	/**
 		\param alignment Выравнивание файла в потоке данных.
 	*/
-	void AddFileStream(const String& fileName, ptr<InputStream> fileStream, size_t alignment = 4);
+	void AddFileStream(const String& fileName, ptr<InputStream> fileStream, size_t alignment = 16);
 
 	/// Завершить создание файловой системы.
 	void Finalize();
