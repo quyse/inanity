@@ -70,12 +70,12 @@ NxManager::NxManager()
 	nn::hid::InitializeNpad();
 	nn::hid::SetSupportedNpadStyleSet(nn::hid::NpadStyleFullKey::Mask | nn::hid::NpadStyleHandheld::Mask);
 
-	// for now we support just 4 controllers at most
 	const nn::hid::NpadIdType npadIds[] = {
 		nn::hid::NpadId::No1,
 		nn::hid::NpadId::No2,
 		nn::hid::NpadId::No3,
-		nn::hid::NpadId::No4
+		nn::hid::NpadId::No4,
+		nn::hid::NpadId::Handheld
 	};
 	const size_t npadsCount = sizeof(npadIds) / sizeof(npadIds[0]);
 	nn::hid::SetSupportedNpadIdType(npadIds, npadsCount);
@@ -92,128 +92,142 @@ void NxManager::Update()
 		int64_t& lastSamplingNumber = i->second.first;
 		ptr<NxController>& controller = i->second.second;
 
-		nn::hid::NpadFullKeyState npadStates[nn::hid::NpadStateCountMax];
-		int statesRead = nn::hid::GetNpadStates(npadStates, sizeof(npadStates) / sizeof(npadStates[0]), i->first);
-
-		for(int j = statesRead - 1; j >= 0; --j)
+		auto processStates = [&](const auto* npadStates, int statesRead)
 		{
-			const nn::hid::NpadFullKeyState& npadState = npadStates[j];
-
-			// skip already processed states
-			if(npadState.samplingNumber <= lastSamplingNumber) continue;
-			lastSamplingNumber = npadState.samplingNumber;
-
-			// process connectivity
-			bool isConnected = npadState.attributes.Test<nn::hid::NpadAttribute::IsConnected>();
-			if(isConnected != !!controller)
+			for(int j = statesRead - 1; j >= 0; --j)
 			{
+				const auto& npadState = npadStates[j];
+
+				// skip already processed states
+				if(npadState.samplingNumber <= lastSamplingNumber) continue;
+				lastSamplingNumber = npadState.samplingNumber;
+
+				// process connectivity
+				bool isConnected = npadState.attributes.template Test<nn::hid::NpadAttribute::IsConnected>();
+				if(isConnected != !!controller)
+				{
+					if(isConnected)
+					{
+						controller = NEW(NxController(controllerId));
+
+						Event e;
+						e.device = Event::deviceController;
+						e.controller.type = Event::Controller::typeDeviceAdded;
+						e.controller.device = controllerId;
+						AddEvent(e);
+					}
+					else
+					{
+						controller->active = false;
+						controller = nullptr;
+
+						Event e;
+						e.device = Event::deviceController;
+						e.controller.type = Event::Controller::typeDeviceRemoved;
+						e.controller.device = controllerId;
+						AddEvent(e);
+					}
+				}
+
+				// process input
 				if(isConnected)
 				{
-					controller = NEW(NxController(controllerId));
-
-					Event e;
-					e.device = Event::deviceController;
-					e.controller.type = Event::Controller::typeDeviceAdded;
-					e.controller.device = controllerId;
-					AddEvent(e);
-				}
-				else
-				{
-					controller->active = false;
-					controller = nullptr;
-
-					Event e;
-					e.device = Event::deviceController;
-					e.controller.type = Event::Controller::typeDeviceRemoved;
-					e.controller.device = controllerId;
-					AddEvent(e);
-				}
-			}
-
-			// process input
-			if(isConnected)
-			{
-				// buttons
-				auto updateButton = [&](Event::Controller::Button button, bool buttonState)
-				{
-					if(!!(controller->buttons & (1 << button)) != buttonState)
+					// buttons
+					auto updateButton = [&](Event::Controller::Button button, bool buttonState)
 					{
-						Event e;
-						e.device = Event::deviceController;
-						e.controller.device = controllerId;
-						e.controller.button = button;
-						if(buttonState)
+						if(!!(controller->buttons & (1 << button)) != buttonState)
 						{
-							controller->buttons |= (1 << button);
-							e.controller.type = Event::Controller::typeButtonDown;
+							Event e;
+							e.device = Event::deviceController;
+							e.controller.device = controllerId;
+							e.controller.button = button;
+							if(buttonState)
+							{
+								controller->buttons |= (1 << button);
+								e.controller.type = Event::Controller::typeButtonDown;
+							}
+							else
+							{
+								controller->buttons &= ~(1 << button);
+								e.controller.type = Event::Controller::typeButtonUp;
+							}
+							AddEvent(e);
 						}
-						else
-						{
-							controller->buttons &= ~(1 << button);
-							e.controller.type = Event::Controller::typeButtonUp;
-						}
-						AddEvent(e);
-					}
-				};
-#define B(a, b) updateButton(Event::Controller::Button::button##b, npadState.buttons.Test<nn::hid::NpadButton::a>())
-				B(A, A);
-				B(B, B);
-				B(X, X);
-				B(Y, Y);
-				B(Minus, Back);
-				// B(, Guide);
-				B(Plus, Start);
-				B(StickL, LeftStick);
-				B(StickR, RightStick);
-				B(L, LeftShoulder);
-				B(R, RightShoulder);
-				B(Up, DPadUp);
-				B(Down, DPadDown);
-				B(Left, DPadLeft);
-				B(Right, DPadRight);
+					};
+#define B(a, b) updateButton(Event::Controller::Button::button##b, npadState.buttons.template Test<nn::hid::NpadButton::a>())
+					B(A, A);
+					B(B, B);
+					B(X, X);
+					B(Y, Y);
+					B(Minus, Back);
+					// B(, Guide);
+					B(Plus, Start);
+					B(StickL, LeftStick);
+					B(StickR, RightStick);
+					B(L, LeftShoulder);
+					B(R, RightShoulder);
+					B(Up, DPadUp);
+					B(Down, DPadDown);
+					B(Left, DPadLeft);
+					B(Right, DPadRight);
 #undef B
-				// convert triggers (buttons) to axis
-				auto updateTrigger = [&](Event::Controller::Axis axis, bool& buttonState, bool newButtonState)
-				{
-					if(buttonState != newButtonState)
+					// convert triggers (buttons) to axis
+					auto updateTrigger = [&](Event::Controller::Axis axis, bool& buttonState, bool newButtonState)
 					{
-						buttonState = newButtonState;
+						if(buttonState != newButtonState)
+						{
+							buttonState = newButtonState;
 
-						Event e;
-						e.device = Event::deviceController;
-						e.controller.type = Event::Controller::typeAxisMotion;
-						e.controller.device = controllerId;
-						e.controller.axis = axis;
-						e.controller.axisValue = buttonState ? 0x7fff : 0;
-						AddEvent(e);
-					}
-				};
-				updateTrigger(Event::Controller::Axis::axisTriggerLeft, controller->leftTrigger, npadState.buttons.Test<nn::hid::NpadButton::ZL>());
-				updateTrigger(Event::Controller::Axis::axisTriggerRight, controller->rightTrigger, npadState.buttons.Test<nn::hid::NpadButton::ZR>());
+							Event e;
+							e.device = Event::deviceController;
+							e.controller.type = Event::Controller::typeAxisMotion;
+							e.controller.device = controllerId;
+							e.controller.axis = axis;
+							e.controller.axisValue = buttonState ? 0x7fff : 0;
+							AddEvent(e);
+						}
+					};
+					updateTrigger(Event::Controller::Axis::axisTriggerLeft, controller->leftTrigger, npadState.buttons.template Test<nn::hid::NpadButton::ZL>());
+					updateTrigger(Event::Controller::Axis::axisTriggerRight, controller->rightTrigger, npadState.buttons.template Test<nn::hid::NpadButton::ZR>());
 
-				// sticks
-				auto updateStick = [&](Event::Controller::Axis axis, int& value, int32_t newValue)
-				{
-					if(value != newValue)
+					// sticks
+					auto updateStick = [&](Event::Controller::Axis axis, int& value, int32_t newValue)
 					{
-						value = newValue;
+						if(value != newValue)
+						{
+							value = newValue;
 
-						Event e;
-						e.device = Event::deviceController;
-						e.controller.type = Event::Controller::typeAxisMotion;
-						e.controller.device = controllerId;
-						e.controller.axis = axis;
-						e.controller.axisValue = value;
-						AddEvent(e);
-					}
-				};
+							Event e;
+							e.device = Event::deviceController;
+							e.controller.type = Event::Controller::typeAxisMotion;
+							e.controller.device = controllerId;
+							e.controller.axis = axis;
+							e.controller.axisValue = value;
+							AddEvent(e);
+						}
+					};
 #define S(a, b, c) updateStick(Event::Controller::Axis::axis##a, controller->b, c)
-				S(LeftX, leftStickX, npadState.analogStickL.x);
-				S(LeftY, leftStickY, -npadState.analogStickL.y);
-				S(RightX, rightStickX, npadState.analogStickR.x);
-				S(RightY, rightStickY, -npadState.analogStickR.y);
+					S(LeftX, leftStickX, npadState.analogStickL.x);
+					S(LeftY, leftStickY, -npadState.analogStickL.y);
+					S(RightX, rightStickX, npadState.analogStickR.x);
+					S(RightY, rightStickY, -npadState.analogStickR.y);
 #undef S
+				}
 			}
+		};
+
+		// choose state style depending on controller id
+		if(controllerId == nn::hid::NpadId::Handheld)
+		{
+			nn::hid::NpadHandheldState npadStates[nn::hid::NpadStateCountMax];
+			int statesRead = nn::hid::GetNpadStates(npadStates, sizeof(npadStates) / sizeof(npadStates[0]), controllerId);
+			processStates(npadStates, statesRead);
+		}
+		else
+		{
+			nn::hid::NpadFullKeyState npadStates[nn::hid::NpadStateCountMax];
+			int statesRead = nn::hid::GetNpadStates(npadStates, sizeof(npadStates) / sizeof(npadStates[0]), controllerId);
+			processStates(npadStates, statesRead);
 		}
 	}
 
