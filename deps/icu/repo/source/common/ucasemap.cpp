@@ -669,13 +669,13 @@ int32_t toUpper(uint32_t options,
             if (change) {
                 destIndex=appendTwoBytes(dest, destIndex, destCapacity, upper);
                 if (destIndex >= 0 && (data & HAS_EITHER_DIALYTIKA) != 0) {
-                    destIndex=appendTwoBytes(dest, destIndex, destCapacity, u8"\u0308");  // restore or add a dialytika
+                    destIndex=appendTwoBytes(dest, destIndex, destCapacity, (const char*)u8"\u0308");  // restore or add a dialytika
                 }
                 if (destIndex >= 0 && addTonos) {
-                    destIndex=appendTwoBytes(dest, destIndex, destCapacity, u8"\u0301");
+                    destIndex=appendTwoBytes(dest, destIndex, destCapacity, (const char*)u8"\u0301");
                 }
                 while (destIndex >= 0 && numYpogegrammeni > 0) {
-                    destIndex=appendTwoBytes(dest, destIndex, destCapacity, u8"\u0399");
+                    destIndex=appendTwoBytes(dest, destIndex, destCapacity, (const char*)u8"\u0399");
                     --numYpogegrammeni;
                 }
                 if(destIndex<0) {
