@@ -1,6 +1,10 @@
 #include "NxDevice.hpp"
+#include "NxSystem.hpp"
+#include "NxBufferedSound.hpp"
 #include "Player3D.hpp"
-#include "Sound.hpp"
+#include "Source.hpp"
+#include "../MemoryFile.hpp"
+#include "../Exception.hpp"
 
 BEGIN_INANITY_AUDIO
 
@@ -24,24 +28,32 @@ public:
 class NxDummySound : public Sound
 {
 public:
-	ptr<Player> CreatePlayer() override
-	{
-		return NEW(NxDummyPlayer());
-	}
-
 	ptr<Player3D> CreatePlayer3D() override
 	{
 		return NEW(NxDummyPlayer());
 	}
 };
 
-NxDevice::NxDevice()
+NxDevice::NxDevice(ptr<NxSystem> system)
+: system(system)
 {
+}
+
+NxDevice::~NxDevice()
+{
+}
+
+ptr<NxSystem> NxDevice::GetSystem() const
+{
+	return system;
 }
 
 ptr<Sound> NxDevice::CreateBufferedSound(ptr<Source> source)
 {
-	return NEW(NxDummySound());
+	// FIXME: 8-bit sounds are not supported
+	if(source->GetFormat().bitsPerSample == 8) return NEW(NxDummySound());
+
+	return NEW(NxBufferedSound(system, system->CreateBufferFile(source->GetData()), source->GetFormat()));
 }
 
 ptr<Sound> NxDevice::CreateStreamedSound(ptr<Source> source)

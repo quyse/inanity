@@ -2,14 +2,23 @@
 #define ___INANITY_AUDIO_NX_DEVICE_HPP___
 
 #include "Device.hpp"
+#include <nn/audio.h>
 
 BEGIN_INANITY_AUDIO
+
+class NxSystem;
 
 /// Nintendo Switch audio device.
 class NxDevice : public Device
 {
+private:
+	ptr<NxSystem> system;
+
 public:
-	NxDevice();
+	NxDevice(ptr<NxSystem> system);
+	~NxDevice();
+
+	ptr<NxSystem> GetSystem() const;
 
 	// Device's methods.
 	ptr<Sound> CreateBufferedSound(ptr<Source> source) override;

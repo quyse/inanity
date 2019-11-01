@@ -366,7 +366,8 @@ var libraries = {
 	// ******* NX Audio
 	'libinanity-nxaudio': {
 		objects: [
-			'audio.NxSystem', 'audio.NxDevice',
+			'audio.NxSystem', 'audio.NxDevice', 'audio.NxPlayer',
+			'audio.NxBufferedSound', 'audio.NxBufferedPlayer',
 		]
 	},
 	// ******* общая физика
