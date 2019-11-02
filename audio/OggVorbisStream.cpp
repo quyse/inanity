@@ -1,5 +1,5 @@
 #include "OggVorbisStream.hpp"
-#include "../File.hpp"
+#include "../Storage.hpp"
 #include "../Exception.hpp"
 #include <memory.h>
 
@@ -20,18 +20,17 @@ size_t OggVorbisStream::ReadFunctionStatic(void* data, size_t size, size_t count
 
 size_t OggVorbisStream::ReadFunction(void* data, size_t size, size_t count)
 {
-	// вычислить, сколько осталось до конца файла
-	size_t toEnd = sourceFile->GetSize() - position;
-	// вычислить, сколько элементов по size мы можем считать
-	size_t maxCount = toEnd / size;
-	// если требуется больше, то фиг вам
+	// determine how many chunks can be read
+	bigsize_t toEnd = storage->GetBigSize() - position;
+	bigsize_t maxCount = toEnd / size;
+	// saturate
 	if(count > maxCount)
-		count = maxCount;
-	// считать данные
+		count = (size_t)maxCount;
+	// read data
 	if(count)
 	{
 		size *= count;
-		memcpy(data, (char*)sourceFile->GetData() + position, size);
+		storage->Read(position, size, data);
 		position += size;
 	}
 	return count;
@@ -45,7 +44,7 @@ int OggVorbisStream::SeekFunctionStatic(void* stream, ogg_int64_t offset, int wh
 int OggVorbisStream::SeekFunction(long long offset, int whence)
 {
 	long long newPosition;
-	size_t fileSize = sourceFile->GetSize();
+	bigsize_t fileSize = storage->GetBigSize();
 	switch(whence)
 	{
 	case SEEK_SET:
@@ -60,8 +59,8 @@ int OggVorbisStream::SeekFunction(long long offset, int whence)
 	default:
 		return -1;
 	}
-	if(newPosition < 0 || (unsigned long long)newPosition > fileSize) return -1;
-	position = (size_t)newPosition;
+	if(newPosition < 0 || (bigsize_t)newPosition > fileSize) return -1;
+	position = (bigsize_t)newPosition;
 	return 0;
 }
 
@@ -75,41 +74,34 @@ long OggVorbisStream::TellFunction()
 	return (long)position;
 }
 
-OggVorbisStream::OggVorbisStream(ptr<File> sourceFile)
-: sourceFile(sourceFile), position(0)
+OggVorbisStream::OggVorbisStream(ptr<Storage> storage)
+: storage(storage), position(0)
 {
-	try
-	{
-		// открыть файл как vorbis
-		int r = ov_open_callbacks(this, &ovFile, 0, -1, oggVorbisCallbacks);
-		if(r != 0)
-		{
-			printf("Error: %d\n", r);
-			THROW("Can't open file as Ogg Vorbis");
-		}
+	BEGIN_TRY();
 
-		// получить информацию о файле
-		vorbis_info* info = ov_info(&ovFile, -1);
-		if(!info)
-			THROW("Can't get information about file");
+	// open file
+	int r = ov_open_callbacks(this, &ovFile, 0, -1, oggVorbisCallbacks);
+	if(r != 0)
+		THROW("Can't open file as Ogg Vorbis");
 
-		// запомнить формат
-		format.samplesPerSecond = info->rate;
-		format.bitsPerSample = 16;
-		format.channelsCount = info->channels;
+	// read file info
+	vorbis_info* info = ov_info(&ovFile, -1);
+	if(!info)
+		THROW("Can't get information about file");
 
-		// получить количество семплов
-		samplesCount = (size_t)ov_pcm_total(&ovFile, -1);
-	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY("Can't create Ogg Vorbis stream", exception);
-	}
+	// remember format
+	format.samplesPerSecond = info->rate;
+	format.bitsPerSample = 16;
+	format.channelsCount = info->channels;
+
+	// get samples count
+	samplesCount = (size_t)ov_pcm_total(&ovFile, -1);
+
+	END_TRY("Can't create Ogg Vorbis stream");
 }
 
 OggVorbisStream::~OggVorbisStream()
 {
-	// закрыть файл vorbis
 	ov_clear(&ovFile);
 }
 
@@ -125,38 +117,35 @@ size_t OggVorbisStream::GetSamplesCount() const
 
 size_t OggVorbisStream::Read(void* dataPtr, size_t size)
 {
-	try
+	BEGIN_TRY();
+
+	char* data = (char*)dataPtr;
+
+	size_t read = 0;
+
+	int bitstream;
+	while(size)
 	{
-		char* data = (char*)dataPtr;
+		long result = ov_read(&ovFile, data, (int)size,
+			0, // means little endian
+			2, // means 16-bit samples
+			1, // means signed values
+			&bitstream);
+		// if this is an error
+		if(result < 0)
+			THROW("Ogg Vorbis file is corrupted");
+		// if end of file, break
+		if(result == 0)
+			break;
 
-		size_t read = 0;
-
-		int bitstream;
-		while(size)
-		{
-			long result = ov_read(&ovFile, data, (int)size,
-				0, // means little endian
-				2, // means 16-bit samples
-				1, // means signed values
-				&bitstream);
-			// if this is an error
-			if(result < 0)
-				THROW("Ogg Vorbis file is corrupted");
-			// if end of file, break
-			if(result == 0)
-				break;
-
-			size -= result;
-			data += result;
-			read += result;
-		}
-
-		return read;
+		size -= result;
+		data += result;
+		read += result;
 	}
-	catch(Exception* exception)
-	{
-		THROW_SECONDARY("Can't read data from Ogg Vorbis file", exception);
-	}
+
+	return read;
+
+	END_TRY("Can't read data from Ogg Vorbis file");
 }
 
 END_INANITY_AUDIO

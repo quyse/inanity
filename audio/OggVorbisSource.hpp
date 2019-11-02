@@ -3,24 +3,28 @@
 
 #include "Source.hpp"
 
+BEGIN_INANITY
+
+class Storage;
+
+END_INANITY
+
 BEGIN_INANITY_AUDIO
 
-/// Класс источника звуковых данных Ogg Vorbis.
+/// Ogg Vorbis source.
 class OggVorbisSource : public Source
 {
 private:
-	ptr<File> file;
+	ptr<Storage> storage;
 	Format format;
 	size_t samplesCount;
-	ptr<File> dataFile;
 
 public:
-	OggVorbisSource(ptr<File> file);
+	OggVorbisSource(ptr<Storage> storage);
 
-	// методы Source
+	// Source's methods.
 	Format GetFormat() const;
 	size_t GetSamplesCount() const;
-	ptr<File> GetData();
 	ptr<InputStream> CreateStream();
 };
 

@@ -7,30 +7,26 @@
 
 BEGIN_INANITY
 
-class File;
+class Storage;
 
 END_INANITY
 
 BEGIN_INANITY_AUDIO
 
-/// Класс потока аудиоданных Ogg Vorbis.
+/// Ogg Vorbis decoding stream.
 class OggVorbisStream : public InputStream
 {
 private:
-	/// Исходный файл.
-	ptr<File> sourceFile;
-	/// Структура библиотеки vorbisfile.
+	/// Source input storage.
+	ptr<Storage> storage;
 	OggVorbis_File ovFile;
-	/// Формат потока.
 	Format format;
-	/// Длина потока в семплах.
 	size_t samplesCount;
-	/// Текущее положение в файле.
-	size_t position;
+	bigsize_t position;
 
-	/// Структура с функциями обратного вызова.
+	/// Callbacks for Ogg Vorbis library.
 	static const ov_callbacks oggVorbisCallbacks;
-	// Функции для структуры ov_callbacks.
+	// Static callback functions.
 	static size_t ReadFunctionStatic(void* data, size_t size, size_t count, void* dataSource);
 	size_t ReadFunction(void* data, size_t size, size_t count);
 	static int SeekFunctionStatic(void* stream, ogg_int64_t offset, int whence);
@@ -39,7 +35,7 @@ private:
 	long TellFunction();
 
 public:
-	OggVorbisStream(ptr<File> sourceFile);
+	OggVorbisStream(ptr<Storage> storage);
 	~OggVorbisStream();
 
 	Format GetFormat() const;
