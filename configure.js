@@ -368,6 +368,7 @@ var libraries = {
 		objects: [
 			'audio.NxSystem', 'audio.NxDevice', 'audio.NxPlayer',
 			'audio.NxBufferedSound', 'audio.NxBufferedPlayer',
+			'audio.NxStreamedSound', 'audio.NxStreamedPlayer',
 		]
 	},
 	// ******* общая физика

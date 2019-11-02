@@ -16,7 +16,6 @@ private:
 
 public:
 	NxDevice(ptr<NxSystem> system);
-	~NxDevice();
 
 	ptr<NxSystem> GetSystem() const;
 

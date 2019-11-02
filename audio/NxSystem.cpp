@@ -15,6 +15,14 @@ private:
 	size_t size;
 
 public:
+	BufferFile(ptr<NxSystem> system, size_t size)
+	: system(system), size(size)
+	{
+		data = system->wavePoolAllocator.Allocate(size, nn::audio::BufferAlignSize);
+		if(!data)
+			THROW("Can't allocate buffer from wave pool");
+	}
+
 	BufferFile(ptr<NxSystem> system, ptr<File> file)
 	: system(system)
 	{
@@ -109,6 +117,11 @@ nn::audio::AudioRendererConfig& NxSystem::GetConfig()
 	return config;
 }
 
+ptr<File> NxSystem::CreateBufferFile(size_t size)
+{
+	return NEW(BufferFile(this, size));
+}
+
 ptr<File> NxSystem::CreateBufferFile(ptr<File> file)
 {
 	return NEW(BufferFile(this, file));
@@ -144,12 +157,12 @@ void NxSystem::DeleteVoice(nn::audio::VoiceType& voice)
 	nn::audio::ReleaseVoiceSlot(&config, &voice);
 }
 
-void NxSystem::SetVoicePanning(nn::audio::VoiceType& voice, float pan)
+void NxSystem::SetVoicePanning(nn::audio::VoiceType& voice, int channelsCount, float pan)
 {
 	// left
-	nn::audio::SetVoiceMixVolume(&voice, &finalMix, 0.5f - pan * 0.5f, 0, 0);
+	nn::audio::SetVoiceMixVolume(&voice, &finalMix, channelsCount == 1 ? 0.5f - pan * 0.5f : 0.5f, 0, 0);
 	// right
-	nn::audio::SetVoiceMixVolume(&voice, &finalMix, 0.5f + pan * 0.5f, 0, 1);
+	nn::audio::SetVoiceMixVolume(&voice, &finalMix, channelsCount == 1 ? 0.5f + pan * 0.5f : 0.5f, 0, 1);
 }
 
 void NxSystem::RegisterPlayer(NxPlayer* player)

@@ -40,11 +40,12 @@ public:
 
 	nn::audio::AudioRendererConfig& GetConfig();
 
+	ptr<File> CreateBufferFile(size_t size);
 	ptr<File> CreateBufferFile(ptr<File> file);
 
 	void CreateVoice(nn::audio::VoiceType& voice, const Format& format);
 	void DeleteVoice(nn::audio::VoiceType& voice);
-	void SetVoicePanning(nn::audio::VoiceType& voice, float pan);
+	void SetVoicePanning(nn::audio::VoiceType& voice, int channelsCount, float pan);
 
 	void RegisterPlayer(NxPlayer* player);
 	void UnregisterPlayer(NxPlayer* player);

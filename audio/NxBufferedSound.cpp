@@ -16,7 +16,7 @@ NxBufferedSound::NxBufferedSound(ptr<NxSystem> system, ptr<File> file, const For
 	buffer.endSampleOffset = file->GetSize() / (format.channelsCount * format.bitsPerSample / 8);
 	buffer.isEndOfStream = true;
 	buffer.loop = false;
-	buffer.loopCount = 1;
+	buffer.loopCount = 0;
 	buffer.loopStartSampleOffset = buffer.startSampleOffset;
 	buffer.loopEndSampleOffset = buffer.endSampleOffset;
 	buffer.pContext = nullptr;
