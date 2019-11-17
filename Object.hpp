@@ -34,8 +34,8 @@ T* ObjectSetAllocationInfo(T* data, const char* info)
 	return data;
 }
 #else
-#define NEW(...) new __VA_ARGS__
-#define NEW_WITH_TAG(tag, ...) new __VA_ARGS__
+#define NEW(...) (new __VA_ARGS__)
+#define NEW_WITH_TAG(tag, ...) (new __VA_ARGS__)
 #endif
 
 END_INANITY
