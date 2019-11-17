@@ -82,10 +82,14 @@ NxManager::NxManager()
 
 	for(size_t i = 0; i < npadsCount; ++i)
 		controllers.insert({ (uint64_t)npadIds[i], { -1, nullptr } });
+
+	// initialize touch screen
+	nn::hid::InitializeTouchScreen();
 }
 
 void NxManager::Update()
 {
+	// update controllers
 	for(Controllers::iterator i = controllers.begin(); i != controllers.end(); ++i)
 	{
 		uint64_t controllerId = i->first;
@@ -228,6 +232,68 @@ void NxManager::Update()
 			nn::hid::NpadFullKeyState npadStates[nn::hid::NpadStateCountMax];
 			int statesRead = nn::hid::GetNpadStates(npadStates, sizeof(npadStates) / sizeof(npadStates[0]), controllerId);
 			processStates(npadStates, statesRead);
+		}
+	}
+
+	// update touch
+	// for now emulate mouse events
+	{
+		nn::hid::TouchScreenState<nn::hid::TouchStateCountMax> touchStates[nn::hid::TouchScreenStateCountMax];
+		int touchStatesCount = nn::hid::GetTouchScreenStates(touchStates, sizeof(touchStates) / sizeof(touchStates[0]));
+		for(int i = touchStatesCount - 1; i >= 0; --i)
+		{
+			const auto& touchState = touchStates[i];
+
+			if(touchState.samplingNumber <= lastTouchSamplingNumber) continue;
+			lastTouchSamplingNumber = touchState.samplingNumber;
+
+			// process only the latest touch
+			if(touchState.count > 0)
+			{
+				const auto& touch = touchState.touches[touchState.count - 1];
+
+				// issue cursor move if needed
+				if(!touched || touch.x != lastTouchX || touch.y != lastTouchY)
+				{
+					lastTouchX = touch.x;
+					lastTouchY = touch.y;
+
+					Event e;
+					e.device = Event::deviceMouse;
+					e.mouse.type = Event::Mouse::typeCursorMove;
+					e.mouse.cursorX = touch.x;
+					e.mouse.cursorY = touch.y;
+					e.mouse.cursorZ = 0;
+					AddEvent(e);
+				}
+
+				// if it's new, issue mouse down
+				if(!touched)
+				{
+					touched = true;
+
+					Event e;
+					e.device = Event::deviceMouse;
+					e.mouse.type = Event::Mouse::typeButtonDown;
+					e.mouse.button = Event::Mouse::buttonLeft;
+					AddEvent(e);
+				}
+			}
+			// there's no touches
+			else
+			{
+				// if it's new, issue mouse up
+				if(touched)
+				{
+					touched = false;
+
+					Event e;
+					e.device = Event::deviceMouse;
+					e.mouse.type = Event::Mouse::typeButtonUp;
+					e.mouse.button = Event::Mouse::buttonLeft;
+					AddEvent(e);
+				}
+			}
 		}
 	}
 

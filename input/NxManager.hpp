@@ -42,6 +42,10 @@ public:
 	typedef std::unordered_map<uint64_t, std::pair<int64_t, ptr<NxController> > > Controllers;
 	Controllers controllers;
 
+	int64_t lastTouchSamplingNumber = -1;
+	int lastTouchX = 0, lastTouchY = 0;
+	bool touched = false;
+
 public:
 	NxManager();
 
