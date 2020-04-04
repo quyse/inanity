@@ -7,18 +7,22 @@ exports.configureCompiler = function(objectFile, compiler) {
 	compiler.addIncludeDir('include/external');
 	compiler.addIncludeDir('../zlib');
 	compiler.addMacro('BOTAN_IS_BEING_BUILT');
+	if(compiler.platform == 'win32') {
+		compiler.addMacro('_ENABLE_EXTENDED_ALIGNED_STORAGE');
+		compiler.addMacro('_WIN32_WINNT=0x0600');
+	}
 	compiler.strict = false;
 };
 
 var objectsByPlatform = {
 	win32: [
-${FILES_WINDOWS}
+${FILES_WIN32}
 	],
 	linux: [
 ${FILES_LINUX}
 	],
 	darwin: [
-${FILES_MACOS}
+${FILES_DARWIN}
 	],
 };
 

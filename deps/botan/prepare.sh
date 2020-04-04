@@ -13,7 +13,8 @@ function preparePlatform {
 		--with-zlib \
 		--with-boost \
 		--enable-modules=certstor_system \
-		--disable-modules=certstor_sql,win32_stats \
+		--disable-modules=ffi,certstor_sql,win32_stats \
+		--disable-shared-library \
 		$2
 	cd ..
 	cp -r build/build/include/* include/
@@ -31,6 +32,6 @@ preparePlatform linux "--cpu=x86_64 --os=linux --cc=clang --enable-modules=certs
 preparePlatform darwin "--cpu=x86_64 --os=macos --cc=clang --enable-modules=certstor_system_macos"
 
 # get list of lib .cpp files
-FILES_LINUX="$(cat files_linux.txt)" FILES_WINDOWS="$(cat files_win32.txt)" envsubst < configure.js.in > configure.js
+FILES_LINUX="$(cat files_linux.txt)" FILES_WIN32="$(cat files_win32.txt)" FILES_DARWIN="$(cat files_darwin.txt)" envsubst < configure.js.in > configure.js
 
 rm -f files_{win32,linux,darwin}.txt
