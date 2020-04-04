@@ -3,7 +3,7 @@
 
 /*
 * This file was automatically generated running
-* 'configure.py --with-build-dir=../build --module-policy=modern --link-method=copy --cpu=x86_64 --with-zlib --with-boost --enable-modules=certstor_system --disable-modules=certstor_sql,win32_stats --os=macos --cc=clang --enable-modules=certstor_system_macos'
+* 'configure.py --with-build-dir=../build --module-policy=modern --link-method=copy --with-zlib --with-boost --enable-modules=certstor_system --disable-modules=certstor_sql,win32_stats --cpu=x86_64 --os=macos --cc=clang --enable-modules=certstor_system_macos'
 *
 * Target
 *  - Compiler: clang++ -fstack-protector -m64 -pthread -stdlib=libc++ -std=c++11 -D_REENTRANT -O3

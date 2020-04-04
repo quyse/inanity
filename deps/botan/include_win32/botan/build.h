@@ -3,11 +3,11 @@
 
 /*
 * This file was automatically generated running
-* 'configure.py --with-build-dir=../build --module-policy=modern --link-method=copy --cpu=x86_64 --with-zlib --with-boost --enable-modules=certstor_system --disable-modules=certstor_sql,win32_stats --os=windows --cc=msvc --enable-modules=certstor_system_windows'
+* 'configure.py --with-build-dir=../build --module-policy=modern --link-method=copy --with-zlib --with-boost --enable-modules=certstor_system --disable-modules=certstor_sql,win32_stats --cpu=x86_32 --os=windows --cc=msvc --enable-modules=certstor_system_windows'
 *
 * Target
 *  - Compiler: cl  /EHs /GR /D_ENABLE_EXTENDED_ALIGNED_STORAGE /MD /bigobj /O2 /Oi
-*  - Arch: x86_64
+*  - Arch: x86_32
 *  - OS: windows
 */
 
@@ -23,7 +23,7 @@
 #define BOTAN_DISTRIBUTION_INFO "unspecified"
 
 /* How many bits per limb in a BigInt */
-#define BOTAN_MP_WORD_BITS 64
+#define BOTAN_MP_WORD_BITS 32
 
 
 #define BOTAN_INSTALL_PREFIX R"(c:\Botan)"
@@ -58,13 +58,11 @@
 
 
 
-#define BOTAN_TARGET_ARCH_IS_X86_64
+#define BOTAN_TARGET_ARCH_IS_X86_32
 #define BOTAN_TARGET_CPU_IS_LITTLE_ENDIAN
 #define BOTAN_TARGET_CPU_IS_X86_FAMILY
-#define BOTAN_TARGET_CPU_HAS_NATIVE_64BIT
 
 #define BOTAN_TARGET_SUPPORTS_AESNI
-#define BOTAN_TARGET_SUPPORTS_AVX2
 #define BOTAN_TARGET_SUPPORTS_BMI2
 #define BOTAN_TARGET_SUPPORTS_RDRAND
 #define BOTAN_TARGET_SUPPORTS_RDSEED
@@ -102,7 +100,6 @@
 #define BOTAN_HAS_CERTSTOR_SYSTEM 20190411
 #define BOTAN_HAS_CERTSTOR_WINDOWS 20190430
 #define BOTAN_HAS_CHACHA 20180807
-#define BOTAN_HAS_CHACHA_AVX2 20180418
 #define BOTAN_HAS_CHACHA_SIMD32 20181104
 #define BOTAN_HAS_CIPHER_MODES 20180124
 #define BOTAN_HAS_CIPHER_MODE_PADDING 20131128
@@ -174,7 +171,6 @@
 #define BOTAN_HAS_SHA3 20161018
 #define BOTAN_HAS_SHAKE_CIPHER 20161018
 #define BOTAN_HAS_SIMD_32 20131128
-#define BOTAN_HAS_SIMD_AVX2 20180824
 #define BOTAN_HAS_SIPHASH 20150110
 #define BOTAN_HAS_SKEIN_512 20131128
 #define BOTAN_HAS_SOCKETS 20171216
@@ -182,7 +178,6 @@
 #define BOTAN_HAS_STREAM_CIPHER 20131128
 #define BOTAN_HAS_SYSTEM_RNG 20141202
 #define BOTAN_HAS_THREEFISH_512 20131224
-#define BOTAN_HAS_THREEFISH_512_AVX2 20160903
 #define BOTAN_HAS_TLS 20191210
 #define BOTAN_HAS_TLS_SESSION_MANAGER_SQL_DB 20141219
 #define BOTAN_HAS_TLS_V10_PRF 20131128
