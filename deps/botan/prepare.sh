@@ -10,7 +10,6 @@ function preparePlatform {
 		--with-build-dir=../build \
 		--module-policy=modern \
 		--link-method=copy \
-		--cpu=x86_64 \
 		--with-zlib \
 		--with-boost \
 		--enable-modules=certstor_system \
@@ -27,9 +26,9 @@ function preparePlatform {
 rm -rf include{,_win32,_linux,_darwin}
 mkdir include
 
-preparePlatform win32 "--os=windows --cc=msvc --enable-modules=certstor_system_windows"
-preparePlatform linux "--os=linux --cc=clang --enable-modules=certstor_flatfile"
-preparePlatform darwin "--os=macos --cc=clang --enable-modules=certstor_system_macos"
+preparePlatform win32 "--cpu=x86_32 --os=windows --cc=msvc --enable-modules=certstor_system_windows"
+preparePlatform linux "--cpu=x86_64 --os=linux --cc=clang --enable-modules=certstor_flatfile"
+preparePlatform darwin "--cpu=x86_64 --os=macos --cc=clang --enable-modules=certstor_system_macos"
 
 # get list of lib .cpp files
 FILES_LINUX="$(cat files_linux.txt)" FILES_WINDOWS="$(cat files_win32.txt)" envsubst < configure.js.in > configure.js
