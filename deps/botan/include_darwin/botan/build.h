@@ -3,7 +3,7 @@
 
 /*
 * This file was automatically generated running
-* 'configure.py --with-build-dir=../build --module-policy=modern --link-method=copy --with-zlib --with-boost --enable-modules=certstor_system --disable-modules=certstor_sql,win32_stats --cpu=x86_64 --os=macos --cc=clang --enable-modules=certstor_system_macos'
+* 'configure.py --with-build-dir=../build --module-policy=modern --link-method=copy --with-zlib --with-boost --enable-modules=certstor_system --disable-modules=ffi,certstor_sql,win32_stats --disable-shared-library --cpu=x86_64 --os=macos --cc=clang --enable-modules=certstor_system_macos'
 *
 * Target
 *  - Compiler: clang++ -fstack-protector -m64 -pthread -stdlib=libc++ -std=c++11 -D_REENTRANT -O3
@@ -35,7 +35,7 @@
 #define BOTAN_SYSTEM_CERT_BUNDLE "/etc/ssl/certs/ca-certificates.crt"
 
 #ifndef BOTAN_DLL
-  #define BOTAN_DLL __attribute__((visibility("default")))
+  #define BOTAN_DLL 
 #endif
 
 /* Target identification and feature test macros */
@@ -135,7 +135,6 @@
 #define BOTAN_HAS_ENTROPY_SRC_DEV_RANDOM 20131128
 #define BOTAN_HAS_ENTROPY_SRC_RDRAND 20131128
 #define BOTAN_HAS_ENTROPY_SRC_RDSEED 20151218
-#define BOTAN_HAS_FFI 20191214
 #define BOTAN_HAS_GCM_CLMUL_CPU 20131227
 #define BOTAN_HAS_GCM_CLMUL_SSSE3 20171020
 #define BOTAN_HAS_HASH 20180112
