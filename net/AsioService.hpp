@@ -33,7 +33,6 @@ private:
 	TlsCredentialsManager tlsCredentialsManager;
 	Botan::TLS::Session_Manager_In_Memory tlsSessionManager;
 	Botan::TLS::Strict_Policy tlsPolicy;
-	Botan::TLS::Context tlsContext;
 
 private:
 	template <typename Socket>
@@ -41,11 +40,12 @@ private:
 	class ConnectUdpRequest;
 	class TlsHandshakeHandler;
 
+	std::unique_ptr<Botan::TLS::Context> CreateTlsContext(String const& host, int port);
+
 public:
 	AsioService();
 
 	boost::asio::io_service& GetIoService();
-	Botan::TLS::Context& GetTlsContext();
 
 	static ptr<Exception> ConvertError(const boost::system::error_code& error);
 	static ptr<Exception> ConvertError(const boost::system::system_error& error);

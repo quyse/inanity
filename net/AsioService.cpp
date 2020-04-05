@@ -16,6 +16,7 @@ class AsioService::ConnectTcpRequest : public Object
 {
 private:
 	ptr<AsioService> service;
+	std::function<ptr<Socket>()> createSocket;
 	ptr<Socket> socket;
 	ptr<TcpSocketHandler> socketHandler;
 
@@ -46,7 +47,7 @@ private:
 		currentEndpointIterator = i;
 
 		// создать сокет
-		socket = NEW(Socket(service));
+		socket = createSocket();
 
 		TryConnect();
 	}
@@ -98,8 +99,8 @@ private:
 	}
 
 public:
-	ConnectTcpRequest(ptr<AsioService> service, const String& host, int port, ptr<TcpSocketHandler> socketHandler)
-	: service(service), socketHandler(socketHandler)
+	ConnectTcpRequest(ptr<AsioService> service, const String& host, int port, std::function<ptr<Socket>()>&& createSocket, ptr<TcpSocketHandler> socketHandler)
+	: service(service), createSocket(createSocket), socketHandler(socketHandler)
 	{
 		// преобразовать порт в строку
 		std::ostringstream ss;
@@ -275,8 +276,7 @@ std::vector<Botan::Certificate_Store*> AsioService::TlsCredentialsManager::trust
 
 AsioService::AsioService()
 : work(new boost::asio::io_service::work(ioService)), tcpResolver(ioService), udpResolver(ioService),
-tlsSessionManager(Botan::system_rng()),
-tlsContext(tlsCredentialsManager, Botan::system_rng(), tlsSessionManager, tlsPolicy)
+tlsSessionManager(Botan::system_rng())
 {}
 
 boost::asio::io_service& AsioService::GetIoService()
@@ -284,9 +284,9 @@ boost::asio::io_service& AsioService::GetIoService()
 	return ioService;
 }
 
-Botan::TLS::Context& AsioService::GetTlsContext()
+std::unique_ptr<Botan::TLS::Context> AsioService::CreateTlsContext(String const& host, int port)
 {
-	return tlsContext;
+	return std::unique_ptr<Botan::TLS::Context>(new Botan::TLS::Context(tlsCredentialsManager, Botan::system_rng(), tlsSessionManager, tlsPolicy, { host, (uint16_t)port }));
 }
 
 ptr<Exception> AsioService::ConvertError(const boost::system::error_code& error)
@@ -332,7 +332,10 @@ ptr<TcpListener> AsioService::ListenTcp(int port, ptr<TcpSocketHandler> socketHa
 
 void AsioService::ConnectTcp(const String& host, int port, ptr<TcpSocketHandler> socketHandler)
 {
-	MakePointer(NEW(ConnectTcpRequest<AsioTcpSocket>(this, host, port, socketHandler)));
+	MakePointer(NEW(ConnectTcpRequest<AsioTcpSocket>(this, host, port, [=]()
+	{
+		return NEW(AsioTcpSocket(this));
+	}, socketHandler)));
 }
 
 ptr<UdpListener> AsioService::ListenUdp(int port, ptr<UdpPacketHandler> receiveHandler)
@@ -366,7 +369,10 @@ void AsioService::ConnectUdp(const String& host, int port, ptr<UdpSocketHandler>
 
 void AsioService::ConnectTlsTcp(const String& host, int port, ptr<TcpSocketHandler> socketHandler)
 {
-	MakePointer(NEW(ConnectTcpRequest<AsioTlsTcpSocket>(this, host, port, TcpSocketHandler::Bind(MakePointer(NEW(TlsHandshakeHandler(socketHandler))), &TlsHandshakeHandler::OnConnect))));
+	MakePointer(NEW(ConnectTcpRequest<AsioTlsTcpSocket>(this, host, port, [=]()
+	{
+		return NEW(AsioTlsTcpSocket(this, CreateTlsContext(host, port)));
+	}, TcpSocketHandler::Bind(MakePointer(NEW(TlsHandshakeHandler(socketHandler))), &TlsHandshakeHandler::OnConnect))));
 }
 
 END_INANITY_NET
