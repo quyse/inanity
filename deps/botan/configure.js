@@ -4,7 +4,6 @@ exports.configureCompiler = function(objectFile, compiler) {
 	compiler.setSourceFile(`repo/src/lib/${a[2].replace(/\./g, '/')}.cpp`);
 	compiler.addIncludeDir(`include_${compiler.platform}`);
 	compiler.addIncludeDir('include');
-	compiler.addIncludeDir('include/external');
 	compiler.addIncludeDir('../zlib');
 	compiler.addMacro('BOTAN_IS_BEING_BUILT');
 	if(compiler.platform == 'win32') {

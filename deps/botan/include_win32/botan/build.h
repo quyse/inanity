@@ -3,7 +3,7 @@
 
 /*
 * This file was automatically generated running
-* 'configure.py --with-build-dir=../build --module-policy=modern --link-method=copy --with-zlib --with-boost --enable-modules=certstor_system --disable-modules=ffi,certstor_sql,win32_stats --disable-shared-library --cpu=x86_32 --os=windows --cc=msvc --enable-modules=certstor_system_windows'
+* 'configure.py --with-build-dir=../build --module-policy=modern --link-method=copy --with-zlib --with-boost --enable-modules=asio,certstor_system --disable-modules=ffi,certstor_sql,win32_stats --disable-shared-library --cpu=x86_32 --os=windows --cc=msvc --enable-modules=certstor_system_windows'
 *
 * Target
 *  - Compiler: cl  /EHs /GR /D_ENABLE_EXTENDED_ALIGNED_STORAGE /MD /bigobj /O2 /Oi
@@ -178,6 +178,7 @@
 #define BOTAN_HAS_SYSTEM_RNG 20141202
 #define BOTAN_HAS_THREEFISH_512 20131224
 #define BOTAN_HAS_TLS 20191210
+#define BOTAN_HAS_TLS_ASIO_STREAM 20181218
 #define BOTAN_HAS_TLS_SESSION_MANAGER_SQL_DB 20141219
 #define BOTAN_HAS_TLS_V10_PRF 20131128
 #define BOTAN_HAS_TLS_V12_PRF 20131128
