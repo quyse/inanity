@@ -6,6 +6,7 @@ exports.configureCompiler = function(objectFile, compiler) {
 	compiler.addIncludeDir('include');
 	compiler.addIncludeDir('../zlib');
 	compiler.addMacro('BOTAN_IS_BEING_BUILT');
+	compiler.addMacro('BOOST_ASIO_SEPARATE_COMPILATION');
 	if(compiler.platform == 'win32') {
 		compiler.addMacro('_ENABLE_EXTENDED_ALIGNED_STORAGE');
 		compiler.addMacro('_WIN32_WINNT=0x0600');
