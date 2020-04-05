@@ -31,6 +31,8 @@ exports.configureCompiler = function(objectFile, compiler) {
 	compiler.addIncludeDir('deps/freetype/repo/include');
 	compiler.addIncludeDir('deps/harfbuzz/generated');
 	compiler.addIncludeDir('deps/icu/repo/source/common');
+	compiler.addIncludeDir(`deps/botan/include_${compiler.platform}`);
+	compiler.addIncludeDir('deps/botan/include');
 	compiler.addIncludeDir('deps/mono/include');
 	compiler.addMacro('U_STATIC_IMPLEMENTATION');
 
@@ -88,7 +90,11 @@ var libraries = {
 	// ******* сетевая библиотека ASIO
 	'libinanity-asio': {
 		objects: [
-		'net.asio', 'net.AsioService', 'net.AsioTcpListener', 'net.AsioTcpSocket', 'net.AsioInternalUdpSocket', 'net.AsioUdpListener', 'net.AsioUdpSocket']
+		'net.asio', 'net.AsioService',
+		'net.AsioTcpListener', 'net.AsioTcpSocket',
+		'net.AsioTlsTcpSocket',
+		'net.AsioInternalUdpSocket', 'net.AsioUdpListener', 'net.AsioUdpSocket',
+		]
 	},
 	// ******* сетевая библиотека Emscripten
 	'libinanity-net-ems': {

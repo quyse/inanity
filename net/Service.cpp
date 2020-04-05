@@ -22,4 +22,9 @@ void Service::ConnectUdp(const String& host, int port, ptr<UdpSocketHandler> soc
 	THROW("Connect UDP not implemented");
 }
 
+void Service::ConnectTlsTcp(const String& host, int port, ptr<TcpSocketHandler> socketHandler)
+{
+	THROW("Connect TCP with TLS not implemented");
+}
+
 END_INANITY_NET
