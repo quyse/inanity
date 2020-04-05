@@ -4,17 +4,19 @@
 #include "AsioInternalUdpSocket.hpp"
 #include "AsioUdpListener.hpp"
 #include "AsioUdpSocket.hpp"
+#include "AsioTlsTcpSocket.hpp"
 #include <vector>
 #include <sstream>
 
 BEGIN_INANITY_NET
 
 /// Вспомогательный класс запроса на TCP-соединение.
+template <typename Socket>
 class AsioService::ConnectTcpRequest : public Object
 {
 private:
 	ptr<AsioService> service;
-	ptr<AsioTcpSocket> socket;
+	ptr<Socket> socket;
 	ptr<TcpSocketHandler> socketHandler;
 
 	class ResolvedBinder
@@ -44,7 +46,7 @@ private:
 		currentEndpointIterator = i;
 
 		// создать сокет
-		socket = NEW(AsioTcpSocket(service));
+		socket = NEW(Socket(service));
 
 		TryConnect();
 	}
@@ -60,7 +62,7 @@ private:
 		}
 
 		// пробуем подключиться
-		socket->GetSocket().async_connect(*currentEndpointIterator, ConnectedBinder(this));
+		socket->GetLowestSocket().async_connect(*currentEndpointIterator, ConnectedBinder(this));
 	}
 
 	class ConnectedBinder
@@ -85,7 +87,7 @@ private:
 			// пробуем следующий endpoint
 			++currentEndpointIterator;
 			// закрываем сокет, чтобы повторно подключиться
-			socket->GetSocket().close();
+			socket->Close();
 			// следующая попытка
 			TryConnect();
 			return;
@@ -221,11 +223,70 @@ public:
 	}
 };
 
-AsioService::AsioService() : work(new boost::asio::io_service::work(ioService)), tcpResolver(ioService), udpResolver(ioService) {}
+class AsioService::TlsHandshakeHandler : public Object
+{
+private:
+	ptr<TcpSocketHandler> socketHandler;
+
+	class HandshakeBinder
+	{
+	private:
+		ptr<TcpSocket> socket;
+		ptr<TcpSocketHandler> handler;
+
+	public:
+		HandshakeBinder(ptr<TcpSocket> socket, ptr<TcpSocketHandler> handler) : socket(socket), handler(handler) {}
+
+		void operator()(const boost::system::error_code& error) const
+		{
+			if(error)
+			{
+				handler->FireError(AsioService::ConvertError(error));
+				return;
+			}
+
+			handler->FireData(socket);
+		}
+	};
+
+public:
+	TlsHandshakeHandler(ptr<TcpSocketHandler> socketHandler) : socketHandler(socketHandler) {}
+
+	void OnConnect(TcpSocketHandler::Result const& result)
+	{
+		try
+		{
+			ptr<AsioTlsTcpSocket> socket = result.GetData().DynamicCast<AsioTlsTcpSocket>();
+
+			socket->GetSocket().async_handshake(Botan::TLS::CLIENT, HandshakeBinder(socket, socketHandler));
+		}
+		catch(Exception* exception)
+		{
+			socketHandler->FireError(exception);
+		}
+	}
+};
+
+std::vector<Botan::Certificate_Store*> AsioService::TlsCredentialsManager::trusted_certificate_authorities(std::string const& type, std::string const& hostname)
+{
+	if(type == "tls-server") return {};
+	return { &certStore };
+}
+
+AsioService::AsioService()
+: work(new boost::asio::io_service::work(ioService)), tcpResolver(ioService), udpResolver(ioService),
+tlsSessionManager(Botan::system_rng()),
+tlsContext(tlsCredentialsManager, Botan::system_rng(), tlsSessionManager, tlsPolicy)
+{}
 
 boost::asio::io_service& AsioService::GetIoService()
 {
 	return ioService;
+}
+
+Botan::TLS::Context& AsioService::GetTlsContext()
+{
+	return tlsContext;
 }
 
 ptr<Exception> AsioService::ConvertError(const boost::system::error_code& error)
@@ -271,7 +332,7 @@ ptr<TcpListener> AsioService::ListenTcp(int port, ptr<TcpSocketHandler> socketHa
 
 void AsioService::ConnectTcp(const String& host, int port, ptr<TcpSocketHandler> socketHandler)
 {
-	MakePointer(NEW(ConnectTcpRequest(this, host, port, socketHandler)));
+	MakePointer(NEW(ConnectTcpRequest<AsioTcpSocket>(this, host, port, socketHandler)));
 }
 
 ptr<UdpListener> AsioService::ListenUdp(int port, ptr<UdpPacketHandler> receiveHandler)
@@ -301,6 +362,11 @@ ptr<UdpListener> AsioService::ListenUdp(int port, ptr<UdpPacketHandler> receiveH
 void AsioService::ConnectUdp(const String& host, int port, ptr<UdpSocketHandler> socketHandler)
 {
 	MakePointer(NEW(ConnectUdpRequest(this, host, port, socketHandler)));
+}
+
+void AsioService::ConnectTlsTcp(const String& host, int port, ptr<TcpSocketHandler> socketHandler)
+{
+	MakePointer(NEW(ConnectTcpRequest<AsioTlsTcpSocket>(this, host, port, TcpSocketHandler::Bind(MakePointer(NEW(TlsHandshakeHandler(socketHandler))), &TlsHandshakeHandler::OnConnect))));
 }
 
 END_INANITY_NET

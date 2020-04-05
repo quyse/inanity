@@ -35,15 +35,19 @@ public:
 
 	/// Open a TCP port and begin listening incoming TCP connections.
 	virtual ptr<TcpListener> ListenTcp(int port, ptr<TcpSocketHandler> socketHandler);
-	/// Create outcoming TCP connection.
+	/// Create outgoing TCP connection.
 	/** socketHandler will be called once. */
 	virtual void ConnectTcp(const String& host, int port, ptr<TcpSocketHandler> socketHandler);
 
 	/// Open an UDP port and begin listening incoming UDP packets.
 	virtual ptr<UdpListener> ListenUdp(int port, ptr<UdpPacketHandler> receiveHandler);
-	/// Create outcoming UDP connection.
+	/// Create outgoing UDP connection.
 	/** Of course this is not actually connection, but only an abstraction. */
 	virtual void ConnectUdp(const String& host, int port, ptr<UdpSocketHandler> socketHandler);
+
+	/// Create outgoing TCP connection with TLS.
+	/** socketHandler will be called once. */
+	virtual void ConnectTlsTcp(const String& host, int port, ptr<TcpSocketHandler> socketHandler);
 };
 
 END_INANITY_NET

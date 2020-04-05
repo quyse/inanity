@@ -99,10 +99,13 @@ private:
 	ptr<HttpStream> outputStream;
 
 public:
-	Request(ptr<Service> service, const String& host, int port, ptr<File> requestFile, Handler handler, ptr<OutputStream> outputStream)
+	Request(ptr<Service> service, const String& schema, const String& host, int port, ptr<File> requestFile, Handler handler, ptr<OutputStream> outputStream)
 	: requestFile(requestFile), handler(handler), outputStream(HttpStream::CreateResponseStream(outputStream))
 	{
-		service->ConnectTcp(host, port, Service::TcpSocketHandler::Bind(MakePointer(this), &Request::OnConnect));
+		if(schema == "https" || schema == "wss")
+			service->ConnectTlsTcp(host, port, Service::TcpSocketHandler::Bind(MakePointer(this), &Request::OnConnect));
+		else
+			service->ConnectTcp(host, port, Service::TcpSocketHandler::Bind(MakePointer(this), &Request::OnConnect));
 	}
 
 private:
@@ -202,7 +205,7 @@ void HttpClient::Fetch(ptr<Service> service, const String& url, const String& me
 	if(data)
 		memcpy((char*)requestFile->GetData() + request.str().length(), data->GetData(), data->GetSize());
 
-	MakePointer(NEW(Request(service, host, port, requestFile, handler, outputStream)));
+	MakePointer(NEW(Request(service, schema, host, port, requestFile, handler, outputStream)));
 
 	END_TRY("Can't fetch http");
 }
