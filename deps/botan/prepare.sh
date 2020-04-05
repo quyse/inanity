@@ -12,7 +12,7 @@ function preparePlatform {
 		--link-method=copy \
 		--with-zlib \
 		--with-boost \
-		--enable-modules=certstor_system \
+		--enable-modules=asio,certstor_system \
 		--disable-modules=ffi,certstor_sql,win32_stats \
 		--disable-shared-library \
 		$2
