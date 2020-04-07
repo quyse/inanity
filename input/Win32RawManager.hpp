@@ -9,8 +9,6 @@ BEGIN_INANITY_INPUT
 class Win32RawManager : public Win32Manager
 {
 private:
-	/// Bound window.
-	HWND hWnd;
 	/// Размер буфера для буферизованного ввода.
 	static const int deviceBufferSize = 32;
 

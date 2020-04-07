@@ -69,7 +69,6 @@ HICON Win32Window::CreateIconFromTexture(ptr<Graphics::RawTextureData> texture, 
 {
 	int width = texture->GetImageWidth();
 	int height = texture->GetImageHeight();
-	int pitch = (width * 3 + 3) & ~3;
 	BITMAPV5HEADER h;
 	ZeroMemory(&h, sizeof(h));
 	h.bV5Size = sizeof(h);
@@ -208,7 +207,7 @@ ptr<Win32Window> Win32Window::Create(ATOM windowClass, const String& title,
 
 	//создать окно
 	HWND hWnd = CreateWindow(
-		(LPCTSTR)windowClass, Strings::UTF82Unicode(title).c_str(),
+		(LPCTSTR)(UINT_PTR)windowClass, Strings::UTF82Unicode(title).c_str(),
 		WS_OVERLAPPEDWINDOW | (visible ? WS_VISIBLE : 0),
 		left, top, width, height,
 		NULL, NULL, GetModuleHandle(NULL), NULL);

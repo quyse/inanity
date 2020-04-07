@@ -20,6 +20,8 @@ DxgiMonitorMode::DxgiMonitorMode(const DXGI_MODE_DESC& desc)
 	case DXGI_FORMAT_B5G6R5_UNORM:
 		stream << ", 16 bit";
 		break;
+	default:
+		break;
 	}
 
 	// refresh rate
@@ -37,6 +39,8 @@ DxgiMonitorMode::DxgiMonitorMode(const DXGI_MODE_DESC& desc)
 	case DXGI_MODE_SCANLINE_ORDER_LOWER_FIELD_FIRST:
 		stream << ", interlaced lower-first";
 		break;
+	default:
+		break;
 	}
 
 	// scaling
@@ -47,6 +51,8 @@ DxgiMonitorMode::DxgiMonitorMode(const DXGI_MODE_DESC& desc)
 		break;
 	case DXGI_MODE_SCALING_STRETCHED:
 		stream << ", stretched";
+		break;
+	default:
 		break;
 	}
 

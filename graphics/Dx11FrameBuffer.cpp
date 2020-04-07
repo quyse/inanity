@@ -12,7 +12,7 @@ Dx11FrameBuffer::Dx11FrameBuffer(ptr<Dx11Device> device, Dx11Presenter* presente
 Dx11RenderBuffer* Dx11FrameBuffer::GetColorBuffer(int i) const
 {
 	return (i || !presenter)
-		? fast_cast<Dx11RenderBuffer*>((RenderBuffer*)colorBuffers[i])
+		? colorBuffers[i].FastCast<Dx11RenderBuffer>()
 		: presenter->GetBackBuffer();
 }
 
@@ -23,14 +23,14 @@ void Dx11FrameBuffer::Apply(ID3D11DeviceContext* deviceContext)
 	{
 		RenderBuffer* abstractColorBuffer = colorBuffers[i];
 		views[i] = abstractColorBuffer ?
-			fast_cast<Dx11RenderBuffer*>(abstractColorBuffer)->GetRenderTargetViewInterface() : 0;
+			fast_cast<Dx11RenderBuffer*>(abstractColorBuffer)->GetRenderTargetViewInterface() : nullptr;
 	}
 
 	if(presenter)
 		views[0] = presenter->GetBackBuffer()->GetRenderTargetViewInterface();
 
 	ID3D11DepthStencilView* depthStencilView = depthStencilBuffer ?
-		fast_cast<Dx11DepthStencilBuffer*>(&*depthStencilBuffer)->GetDepthStencilViewInterface() : 0;
+		fast_cast<Dx11DepthStencilBuffer*>(&*depthStencilBuffer)->GetDepthStencilViewInterface() : nullptr;
 
 	// apply to context
 	deviceContext->OMSetRenderTargets(maxColorBuffersCount, views, depthStencilView);

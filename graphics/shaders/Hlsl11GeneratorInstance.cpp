@@ -380,7 +380,7 @@ void Hlsl11GeneratorInstance::PrintUniforms()
 			int slotA = a.first->GetSlot();
 			int slotB = b.first->GetSlot();
 
-			return slotA < slotB || slotA == slotB && a.second->GetOffset() < b.second->GetOffset();
+			return slotA < slotB || (slotA == slotB && a.second->GetOffset() < b.second->GetOffset());
 		}
 	};
 	std::sort(uniforms.begin(), uniforms.end(), Sorter());

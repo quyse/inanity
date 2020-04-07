@@ -28,7 +28,7 @@ public:
 	IncludeProcessor(ptr<FileSystem> fileSystem) : fileSystem(fileSystem) {}
 
 	/// Открыть файл.
-	HRESULT STDMETHODCALLTYPE Open(D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID* ppData, UINT* pBytes)
+	HRESULT STDMETHODCALLTYPE Open(D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID* ppData, UINT* pBytes) noexcept override
 	{
 		// если файл не локальный, закончить (потому что системных файлов пока не обрабатываем)
 		if(IncludeType != D3D_INCLUDE_LOCAL)
@@ -50,7 +50,7 @@ public:
 	}
 
 	/// Закрыть файл.
-	HRESULT STDMETHODCALLTYPE Close(LPCVOID pData)
+	HRESULT STDMETHODCALLTYPE Close(LPCVOID pData) noexcept override
 	{
 		// найти и закрыть файл
 		for(size_t i = 0; i < files.size(); ++i)

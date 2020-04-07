@@ -84,7 +84,8 @@ void Dx11SwapChainPresenter::SetMode(ptr<MonitorMode> abstractMode)
 		// В MSDN рекомендуется сначала изменять размер, а потом переключать полноэкранность.
 
 		// изменить режим
-		if(FAILED(swapChain->ResizeTarget(&Dx11System::GetModeDesc(mode, width, height))))
+		DXGI_MODE_DESC modeDesc = Dx11System::GetModeDesc(mode, width, height);
+		if(FAILED(swapChain->ResizeTarget(&modeDesc)))
 			THROW("Can't resize target");
 		// если полноэкранность изменилась, изменить её
 		if(!currentMode != !mode)

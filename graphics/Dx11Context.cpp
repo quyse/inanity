@@ -136,14 +136,14 @@ void Dx11Context::Update()
 			for(int i = begin; i < end; ++i)
 			{
 				const LetSampler* let = (LetSampler*)cellSamplers[i].top;
-				Texture* abstractTexture = let ? let->texture : 0;
+				Texture* abstractTexture = let ? let->texture : nullptr;
 				Dx11Texture* texture = fast_cast<Dx11Texture*>(abstractTexture);
-				views[i] = texture ? texture->GetShaderResourceViewInterface() : 0;
-				SamplerState* abstractSamplerState = let ? let->samplerState : 0;
+				views[i] = texture ? texture->GetShaderResourceViewInterface() : nullptr;
+				SamplerState* abstractSamplerState = let ? let->samplerState : nullptr;
 				Dx11SamplerState* samplerState = fast_cast<Dx11SamplerState*>(abstractSamplerState);
 				if(!samplerState && texture)
 					samplerState = texture->GetSamplerState();
-				states[i] = samplerState ? samplerState->GetSamplerStateInterface(device) : 0;
+				states[i] = samplerState ? samplerState->GetSamplerStateInterface(device) : nullptr;
 			}
 
 			// set textures
@@ -178,7 +178,7 @@ void Dx11Context::Update()
 			for(int i = begin; i < end; ++i)
 			{
 				LetUniformBuffer* let = (LetUniformBuffer*)cellUniformBuffers[i].top;
-				UniformBuffer* abstractUniformBuffer = let ? let->uniformBuffer : 0;
+				UniformBuffer* abstractUniformBuffer = let ? let->uniformBuffer : nullptr;
 				buffers[i] = abstractUniformBuffer
 					? fast_cast<Dx11UniformBuffer*>(abstractUniformBuffer)->GetBufferInterface()
 					: 0;
@@ -228,7 +228,7 @@ void Dx11Context::Update()
 			for(int i = begin; i < end; ++i)
 			{
 				LetVertexBuffer* let = (LetVertexBuffer*)cellVertexBuffers[i].top;
-				VertexBuffer* abstractVertexBuffer = let ? let->vertexBuffer : 0;
+				VertexBuffer* abstractVertexBuffer = let ? let->vertexBuffer : nullptr;
 				if(abstractVertexBuffer)
 				{
 					Dx11VertexBuffer* vertexBuffer = fast_cast<Dx11VertexBuffer*>(abstractVertexBuffer);
@@ -446,7 +446,7 @@ void Dx11Context::Draw(int count)
 	Update();
 
 	LetIndexBuffer* letIndexBuffer = (LetIndexBuffer*)cellIndexBuffer.current;
-	IndexBuffer* abstractIndexBuffer = letIndexBuffer ? letIndexBuffer->indexBuffer : 0;
+	IndexBuffer* abstractIndexBuffer = letIndexBuffer ? letIndexBuffer->indexBuffer : nullptr;
 	if(abstractIndexBuffer)
 		deviceContext->DrawIndexed(count >= 0 ? count : fast_cast<Dx11IndexBuffer*>(abstractIndexBuffer)->GetIndicesCount(), 0, 0);
 	else
@@ -463,7 +463,7 @@ void Dx11Context::DrawInstanced(int instancesCount, int count)
 	Update();
 
 	LetIndexBuffer* letIndexBuffer = (LetIndexBuffer*)cellIndexBuffer.current;
-	IndexBuffer* abstractIndexBuffer = letIndexBuffer ? letIndexBuffer->indexBuffer : 0;
+	IndexBuffer* abstractIndexBuffer = letIndexBuffer ? letIndexBuffer->indexBuffer : nullptr;
 	if(abstractIndexBuffer)
 		deviceContext->DrawIndexedInstanced(count >= 0 ? count : fast_cast<Dx11IndexBuffer*>(abstractIndexBuffer)->GetIndicesCount(), instancesCount, 0, 0, 0);
 	else
