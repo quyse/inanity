@@ -25,14 +25,17 @@ function preparePlatform {
 	rm -r build
 }
 
-rm -rf include{,_win32,_linux,_darwin}
+rm -rf include{,_win32,_linux,_darwin{64,32}}
 mkdir include
 
 preparePlatform win32 "--cpu=x86_32 --os=windows --cc=msvc --enable-modules=certstor_system_windows --disable-ssse3 --disable-sse4.1 --disable-sse4.2"
 preparePlatform linux "--cpu=x86_64 --os=linux --cc=clang --enable-modules=certstor_flatfile"
-preparePlatform darwin "--cpu=x86_64 --os=macos --cc=clang --enable-modules=certstor_system_macos"
+preparePlatform darwin64 "--cpu=x86_64 --os=macos --cc=clang --enable-modules=certstor_system_macos --disable-modules=sha2_64_bmi2,sha3_bmi2"
+preparePlatform darwin32 "--cpu=x86_32 --os=macos --cc=clang --enable-modules=certstor_system_macos"
+
+cmp files_darwin{64,32}.txt
 
 # get list of lib .cpp files
-FILES_LINUX="$(cat files_linux.txt)" FILES_WIN32="$(cat files_win32.txt)" FILES_DARWIN="$(cat files_darwin.txt)" envsubst < configure.js.in > configure.js
+FILES_LINUX="$(cat files_linux.txt)" FILES_WIN32="$(cat files_win32.txt)" FILES_DARWIN="$(cat files_darwin64.txt)" envsubst < configure.js.in > configure.js
 
-rm -f files_{win32,linux,darwin}.txt
+rm -f files_{win32,linux,darwin{64,32}}.txt
