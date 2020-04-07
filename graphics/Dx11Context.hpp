@@ -69,17 +69,17 @@ public:
 
 	// методы Context
 
-	void ClearColor(int colorBufferIndex, const vec4& color);
-	void ClearDepth(float depth);
-	void ClearStencil(uint8_t stencil);
-	void ClearDepthStencil(float depth, uint8_t stencil);
+	void ClearColor(int colorBufferIndex, const vec4& color) override;
+	void ClearDepth(float depth) override;
+	void ClearStencil(uint8_t stencil) override;
+	void ClearDepthStencil(float depth, uint8_t stencil) override;
 
-	void UploadUniformBufferData(UniformBuffer* buffer, const void* data, int size);
-	void UploadVertexBufferData(VertexBuffer* buffer, const void* data, int size);
-	void UploadIndexBufferData(IndexBuffer* buffer, const void* data, int size);
+	void UploadUniformBufferData(UniformBuffer* buffer, const void* data, int size) override;
+	void UploadVertexBufferData(VertexBuffer* buffer, const void* data, int size) override;
+	void UploadIndexBufferData(IndexBuffer* buffer, const void* data, int size) override;
 
-	void Draw(int count = -1);
-	void DrawInstanced(int instancesCount, int count = -1);
+	void Draw(int count = -1) override;
+	void DrawInstanced(int instancesCount, int count = -1) override;
 
 	ptr<RawTextureData> GetPresenterTextureData(ptr<Presenter> presenter) override;
 };

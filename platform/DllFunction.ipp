@@ -14,7 +14,7 @@ DllFunction<Function>::DllFunction(const String& dllName, const char* functionNa
 
 #ifdef ___INANITY_PLATFORM_WINDOWS
 	HMODULE hModule = DllCache::Load(dllName);
-	void* f = GetProcAddress(hModule, functionName);
+	void* f = (void*)GetProcAddress(hModule, functionName);
 	if(!f)
 		THROW("Function was not found");
 	function = (Function)f;

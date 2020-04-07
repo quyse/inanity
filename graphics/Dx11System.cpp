@@ -67,6 +67,7 @@ DXGI_FORMAT Dx11System::GetDXGIFormat(PixelFormat format)
 				case S(8bit): return X(R8_TYPELESS);
 				case S(16bit): return X(R16_TYPELESS);
 				case S(32bit): return X(R32_TYPELESS);
+				default: break;
 				};
 				break;
 			case F(Uint):
@@ -74,6 +75,7 @@ DXGI_FORMAT Dx11System::GetDXGIFormat(PixelFormat format)
 				{
 				case S(8bit): return X(R8_UNORM);
 				case S(16bit): return X(R16_UNORM);
+				default: break;
 				}
 				break;
 			case F(Float):
@@ -81,6 +83,7 @@ DXGI_FORMAT Dx11System::GetDXGIFormat(PixelFormat format)
 				{
 				case S(16bit): return X(R16_FLOAT);
 				case S(32bit): return X(R32_FLOAT);
+				default: break;
 				}
 				break;
 			}
@@ -93,6 +96,7 @@ DXGI_FORMAT Dx11System::GetDXGIFormat(PixelFormat format)
 				{
 				case S(16bit): return X(R8G8_TYPELESS);
 				case S(32bit): return X(R16G16_TYPELESS);
+				default: break;
 				}
 				break;
 			case F(Uint):
@@ -100,6 +104,7 @@ DXGI_FORMAT Dx11System::GetDXGIFormat(PixelFormat format)
 				{
 				case S(16bit): return X(R8G8_UNORM);
 				case S(32bit): return X(R16G16_UNORM);
+				default: break;
 				}
 				break;
 			case F(Float):
@@ -107,6 +112,7 @@ DXGI_FORMAT Dx11System::GetDXGIFormat(PixelFormat format)
 				{
 				case S(32bit): return X(R16G16_FLOAT);
 				case S(64bit): return X(R32G32_FLOAT);
+				default: break;
 				}
 				break;
 			}
@@ -123,6 +129,7 @@ DXGI_FORMAT Dx11System::GetDXGIFormat(PixelFormat format)
 				{
 				case S(32bit): return X(R11G11B10_FLOAT);
 				case S(96bit): return X(R32G32B32_FLOAT);
+				default: break;
 				}
 				break;
 			}
@@ -136,6 +143,7 @@ DXGI_FORMAT Dx11System::GetDXGIFormat(PixelFormat format)
 				case S(32bit): return X(R10G10B10A2_TYPELESS);
 				case S(64bit): return X(R16G16B16A16_TYPELESS);
 				case S(128bit): return X(R32G32B32A32_TYPELESS);
+				default: break;
 				}
 				break;
 			case F(Uint):
@@ -143,6 +151,7 @@ DXGI_FORMAT Dx11System::GetDXGIFormat(PixelFormat format)
 				{
 				case S(32bit): return format.srgb ? X(R8G8B8A8_UNORM_SRGB) : X(R8G8B8A8_UNORM);
 				case S(64bit): return X(R16G16B16A16_UNORM);
+				default: break;
 				}
 				break;
 			case F(Float):
@@ -150,6 +159,7 @@ DXGI_FORMAT Dx11System::GetDXGIFormat(PixelFormat format)
 				{
 				case S(64bit): return X(R16G16B16A16_FLOAT);
 				case S(128bit): return X(R32G32B32A32_FLOAT);
+				default: break;
 				}
 				break;
 			}
@@ -167,6 +177,7 @@ DXGI_FORMAT Dx11System::GetDXGIFormat(PixelFormat format)
 		case C(Bc4Signed): return X(BC4_SNORM);
 		case C(Bc5): return X(BC5_UNORM);
 		case C(Bc5Signed): return X(BC5_SNORM);
+		default: break;
 		}
 		break;
 	}

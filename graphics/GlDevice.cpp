@@ -53,7 +53,7 @@ BEGIN_INANITY_GRAPHICS
 #if defined(___INANITY_PLATFORM_WINDOWS)
 
 GlDevice::GlDevice(ptr<GlSystem> system, const String& deviceName)
-: system(system), deviceName(deviceName), boundPresenter(nullptr), hglrc(0)
+: system(system), boundPresenter(nullptr), deviceName(deviceName), hglrc(0)
 {
 	// create hidden window
 	hiddenWindow = Platform::Win32Window::CreateForOpenGL("Inanity OpenGL Hidden Window",

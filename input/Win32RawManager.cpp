@@ -5,7 +5,7 @@
 
 BEGIN_INANITY_INPUT
 
-Win32RawManager::Win32RawManager(HWND hWnd) : hWnd(hWnd)
+Win32RawManager::Win32RawManager(HWND hWnd)
 {
 	try
 	{

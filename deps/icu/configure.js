@@ -23,7 +23,7 @@ exports.configureCompiler = function(objectFile, compiler) {
 	compiler.addMacro('UCONFIG_NO_FILE_IO=1');
 	// crazy hacks for windows
 	compiler.addMacro('__WINTZ'); // to skip including wintz.h
-	compiler.addMacro('uprv_detectWindowsTimeZone=__noop');
+	compiler.addMacro('uprv_detectWindowsTimeZone=(const char*)__noop');
 	// crazy hacks for xbox
 	if(compiler.platform == 'xbox') {
 		compiler.addMacro('U_TZSET=__noop');

@@ -628,7 +628,6 @@ ptr<SamplerState> Dx11Device::CreateSamplerState(const SamplerSettings& samplerS
 
 	// в DirectX общий параметр для фильтрации, так что разбираемся
 
-	static bool haveFilterConversionMap = false;
 	// параметры: min, mag, mip (как в DX, и не как в Sampler)
 	static D3D11_FILTER filterConversionMap[2][2][2] =
 	{
