@@ -14,6 +14,7 @@ function preparePlatform {
 		--with-boost \
 		--enable-modules=asio,certstor_system \
 		--disable-modules=ffi,certstor_sql,win32_stats \
+		--disable-rdrand --disable-rdseed \
 		--disable-shared-library \
 		$2
 	cd ..
@@ -27,7 +28,7 @@ function preparePlatform {
 rm -rf include{,_win32,_linux,_darwin}
 mkdir include
 
-preparePlatform win32 "--cpu=x86_32 --os=windows --cc=msvc --enable-modules=certstor_system_windows"
+preparePlatform win32 "--cpu=x86_32 --os=windows --cc=msvc --enable-modules=certstor_system_windows --disable-ssse3 --disable-sse4.1 --disable-sse4.2"
 preparePlatform linux "--cpu=x86_64 --os=linux --cc=clang --enable-modules=certstor_flatfile"
 preparePlatform darwin "--cpu=x86_64 --os=macos --cc=clang --enable-modules=certstor_system_macos"
 

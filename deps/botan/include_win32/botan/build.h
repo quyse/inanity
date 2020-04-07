@@ -3,7 +3,7 @@
 
 /*
 * This file was automatically generated running
-* 'configure.py --with-build-dir=../build --module-policy=modern --link-method=copy --with-zlib --with-boost --enable-modules=asio,certstor_system --disable-modules=ffi,certstor_sql,win32_stats --disable-shared-library --cpu=x86_32 --os=windows --cc=msvc --enable-modules=certstor_system_windows'
+* 'configure.py --with-build-dir=../build --module-policy=modern --link-method=copy --with-zlib --with-boost --enable-modules=asio,certstor_system --disable-modules=ffi,certstor_sql,win32_stats --disable-rdrand --disable-rdseed --disable-shared-library --cpu=x86_32 --os=windows --cc=msvc --enable-modules=certstor_system_windows --disable-ssse3 --disable-sse4.1 --disable-sse4.2'
 *
 * Target
 *  - Compiler: cl  /EHs /GR /D_ENABLE_EXTENDED_ALIGNED_STORAGE /MD /bigobj /O2 /Oi
@@ -64,13 +64,8 @@
 
 #define BOTAN_TARGET_SUPPORTS_AESNI
 #define BOTAN_TARGET_SUPPORTS_BMI2
-#define BOTAN_TARGET_SUPPORTS_RDRAND
-#define BOTAN_TARGET_SUPPORTS_RDSEED
 #define BOTAN_TARGET_SUPPORTS_SHA
 #define BOTAN_TARGET_SUPPORTS_SSE2
-#define BOTAN_TARGET_SUPPORTS_SSE41
-#define BOTAN_TARGET_SUPPORTS_SSE42
-#define BOTAN_TARGET_SUPPORTS_SSSE3
 
 
 
@@ -85,7 +80,6 @@
 #define BOTAN_HAS_AEAD_MODES 20131128
 #define BOTAN_HAS_AEAD_OCB 20131128
 #define BOTAN_HAS_AES 20131128
-#define BOTAN_HAS_AES_NI 20131128
 #define BOTAN_HAS_ASN1 20171109
 #define BOTAN_HAS_AUTO_RNG 20161126
 #define BOTAN_HAS_AUTO_SEEDING_RNG 20160821
@@ -126,9 +120,6 @@
 #define BOTAN_HAS_EMSA_PKCS1 20140118
 #define BOTAN_HAS_EMSA_PSSR 20131128
 #define BOTAN_HAS_ENTROPY_SOURCE 20151120
-#define BOTAN_HAS_ENTROPY_SRC_RDRAND 20131128
-#define BOTAN_HAS_ENTROPY_SRC_RDSEED 20151218
-#define BOTAN_HAS_GCM_CLMUL_SSSE3 20171020
 #define BOTAN_HAS_HASH 20180112
 #define BOTAN_HAS_HASH_ID 20131128
 #define BOTAN_HAS_HEX_CODEC 20131128
@@ -158,7 +149,6 @@
 #define BOTAN_HAS_POLY1305 20141227
 #define BOTAN_HAS_POLY_DBL 20170927
 #define BOTAN_HAS_PUBLIC_KEY_CRYPTO 20131128
-#define BOTAN_HAS_RDRAND_RNG 20160619
 #define BOTAN_HAS_RFC6979_GENERATOR 20140321
 #define BOTAN_HAS_RSA 20160730
 #define BOTAN_HAS_SERPENT 20131128
