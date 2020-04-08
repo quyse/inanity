@@ -30,8 +30,8 @@ mkdir include
 
 preparePlatform win32 "--cpu=x86_32 --os=windows --cc=msvc --enable-modules=certstor_system_windows --disable-ssse3 --disable-sse4.1 --disable-sse4.2"
 preparePlatform linux "--cpu=x86_64 --os=linux --cc=clang --enable-modules=certstor_flatfile"
-preparePlatform darwin64 "--cpu=x86_64 --os=macos --cc=clang --enable-modules=certstor_system_macos --disable-modules=sha2_64_bmi2,sha3_bmi2"
-preparePlatform darwin32 "--cpu=x86_32 --os=macos --cc=clang --enable-modules=certstor_system_macos"
+preparePlatform darwin64 "--cpu=x86_64 --os=macos --cc=clang --enable-modules=certstor_system_macos --without-os-features=clock_gettime --disable-modules=sha2_64_bmi2,sha3_bmi2"
+preparePlatform darwin32 "--cpu=x86_32 --os=macos --cc=clang --enable-modules=certstor_system_macos --without-os-features=clock_gettime"
 
 cmp files_darwin{64,32}.txt
 

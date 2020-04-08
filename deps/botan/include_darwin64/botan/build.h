@@ -3,7 +3,7 @@
 
 /*
 * This file was automatically generated running
-* 'configure.py --with-build-dir=../build --module-policy=modern --link-method=copy --with-zlib --with-boost --enable-modules=asio,certstor_system --disable-modules=ffi,certstor_sql,win32_stats --disable-rdrand --disable-rdseed --disable-shared-library --cpu=x86_64 --os=macos --cc=clang --enable-modules=certstor_system_macos --disable-modules=sha2_64_bmi2,sha3_bmi2'
+* 'configure.py --with-build-dir=../build --module-policy=modern --link-method=copy --with-zlib --with-boost --enable-modules=asio,certstor_system --disable-modules=ffi,certstor_sql,win32_stats --disable-rdrand --disable-rdseed --disable-shared-library --cpu=x86_64 --os=macos --cc=clang --enable-modules=certstor_system_macos --without-os-features=clock_gettime --disable-modules=sha2_64_bmi2,sha3_bmi2'
 *
 * Target
 *  - Compiler: clang++ -fstack-protector -m64 -pthread -stdlib=libc++ -std=c++11 -D_REENTRANT -O3
@@ -44,7 +44,6 @@
 
 #define BOTAN_TARGET_OS_HAS_APPLE_KEYCHAIN
 #define BOTAN_TARGET_OS_HAS_ARC4RANDOM
-#define BOTAN_TARGET_OS_HAS_CLOCK_GETTIME
 #define BOTAN_TARGET_OS_HAS_COMMONCRYPTO
 #define BOTAN_TARGET_OS_HAS_DEV_RANDOM
 #define BOTAN_TARGET_OS_HAS_FILESYSTEM
