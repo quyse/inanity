@@ -3,7 +3,7 @@
 
 /*
 * This file was automatically generated running
-* 'configure.py --with-build-dir=../build --module-policy=modern --link-method=copy --with-zlib --with-boost --enable-modules=asio,certstor_system --disable-modules=ffi,certstor_sql,win32_stats --disable-rdrand --disable-rdseed --disable-shared-library --cpu=x86_64 --os=macos --cc=clang --enable-modules=certstor_system_macos --without-os-features=clock_gettime --disable-modules=sha2_64_bmi2,sha3_bmi2'
+* 'configure.py --with-build-dir=../build --module-policy=modern --link-method=copy --with-zlib --with-boost --enable-modules=asio,certstor_system --disable-modules=ffi,certstor_sql,win32_stats --disable-rdrand --disable-rdseed --disable-shared-library --cpu=x86_64 --os=macos --cc=clang --enable-modules=certstor_system_macos --without-os-features=clock_gettime'
 *
 * Target
 *  - Compiler: clang++ -fstack-protector -m64 -pthread -stdlib=libc++ -std=c++11 -D_REENTRANT -O3
@@ -173,7 +173,9 @@
 #define BOTAN_HAS_SHA2_32_X86 20170518
 #define BOTAN_HAS_SHA2_32_X86_BMI2 20180526
 #define BOTAN_HAS_SHA2_64 20131128
+#define BOTAN_HAS_SHA2_64_BMI2 20190117
 #define BOTAN_HAS_SHA3 20161018
+#define BOTAN_HAS_SHA3_BMI2 20190117
 #define BOTAN_HAS_SHAKE_CIPHER 20161018
 #define BOTAN_HAS_SIMD_32 20131128
 #define BOTAN_HAS_SIMD_AVX2 20180824

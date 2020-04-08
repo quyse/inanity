@@ -2,7 +2,7 @@ exports.configureCompiler = function(objectFile, compiler) {
 	var a = /^([^\/]+)\/([^\/]+)$/.exec(objectFile);
 	compiler.configuration = a[1];
 	compiler.setSourceFile(`repo/src/lib/${a[2].replace(/\./g, '/')}.cpp`);
-	compiler.addIncludeDir(`include_${compiler.platform}`);
+	compiler.addIncludeDir(`include_${compiler.platform}_${compiler.arch}`);
 	compiler.addIncludeDir('include');
 	compiler.addIncludeDir('../zlib');
 	compiler.addMacro('BOTAN_IS_BEING_BUILT');
@@ -15,14 +15,17 @@ exports.configureCompiler = function(objectFile, compiler) {
 };
 
 var objectsByPlatform = {
-	win32: [
+	win32_x86: [
 ${FILES_WIN32}
 	],
-	linux: [
-${FILES_LINUX}
+	linux_x64: [
+${FILES_LINUX64}
 	],
-	darwin: [
-${FILES_DARWIN}
+	darwin_x64: [
+${FILES_DARWIN64}
+	],
+	darwin_x86: [
+${FILES_DARWIN32}
 	],
 };
 
@@ -30,7 +33,7 @@ exports.configureComposer = function(libraryFile, composer) {
 	var a = /^(([^\/]+)\/)([^\/]+)$/.exec(libraryFile);
 	var confDir = a[1];
 	composer.configuration = a[2];
-	var objects = objectsByPlatform[composer.platform];
+	var objects = objectsByPlatform[`${composer.platform}_${composer.arch}`];
 	for ( var i = 0; i < objects.length; ++i)
 		composer.addObjectFile(confDir + objects[i]);
 };
