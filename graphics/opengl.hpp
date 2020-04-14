@@ -24,7 +24,7 @@
 #elif defined(___INANITY_PLATFORM_MACOS)
 
 #include "../deps/glew/include/GL/glew.h"
-#include </System/Library/Frameworks/OpenGL.framework/Headers/gl.h>
+#include <OpenGL/gl.h>
 
 #elif defined(___INANITY_PLATFORM_SWITCH)
 
