@@ -7,7 +7,7 @@
 BEGIN_INANITY_PLATFORM
 
 SdlWindow::SdlWindow(SDL_Window* handle)
-: sdl(Sdl::Get()), handle(handle), quit(false), fullscreen(false)
+: sdl(Sdl::Get()), handle(handle), fullscreen(false)
 {
 	SDL_GetWindowSize(handle, &virtualWidth, &virtualHeight);
 	SDL_GL_GetDrawableSize(handle, &clientWidth, &clientHeight);
@@ -52,7 +52,7 @@ void SdlWindow::Close()
 		SDL_DestroyWindow(handle);
 		handle = nullptr;
 	}
-	quit = true;
+	Stop();
 }
 
 void SdlWindow::SetFullScreen(bool fullscreen)
@@ -81,7 +81,9 @@ void SdlWindow::GetRect(int& left, int& top, int& width, int& height)
 
 void SdlWindow::Run(ptr<Handler> activeHandler)
 {
-	while(!quit)
+	running = true;
+
+	while(running)
 	{
 		SDL_Event event;
 		while(SDL_PollEvent(&event))
@@ -104,7 +106,8 @@ void SdlWindow::Run(ptr<Handler> activeHandler)
 						presenter->Resize(clientWidth, clientHeight);
 					break;
 				case SDL_WINDOWEVENT_CLOSE:
-					Close();
+					if(preventUserClose) Stop();
+					else Close();
 					break;
 				case SDL_WINDOWEVENT_FOCUS_LOST:
 					if(inputManager)

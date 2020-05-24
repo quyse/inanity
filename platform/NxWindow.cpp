@@ -4,7 +4,7 @@
 BEGIN_INANITY_PLATFORM
 
 NxWindow::NxWindow()
-: clientWidth(1280), clientHeight(720), dpiScale(1), quit(false) // TODO
+: clientWidth(1280), clientHeight(720), dpiScale(1) // TODO
 {}
 
 void NxWindow::SetInputManager(ptr<Input::NxManager> inputManager)
@@ -28,7 +28,7 @@ void NxWindow::SetTitle(const String& title)
 
 void NxWindow::Close()
 {
-	quit = true;
+	Stop();
 }
 
 void NxWindow::SetFullScreen(bool fullscreen)
@@ -46,7 +46,7 @@ void NxWindow::GetRect(int& left, int& top, int& width, int& height)
 
 void NxWindow::Run(ptr<Handler> activeHandler)
 {
-	while(!quit)
+	while(running)
 	{
 		if(inputManager)
 			inputManager->Update();

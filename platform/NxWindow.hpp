@@ -19,7 +19,6 @@ private:
 	ptr<Input::NxManager> inputManager;
 	int clientWidth, clientHeight;
 	float dpiScale;
-	bool quit;
 
 protected:
 	void UpdateMouseLock();

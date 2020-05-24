@@ -22,7 +22,6 @@ private:
 	ptr<Sdl> sdl;
 	SDL_Window* handle;
 	ptr<Input::SdlManager> inputManager;
-	bool quit;
 	bool fullscreen;
 	int virtualWidth, virtualHeight;
 	int clientWidth, clientHeight;

@@ -63,6 +63,12 @@ public:
 	/// Set cursor.
 	virtual void SetCursor(ptr<Cursor> cursor) = 0;
 
+	/// Stop run loop.
+	virtual void Stop();
+	/// Set prevent-close-by-user mode.
+	/** User trying to close the window will still stop the Run loop. */
+	void SetPreventUserClose(bool preventUserClose);
+
 protected:
 	/// Presenter for notifications.
 	Graphics::Presenter* presenter;
@@ -74,6 +80,10 @@ protected:
 	bool cursorVisible;
 	/// Sleep when window is inactive.
 	bool sleepWhenInactive;
+	/// Continue run loop.
+	bool running;
+	/// Prevent close by user.
+	bool preventUserClose;
 
 	Window();
 
