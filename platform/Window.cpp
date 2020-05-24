@@ -6,7 +6,9 @@ Window::Window() :
 	presenter(nullptr),
 	mouseLock(false),
 	cursorVisible(true),
-	sleepWhenInactive(false)
+	sleepWhenInactive(false),
+	running(false),
+	preventUserClose(false)
 {}
 
 float Window::GetDPIScale() const
@@ -35,6 +37,16 @@ void Window::SetCursorVisible(bool cursorVisible)
 		this->cursorVisible = cursorVisible;
 		UpdateCursorVisible();
 	}
+}
+
+void Window::Stop()
+{
+	running = false;
+}
+
+void Window::SetPreventUserClose(bool preventUserClose)
+{
+	this->preventUserClose = preventUserClose;
 }
 
 END_INANITY_PLATFORM

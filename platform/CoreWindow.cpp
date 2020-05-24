@@ -55,7 +55,7 @@ public:
 
 	virtual void Run()
 	{
-		while(!window->closed)
+		while(window->running)
 		{
 			WUC::CoreWindow::GetForCurrentThread()->Dispatcher->
 				ProcessEvents(window->active ? CoreProcessEventsOption::ProcessAllIfPresent : CoreProcessEventsOption::ProcessUntilQuit);
@@ -106,7 +106,7 @@ private:
 
 	void OnWindowClosed(WUC::CoreWindow^ sender, CoreWindowEventArgs^ args)
 	{
-		window->closed = true;
+		window->Stop();
 	}
 };
 
@@ -128,7 +128,7 @@ public:
 
 // CoreWindow class
 
-CoreWindow::CoreWindow(const String& title) : title(title), active(false), closed(false)
+CoreWindow::CoreWindow(const String& title) : title(title), active(false)
 {
 }
 
@@ -153,7 +153,7 @@ void CoreWindow::SetTitle(const String& title)
 
 void CoreWindow::Close()
 {
-	closed = true;
+	Stop();
 }
 
 void CoreWindow::SetFullScreen(bool fullscreen)

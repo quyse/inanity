@@ -200,6 +200,12 @@ void Win32Window::SetCursor(ptr<Cursor> cursor)
 	UpdateCursor();
 }
 
+void Win32Window::Stop()
+{
+	Window::Stop();
+	PostQuitMessage(0);
+}
+
 ptr<Win32Window> Win32Window::Create(ATOM windowClass, const String& title,
 	int left, int top, int width, int height, bool visible)
 {
@@ -383,13 +389,13 @@ LRESULT Win32Window::WndProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		if(wParam == SC_KEYMENU && GET_Y_LPARAM(lParam) <= 0) return 0;
 		break;
 	case WM_CLOSE:
-		Close();
+		if(preventUserClose) Stop();
+		else Close();
 		return 0;
 	case WM_DESTROY:
 		hWnd = 0;
 		ClipCursor(NULL);
-		if(own)
-			PostQuitMessage(0);
+		Stop();
 		return 0;
 	}
 

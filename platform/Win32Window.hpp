@@ -88,6 +88,7 @@ public:
 	void SetIcon(ptr<Icon> icon);
 	ptr<Cursor> CreateCursor(ptr<Graphics::RawTextureData> texture, int hotX, int hotY);
 	void SetCursor(ptr<Cursor> cursor);
+	void Stop();
 
 	/// Создать окно для DirectX.
 	static ptr<Win32Window> CreateForDirectX(const String& title,

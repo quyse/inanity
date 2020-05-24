@@ -21,7 +21,6 @@ private:
 	String title;
 	ptr<Handler> activeHandler;
 	bool active;
-	bool closed;
 
 	ptr<Input::CoreManager> inputManager;
 
