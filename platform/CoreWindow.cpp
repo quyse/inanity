@@ -171,6 +171,7 @@ void CoreWindow::GetRect(int& left, int& top, int& width, int& height)
 
 void CoreWindow::Run(ptr<Handler> activeHandler)
 {
+	running = true;
 	this->activeHandler = activeHandler;
 	CoreApplication::Run(ref new ViewProviderFactory(this));
 }
