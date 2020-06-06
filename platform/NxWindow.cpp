@@ -46,6 +46,7 @@ void NxWindow::GetRect(int& left, int& top, int& width, int& height)
 
 void NxWindow::Run(ptr<Handler> activeHandler)
 {
+	running = true;
 	while(running)
 	{
 		if(inputManager)
