@@ -19,6 +19,8 @@ public:
 	ptr<File> TryLoadFile(const String& fileName);
 	void SaveFile(ptr<File> file, const String& fileName);
 	void GetFileNames(std::vector<String>& fileNames) const;
+	void MakeDirectory(const String& directoryName);
+	void DeleteEntry(const String& entryName);
 };
 
 END_INANITY_DATA

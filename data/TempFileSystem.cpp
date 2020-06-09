@@ -20,4 +20,13 @@ void TempFileSystem::GetFileNames(std::vector<String>& fileNames) const
 		fileNames.push_back(i->first);
 }
 
+void TempFileSystem::MakeDirectory(const String& directoryName)
+{
+}
+
+void TempFileSystem::DeleteEntry(const String& entryName)
+{
+	files.erase(entryName);
+}
+
 END_INANITY_DATA
