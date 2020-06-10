@@ -325,7 +325,7 @@ void Win32FileSystem::SaveFile(ptr<File> file, const String& fileName)
 
 	BEGIN_TRY();
 
-	Win32Handle hFile = CreateFile(Strings::UTF82Unicode(name).c_str(), GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, NULL);
+	Win32Handle hFile = CreateFile(Strings::UTF82Unicode(name).c_str(), GENERIC_WRITE, FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, NULL);
 	if(!hFile.IsValid())
 		THROW_SECONDARY("Can't create file", Exception::SystemError());
 	DWORD written;
@@ -351,7 +351,7 @@ ptr<OutputStream> Win32FileSystem::SaveStream(const String& fileName)
 
 	BEGIN_TRY();
 
-	Win32Handle file = CreateFile(Strings::UTF82Unicode(name).c_str(), GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, NULL);
+	Win32Handle file = CreateFile(Strings::UTF82Unicode(name).c_str(), GENERIC_WRITE, FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, NULL);
 	if(!file.IsValid())
 		THROW_SECONDARY("Can't open file", Exception::SystemError());
 	return NEW(Win32OutputStream(std::move(file)));
