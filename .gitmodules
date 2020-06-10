@@ -18,7 +18,7 @@
 	url = https://github.com/grigorig/ucdn.git
 [submodule "deps/eigen/repo"]
 	path = deps/eigen/repo
-	url = https://github.com/eigenteam/eigen-git-mirror.git
+	url = https://gitlab.com/libeigen/eigen.git
 [submodule "deps/discord-rpc/repo"]
 	path = deps/discord-rpc/repo
 	url = https://github.com/discordapp/discord-rpc.git
