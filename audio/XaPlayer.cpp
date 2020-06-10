@@ -89,44 +89,33 @@ void XaPlayer::ApplyPan()
 	// set pan only for mono voices
 	if(channelsCount != 1) return;
 
-	float outputMatrix[8] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
-
 	float left = 0.5f - pan * 0.5f;
 	float right = 0.5f + pan * 0.5f;
 
-	switch(device->GetChannelMask())
-	{
-	case SPEAKER_MONO:
-		break;
-	case SPEAKER_STEREO:
-	case SPEAKER_2POINT1:
-	case SPEAKER_SURROUND:
-		outputMatrix[0] = left;
-		outputMatrix[1] = right;
-		break;
-	case SPEAKER_QUAD:
-		outputMatrix[0] = outputMatrix[2] = left;
-		outputMatrix[1] = outputMatrix[3] = right;
-		break;
-	case SPEAKER_4POINT1:
-		outputMatrix[0] = outputMatrix[3] = left;
-		outputMatrix[1] = outputMatrix[4] = right;
-		break;
-	case SPEAKER_5POINT1:
-	case SPEAKER_7POINT1:
-	case SPEAKER_5POINT1_SURROUND:
-		outputMatrix[0] = outputMatrix[4] = left;
-		outputMatrix[1] = outputMatrix[5] = right;
-		break;
-	case SPEAKER_7POINT1_SURROUND:
-		outputMatrix[0] = outputMatrix[4] = outputMatrix[6] = left;
-		outputMatrix[1] = outputMatrix[5] = outputMatrix[7] = right;
-		break;
-	default:
-		return;
-	}
+	DWORD channelMask = device->GetChannelMask();
+	float outputMatrix[32] = {};
+	int channel = 0;
+	// see https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/ksmedia/ns-ksmedia-waveformatextensible
+	if(channelMask & SPEAKER_FRONT_LEFT)            outputMatrix[channel++] = left;
+	if(channelMask & SPEAKER_FRONT_RIGHT)           outputMatrix[channel++] = right;
+	if(channelMask & SPEAKER_FRONT_CENTER)          outputMatrix[channel++] = 0;
+	if(channelMask & SPEAKER_LOW_FREQUENCY)         outputMatrix[channel++] = 0;
+	if(channelMask & SPEAKER_BACK_LEFT)             outputMatrix[channel++] = left;
+	if(channelMask & SPEAKER_BACK_RIGHT)            outputMatrix[channel++] = right;
+	if(channelMask & SPEAKER_FRONT_LEFT_OF_CENTER)  outputMatrix[channel++] = left;
+	if(channelMask & SPEAKER_FRONT_RIGHT_OF_CENTER) outputMatrix[channel++] = right;
+	if(channelMask & SPEAKER_BACK_CENTER)           outputMatrix[channel++] = 0;
+	if(channelMask & SPEAKER_SIDE_LEFT)             outputMatrix[channel++] = left;
+	if(channelMask & SPEAKER_SIDE_RIGHT)            outputMatrix[channel++] = right;
+	if(channelMask & SPEAKER_TOP_CENTER)            outputMatrix[channel++] = 0;
+	if(channelMask & SPEAKER_TOP_FRONT_LEFT)        outputMatrix[channel++] = left;
+	if(channelMask & SPEAKER_TOP_FRONT_CENTER)      outputMatrix[channel++] = 0;
+	if(channelMask & SPEAKER_TOP_FRONT_RIGHT)       outputMatrix[channel++] = right;
+	if(channelMask & SPEAKER_TOP_BACK_LEFT)         outputMatrix[channel++] = left;
+	if(channelMask & SPEAKER_TOP_BACK_CENTER)       outputMatrix[channel++] = 0;
+	if(channelMask & SPEAKER_TOP_BACK_RIGHT)        outputMatrix[channel++] = right;
 
-	if(FAILED(voice->SetOutputMatrix(nullptr, 1, device->GetChannelsCount(), outputMatrix, device->GetSystem()->GetOperationSet())))
+	if(FAILED(voice->SetOutputMatrix(nullptr, 1, channel, outputMatrix, device->GetSystem()->GetOperationSet())))
 		THROW("Can't set XAudio2 voice output matrix");
 }
 
