@@ -24,9 +24,11 @@ private:
 	class TlsCredentialsManager : public Botan::Credentials_Manager
 	{
 	private:
-		Botan::System_Certificate_Store certStore;
+		std::vector<std::unique_ptr<Botan::Certificate_Store>> certStores;
 
 	public:
+		TlsCredentialsManager();
+
 		std::vector<Botan::Certificate_Store*> trusted_certificate_authorities(std::string const& type, std::string const& hostname) override;
 	};
 

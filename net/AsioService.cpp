@@ -268,10 +268,27 @@ public:
 	}
 };
 
+AsioService::TlsCredentialsManager::TlsCredentialsManager()
+{
+	// ignore errors for now
+	try
+	{
+		certStores.push_back(std::make_unique<Botan::System_Certificate_Store>());
+	}
+	catch(...)
+	{
+	}
+}
+
 std::vector<Botan::Certificate_Store*> AsioService::TlsCredentialsManager::trusted_certificate_authorities(std::string const& type, std::string const& hostname)
 {
 	if(type == "tls-server") return {};
-	return { &certStore };
+
+	std::vector<Botan::Certificate_Store*> certStores;
+	certStores.reserve(this->certStores.size());
+	for(auto& certStore : this->certStores)
+		certStores.push_back(certStore.get());
+	return certStores;
 }
 
 AsioService::AsioService()
