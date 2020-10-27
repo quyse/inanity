@@ -78,16 +78,19 @@ private:
 
 	void OnSuspending(::Platform::Object^ sender, SuspendingEventArgs^ args)
 	{
-		window->active = false;
 		auto deferral = args->SuspendingOperation->GetDeferral();
+
+		window->active = false;
 
 		if(window->inputManager)
 			window->inputManager->ReleaseButtonsOnUpdate();
 
-		concurrency::create_task([this, deferral]()
+		if(window->presenter)
+			window->presenter->Suspend();
+
+		concurrency::create_task([deferral]()
 		{
-			// TODO: work on suspending
-			// ...
+			// TODO: other async stuff
 
 			deferral->Complete();
 		});
@@ -95,7 +98,10 @@ private:
 
 	void OnResuming(::Platform::Object^ sender, ::Platform::Object^ args)
 	{
-		window->active = false;
+		window->active = true;
+
+		if(window->presenter)
+			window->presenter->Resume();
 	}
 
 	void OnWindowSizeChanged(WUC::CoreWindow^ sender, WindowSizeChangedEventArgs^ args)

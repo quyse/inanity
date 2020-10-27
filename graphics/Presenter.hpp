@@ -38,6 +38,11 @@ public:
 	/// Изменить размер области вывода.
 	/** Вызывается окном, когда его размер изменяется. */
 	virtual void Resize(int width, int height) = 0;
+
+	/// Suspend graphics (on some platforms).
+	virtual void Suspend() {}
+	/// Resume graphics (on some platforms).
+	virtual void Resume() {}
 };
 
 END_INANITY_GRAPHICS

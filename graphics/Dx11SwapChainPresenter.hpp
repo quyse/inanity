@@ -58,6 +58,8 @@ public:
 	void SetSwapInterval(int swapInterval);
 	void Present();
 	void Resize(int width, int height);
+	void Suspend();
+	void Resume();
 };
 
 END_INANITY_GRAPHICS

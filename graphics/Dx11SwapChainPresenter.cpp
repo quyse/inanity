@@ -131,4 +131,22 @@ void Dx11SwapChainPresenter::Resize(int width, int height)
 		THROW("Can't resize buffers");
 }
 
+void Dx11SwapChainPresenter::Suspend()
+{
+#if defined(___INANITY_PLATFORM_XBOX)
+	ComPointer<ID3D11DeviceContextX> deviceContextX;
+	if(SUCCEEDED(device->GetDeviceContextInterface()->QueryInterface(__uuidof(ID3D11DeviceContextX), (void**)&deviceContextX)))
+		deviceContextX->Suspend(0);
+#endif
+}
+
+void Dx11SwapChainPresenter::Resume()
+{
+#if defined(___INANITY_PLATFORM_XBOX)
+	ComPointer<ID3D11DeviceContextX> deviceContextX;
+	if(SUCCEEDED(device->GetDeviceContextInterface()->QueryInterface(__uuidof(ID3D11DeviceContextX), (void**)&deviceContextX)))
+		deviceContextX->Resume();
+#endif
+}
+
 END_INANITY_GRAPHICS
