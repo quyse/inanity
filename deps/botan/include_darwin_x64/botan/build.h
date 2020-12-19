@@ -2,7 +2,9 @@
 #define BOTAN_BUILD_CONFIG_H_
 
 /*
-* This file was automatically generated running
+* Build configuration for Botan 2.17.2
+*
+* Automatically generated from
 * 'configure.py --with-build-dir=../build --module-policy=modern --link-method=copy --with-zlib --with-boost --enable-modules=asio,certstor_system --disable-modules=ffi,certstor_sql,win32_stats --disable-rdrand --disable-rdseed --disable-shared-library --cpu=x86_64 --os=macos --cc=clang --enable-modules=certstor_system_macos --without-os-features=clock_gettime'
 *
 * Target
@@ -12,13 +14,14 @@
 */
 
 #define BOTAN_VERSION_MAJOR 2
-#define BOTAN_VERSION_MINOR 13
-#define BOTAN_VERSION_PATCH 0
+#define BOTAN_VERSION_MINOR 17
+#define BOTAN_VERSION_PATCH 2
 #define BOTAN_VERSION_DATESTAMP 0
+
 
 #define BOTAN_VERSION_RELEASE_TYPE "unreleased"
 
-#define BOTAN_VERSION_VC_REVISION "git:ed360ab268544fd801b8ea68ff08b07610680052"
+#define BOTAN_VERSION_VC_REVISION "git:8130e32ebd1022516f5295d3f55bb5c50f250b8c"
 
 #define BOTAN_DISTRIBUTION_INFO "unspecified"
 
@@ -44,6 +47,7 @@
 
 #define BOTAN_TARGET_OS_HAS_APPLE_KEYCHAIN
 #define BOTAN_TARGET_OS_HAS_ARC4RANDOM
+#define BOTAN_TARGET_OS_HAS_ATOMICS
 #define BOTAN_TARGET_OS_HAS_COMMONCRYPTO
 #define BOTAN_TARGET_OS_HAS_DEV_RANDOM
 #define BOTAN_TARGET_OS_HAS_FILESYSTEM
@@ -130,8 +134,9 @@
 #define BOTAN_HAS_EMSA_PSSR 20131128
 #define BOTAN_HAS_ENTROPY_SOURCE 20151120
 #define BOTAN_HAS_ENTROPY_SRC_DEV_RANDOM 20131128
-#define BOTAN_HAS_GCM_CLMUL_CPU 20131227
-#define BOTAN_HAS_GCM_CLMUL_SSSE3 20171020
+#define BOTAN_HAS_GHASH 20201002
+#define BOTAN_HAS_GHASH_CLMUL_CPU 20201002
+#define BOTAN_HAS_GHASH_CLMUL_VPERM 20201002
 #define BOTAN_HAS_HASH 20180112
 #define BOTAN_HAS_HASH_ID 20131128
 #define BOTAN_HAS_HEX_CODEC 20131128
@@ -160,6 +165,7 @@
 #define BOTAN_HAS_PK_PADDING 20131128
 #define BOTAN_HAS_POLY1305 20141227
 #define BOTAN_HAS_POLY_DBL 20170927
+#define BOTAN_HAS_PROCESSOR_RNG 20200508
 #define BOTAN_HAS_PUBLIC_KEY_CRYPTO 20131128
 #define BOTAN_HAS_RFC6979_GENERATOR 20140321
 #define BOTAN_HAS_RSA 20160730
@@ -272,13 +278,10 @@
 
 /*
 * Specifies (in order) the list of entropy sources that will be used
-* to seed an in-memory RNG. The first in the default list: "rdseed"
-* and "rdrand" do not count as contributing any entropy but are
-* included as they are fast and help protect against a seriously
-* broken system RNG.
+* to seed an in-memory RNG.
 */
 #define BOTAN_ENTROPY_DEFAULT_SOURCES \
-   { "rdseed", "rdrand", "p9_darn", "getentropy", "dev_random", \
+   { "rdseed", "hwrng", "p9_darn", "getentropy", "dev_random", \
      "system_rng", "proc_walk", "system_stats" }
 
 /* Multiplier on a block cipher's native parallelism */
