@@ -23,9 +23,15 @@ private:
 	template <typename F>
 	auto WithPath(const String& path, F&& f) const -> decltype(f(ptr<FileSystem>(), String()));
 
+	void NormalizePath(String& path);
+
 public:
 	/// Примонтировать файловую систему в указанный путь.
+	/** Добавляет систему в конец списка. */
 	void Mount(ptr<FileSystem> fileSystem, String path = "/");
+	/// Примонтировать файловую систему в указанный путь.
+	/** Заменяет существующую систему, если есть, или добавляет в конец списка. */
+	void Remount(ptr<FileSystem> fileSystem, String path = "/");
 
 	ptr<File> TryLoadFile(const String& fileName) override;
 	ptr<Storage> LoadStorage(const String& fileName) override;
