@@ -34,11 +34,33 @@ auto CompositeFileSystem::WithPath(const String& path, F&& f) const -> decltype(
 	return decltype(f(ptr<FileSystem>(), String()))();
 }
 
-void CompositeFileSystem::Mount(ptr<FileSystem> fileSystem, String path)
+void CompositeFileSystem::NormalizePath(String& path)
 {
 	// add final slash if needed
 	if(!path.length() || path.back() != '/')
 		path += '/';
+}
+
+void CompositeFileSystem::Mount(ptr<FileSystem> fileSystem, String path)
+{
+	NormalizePath(path);
+	fileSystems.push_back(std::make_pair(path, fileSystem));
+}
+
+void CompositeFileSystem::Remount(ptr<FileSystem> fileSystem, String path)
+{
+	NormalizePath(path);
+	// try to find and replace filesystem
+	for(size_t i = 0; i < fileSystems.size(); ++i)
+	{
+		if(fileSystems[i].first == path)
+		{
+			fileSystems[i].second = fileSystem;
+			return;
+		}
+	}
+
+	// otherwise append
 	fileSystems.push_back(std::make_pair(path, fileSystem));
 }
 
