@@ -31,7 +31,7 @@ exports.configureCompiler = function(objectFile, compiler) {
 	compiler.addIncludeDir('deps/freetype/repo/include');
 	compiler.addIncludeDir('deps/harfbuzz/generated');
 	compiler.addIncludeDir('deps/icu/repo/source/common');
-	compiler.addIncludeDir(`deps/botan/include_${compiler.platform}_${compiler.arch}`);
+	compiler.addIncludeDir(`deps/botan/include_${compiler.platform}_${compiler.arch}_${compiler.toolchain}`);
 	compiler.addIncludeDir('deps/botan/include');
 	compiler.addIncludeDir('deps/mono/include');
 	compiler.addMacro('U_STATIC_IMPLEMENTATION');

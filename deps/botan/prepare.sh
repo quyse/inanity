@@ -28,12 +28,19 @@ function preparePlatform {
 rm -rf include{,_{win32,linux,darwin}_x{64,86}}
 mkdir include
 
-preparePlatform win32_x86 "--cpu=x86_32 --os=windows --cc=msvc --enable-modules=certstor_system_windows --disable-ssse3 --disable-sse4.1 --disable-sse4.2"
-preparePlatform linux_x64 "--cpu=x86_64 --os=linux --cc=clang --enable-modules=certstor_flatfile"
-preparePlatform darwin_x64 "--cpu=x86_64 --os=macos --cc=clang --enable-modules=certstor_system_macos --without-os-features=clock_gettime"
-preparePlatform darwin_x86 "--cpu=x86_32 --os=macos --cc=clang --enable-modules=certstor_system_macos --without-os-features=clock_gettime"
+preparePlatform win32_x64_clang "--cpu=x86_64 --os=windows --cc=clang --enable-modules=certstor_system_windows --disable-ssse3 --disable-sse4.1 --disable-sse4.2"
+preparePlatform win32_x86_msvc "--cpu=x86_32 --os=windows --cc=msvc --enable-modules=certstor_system_windows --disable-ssse3 --disable-sse4.1 --disable-sse4.2"
+preparePlatform linux_x64_clang "--cpu=x86_64 --os=linux --cc=clang --enable-modules=certstor_flatfile"
+preparePlatform darwin_x64_clang "--cpu=x86_64 --os=macos --cc=clang --enable-modules=certstor_system_macos --without-os-features=clock_gettime"
+preparePlatform darwin_x86_clang "--cpu=x86_32 --os=macos --cc=clang --enable-modules=certstor_system_macos --without-os-features=clock_gettime"
 
 # get list of lib .cpp files
-FILES_LINUX64="$(cat files_linux_x64.txt)" FILES_WIN32="$(cat files_win32_x86.txt)" FILES_DARWIN64="$(cat files_darwin_x64.txt)" FILES_DARWIN32="$(cat files_darwin_x86.txt)" envsubst < configure.js.in > configure.js
+\
+	FILES_LINUX64_CLANG="$(cat files_linux_x64_clang.txt)" \
+	FILES_WIN64_CLANG="$(cat files_win32_x64_clang.txt)" \
+	FILES_WIN32_MSVC="$(cat files_win32_x86_msvc.txt)" \
+	FILES_DARWIN64_CLANG="$(cat files_darwin_x64_clang.txt)" \
+	FILES_DARWIN32_CLANG="$(cat files_darwin_x86_clang.txt)" \
+	envsubst < configure.js.in > configure.js
 
-rm -f files_{win32,linux,darwin}_x{64,86}.txt
+rm -f files_{win32,linux,darwin}_x{64,86}_{clang,msvc}.txt
