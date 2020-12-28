@@ -463,7 +463,7 @@ var objectsByPlatform = {
 'x509.x509path',
 'x509.x509self',
 	],
-	linux_x64: [
+	linux_x64_clang: [
 'asn1.alg_id',
 'asn1.asn1_obj',
 'asn1.asn1_oid',
@@ -697,7 +697,7 @@ var objectsByPlatform = {
 'x509.x509path',
 'x509.x509self',
 	],
-	darwin_x64: [
+	darwin_x64_clang: [
 'asn1.alg_id',
 'asn1.asn1_obj',
 'asn1.asn1_oid',
@@ -930,7 +930,7 @@ var objectsByPlatform = {
 'x509.x509path',
 'x509.x509self',
 	],
-	darwin_x86: [
+	darwin_x86_clang: [
 'asn1.alg_id',
 'asn1.asn1_obj',
 'asn1.asn1_oid',
