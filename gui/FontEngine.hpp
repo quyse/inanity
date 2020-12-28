@@ -17,7 +17,7 @@ class FontFace;
 class FontEngine : public Object
 {
 public:
-	virtual ptr<FontFace> LoadFontFace(ptr<File> file) = 0;
+	virtual ptr<FontFace> LoadFontFace(ptr<File> file, int size) = 0;
 };
 
 END_INANITY_GUI

@@ -13,20 +13,18 @@ BEGIN_INANITY_GUI
 
 using namespace Graphics;
 
-FtFontFace::FtFontFace(ptr<FtEngine> engine, FT_Face ftFace, ptr<File> file)
-: engine(engine), ftFace(ftFace), file(file) {}
+FtFontFace::FtFontFace(ptr<FtEngine> engine, FT_Face ftFace, ptr<File> file, int size)
+: engine(engine), ftFace(ftFace), file(file), size(size)
+{}
 
 FtFontFace::~FtFontFace()
 {
 	FT_Done_Face(ftFace);
 }
 
-ptr<FontShape> FtFontFace::CreateShape(int size)
+ptr<FontShape> FtFontFace::CreateShape()
 {
 	BEGIN_TRY();
-
-	if(FT_Set_Pixel_Sizes(ftFace, size, size))
-		THROW("Can't set pixel sizes");
 
 	hb_font_t* hbFont = hb_ft_font_create(ftFace, nullptr);
 	return NEW(HbFontShape(this, hbFont));
@@ -34,7 +32,7 @@ ptr<FontShape> FtFontFace::CreateShape(int size)
 	END_TRY("Can't create shape for Freetype font face");
 }
 
-ptr<FontGlyphs> FtFontFace::CreateGlyphs(Canvas* canvas, int size, const CreateGlyphsConfig& config)
+ptr<FontGlyphs> FtFontFace::CreateGlyphs(Canvas* canvas, const CreateGlyphsConfig& config)
 {
 	BEGIN_TRY();
 
@@ -160,7 +158,7 @@ ptr<FontGlyphs> FtFontFace::CreateGlyphs(Canvas* canvas, int size, const CreateG
 	END_TRY("Can't create Freetype font instance");
 }
 
-FontFace::Metrics FtFontFace::CalculateMetrics(int size) const
+FontFace::Metrics FtFontFace::CalculateMetrics() const
 {
 	float scale = (float)size / (float)ftFace->units_per_EM;
 	Metrics metrics;

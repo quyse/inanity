@@ -17,7 +17,7 @@ public:
 	~FtEngine();
 
 	//*** FontEngine's methods.
-	ptr<FontFace> LoadFontFace(ptr<File> file);
+	ptr<FontFace> LoadFontFace(ptr<File> file, int size);
 };
 
 END_INANITY_GUI
