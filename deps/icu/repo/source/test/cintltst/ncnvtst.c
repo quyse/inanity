@@ -22,6 +22,8 @@
 #include "unicode/utypes.h"
 #include "unicode/ustring.h"
 #include "unicode/uset.h"
+#include "unicode/utf8.h"
+#include "unicode/utf16.h"
 #include "cintltst.h"
 #include "cmemory.h"
 
@@ -697,14 +699,14 @@ static void TestRegressionUTF8(){
         offset16 = 0;
         offset8 = 0;
         while(currCh <= UNICODE_LIMIT
-            && offset16 < (MAX_LENGTH/sizeof(UChar) - MAX_UTF16_LEN)
+            && offset16 < ((int32_t)(MAX_LENGTH/sizeof(UChar) - MAX_UTF16_LEN))
             && offset8 < (MAX_LENGTH - MAX_UTF8_LEN))
         {
             if (currCh == SURROGATE_HIGH_START) {
                 currCh = SURROGATE_LOW_END + 1; /* Skip surrogate range */
             }
-            UTF16_APPEND_CHAR_SAFE(standardForm, offset16, MAX_LENGTH, currCh);
-            UTF8_APPEND_CHAR_SAFE(utf8, offset8, MAX_LENGTH, currCh);
+            U16_APPEND_UNSAFE(standardForm, offset16, currCh);
+            U8_APPEND_UNSAFE(utf8, offset8, currCh);
             currCh++;
         }
         if(!convertFromU(standardForm, offset16, 
@@ -768,14 +770,14 @@ static void TestRegressionUTF32(){
         offset16 = 0;
         offset32 = 0;
         while(currCh <= UNICODE_LIMIT
-            && offset16 < (MAX_LENGTH/sizeof(UChar) - MAX_UTF16_LEN)
-            && offset32 < (MAX_LENGTH/sizeof(UChar32) - MAX_UTF32_LEN))
+            && offset16 < ((int32_t)(MAX_LENGTH/sizeof(UChar) - MAX_UTF16_LEN))
+            && offset32 < ((int32_t)(MAX_LENGTH/sizeof(UChar32) - MAX_UTF32_LEN)))
         {
             if (currCh == SURROGATE_HIGH_START) {
                 currCh = SURROGATE_LOW_END + 1; /* Skip surrogate range */
             }
-            UTF16_APPEND_CHAR_SAFE(standardForm, offset16, MAX_LENGTH, currCh);
-            UTF32_APPEND_CHAR_SAFE(utf32, offset32, MAX_LENGTH, currCh);
+            U16_APPEND_UNSAFE(standardForm, offset16, currCh);
+            utf32[offset32++] = currCh;
             currCh++;
         }
         if(!convertFromU(standardForm, offset16, 
@@ -961,12 +963,12 @@ static void TestWithBufferSize(int32_t insize, int32_t outsize){
     {
         const uint8_t sampleText1[] = { 0x31, 0xe4, 0xba, 0x8c, 
             0xe0, 0x80,  0x61};
-        UChar    expected1[] = {  0x0031, 0x4e8c, 0xfffd, 0x0061};
-        int32_t offsets1[] = {   0x0000, 0x0001, 0x0004, 0x0006};
+        UChar    expected1[] = {  0x0031, 0x4e8c, 0xfffd, 0xfffd, 0x0061};
+        int32_t offsets1[] = {   0x0000, 0x0001, 0x0004, 0x0005, 0x0006};
 
         if(!testConvertToU(sampleText1, sizeof(sampleText1),
                  expected1, UPRV_LENGTHOF(expected1),"utf8", UCNV_TO_U_CALLBACK_SUBSTITUTE, offsets1,FALSE))
-            log_err("utf8->u with substitute did not match.\n");;
+            log_err("utf8->u with substitute did not match.\n");
     }
 
 #if !UCONFIG_NO_LEGACY_CONVERSION

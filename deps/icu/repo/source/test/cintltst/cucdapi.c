@@ -281,7 +281,7 @@ void TestUScriptCodeAPI(){
                 0x0001D1AA, /* USCRIPT_INHERITED*/
                 0x00020000, /* USCRIPT_HAN*/
                 0x00000D02, /* USCRIPT_MALAYALAM*/
-                0x00000D00, /* USCRIPT_UNKNOWN (new Zzzz value in Unicode 5.0) */
+                0x00050005, /* USCRIPT_UNKNOWN (new Zzzz value in Unicode 5.0) */
                 0x00000000, /* USCRIPT_COMMON*/
                 0x0001D169, /* USCRIPT_INHERITED*/
                 0x0001D182, /* USCRIPT_INHERITED*/
@@ -403,7 +403,7 @@ void TestUScriptCodeAPI(){
             "Loma", "Mende_Kikakui", "Meroitic_Cursive",
             "Old_North_Arabian", "Nabataean", "Palmyrene", "Khudawadi", "Warang_Citi",
             /* new in ICU 4.8 */
-            "Afak", "Jurc", "Mro", "Nshu", "Sharada", "Sora_Sompeng", "Takri", "Tangut", "Wole",
+            "Afak", "Jurc", "Mro", "Nushu", "Sharada", "Sora_Sompeng", "Takri", "Tangut", "Wole",
             /* new in ICU 49 */
             "Anatolian_Hieroglyphs", "Khojki", "Tirhuta",
             /* new in ICU 52 */
@@ -411,7 +411,16 @@ void TestUScriptCodeAPI(){
             /* new in ICU 54 */
             "Ahom", "Hatran", "Modi", "Multani", "Pau_Cin_Hau", "Siddham",
             // new in ICU 58
-            "Adlam", "Bhaiksuki", "Marchen", "Newa", "Osage", "Hanb", "Jamo", "Zsye"
+            "Adlam", "Bhaiksuki", "Marchen", "Newa", "Osage", "Hanb", "Jamo", "Zsye",
+            // new in ICU 60
+            "Masaram_Gondi", "Soyombo", "Zanabazar_Square",
+            // new in ICU 61
+            "Dogra", "Gunjala_Gondi", "Makasar", "Medefaidrin",
+            "Hanifi_Rohingya", "Sogdian", "Old_Sogdian",
+            // new in ICU 64
+            "Elymaic", "Nyiakeng_Puachue_Hmong", "Nandinagari", "Wancho",
+            // new in ICU 66
+            "Chorasmian", "Dives_Akuru", "Khitan_Small_Script", "Yezidi",
         };
         static const char* expectedShort[] = {
             "Bali", "Batk", "Blis", "Brah", "Cham", "Cirt", "Cyrs", "Egyd", "Egyh", "Egyp",
@@ -439,7 +448,15 @@ void TestUScriptCodeAPI(){
             /* new in ICU 54 */
             "Ahom", "Hatr", "Modi", "Mult", "Pauc", "Sidd",
             // new in ICU 58
-            "Adlm", "Bhks", "Marc", "Newa", "Osge", "Hanb", "Jamo", "Zsye"
+            "Adlm", "Bhks", "Marc", "Newa", "Osge", "Hanb", "Jamo", "Zsye",
+            // new in ICU 60
+            "Gonm", "Soyo", "Zanb",
+            // new in ICU 61
+            "Dogr", "Gong", "Maka", "Medf", "Rohg", "Sogd", "Sogo",
+            // new in ICU 64
+            "Elym", "Hmnp", "Nand", "Wcho",
+            // new in ICU 66
+            "Chrs", "Diak", "Kits", "Yezi",
         };
         int32_t j = 0;
         if(UPRV_LENGTHOF(expectedLong)!=(USCRIPT_CODE_LIMIT-USCRIPT_BALINESE)) {
@@ -666,7 +683,8 @@ void TestScriptMetadataAPI() {
     }
 
     if(uscript_getUsage(USCRIPT_LATIN)!=USCRIPT_USAGE_RECOMMENDED ||
-            uscript_getUsage(USCRIPT_YI)!=USCRIPT_USAGE_ASPIRATIONAL ||
+            // Unicode 10 gives up on "aspirational".
+            uscript_getUsage(USCRIPT_YI)!=USCRIPT_USAGE_LIMITED_USE ||
             uscript_getUsage(USCRIPT_CHEROKEE)!=USCRIPT_USAGE_LIMITED_USE ||
             uscript_getUsage(USCRIPT_COPTIC)!=USCRIPT_USAGE_EXCLUDED ||
             uscript_getUsage(USCRIPT_CIRTH)!=USCRIPT_USAGE_NOT_ENCODED ||

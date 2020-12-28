@@ -23,31 +23,30 @@
 #include "unicode/ustring.h"
 #include "unicode/parsepos.h"
 #include "unicode/symtable.h"
+#include "unicode/utf8.h"
+#include "unicode/utf16.h"
 #include "unicode/uversion.h"
 #include "cmemory.h"
 #include "hash.h"
 
-#define TEST_ASSERT_SUCCESS(status) {if (U_FAILURE(status)) { \
-    dataerrln("fail in file \"%s\", line %d: \"%s\"", __FILE__, __LINE__, \
-    u_errorName(status));}}
+#define TEST_ASSERT_SUCCESS(status) UPRV_BLOCK_MACRO_BEGIN { \
+    if (U_FAILURE(status)) { \
+        dataerrln("fail in file \"%s\", line %d: \"%s\"", __FILE__, __LINE__, \
+                  u_errorName(status)); \
+    } \
+} UPRV_BLOCK_MACRO_END
 
-#define TEST_ASSERT(expr) {if (!(expr)) { \
-    dataerrln("fail in file \"%s\", line %d", __FILE__, __LINE__); }}
+#define TEST_ASSERT(expr) UPRV_BLOCK_MACRO_BEGIN { \
+    if (!(expr)) { \
+        dataerrln("fail in file \"%s\", line %d", __FILE__, __LINE__); \
+    } \
+} UPRV_BLOCK_MACRO_END
 
 UnicodeString operator+(const UnicodeString& left, const UnicodeSet& set) {
     UnicodeString pat;
     set.toPattern(pat);
     return left + UnicodeSetTest::escape(pat);
 }
-
-#define CASE(id,test) case id:                          \
-                          name = #test;                 \
-                          if (exec) {                   \
-                              logln(#test "---");       \
-                              logln();                  \
-                              test();                   \
-                          }                             \
-                          break
 
 UnicodeSetTest::UnicodeSetTest() : utf8Cnv(NULL) {
 }
@@ -67,35 +66,39 @@ UnicodeSetTest::~UnicodeSetTest() {
 void
 UnicodeSetTest::runIndexedTest(int32_t index, UBool exec,
                                const char* &name, char* /*par*/) {
-    // if (exec) logln((UnicodeString)"TestSuite UnicodeSetTest");
-    switch (index) {
-        CASE(0,TestPatterns);
-        CASE(1,TestAddRemove);
-        CASE(2,TestCategories);
-        CASE(3,TestCloneEqualHash);
-        CASE(4,TestMinimalRep);
-        CASE(5,TestAPI);
-        CASE(6,TestScriptSet);
-        CASE(7,TestPropertySet);
-        CASE(8,TestClone);
-        CASE(9,TestExhaustive);
-        CASE(10,TestToPattern);
-        CASE(11,TestIndexOf);
-        CASE(12,TestStrings);
-        CASE(13,Testj2268);
-        CASE(14,TestCloseOver);
-        CASE(15,TestEscapePattern);
-        CASE(16,TestInvalidCodePoint);
-        CASE(17,TestSymbolTable);
-        CASE(18,TestSurrogate);
-        CASE(19,TestPosixClasses);
-        CASE(20,TestIteration);
-        CASE(21,TestFreezable);
-        CASE(22,TestSpan);
-        CASE(23,TestStringSpan);
-        CASE(24,TestUCAUnsafeBackwards);
-        default: name = ""; break;
+    if (exec) {
+        logln(u"TestSuite UnicodeSetTest");
     }
+    TESTCASE_AUTO_BEGIN;
+    TESTCASE_AUTO(TestPatterns);
+    TESTCASE_AUTO(TestAddRemove);
+    TESTCASE_AUTO(TestCategories);
+    TESTCASE_AUTO(TestCloneEqualHash);
+    TESTCASE_AUTO(TestMinimalRep);
+    TESTCASE_AUTO(TestAPI);
+    TESTCASE_AUTO(TestScriptSet);
+    TESTCASE_AUTO(TestPropertySet);
+    TESTCASE_AUTO(TestClone);
+    TESTCASE_AUTO(TestExhaustive);
+    TESTCASE_AUTO(TestToPattern);
+    TESTCASE_AUTO(TestIndexOf);
+    TESTCASE_AUTO(TestStrings);
+    TESTCASE_AUTO(Testj2268);
+    TESTCASE_AUTO(TestCloseOver);
+    TESTCASE_AUTO(TestEscapePattern);
+    TESTCASE_AUTO(TestInvalidCodePoint);
+    TESTCASE_AUTO(TestSymbolTable);
+    TESTCASE_AUTO(TestSurrogate);
+    TESTCASE_AUTO(TestPosixClasses);
+    TESTCASE_AUTO(TestIteration);
+    TESTCASE_AUTO(TestFreezable);
+    TESTCASE_AUTO(TestSpan);
+    TESTCASE_AUTO(TestStringSpan);
+    TESTCASE_AUTO(TestUCAUnsafeBackwards);
+    TESTCASE_AUTO(TestIntOverflow);
+    TESTCASE_AUTO(TestUnusedCcc);
+    TESTCASE_AUTO(TestDeepPattern);
+    TESTCASE_AUTO_END;
 }
 
 static const char NOT[] = "%%%%";
@@ -361,8 +364,8 @@ UnicodeSetTest::TestCloneEqualHash(void) {
     }
 
     logln("Testing clone()");
-    UnicodeSet *set1clone=(UnicodeSet*)set1->clone();
-    UnicodeSet *set2clone=(UnicodeSet*)set2->clone();
+    UnicodeSet *set1clone=set1->clone();
+    UnicodeSet *set2clone=set2->clone();
     if(*set1clone != *set1 || *set1clone != *set1copy || *set1clone != set1equal || 
         *set2clone != *set2 || *set2clone == *set1copy || *set2clone != set2equal || 
         *set2clone == *set1 || *set2clone == set1equal || *set2clone == *set1clone){
@@ -2252,7 +2255,7 @@ void UnicodeSetTest::TestFreezable() {
         errln("FAIL: copying a frozen set results in a thawed one");
     }
 
-    UnicodeSet *cloned=(UnicodeSet *)frozen.clone();
+    UnicodeSet *cloned=frozen.clone();
     if(!cloned->isFrozen() || *cloned!=frozen || cloned->containsSome(0xd802, 0xd805)) {
         errln("FAIL: clone() failed");
     }
@@ -2262,7 +2265,7 @@ void UnicodeSetTest::TestFreezable() {
     }
     delete cloned;
 
-    UnicodeSet *thawed=(UnicodeSet *)frozen.cloneAsThawed();
+    UnicodeSet *thawed=frozen.cloneAsThawed();
     if(thawed->isFrozen() || *thawed!=frozen || thawed->containsSome(0xd802, 0xd805)) {
         errln("FAIL: cloneAsThawed() failed");
     }
@@ -2895,7 +2898,7 @@ static inline USetSpanCondition invertSpanCondition(USetSpanCondition spanCondit
 }
 
 static inline int32_t slen(const void *s, UBool isUTF16) {
-    return isUTF16 ? u_strlen((const UChar *)s) : strlen((const char *)s);
+    return isUTF16 ? u_strlen((const UChar *)s) : static_cast<int32_t>(strlen((const char *)s));
 }
 
 /*
@@ -3689,11 +3692,11 @@ void UnicodeSetTest::TestSpan() {
             // Intermediate set: Test cloning of a frozen set.
             UnicodeSet *fast=new UnicodeSet(*sets[SLOW]);
             fast->freeze();
-            sets[FAST]=(UnicodeSet *)fast->clone();
+            sets[FAST]=fast->clone();
             delete fast;
             UnicodeSet *fastNot=new UnicodeSet(*sets[SLOW_NOT]);
             fastNot->freeze();
-            sets[FAST_NOT]=(UnicodeSet *)fastNot->clone();
+            sets[FAST_NOT]=fastNot->clone();
             delete fastNot;
 
             for(j=0; j<SET_COUNT; ++j) {
@@ -3924,4 +3927,60 @@ void UnicodeSetTest::TestUCAUnsafeBackwards() {
         checkRoundTrip(*unsafeBackwardSet);
     }
 #endif
+}
+
+void UnicodeSetTest::TestIntOverflow() {
+    // This test triggers undefined double->int conversion behavior
+    // if the implementation is not careful.
+    IcuTestErrorCode errorCode(*this, "TestIntOverflow");
+    UnicodeSet set(u"[:ccc=2222222222222222222:]", errorCode);
+    assertTrue("[:ccc=int_overflow:] -> empty set", set.isEmpty());
+    assertEquals("[:ccc=int_overflow:] -> illegal argument",
+                 U_ILLEGAL_ARGUMENT_ERROR, errorCode.reset());
+}
+
+void UnicodeSetTest::TestUnusedCcc() {
+#if !UCONFIG_NO_NORMALIZATION
+    // All numeric ccc values 0..255 are valid, but many are unused.
+    IcuTestErrorCode errorCode(*this, "TestUnusedCcc");
+    UnicodeSet ccc2(u"[:ccc=2:]", errorCode);
+    assertSuccess("[:ccc=2:]", errorCode);
+    assertTrue("[:ccc=2:] -> empty set", ccc2.isEmpty());
+
+    UnicodeSet ccc255(u"[:ccc=255:]", errorCode);
+    assertSuccess("[:ccc=255:]", errorCode);
+    assertTrue("[:ccc=255:] -> empty set", ccc255.isEmpty());
+
+    // Non-integer values and values outside 0..255 are invalid.
+    UnicodeSet ccc_1(u"[:ccc=-1:]", errorCode);
+    assertEquals("[:ccc=-1:] -> illegal argument",
+                 U_ILLEGAL_ARGUMENT_ERROR, errorCode.reset());
+    assertTrue("[:ccc=-1:] -> empty set", ccc_1.isEmpty());
+
+    UnicodeSet ccc256(u"[:ccc=256:]", errorCode);
+    assertEquals("[:ccc=256:] -> illegal argument",
+                 U_ILLEGAL_ARGUMENT_ERROR, errorCode.reset());
+    assertTrue("[:ccc=256:] -> empty set", ccc256.isEmpty());
+
+    UnicodeSet ccc1_1(u"[:ccc=1.1:]", errorCode);
+    assertEquals("[:ccc=1.1:] -> illegal argument",
+                 U_ILLEGAL_ARGUMENT_ERROR, errorCode.reset());
+    assertTrue("[:ccc=1.1:] -> empty set", ccc1_1.isEmpty());
+#endif
+}
+
+void UnicodeSetTest::TestDeepPattern() {
+    IcuTestErrorCode errorCode(*this, "TestDeepPattern");
+    // Nested ranges are parsed via recursion which can use a lot of stack space.
+    // After a reasonable limit, we should get an error.
+    constexpr int32_t DEPTH = 20000;
+    UnicodeString pattern, suffix;
+    for (int32_t i = 0; i < DEPTH; ++i) {
+        pattern.append(u"[a", 2);
+        suffix.append(']');
+    }
+    pattern.append(suffix);
+    UnicodeSet set(pattern, errorCode);
+    assertTrue("[a[a[a...1000s...]]] -> error", errorCode.isFailure());
+    errorCode.reset();
 }

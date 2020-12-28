@@ -37,7 +37,7 @@ enum {
     /** 0.x */
     PROPER_FRACTION_RULE_INDEX = 2,
     /** x.0 */
-    MASTER_RULE_INDEX = 3,
+    DEFAULT_RULE_INDEX = 3,
     /** Inf */
     INFINITY_RULE_INDEX = 4,
     /** NaN */
@@ -278,8 +278,8 @@ void NFRuleSet::setNonNumericalRule(NFRule *rule) {
     else if (baseValue == NFRule::kProperFractionRule) {
         setBestFractionRule(PROPER_FRACTION_RULE_INDEX, rule, TRUE);
     }
-    else if (baseValue == NFRule::kMasterRule) {
-        setBestFractionRule(MASTER_RULE_INDEX, rule, TRUE);
+    else if (baseValue == NFRule::kDefaultRule) {
+        setBestFractionRule(DEFAULT_RULE_INDEX, rule, TRUE);
     }
     else if (baseValue == NFRule::kInfinityRule) {
         delete nonNumericalRules[INFINITY_RULE_INDEX];
@@ -323,7 +323,7 @@ NFRuleSet::~NFRuleSet()
     for (int i = 0; i < NON_NUMERICAL_RULE_LENGTH; i++) {
         if (i != IMPROPER_FRACTION_RULE_INDEX
             && i != PROPER_FRACTION_RULE_INDEX
-            && i != MASTER_RULE_INDEX)
+            && i != DEFAULT_RULE_INDEX)
         {
             delete nonNumericalRules[i];
         }
@@ -375,7 +375,7 @@ NFRuleSet::setDecimalFormatSymbols(const DecimalFormatSymbols &newSymbols, UErro
         rules[i]->setDecimalFormatSymbols(newSymbols, status);
     }
     // Switch the fraction rules to mirror the DecimalFormatSymbols.
-    for (int32_t nonNumericalIdx = IMPROPER_FRACTION_RULE_INDEX; nonNumericalIdx <= MASTER_RULE_INDEX; nonNumericalIdx++) {
+    for (int32_t nonNumericalIdx = IMPROPER_FRACTION_RULE_INDEX; nonNumericalIdx <= DEFAULT_RULE_INDEX; nonNumericalIdx++) {
         if (nonNumericalRules[nonNumericalIdx]) {
             for (uint32_t fIdx = 0; fIdx < fractionRules.size(); fIdx++) {
                 NFRule *fractionRule = fractionRules[fIdx];
@@ -472,9 +472,9 @@ NFRuleSet::findDoubleRule(double number) const
         }
     }
 
-    // if there's a master rule, use it to format the number
-    if (nonNumericalRules[MASTER_RULE_INDEX]) {
-        return nonNumericalRules[MASTER_RULE_INDEX];
+    // if there's a default rule, use it to format the number
+    if (nonNumericalRules[DEFAULT_RULE_INDEX]) {
+        return nonNumericalRules[DEFAULT_RULE_INDEX];
     }
 
     // and if we haven't yet returned a rule, use findNormalRule()
@@ -507,13 +507,13 @@ NFRuleSet::findNormalRule(int64_t number) const
     // do them in findRule(), because the version of format() that
     // takes a long bypasses findRule() and goes straight to this
     // function.  This function does skip the fraction rules since
-    // we know the value is an integer (it also skips the master
+    // we know the value is an integer (it also skips the default
     // rule, since it's considered a fraction rule.  Skipping the
-    // master rule in this function is also how we avoid infinite
+    // default rule in this function is also how we avoid infinite
     // recursion)
 
     // {dlf} unfortunately this fails if there are no rules except
-    // special rules.  If there are no rules, use the master rule.
+    // special rules.  If there are no rules, use the default rule.
 
     // binary-search the rule list for the applicable rule
     // (a rule is used for all values from its base value to
@@ -553,8 +553,8 @@ NFRuleSet::findNormalRule(int64_t number) const
         }
         return result;
     }
-    // else use the master rule
-    return nonNumericalRules[MASTER_RULE_INDEX];
+    // else use the default rule
+    return nonNumericalRules[DEFAULT_RULE_INDEX];
 }
 
 /**
@@ -681,7 +681,7 @@ static void dumpUS(FILE* f, const UnicodeString& us) {
 #endif
 
 UBool
-NFRuleSet::parse(const UnicodeString& text, ParsePosition& pos, double upperBound, Formattable& result) const
+NFRuleSet::parse(const UnicodeString& text, ParsePosition& pos, double upperBound, uint32_t nonNumericalExecutedRuleMask, Formattable& result) const
 {
     // try matching each rule in the rule set against the text being
     // parsed.  Whichever one matches the most characters is the one
@@ -707,9 +707,12 @@ NFRuleSet::parse(const UnicodeString& text, ParsePosition& pos, double upperBoun
 #endif
     // Try each of the negative rules, fraction rules, infinity rules and NaN rules
     for (int i = 0; i < NON_NUMERICAL_RULE_LENGTH; i++) {
-        if (nonNumericalRules[i]) {
+        if (nonNumericalRules[i] && ((nonNumericalExecutedRuleMask >> i) & 1) == 0) {
+            // Mark this rule as being executed so that we don't try to execute it again.
+            nonNumericalExecutedRuleMask |= 1 << i;
+
             Formattable tempResult;
-            UBool success = nonNumericalRules[i]->doParse(text, workingPos, 0, upperBound, tempResult);
+            UBool success = nonNumericalRules[i]->doParse(text, workingPos, 0, upperBound, nonNumericalExecutedRuleMask, tempResult);
             if (success && (workingPos.getIndex() > highWaterMark.getIndex())) {
                 result = tempResult;
                 highWaterMark = workingPos;
@@ -748,7 +751,7 @@ NFRuleSet::parse(const UnicodeString& text, ParsePosition& pos, double upperBoun
                 continue;
             }
             Formattable tempResult;
-            UBool success = rules[i]->doParse(text, workingPos, fIsFractionRuleSet, upperBound, tempResult);
+            UBool success = rules[i]->doParse(text, workingPos, fIsFractionRuleSet, upperBound, nonNumericalExecutedRuleMask, tempResult);
             if (success && workingPos.getIndex() > highWaterMark.getIndex()) {
                 result = tempResult;
                 highWaterMark = workingPos;
@@ -789,7 +792,7 @@ NFRuleSet::appendRules(UnicodeString& result) const
         if (nonNumericalRules[i]) {
             if (rule->getBaseValue() == NFRule::kImproperFractionRule
                 || rule->getBaseValue() == NFRule::kProperFractionRule
-                || rule->getBaseValue() == NFRule::kMasterRule)
+                || rule->getBaseValue() == NFRule::kDefaultRule)
             {
                 for (uint32_t fIdx = 0; fIdx < fractionRules.size(); fIdx++) {
                     NFRule *fractionRule = fractionRules[fIdx];
@@ -830,19 +833,22 @@ int64_t util64_fromDouble(double d) {
     return result;
 }
 
-int64_t util64_pow(int32_t base, uint16_t exponent)  { 
+uint64_t util64_pow(uint32_t base, uint16_t exponent)  {
     if (base == 0) {
         return 0;
     }
-    int64_t result = 1;
-    int64_t pow = base;
-    while (exponent > 0) { 
-        if ((exponent & 1) == 1) { 
-            result *= pow; 
-        } 
-        pow *= pow; 
-        exponent >>= 1; 
-    } 
+    uint64_t result = 1;
+    uint64_t pow = base;
+    while (true) {
+        if ((exponent & 1) == 1) {
+            result *= pow;
+        }
+        exponent >>= 1;
+        if (exponent == 0) {
+            break;
+        }
+        pow *= pow;
+    }
     return result;
 }
 
@@ -1027,4 +1033,3 @@ U_NAMESPACE_END
 
 /* U_HAVE_RBNF */
 #endif
-

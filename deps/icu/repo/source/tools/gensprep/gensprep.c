@@ -28,6 +28,7 @@
 
 #include "cmemory.h"
 #include "cstring.h"
+#include "toolutil.h"
 #include "unewdata.h"
 #include "uoptions.h"
 #include "uparse.h"
@@ -113,7 +114,7 @@ static int printHelp(int argc, char* argv[]){
     fprintf(stderr,
         "\t-d or --destdir          destination directory, followed by the path\n"
         "\t-s or --sourcedir        source directory of ICU data, followed by the path\n"
-        "\t-b or --bundle-name      generate the ouput data file with the name specified\n"
+        "\t-b or --bundle-name      generate the output data file with the name specified\n"
         "\t-i or --icudatadir       directory for locating any needed intermediate data files,\n"
         "\t                         followed by path, defaults to %s\n",
         u_getDataDirectory());
@@ -278,6 +279,8 @@ static void U_CALLCONV
 normalizationCorrectionsLineFn(void *context,
                     char *fields[][2], int32_t fieldCount,
                     UErrorCode *pErrorCode) {
+    (void)context; // suppress compiler warnings about unused variable
+    (void)fieldCount; // suppress compiler warnings about unused variable
     uint32_t mapping[40];
     char *end, *s;
     uint32_t code;
@@ -341,6 +344,7 @@ static void U_CALLCONV
 strprepProfileLineFn(void *context,
               char *fields[][2], int32_t fieldCount,
               UErrorCode *pErrorCode) {
+    (void)fieldCount; // suppress compiler warnings about unused variable  
     uint32_t mapping[40];
     char *end, *map;
     uint32_t code;
@@ -355,7 +359,7 @@ strprepProfileLineFn(void *context,
     if (*s == '@') {
         /* special directive */
         s++;
-        length = fields[0][1] - s;
+        length = (int32_t)(fields[0][1] - s);
         if (length >= NORMALIZE_DIRECTIVE_LEN
             && uprv_strncmp(s, NORMALIZE_DIRECTIVE, NORMALIZE_DIRECTIVE_LEN) == 0) {
             options[NORMALIZE].doesOccur = TRUE;

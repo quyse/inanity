@@ -159,6 +159,7 @@ void addNormTest(TestNode** root)
 }
 
 static const char* const modeStrings[]={
+    "?",
     "UNORM_NONE",
     "UNORM_NFD",
     "UNORM_NFKD",
@@ -183,7 +184,7 @@ static void TestNormCases(UNormalizationMode mode,
         length2= unorm_normalize(source, -1, mode, 0, NULL, 0, &status2);
         if(neededLen!=length2) {
           log_err("ERROR in unorm_normalize(%s)[%d]: "
-                  "preflight length/NUL %d!=%d preflight length/srcLength\n",
+                  "preflight length/srcLength %d!=%d preflight length/NUL\n",
                   modeStrings[mode], (int)x, (int)neededLen, (int)length2);
         }
         if(status==U_BUFFER_OVERFLOW_ERROR)
@@ -192,14 +193,14 @@ static void TestNormCases(UNormalizationMode mode,
         }
         length2=unorm_normalize(source, u_strlen(source), mode, 0, result, UPRV_LENGTHOF(result), &status); 
         if(U_FAILURE(status) || neededLen!=length2) {
-            log_data_err("ERROR in unorm_normalize(%s/NUL) at %s:  %s - (Are you missing data?)\n",
+            log_data_err("ERROR in unorm_normalize(%s/srcLength) at %s:  %s - (Are you missing data?)\n",
                          modeStrings[mode], austrdup(source), myErrorName(status));
         } else {
             assertEqual(result, cases[x][expIndex], x);
         }
         length2=unorm_normalize(source, -1, mode, 0, result, UPRV_LENGTHOF(result), &status); 
         if(U_FAILURE(status) || neededLen!=length2) {
-            log_data_err("ERROR in unorm_normalize(%s/srcLength) at %s:  %s - (Are you missing data?)\n",
+            log_data_err("ERROR in unorm_normalize(%s/NUL) at %s:  %s - (Are you missing data?)\n",
                          modeStrings[mode], austrdup(source), myErrorName(status));
         } else {
             assertEqual(result, cases[x][expIndex], x);
@@ -483,6 +484,7 @@ static void TestQuickCheckStringResult()
                                                             UNORM_YES)
     {
       log_data_err("ERROR in NFD quick check for string at count %d - (Are you missing data?)\n", count);
+      free(d); free(c);
       return;
     }
 
@@ -490,6 +492,7 @@ static void TestQuickCheckStringResult()
                                                             UNORM_NO)
     {
       log_err("ERROR in NFC quick check for string at count %d\n", count);
+      free(d); free(c);
       return;
     }
 
@@ -505,6 +508,7 @@ static void TestQuickCheckStringResult()
                                                             UNORM_YES)
     {
       log_data_err("ERROR in NFKD quick check for string at count %d\n", count);
+      free(d); free(c);
       return;
     }
 
@@ -512,6 +516,7 @@ static void TestQuickCheckStringResult()
                                                             UNORM_YES)
     {
       log_err("ERROR in NFKC quick check for string at count %d\n", count);
+      free(d); free(c);
       return;
     }
 
@@ -660,7 +665,7 @@ void TestCheckFCD()
   for (count = 0; count < 50; count ++)
   {
     int size = 0;
-    UBool testresult = UNORM_YES;
+    UNormalizationCheckResult testresult = UNORM_YES;
     UChar data[20];
     UChar norm[100];
     UChar nfd[100];
@@ -1408,6 +1413,11 @@ TestQuickCheckPerCP() {
         }
 
         length=unorm_normalize(s, length, UNORM_NFD, 0, nfd, UPRV_LENGTHOF(nfd), &errorCode);
+        if (U_FAILURE(errorCode)) {
+            log_data_err("%s:%d errorCode=%s\n", __FILE__, __LINE__, u_errorName(errorCode));
+            break;
+        }
+
         /* length-length == 0 is used to get around a compiler warning. */
         U16_GET(nfd, 0, length-length, length, lead);
         U16_GET(nfd, 0, length-1, length, trail);

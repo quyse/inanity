@@ -28,8 +28,11 @@ class TimeZoneFormatTest : public IntlTest {
     void TestFormat(void);
     void TestFormatTZDBNames(void);
     void TestFormatCustomZone(void);
+    void TestFormatTZDBNamesAllZoneCoverage(void);
+    void TestAdoptDefaultThreadSafe(void);
 
     void RunTimeRoundTripTests(int32_t threadNumber);
+    void RunAdoptDefaultThreadSafeTests(int32_t threadNumber);
 };
 
 #endif /* #if !UCONFIG_NO_FORMATTING */

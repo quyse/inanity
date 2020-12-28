@@ -22,6 +22,7 @@
 #include "unicode/utypes.h"
 #include "unicode/ucnvsel.h"
 #include "unicode/ustring.h"
+#include "unicode/utf8.h"
 #include "cmemory.h"
 #include "cstring.h"
 #include "propsvec.h"
@@ -164,8 +165,8 @@ static FILE *fopenOrError(const char *filename) {
     int32_t needLen;
     FILE *f;
     char fnbuf[FILENAME_BUFFER];
-    const char* directory= ctest_dataSrcDir();
-    needLen = uprv_strlen(directory)+uprv_strlen(TDSRCPATH)+uprv_strlen(filename)+1;
+    const char* directory = ctest_dataSrcDir();
+    needLen = (int32_t)(uprv_strlen(directory) + uprv_strlen(TDSRCPATH) + uprv_strlen(filename) + 1);
     if(needLen > FILENAME_BUFFER) {
         log_err("FAIL: Could not load %s. Filename buffer overflow, needed %d but buffer is %d\n",
                 filename, needLen, FILENAME_BUFFER);
@@ -239,7 +240,7 @@ text_open(TestText *tt) {
     fclose(f);
     return FALSE;
   }
-  if (length != fread(tt->text, 1, length, f)) {
+  if (length != (int32_t)fread(tt->text, 1, length, f)) {
     log_err("error reading %ld bytes from test text file\n", (long)length);
     length = 0;
     uprv_free(tt->text);
@@ -385,7 +386,7 @@ static void TestSelector()
     return;
   }
   if (!text_open(&text)) {
-    releaseAvailableNames();;
+    releaseAvailableNames();
   }
 
   excluded_sets[0] = uset_openEmpty();

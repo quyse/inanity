@@ -1,6 +1,6 @@
 /********************************************************************
  *   © 2016 and later: Unicode, Inc. and others.
- *   License & terms of use: http://www.unicode.org/copyright.html#License
+ *   License & terms of use: http://www.unicode.org/copyright.html
  *************************************************************************
  *************************************************************************
  * COPYRIGHT:
@@ -10,6 +10,8 @@
 
 #include "unicode/unistr.h"
 #include "unicode/fmtable.h"
+
+using namespace icu;
 
 #ifndef UPRV_LENGTHOF 
 #define UPRV_LENGTHOF(array) (int32_t)(sizeof(array)/sizeof((array)[0])) 

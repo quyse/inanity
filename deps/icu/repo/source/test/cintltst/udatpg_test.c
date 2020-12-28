@@ -42,12 +42,18 @@ static void TestOpenClose(void);
 static void TestUsage(void);
 static void TestBuilder(void);
 static void TestOptions(void);
+static void TestGetFieldDisplayNames(void);
+static void TestGetDefaultHourCycle(void);
+static void TestGetDefaultHourCycleOnEmptyInstance(void);
 
 void addDateTimePatternGeneratorTest(TestNode** root) {
     TESTCASE(TestOpenClose);
     TESTCASE(TestUsage);
     TESTCASE(TestBuilder);
     TESTCASE(TestOptions);
+    TESTCASE(TestGetFieldDisplayNames);
+    TESTCASE(TestGetDefaultHourCycle);
+    TESTCASE(TestGetDefaultHourCycleOnEmptyInstance);
 }
 
 /*
@@ -436,6 +442,142 @@ static void TestOptions() {
             log_data_err("ERROR udatpg_open failed for locale %s : %s - (Are you missing data?)\n", testDataPtr->locale, myErrorName(status));
         }
     }
+}
+
+typedef struct FieldDisplayNameData {
+    const char *            locale;
+    UDateTimePatternField   field;
+    UDateTimePGDisplayWidth width;
+    const char *            expected;
+} FieldDisplayNameData;
+enum { kFieldDisplayNameMax = 32, kFieldDisplayNameBytesMax  = 64};
+
+static void TestGetFieldDisplayNames() {
+    const FieldDisplayNameData testData[] = {
+        /*loc      field                              width               expectedName */
+        { "de",    UDATPG_QUARTER_FIELD,              UDATPG_WIDE,        "Quartal" },
+        { "de",    UDATPG_QUARTER_FIELD,              UDATPG_ABBREVIATED, "Quart." },
+        { "de",    UDATPG_QUARTER_FIELD,              UDATPG_NARROW,      "Q" },
+        { "en",    UDATPG_DAY_OF_WEEK_IN_MONTH_FIELD, UDATPG_WIDE,        "weekday of the month" },
+        { "en",    UDATPG_DAY_OF_WEEK_IN_MONTH_FIELD, UDATPG_ABBREVIATED, "wkday. of mo." },
+        { "en",    UDATPG_DAY_OF_WEEK_IN_MONTH_FIELD, UDATPG_NARROW,      "wkday. of mo." }, // fallback
+        { "en_GB", UDATPG_DAY_OF_WEEK_IN_MONTH_FIELD, UDATPG_WIDE,        "weekday of the month" },
+        { "en_GB", UDATPG_DAY_OF_WEEK_IN_MONTH_FIELD, UDATPG_ABBREVIATED, "wkday of mo" }, // override
+        { "en_GB", UDATPG_DAY_OF_WEEK_IN_MONTH_FIELD, UDATPG_NARROW,      "wkday of mo" },
+        { "it",    UDATPG_SECOND_FIELD,               UDATPG_WIDE,        "secondo" },
+        { "it",    UDATPG_SECOND_FIELD,               UDATPG_ABBREVIATED, "s" },
+        { "it",    UDATPG_SECOND_FIELD,               UDATPG_NARROW,      "s" },
+    };
+
+    int count = UPRV_LENGTHOF(testData);
+    const FieldDisplayNameData * testDataPtr = testData;
+    for (; count-- > 0; ++testDataPtr) {
+        UErrorCode status = U_ZERO_ERROR;
+        UDateTimePatternGenerator * dtpgen = udatpg_open(testDataPtr->locale, &status);
+        if ( U_FAILURE(status) ) {
+            log_data_err("ERROR udatpg_open failed for locale %s : %s - (Are you missing data?)\n", testDataPtr->locale, myErrorName(status));
+        } else {
+            UChar expName[kFieldDisplayNameMax];
+            UChar getName[kFieldDisplayNameMax];
+            u_unescape(testDataPtr->expected, expName, kFieldDisplayNameMax);
+            
+            int32_t getLen = udatpg_getFieldDisplayName(dtpgen, testDataPtr->field, testDataPtr->width,
+                                                        getName, kFieldDisplayNameMax, &status);
+            if ( U_FAILURE(status) ) {
+                log_err("ERROR udatpg_getFieldDisplayName locale %s field %d width %d, got status %s, len %d\n",
+                        testDataPtr->locale, testDataPtr->field, testDataPtr->width, u_errorName(status), getLen);
+            } else if ( u_strncmp(expName, getName, kFieldDisplayNameMax) != 0 ) {
+                char expNameB[kFieldDisplayNameBytesMax];
+                char getNameB[kFieldDisplayNameBytesMax];
+                log_err("ERROR udatpg_getFieldDisplayName locale %s field %d width %d, expected %s, got %s, status %s\n",
+                        testDataPtr->locale, testDataPtr->field, testDataPtr->width,
+                        u_austrncpy(expNameB,expName,kFieldDisplayNameBytesMax),
+                        u_austrncpy(getNameB,getName,kFieldDisplayNameBytesMax), u_errorName(status) );
+            } else if (testDataPtr->width == UDATPG_WIDE && getLen > 1) {
+                // test preflight & inadequate buffer
+                int32_t getNewLen;
+                status = U_ZERO_ERROR;
+                getNewLen = udatpg_getFieldDisplayName(dtpgen, testDataPtr->field, UDATPG_WIDE, NULL, 0, &status);
+                if (U_FAILURE(status) || getNewLen != getLen) {
+                    log_err("ERROR udatpg_getFieldDisplayName locale %s field %d width %d, preflight expected len %d, got %d, status %s\n",
+                        testDataPtr->locale, testDataPtr->field, testDataPtr->width, getLen, getNewLen, u_errorName(status) );
+                }
+                status = U_ZERO_ERROR;
+                getNewLen = udatpg_getFieldDisplayName(dtpgen, testDataPtr->field, UDATPG_WIDE, getName, getLen-1, &status);
+                if (status!=U_BUFFER_OVERFLOW_ERROR || getNewLen != getLen) {
+                    log_err("ERROR udatpg_getFieldDisplayName locale %s field %d width %d, overflow expected len %d & BUFFER_OVERFLOW_ERROR, got %d & status %s\n",
+                        testDataPtr->locale, testDataPtr->field, testDataPtr->width, getLen, getNewLen, u_errorName(status) );
+                }
+            }
+            udatpg_close(dtpgen);
+        }
+    }
+}
+
+typedef struct HourCycleData {
+    const char *         locale;
+    UDateFormatHourCycle   expected;
+} HourCycleData;
+
+static void TestGetDefaultHourCycle() {
+    const HourCycleData testData[] = {
+        /*loc      expected */
+        { "ar_EG",    UDAT_HOUR_CYCLE_12 },
+        { "de_DE",    UDAT_HOUR_CYCLE_23 },
+        { "en_AU",    UDAT_HOUR_CYCLE_12 },
+        { "en_CA",    UDAT_HOUR_CYCLE_12 },
+        { "en_US",    UDAT_HOUR_CYCLE_12 },
+        { "es_ES",    UDAT_HOUR_CYCLE_23 },
+        { "fi",       UDAT_HOUR_CYCLE_23 },
+        { "fr",       UDAT_HOUR_CYCLE_23 },
+        { "ja_JP",    UDAT_HOUR_CYCLE_23 },
+        { "zh_CN",    UDAT_HOUR_CYCLE_12 },
+        { "zh_HK",    UDAT_HOUR_CYCLE_12 },
+        { "zh_TW",    UDAT_HOUR_CYCLE_12 },
+        { "ko_KR",    UDAT_HOUR_CYCLE_12 },
+    };
+    int count = UPRV_LENGTHOF(testData);
+    const HourCycleData * testDataPtr = testData;
+    for (; count-- > 0; ++testDataPtr) {
+        UErrorCode status = U_ZERO_ERROR;
+        UDateTimePatternGenerator * dtpgen =
+            udatpg_open(testDataPtr->locale, &status);
+        if ( U_FAILURE(status) ) {
+            log_data_err( "ERROR udatpg_open failed for locale %s : %s - (Are you missing data?)\n",
+                         testDataPtr->locale, myErrorName(status));
+        } else {
+            UDateFormatHourCycle actual = udatpg_getDefaultHourCycle(dtpgen, &status);
+            if (U_FAILURE(status) || testDataPtr->expected != actual) {
+                log_err("ERROR dtpgen locale %s udatpg_getDefaultHourCycle expecte to get %d but get %d\n",
+                        testDataPtr->locale, testDataPtr->expected, actual);
+            }
+            udatpg_close(dtpgen);
+        }
+    }
+}
+
+// Ensure that calling udatpg_getDefaultHourCycle on an empty instance doesn't call UPRV_UNREACHABLE/abort.
+static void TestGetDefaultHourCycleOnEmptyInstance() {
+    UErrorCode status = U_ZERO_ERROR;
+    UDateTimePatternGenerator * dtpgen = udatpg_openEmpty(&status);
+
+    if (U_FAILURE(status)) {
+        log_data_err("ERROR udatpg_openEmpty failed, status: %s \n", myErrorName(status));
+        return;
+    }
+
+    (void)udatpg_getDefaultHourCycle(dtpgen, &status);
+    if (!U_FAILURE(status)) {
+        log_data_err("ERROR expected udatpg_getDefaultHourCycle on an empty instance to fail, status: %s", myErrorName(status));
+    }
+
+    status = U_USELESS_COLLATOR_ERROR;
+    (void)udatpg_getDefaultHourCycle(dtpgen, &status);
+    if (status != U_USELESS_COLLATOR_ERROR) {
+        log_data_err("ERROR udatpg_getDefaultHourCycle shouldn't modify status if it is already failed, status: %s", myErrorName(status));
+    }
+
+    udatpg_close(dtpgen);
 }
 
 #endif

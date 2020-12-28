@@ -2,7 +2,7 @@
 *******************************************************************************
 *
 *   © 2016 and later: Unicode, Inc. and others.
-*   License & terms of use: http://www.unicode.org/copyright.html#License
+*   License & terms of use: http://www.unicode.org/copyright.html
 *
 *******************************************************************************
 *******************************************************************************
@@ -17,8 +17,9 @@
 #include <unicode/brkiter.h>
 #include <stdlib.h>
 
-U_CFUNC int c_main(void);
+using namespace icu;
 
+U_CFUNC int c_main(void);
 
 void printUnicodeString(const UnicodeString &s) {
     char charBuf[1000];

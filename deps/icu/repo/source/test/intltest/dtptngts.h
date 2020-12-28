@@ -30,6 +30,13 @@ private:
     void testAllFieldPatterns(/* char* par */);
     void testStaticGetSkeleton(/* char* par */);
     void testC();
+    void testSkeletonsWithDayPeriods();
+    void testGetFieldDisplayNames();
+    void testJjMapping();
+    void test20640_HourCyclArsEnNH();
+    void testFallbackWithDefaultRootLocale();
+    void testGetDefaultHourCycle_OnEmptyInstance();
+    void test_jConsistencyOddLocales();
 };
 
 #endif /* #if !UCONFIG_NO_FORMATTING */
