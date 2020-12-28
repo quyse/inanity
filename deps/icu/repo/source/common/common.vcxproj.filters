@@ -97,6 +97,9 @@
     <ClCompile Include="rbbitblb.cpp">
       <Filter>break iteration</Filter>
     </ClCompile>
+    <ClCompile Include="rbbi_cache.cpp">
+      <Filter>break iteration</Filter>
+    </ClCompile>
     <ClCompile Include="ubrk.cpp">
       <Filter>break iteration</Filter>
     </ClCompile>
@@ -134,6 +137,9 @@
       <Filter>collections</Filter>
     </ClCompile>
     <ClCompile Include="utrie.cpp">
+      <Filter>collections</Filter>
+    </ClCompile>
+    <ClCompile Include="utrie_swap.cpp">
       <Filter>collections</Filter>
     </ClCompile>
     <ClCompile Include="utrie2.cpp">
@@ -307,6 +313,15 @@
     <ClCompile Include="uts46.cpp">
       <Filter>idna</Filter>
     </ClCompile>
+    <ClCompile Include="localebuilder.cpp">
+      <Filter>locales &amp; resources</Filter>
+    </ClCompile>
+    <ClCompile Include="localematcher.cpp">
+      <Filter>locales &amp; resources</Filter>
+    </ClCompile>
+    <ClCompile Include="localeprioritylist.cpp">
+      <Filter>locales &amp; resources</Filter>
+    </ClCompile>
     <ClCompile Include="locavailable.cpp">
       <Filter>locales &amp; resources</Filter>
     </ClCompile>
@@ -316,16 +331,25 @@
     <ClCompile Include="locdispnames.cpp">
       <Filter>locales &amp; resources</Filter>
     </ClCompile>
+    <ClCompile Include="locdistance.cpp">
+      <Filter>locales &amp; resources</Filter>
+    </ClCompile>
     <ClCompile Include="locid.cpp">
       <Filter>locales &amp; resources</Filter>
     </ClCompile>
     <ClCompile Include="loclikely.cpp">
       <Filter>locales &amp; resources</Filter>
     </ClCompile>
+    <ClCompile Include="loclikelysubtags.cpp">
+      <Filter>locales &amp; resources</Filter>
+    </ClCompile>
     <ClCompile Include="locresdata.cpp">
       <Filter>locales &amp; resources</Filter>
     </ClCompile>
     <ClCompile Include="locutil.cpp">
+      <Filter>locales &amp; resources</Filter>
+    </ClCompile>
+    <ClCompile Include="lsr.cpp">
       <Filter>locales &amp; resources</Filter>
     </ClCompile>
     <ClCompile Include="resbund.cpp">
@@ -380,6 +404,9 @@
       <Filter>normalization</Filter>
     </ClCompile>
     <ClCompile Include="bmpset.cpp">
+      <Filter>properties &amp; sets</Filter>
+    </ClCompile>
+    <ClCompile Include="characterproperties.cpp">
       <Filter>properties &amp; sets</Filter>
     </ClCompile>
     <ClCompile Include="propname.cpp">
@@ -459,6 +486,9 @@
     </ClCompile>
     <ClCompile Include="usprep.cpp">
       <Filter>sprep</Filter>
+    </ClCompile>
+    <ClCompile Include="bytesinkutil.cpp">
+      <Filter>strings</Filter>
     </ClCompile>
     <ClCompile Include="bytestream.cpp">
       <Filter>strings</Filter>
@@ -556,12 +586,6 @@
     <ClCompile Include="bytestriebuilder.cpp">
       <Filter>collections</Filter>
     </ClCompile>
-    <ClCompile Include="listformatter.cpp">
-      <Filter>formatting</Filter>
-    </ClCompile>
-    <ClCompile Include="ulistformatter.cpp">
-      <Filter>formatting</Filter>
-    </ClCompile>
     <ClCompile Include="messagepattern.cpp">
       <Filter>formatting</Filter>
     </ClCompile>
@@ -583,6 +607,12 @@
     <ClCompile Include="ucharstrieiterator.cpp">
       <Filter>collections</Filter>
     </ClCompile>
+    <ClCompile Include="ucptrie.cpp">
+      <Filter>collections</Filter>
+    </ClCompile>
+    <ClCompile Include="umutablecptrie.cpp">
+      <Filter>collections</Filter>
+    </ClCompile>
     <ClCompile Include="patternprops.cpp">
       <Filter>properties &amp; sets</Filter>
     </ClCompile>
@@ -600,6 +630,12 @@
     </ClCompile>
     <ClCompile Include="ubiditransform.cpp">
       <Filter>bidi</Filter>
+    </ClCompile>
+    <ClCompile Include="static_unicode_sets.cpp">
+      <Filter>formatting</Filter>
+    </ClCompile>
+    <ClCompile Include="restrace.cpp">
+      <Filter>data &amp; memory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -634,6 +670,9 @@
       <Filter>break iteration</Filter>
     </ClInclude>
     <ClInclude Include="rbbitblb.h">
+      <Filter>break iteration</Filter>
+    </ClInclude>
+    <ClInclude Include="rbbi_cache.h">
       <Filter>break iteration</Filter>
     </ClInclude>
     <ClInclude Include="ubrkimpl.h">
@@ -792,10 +831,28 @@
     <ClInclude Include="punycode.h">
       <Filter>idna</Filter>
     </ClInclude>
+    <ClInclude Include="localeprioritylist.h">
+      <Filter>locales &amp; resources</Filter>
+    </ClInclude>
     <ClInclude Include="locbased.h">
       <Filter>locales &amp; resources</Filter>
     </ClInclude>
+    <ClInclude Include="locdistance.h">
+      <Filter>locales &amp; resources</Filter>
+    </ClInclude>
+    <ClInclude Include="charstrmap.h">
+      <Filter>locales &amp; resources</Filter>
+    </ClInclude>
+    <ClInclude Include="uniquecharstr.h">
+      <Filter>locales &amp; resources</Filter>
+    </ClInclude>
+    <ClInclude Include="loclikelysubtags.h">
+      <Filter>locales &amp; resources</Filter>
+    </ClInclude>
     <ClInclude Include="locutil.h">
+      <Filter>locales &amp; resources</Filter>
+    </ClInclude>
+    <ClInclude Include="lsr.h">
       <Filter>locales &amp; resources</Filter>
     </ClInclude>
     <ClInclude Include="ulocimp.h">
@@ -834,6 +891,9 @@
     <ClInclude Include="ucase.h">
       <Filter>properties &amp; sets</Filter>
     </ClInclude>
+    <ClInclude Include="ulayout_props.h">
+      <Filter>properties &amp; sets</Filter>
+    </ClInclude>
     <ClInclude Include="unisetspan.h">
       <Filter>properties &amp; sets</Filter>
     </ClInclude>
@@ -860,6 +920,9 @@
     </ClInclude>
     <ClInclude Include="sprpimpl.h">
       <Filter>sprep</Filter>
+    </ClInclude>
+    <ClInclude Include="bytesinkutil.h">
+      <Filter>strings</Filter>
     </ClInclude>
     <ClInclude Include="charstr.h">
       <Filter>strings</Filter>
@@ -923,6 +986,15 @@
     </ClInclude>
     <ClInclude Include="unicode\ubiditransform.h">
       <Filter>bidi</Filter>
+    </ClInclude>
+    <ClInclude Include="static_unicode_sets.h">
+      <Filter>formatting</Filter>
+    </ClInclude>
+    <ClInclude Include="capi_helper.h">
+      <Filter>data &amp; memory</Filter>
+    </ClInclude>
+    <ClInclude Include="restrace.h">
+      <Filter>data &amp; memory</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1038,6 +1110,12 @@
     </CustomBuild>
     <CustomBuild Include="unicode\uidna.h">
       <Filter>idna</Filter>
+    </CustomBuild>
+    <CustomBuild Include="unicode\localebuilder.h">
+      <Filter>locales &amp; resources</Filter>
+    </CustomBuild>
+    <CustomBuild Include="unicode\localematcher.h">
+      <Filter>locales &amp; resources</Filter>
     </CustomBuild>
     <CustomBuild Include="unicode\locid.h">
       <Filter>locales &amp; resources</Filter>
@@ -1168,12 +1246,6 @@
     <CustomBuild Include="unicode\messagepattern.h">
       <Filter>formatting</Filter>
     </CustomBuild>
-    <CustomBuild Include="unicode\listformatter.h">
-      <Filter>formatting</Filter>
-    </CustomBuild>
-    <CustomBuild Include="unicode\ulistformatter.h">
-      <Filter>formatting</Filter>
-    </CustomBuild>
     <CustomBuild Include="unicode\appendable.h">
       <Filter>strings</Filter>
     </CustomBuild>
@@ -1186,6 +1258,12 @@
     <CustomBuild Include="unicode\ucharstriebuilder.h">
       <Filter>collections</Filter>
     </CustomBuild>
+    <CustomBuild Include="unicode\ucptrie.h">
+      <Filter>collections</Filter>
+    </CustomBuild>
+    <CustomBuild Include="unicode\umutablecptrie.h">
+      <Filter>collections</Filter>
+    </CustomBuild>
     <CustomBuild Include="unicode\enumset.h">
       <Filter>data &amp; memory</Filter>
     </CustomBuild>
@@ -1194,6 +1272,9 @@
     </CustomBuild>
     <CustomBuild Include="unicode\stringtriebuilder.h">
       <Filter>collections</Filter>
+    </CustomBuild>
+    <CustomBuild Include="unicode\stringoptions.h">
+      <Filter>strings</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>

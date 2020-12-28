@@ -18,6 +18,7 @@
 
 #include <stdio.h>
 #include "unicode/utypes.h"
+#include "unicode/utf8.h"
 #include "utrie2.h"
 #include "utrie.h"
 #include "cstring.h"
@@ -74,6 +75,7 @@ getSpecialValues(const CheckRange checkRanges[], int32_t countCheckRanges,
 /* utrie2_enum() callback, modifies a value */
 static uint32_t U_CALLCONV
 testEnumValue(const void *context, uint32_t value) {
+    (void)context; // suppress compiler warnings about unused variable
     return value^0x5555;
 }
 
@@ -97,6 +99,7 @@ static void
 testTrieEnum(const char *testName,
              const UTrie2 *trie,
              const CheckRange checkRanges[], int32_t countCheckRanges) {
+    (void)testName; // suppress compiler warnings about unused variable
     /* skip over special values */
     while(countCheckRanges>0 && checkRanges[0].limit<=0) {
         ++checkRanges;
@@ -349,6 +352,11 @@ static void
 testTrieUTF8(const char *testName,
              const UTrie2 *trie, UTrie2ValueBits valueBits,
              const CheckRange checkRanges[], int32_t countCheckRanges) {
+    // Note: The byte sequence comments refer to the original UTF-8 definition.
+    // Starting with ICU 60, any sequence that is not a prefix of a valid one
+    // is treated as multiple single-byte errors.
+    // For testing, we only rely on U8_... and UTrie2 UTF-8 macros
+    // iterating consistently.
     static const uint8_t illegal[]={
         0xc0, 0x80,                         /* non-shortest U+0000 */
         0xc1, 0xbf,                         /* non-shortest U+007f */
@@ -393,17 +401,38 @@ testTrieUTF8(const char *testName,
         value=checkRanges[i].value;
         /* write three legal (or surrogate) code points */
         U8_APPEND_UNSAFE(s, length, prevCP);    /* start of the range */
-        values[countValues++]=U_IS_SURROGATE(prevCP) ? errorValue : value;
+        if(U_IS_SURROGATE(prevCP)) {
+            // A surrogate byte sequence counts as 3 single-byte errors.
+            values[countValues++]=errorValue;
+            values[countValues++]=errorValue;
+            values[countValues++]=errorValue;
+        } else {
+            values[countValues++]=value;
+        }
         c=checkRanges[i].limit;
         prevCP=(prevCP+c)/2;                    /* middle of the range */
         U8_APPEND_UNSAFE(s, length, prevCP);
-        values[countValues++]=U_IS_SURROGATE(prevCP) ? errorValue : value;
+        if(U_IS_SURROGATE(prevCP)) {
+            // A surrogate byte sequence counts as 3 single-byte errors.
+            values[countValues++]=errorValue;
+            values[countValues++]=errorValue;
+            values[countValues++]=errorValue;
+        } else {
+            values[countValues++]=value;
+        }
         prevCP=c;
         --c;                                    /* end of the range */
         U8_APPEND_UNSAFE(s, length, c);
-        values[countValues++]=U_IS_SURROGATE(c) ? errorValue : value;
+        if(U_IS_SURROGATE(c)) {
+            // A surrogate byte sequence counts as 3 single-byte errors.
+            values[countValues++]=errorValue;
+            values[countValues++]=errorValue;
+            values[countValues++]=errorValue;
+        } else {
+            values[countValues++]=value;
+        }
         /* write an illegal byte sequence */
-        if(i8<sizeof(illegal)) {
+        if(i8<(int32_t)sizeof(illegal)) {
             U8_FWD_1(illegal, i8, sizeof(illegal));
             while(prev8<i8) {
                 s[length++]=illegal[prev8++];
@@ -412,7 +441,7 @@ testTrieUTF8(const char *testName,
         }
     }
     /* write the remaining illegal byte sequences */
-    while(i8<sizeof(illegal)) {
+    while(i8<(int32_t)sizeof(illegal)) {
         U8_FWD_1(illegal, i8, sizeof(illegal));
         while(prev8<i8) {
             s[length++]=illegal[prev8++];
@@ -434,17 +463,20 @@ testTrieUTF8(const char *testName,
         }
         bytes=0;
         if(value!=values[i] || i8!=(p-s)) {
-            while(prev8<i8) {
-                bytes=(bytes<<8)|s[prev8++];
+            int32_t k=prev8;
+            while(k<i8) {
+                bytes=(bytes<<8)|s[k++];
             }
         }
         if(value!=values[i]) {
-            log_err("error: wrong value from UTRIE2_U8_NEXT(%s)(%lx->U+%04lx): 0x%lx instead of 0x%lx\n",
-                    testName, (unsigned long)bytes, (long)c, (long)value, (long)values[i]);
+            log_err("error: wrong value from UTRIE2_U8_NEXT(%s)(from %d %lx->U+%04lx) (read %d bytes): "
+                    "0x%lx instead of 0x%lx\n",
+                    testName, (int)prev8, (unsigned long)bytes, (long)c, (int)((p-s)-prev8),
+                    (long)value, (long)values[i]);
         }
         if(i8!=(p-s)) {
-            log_err("error: wrong end index from UTRIE2_U8_NEXT(%s)(%lx->U+%04lx): %ld != %ld\n",
-                    testName, (unsigned long)bytes, (long)c, (long)(p-s), (long)i8);
+            log_err("error: wrong end index from UTRIE2_U8_NEXT(%s)(from %d %lx->U+%04lx): %ld != %ld\n",
+                    testName, (int)prev8, (unsigned long)bytes, (long)c, (long)(p-s), (long)i8);
             continue;
         }
         ++i;
@@ -470,12 +502,14 @@ testTrieUTF8(const char *testName,
             }
         }
         if(value!=values[i]) {
-            log_err("error: wrong value from UTRIE2_U8_PREV(%s)(%lx->U+%04lx): 0x%lx instead of 0x%lx\n",
-                    testName, (unsigned long)bytes, (long)c, (long)value, (long)values[i]);
+            log_err("error: wrong value from UTRIE2_U8_PREV(%s)(from %d %lx->U+%04lx) (read %d bytes): "
+                    ": 0x%lx instead of 0x%lx\n",
+                    testName, (int)prev8, (unsigned long)bytes, (long)c, (int)(prev8-(p-s)),
+                    (long)value, (long)values[i]);
         }
         if(i8!=(p-s)) {
-            log_err("error: wrong end index from UTRIE2_U8_PREV(%s)(%lx->U+%04lx): %ld != %ld\n",
-                    testName, (unsigned long)bytes, (long)c, (long)(p-s), (long)i8);
+            log_err("error: wrong end index from UTRIE2_U8_PREV(%s)(from %d %lx->U+%04lx): %ld != %ld\n",
+                    testName, (int)prev8, (unsigned long)bytes, (long)c, (long)(p-s), (long)i8);
             continue;
         }
     }
@@ -1255,31 +1289,6 @@ GrowDataArrayTest(void) {
 
 /* versions 1 and 2 --------------------------------------------------------- */
 
-static void
-GetVersionTest(void) {
-    uint32_t data[4];
-    if( /* version 1 */
-        (data[0]=0x54726965, 1!=utrie2_getVersion(data, sizeof(data), FALSE)) ||
-        (data[0]=0x54726965, 1!=utrie2_getVersion(data, sizeof(data), TRUE)) ||
-        (data[0]=0x65697254, 0!=utrie2_getVersion(data, sizeof(data), FALSE)) ||
-        (data[0]=0x65697254, 1!=utrie2_getVersion(data, sizeof(data), TRUE)) ||
-        /* version 2 */
-        (data[0]=0x54726932, 2!=utrie2_getVersion(data, sizeof(data), FALSE)) ||
-        (data[0]=0x54726932, 2!=utrie2_getVersion(data, sizeof(data), TRUE)) ||
-        (data[0]=0x32697254, 0!=utrie2_getVersion(data, sizeof(data), FALSE)) ||
-        (data[0]=0x32697254, 2!=utrie2_getVersion(data, sizeof(data), TRUE)) ||
-        /* illegal arguments */
-        (data[0]=0x54726932, 0!=utrie2_getVersion(NULL, sizeof(data), FALSE)) ||
-        (data[0]=0x54726932, 0!=utrie2_getVersion(data, 3, FALSE)) ||
-        (data[0]=0x54726932, 0!=utrie2_getVersion((char *)data+1, sizeof(data), FALSE)) ||
-        /* unknown signature values */
-        (data[0]=0x11223344, 0!=utrie2_getVersion(data, sizeof(data), FALSE)) ||
-        (data[0]=0x54726933, 0!=utrie2_getVersion(data, sizeof(data), FALSE))
-    ) {
-        log_err("error: utrie2_getVersion() is not working as expected\n");
-    }
-}
-
 static UNewTrie *
 makeNewTrie1WithRanges(const char *testName,
                        const SetRange setRanges[], int32_t countSetRanges,
@@ -1423,6 +1432,5 @@ addTrie2Test(TestNode** root) {
     addTest(root, &DummyTrieTest, "tsutil/trie2test/DummyTrieTest");
     addTest(root, &FreeBlocksTest, "tsutil/trie2test/FreeBlocksTest");
     addTest(root, &GrowDataArrayTest, "tsutil/trie2test/GrowDataArrayTest");
-    addTest(root, &GetVersionTest, "tsutil/trie2test/GetVersionTest");
     addTest(root, &Trie12ConversionTest, "tsutil/trie2test/Trie12ConversionTest");
 }

@@ -77,9 +77,12 @@ ucase_addPropertyStarts(const USetAdder *sa, UErrorCode *pErrorCode) {
 
 /* data access primitives --------------------------------------------------- */
 
-#define GET_EXCEPTIONS(csp, props) ((csp)->exceptions+((props)>>UCASE_EXC_SHIFT))
+U_CFUNC const UTrie2 * U_EXPORT2
+ucase_getTrie() {
+    return &ucase_props_singleton.trie;
+}
 
-#define PROPS_HAS_EXCEPTION(props) ((props)&UCASE_EXCEPTION)
+#define GET_EXCEPTIONS(csp, props) ((csp)->exceptions+((props)>>UCASE_EXC_SHIFT))
 
 /* number of bits in an 8-bit integer value */
 static const uint8_t flagsOffset[256]={
@@ -113,7 +116,7 @@ static const uint8_t flagsOffset[256]={
  *               moved to the last uint16_t of the value, use +1 for beginning of next slot
  * @param value (out) int32_t or uint32_t output if hasSlot, otherwise not modified
  */
-#define GET_SLOT_VALUE(excWord, idx, pExc16, value) \
+#define GET_SLOT_VALUE(excWord, idx, pExc16, value) UPRV_BLOCK_MACRO_BEGIN { \
     if(((excWord)&UCASE_EXC_DOUBLE_SLOTS)==0) { \
         (pExc16)+=SLOT_OFFSET(excWord, idx); \
         (value)=*pExc16; \
@@ -121,20 +124,26 @@ static const uint8_t flagsOffset[256]={
         (pExc16)+=2*SLOT_OFFSET(excWord, idx); \
         (value)=*pExc16++; \
         (value)=((value)<<16)|*pExc16; \
-    }
+    } \
+} UPRV_BLOCK_MACRO_END
 
 /* simple case mappings ----------------------------------------------------- */
 
 U_CAPI UChar32 U_EXPORT2
 ucase_tolower(UChar32 c) {
     uint16_t props=UTRIE2_GET16(&ucase_props_singleton.trie, c);
-    if(!PROPS_HAS_EXCEPTION(props)) {
-        if(UCASE_GET_TYPE(props)>=UCASE_UPPER) {
+    if(!UCASE_HAS_EXCEPTION(props)) {
+        if(UCASE_IS_UPPER_OR_TITLE(props)) {
             c+=UCASE_GET_DELTA(props);
         }
     } else {
         const uint16_t *pe=GET_EXCEPTIONS(&ucase_props_singleton, props);
         uint16_t excWord=*pe++;
+        if(HAS_SLOT(excWord, UCASE_EXC_DELTA) && UCASE_IS_UPPER_OR_TITLE(props)) {
+            int32_t delta;
+            GET_SLOT_VALUE(excWord, UCASE_EXC_DELTA, pe, delta);
+            return (excWord&UCASE_EXC_DELTA_IS_NEGATIVE)==0 ? c+delta : c-delta;
+        }
         if(HAS_SLOT(excWord, UCASE_EXC_LOWER)) {
             GET_SLOT_VALUE(excWord, UCASE_EXC_LOWER, pe, c);
         }
@@ -145,13 +154,18 @@ ucase_tolower(UChar32 c) {
 U_CAPI UChar32 U_EXPORT2
 ucase_toupper(UChar32 c) {
     uint16_t props=UTRIE2_GET16(&ucase_props_singleton.trie, c);
-    if(!PROPS_HAS_EXCEPTION(props)) {
+    if(!UCASE_HAS_EXCEPTION(props)) {
         if(UCASE_GET_TYPE(props)==UCASE_LOWER) {
             c+=UCASE_GET_DELTA(props);
         }
     } else {
         const uint16_t *pe=GET_EXCEPTIONS(&ucase_props_singleton, props);
         uint16_t excWord=*pe++;
+        if(HAS_SLOT(excWord, UCASE_EXC_DELTA) && UCASE_GET_TYPE(props)==UCASE_LOWER) {
+            int32_t delta;
+            GET_SLOT_VALUE(excWord, UCASE_EXC_DELTA, pe, delta);
+            return (excWord&UCASE_EXC_DELTA_IS_NEGATIVE)==0 ? c+delta : c-delta;
+        }
         if(HAS_SLOT(excWord, UCASE_EXC_UPPER)) {
             GET_SLOT_VALUE(excWord, UCASE_EXC_UPPER, pe, c);
         }
@@ -162,13 +176,18 @@ ucase_toupper(UChar32 c) {
 U_CAPI UChar32 U_EXPORT2
 ucase_totitle(UChar32 c) {
     uint16_t props=UTRIE2_GET16(&ucase_props_singleton.trie, c);
-    if(!PROPS_HAS_EXCEPTION(props)) {
+    if(!UCASE_HAS_EXCEPTION(props)) {
         if(UCASE_GET_TYPE(props)==UCASE_LOWER) {
             c+=UCASE_GET_DELTA(props);
         }
     } else {
         const uint16_t *pe=GET_EXCEPTIONS(&ucase_props_singleton, props);
         uint16_t excWord=*pe++;
+        if(HAS_SLOT(excWord, UCASE_EXC_DELTA) && UCASE_GET_TYPE(props)==UCASE_LOWER) {
+            int32_t delta;
+            GET_SLOT_VALUE(excWord, UCASE_EXC_DELTA, pe, delta);
+            return (excWord&UCASE_EXC_DELTA_IS_NEGATIVE)==0 ? c+delta : c-delta;
+        }
         int32_t idx;
         if(HAS_SLOT(excWord, UCASE_EXC_TITLE)) {
             idx=UCASE_EXC_TITLE;
@@ -223,7 +242,7 @@ ucase_addCaseClosure(UChar32 c, const USetAdder *sa) {
     }
 
     props=UTRIE2_GET16(&ucase_props_singleton.trie, c);
-    if(!PROPS_HAS_EXCEPTION(props)) {
+    if(!UCASE_HAS_EXCEPTION(props)) {
         if(UCASE_GET_TYPE(props)!=UCASE_NONE) {
             /* add the one simple case mapping, no matter what type it is */
             int32_t delta=UCASE_GET_DELTA(props);
@@ -250,6 +269,12 @@ ucase_addCaseClosure(UChar32 c, const USetAdder *sa) {
                 GET_SLOT_VALUE(excWord, idx, pe, c);
                 sa->add(sa->set, c);
             }
+        }
+        if(HAS_SLOT(excWord, UCASE_EXC_DELTA)) {
+            pe=pe0;
+            int32_t delta;
+            GET_SLOT_VALUE(excWord, UCASE_EXC_DELTA, pe, delta);
+            sa->add(sa->set, (excWord&UCASE_EXC_DELTA_IS_NEGATIVE)==0 ? c+delta : c-delta);
         }
 
         /* get the closure string pointer & length */
@@ -419,6 +444,138 @@ FullCaseFoldingIterator::next(UnicodeString &full) {
     return c;
 }
 
+namespace LatinCase {
+
+const int8_t TO_LOWER_NORMAL[LIMIT] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+
+    0, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+    32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, EXC, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+
+    32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+    32, 32, 32, 32, 32, 32, 32, 0, 32, 32, 32, 32, 32, 32, 32, EXC,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+
+    1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
+    1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
+    1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
+    EXC, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1,
+
+    0, 1, 0, 1, 0, 1, 0, 1, 0, EXC, 1, 0, 1, 0, 1, 0,
+    1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
+    1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
+    1, 0, 1, 0, 1, 0, 1, 0, -121, 1, 0, 1, 0, 1, 0, EXC
+};
+
+const int8_t TO_LOWER_TR_LT[LIMIT] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+
+    0, 32, 32, 32, 32, 32, 32, 32, 32, EXC, EXC, 32, 32, 32, 32, 32,
+    32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, EXC, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+
+    32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, EXC, EXC, 32, 32,
+    32, 32, 32, 32, 32, 32, 32, 0, 32, 32, 32, 32, 32, 32, 32, EXC,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+
+    1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
+    1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
+    1, 0, 1, 0, 1, 0, 1, 0, EXC, 0, 1, 0, 1, 0, EXC, 0,
+    EXC, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1,
+
+    0, 1, 0, 1, 0, 1, 0, 1, 0, EXC, 1, 0, 1, 0, 1, 0,
+    1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
+    1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
+    1, 0, 1, 0, 1, 0, 1, 0, -121, 1, 0, 1, 0, 1, 0, EXC
+};
+
+const int8_t TO_UPPER_NORMAL[LIMIT] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, -32, -32, -32, -32, -32, -32, -32, -32, -32, -32, -32, -32, -32, -32, -32,
+    -32, -32, -32, -32, -32, -32, -32, -32, -32, -32, -32, 0, 0, 0, 0, 0,
+
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, EXC, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, EXC,
+    -32, -32, -32, -32, -32, -32, -32, -32, -32, -32, -32, -32, -32, -32, -32, -32,
+    -32, -32, -32, -32, -32, -32, -32, 0, -32, -32, -32, -32, -32, -32, -32, 121,
+
+    0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1,
+    0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1,
+    0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1,
+    0, EXC, 0, -1, 0, -1, 0, -1, 0, 0, -1, 0, -1, 0, -1, 0,
+
+    -1, 0, -1, 0, -1, 0, -1, 0, -1, EXC, 0, -1, 0, -1, 0, -1,
+    0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1,
+    0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1,
+    0, -1, 0, -1, 0, -1, 0, -1, 0, 0, -1, 0, -1, 0, -1, EXC
+};
+
+const int8_t TO_UPPER_TR[LIMIT] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, -32, -32, -32, -32, -32, -32, -32, -32, EXC, -32, -32, -32, -32, -32, -32,
+    -32, -32, -32, -32, -32, -32, -32, -32, -32, -32, -32, 0, 0, 0, 0, 0,
+
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, EXC, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, EXC,
+    -32, -32, -32, -32, -32, -32, -32, -32, -32, -32, -32, -32, -32, -32, -32, -32,
+    -32, -32, -32, -32, -32, -32, -32, 0, -32, -32, -32, -32, -32, -32, -32, 121,
+
+    0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1,
+    0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1,
+    0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1,
+    0, EXC, 0, -1, 0, -1, 0, -1, 0, 0, -1, 0, -1, 0, -1, 0,
+
+    -1, 0, -1, 0, -1, 0, -1, 0, -1, EXC, 0, -1, 0, -1, 0, -1,
+    0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1,
+    0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1,
+    0, -1, 0, -1, 0, -1, 0, -1, 0, 0, -1, 0, -1, 0, -1, EXC
+};
+
+}  // namespace LatinCase
+
 U_NAMESPACE_END
 
 /** @return UCASE_NONE, UCASE_LOWER, UCASE_UPPER, UCASE_TITLE */
@@ -439,7 +596,7 @@ ucase_getTypeOrIgnorable(UChar32 c) {
 static inline int32_t
 getDotType(UChar32 c) {
     uint16_t props=UTRIE2_GET16(&ucase_props_singleton.trie, c);
-    if(!PROPS_HAS_EXCEPTION(props)) {
+    if(!UCASE_HAS_EXCEPTION(props)) {
         return props&UCASE_DOT_MASK;
     } else {
         const uint16_t *pe=GET_EXCEPTIONS(&ucase_props_singleton, props);
@@ -455,7 +612,12 @@ ucase_isSoftDotted(UChar32 c) {
 U_CAPI UBool U_EXPORT2
 ucase_isCaseSensitive(UChar32 c) {
     uint16_t props=UTRIE2_GET16(&ucase_props_singleton.trie, c);
-    return (UBool)((props&UCASE_SENSITIVE)!=0);
+    if(!UCASE_HAS_EXCEPTION(props)) {
+        return (UBool)((props&UCASE_SENSITIVE)!=0);
+    } else {
+        const uint16_t *pe=GET_EXCEPTIONS(&ucase_props_singleton, props);
+        return (UBool)((*pe&UCASE_EXC_SENSITIVE)!=0);
+    }
 }
 
 /* string casing ------------------------------------------------------------ */
@@ -545,6 +707,7 @@ ucase_isCaseSensitive(UChar32 c) {
 #define is_r(c) ((c)=='r' || (c)=='R')
 #define is_t(c) ((c)=='t' || (c)=='T')
 #define is_u(c) ((c)=='u' || (c)=='U')
+#define is_y(c) ((c)=='y' || (c)=='Y')
 #define is_z(c) ((c)=='z' || (c)=='Z')
 
 /* separator? */
@@ -642,6 +805,18 @@ ucase_getCaseLocale(const char *locale) {
                     return UCASE_LOC_DUTCH;
                 }
             }
+        } else if(c=='h') {
+            /* hy or hye? *not* hyw */
+            c=*locale++;
+            if(is_y(c)) {
+                c=*locale++;
+                if(is_e(c)) {
+                    c=*locale;
+                }
+                if(is_sep(c)) {
+                    return UCASE_LOC_ARMENIAN;
+                }
+            }
         }
     } else {
         // uppercase c
@@ -704,6 +879,18 @@ ucase_getCaseLocale(const char *locale) {
                 }
                 if(is_sep(c)) {
                     return UCASE_LOC_DUTCH;
+                }
+            }
+        } else if(c=='H') {
+            /* hy or hye? *not* hyw */
+            c=*locale++;
+            if(is_y(c)) {
+                c=*locale++;
+                if(is_e(c)) {
+                    c=*locale;
+                }
+                if(is_sep(c)) {
+                    return UCASE_LOC_ARMENIAN;
                 }
             }
         }
@@ -878,8 +1065,8 @@ ucase_toFullLower(UChar32 c,
     U_ASSERT(c >= 0);
     UChar32 result=c;
     uint16_t props=UTRIE2_GET16(&ucase_props_singleton.trie, c);
-    if(!PROPS_HAS_EXCEPTION(props)) {
-        if(UCASE_GET_TYPE(props)>=UCASE_UPPER) {
+    if(!UCASE_HAS_EXCEPTION(props)) {
+        if(UCASE_IS_UPPER_OR_TITLE(props)) {
             result=c+UCASE_GET_DELTA(props);
         }
     } else {
@@ -961,6 +1148,7 @@ ucase_toFullLower(UChar32 c,
                     0307; ; 0307; 0307; tr After_I; # COMBINING DOT ABOVE
                     0307; ; 0307; 0307; az After_I; # COMBINING DOT ABOVE
                  */
+                *pString=nullptr;
                 return 0; /* remove the dot (continue without output) */
             } else if(loc==UCASE_LOC_TURKISH && c==0x49 && !isFollowedByDotAbove(iter, context)) {
                 /*
@@ -1004,6 +1192,11 @@ ucase_toFullLower(UChar32 c,
             }
         }
 
+        if(HAS_SLOT(excWord, UCASE_EXC_DELTA) && UCASE_IS_UPPER_OR_TITLE(props)) {
+            int32_t delta;
+            GET_SLOT_VALUE(excWord, UCASE_EXC_DELTA, pe2, delta);
+            return (excWord&UCASE_EXC_DELTA_IS_NEGATIVE)==0 ? c+delta : c-delta;
+        }
         if(HAS_SLOT(excWord, UCASE_EXC_LOWER)) {
             GET_SLOT_VALUE(excWord, UCASE_EXC_LOWER, pe2, result);
         }
@@ -1023,7 +1216,7 @@ toUpperOrTitle(UChar32 c,
     U_ASSERT(c >= 0);
     UChar32 result=c;
     uint16_t props=UTRIE2_GET16(&ucase_props_singleton.trie, c);
-    if(!PROPS_HAS_EXCEPTION(props)) {
+    if(!UCASE_HAS_EXCEPTION(props)) {
         if(UCASE_GET_TYPE(props)==UCASE_LOWER) {
             result=c+UCASE_GET_DELTA(props);
         }
@@ -1059,7 +1252,19 @@ toUpperOrTitle(UChar32 c,
 
                     0307; 0307; ; ; lt After_Soft_Dotted; # COMBINING DOT ABOVE
                  */
+                *pString=nullptr;
                 return 0; /* remove the dot (continue without output) */
+            } else if(c==0x0587) {
+                // See ICU-13416:
+                // և ligature ech-yiwn
+                // uppercases to ԵՒ=ech+yiwn by default and in Western Armenian,
+                // but to ԵՎ=ech+vew in Eastern Armenian.
+                if(loc==UCASE_LOC_ARMENIAN) {
+                    *pString=upperNotTitle ? u"ԵՎ" : u"Եվ";
+                } else {
+                    *pString=upperNotTitle ? u"ԵՒ" : u"Եւ";
+                }
+                return 2;
             } else {
                 /* no known conditional special case mapping, use a normal mapping */
             }
@@ -1092,6 +1297,11 @@ toUpperOrTitle(UChar32 c,
             }
         }
 
+        if(HAS_SLOT(excWord, UCASE_EXC_DELTA) && UCASE_GET_TYPE(props)==UCASE_LOWER) {
+            int32_t delta;
+            GET_SLOT_VALUE(excWord, UCASE_EXC_DELTA, pe2, delta);
+            return (excWord&UCASE_EXC_DELTA_IS_NEGATIVE)==0 ? c+delta : c-delta;
+        }
         if(!upperNotTitle && HAS_SLOT(excWord, UCASE_EXC_TITLE)) {
             idx=UCASE_EXC_TITLE;
         } else if(HAS_SLOT(excWord, UCASE_EXC_UPPER)) {
@@ -1167,8 +1377,8 @@ ucase_toFullTitle(UChar32 c,
 U_CAPI UChar32 U_EXPORT2
 ucase_fold(UChar32 c, uint32_t options) {
     uint16_t props=UTRIE2_GET16(&ucase_props_singleton.trie, c);
-    if(!PROPS_HAS_EXCEPTION(props)) {
-        if(UCASE_GET_TYPE(props)>=UCASE_UPPER) {
+    if(!UCASE_HAS_EXCEPTION(props)) {
+        if(UCASE_IS_UPPER_OR_TITLE(props)) {
             c+=UCASE_GET_DELTA(props);
         }
     } else {
@@ -1196,6 +1406,14 @@ ucase_fold(UChar32 c, uint32_t options) {
                     return 0x69;
                 }
             }
+        }
+        if((excWord&UCASE_EXC_NO_SIMPLE_CASE_FOLDING)!=0) {
+            return c;
+        }
+        if(HAS_SLOT(excWord, UCASE_EXC_DELTA) && UCASE_IS_UPPER_OR_TITLE(props)) {
+            int32_t delta;
+            GET_SLOT_VALUE(excWord, UCASE_EXC_DELTA, pe, delta);
+            return (excWord&UCASE_EXC_DELTA_IS_NEGATIVE)==0 ? c+delta : c-delta;
         }
         if(HAS_SLOT(excWord, UCASE_EXC_FOLD)) {
             idx=UCASE_EXC_FOLD;
@@ -1232,8 +1450,8 @@ ucase_toFullFolding(UChar32 c,
     U_ASSERT(c >= 0);
     UChar32 result=c;
     uint16_t props=UTRIE2_GET16(&ucase_props_singleton.trie, c);
-    if(!PROPS_HAS_EXCEPTION(props)) {
-        if(UCASE_GET_TYPE(props)>=UCASE_UPPER) {
+    if(!UCASE_HAS_EXCEPTION(props)) {
+        if(UCASE_IS_UPPER_OR_TITLE(props)) {
             result=c+UCASE_GET_DELTA(props);
         }
     } else {
@@ -1284,6 +1502,14 @@ ucase_toFullFolding(UChar32 c,
             }
         }
 
+        if((excWord&UCASE_EXC_NO_SIMPLE_CASE_FOLDING)!=0) {
+            return ~c;
+        }
+        if(HAS_SLOT(excWord, UCASE_EXC_DELTA) && UCASE_IS_UPPER_OR_TITLE(props)) {
+            int32_t delta;
+            GET_SLOT_VALUE(excWord, UCASE_EXC_DELTA, pe2, delta);
+            return (excWord&UCASE_EXC_DELTA_IS_NEGATIVE)==0 ? c+delta : c-delta;
+        }
         if(HAS_SLOT(excWord, UCASE_EXC_FOLD)) {
             idx=UCASE_EXC_FOLD;
         } else if(HAS_SLOT(excWord, UCASE_EXC_LOWER)) {

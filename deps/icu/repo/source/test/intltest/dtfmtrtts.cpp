@@ -249,7 +249,7 @@ void DateFormatRoundTripTest::test(const Locale& loc)
     
     for(style = DateFormat::FULL; style <= DateFormat::SHORT; ++style) {
         if (TEST_TABLE[itable++]) {
-          logln("Testing style " + UnicodeString(styleName((DateFormat::EStyle)style)));
+            logln("Testing style " + UnicodeString(styleName((DateFormat::EStyle)style)));
             DateFormat *df = DateFormat::createTimeInstance((DateFormat::EStyle)style, loc);
             if(df == NULL) {
               errln(UnicodeString("Could not DF::createTimeInstance ") + UnicodeString(styleName((DateFormat::EStyle)style)) + " Locale: " + loc.getDisplayName(temp));
@@ -340,8 +340,13 @@ void DateFormatRoundTripTest::test(DateFormat *fmt, const Locale &origLocale, UB
             for(loop = 0; loop < DEPTH; ++loop) {
                 if (loop > 0)  {
                     d[loop] = fmt->parse(s[loop-1], status);
-                    failure(status, "fmt->parse", s[loop-1]+" in locale: " + origLocale.getName() + " with pattern: " + pat);
-                    status = U_ZERO_ERROR; /* any error would have been reported */
+                    if(U_FAILURE(status)) {
+                        ParsePosition ppos;
+                        (void)fmt->parse(s[loop-1], ppos);
+                        failure(status, "fmt->parse", s[loop-1]+" in locale: " + origLocale.getName() +
+                                " with pattern: " + pat + " has errIndex: " + ppos.getErrorIndex());
+                        status = U_ZERO_ERROR; /* any error would have been reported */
+                    }
                 }
 
                 s[loop] = fmt->format(d[loop], s[loop]);
@@ -465,7 +470,14 @@ void DateFormatRoundTripTest::test(DateFormat *fmt, const Locale &origLocale, UB
               } else if(!strcmp(type,"hebrew")) {
                   maxSmatch = 3;
                   maxDmatch = 3;
-                }
+              } else if (timeOnly && uprv_strcmp(origLocale.getName(),"ar_JO@calendar=islamic-civil")==0 &&
+                      logKnownIssue("21049", "ar_JO@calendar=islamic-civil timeOnly roundtrip converges too slowly")) {
+                  // For some reason, for time-only tests, ar_JO@calendar=islamic-civil is no
+                  // longer converging to a match as fast as expected above. Investigate with
+                  // ICU-21022, but meanwhile allow more cycles for convergence.
+                  maxSmatch = 2;
+                  maxDmatch = 3;
+              }
             }
 
             // Use @v to see verbose results on successful cases
@@ -473,7 +485,9 @@ void DateFormatRoundTripTest::test(DateFormat *fmt, const Locale &origLocale, UB
             if (optionv || fail) {
                 if (fail) {
                     errln(UnicodeString("\nFAIL: Pattern: ") + pat +
-                          " in Locale: " + origLocale.getName());
+                          " in Locale: " + origLocale.getName() +
+                          "\nget dmatch: " + dmatch + " (expected max " + maxDmatch +
+                          "), smatch: " + smatch + " (expected max " + maxSmatch + ")");
                 } else {
                     errln(UnicodeString("\nOk: Pattern: ") + pat +
                           " in Locale: " + origLocale.getName());
@@ -534,13 +548,16 @@ UnicodeString& DateFormatRoundTripTest::escape(const UnicodeString& src, Unicode
 {
     dst.remove();
     for (int32_t i = 0; i < src.length(); ++i) {
-        UChar c = src[i];
-        if(c < 0x0080) 
+        UChar32 c = src.char32At(i);
+        if (c >= 0x10000) {
+            ++i;
+        }
+        if (c < 0x0080) {
             dst += c;
-        else {
+        } else {
             dst += UnicodeString("[");
-            char buf [8];
-            sprintf(buf, "%#x", c);
+            char buf [12];
+            sprintf(buf, "%#04x", c);
             dst += UnicodeString(buf);
             dst += UnicodeString("]");
         }

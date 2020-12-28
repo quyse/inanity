@@ -16,6 +16,7 @@
 #include "unicode/decimfmt.h"
 #include "unicode/locid.h"
 #include "putilimp.h"
+#include "cstring.h"
 
 #include <float.h>
 #include <stdio.h>    // for sprintf
@@ -249,7 +250,12 @@ NumberFormatRoundTripTest::test(NumberFormat *fmt, const Formattable& value)
         logln(/*value.getString(temp) +*/ " F> " + escape(s));
 
     fmt->parse(s, n, status);
-    failure(status, "fmt->parse");
+    if(U_FAILURE(status)) {
+        UErrorCode infoStatus = U_ZERO_ERROR;
+        const char* localeID = fmt->getLocaleID(ULOC_ACTUAL_LOCALE, infoStatus);
+        localeID = (U_SUCCESS(infoStatus) && localeID)? localeID: "?";
+        errln(UnicodeString("FAIL: fmt->parse failed, locale: ") + localeID + ", error: " + u_errorName(status));
+    }
     if(DEBUG_VAR) 
         logln(escape(s) + " P> " /*+ n.getString(temp)*/);
 
@@ -343,10 +349,13 @@ NumberFormatRoundTripTest::escape(UnicodeString& s)
     UnicodeString copy(s);
     s.remove();
     for(int i = 0; i < copy.length(); ++i) {
-        UChar c = copy[i];
-        if(c < 0x00FF) 
+        UChar32 c = copy.char32At(i);
+        if (c >= 0x10000) {
+            ++i;
+        }
+        if(c < 0x00FF) {
             s += c;
-        else {
+        } else {
             s += "+U";
             char temp[16];
             sprintf(temp, "%4X", c);        // might not work
