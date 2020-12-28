@@ -23,12 +23,8 @@ exports.configureCompiler = function(objectFile, compiler) {
 	compiler.addMacro('UCONFIG_NO_FILE_IO=1');
 	// crazy hacks for windows
 	if(compiler.platform == 'win32') {
-		if(compiler.toolchain == 'msvc') {
-			compiler.addMacro('__WINTZ'); // to skip including wintz.h
-			compiler.addMacro('uprv_detectWindowsTimeZone=(const char*)__noop');
-		} else if(compiler.toolchain == 'clang') {
-			compiler.addMacro('U_POSIX_LOCALE=1');
-		}
+		compiler.addMacro('__WINTZ'); // to skip including wintz.h
+		compiler.addMacro('uprv_detectWindowsTimeZone=(const char*)__noop');
 	}
 	// crazy hacks for xbox
 	if(compiler.platform == 'xbox') {
@@ -249,7 +245,7 @@ var objects = [
 	'common.uvector',
 	'common.uvectr32',
 	'common.uvectr64',
-	'common.wintz',
+	// 'common.wintz',
 
 	'stubdata.stubdata',
 ];
