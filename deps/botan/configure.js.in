@@ -21,13 +21,13 @@ ${FILES_WIN64_CLANG}
 	win32_x86_msvc: [
 ${FILES_WIN32_MSVC}
 	],
-	linux_x64: [
+	linux_x64_clang: [
 ${FILES_LINUX64_CLANG}
 	],
-	darwin_x64: [
+	darwin_x64_clang: [
 ${FILES_DARWIN64_CLANG}
 	],
-	darwin_x86: [
+	darwin_x86_clang: [
 ${FILES_DARWIN32_CLANG}
 	],
 };
