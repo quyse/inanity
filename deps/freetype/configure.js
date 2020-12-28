@@ -16,7 +16,7 @@ exports.configureCompiler = function(objectFile, compiler) {
 
 var modules = {
 	autofit: "autofit",
-	base: "ftbase ftinit ftmm ftsystem ftbitmap ftglyph",
+	base: "ftbase ftdebug ftinit ftmm ftsystem ftbitmap ftglyph",
 	bdf: "bdf",
 	bzip2: "ftbzip2",
 	cache: "ftcache",
