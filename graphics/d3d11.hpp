@@ -2,7 +2,7 @@
 #define ___INANITY_D3D11_HPP___
 
 #include "../platform/windows.hpp"
-#include <InitGuid.h>
+#include <initguid.h>
 
 #if defined(___INANITY_PLATFORM_XBOX)
 
