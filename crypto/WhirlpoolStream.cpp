@@ -20,28 +20,15 @@ BEGIN_INANITY_CRYPTO
  * i.e., to specify the size of the result of each expression.
  */
 
-typedef signed char s8;
-typedef unsigned char u8;
+typedef int8_t s8;
+typedef uint8_t u8;
 
-#if UINT_MAX >= 4294967295UL
+typedef int16_t s16;
+typedef int32_t s32;
+typedef uint16_t u16;
+typedef uint32_t u32;
 
-typedef signed short s16;
-typedef signed int s32;
-typedef unsigned short u16;
-typedef unsigned int u32;
-
-#define ONE32   0xffffffffU
-
-#else
-
-typedef signed int s16;
-typedef signed long s32;
-typedef unsigned int u16;
-typedef unsigned long u32;
-
-#define ONE32   0xffffffffUL
-
-#endif
+#define ONE32   ((u32)0xffffffff)
 
 #define ONE8  0xffU
 #define ONE16   0xffffU
@@ -50,8 +37,8 @@ typedef unsigned long u32;
 #define T16(x)  ((x) & ONE16)
 #define T32(x)  ((x) & ONE32)
 
-typedef unsigned long long u64;
-typedef signed long long s64;
+typedef uint64_t u64;
+typedef int64_t s64;
 #define LL(v)   (v##ULL)
 #define ONE64   LL(0xffffffffffffffff)
 #define T64(x)  ((x) & ONE64)
@@ -990,7 +977,7 @@ void WhirlpoolStream::processBuffer() {
  *
  * This method maintains the invariant: bufferBits < DIGESTBITS
  */
-void WhirlpoolStream::add(const unsigned char * const source, unsigned long sourceBits) {
+void WhirlpoolStream::add(const uint8_t * const source, unsigned long sourceBits) {
 	/*
 											sourcePos
 											|
@@ -1181,7 +1168,7 @@ WhirlpoolStream::WhirlpoolStream()
 void WhirlpoolStream::Write(const void* data, size_t size)
 {
 	THROW_ASSERT(size < 0x20000000);
-	add((const unsigned char*)data, (unsigned long)(size * 8));
+	add((const uint8_t*)data, (unsigned long)(size * 8));
 }
 
 size_t WhirlpoolStream::GetHashSize() const

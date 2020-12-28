@@ -16,18 +16,18 @@ public:
 	static const char* algorithmName;
 
 private:
-	unsigned char bitLength[32]; /* global number of hashed bits (256-bit counter) */
-	unsigned char buffer[64];	/* buffer of data to hash */
+	uint8_t bitLength[32]; /* global number of hashed bits (256-bit counter) */
+	uint8_t buffer[64];	/* buffer of data to hash */
 	int bufferBits;		        /* current number of bits on the buffer */
 	int bufferPos;		        /* current (possibly incomplete) byte slot on the buffer */
-	unsigned long long hash[8];    /* the hashing state */
+	uint64_t hash[8];    /* the hashing state */
 	/// Результирующий хеш.
-	unsigned char digest[64];
+	uint8_t digest[64];
 	/// Завершён ли буфер.
 	bool ended;
 
 	void processBuffer();
-	void add(const unsigned char * const source, unsigned long sourceBits);
+	void add(const uint8_t * const source, unsigned long sourceBits);
 
 public:
 	WhirlpoolStream();

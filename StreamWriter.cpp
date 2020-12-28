@@ -52,7 +52,7 @@ void StreamWriter::WriteShortlyBig(bigsize_t data)
 	// additional length
 	int length;
 	// bytes
-	unsigned char bytes[9];
+	uint8_t bytes[9];
 
 	if(data < 0x80)
 	{
@@ -111,10 +111,10 @@ void StreamWriter::WriteShortlyBig(bigsize_t data)
 #endif
 
 	// prepare first byte
-	bytes[0] |= (unsigned char)(data >> (length * 8));
+	bytes[0] |= (uint8_t)(data >> (length * 8));
 	// prepare additional bytes
 	for(int i = 0; i < length; ++i)
-		bytes[1 + i] = (unsigned char)(data >> ((length - 1 - i) * 8));
+		bytes[1 + i] = (uint8_t)(data >> ((length - 1 - i) * 8));
 
 	// write
 	Write(bytes, length + 1);
@@ -125,7 +125,8 @@ void StreamWriter::WriteString(const String& data)
 	//сначала записать длину строки
 	WriteShortly(data.length());
 	//затем саму строку
-	Write(data.c_str(), data.length());
+	if(data.length())
+		Write(data.c_str(), data.length());
 }
 
 void StreamWriter::WriteGap(size_t alignment)
@@ -141,7 +142,7 @@ void StreamWriter::WriteGap(size_t alignment)
 	//записать их
 	if(alignment)
 	{
-		unsigned char* data = (unsigned char*)alloca(alignment);
+		uint8_t* data = (uint8_t*)alloca(alignment);
 		for(size_t i = 0; i < alignment; ++i)
 			data[i] = 0xCC;
 		Write(data, alignment);

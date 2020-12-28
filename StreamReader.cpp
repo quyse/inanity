@@ -55,7 +55,7 @@ size_t StreamReader::ReadShortly()
 bigsize_t StreamReader::ReadShortlyBig()
 {
 	// read first byte
-	unsigned char first = Read<unsigned char>();
+	uint8_t first = Read<uint8_t>();
 	// determine additional length
 	int length;
 	if(!(first & 0x80))
@@ -103,7 +103,7 @@ bigsize_t StreamReader::ReadShortlyBig()
 	}
 
 	// read additional bytes
-	unsigned char bytes[8];
+	uint8_t bytes[8];
 	Read(bytes, length);
 
 	// calculate result
