@@ -24,15 +24,16 @@ private:
 	/** File memory should not be freed
 	until FT_Face is live. */
 	ptr<File> file;
+	int size;
 
 public:
-	FtFontFace(ptr<FtEngine> engine, FT_Face ftFace, ptr<File> file);
+	FtFontFace(ptr<FtEngine> engine, FT_Face ftFace, ptr<File> file, int size);
 	~FtFontFace();
 
 	//*** FontFace's methods.
-	ptr<FontShape> CreateShape(int size);
-	ptr<FontGlyphs> CreateGlyphs(Canvas* canvas, int size, const CreateGlyphsConfig& config);
-	Metrics CalculateMetrics(int size) const;
+	ptr<FontShape> CreateShape();
+	ptr<FontGlyphs> CreateGlyphs(Canvas* canvas, const CreateGlyphsConfig& config);
+	Metrics CalculateMetrics() const;
 };
 
 END_INANITY_GUI

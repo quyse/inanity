@@ -17,7 +17,7 @@ FtEngine::~FtEngine()
 	FT_Done_FreeType(library);
 }
 
-ptr<FontFace> FtEngine::LoadFontFace(ptr<File> file)
+ptr<FontFace> FtEngine::LoadFontFace(ptr<File> file, int size)
 {
 	BEGIN_TRY();
 
@@ -25,7 +25,10 @@ ptr<FontFace> FtEngine::LoadFontFace(ptr<File> file)
 	if(FT_New_Memory_Face(library, (const FT_Byte*)file->GetData(), (FT_Long)file->GetSize(), 0, &face))
 		THROW("Can't create font face");
 
-	return NEW(FtFontFace(this, face, file));
+  if(FT_Set_Pixel_Sizes(face, size, size))
+    THROW("Can't set pixel sizes");
+
+	return NEW(FtFontFace(this, face, file, size));
 
 	END_TRY("Can't load Freetype font");
 }
