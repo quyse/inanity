@@ -101,7 +101,7 @@
 #   define NOIME
 #   define NOMCX
 #   include <windows.h>
-#   include "unicode\uloc.h"
+#   include "unicode/uloc.h"
 #if U_PLATFORM_HAS_WINUWP_API == 0
 #   include "wintz.h"
 #else // U_PLATFORM_HAS_WINUWP_API
