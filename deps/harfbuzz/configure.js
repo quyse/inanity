@@ -17,6 +17,7 @@ exports.configureCompiler = function(objectFile, compiler) {
 	// crazy hacks for xbox
 	if(compiler.platform == 'xbox') {
 		compiler.addMacro('getenv=(char*)""+__noop');
+		compiler.addMacro('HB_NO_MMAP');
 	}
 
 	compiler.strict = false;
