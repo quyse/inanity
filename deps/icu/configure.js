@@ -28,6 +28,8 @@ exports.configureCompiler = function(objectFile, compiler) {
 	}
 	// crazy hacks for xbox
 	if(compiler.platform == 'xbox') {
+		compiler.addMacro('__WINTZ'); // to skip including wintz.h
+		compiler.addMacro('uprv_detectWindowsTimeZone=(const char*)__noop');
 		compiler.addMacro('U_TZSET=__noop');
 		compiler.addMacro('getenv=""+__noop');
 		compiler.addMacro('GetACP=65001+__noop');
