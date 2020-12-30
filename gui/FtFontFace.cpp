@@ -13,20 +13,33 @@ BEGIN_INANITY_GUI
 
 using namespace Graphics;
 
-FtFontFace::FtFontFace(ptr<FtEngine> engine, FT_Face ftFace, ptr<File> file, int size)
-: engine(engine), ftFace(ftFace), file(file), size(size)
-{}
+FtFontFace::FtFontFace(ptr<FtEngine> engine, ptr<File> file, int size)
+: engine(engine), file(file), size(size)
+{
+	if(FT_New_Memory_Face(engine->GetLibrary(), (const FT_Byte*)file->GetData(), (FT_Long)file->GetSize(), 0, &ftFace))
+		THROW("Can't create font glyph face");
+
+	if(FT_Set_Pixel_Sizes(ftFace, size, size))
+		THROW("Can't set pixel sizes");
+
+	if(FT_New_Memory_Face(engine->GetLibrary(), (const FT_Byte*)file->GetData(), (FT_Long)file->GetSize(), 0, &ftShapeFace))
+		THROW("Can't create font face");
+
+	if(FT_Set_Pixel_Sizes(ftShapeFace, size, size))
+		THROW("Can't set pixel sizes");
+}
 
 FtFontFace::~FtFontFace()
 {
 	FT_Done_Face(ftFace);
+	FT_Done_Face(ftShapeFace);
 }
 
 ptr<FontShape> FtFontFace::CreateShape()
 {
 	BEGIN_TRY();
 
-	hb_font_t* hbFont = hb_ft_font_create(ftFace, nullptr);
+	hb_font_t* hbFont = hb_ft_font_create(ftShapeFace, nullptr);
 	return NEW(HbFontShape(this, hbFont));
 
 	END_TRY("Can't create shape for Freetype font face");
