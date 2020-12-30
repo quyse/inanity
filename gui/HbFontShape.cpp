@@ -19,7 +19,7 @@ HbFontShape::~HbFontShape()
 
 FontShape::Language HbFontShape::GetLanguage(const String& tag)
 {
-	return (Language)hb_language_from_string(tag.c_str(), tag.length());
+	return (Language)hb_language_from_string(tag.c_str(), (int)tag.length());
 }
 
 void HbFontShape::Shape(const String& text, Script script, Language language, vec2* outAdvance, std::vector<OutGlyph>* outGlyphs)
