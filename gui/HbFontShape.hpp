@@ -22,10 +22,10 @@ public:
 	~HbFontShape();
 
 	/// FontShape's methods.
-	/** Out parameters are optional. */
-	void Shape(const String& text, Script script, Graphics::vec2* outSize, std::vector<OutGlyph>* outGlyphs);
+	void Shape(const String& text, Script script, Language language, Graphics::vec2* outSize, std::vector<OutGlyph>* outGlyphs);
 
-	void ShapeParagraph(const String& text, Script script, const icu::Locale& locale, float maxLineWidth, float lineHeight, std::vector<OutGlyph>* outGlyphs);
+	static Language GetLanguage(const String& tag);
+	void ShapeParagraph(const String& text, Script script, Language language, const icu::Locale& locale, float maxLineWidth, float lineHeight, std::vector<OutGlyph>* outGlyphs);
 };
 
 END_INANITY_GUI

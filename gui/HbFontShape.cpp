@@ -17,7 +17,12 @@ HbFontShape::~HbFontShape()
 	hb_buffer_destroy(buffer);
 }
 
-void HbFontShape::Shape(const String& text, Script script, vec2* outAdvance, std::vector<OutGlyph>* outGlyphs)
+FontShape::Language HbFontShape::GetLanguage(const String& tag)
+{
+	return (Language)hb_language_from_string(tag.c_str(), tag.length());
+}
+
+void HbFontShape::Shape(const String& text, Script script, Language language, vec2* outAdvance, std::vector<OutGlyph>* outGlyphs)
 {
 	if(text.empty())
 	{
@@ -28,6 +33,7 @@ void HbFontShape::Shape(const String& text, Script script, vec2* outAdvance, std
 
 	// shape text, and get glyph numbers and offsets
 	hb_buffer_set_script(buffer, (hb_script_t)script);
+	hb_buffer_set_language(buffer, (hb_language_t)language);
 	hb_buffer_set_direction(buffer, hb_script_get_horizontal_direction((hb_script_t)script));
 	hb_buffer_add_utf8(buffer, text.c_str(), (int)text.length(), 0, (int)text.length());
 	hb_shape(font, buffer, nullptr, 0);
@@ -68,10 +74,10 @@ void HbFontShape::Shape(const String& text, Script script, vec2* outAdvance, std
 		*outAdvance = position;
 
 	// cleanup
-	hb_buffer_clear_contents(buffer);
+	hb_buffer_reset(buffer);
 }
 
-void HbFontShape::ShapeParagraph(const String& text, Script script, const icu::Locale& locale, float maxLineWidth, float lineHeight, std::vector<OutGlyph>* outGlyphs)
+void HbFontShape::ShapeParagraph(const String& text, Script script, Language language, const icu::Locale& locale, float maxLineWidth, float lineHeight, std::vector<OutGlyph>* outGlyphs)
 {
 	UErrorCode e = U_ZERO_ERROR;
 	icu::UnicodeString s = icu::UnicodeString::fromUTF8(text);
@@ -98,6 +104,7 @@ void HbFontShape::ShapeParagraph(const String& text, Script script, const icu::L
 
 		// shape logical run
 		hb_buffer_set_script(buffer, (hb_script_t)script);
+		hb_buffer_set_language(buffer, (hb_language_t)language);
 		hb_buffer_set_direction(buffer, runLevel == UBIDI_RTL ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
 		hb_buffer_add_utf16(buffer, (const uint16_t*)runStr.getBuffer(), runStr.length(), 0, runStr.length());
 		hb_shape(font, buffer, nullptr, 0);
@@ -205,7 +212,7 @@ void HbFontShape::ShapeParagraph(const String& text, Script script, const icu::L
 		addCombinedPiece(combinedPieceStart, runStr.length(), combinedPieceWidth);
 
 		// cleanup
-		hb_buffer_clear_contents(buffer);
+		hb_buffer_reset(buffer);
 	};
 
 	delete breakIter;
