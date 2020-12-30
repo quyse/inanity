@@ -16,6 +16,8 @@ public:
 	FtEngine();
 	~FtEngine();
 
+	FT_Library GetLibrary() const;
+
 	//*** FontEngine's methods.
 	ptr<FontFace> LoadFontFace(ptr<File> file, int size);
 };

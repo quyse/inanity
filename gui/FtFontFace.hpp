@@ -19,15 +19,18 @@ class FtFontFace : public FontFace
 {
 private:
 	ptr<FtEngine> engine;
-	FT_Face ftFace;
 	/// File from which face was created.
 	/** File memory should not be freed
 	until FT_Face is live. */
 	ptr<File> file;
 	int size;
+	// Main face.
+	FT_Face ftFace = nullptr;
+	// Separate immutable face for shapes.
+	FT_Face ftShapeFace = nullptr;
 
 public:
-	FtFontFace(ptr<FtEngine> engine, FT_Face ftFace, ptr<File> file, int size);
+	FtFontFace(ptr<FtEngine> engine, ptr<File> file, int size);
 	~FtFontFace();
 
 	//*** FontFace's methods.
