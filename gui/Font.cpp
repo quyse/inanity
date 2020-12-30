@@ -19,11 +19,11 @@ ptr<FontGlyphs> Font::GetGlyphs() const
 	return glyphs;
 }
 
-void Font::InternalShape(const String& text, FontShape::Script script)
+void Font::InternalShape(const String& text, FontShape::Script script, FontShape::Language language)
 {
 	outGlyphs.clear();
 	Graphics::vec2 size;
-	shape->Shape(text, script, &size, &outGlyphs);
+	shape->Shape(text, script, language, &size, &outGlyphs);
 
 	// calculate string bounds
 	const FontGlyphs::GlyphInfos& glyphInfos = glyphs->GetGlyphInfos();
@@ -53,6 +53,7 @@ void Font::DrawString(
 	Canvas* canvas,
 	const String& text,
 	FontShape::Script script,
+	FontShape::Language language,
 	const Graphics::vec2& position,
 	const Graphics::vec4& color,
 	int textOriginFlags)
@@ -60,7 +61,7 @@ void Font::DrawString(
 	BEGIN_TRY();
 
 	// shape glyphs
-	InternalShape(text, script);
+	InternalShape(text, script, language);
 
 	// calculate origin point
 	Graphics::vec2 origin = position;
@@ -109,9 +110,9 @@ void Font::DrawString(
 	END_TRY("Can't draw string with font");
 }
 
-Graphics::vec2 Font::GetStringSize(const String& text, FontShape::Script script)
+Graphics::vec2 Font::GetStringSize(const String& text, FontShape::Script script, FontShape::Language language)
 {
-	InternalShape(text, script);
+	InternalShape(text, script, language);
 	return Graphics::vec2(right - left, bottom - top);
 }
 

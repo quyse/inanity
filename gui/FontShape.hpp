@@ -26,9 +26,11 @@ public:
 
 	/// Font script code.
 	typedef uint32_t Script;
+	/// Font language.
+	typedef uintptr_t Language;
 
 public:
-	virtual void Shape(const String& text, Script script, Graphics::vec2* outAdvance, std::vector<OutGlyph>* outGlyphs) = 0;
+	virtual void Shape(const String& text, Script script, Language language, Graphics::vec2* outAdvance, std::vector<OutGlyph>* outGlyphs) = 0;
 };
 
 END_INANITY_GUI
