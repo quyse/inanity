@@ -4,7 +4,8 @@
 #include "Window.hpp"
 #include "../input/input.hpp"
 #include "windows.hpp"
-#include <agile.h>
+#include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.UI.Core.h>
 
 BEGIN_INANITY_INPUT
 
@@ -17,15 +18,15 @@ BEGIN_INANITY_PLATFORM
 class CoreWindow : public Window
 {
 private:
-	::Platform::Agile<Windows::UI::Core::CoreWindow> window;
+	winrt::Windows::UI::Core::CoreWindow window;
 	String title;
 	ptr<Handler> activeHandler;
 	bool active;
 
 	ptr<Input::CoreManager> inputManager;
 
-	ref class ViewProvider;
-	ref class ViewProviderFactory;
+	class ViewProvider;
+	class ViewProviderFactory;
 
 	CoreWindow(const String& title);
 
@@ -35,7 +36,7 @@ private:
 public:
 	static ptr<CoreWindow> CreateForDirectX(const String& title);
 
-	IUnknown* GetWindowUnknown() const;
+	winrt::Windows::Foundation::IUnknown GetWindowUnknown() const;
 
 	//*** Window's methods
 	void SetTitle(const String& title);

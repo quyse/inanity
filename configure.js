@@ -161,7 +161,7 @@ var libraries = {
 		'objects-darwin': ['input.SdlManager'],
 		'objects-android': ['input.SdlManager'],
 		'objects-emscripten': ['input.SdlManager'],
-		'objects-xbox': ['input.CoreManager.cx'],
+		'objects-xbox': ['input.CoreManager'],
 		'objects-switch': ['input.NxManager'],
 	},
 	// ******* filesystem platform
@@ -221,7 +221,7 @@ var libraries = {
 			'graphics.EmsAdapter', 'graphics.EmsMonitor',
 		],
 		'objects-xbox': [
-			'platform.CoreWindow.cx',
+			'platform.CoreWindow',
 			'platform.DllCache'
 		],
 		'objects-switch': [
@@ -247,7 +247,7 @@ var libraries = {
 			'platform.Game',
 		],
 		'objects-xbox': [
-			'platform.Game.cx',
+			'platform.Game',
 		],
 		'objects-switch': [
 			'platform.Game',
@@ -296,9 +296,9 @@ var libraries = {
 			'graphics.DxgiAdapter', 'graphics.DxgiMonitor'
 		],
 		'objects-xbox': [
-			'graphics.Dx11Device.cx',
-			'graphics.Dx11SwapChainPresenter.cx',
-			'graphics.DxgiAdapter.cx', 'graphics.DxgiMonitor.cx'
+			'graphics.Dx11Device',
+			'graphics.Dx11SwapChainPresenter',
+			'graphics.DxgiAdapter', 'graphics.DxgiMonitor'
 		],
 	},
 	// ******* подсистема OpenGl

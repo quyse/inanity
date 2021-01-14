@@ -4,31 +4,30 @@
 #include "Frame.hpp"
 #include <unordered_map>
 
-using Windows::Foundation::Collections::IVectorView;
-using Windows::Foundation::EventHandler;
-using Windows::Xbox::Input::Gamepad;
-using Windows::Xbox::Input::GamepadAddedEventArgs;
-using Windows::Xbox::Input::GamepadButtons;
-using Windows::Xbox::Input::GamepadRemovedEventArgs;
-using Windows::Xbox::Input::GamepadVibration;
-using Windows::Xbox::Input::IGamepad;
-using Windows::Xbox::Input::RawGamepadReading;
+#include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.Foundation.Collections.h>
+#include <winrt/Windows.Xbox.Input.h>
+
+using namespace winrt;
+using namespace Windows::Foundation;
+using namespace Windows::Foundation::Collections;
+using namespace Windows::Xbox::Input;
 
 BEGIN_INANITY_INPUT
 
-ref class CoreManager::Impl sealed
+class CoreManager::Impl : public Object
 {
 private:
 	CoreManager* manager;
 
 	struct CoreController : public Controller
 	{
-		IGamepad^ gamepad;
+		IGamepad gamepad;
 		RawGamepadReading lastReading;
 
-		CoreController(IGamepad^ gamepad) : Controller(gamepad->Id), gamepad(gamepad)
+		CoreController(IGamepad gamepad) : Controller(gamepad.Id()), gamepad(gamepad)
 		{
-			lastReading = gamepad->GetRawCurrentReading();
+			lastReading = gamepad.GetRawCurrentReading();
 		}
 
 		void Reset()
@@ -51,7 +50,7 @@ private:
 				vibration.RightMotorLevel = right;
 				vibration.LeftTriggerLevel = 0;
 				vibration.RightTriggerLevel = 0;
-				gamepad->SetVibration(vibration);
+				gamepad.SetVibration(vibration);
 			}
 		}
 
@@ -63,18 +62,18 @@ private:
 
 	std::unordered_map<uint64_t, ptr<CoreController> > controllers;
 
-internal:
+public:
 	Impl(CoreManager* manager) : manager(manager)
 	{
 		// add gamepads initially
 		{
-			IVectorView<IGamepad^>^ gamepads = Gamepad::Gamepads;
-			for(uint32 i = 0; i < gamepads->Size; ++i)
-				AddGamepad(gamepads->GetAt(i));
+			IVectorView<IGamepad> gamepads = Gamepad::Gamepads();
+			for(auto gamepad : gamepads)
+				AddGamepad(gamepad);
 		}
 
-		Gamepad::GamepadAdded += ref new EventHandler<GamepadAddedEventArgs^>(this, &Impl::OnGamepadAdded);
-		Gamepad::GamepadRemoved += ref new EventHandler<GamepadRemovedEventArgs^>(this, &Impl::OnGamepadRemoved);
+		Gamepad::GamepadAdded({ this, &Impl::OnGamepadAdded });
+		Gamepad::GamepadRemoved({ this, &Impl::OnGamepadRemoved });
 	}
 
 	void Reset()
@@ -86,7 +85,7 @@ internal:
 	{
 		for(auto& controller : controllers)
 		{
-			RawGamepadReading reading = controller.second->gamepad->GetRawCurrentReading();
+			RawGamepadReading reading = controller.second->gamepad.GetRawCurrentReading();
 
 			if(manager)
 			{
@@ -124,7 +123,7 @@ internal:
 #undef BUTTON_EVENT
 
 				// axes
-				auto axisEvent = [&](float32 RawGamepadReading::* axis, Event::Controller::Axis eaxis, int multiplier)
+				auto axisEvent = [&](float RawGamepadReading::* axis, Event::Controller::Axis eaxis, int multiplier)
 				{
 					if(reading.*axis != controller.second->lastReading.*axis)
 					{
@@ -161,26 +160,26 @@ internal:
 	}
 
 private:
-	void OnGamepadAdded(::Platform::Object^ sender, GamepadAddedEventArgs^ args)
+	void OnGamepadAdded(IInspectable sender, GamepadAddedEventArgs args)
 	{
-		AddGamepad(args->Gamepad);
+		AddGamepad(args.Gamepad());
 	}
 
-	void OnGamepadRemoved(::Platform::Object^ sender, GamepadRemovedEventArgs^ args)
+	void OnGamepadRemoved(IInspectable sender, GamepadRemovedEventArgs args)
 	{
-		RemoveGamepad(args->Gamepad->Id);
+		RemoveGamepad(args.Gamepad().Id());
 	}
 
-	void AddGamepad(IGamepad^ gamepad)
+	void AddGamepad(IGamepad gamepad)
 	{
-		controllers.insert(std::make_pair(gamepad->Id, NEW(CoreController(gamepad))));
+		controllers.insert(std::make_pair(gamepad.Id(), NEW(CoreController(gamepad))));
 
 		if(manager)
 		{
 			Event e;
 			e.device = Event::deviceController;
 			e.controller.type = Event::Controller::typeDeviceAdded;
-			e.controller.device = gamepad->Id;
+			e.controller.device = gamepad.Id();
 			manager->AddEvent(e);
 		}
 	}
@@ -209,7 +208,7 @@ private:
 
 CoreManager::CoreManager(ptr<Platform::CoreWindow> window)
 {
-	impl = ref new Impl(this);
+	impl = NEW(Impl(this));
 }
 
 CoreManager::~CoreManager()

@@ -4,61 +4,62 @@
 #include "../input/CoreManager.hpp"
 #include <ppltasks.h>
 
-using Windows::ApplicationModel::Activation::IActivatedEventArgs;
-using Windows::ApplicationModel::SuspendingEventArgs;
-using Windows::ApplicationModel::Core::CoreApplication;
-using Windows::ApplicationModel::Core::CoreApplicationView;
-using Windows::UI::Core::CoreWindowEventArgs;
-using Windows::ApplicationModel::Core::IFrameworkView;
-using Windows::ApplicationModel::Core::IFrameworkViewSource;
+#include <winrt/Windows.ApplicationModel.Activation.h>
+#include <winrt/Windows.ApplicationModel.Core.h>
+#include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.UI.Core.h>
+
+using namespace winrt;
+using namespace Windows::ApplicationModel::Activation;
+using namespace Windows::ApplicationModel::Core;
+using namespace Windows::ApplicationModel;
+using namespace Windows::Foundation;
 using Windows::UI::Core::CoreProcessEventsOption;
 using Windows::UI::Core::CoreWindow;
+using Windows::UI::Core::CoreWindowEventArgs;
 using Windows::UI::Core::WindowSizeChangedEventArgs;
-using Windows::Foundation::EventHandler;
-using Windows::Foundation::TypedEventHandler;
 namespace WUC = Windows::UI::Core;
 
 BEGIN_INANITY_PLATFORM
 
 // helper classes
 
-ref class CoreWindow::ViewProvider sealed : public IFrameworkView
+class CoreWindow::ViewProvider : public implements<CoreWindow::ViewProvider, IFrameworkView>
 {
 private:
 	ptr<CoreWindow> window;
 
-internal:
+public:
 	ViewProvider(ptr<CoreWindow> window) : window(window) {}
 
-public:
-	virtual void Initialize(CoreApplicationView^ applicationView)
+	void Initialize(CoreApplicationView applicationView)
 	{
-		applicationView->Activated += ref new TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^>(this, &ViewProvider::OnActivated);
-		CoreApplication::Suspending += ref new EventHandler<SuspendingEventArgs^>(this, &ViewProvider::OnSuspending);
-		CoreApplication::Resuming += ref new EventHandler<::Platform::Object^>(this, &ViewProvider::OnResuming);
+		applicationView.Activated({ this, &ViewProvider::OnActivated });
+		CoreApplication::Suspending({ this, &ViewProvider::OnSuspending });
+		CoreApplication::Resuming({ this, &ViewProvider::OnResuming });
 	}
 
-	virtual void Uninitialize()
+	void Uninitialize()
 	{
 	}
 
-	virtual void SetWindow(WUC::CoreWindow^ coreWindow)
+	void SetWindow(WUC::CoreWindow coreWindow)
 	{
 		window->window = coreWindow;
-		coreWindow->SizeChanged += ref new TypedEventHandler<WUC::CoreWindow^, WindowSizeChangedEventArgs^>(this, &ViewProvider::OnWindowSizeChanged);
-		coreWindow->Closed += ref new TypedEventHandler<WUC::CoreWindow^, CoreWindowEventArgs^>(this, &ViewProvider::OnWindowClosed);
+		coreWindow.SizeChanged({ this, &ViewProvider::OnWindowSizeChanged });
+		coreWindow.Closed({ this, &ViewProvider::OnWindowClosed });
 	}
 
-	virtual void Load(::Platform::String^ entryPoint)
+	void Load(hstring entryPoint)
 	{
 	}
 
-	virtual void Run()
+	void Run()
 	{
 		while(window->running)
 		{
-			WUC::CoreWindow::GetForCurrentThread()->Dispatcher->
-				ProcessEvents(window->active ? CoreProcessEventsOption::ProcessAllIfPresent : CoreProcessEventsOption::ProcessUntilQuit);
+			WUC::CoreWindow::GetForCurrentThread().Dispatcher()
+				.ProcessEvents(window->active ? CoreProcessEventsOption::ProcessAllIfPresent : CoreProcessEventsOption::ProcessUntilQuit);
 
 			if(window->active)
 			{
@@ -70,15 +71,15 @@ public:
 	}
 
 private:
-	void OnActivated(CoreApplicationView^ applicationView, IActivatedEventArgs^ args)
+	void OnActivated(CoreApplicationView applicationView, IActivatedEventArgs args)
 	{
 		window->active = true;
-		WUC::CoreWindow::GetForCurrentThread()->Activate();
+		WUC::CoreWindow::GetForCurrentThread().Activate();
 	}
 
-	void OnSuspending(::Platform::Object^ sender, SuspendingEventArgs^ args)
+	void OnSuspending(IInspectable sender, SuspendingEventArgs args)
 	{
-		auto deferral = args->SuspendingOperation->GetDeferral();
+		SuspendingDeferral deferral = args.SuspendingOperation().GetDeferral();
 
 		window->active = false;
 
@@ -92,11 +93,11 @@ private:
 		{
 			// TODO: other async stuff
 
-			deferral->Complete();
+			deferral.Complete();
 		});
 	}
 
-	void OnResuming(::Platform::Object^ sender, ::Platform::Object^ args)
+	void OnResuming(IInspectable sender, IInspectable args)
 	{
 		window->active = true;
 
@@ -104,37 +105,36 @@ private:
 			window->presenter->Resume();
 	}
 
-	void OnWindowSizeChanged(WUC::CoreWindow^ sender, WindowSizeChangedEventArgs^ args)
+	void OnWindowSizeChanged(WUC::CoreWindow sender, WindowSizeChangedEventArgs args)
 	{
 		if(window->presenter)
-			window->presenter->Resize((int)args->Size.Width, (int)args->Size.Height);
+			window->presenter->Resize((int)args.Size().Width, (int)args.Size().Height);
 	}
 
-	void OnWindowClosed(WUC::CoreWindow^ sender, CoreWindowEventArgs^ args)
+	void OnWindowClosed(WUC::CoreWindow sender, CoreWindowEventArgs args)
 	{
 		window->Stop();
 	}
 };
 
-ref class CoreWindow::ViewProviderFactory sealed : public IFrameworkViewSource
+class CoreWindow::ViewProviderFactory : public implements<CoreWindow::ViewProviderFactory, IFrameworkViewSource>
 {
 private:
 	ptr<CoreWindow> window;
 
-internal:
+public:
 	ViewProviderFactory(ptr<CoreWindow> window) : window(window) {}
 
-public:
-	virtual IFrameworkView^ CreateView()
+	IFrameworkView CreateView()
 	{
-		return ref new ViewProvider(window);
+		return winrt::make<ViewProvider>(window);
 	}
 };
 
 
 // CoreWindow class
 
-CoreWindow::CoreWindow(const String& title) : title(title), active(false)
+CoreWindow::CoreWindow(const String& title) : window(nullptr), title(title), active(false)
 {
 }
 
@@ -143,9 +143,9 @@ ptr<CoreWindow> CoreWindow::CreateForDirectX(const String& title)
 	return NEW(CoreWindow(title));
 }
 
-IUnknown* CoreWindow::GetWindowUnknown() const
+winrt::Windows::Foundation::IUnknown CoreWindow::GetWindowUnknown() const
 {
-	return reinterpret_cast<IUnknown*>(window.Get());
+	return window;
 }
 
 void CoreWindow::SetInputManager(ptr<Input::CoreManager> inputManager)
@@ -179,7 +179,7 @@ void CoreWindow::Run(ptr<Handler> activeHandler)
 {
 	running = true;
 	this->activeHandler = activeHandler;
-	CoreApplication::Run(ref new ViewProviderFactory(this));
+	CoreApplication::Run(winrt::make<ViewProviderFactory>(this));
 }
 
 void CoreWindow::PlaceCursor(int x, int y)
