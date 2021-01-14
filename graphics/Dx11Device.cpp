@@ -122,7 +122,7 @@ ptr<Dx11SwapChainPresenter> Dx11Device::CreatePresenter(ptr<Platform::Win32Windo
 
 	// create swap chain
 	ComPointer<IDXGISwapChain1> swapChain;
-	if(FAILED(dxgiFactory->CreateSwapChainForCoreWindow(device, window->GetWindowUnknown(), &desc, nullptr, &swapChain)))
+	if(FAILED(dxgiFactory->CreateSwapChainForCoreWindow(device, winrt::get_abi(window->GetWindowUnknown()), &desc, nullptr, &swapChain)))
 		THROW("Can't create swap chain");
 
 #else

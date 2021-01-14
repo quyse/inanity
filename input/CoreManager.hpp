@@ -4,7 +4,6 @@
 #include "Manager.hpp"
 #include "Key.hpp"
 #include "../platform/platform.hpp"
-#include <agile.h>
 
 BEGIN_INANITY_PLATFORM
 
@@ -18,8 +17,8 @@ BEGIN_INANITY_INPUT
 class CoreManager : public Manager
 {
 private:
-	ref class Impl;
-	::Platform::Agile<Impl> impl;
+	class Impl;
+	ptr<Impl> impl;
 
 public:
 	CoreManager(ptr<Platform::CoreWindow> window);
