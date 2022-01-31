@@ -24,7 +24,9 @@
 
 #include "../input/Frame.hpp"
 #include "../graphics/GlSystem.hpp"
-#if !defined(___INANITY_PLATFORM_ANDROID)
+#if defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_MACOS)
+#include "../audio/SdlSystem.hpp"
+#elif defined(___INANITY_PLATFORM_SWITCH)
 #include "../audio/AlSystem.hpp"
 #endif
 
@@ -48,8 +50,9 @@ ptr<Graphics::System> Game::CreateDefaultGraphicsSystem()
 
 ptr<Audio::System> Game::CreateDefaultAudioSystem()
 {
-#if !defined(___INANITY_PLATFORM_ANDROID)
-	// for now there is only one system
+#if defined(___INANITY_PLATFORM_LINUX) || defined(___INANITY_PLATFORM_MACOS)
+	return NEW(Audio::SdlSystem());
+#elif defined(___INANITY_PLATFORM_SWITCH)
 	return NEW(Audio::AlSystem());
 #else
 	THROW("No audio system supported");

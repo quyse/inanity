@@ -353,6 +353,12 @@ var libraries = {
 			'audio.OggVorbisSource', 'audio.OggVorbisStream',
 		]
 	},
+	// ******* SDL
+	'libinanity-audio-sdl': {
+		objects: [
+			'audio.SdlSystem', 'audio.SdlDevice', 'audio.SdlPlayer', 'audio.SdlSound',
+		]
+	},
 	// ******* OpenAL
 	'libinanity-al': {
 		objects: [
