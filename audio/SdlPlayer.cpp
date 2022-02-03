@@ -76,7 +76,7 @@ size_t SdlPlayer::Read(Math::vec2* data, size_t count)
       case 1:
         for(size_t i = 0; i < read; )
         {
-          float sample = (float)(buffer.data()[i++] - 127) / 128;
+          float sample = ((float)buffer.data()[i++] - 127) / 128;
           sample *= volume;
           *data++ += Math::vec2(sample * (pan * -0.5f + 0.5f), sample * (pan * 0.5f + 0.5f));
           --count;
@@ -86,8 +86,8 @@ size_t SdlPlayer::Read(Math::vec2* data, size_t count)
       case 2:
         for(size_t i = 0; i + 1 < read; )
         {
-          float sample1 = (float)(buffer.data()[i++] - 127) / 128;
-          float sample2 = (float)(buffer.data()[i++] - 127) / 128;
+          float sample1 = ((float)buffer.data()[i++] - 127) / 128;
+          float sample2 = ((float)buffer.data()[i++] - 127) / 128;
           *data++ += Math::vec2(sample1 * volume * (pan * -0.5f + 0.5f), sample2 * volume * (pan * 0.5f + 0.5f));
           --count;
           ++readCount;
@@ -103,7 +103,7 @@ size_t SdlPlayer::Read(Math::vec2* data, size_t count)
       case 1:
         for(size_t i = 0; i * sizeof(int16_t) < read; )
         {
-          float sample = (float)(((int16_t*)buffer.data())[i++]) / 0x8000;
+          float sample = (float)((int16_t*)buffer.data())[i++] / 0x8000f;
           sample *= volume;
           *data++ += Math::vec2(sample * (pan * -0.5f + 0.5f), sample * (pan * 0.5f + 0.5f));
           --count;
@@ -113,8 +113,8 @@ size_t SdlPlayer::Read(Math::vec2* data, size_t count)
       case 2:
         for(size_t i = 0; (i + 1) * sizeof(int16_t) < read; )
         {
-          float sample1 = (float)(((int16_t*)buffer.data())[i++]) / 0x8000;
-          float sample2 = (float)(((int16_t*)buffer.data())[i++]) / 0x8000;
+          float sample1 = (float)((int16_t*)buffer.data())[i++] / 0x8000f;
+          float sample2 = (float)((int16_t*)buffer.data())[i++] / 0x8000f;
           *data++ += Math::vec2(sample1 * volume * (pan * -0.5f + 0.5f), sample2 * volume * (pan * 0.5f + 0.5f));
           --count;
           ++readCount;
