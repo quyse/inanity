@@ -17,6 +17,7 @@ exports.configureCompiler = function(objectFile, compiler) {
 	for ( var i = 0; i < includes.length; ++i)
 		compiler.addIncludeDir(includes[i]);
 	compiler.cppMode = false;
+	compiler.strict = false;
 };
 
 var library = {
