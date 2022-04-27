@@ -15,7 +15,7 @@ All third-party software are placed under `/deps` directory.
 * [sqlite](http://www.sqlite.org/) - [in public domain](http://sqlite.org/copyright.html)
 * [bullet](http://bulletphysics.org) - [zlib license](http://zlib.net/zlib_license.html)
 * [http-parser](https://github.com/joyent/http-parser) - MIT license
-* [utf8](http://utfcpp.sourceforge.net/) - MIT-like license (see `/deps/utf8.h` heading comment)
+* [utf8](https://github.com/nemtrif/utfcpp) - MIT-like license (see `/deps/utf8.h` heading comment)
 * [libogg](http://xiph.org/ogg/) - BSD-style license (see `/deps/libogg/COPYING`)
 * [libvorbis](http://xiph.org/vorbis/) - BSD-style license (see `/deps/libvorbis/COPYING`)
 * [v8](https://developers.google.com/v8/) - New BSD license (see `/deps/v8/repo/LICENSE`)
