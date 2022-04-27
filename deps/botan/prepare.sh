@@ -16,6 +16,7 @@ function preparePlatform {
 		--disable-modules=ffi,certstor_sql,win32_stats \
 		--disable-rdrand --disable-rdseed \
 		--disable-shared-library \
+		--disable-cc-tests \
 		$2
 	cd ..
 	cp -r build/build/include/* include/
@@ -33,6 +34,7 @@ preparePlatform win32_x86_msvc "--cpu=x86_32 --os=windows --cc=msvc --enable-mod
 preparePlatform linux_x64_clang "--cpu=x86_64 --os=linux --cc=clang --enable-modules=certstor_flatfile"
 preparePlatform darwin_x64_clang "--cpu=x86_64 --os=macos --cc=clang --enable-modules=certstor_system_macos --without-os-features=clock_gettime"
 preparePlatform darwin_x86_clang "--cpu=x86_32 --os=macos --cc=clang --enable-modules=certstor_system_macos --without-os-features=clock_gettime"
+preparePlatform darwin_arm64_clang "--cpu=arm64 --os=macos --cc=clang --enable-modules=certstor_system_macos --without-os-features=clock_gettime"
 
 # get list of lib .cpp files
 \
@@ -41,6 +43,7 @@ preparePlatform darwin_x86_clang "--cpu=x86_32 --os=macos --cc=clang --enable-mo
 	FILES_WIN32_MSVC="$(cat files_win32_x86_msvc.txt)" \
 	FILES_DARWIN64_CLANG="$(cat files_darwin_x64_clang.txt)" \
 	FILES_DARWIN32_CLANG="$(cat files_darwin_x86_clang.txt)" \
+	FILES_DARWIN_ARM64_CLANG="$(cat files_darwin_arm64_clang.txt)" \
 	envsubst < configure.js.in > configure.js
 
-rm -f files_{win32,linux,darwin}_x{64,86}_{clang,msvc}.txt
+rm -f files_{win32,linux,darwin}_{x64,x86,arm64}_{clang,msvc}.txt

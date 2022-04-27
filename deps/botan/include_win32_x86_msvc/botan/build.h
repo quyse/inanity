@@ -2,10 +2,10 @@
 #define BOTAN_BUILD_CONFIG_H_
 
 /*
-* Build configuration for Botan 2.17.2
+* Build configuration for Botan 2.19.1
 *
 * Automatically generated from
-* 'configure.py --with-build-dir=../build --module-policy=modern --link-method=copy --with-zlib --with-boost --enable-modules=asio,certstor_system --disable-modules=ffi,certstor_sql,win32_stats --disable-rdrand --disable-rdseed --disable-shared-library --cpu=x86_32 --os=windows --cc=msvc --enable-modules=certstor_system_windows --disable-ssse3 --disable-sse4.1 --disable-sse4.2'
+* 'configure.py --with-build-dir=../build --module-policy=modern --link-method=copy --with-zlib --with-boost --enable-modules=asio,certstor_system --disable-modules=ffi,certstor_sql,win32_stats --disable-rdrand --disable-rdseed --disable-shared-library --disable-cc-tests --cpu=x86_32 --os=windows --cc=msvc --enable-modules=certstor_system_windows --disable-ssse3 --disable-sse4.1 --disable-sse4.2'
 *
 * Target
 *  - Compiler: cl  /EHs /GR /MD /bigobj /O2 /Oi
@@ -14,14 +14,14 @@
 */
 
 #define BOTAN_VERSION_MAJOR 2
-#define BOTAN_VERSION_MINOR 17
-#define BOTAN_VERSION_PATCH 2
+#define BOTAN_VERSION_MINOR 19
+#define BOTAN_VERSION_PATCH 1
 #define BOTAN_VERSION_DATESTAMP 0
 
 
 #define BOTAN_VERSION_RELEASE_TYPE "unreleased"
 
-#define BOTAN_VERSION_VC_REVISION "git:8130e32ebd1022516f5295d3f55bb5c50f250b8c"
+#define BOTAN_VERSION_VC_REVISION "git:fe62c1f5ce6c4379a52bd018c2ff68bed3024c4d"
 
 #define BOTAN_DISTRIBUTION_INFO "unspecified"
 

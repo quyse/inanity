@@ -2,10 +2,10 @@
 #define BOTAN_BUILD_CONFIG_H_
 
 /*
-* Build configuration for Botan 2.17.2
+* Build configuration for Botan 2.19.1
 *
 * Automatically generated from
-* 'configure.py --with-build-dir=../build --module-policy=modern --link-method=copy --with-zlib --with-boost --enable-modules=asio,certstor_system --disable-modules=ffi,certstor_sql,win32_stats --disable-rdrand --disable-rdseed --disable-shared-library --cpu=x86_64 --os=linux --cc=clang --enable-modules=certstor_flatfile'
+* 'configure.py --with-build-dir=../build --module-policy=modern --link-method=copy --with-zlib --with-boost --enable-modules=asio,certstor_system --disable-modules=ffi,certstor_sql,win32_stats --disable-rdrand --disable-rdseed --disable-shared-library --disable-cc-tests --cpu=x86_64 --os=linux --cc=clang --enable-modules=certstor_flatfile'
 *
 * Target
 *  - Compiler: clang++ -fstack-protector -m64 -pthread -std=c++11 -D_REENTRANT -O3
@@ -14,14 +14,14 @@
 */
 
 #define BOTAN_VERSION_MAJOR 2
-#define BOTAN_VERSION_MINOR 17
-#define BOTAN_VERSION_PATCH 2
+#define BOTAN_VERSION_MINOR 19
+#define BOTAN_VERSION_PATCH 1
 #define BOTAN_VERSION_DATESTAMP 0
 
 
 #define BOTAN_VERSION_RELEASE_TYPE "unreleased"
 
-#define BOTAN_VERSION_VC_REVISION "git:8130e32ebd1022516f5295d3f55bb5c50f250b8c"
+#define BOTAN_VERSION_VC_REVISION "git:fe62c1f5ce6c4379a52bd018c2ff68bed3024c4d"
 
 #define BOTAN_DISTRIBUTION_INFO "unspecified"
 
@@ -135,7 +135,6 @@
 #define BOTAN_HAS_ENTROPY_SRC_DEV_RANDOM 20131128
 #define BOTAN_HAS_ENTROPY_SRC_PROC_WALKER 20131128
 #define BOTAN_HAS_GHASH 20201002
-#define BOTAN_HAS_GHASH_CLMUL_CPU 20201002
 #define BOTAN_HAS_GHASH_CLMUL_VPERM 20201002
 #define BOTAN_HAS_HASH 20180112
 #define BOTAN_HAS_HASH_ID 20131128
@@ -174,9 +173,7 @@
 #define BOTAN_HAS_SERPENT_SIMD 20160903
 #define BOTAN_HAS_SHA1 20131128
 #define BOTAN_HAS_SHA1_SSE2 20160803
-#define BOTAN_HAS_SHA1_X86_SHA_NI 20170518
 #define BOTAN_HAS_SHA2_32 20131128
-#define BOTAN_HAS_SHA2_32_X86 20170518
 #define BOTAN_HAS_SHA2_32_X86_BMI2 20180526
 #define BOTAN_HAS_SHA2_64 20131128
 #define BOTAN_HAS_SHA2_64_BMI2 20190117

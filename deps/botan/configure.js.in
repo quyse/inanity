@@ -30,6 +30,9 @@ ${FILES_DARWIN64_CLANG}
 	darwin_x86_clang: [
 ${FILES_DARWIN32_CLANG}
 	],
+	darwin_arm64_clang: [
+${FILES_DARWIN_ARM64_CLANG}
+	],
 };
 
 exports.configureComposer = function(libraryFile, composer) {
