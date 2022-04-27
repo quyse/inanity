@@ -38,14 +38,14 @@ var library = {
 	'pngwtran',
 	'pngwutil',
 	],
-	'objects-android': [
+	'objects-arm64': [
 	'arm.arm_init',
 	'arm.filter_neon_intrinsics',
-	]
+	],
 };
 
-var platformed = function(object, field, platform) {
-	return (object[field] || []).concat(object[field + '-' + platform] || []);
+var platformed = function(object, field, platform, arch) {
+	return (object[field] || []).concat(object[field + '-' + arch] || []);
 };
 
 exports.configureComposer = function(libraryFile, composer) {
@@ -53,7 +53,7 @@ exports.configureComposer = function(libraryFile, composer) {
 	var a = /^(([^\/]+)\/)([^\/]+)$/.exec(libraryFile);
 	var confDir = a[1];
 	composer.configuration = a[2];
-	var objects = platformed(library, 'objects', composer.platform);
+	var objects = platformed(library, 'objects', composer.platform, composer.arch);
 	for ( var i = 0; i < objects.length; ++i)
 		composer.addObjectFile(confDir + objects[i]);
 };
