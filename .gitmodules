@@ -1,18 +1,18 @@
 [submodule "deps/v8/repo"]
 	path = deps/v8/repo
-	url = git://github.com/v8/v8.git
+	url = https://github.com/v8/v8.git
 [submodule "deps/freetype/repo"]
 	path = deps/freetype/repo
 	url = https://gitlab.com/quyse/freetype2.git
 [submodule "deps/harfbuzz/repo"]
 	path = deps/harfbuzz/repo
-	url = git://github.com/behdad/harfbuzz.git
+	url = https://github.com/behdad/harfbuzz.git
 [submodule "deps/http-parser/repo"]
 	path = deps/http-parser/repo
-	url = git://github.com/nodejs/http-parser.git
+	url = https://github.com/nodejs/http-parser.git
 [submodule "deps/assimp/repo"]
 	path = deps/assimp/repo
-	url = git://github.com/assimp/assimp.git
+	url = https://github.com/assimp/assimp.git
 [submodule "deps/ucdn/repo"]
 	path = deps/ucdn/repo
 	url = https://github.com/grigorig/ucdn.git
