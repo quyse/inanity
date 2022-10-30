@@ -6,6 +6,7 @@ exports.configureCompiler = function(objectFile, compiler) {
 	compiler.configuration = a[1];
 	compiler.setSourceFile(a[2] + '.c');
 	compiler.cppMode = false;
+	compiler.strict = false;
 };
 
 var objects = 'adler32 compress crc32 deflate infback inflate inftrees inffast trees uncompr zutil'.split(' ');
