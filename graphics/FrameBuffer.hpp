@@ -14,7 +14,7 @@ class FrameBuffer : public Object
 {
 public:
 	/// Maximum number of color buffers.
-	static const int maxColorBuffersCount = 8;
+	static constexpr int maxColorBuffersCount = 8;
 
 protected:
 	/// Color buffers.
