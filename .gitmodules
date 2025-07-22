@@ -3,7 +3,7 @@
 	url = https://github.com/v8/v8.git
 [submodule "deps/freetype/repo"]
 	path = deps/freetype/repo
-	url = https://gitlab.com/quyse/freetype2.git
+	url = https://github.com/freetype/freetype.git
 [submodule "deps/harfbuzz/repo"]
 	path = deps/harfbuzz/repo
 	url = https://github.com/behdad/harfbuzz.git
