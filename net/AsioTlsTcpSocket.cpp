@@ -1,4 +1,4 @@
-#include "AsioTlsTcpSocket.hpp"
+﻿#include "AsioTlsTcpSocket.hpp"
 #include "AsioBaseTcpSocket.ipp"
 #include "AsioService.hpp"
 
@@ -6,8 +6,8 @@ BEGIN_INANITY_NET
 
 template class AsioBaseTcpSocket<Botan::TLS::Stream<boost::asio::ip::tcp::socket> >;
 
-AsioTlsTcpSocket::AsioTlsTcpSocket(ptr<AsioService> service, std::unique_ptr<Botan::TLS::Context>&& tlsContext)
-: AsioBaseTcpSocket(service, service->GetIoService(), *tlsContext), tlsContext(std::move(tlsContext)) {}
+AsioTlsTcpSocket::AsioTlsTcpSocket(ptr<AsioService> service, std::shared_ptr<Botan::TLS::Context> tlsContext)
+: AsioBaseTcpSocket(service, service->GetIoContext(), tlsContext), tlsContext(tlsContext) {}
 
 void AsioTlsTcpSocket::ShutdownNonSynced()
 {

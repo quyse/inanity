@@ -9,18 +9,18 @@
 #ifndef BOTAN_TLS_RECORDS_H_
 #define BOTAN_TLS_RECORDS_H_
 
+#include <botan/aead.h>
 #include <botan/tls_algos.h>
 #include <botan/tls_magic.h>
 #include <botan/tls_version.h>
-#include <botan/aead.h>
-#include <vector>
+#include <botan/internal/tls_channel_impl.h>
 #include <chrono>
 #include <functional>
+#include <vector>
 
-namespace Botan {
+namespace Botan::TLS {
 
-namespace TLS {
-
+class Callbacks;
 class Ciphersuite;
 class Session_Keys;
 
@@ -29,8 +29,7 @@ class Connection_Sequence_Numbers;
 /**
 * TLS Cipher State
 */
-class Connection_Cipher_State final
-   {
+class Connection_Cipher_State final {
    public:
       /**
       * Initialize a new cipher state
@@ -42,91 +41,65 @@ class Connection_Cipher_State final
                               const Session_Keys& keys,
                               bool uses_encrypt_then_mac);
 
-      AEAD_Mode& aead()
-         {
+      AEAD_Mode& aead() {
          BOTAN_ASSERT_NONNULL(m_aead.get());
-         return *m_aead.get();
-         }
+         return *m_aead;
+      }
 
       std::vector<uint8_t> aead_nonce(uint64_t seq, RandomNumberGenerator& rng);
 
       std::vector<uint8_t> aead_nonce(const uint8_t record[], size_t record_len, uint64_t seq);
 
-      std::vector<uint8_t> format_ad(uint64_t seq, uint8_t type,
-                                  Protocol_Version version,
-                                  uint16_t ptext_length);
+      std::vector<uint8_t> format_ad(uint64_t seq, Record_Type type, Protocol_Version version, uint16_t ptext_length);
 
       size_t nonce_bytes_from_handshake() const { return m_nonce_bytes_from_handshake; }
+
       size_t nonce_bytes_from_record() const { return m_nonce_bytes_from_record; }
 
       Nonce_Format nonce_format() const { return m_nonce_format; }
 
-      std::chrono::seconds age() const
-         {
-         return std::chrono::duration_cast<std::chrono::seconds>(
-            std::chrono::system_clock::now() - m_start_time);
-         }
-
    private:
-      std::chrono::system_clock::time_point m_start_time;
       std::unique_ptr<AEAD_Mode> m_aead;
 
       std::vector<uint8_t> m_nonce;
       Nonce_Format m_nonce_format;
       size_t m_nonce_bytes_from_handshake;
       size_t m_nonce_bytes_from_record;
-   };
+};
 
-class Record_Header final
-   {
+class Record_Header final {
    public:
-      Record_Header(uint64_t sequence,
-                    Protocol_Version version,
-                    Record_Type type) :
-         m_needed(0),
-         m_sequence(sequence),
-         m_version(version),
-         m_type(type)
-         {}
+      Record_Header(uint64_t sequence, Protocol_Version version, Record_Type type) :
+            m_needed(0), m_sequence(sequence), m_version(version), m_type(type) {}
 
       Record_Header(size_t needed) :
-         m_needed(needed),
-         m_sequence(0),
-         m_version(Protocol_Version()),
-         m_type(NO_RECORD)
-         {}
+            m_needed(needed), m_sequence(0), m_version(Protocol_Version()), m_type(Record_Type::Invalid) {}
 
       size_t needed() const { return m_needed; }
 
-      Protocol_Version version() const
-         {
+      Protocol_Version version() const {
          BOTAN_ASSERT_NOMSG(m_needed == 0);
          return m_version;
-         }
+      }
 
-      uint64_t sequence() const
-         {
+      uint64_t sequence() const {
          BOTAN_ASSERT_NOMSG(m_needed == 0);
          return m_sequence;
-         }
+      }
 
-      uint16_t epoch() const
-         {
-         return static_cast<uint16_t>(sequence() >> 48);
-         }
+      uint16_t epoch() const { return static_cast<uint16_t>(sequence() >> 48); }
 
-      Record_Type type() const
-         {
+      Record_Type type() const {
          BOTAN_ASSERT_NOMSG(m_needed == 0);
          return m_type;
-         }
+      }
 
    private:
       size_t m_needed;
       uint64_t m_sequence;
       Protocol_Version m_version;
       Record_Type m_type;
-   };
+};
 
 /**
 * Create an initial (unencrypted) TLS handshake record
@@ -138,7 +111,7 @@ class Record_Header final
 * @param message_len is size of message
 */
 void write_unencrypted_record(secure_vector<uint8_t>& write_buffer,
-                              uint8_t record_type,
+                              Record_Type record_type,
                               Protocol_Version record_version,
                               uint64_t record_sequence,
                               const uint8_t* message,
@@ -156,7 +129,7 @@ void write_unencrypted_record(secure_vector<uint8_t>& write_buffer,
 * @param rng is a random number generator
 */
 void write_record(secure_vector<uint8_t>& write_buffer,
-                  uint8_t record_type,
+                  Record_Type record_type,
                   Protocol_Version record_version,
                   uint64_t record_sequence,
                   const uint8_t* message,
@@ -165,7 +138,7 @@ void write_record(secure_vector<uint8_t>& write_buffer,
                   RandomNumberGenerator& rng);
 
 // epoch -> cipher state
-typedef std::function<std::shared_ptr<Connection_Cipher_State> (uint16_t)> get_cipherstate_fn;
+typedef std::function<std::shared_ptr<Connection_Cipher_State>(uint16_t)> get_cipherstate_fn;
 
 /**
 * Decode a TLS record
@@ -178,11 +151,9 @@ Record_Header read_record(bool is_datagram,
                           size_t& consumed,
                           secure_vector<uint8_t>& record_buf,
                           Connection_Sequence_Numbers* sequence_numbers,
-                          get_cipherstate_fn get_cipherstate,
+                          const get_cipherstate_fn& get_cipherstate,
                           bool allow_epoch0_restart);
 
-}
-
-}
+}  // namespace Botan::TLS
 
 #endif

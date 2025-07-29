@@ -3,11 +3,12 @@
 
 #include "Service.hpp"
 #include "asio.hpp"
-#include <botan/certstor_system.h>
-#include <botan/tls_session_manager.h>
-#include <botan/tls_policy.h>
-#include <botan/asio_stream.h>
 #include <boost/scoped_ptr.hpp>
+#include <botan/asio_stream.h>
+#include <botan/certstor_system.h>
+#include <botan/system_rng.h>
+#include <botan/tls_policy.h>
+#include <botan/tls_session_manager_memory.h>
 
 BEGIN_INANITY_NET
 
@@ -15,8 +16,8 @@ BEGIN_INANITY_NET
 class AsioService : public Service
 {
 private:
-	boost::asio::io_service ioService;
-	boost::scoped_ptr<boost::asio::io_service::work> work;
+	boost::asio::io_context ioContext;
+	boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work;
 	boost::asio::ip::tcp::resolver tcpResolver;
 	boost::asio::ip::udp::resolver udpResolver;
 
@@ -32,10 +33,6 @@ private:
 		std::vector<Botan::Certificate_Store*> trusted_certificate_authorities(std::string const& type, std::string const& hostname) override;
 	};
 
-	TlsCredentialsManager tlsCredentialsManager;
-	Botan::TLS::Session_Manager_In_Memory tlsSessionManager;
-	Botan::TLS::Strict_Policy tlsPolicy;
-
 private:
 	template <typename Socket>
 	class ConnectTcpRequest;
@@ -47,7 +44,7 @@ private:
 public:
 	AsioService();
 
-	boost::asio::io_service& GetIoService();
+	boost::asio::io_context& GetIoContext();
 
 	static ptr<Exception> ConvertError(const boost::system::error_code& error);
 	static ptr<Exception> ConvertError(const boost::system::system_error& error);

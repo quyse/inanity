@@ -1,4 +1,4 @@
-#ifndef ___INANITY_NET_ASIO_BASE_TCP_SOCKET_IPP___
+﻿#ifndef ___INANITY_NET_ASIO_BASE_TCP_SOCKET_IPP___
 #define ___INANITY_NET_ASIO_BASE_TCP_SOCKET_IPP___
 
 #include "AsioBaseTcpSocket.hpp"
@@ -58,6 +58,12 @@ public:
 		InternalIterator it;
 
 	public:
+		using difference_type = InternalIterator::difference_type;
+		using value_type = Buffer;
+		using pointer = const Buffer*;
+		using reference = const Buffer&;
+		using iterator_category = std::bidirectional_iterator_tag;
+
 		ConstIterator(const Buffers& buffers, InternalIterator it) : buffers(buffers), it(it) {}
 
 		const Buffer operator*() const

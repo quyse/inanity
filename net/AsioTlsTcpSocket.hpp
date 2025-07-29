@@ -1,4 +1,4 @@
-#ifndef ___INANITY_NET_ASIO_TLS_TCP_SOCKET_HPP___
+﻿#ifndef ___INANITY_NET_ASIO_TLS_TCP_SOCKET_HPP___
 #define ___INANITY_NET_ASIO_TLS_TCP_SOCKET_HPP___
 
 #include "AsioBaseTcpSocket.hpp"
@@ -14,14 +14,14 @@ extern template class AsioBaseTcpSocket<Botan::TLS::Stream<boost::asio::ip::tcp:
 class AsioTlsTcpSocket : public AsioBaseTcpSocket<Botan::TLS::Stream<boost::asio::ip::tcp::socket> >
 {
 protected:
-	std::unique_ptr<Botan::TLS::Context> tlsContext;
+	std::shared_ptr<Botan::TLS::Context> tlsContext;
 
 	//*** AsioBaseTcpSocket's methods.
 	void ShutdownNonSynced() override;
 	void CloseNonSynced() override;
 
 public:
-	AsioTlsTcpSocket(ptr<AsioService> service, std::unique_ptr<Botan::TLS::Context>&& tlsContext);
+	AsioTlsTcpSocket(ptr<AsioService> service, std::shared_ptr<Botan::TLS::Context> tlsContext);
 
 	//*** AsioBaseTcpSocket's methods.
 	boost::asio::basic_socket<boost::asio::ip::tcp>& GetLowestSocket() override;

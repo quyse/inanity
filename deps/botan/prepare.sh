@@ -20,8 +20,9 @@ function preparePlatform {
 		$2
 	cd ..
 	cp -r build/build/include/* include/
-	mkdir -p include_$1/botan
-	mv include/botan/build.h include_$1/botan/
+	mkdir -p include_$1/botan/internal
+	mv include/public/botan/build.h include_$1/botan/
+	mv include/internal/botan/internal/target_info.h include_$1/botan/internal/
 	grep -oP 'src/lib/[\w/]+\.cpp' build/Makefile | sort -u | sed -E 's/src\/lib\/(.+)\.cpp/'\''\1'\'',/' | sed -E 's/\//./g' > files_$1.txt
 	rm -r build
 }
@@ -35,6 +36,10 @@ preparePlatform linux_x64_clang "--cpu=x86_64 --os=linux --cc=clang --enable-mod
 preparePlatform darwin_x64_clang "--cpu=x86_64 --os=macos --cc=clang --enable-modules=certstor_system_macos --without-os-features=clock_gettime"
 preparePlatform darwin_x86_clang "--cpu=x86_32 --os=macos --cc=clang --enable-modules=certstor_system_macos --without-os-features=clock_gettime"
 preparePlatform darwin_arm64_clang "--cpu=arm64 --os=macos --cc=clang --enable-modules=certstor_system_macos --without-os-features=clock_gettime"
+
+mv include/internal/botan/internal include/public/botan/internal
+mv include/public/botan include/botan
+rmdir include/{external,internal{/botan,},public}
 
 # get list of lib .cpp files
 \

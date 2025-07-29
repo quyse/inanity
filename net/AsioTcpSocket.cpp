@@ -1,4 +1,4 @@
-#include "AsioTcpSocket.hpp"
+﻿#include "AsioTcpSocket.hpp"
 #include "AsioBaseTcpSocket.ipp"
 
 BEGIN_INANITY_NET
@@ -6,7 +6,7 @@ BEGIN_INANITY_NET
 template class AsioBaseTcpSocket<boost::asio::ip::tcp::socket>;
 
 AsioTcpSocket::AsioTcpSocket(ptr<AsioService> service)
-: AsioBaseTcpSocket(service, service->GetIoService()) {}
+: AsioBaseTcpSocket(service, service->GetIoContext()) {}
 
 void AsioTcpSocket::ShutdownNonSynced()
 {

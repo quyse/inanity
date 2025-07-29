@@ -9,13 +9,18 @@
 #define BOTAN_OS_UTILS_H_
 
 #include <botan/types.h>
+#include <ctime>
 #include <functional>
+#include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
-namespace Botan {
+#if defined(BOTAN_TARGET_OS_HAS_THREADS)
+   #include <thread>
+#endif
 
-namespace OS {
+namespace Botan::OS {
 
 /*
 * This header is internal (not installed) and these functions are not
@@ -27,17 +32,13 @@ namespace OS {
 
 /**
 * @return process ID assigned by the operating system.
+*
 * On Unix and Windows systems, this always returns a result
-* On IncludeOS it returns 0 since there is no process ID to speak of
-* in a unikernel.
+*
+* On systems where there is no processes to speak of (for example on baremetal
+* systems or within a unikernel), this function returns zero.
 */
 uint32_t BOTAN_TEST_API get_process_id();
-
-/**
-* Test if we are currently running with elevated permissions
-* eg setuid, setgid, or with POSIX caps set.
-*/
-bool running_in_privileged_state();
 
 /**
 * @return CPU processor clock, if available
@@ -50,18 +51,16 @@ bool running_in_privileged_state();
 */
 uint64_t BOTAN_TEST_API get_cpu_cycle_counter();
 
-size_t BOTAN_TEST_API get_cpu_total();
 size_t BOTAN_TEST_API get_cpu_available();
 
 /**
-* Return the ELF auxiliary vector cooresponding to the given ID.
-* This only makes sense on Unix-like systems and is currently
-* only supported on Linux, Android, and FreeBSD.
+* If this system supports getauxval (or an equivalent interface,
+* like FreeBSD's elf_aux_info) queries AT_HWCAP and AT_HWCAP2
+* and returns both.
 *
-* Returns zero if not supported on the current system or if
-* the id provided is not known.
+* Otherwise returns nullopt.
 */
-unsigned long get_auxval(unsigned long id);
+std::optional<std::pair<unsigned long, unsigned long>> get_auxval_hwcap();
 
 /*
 * @return best resolution timestamp available
@@ -71,15 +70,29 @@ unsigned long get_auxval(unsigned long id);
 *
 * Uses hardware cycle counter, if available.
 * On POSIX platforms clock_gettime is used with a monotonic timer
+*
 * As a final fallback std::chrono::high_resolution_clock is used.
+*
+* On systems that are lacking a real time clock, this may return 0
 */
 uint64_t BOTAN_TEST_API get_high_resolution_clock();
 
 /**
 * @return system clock (reflecting wall clock) with best resolution
-* available, normalized to nanoseconds resolution.
+* available, normalized to nanoseconds resolution, using Unix epoch.
+*
+* If the system does not have a real time clock this function will throw
+* Not_Implemented
 */
 uint64_t BOTAN_TEST_API get_system_timestamp_ns();
+
+/**
+* Format a time
+*
+* Converts the time_t to a local time representation,
+* then invokes std::put_time with the specified format.
+*/
+std::string BOTAN_TEST_API format_time(time_t time, const std::string& format);
 
 /**
 * @return maximum amount of memory (in bytes) Botan could/should
@@ -100,7 +113,7 @@ size_t system_page_size();
 * is set. If the process seems to be running in a privileged state (such as
 * setuid) then always returns false and does not examine the environment.
 */
-bool read_env_variable(std::string& value_out, const std::string& var_name);
+bool read_env_variable(std::string& value_out, std::string_view var_name);
 
 /**
 * Read the value of an environment variable and convert it to an
@@ -109,7 +122,7 @@ bool read_env_variable(std::string& value_out, const std::string& var_name);
 * If the process seems to be running in a privileged state (such as setuid)
 * then always returns nullptr, similiar to glibc's secure_getenv.
 */
-size_t read_env_variable_sz(const std::string& var_name, size_t def_value = 0);
+size_t read_env_variable_sz(std::string_view var_name, size_t def_value = 0);
 
 /**
 * Request count pages of RAM which are locked into memory using mlock,
@@ -144,6 +157,14 @@ void page_prohibit_access(void* page);
 */
 void page_allow_access(void* page);
 
+/**
+* Set a ID to a page's range expressed by size bytes
+*/
+void page_named(void* page, size_t size);
+
+#if defined(BOTAN_TARGET_OS_HAS_THREADS)
+void set_thread_name(std::thread& thread, const std::string& name);
+#endif
 
 /**
 * Run a probe instruction to test for support for a CPU instruction.
@@ -166,13 +187,12 @@ void page_allow_access(void* page);
 * Return codes:
 * -1 illegal instruction detected
 */
-int BOTAN_TEST_API run_cpu_instruction_probe(std::function<int ()> probe_fn);
+int BOTAN_TEST_API run_cpu_instruction_probe(const std::function<int()>& probe_fn);
 
 /**
 * Represents a terminal state
 */
-class BOTAN_UNSTABLE_API Echo_Suppression
-   {
+class BOTAN_UNSTABLE_API Echo_Suppression {
    public:
       /**
       * Reenable echo on this terminal. Can be safely called
@@ -185,7 +205,7 @@ class BOTAN_UNSTABLE_API Echo_Suppression
       * errors which would leave the terminal in an invalid state.
       */
       virtual ~Echo_Suppression() = default;
-   };
+};
 
 /**
 * Suppress echo on the terminal
@@ -193,8 +213,6 @@ class BOTAN_UNSTABLE_API Echo_Suppression
 */
 std::unique_ptr<Echo_Suppression> BOTAN_UNSTABLE_API suppress_echo_on_terminal();
 
-}
-
-}
+}  // namespace Botan::OS
 
 #endif

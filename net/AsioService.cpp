@@ -1,4 +1,4 @@
-#include "AsioService.hpp"
+﻿#include "AsioService.hpp"
 #include "AsioTcpListener.hpp"
 #include "AsioTcpSocket.hpp"
 #include "AsioInternalUdpSocket.hpp"
@@ -28,15 +28,16 @@ private:
 	public:
 		ResolvedBinder(ptr<ConnectTcpRequest> request) : request(request) {}
 
-		void operator()(const boost::system::error_code& error, boost::asio::ip::tcp::resolver::iterator iterator) const
+		void operator()(const boost::system::error_code& error, boost::asio::ip::tcp::resolver::results_type results) const
 		{
-			request->Resolved(error, iterator);
+			request->Resolved(error, results);
 		}
 	};
 
-	boost::asio::ip::tcp::resolver::iterator currentEndpointIterator;
+	boost::asio::ip::tcp::resolver::results_type results;
+	boost::asio::ip::tcp::resolver::results_type::const_iterator currentEndpointIterator;
 
-	void Resolved(const boost::system::error_code& error, boost::asio::ip::tcp::resolver::iterator i)
+	void Resolved(const boost::system::error_code& error, boost::asio::ip::tcp::resolver::results_type results)
 	{
 		if(error)
 		{
@@ -44,7 +45,8 @@ private:
 			return;
 		}
 
-		currentEndpointIterator = i;
+		this->results = results;
+		currentEndpointIterator = this->results.cbegin();
 
 		// создать сокет
 		socket = createSocket();
@@ -55,7 +57,7 @@ private:
 	void TryConnect()
 	{
 		// если итератор - последний
-		if(currentEndpointIterator == boost::asio::ip::tcp::resolver::iterator())
+		if(currentEndpointIterator == results.cend())
 		{
 			// значит, ни к одному из endpoints не удалось подключиться
 			socketHandler->FireError(NEW(Exception("No luck trying connecting to endpoints")));
@@ -107,11 +109,8 @@ public:
 		ss << port;
 		// разрешить имя хоста
 		service->tcpResolver.async_resolve(
-			boost::asio::ip::tcp::resolver::query(
-				boost::asio::ip::tcp::v4(),
-				host,
-				ss.str()
-			),
+			host,
+			ss.str(),
 			ResolvedBinder(this)
 		);
 	}
@@ -133,15 +132,16 @@ private:
 	public:
 		ResolvedBinder(ptr<ConnectUdpRequest> request) : request(request) {}
 
-		void operator()(const boost::system::error_code& error, boost::asio::ip::udp::resolver::iterator iterator) const
+		void operator()(const boost::system::error_code& error, boost::asio::ip::udp::resolver::results_type results) const
 		{
-			request->Resolved(error, iterator);
+			request->Resolved(error, results);
 		}
 	};
 
-	boost::asio::ip::udp::resolver::iterator currentEndpointIterator;
+	boost::asio::ip::udp::resolver::results_type results;
+	boost::asio::ip::udp::resolver::results_type::const_iterator currentEndpointIterator;
 
-	void Resolved(const boost::system::error_code& error, boost::asio::ip::udp::resolver::iterator i)
+	void Resolved(const boost::system::error_code& error, boost::asio::ip::udp::resolver::results_type results)
 	{
 		if(error)
 		{
@@ -149,7 +149,8 @@ private:
 			return;
 		}
 
-		currentEndpointIterator = i;
+		this->results = results;
+		currentEndpointIterator = this->results.cbegin();
 
 		// создать внутренний сокет
 		internalSocket = NEW(AsioInternalUdpSocket(service));
@@ -160,7 +161,7 @@ private:
 	void TryConnect()
 	{
 		// если итератор - последний
-		if(currentEndpointIterator == boost::asio::ip::udp::resolver::iterator())
+		if(currentEndpointIterator == results.cend())
 		{
 			// значит, ни к одному из endpoints не удалось подключиться
 			socketHandler->FireError(NEW(Exception("No luck trying connecting to endpoints")));
@@ -214,11 +215,8 @@ public:
 		ss << port;
 		// разрешить имя хоста
 		service->udpResolver.async_resolve(
-			boost::asio::ip::udp::resolver::query(
-				boost::asio::ip::udp::v4(),
-				host,
-				ss.str()
-			),
+			host,
+			ss.str(),
 			ResolvedBinder(this)
 		);
 	}
@@ -259,7 +257,7 @@ public:
 		{
 			ptr<AsioTlsTcpSocket> socket = result.GetData().DynamicCast<AsioTlsTcpSocket>();
 
-			socket->GetSocket().async_handshake(Botan::TLS::CLIENT, HandshakeBinder(socket, socketHandler));
+			socket->GetSocket().async_handshake(Botan::TLS::Connection_Side::Client, HandshakeBinder(socket, socketHandler));
 		}
 		catch(Exception* exception)
 		{
@@ -292,18 +290,24 @@ std::vector<Botan::Certificate_Store*> AsioService::TlsCredentialsManager::trust
 }
 
 AsioService::AsioService()
-: work(new boost::asio::io_service::work(ioService)), tcpResolver(ioService), udpResolver(ioService),
-tlsSessionManager(Botan::system_rng())
+: work(boost::asio::make_work_guard(ioContext)), tcpResolver(ioContext), udpResolver(ioContext)
 {}
 
-boost::asio::io_service& AsioService::GetIoService()
+boost::asio::io_context& AsioService::GetIoContext()
 {
-	return ioService;
+	return ioContext;
 }
 
 std::unique_ptr<Botan::TLS::Context> AsioService::CreateTlsContext(String const& host, int port)
 {
-	return std::unique_ptr<Botan::TLS::Context>(new Botan::TLS::Context(tlsCredentialsManager, Botan::system_rng(), tlsSessionManager, tlsPolicy, { host, (uint16_t)port }));
+	auto rng = std::make_shared<Botan::System_RNG>();
+	return std::make_unique<Botan::TLS::Context>(
+		std::make_shared<TlsCredentialsManager>(),
+		rng,
+		std::make_shared<Botan::TLS::Session_Manager_In_Memory>(rng),
+		std::make_shared<Botan::TLS::Strict_Policy>(),
+		Botan::TLS::Server_Information(host, port)
+	);
 }
 
 ptr<Exception> AsioService::ConvertError(const boost::system::error_code& error)
@@ -320,22 +324,22 @@ ptr<Exception> AsioService::ConvertError(const boost::system::system_error& erro
 
 void AsioService::Run()
 {
-	while(!ioService.stopped())
+	while(!ioContext.stopped())
 	{
-		ioService.reset();
-		ioService.run();
+		ioContext.restart();
+		ioContext.run();
 	}
 }
 
 void AsioService::Stop()
 {
 	work.reset();
-	ioService.stop();
+	ioContext.stop();
 }
 
 void AsioService::Wait(std::function<void()> handler, int seconds)
 {
-	std::shared_ptr<boost::asio::deadline_timer> timer = std::make_shared<boost::asio::deadline_timer>(ioService, boost::posix_time::seconds(seconds));
+	std::shared_ptr<boost::asio::deadline_timer> timer = std::make_shared<boost::asio::deadline_timer>(ioContext, boost::posix_time::seconds(seconds));
 	timer->async_wait([timer, handler](const boost::system::error_code& error)
 	{
 		handler();

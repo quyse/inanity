@@ -31,7 +31,7 @@ public:
 const size_t AsioInternalUdpSocket::receiveFileSize = 0x1000;
 
 AsioInternalUdpSocket::AsioInternalUdpSocket(ptr<AsioService> service)
-: service(service), socket(service->GetIoService()) {}
+: service(service), socket(service->GetIoContext()) {}
 
 boost::asio::ip::udp::socket& AsioInternalUdpSocket::GetSocket()
 {
